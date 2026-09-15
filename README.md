@@ -1,6 +1,6 @@
 # CameraAI — Hệ thống camera giám sát hành vi ứng dụng AI và AWS
 
-> Đồ án môn Công nghệ phần mềm · 5 sinh viên · 30 ngày · Agile/Scrum
+> Đồ án môn Project 1 · 5 sinh viên · 30 ngày · Agile/Scrum
 
 Hệ thống giám sát an toàn tại nhà: tự động phát hiện tình huống nguy hiểm bằng AI,
 cảnh báo theo cấp độ, và leo thang lên cuộc gọi khẩn khi không ai phản hồi.
@@ -190,4 +190,4 @@ Hệ thống xử lý dữ liệu sinh trắc học và hình ảnh trong nhà r
 
 ## Giấy phép
 
-Dự án học tập trong khuôn khổ môn Công nghệ phần mềm.
+Dự án học tập trong khuôn khổ môn Project 1.

@@ -1016,4 +1016,4 @@ Mã hoá: `FR-<NHÓM>-<số>`. Mức độ: **M** = Mandatory, **D** = Desirable
 | E9 | US-23, 24, 25, 28 | FR-DAT-01→04, FR-LOG-02→04, FR-DET-M1-05/06 | 1.0 |
 | E10 | US-08, 22, 29, 30, 31 | FR-ADM-05, FR-LOG-01/05, NFR toàn bộ | 0.3, 1.0 |
 
-Ma trận này dùng để chứng minh trước hội đồng rằng **không có yêu cầu chức năng nào bị bỏ sót** và **không có story nào được viết ra mà không phục vụ yêu cầu nào** — hai lỗi phổ biến nhất trong đồ án môn Công nghệ phần mềm.
+Ma trận này dùng để chứng minh trước hội đồng rằng **không có yêu cầu chức năng nào bị bỏ sót** và **không có story nào được viết ra mà không phục vụ yêu cầu nào** — hai lỗi phổ biến nhất trong đồ án môn Project 1.
