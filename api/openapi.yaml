@@ -1,0 +1,1729 @@
+openapi: 3.1.0
+
+# =====================================================================
+# HOP DONG API — Orchestrator (NestJS)
+#
+# CONTRACT-FIRST (task 0.4): file nay la NGUON SU THAT.
+#   - Sua spec TRUOC, code SAU. PR doi endpoint ma khong doi spec se bi tu choi.
+#   - FE sinh kieu du lieu:  pnpm contracts:generate
+#   - Kiem tra spec hop le:  pnpm api:lint
+#   - Xem tai lieu:          pnpm api:preview
+# Huong dan su dung: docs/api/API_GUIDE.md
+# =====================================================================
+
+info:
+  title: CameraAI Orchestrator API
+  version: 0.1.0
+  description: |
+    API cua he thong camera giam sat hanh vi ung dung AI va AWS.
+
+    ## Quy uoc chung
+    - Tat ca endpoint (tru `/health` va `/auth/*`) yeu cau header
+      `Authorization: Bearer <access_token>`.
+    - Thoi gian luon la ISO-8601 co mui gio (`2026-09-15T08:30:00+07:00`).
+    - Danh sach luon tra ve dang `{ data: [...], meta: { page, pageSize, total } }`.
+    - Loi luon tra ve dang `{ error: { code, message, details?, traceId } }`.
+
+    ## Trang thai su kien
+    `DETECTED -> LOGGED_ONLY | NOTIFIED -> ESCALATED | RESOLVED -> CLOSED`
+    (chi tiet: docs/architecture/C4_ARCHITECTURE.md, muc "State machine").
+  contact:
+    name: Nhom CameraAI
+  license:
+    name: MIT
+    identifier: MIT
+
+servers:
+  - url: http://localhost:3001/api/v1
+    description: Dev local (docker compose)
+  - url: https://{host}/api/v1
+    description: AWS (Sprint 4)
+    variables:
+      host:
+        default: api.camerai.example.com
+
+tags:
+  - name: health
+    description: Kiem tra suc khoe dich vu
+  - name: auth
+    description: Xac thuc va phien dang nhap (US-05, US-25)
+  - name: users
+    description: Quan ly nguoi dung
+  - name: devices
+    description: Thiet bi edge / NVR
+  - name: cameras
+    description: Camera (US-01)
+  - name: zones
+    description: Vung giam sat (US-12)
+  - name: known-faces
+    description: Danh sach nguoi quen (US-09)
+  - name: events
+    description: Su kien phat hien (US-03, US-06, US-21)
+  - name: media
+    description: Anh va clip cua su kien (US-04)
+  - name: escalation-rules
+    description: Nguong tin cay va thoi gian cho (US-15)
+  - name: wellness
+    description: Lich kiem tra hien dien (US-20)
+  - name: emergency-contacts
+    description: Lien he khan cap (US-27)
+  - name: internal
+    description: Endpoint noi bo — chi AI service va webhook goi duoc
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ===================================================================
+  # HEALTH
+  # ===================================================================
+  /health:
+    get:
+      tags: [health]
+      summary: Kiem tra dich vu song
+      operationId: getHealth
+      security: []
+      responses:
+        "200":
+          description: Dich vu hoat dong binh thuong
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+        "503":
+          description: Dich vu suy giam — mot phu thuoc khong khoi dung duoc
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+
+  # ===================================================================
+  # AUTH — US-05, US-25
+  # ===================================================================
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Dang nhap bang email va mat khau
+      description: |
+        FR-AUT-03: sau 5 lan sai lien tiep, tai khoan bi khoa 15 phut
+        va tra ve `423 Locked`.
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Dang nhap thanh cong
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthTokens" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401":
+          description: Sai email hoac mat khau
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "423":
+          description: Tai khoan dang bi khoa tam thoi (FR-AUT-03)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /auth/refresh:
+    post:
+      tags: [auth]
+      summary: Lam moi access token
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken: { type: string }
+      responses:
+        "200":
+          description: Token moi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthTokens" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Dang xuat va thu hoi refresh token
+      operationId: logout
+      responses:
+        "204": { description: Da dang xuat }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Thong tin nguoi dung hien tai
+      operationId: getCurrentUser
+      responses:
+        "200":
+          description: Ho so nguoi dung
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  # ===================================================================
+  # USERS
+  # ===================================================================
+  /users:
+    get:
+      tags: [users]
+      summary: Danh sach nguoi dung
+      description: Chi ADMIN goi duoc (FR-AUT-05).
+      operationId: listUsers
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+        - name: role
+          in: query
+          schema: { $ref: "#/components/schemas/UserRole" }
+      responses:
+        "200":
+          description: Danh sach nguoi dung
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: "#/components/schemas/User" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [users]
+      summary: Tao nguoi dung moi
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateUserRequest" }
+      responses:
+        "201":
+          description: Da tao
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /users/{userId}:
+    parameters:
+      - $ref: "#/components/parameters/UserId"
+    get:
+      tags: [users]
+      summary: Chi tiet nguoi dung
+      operationId: getUser
+      responses:
+        "200":
+          description: Nguoi dung
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [users]
+      summary: Cap nhat nguoi dung
+      operationId: updateUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateUserRequest" }
+      responses:
+        "200":
+          description: Da cap nhat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [users]
+      summary: Vo hieu hoa nguoi dung
+      operationId: deleteUser
+      responses:
+        "204": { description: Da vo hieu hoa }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ===================================================================
+  # DEVICES
+  # ===================================================================
+  /devices:
+    get:
+      tags: [devices]
+      summary: Danh sach thiet bi
+      operationId: listDevices
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Danh sach thiet bi
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: "#/components/schemas/Device" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [devices]
+      summary: Dang ky thiet bi moi
+      operationId: createDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateDeviceRequest" }
+      responses:
+        "201":
+          description: Da tao
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Device" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  /devices/{deviceId}:
+    parameters:
+      - $ref: "#/components/parameters/DeviceId"
+    get:
+      tags: [devices]
+      summary: Chi tiet thiet bi
+      operationId: getDevice
+      responses:
+        "200":
+          description: Thiet bi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Device" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [devices]
+      summary: Cap nhat thiet bi
+      operationId: updateDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateDeviceRequest" }
+      responses:
+        "200":
+          description: Da cap nhat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Device" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [devices]
+      summary: Xoa thiet bi (xoa theo tang ca camera ben trong)
+      operationId: deleteDevice
+      responses:
+        "204": { description: Da xoa }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ===================================================================
+  # CAMERAS — US-01
+  # ===================================================================
+  /cameras:
+    get:
+      tags: [cameras]
+      summary: Danh sach camera
+      operationId: listCameras
+      parameters:
+        - name: deviceId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: isEnabled
+          in: query
+          schema: { type: boolean }
+      responses:
+        "200":
+          description: Danh sach camera
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Camera" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [cameras]
+      summary: Them camera
+      description: |
+        `rtspUrl` chi duoc gui len, KHONG bao gio tra ve trong response
+        cho role khac ADMIN (NFR-09).
+      operationId: createCamera
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateCameraRequest" }
+      responses:
+        "201":
+          description: Da tao
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Camera" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /cameras/{cameraId}:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    get:
+      tags: [cameras]
+      summary: Chi tiet camera
+      operationId: getCamera
+      responses:
+        "200":
+          description: Camera
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Camera" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [cameras]
+      summary: Cap nhat camera
+      operationId: updateCamera
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateCameraRequest" }
+      responses:
+        "200":
+          description: Da cap nhat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Camera" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [cameras]
+      summary: Xoa camera
+      operationId: deleteCamera
+      responses:
+        "204": { description: Da xoa }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/snapshot:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    get:
+      tags: [cameras]
+      summary: Anh preview hien tai cua camera
+      description: Dung lam nen de admin ve vung giam sat (US-12).
+      operationId: getCameraSnapshot
+      responses:
+        "200":
+          description: Presigned URL cua anh preview
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MediaUrl" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "503":
+          description: Camera dang offline, khong lay duoc frame
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  # ===================================================================
+  # ZONES — US-12
+  # ===================================================================
+  /cameras/{cameraId}/zones:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    get:
+      tags: [zones]
+      summary: Danh sach vung cua mot camera
+      operationId: listZones
+      responses:
+        "200":
+          description: Danh sach vung
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Zone" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    post:
+      tags: [zones]
+      summary: Tao vung giam sat moi
+      description: |
+        Toa do da giac phai CHUAN HOA ve khoang 0..1 de doc lap do phan giai.
+        Orchestrator tu sinh lai cau hinh Frigate sau khi luu.
+      operationId: createZone
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateZoneRequest" }
+      responses:
+        "201":
+          description: Da tao
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Zone" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  /zones/{zoneId}:
+    parameters:
+      - $ref: "#/components/parameters/ZoneId"
+    patch:
+      tags: [zones]
+      summary: Cap nhat vung
+      operationId: updateZone
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateZoneRequest" }
+      responses:
+        "200":
+          description: Da cap nhat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Zone" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [zones]
+      summary: Xoa vung
+      operationId: deleteZone
+      responses:
+        "204": { description: Da xoa }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ===================================================================
+  # KNOWN FACES — US-09
+  # ===================================================================
+  /known-faces:
+    get:
+      tags: [known-faces]
+      summary: Danh sach nguoi quen
+      operationId: listKnownFaces
+      responses:
+        "200":
+          description: Danh sach nguoi quen
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/KnownFace" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [known-faces]
+      summary: Dang ky nguoi quen tu 1-5 anh
+      description: |
+        FR-DEV-06: anh khong phat hien duoc khuon mat -> `422` voi
+        `code = NO_FACE_DETECTED`.
+        Anh co nhieu hon 1 khuon mat -> `422` voi `code = MULTIPLE_FACES`
+        kem `details.faces[]` de nguoi dung chon.
+        FR-DEV-08: he thong chi luu embedding, KHONG luu anh goc.
+      operationId: createKnownFace
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [personName, images]
+              properties:
+                personName: { type: string, maxLength: 120 }
+                relationship: { type: string, maxLength: 60 }
+                linkedUserId: { type: string, format: uuid }
+                images:
+                  type: array
+                  minItems: 1
+                  maxItems: 5
+                  items: { type: string, format: binary }
+      responses:
+        "201":
+          description: Da dang ky
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/KnownFace" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422":
+          description: Anh khong dung yeu cau (FR-DEV-06)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /known-faces/{knownFaceId}:
+    parameters:
+      - name: knownFaceId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    delete:
+      tags: [known-faces]
+      summary: Xoa vinh vien du lieu khuon mat
+      description: |
+        FR-DEV-07 / FR-DAT-03: xoa THAT khoi DB va khoi Rekognition
+        Collection neu dang dung. Khong soft-delete. Ghi audit log.
+      operationId: deleteKnownFace
+      responses:
+        "204": { description: Da xoa vinh vien }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ===================================================================
+  # EVENTS — US-03, US-06, US-13, US-21
+  # ===================================================================
+  /events:
+    get:
+      tags: [events]
+      summary: Danh sach su kien co loc va phan trang
+      description: Mac dinh sap xep theo `detectedAt` giam dan (US-06, US-21).
+      operationId: listEvents
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+        - name: eventType
+          in: query
+          description: Co the truyen nhieu lan
+          schema:
+            type: array
+            items: { $ref: "#/components/schemas/EventType" }
+        - name: status
+          in: query
+          schema:
+            type: array
+            items: { $ref: "#/components/schemas/EventStatus" }
+        - name: priority
+          in: query
+          schema:
+            type: array
+            items: { $ref: "#/components/schemas/PriorityLevel" }
+        - name: cameraId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: zoneId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: from
+          in: query
+          description: Loc tu thoi diem nay (ISO-8601)
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+        - name: isFalseAlarm
+          in: query
+          schema: { type: boolean }
+      responses:
+        "200":
+          description: Danh sach su kien
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: "#/components/schemas/EventSummary" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /events/stream:
+    get:
+      tags: [events]
+      summary: Luong su kien thoi gian thuc (Server-Sent Events)
+      description: |
+        FR-DSH-02: dashboard tu cap nhat khong can F5.
+        Moi su kien la mot SSE message: `event: event.created` hoac
+        `event: event.updated`, phan `data` la `EventSummary` dang JSON.
+        Client gui `Authorization` qua query `?token=` vi EventSource
+        khong dat duoc header.
+      operationId: streamEvents
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Luong SSE
+          content:
+            text/event-stream:
+              schema: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /events/{eventId}:
+    parameters:
+      - $ref: "#/components/parameters/EventId"
+    get:
+      tags: [events]
+      summary: Chi tiet su kien
+      operationId: getEvent
+      responses:
+        "200":
+          description: Su kien day du kem media, ket qua AI va lich su trang thai
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EventDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [events]
+      summary: Danh dau bao dong gia hoac giu lai su kien
+      description: |
+        FR-EVT-06: `isFalseAlarm` la nguon du lieu that de do FAR (US-22).
+        FR-DAT-02: `retain = true` giu media khoi bi lifecycle xoa.
+      operationId: updateEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isFalseAlarm: { type: boolean }
+                retain: { type: boolean }
+      responses:
+        "200":
+          description: Da cap nhat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EventDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /events/{eventId}/confirm:
+    parameters:
+      - $ref: "#/components/parameters/EventId"
+    post:
+      tags: [events]
+      summary: Xac nhan su kien ("Toi on" / "Can giup do")
+      description: |
+        FR-ESC-03/04/09. Chi lan xac nhan DAU TIEN quyet dinh trang thai;
+        lan bam sau tra ve `409 ALREADY_CONFIRMED` va van duoc ghi lai
+        de kiem toan (US-14).
+      operationId: confirmEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ConfirmEventRequest" }
+      responses:
+        "200":
+          description: Da xac nhan
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Confirmation" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Su kien da duoc xu ly boi nguoi khac
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /events/{eventId}/media:
+    parameters:
+      - $ref: "#/components/parameters/EventId"
+    get:
+      tags: [media]
+      summary: Danh sach media cua su kien kem presigned URL
+      description: FR-EVT-07 — URL het han sau 15 phut, khong lo credential bucket.
+      operationId: listEventMedia
+      responses:
+        "200":
+          description: Danh sach media
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/EventMedia" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /events/{eventId}/history:
+    parameters:
+      - $ref: "#/components/parameters/EventId"
+    get:
+      tags: [events]
+      summary: Lich su chuyen trang thai cua su kien
+      description: FR-EVT-05 — ai xac nhan, luc nao, qua kenh nao.
+      operationId: getEventHistory
+      responses:
+        "200":
+          description: Lich su trang thai
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/EventStatusHistoryEntry" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /events/{eventId}/notifications:
+    parameters:
+      - $ref: "#/components/parameters/EventId"
+    get:
+      tags: [events]
+      summary: Danh sach thong bao da gui cho su kien
+      description: FR-NOT-04 — theo doi kenh nao gui thanh cong, kenh nao that bai.
+      operationId: listEventNotifications
+      responses:
+        "200":
+          description: Danh sach thong bao
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Notification" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /media/{mediaId}/url:
+    parameters:
+      - name: mediaId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [media]
+      summary: Sinh presigned URL moi cho mot media
+      operationId: getMediaUrl
+      responses:
+        "200":
+          description: Presigned URL
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MediaUrl" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "410":
+          description: Media da bi xoa theo chinh sach luu tru (FR-DAT-01)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  # ===================================================================
+  # ESCALATION RULES — US-15
+  # ===================================================================
+  /escalation-rules:
+    get:
+      tags: [escalation-rules]
+      summary: Danh sach quy tac leo thang theo loai su kien
+      operationId: listEscalationRules
+      responses:
+        "200":
+          description: Danh sach quy tac
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/EscalationRule" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /escalation-rules/{eventType}:
+    parameters:
+      - name: eventType
+        in: path
+        required: true
+        schema: { $ref: "#/components/schemas/EventType" }
+    put:
+      tags: [escalation-rules]
+      summary: Cap nhat nguong va thoi gian cho
+      description: |
+        FR-ADM-02: thay doi co hieu luc trong vong 60 giay, khong can restart.
+        FR-ADM-03: `tLow > tHigh` bi tu choi voi `400 INVALID_THRESHOLD`.
+      operationId: updateEscalationRule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateEscalationRuleRequest" }
+      responses:
+        "200":
+          description: Da cap nhat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EscalationRule" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  # ===================================================================
+  # WELLNESS — US-20
+  # ===================================================================
+  /wellness-schedules:
+    get:
+      tags: [wellness]
+      summary: Danh sach lich kiem tra hien dien
+      operationId: listWellnessSchedules
+      responses:
+        "200":
+          description: Danh sach lich
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/WellnessSchedule" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [wellness]
+      summary: Tao lich kiem tra
+      operationId: createWellnessSchedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateWellnessScheduleRequest" }
+      responses:
+        "201":
+          description: Da tao
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WellnessSchedule" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  /wellness-schedules/{scheduleId}:
+    parameters:
+      - name: scheduleId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    patch:
+      tags: [wellness]
+      summary: Cap nhat lich kiem tra
+      operationId: updateWellnessSchedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateWellnessScheduleRequest" }
+      responses:
+        "200":
+          description: Da cap nhat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WellnessSchedule" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [wellness]
+      summary: Xoa lich kiem tra
+      operationId: deleteWellnessSchedule
+      responses:
+        "204": { description: Da xoa }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ===================================================================
+  # EMERGENCY CONTACTS — US-27
+  # ===================================================================
+  /emergency-contacts:
+    get:
+      tags: [emergency-contacts]
+      summary: Danh sach lien he khan cap theo thu tu uu tien
+      operationId: listEmergencyContacts
+      responses:
+        "200":
+          description: Danh sach lien he
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/EmergencyContact" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [emergency-contacts]
+      summary: Them lien he khan cap (toi da 3)
+      operationId: createEmergencyContact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateEmergencyContactRequest" }
+      responses:
+        "201":
+          description: Da tao
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EmergencyContact" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /emergency-contacts/{contactId}:
+    parameters:
+      - name: contactId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    delete:
+      tags: [emergency-contacts]
+      summary: Xoa lien he khan cap
+      operationId: deleteEmergencyContact
+      responses:
+        "204": { description: Da xoa }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ===================================================================
+  # INTERNAL — AI service callback & webhook
+  # ===================================================================
+  /internal/events/{eventId}/ai-result:
+    parameters:
+      - $ref: "#/components/parameters/EventId"
+    post:
+      tags: [internal]
+      summary: AI service tra ket qua suy luan ve cho orchestrator
+      description: |
+        US-11. Xac thuc bang `X-Internal-Token` (secret dung chung trong
+        docker network), KHONG dung JWT nguoi dung.
+      operationId: submitAiResult
+      security:
+        - internalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AiResultRequest" }
+      responses:
+        "202":
+          description: Da tiep nhan, dang chuyen cho escalation engine
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /webhooks/telegram:
+    post:
+      tags: [internal]
+      summary: Callback khi nguoi dung bam nut trong Telegram
+      description: |
+        US-14. Xac thuc bang header `X-Telegram-Bot-Api-Secret-Token`.
+        Body la Update object cua Telegram — khong mo ta lai o day.
+      operationId: telegramWebhook
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        "200": { description: Da xu ly }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /webhooks/connect:
+    post:
+      tags: [internal]
+      summary: Callback ket qua cuoc goi tu Amazon Connect
+      description: US-27 — nguoi nghe bam phim 1 de xac nhan da tiep nhan.
+      operationId: connectWebhook
+      security:
+        - internalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contactId, outcome]
+              properties:
+                contactId: { type: string }
+                outcome:
+                  type: string
+                  enum: [ANSWERED_CONFIRMED, ANSWERED_NO_INPUT, NO_ANSWER, FAILED]
+                answeredAt: { type: string, format: date-time }
+      responses:
+        "200": { description: Da xu ly }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: Khong tim thay notification khop voi contactId
+
+# =====================================================================
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Sprint 1-3: JWT do orchestrator tu cap.
+        Sprint 4 (US-25): token do Cognito cap, xac thuc bang JWKS cua User Pool.
+    internalToken:
+      type: apiKey
+      in: header
+      name: X-Internal-Token
+      description: Secret dung chung giua cac service noi bo, khong lo ra ngoai.
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    PageSize:
+      name: pageSize
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    DeviceId:
+      name: deviceId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    CameraId:
+      name: cameraId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ZoneId:
+      name: zoneId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    EventId:
+      name: eventId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
+  responses:
+    BadRequest:
+      description: Du lieu gui len khong hop le
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Unauthorized:
+      description: Chua xac thuc hoac token het han (FR-AUT-06)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Forbidden:
+      description: Khong du quyen cho vai tro hien tai (FR-AUT-05)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    NotFound:
+      description: Khong tim thay tai nguyen
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Conflict:
+      description: Xung dot voi du lieu da ton tai
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  schemas:
+    # ---------------- Enum dung chung ----------------
+    UserRole:
+      type: string
+      enum: [ADMIN, CAREGIVER, VIEWER]
+    EventType:
+      type: string
+      enum:
+        - PERSON_DETECTED
+        - UNKNOWN_PERSON
+        - RESTRICTED_ZONE
+        - FALL_DETECTED
+        - FIRE_SMOKE_DETECTED
+        - WELLNESS_TIMEOUT
+    EventStatus:
+      type: string
+      enum: [DETECTED, LOGGED_ONLY, NOTIFIED, ESCALATED, RESOLVED, CLOSED, AI_FAILED]
+    PriorityLevel:
+      type: string
+      enum: [P0, P1, P2, P3]
+    PersonStatus:
+      type: string
+      enum: [KNOWN, UNKNOWN, UNDETERMINED]
+    ZoneType:
+      type: string
+      enum: [RESTRICTED, REST_AREA, NORMAL]
+      description: REST_AREA (giuong/sofa) khong sinh canh bao te nga — FR-DET-M2-05.
+    MediaType:
+      type: string
+      enum: [SNAPSHOT, CLIP, THUMBNAIL]
+    NotificationChannel:
+      type: string
+      enum: [TELEGRAM, SNS_EMAIL, SNS_SMS, CONNECT_CALL, DASHBOARD, WEBHOOK]
+    NotificationStatus:
+      type: string
+      enum: [PENDING, SENT, FAILED, CONFIRMED, SKIPPED]
+    ConfirmationResponse:
+      type: string
+      enum: [IM_OK, NEED_HELP, ACKNOWLEDGED]
+    DeviceStatus:
+      type: string
+      enum: [ONLINE, OFFLINE, DEGRADED, DISABLED]
+
+    # ---------------- Bao boc chung ----------------
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, traceId]
+          properties:
+            code:
+              type: string
+              description: Ma loi on dinh de FE xu ly, vi du TOKEN_EXPIRED.
+              examples: [NO_FACE_DETECTED]
+            message:
+              type: string
+              description: Thong diep tieng Viet hien thi duoc cho nguoi dung.
+            details:
+              type: object
+              additionalProperties: true
+            traceId:
+              type: string
+              description: FR-LOG-02 — dung de tra log xuyen service.
+
+    PaginatedResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: {}
+        meta:
+          type: object
+          required: [page, pageSize, total]
+          properties:
+            page: { type: integer }
+            pageSize: { type: integer }
+            total: { type: integer }
+
+    HealthStatus:
+      type: object
+      required: [status, service, version]
+      properties:
+        status: { type: string, enum: [ok, degraded] }
+        service: { type: string }
+        version: { type: string }
+        uptimeSeconds: { type: integer }
+        timestamp: { type: string, format: date-time }
+
+    # ---------------- Auth ----------------
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8, format: password }
+
+    AuthTokens:
+      type: object
+      required: [accessToken, refreshToken, expiresIn, user]
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        expiresIn:
+          type: integer
+          description: So giay con hieu luc cua access token (mac dinh 3600).
+        user: { $ref: "#/components/schemas/User" }
+
+    # ---------------- Users ----------------
+    User:
+      type: object
+      required: [id, email, fullName, role, isActive, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        fullName: { type: string }
+        role: { $ref: "#/components/schemas/UserRole" }
+        phoneE164: { type: ["string", "null"], pattern: '^\+[1-9][0-9]{7,14}$' }
+        telegramChatId: { type: ["string", "null"] }
+        isActive: { type: boolean }
+        lastLoginAt: { type: ["string", "null"], format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    CreateUserRequest:
+      type: object
+      required: [email, fullName, role]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        fullName: { type: string, maxLength: 120 }
+        role: { $ref: "#/components/schemas/UserRole" }
+        phoneE164: { type: string }
+        telegramChatId: { type: string }
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        fullName: { type: string, maxLength: 120 }
+        role: { $ref: "#/components/schemas/UserRole" }
+        phoneE164: { type: string }
+        telegramChatId: { type: string }
+        isActive: { type: boolean }
+
+    # ---------------- Devices ----------------
+    Device:
+      type: object
+      required: [id, name, deviceType, status, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        deviceType: { type: string, enum: [EDGE_GATEWAY, NVR, STANDALONE_CAM] }
+        serialNumber: { type: ["string", "null"] }
+        locationLabel: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/DeviceStatus" }
+        agentVersion: { type: ["string", "null"] }
+        lastHeartbeatAt: { type: ["string", "null"], format: date-time }
+        cameraCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+
+    CreateDeviceRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, maxLength: 120 }
+        deviceType: { type: string, enum: [EDGE_GATEWAY, NVR, STANDALONE_CAM] }
+        serialNumber: { type: string }
+        locationLabel: { type: string }
+
+    # ---------------- Cameras ----------------
+    Camera:
+      type: object
+      required: [id, deviceId, name, slug, isEnabled, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        deviceId: { type: string, format: uuid }
+        name: { type: string }
+        slug:
+          type: string
+          pattern: "^[a-z][a-z0-9_]{2,63}$"
+          description: Khoa noi voi Frigate. Bat bien sau khi tao.
+        rtspUrl:
+          type: ["string", "null"]
+          description: Chi tra ve cho role ADMIN; cac role khac nhan null (NFR-09).
+        detectWidth: { type: integer }
+        detectHeight: { type: integer }
+        fps: { type: integer, minimum: 1, maximum: 30 }
+        timezone: { type: string }
+        isEnabled: { type: boolean }
+        detectionEnabled: { type: boolean }
+        retentionDays: { type: integer }
+        zoneCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+
+    CreateCameraRequest:
+      type: object
+      required: [deviceId, name, slug, rtspUrl]
+      properties:
+        deviceId: { type: string, format: uuid }
+        name: { type: string, maxLength: 120 }
+        slug: { type: string, pattern: "^[a-z][a-z0-9_]{2,63}$" }
+        rtspUrl: { type: string }
+        detectWidth: { type: integer, default: 1280 }
+        detectHeight: { type: integer, default: 720 }
+        fps: { type: integer, minimum: 1, maximum: 30, default: 5 }
+        timezone: { type: string, default: Asia/Ho_Chi_Minh }
+
+    UpdateCameraRequest:
+      type: object
+      description: Khong doi duoc `slug` — doi slug se lam dut lien ket voi Frigate.
+      properties:
+        name: { type: string }
+        rtspUrl: { type: string }
+        fps: { type: integer, minimum: 1, maximum: 30 }
+        isEnabled: { type: boolean }
+        detectionEnabled: { type: boolean }
+        retentionDays: { type: integer, minimum: 1, maximum: 90 }
+
+    # ---------------- Zones ----------------
+    Polygon:
+      type: array
+      minItems: 3
+      description: Da giac voi toa do CHUAN HOA 0..1 theo [x, y].
+      items:
+        type: array
+        minItems: 2
+        maxItems: 2
+        items: { type: number, minimum: 0, maximum: 1 }
+      examples:
+        - [[0.4, 0.3], [0.95, 0.3], [0.95, 0.9], [0.4, 0.9]]
+
+    Zone:
+      type: object
+      required: [id, cameraId, name, slug, zoneType, polygon, isEnabled]
+      properties:
+        id: { type: string, format: uuid }
+        cameraId: { type: string, format: uuid }
+        name: { type: string }
+        slug: { type: string }
+        zoneType: { $ref: "#/components/schemas/ZoneType" }
+        polygon: { $ref: "#/components/schemas/Polygon" }
+        minDwellSeconds:
+          type: integer
+          description: FR-DET-M4-02 — di luot qua duoi nguong nay khong sinh canh bao.
+        activeFrom: { type: ["string", "null"], examples: ["06:00"] }
+        activeTo: { type: ["string", "null"], examples: ["22:00"] }
+        isEnabled: { type: boolean }
+
+    CreateZoneRequest:
+      type: object
+      required: [name, slug, zoneType, polygon]
+      properties:
+        name: { type: string, maxLength: 60 }
+        slug: { type: string, pattern: "^[a-z][a-z0-9_]{2,63}$" }
+        zoneType: { $ref: "#/components/schemas/ZoneType" }
+        polygon: { $ref: "#/components/schemas/Polygon" }
+        minDwellSeconds: { type: integer, minimum: 0, maximum: 300, default: 2 }
+        activeFrom: { type: string }
+        activeTo: { type: string }
+
+    UpdateZoneRequest:
+      type: object
+      properties:
+        name: { type: string }
+        zoneType: { $ref: "#/components/schemas/ZoneType" }
+        polygon: { $ref: "#/components/schemas/Polygon" }
+        minDwellSeconds: { type: integer }
+        activeFrom: { type: ["string", "null"] }
+        activeTo: { type: ["string", "null"] }
+        isEnabled: { type: boolean }
+
+    # ---------------- Known faces ----------------
+    KnownFace:
+      type: object
+      required: [id, personName, provider, isActive, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        personName: { type: string }
+        relationship: { type: ["string", "null"] }
+        linkedUserId: { type: ["string", "null"], format: uuid }
+        provider: { type: string, enum: [LOCAL, REKOGNITION] }
+        modelVersion: { type: string }
+        sourceImageCount: { type: integer, minimum: 1, maximum: 5 }
+        isActive: { type: boolean }
+        createdAt: { type: string, format: date-time }
+      description: |
+        Khong co truong anh: FR-DEV-08 cam luu anh goc, chi luu embedding
+        va embedding khong bao gio duoc tra ra ngoai qua API.
+
+    # ---------------- Events ----------------
+    EventSummary:
+      type: object
+      required: [id, eventType, status, priority, detectedAt]
+      properties:
+        id: { type: string, format: uuid }
+        eventType: { $ref: "#/components/schemas/EventType" }
+        status: { $ref: "#/components/schemas/EventStatus" }
+        priority: { $ref: "#/components/schemas/PriorityLevel" }
+        camera:
+          type: ["object", "null"]
+          properties:
+            id: { type: string, format: uuid }
+            name: { type: string }
+        zone:
+          type: ["object", "null"]
+          properties:
+            id: { type: string, format: uuid }
+            name: { type: string }
+        confidence: { type: ["number", "null"], minimum: 0, maximum: 1 }
+        personStatus: { $ref: "#/components/schemas/PersonStatus" }
+        matchedPersonName: { type: ["string", "null"] }
+        thumbnailUrl:
+          type: ["string", "null"]
+          description: Presigned URL het han 15 phut.
+        isFalseAlarm: { type: boolean }
+        detectedAt: { type: string, format: date-time }
+
+    EventDetail:
+      allOf:
+        - $ref: "#/components/schemas/EventSummary"
+        - type: object
+          properties:
+            source: { type: string, enum: [FRIGATE, AI_SERVICE, SCHEDULER, MANUAL] }
+            trackId: { type: ["string", "null"] }
+            aiLabel: { type: ["string", "null"] }
+            aiModelVersion: { type: ["string", "null"] }
+            aiResults:
+              type: array
+              description: FR-EVT-04 — giu du chi tiet tung nhan AI.
+              items: { $ref: "#/components/schemas/AiResultItem" }
+            retain: { type: boolean }
+            correlationId: { type: string, format: uuid }
+            escalationDeadlineAt: { type: ["string", "null"], format: date-time }
+            notifiedAt: { type: ["string", "null"], format: date-time }
+            escalatedAt: { type: ["string", "null"], format: date-time }
+            resolvedAt: { type: ["string", "null"], format: date-time }
+            closedAt: { type: ["string", "null"], format: date-time }
+            media:
+              type: array
+              items: { $ref: "#/components/schemas/EventMedia" }
+            statusHistory:
+              type: array
+              items: { $ref: "#/components/schemas/EventStatusHistoryEntry" }
+
+    AiResultItem:
+      type: object
+      required: [module, label, confidence]
+      properties:
+        module:
+          type: string
+          enum: [M1_FACE, M2A_FALL, M2B_POSTURE, M3_FIRE, M4_ZONE, M5_WELLNESS]
+        label: { type: string }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        modelVersion: { type: string }
+        boundingBox:
+          type: ["object", "null"]
+          description: Toa do chuan hoa 0..1.
+          properties:
+            x: { type: number }
+            y: { type: number }
+            width: { type: number }
+            height: { type: number }
+        metadata: { type: object, additionalProperties: true }
+
+    EventMedia:
+      type: object
+      required: [id, mediaType, url, expiresAt]
+      properties:
+        id: { type: string, format: uuid }
+        mediaType: { $ref: "#/components/schemas/MediaType" }
+        url: { type: string, format: uri, description: Presigned URL. }
+        expiresAt: { type: string, format: date-time }
+        contentType: { type: string }
+        sizeBytes: { type: ["integer", "null"] }
+        width: { type: ["integer", "null"] }
+        height: { type: ["integer", "null"] }
+        durationMs: { type: ["integer", "null"] }
+        createdAt: { type: string, format: date-time }
+
+    MediaUrl:
+      type: object
+      required: [url, expiresAt]
+      properties:
+        url: { type: string, format: uri }
+        expiresAt: { type: string, format: date-time }
+
+    EventStatusHistoryEntry:
+      type: object
+      required: [toStatus, actorType, createdAt]
+      properties:
+        fromStatus: { $ref: "#/components/schemas/EventStatus" }
+        toStatus: { $ref: "#/components/schemas/EventStatus" }
+        reason:
+          type: ["string", "null"]
+          examples: [TIMEOUT, USER_CONFIRMED, AI_RESULT]
+        actorType: { type: string, enum: [SYSTEM, USER, SCHEDULER, EMERGENCY_CONTACT] }
+        actorName: { type: ["string", "null"] }
+        channel: { $ref: "#/components/schemas/NotificationChannel" }
+        createdAt: { type: string, format: date-time }
+
+    ConfirmEventRequest:
+      type: object
+      required: [response]
+      properties:
+        response: { $ref: "#/components/schemas/ConfirmationResponse" }
+        note: { type: string, maxLength: 500 }
+
+    Confirmation:
+      type: object
+      required: [id, eventId, response, channel, respondedAt, resultingStatus]
+      properties:
+        id: { type: string, format: uuid }
+        eventId: { type: string, format: uuid }
+        response: { $ref: "#/components/schemas/ConfirmationResponse" }
+        channel: { $ref: "#/components/schemas/NotificationChannel" }
+        confirmedByName: { type: ["string", "null"] }
+        note: { type: ["string", "null"] }
+        respondedAt: { type: string, format: date-time }
+        resultingStatus:
+          $ref: "#/components/schemas/EventStatus"
+          description: IM_OK -> RESOLVED, NEED_HELP -> ESCALATED (FR-ESC-03/04).
+
+    Notification:
+      type: object
+      required: [id, channel, status, escalationLevel, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        channel: { $ref: "#/components/schemas/NotificationChannel" }
+        status: { $ref: "#/components/schemas/NotificationStatus" }
+        escalationLevel:
+          type: integer
+          description: 0 = caregiver, 1..3 = lien he khan cap theo thu tu.
+        recipientName: { type: ["string", "null"] }
+        attemptCount: { type: integer }
+        errorCode: { type: ["string", "null"] }
+        errorMessage: { type: ["string", "null"] }
+        sentAt: { type: ["string", "null"], format: date-time }
+        confirmedAt: { type: ["string", "null"], format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    # ---------------- Escalation rules ----------------
+    EscalationRule:
+      type: object
+      required: [eventType, priority, tWaitSeconds, isEnabled]
+      properties:
+        eventType: { $ref: "#/components/schemas/EventType" }
+        priority: { $ref: "#/components/schemas/PriorityLevel" }
+        tLow:
+          type: ["number", "null"]
+          minimum: 0
+          maximum: 1
+          description: Duoi nguong nay -> LOGGED_ONLY, khong lam phien ai.
+        tHigh:
+          type: ["number", "null"]
+          minimum: 0
+          maximum: 1
+          description: Tu nguong nay -> NOTIFIED kem hen gio ngan.
+        tWaitSeconds:
+          type: integer
+          minimum: 0
+          description: Het thoi gian nay khong co phan hoi -> ESCALATED (FR-ESC-02).
+        skipLoggedOnly:
+          type: boolean
+          description: US-19 — chay/khoi vao thang NOTIFIED bat ke confidence.
+        notifyChannels:
+          type: array
+          items: { $ref: "#/components/schemas/NotificationChannel" }
+        escalateChannels:
+          type: array
+          items: { $ref: "#/components/schemas/NotificationChannel" }
+        maxEscalationLevel: { type: integer, minimum: 1, maximum: 3 }
+        isEnabled: { type: boolean }
+        updatedAt: { type: string, format: date-time }
+
+    UpdateEscalationRuleRequest:
+      type: object
+      required: [priority, tWaitSeconds]
+      properties:
+        priority: { $ref: "#/components/schemas/PriorityLevel" }
+        tLow: { type: ["number", "null"], minimum: 0, maximum: 1 }
+        tHigh: { type: ["number", "null"], minimum: 0, maximum: 1 }
+        tWaitSeconds: { type: integer, minimum: 0, maximum: 3600 }
+        skipLoggedOnly: { type: boolean }
+        notifyChannels:
+          type: array
+          items: { $ref: "#/components/schemas/NotificationChannel" }
+        escalateChannels:
+          type: array
+          items: { $ref: "#/components/schemas/NotificationChannel" }
+        maxEscalationLevel: { type: integer, minimum: 1, maximum: 3 }
+        isEnabled: { type: boolean }
+
+    # ---------------- Wellness ----------------
+    WellnessSchedule:
+      type: object
+      required: [id, residentUserId, checkAt, lookbackHours, isEnabled]
+      properties:
+        id: { type: string, format: uuid }
+        residentUserId: { type: string, format: uuid }
+        residentName: { type: string }
+        name: { type: string }
+        checkAt: { type: string, examples: ["09:00"] }
+        daysOfWeek:
+          type: array
+          description: 1 = Thu Hai ... 7 = Chu Nhat.
+          items: { type: integer, minimum: 1, maximum: 7 }
+        lookbackHours: { type: integer, minimum: 1, maximum: 24 }
+        graceSeconds: { type: integer }
+        cameraIds:
+          type: array
+          description: Rong = xet moi camera cua ho.
+          items: { type: string, format: uuid }
+        timezone: { type: string }
+        isEnabled: { type: boolean }
+        lastCheckedAt: { type: ["string", "null"], format: date-time }
+
+    CreateWellnessScheduleRequest:
+      type: object
+      required: [residentUserId, checkAt]
+      properties:
+        residentUserId: { type: string, format: uuid }
+        name: { type: string }
+        checkAt: { type: string, pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$" }
+        daysOfWeek:
+          type: array
+          items: { type: integer, minimum: 1, maximum: 7 }
+        lookbackHours: { type: integer, minimum: 1, maximum: 24, default: 6 }
+        graceSeconds: { type: integer, minimum: 60, maximum: 3600, default: 300 }
+        cameraIds:
+          type: array
+          items: { type: string, format: uuid }
+        isEnabled: { type: boolean, default: true }
+
+    # ---------------- Emergency contacts ----------------
+    EmergencyContact:
+      type: object
+      required: [id, name, phoneE164, priorityOrder, isVerified]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        phoneE164: { type: string }
+        email: { type: ["string", "null"], format: email }
+        priorityOrder: { type: integer, minimum: 1, maximum: 3 }
+        isVerified:
+          type: boolean
+          description: SNS/Connect sandbox chi goi duoc so da verify (US-26, US-27).
+        isEnabled: { type: boolean }
+
+    CreateEmergencyContactRequest:
+      type: object
+      required: [name, phoneE164, priorityOrder]
+      properties:
+        name: { type: string, maxLength: 120 }
+        phoneE164: { type: string, pattern: '^\+[1-9][0-9]{7,14}$' }
+        email: { type: string, format: email }
+        priorityOrder: { type: integer, minimum: 1, maximum: 3 }
+
+    # ---------------- Internal ----------------
+    AiResultRequest:
+      type: object
+      required: [module, results, modelVersion, processedAt]
+      properties:
+        module:
+          type: string
+          enum: [M1_FACE, M2A_FALL, M2B_POSTURE, M3_FIRE, M4_ZONE, M5_WELLNESS]
+        modelVersion: { type: string }
+        results:
+          type: array
+          items: { $ref: "#/components/schemas/AiResultItem" }
+        personStatus: { $ref: "#/components/schemas/PersonStatus" }
+        matchedKnownFaceId: { type: ["string", "null"], format: uuid }
+        processedAt: { type: string, format: date-time }
+        error:
+          type: ["object", "null"]
+          description: |
+            Co gia tri khi suy luan that bai — orchestrator dat
+            status = AI_FAILED va van giu su kien (US-10, FR-LOG-05).
+          properties:
+            code: { type: string }
+            message: { type: string }

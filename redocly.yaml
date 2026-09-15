@@ -1,0 +1,15 @@
+# Cau hinh lint cho OpenAPI spec.
+# Chay: pnpm api:lint  (CI cung chay dung lenh nay)
+extends:
+  - recommended
+
+rules:
+  # Tat quy tac nay: `http://localhost:3001` la server dev THAT cua nhom,
+  # khai bao no giup Swagger UI va mock server dung duoc ngay.
+  no-server-example.com: off
+
+apis:
+  orchestrator:
+    root: api/openapi.yaml
+  ai-service:
+    root: api/openapi-ai-service.yaml

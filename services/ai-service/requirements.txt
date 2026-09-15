@@ -1,0 +1,7 @@
+# Dung cho Docker image. Dependency "that" khai bao trong pyproject.toml.
+fastapi>=0.115.0
+uvicorn[standard]>=0.31.0
+pydantic>=2.9.0
+pydantic-settings>=2.5.0
+numpy>=1.26.0
+python-multipart>=0.0.12

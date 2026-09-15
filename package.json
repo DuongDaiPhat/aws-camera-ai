@@ -1,0 +1,50 @@
+{
+  "name": "aws-camera-ai",
+  "version": "0.0.1",
+  "private": true,
+  "description": "He thong camera giam sat hanh vi ung dung AI va AWS",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "docker compose up -d && pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md,yaml,yml}\"",
+    "test": "pnpm -r test",
+    "test:cov": "pnpm -r test:cov",
+    "typecheck": "pnpm -r typecheck",
+    "api:lint": "redocly lint api/openapi.yaml api/openapi-ai-service.yaml",
+    "api:preview": "redocly preview-docs api/openapi.yaml",
+    "contracts:generate": "pnpm --filter @cam/contracts generate",
+    "db:migrate": "node tools/scripts/migrate.mjs up",
+    "db:reset": "node tools/scripts/migrate.mjs reset",
+    "seed": "node tools/scripts/seed.mjs",
+    "prepare": "husky || true"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "@redocly/cli": "^1.25.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yaml,yml}": [
+      "prettier --write"
+    ],
+    "*.py": [
+      "ruff check --fix",
+      "ruff format"
+    ]
+  }
+}

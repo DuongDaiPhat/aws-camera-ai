@@ -1,0 +1,227 @@
+# =====================================================================
+# Skeleton moi truong DEV (Sprint 0 -> Sprint 3)
+# Chay:  cp .env.example .env && docker compose up -d
+# Kien truc tuong ung: docs/architecture/C4_ARCHITECTURE.md (muc C3)
+# =====================================================================
+name: camerai
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-healthcheck-defaults: &hc
+  interval: 10s
+  timeout: 5s
+  retries: 10
+  start_period: 20s
+
+services:
+  # ------------------------------------------------------------------
+  # 1. PostgreSQL - nguon du lieu duy nhat (ERD: docs/database/ERD.md)
+  # ------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: camerai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: ${TZ}
+    ports:
+      - "${PORT_POSTGRES:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      <<: *hc
+    logging: *default-logging
+
+  # ------------------------------------------------------------------
+  # 2. Mosquitto - MQTT broker giua Frigate va Orchestrator
+  # ------------------------------------------------------------------
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: camerai-mosquitto
+    restart: unless-stopped
+    ports:
+      - "${PORT_MQTT:-1883}:1883"
+    volumes:
+      - ./infra/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mqttdata:/mosquitto/data
+    healthcheck:
+      test: ["CMD-SHELL", 'mosquitto_sub -t \$$SYS/# -C 1 -W 3 -h localhost || exit 1']
+      <<: *hc
+    logging: *default-logging
+
+  # ------------------------------------------------------------------
+  # 3. MinIO - object storage local, Sprint 4 thay bang S3 (US-23)
+  # ------------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: camerai-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "${PORT_MINIO_API:-9000}:9000"
+      - "${PORT_MINIO_CONSOLE:-9001}:9001"
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      <<: *hc
+    logging: *default-logging
+
+  # Job chay 1 lan: tao bucket + lifecycle 7 ngay (FR-DAT-01)
+  minio-init:
+    image: minio/mc:latest
+    container_name: camerai-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      STORAGE_BUCKET: ${STORAGE_BUCKET}
+      MEDIA_RETENTION_DAYS: ${MEDIA_RETENTION_DAYS}
+    entrypoint: ["/bin/sh", "/scripts/minio-init.sh"]
+    volumes:
+      - ./infra/minio/minio-init.sh:/scripts/minio-init.sh:ro
+    restart: "no"
+
+  # ------------------------------------------------------------------
+  # 4. mediamtx - gia lap camera RTSP tu webcam / file mp4 (task 0.6)
+  # ------------------------------------------------------------------
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: camerai-mediamtx
+    restart: unless-stopped
+    ports:
+      - "${PORT_RTSP:-8554}:8554"
+      - "8889:8889"
+    volumes:
+      - ./infra/mediamtx/mediamtx.yml:/mediamtx.yml:ro
+    logging: *default-logging
+
+  # ------------------------------------------------------------------
+  # 5. Frigate - detector "person" + zone + snapshot/clip
+  #    profile "cv": chi bat khi may du khoe (docker compose --profile cv up)
+  # ------------------------------------------------------------------
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:stable
+    container_name: camerai-frigate
+    restart: unless-stopped
+    profiles: ["cv"]
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    shm_size: "256mb"
+    environment:
+      FRIGATE_MQTT_HOST: mosquitto
+    ports:
+      - "${PORT_FRIGATE:-5000}:5000"
+    volumes:
+      - ./infra/frigate/config.yml:/config/config.yml:ro
+      - frigatemedia:/media/frigate
+      - /etc/localtime:/etc/localtime:ro
+    logging: *default-logging
+
+  # ------------------------------------------------------------------
+  # 6. AI service (FastAPI) - M1 face, M2a pose, M3 fire
+  # ------------------------------------------------------------------
+  ai-service:
+    build:
+      context: ./services/ai-service
+      dockerfile: Dockerfile
+    container_name: camerai-ai
+    restart: unless-stopped
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL}
+      FACE_PROVIDER: ${FACE_PROVIDER}
+      FACE_MATCH_THRESHOLD: ${FACE_MATCH_THRESHOLD}
+      FALL_IMMOBILITY_SECONDS: ${FALL_IMMOBILITY_SECONDS}
+      FIRE_MIN_CONSECUTIVE_FRAMES: ${FIRE_MIN_CONSECUTIVE_FRAMES}
+      AWS_REGION: ${AWS_REGION}
+      REKOGNITION_COLLECTION_ID: ${REKOGNITION_COLLECTION_ID}
+    ports:
+      - "${PORT_AI:-8000}:8000"
+    volumes:
+      - ./services/ai-service/app:/app/app
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)",
+        ]
+      <<: *hc
+    logging: *default-logging
+
+  # ------------------------------------------------------------------
+  # 7. Orchestrator (NestJS) - bo nao he thong
+  # ------------------------------------------------------------------
+  orchestrator:
+    build:
+      context: .
+      dockerfile: apps/orchestrator/Dockerfile
+      target: development
+    container_name: camerai-orchestrator
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      PORT: 3001
+    ports:
+      - "${PORT_ORCHESTRATOR:-3001}:3001"
+    volumes:
+      - ./apps/orchestrator/src:/workspace/apps/orchestrator/src
+      - ./packages/contracts/src:/workspace/packages/contracts/src
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/api/v1/health || exit 1"]
+      <<: *hc
+    logging: *default-logging
+
+  # ------------------------------------------------------------------
+  # 8. Dashboard (Next.js)
+  # ------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: development
+    container_name: camerai-web
+    restart: unless-stopped
+    depends_on:
+      orchestrator:
+        condition: service_started
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+      NODE_ENV: ${NODE_ENV}
+    ports:
+      - "${PORT_WEB:-3000}:3000"
+    volumes:
+      - ./apps/web/src:/workspace/apps/web/src
+    logging: *default-logging
+
+volumes:
+  pgdata:
+  mqttdata:
+  miniodata:
+  frigatemedia:
+
+networks:
+  default:
+    name: camerai-net

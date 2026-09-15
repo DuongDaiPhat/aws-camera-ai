@@ -1,0 +1,24 @@
+{
+  "name": "@cam/contracts",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Kieu du lieu dung chung FE/BE, SINH RA tu api/openapi.yaml",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate": "openapi-typescript ../../api/openapi.yaml -o ./src/generated/orchestrator.ts",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"(contracts - kieu du lieu thuan, khong co runtime test)\""
+  },
+  "devDependencies": {
+    "@cam/eslint-config": "workspace:*",
+    "openapi-typescript": "^7.4.1",
+    "typescript": "^5.6.2"
+  }
+}

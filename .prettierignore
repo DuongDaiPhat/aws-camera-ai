@@ -1,0 +1,15 @@
+node_modules
+dist
+.next
+coverage
+pnpm-lock.yaml
+
+# Migration SQL — thut dong can chinh bang tay cho de doc
+db/migrations
+
+# Tai lieu ke hoach goc cua nhom — giu nguyen dinh dang tac gia
+docs/KE_HOACH_AGILE_CameraAI_AWS.md
+docs/Roadmap_Backlog_UserStory_FR_CameraAI.md
+
+# Code sinh tu dong
+packages/contracts/src/generated

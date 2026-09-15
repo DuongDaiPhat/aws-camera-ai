@@ -1,0 +1,83 @@
+# ---------------------------------------------------------------------
+# Frigate - cau hinh mau cho moi truong DEV
+# Copy sang infra/frigate/config.yml roi chinh theo may cua ban.
+# config.yml bi gitignore vi chua URL RTSP that.
+#   cp infra/frigate/config.example.yml infra/frigate/config.yml
+# ---------------------------------------------------------------------
+
+mqtt:
+  enabled: true
+  host: mosquitto
+  port: 1883
+  topic_prefix: frigate
+  client_id: frigate
+
+# Detector: chon 1 trong 3 tuy suc may (rui ro R4 trong ke hoach)
+#   cpu      - chay moi may, cham nhat  -> mac dinh cho Sprint 0/1
+#   openvino - CPU Intel the he 6+
+#   tensorrt - GPU NVIDIA
+detectors:
+  cpu1:
+    type: cpu
+    num_threads: 3
+
+objects:
+  track:
+    - person
+  filters:
+    person:
+      min_score: 0.5
+      threshold: 0.7
+      min_area: 1500
+
+snapshots:
+  enabled: true
+  timestamp: true
+  bounding_box: true
+  retain:
+    default: 2 # ngay - media that nam o MinIO/S3, day chi la ban dem
+
+record:
+  enabled: true
+  retain:
+    days: 1
+    mode: motion
+  alerts:
+    retain:
+      days: 2
+
+cameras:
+  cam_living_room:
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: rtsp://mediamtx:8554/cam_living_room
+          roles: [detect, record]
+      input_args: preset-rtsp-restream
+    detect:
+      width: 1280
+      height: 720
+      fps: 5 # giam con 5 fps khi may yeu
+    zones:
+      # Toa do o day la pixel cua khung detect.
+      # Nguon su that cua zone la bang `zones` trong Postgres (toa do chuan hoa 0-1);
+      # orchestrator sinh lai khoi nay khi admin ve zone tren dashboard (US-12).
+      rest_area_sofa:
+        coordinates: 0.05,0.55,0.45,0.55,0.45,0.95,0.05,0.95
+
+  cam_kitchen:
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: rtsp://mediamtx:8554/cam_kitchen
+          roles: [detect, record]
+      input_args: preset-rtsp-restream
+    detect:
+      width: 1280
+      height: 720
+      fps: 5
+    zones:
+      restricted_stove:
+        coordinates: 0.40,0.30,0.95,0.30,0.95,0.90,0.40,0.90
+
+version: 0.14

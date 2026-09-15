@@ -1,0 +1,362 @@
+openapi: 3.1.0
+
+# =====================================================================
+# HOP DONG API — AI Inference Service (FastAPI)
+#
+# Service noi bo: chi orchestrator goi, khong lo ra Internet.
+# Tach rieng khoi openapi.yaml de D/E (AI) va B (backend) lam song song
+# ma khong dung nhau trong cung mot file.
+# =====================================================================
+
+info:
+  title: CameraAI — AI Inference Service
+  version: 0.1.0
+  description: |
+    Suy luan AI cho tung module. Moi endpoint la STATELESS tru `/pose/fall`,
+    vi phat hien te nga can theo doi chuoi frame theo `trackId` (US-16/US-17).
+
+    ## Nguyen tac
+    - Service KHONG ghi database va KHONG goi Telegram. Moi quyet dinh
+      nghiep vu thuoc ve orchestrator.
+    - Moi nguong deu doc tu bien moi truong, khong hard-code (US-15).
+    - Loi suy luan tra ve `200` voi `error != null`, KHONG tra `500`,
+      de orchestrator van ghi duoc su kien voi status `AI_FAILED` (US-10).
+
+  license:
+    name: MIT
+    identifier: MIT
+
+servers:
+  - url: http://ai-service:8000
+    description: Trong docker network
+  - url: http://localhost:8000
+    description: Dev tren may that
+
+security:
+  - internalToken: []
+
+tags:
+  - name: health
+    description: Kiem tra suc khoe dich vu
+  - name: face
+    description: Module 1 — nhan dien nguoi la (US-10)
+  - name: pose
+    description: Module 2a — phat hien te nga (US-16, US-17)
+  - name: fire
+    description: Module 3 — phat hien lua/khoi (US-18)
+
+paths:
+  /health:
+    get:
+      tags: [health]
+      summary: Kiem tra service song va provider dang bat
+      operationId: aiHealth
+      security: []
+      responses:
+        "200":
+          description: Trang thai service
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, service, version, faceProvider]
+                properties:
+                  status: { type: string, enum: [ok, degraded] }
+                  service: { type: string }
+                  version: { type: string }
+                  faceProvider:
+                    type: string
+                    enum: [local, rekognition]
+                    description: Quan sat feature flag US-24 tu ben ngoai.
+                  uptimeSeconds: { type: integer }
+        "503":
+          description: Service dang khoi dong, model chua nap xong
+
+  /face/embed:
+    post:
+      tags: [face]
+      summary: Trich xuat embedding tu anh de dang ky nguoi quen
+      description: |
+        US-09. Tra `error.code = NO_FACE_DETECTED` khi khong thay khuon mat,
+        `MULTIPLE_FACES` kem danh sach bounding box khi co nhieu hon mot.
+      operationId: embedFace
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image]
+              properties:
+                image: { type: string, format: binary }
+      responses:
+        "200":
+          description: Ket qua trich xuat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EmbedResponse" }
+        "401":
+          description: Thieu hoac sai X-Internal-Token
+        "422":
+          description: Thieu truong bat buoc trong form-data
+
+  /face/match:
+    post:
+      tags: [face]
+      summary: So khop anh crop voi danh sach nguoi quen
+      description: |
+        US-10. `personStatus`:
+          - `KNOWN`        khi similarity >= FACE_MATCH_THRESHOLD
+          - `UNKNOWN`      khi similarity < nguong
+          - `UNDETERMINED` khi khong trich xuat duoc khuon mat (quay lung,
+            qua toi, qua nho). FR-DET-M1-04: truong hop nay KHONG sinh canh bao.
+      operationId: matchFace
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image, eventId]
+              properties:
+                image: { type: string, format: binary }
+                eventId: { type: string, format: uuid }
+                threshold:
+                  type: number
+                  description: Ghi de nguong mac dinh; de trong thi dung cau hinh service.
+      responses:
+        "200":
+          description: Ket qua so khop
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MatchResponse" }
+        "401":
+          description: Thieu hoac sai X-Internal-Token
+        "422":
+          description: Thieu truong bat buoc trong form-data
+
+  /face/collection/sync:
+    post:
+      tags: [face]
+      summary: Nap lai danh sach embedding nguoi quen vao bo nho service
+      description: Orchestrator goi sau khi them/xoa nguoi quen.
+      operationId: syncFaceCollection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [faces]
+              properties:
+                faces:
+                  type: array
+                  items:
+                    type: object
+                    required: [knownFaceId, personName]
+                    properties:
+                      knownFaceId: { type: string, format: uuid }
+                      personName: { type: string }
+                      embeddingBase64: { type: ["string", "null"] }
+                      rekognitionFaceId: { type: ["string", "null"] }
+      responses:
+        "200":
+          description: Da dong bo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  loaded: { type: integer }
+                  provider: { type: string, enum: [local, rekognition] }
+        "401":
+          description: Thieu hoac sai X-Internal-Token
+        "422":
+          description: Danh sach faces sai dinh dang
+
+  /pose/fall:
+    post:
+      tags: [pose]
+      summary: Danh gia mot frame trong chuoi theo doi te nga
+      description: |
+        US-16/US-17. Service giu trang thai theo `trackId`:
+          - `MONITORING` — tu the binh thuong
+          - `CANDIDATE`  — truc than gan nam ngang, dang dem thoi gian
+          - `CONFIRMED`  — bat dong qua `FALL_IMMOBILITY_SECONDS` -> sinh canh bao
+          - `CANCELLED`  — dung day trong thoi gian theo doi, chi ghi log
+        Orchestrator chi tao su kien khi nhan `CONFIRMED`.
+      operationId: evaluateFall
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image, trackId, cameraSlug, frameTimestamp]
+              properties:
+                image: { type: string, format: binary }
+                trackId: { type: string }
+                cameraSlug: { type: string }
+                frameTimestamp: { type: string, format: date-time }
+                inRestArea:
+                  type: boolean
+                  default: false
+                  description: FR-DET-M2-05 — true thi khong bao gio tra CONFIRMED.
+      responses:
+        "200":
+          description: Trang thai theo doi hien tai
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FallResponse" }
+        "401":
+          description: Thieu hoac sai X-Internal-Token
+        "422":
+          description: Thieu truong bat buoc trong form-data
+
+  /fire/detect:
+    post:
+      tags: [fire]
+      summary: Phat hien lua/khoi tren mot frame
+      description: |
+        US-18. `confirmed = true` chi khi tin hieu xuat hien lien tuc tren
+        >= FIRE_MIN_CONSECUTIVE_FRAMES frame trong 5 giay (FR-DET-M3-02),
+        de loai nhieu tu den mau va anh nang.
+      operationId: detectFire
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image, cameraSlug, frameTimestamp]
+              properties:
+                image: { type: string, format: binary }
+                cameraSlug: { type: string }
+                frameTimestamp: { type: string, format: date-time }
+      responses:
+        "200":
+          description: Ket qua phat hien
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FireResponse" }
+        "401":
+          description: Thieu hoac sai X-Internal-Token
+        "422":
+          description: Thieu truong bat buoc trong form-data
+
+components:
+  securitySchemes:
+    internalToken:
+      type: apiKey
+      in: header
+      name: X-Internal-Token
+
+  schemas:
+    BoundingBox:
+      type: object
+      description: Toa do chuan hoa 0..1.
+      required: [x, y, width, height]
+      properties:
+        x: { type: number, minimum: 0, maximum: 1 }
+        y: { type: number, minimum: 0, maximum: 1 }
+        width: { type: number, minimum: 0, maximum: 1 }
+        height: { type: number, minimum: 0, maximum: 1 }
+
+    InferenceError:
+      type: ["object", "null"]
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - NO_FACE_DETECTED
+            - MULTIPLE_FACES
+            - IMAGE_DECODE_FAILED
+            - MODEL_NOT_LOADED
+            - PROVIDER_UNAVAILABLE
+            - TIMEOUT
+        message: { type: string }
+
+    EmbedResponse:
+      type: object
+      required: [modelVersion]
+      properties:
+        embeddingBase64:
+          type: ["string", "null"]
+          description: float32 array da pack, base64. Null khi co loi.
+        embeddingDim: { type: ["integer", "null"] }
+        faces:
+          type: array
+          description: Co nhieu phan tu khi anh chua nhieu khuon mat (US-09).
+          items: { $ref: "#/components/schemas/BoundingBox" }
+        modelVersion: { type: string }
+        error: { $ref: "#/components/schemas/InferenceError" }
+
+    MatchResponse:
+      type: object
+      required: [personStatus, modelVersion, processedAt]
+      properties:
+        personStatus:
+          type: string
+          enum: [KNOWN, UNKNOWN, UNDETERMINED]
+        matchedKnownFaceId: { type: ["string", "null"], format: uuid }
+        matchedPersonName: { type: ["string", "null"] }
+        similarity:
+          type: ["number", "null"]
+          minimum: 0
+          maximum: 1
+          description: Do tuong dong cosine voi ban ghi khop nhat.
+        thresholdUsed: { type: number }
+        boundingBox: { $ref: "#/components/schemas/BoundingBox" }
+        modelVersion: { type: string }
+        provider: { type: string, enum: [local, rekognition] }
+        fellBackToLocal:
+          type: boolean
+          description: FR-DET-M1-06 — true khi Rekognition loi va da tu chuyen ve model local.
+        processedAt: { type: string, format: date-time }
+        error: { $ref: "#/components/schemas/InferenceError" }
+
+    FallResponse:
+      type: object
+      required: [trackId, state, modelVersion, processedAt]
+      properties:
+        trackId: { type: string }
+        state:
+          type: string
+          enum: [MONITORING, CANDIDATE, CONFIRMED, CANCELLED]
+        confidence: { type: ["number", "null"], minimum: 0, maximum: 1 }
+        torsoAngleDeg:
+          type: ["number", "null"]
+          description: Goc truc than so voi phuong ngang; duoi 30 do la dau hieu nam.
+        immobileSeconds:
+          type: number
+          description: So giay da bat dong lien tuc.
+        thresholdSeconds: { type: integer }
+        keypointsDetected: { type: integer, description: 0..33 (MediaPipe Pose). }
+        boundingBox: { $ref: "#/components/schemas/BoundingBox" }
+        modelVersion: { type: string }
+        processedAt: { type: string, format: date-time }
+        error: { $ref: "#/components/schemas/InferenceError" }
+
+    FireResponse:
+      type: object
+      required: [confirmed, detections, modelVersion, processedAt]
+      properties:
+        confirmed:
+          type: boolean
+          description: True khi da du so frame lien tiep xac nhan (FR-DET-M3-02).
+        consecutiveFrames: { type: integer }
+        requiredFrames: { type: integer }
+        detections:
+          type: array
+          items:
+            type: object
+            required: [label, confidence, boundingBox]
+            properties:
+              label: { type: string, enum: [fire, smoke] }
+              confidence: { type: number, minimum: 0, maximum: 1 }
+              boundingBox: { $ref: "#/components/schemas/BoundingBox" }
+        maxConfidence: { type: number, minimum: 0, maximum: 1 }
+        modelVersion: { type: string }
+        processedAt: { type: string, format: date-time }
+        error: { $ref: "#/components/schemas/InferenceError" }

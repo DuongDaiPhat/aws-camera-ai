@@ -1,1 +1,63 @@
-docs/
+# ---- Node / pnpm ----
+node_modules/
+.pnpm-store/
+dist/
+build/
+out/
+.next/
+coverage/
+*.tsbuildinfo
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+
+# ---- Secrets & env (NFR-09: credential khong duoc vao repo) ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+aws-credentials*
+**/secrets/
+
+# ---- Du lieu runtime (KHONG commit) ----
+infra/**/data/
+infra/frigate/media/
+# Sinh tu config.example.yml, chua URL RTSP that cua tung may
+infra/frigate/config.yml
+db/data/
+*.db
+*.sqlite3
+
+# ---- Dataset & model weights (dung Git LFS hoac luu ngoai repo) ----
+datasets/
+models/*.pt
+models/*.onnx
+models/*.tflite
+*.mp4
+*.avi
+*.mkv
+!docs/**/*.mp4
+
+# ---- IDE / OS ----
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Logs ----
+*.log
+logs/
+npm-debug.log*
+pnpm-debug.log*

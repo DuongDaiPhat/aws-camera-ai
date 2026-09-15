@@ -1,0 +1,240 @@
+name: CI
+
+# =====================================================================
+# Cong kiem soat chat luong (DoD: "CI xanh" moi duoc merge).
+# Chay song song 5 job doc lap de phan hoi nhanh — mot job do khong
+# chan cac job con lai, nguoi lam biet HET van de trong mot lan chay.
+# Huong dan: docs/conventions/GIT_WORKFLOW.md
+# =====================================================================
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# PR moi day len se huy lan chay cu — tiet kiem phut Actions
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  PYTHON_VERSION: "3.11"
+  PNPM_VERSION: "9"
+
+jobs:
+  # -------------------------------------------------------------------
+  # 1. Node — lint, typecheck, unit test cho orchestrator + web + contracts
+  # -------------------------------------------------------------------
+  node:
+    name: Node (lint · typecheck · test)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      # TODO(Sprint 1): khi da commit pnpm-lock.yaml, doi thanh --frozen-lockfile
+      - name: Cai dependency
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Kiem tra dinh dang (Prettier)
+        run: pnpm format:check
+
+      - name: Lint (ESLint)
+        run: pnpm lint
+
+      - name: Kiem tra kieu (TypeScript)
+        run: pnpm typecheck
+
+      - name: Unit test
+        run: pnpm test
+
+      - name: Upload bao cao coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-node
+          path: apps/*/coverage/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # -------------------------------------------------------------------
+  # 2. Python — ruff + pytest cho AI service
+  # -------------------------------------------------------------------
+  python:
+    name: Python (ruff · pytest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: services/ai-service
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Cai dependency
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Kiem tra dinh dang (ruff format)
+        run: ruff format --check .
+
+      - name: Unit test (pytest + coverage)
+        run: pytest
+
+  # -------------------------------------------------------------------
+  # 3. OpenAPI — spec phai hop le TRUOC khi code theo no (task 0.4)
+  # -------------------------------------------------------------------
+  openapi:
+    name: OpenAPI (lint spec)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Lint spec orchestrator va AI service
+        run: npx --yes @redocly/cli@latest lint api/openapi.yaml api/openapi-ai-service.yaml
+
+  # -------------------------------------------------------------------
+  # 4. Database — migration phai chay duoc tren Postgres sach
+  #    (bat duoc loi cu phap SQL truoc khi ai do keo ve may minh)
+  # -------------------------------------------------------------------
+  database:
+    name: Database (migration tren Postgres sach)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: camerai_test
+          POSTGRES_USER: camerai
+          POSTGRES_PASSWORD: camerai
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U camerai"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cai psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Chay toan bo migration theo thu tu
+        env:
+          PGPASSWORD: camerai
+        run: |
+          for file in db/migrations/*.sql; do
+            echo "--> $file"
+            psql -h localhost -U camerai -d camerai_test -v ON_ERROR_STOP=1 -f "$file"
+          done
+
+      - name: Kiem tra 14 bang da duoc tao
+        env:
+          PGPASSWORD: camerai
+        run: |
+          count=$(psql -h localhost -U camerai -d camerai_test -tAc \
+            "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';")
+          echo "So bang: $count"
+          test "$count" -ge 14
+
+  # -------------------------------------------------------------------
+  # 5. Docker — compose file phai parse duoc, Dockerfile phai build duoc
+  # -------------------------------------------------------------------
+  docker:
+    name: Docker (compose config · build image)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tao .env tu mau
+        run: cp .env.example .env
+
+      - name: Kiem tra docker-compose.yml hop le
+        run: docker compose config --quiet
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build image AI service
+        uses: docker/build-push-action@v6
+        with:
+          context: ./services/ai-service
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # -------------------------------------------------------------------
+  # 6. Quy uoc commit — chi chay tren PR
+  # -------------------------------------------------------------------
+  commitlint:
+    name: Commit message
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - run: pnpm install --no-frozen-lockfile
+
+      - name: Kiem tra commit trong PR
+        run: >-
+          npx commitlint
+          --from ${{ github.event.pull_request.base.sha }}
+          --to ${{ github.event.pull_request.head.sha }}
+          --verbose
+
+  # -------------------------------------------------------------------
+  # Cong tong: bat branch protection vao job NAY, khong phai tung job le
+  # -------------------------------------------------------------------
+  ci-ok:
+    name: CI xanh
+    runs-on: ubuntu-latest
+    needs: [node, python, openapi, database, docker]
+    if: always()
+    steps:
+      - name: Kiem tra khong co job nao that bai
+        run: |
+          echo "Ket qua: ${{ join(needs.*.result, ', ') }}"
+          if echo "${{ join(needs.*.result, ',') }}" | grep -qE 'failure|cancelled'; then
+            echo "Co job that bai — khong duoc merge."
+            exit 1
+          fi

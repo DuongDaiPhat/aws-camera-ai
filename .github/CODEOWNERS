@@ -1,0 +1,30 @@
+# Tu dong gan nguoi review theo vung code (tuong ung phan cong muc 4
+# cua docs/KE_HOACH_AGILE_CameraAI_AWS.md).
+#
+# THAY <github-username> bang tai khoan that o buoi Sprint Planning dau tien.
+# Thanh vien: A=Team Lead/FE, B=Backend Lead, C=Infra, D=AI#1, E=AI#2
+
+# Mac dinh: Backend Lead (B) xem moi thu
+*                        @B-username
+
+# Frontend — A, backup B
+/apps/web/               @A-username @B-username
+
+# Backend — B, backup A
+/apps/orchestrator/      @B-username @A-username
+/db/                     @B-username
+/packages/contracts/     @B-username @A-username
+
+# AI service — D va E cung so huu
+/services/ai-service/    @D-username @E-username
+
+# Ha tang / CI — C, backup B
+/infra/                  @C-username @B-username
+/.github/                @C-username @B-username
+/docker-compose.yml      @C-username @B-username
+
+# Hop dong API — doi la phai co CA A va B duyet
+/api/                    @A-username @B-username
+
+# Tai lieu quy trinh — B (Scrum Master)
+/docs/conventions/       @B-username
