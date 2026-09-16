@@ -3,6 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,6 +13,20 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     log_level: str = "INFO"
+
+    @field_validator("log_level")
+    @classmethod
+    def _chuan_hoa_log_level(cls, v: str) -> str:
+        """`logging` cua Python chi chap nhan ten muc VIET HOA.
+
+        `.env` thuong duoc viet thuong (`LOG_LEVEL=debug`) nen phai tu chuan hoa,
+        neu khong service se chet ngay luc khoi dong voi `ValueError: Unknown level`.
+        """
+        muc = v.strip().upper()
+        hop_le = {"CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET"}
+        if muc not in hop_le:
+            raise ValueError(f"LOG_LEVEL khong hop le: {v!r}. Chon mot trong {sorted(hop_le)}")
+        return muc
 
     # Module 1 — nhan dien nguoi la
     face_provider: Literal["local", "rekognition"] = "local"
