@@ -173,7 +173,7 @@ git fetch origin
 git rebase origin/main
 
 # 5. Kiểm tra trước khi mở PR
-pnpm lint && pnpm typecheck && pnpm test && pnpm api:lint
+pnpm check:all      # Prettier, ESLint, TS, test, OpenAPI, ruff, pytest
 docker compose up -d && docker compose ps    # mọi container phải healthy
 
 # 6. Đẩy lên

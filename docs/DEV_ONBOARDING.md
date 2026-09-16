@@ -116,22 +116,59 @@ Mở trình duyệt:
 
 ```bash
 pnpm install
-
-cd services/ai-service
-python -m venv .venv
-source .venv/Scripts/activate    # Linux/macOS: source .venv/bin/activate
-pip install -e ".[dev]"
+pnpm setup:ai
 ```
+
+`pnpm setup:ai` tự tạo `services/ai-service/.venv` và cài dependency Python.
+Chạy được ở mọi shell (PowerShell, CMD, Git Bash, macOS, Linux).
 
 ### Kiểm tra tất cả chạy được
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm test && pnpm api:lint
-
-cd services/ai-service && ruff check . && pytest
+pnpm check:all
 ```
 
+Một lệnh chạy hết: Prettier → ESLint → TypeScript → test JS → OpenAPI → ruff → pytest.
 Tất cả xanh nghĩa là môi trường của bạn khớp với CI.
+
+Muốn chạy riêng từng phần:
+
+```bash
+pnpm lint && pnpm typecheck && pnpm test && pnpm api:lint   # phần JS/TS
+pnpm check:ai                                               # phần Python (AI service)
+```
+
+> **Vì sao không gõ thẳng `ruff` và `pytest`?**
+> Hai công cụ này chỉ tồn tại **bên trong venv**, không có trên PATH toàn cục.
+> Gõ `cd services/ai-service && ruff check .` mà chưa activate venv sẽ báo
+> `ruff: command not found` / `'ruff' is not recognized`.
+> Các script `pnpm *:ai` tự tìm Python trong venv nên không cần activate.
+
+<details>
+<summary>Nếu bạn vẫn muốn activate venv thủ công</summary>
+
+Lệnh activate **khác nhau theo shell** — đây là chỗ hay nhầm nhất:
+
+| Shell                              | Lệnh                            |
+| ---------------------------------- | ------------------------------- |
+| PowerShell (mặc định trên Windows) | `.venv\Scripts\Activate.ps1`    |
+| CMD                                | `.venv\Scripts\activate.bat`    |
+| Git Bash (Windows)                 | `source .venv/Scripts/activate` |
+| macOS / Linux                      | `source .venv/bin/activate`     |
+
+```powershell
+cd services/ai-service
+.venv\Scripts\Activate.ps1
+ruff check . ; pytest
+```
+
+PowerShell chặn script thì chạy một lần:
+`Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`
+
+Nhớ rằng activate chỉ có tác dụng **trong terminal hiện tại** — mở tab mới là phải
+activate lại. Đây chính là lý do nên dùng `pnpm check:ai`.
+
+</details>
 
 ---
 
@@ -386,6 +423,24 @@ Hoặc mở WebRTC trong trình duyệt: http://localhost:8889/cam_living_room
 ---
 
 ## 8. Gỡ rối
+
+### `pull access denied for minio/mc` hoặc `minio/minio`
+
+**Không phải lỗi máy bạn.** MinIO đã ngừng publish image lên Docker Hub; registry
+chính thức bây giờ là `quay.io`. `docker-compose.yml` đã trỏ đúng:
+
+```yaml
+image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
+```
+
+Nếu vẫn gặp lỗi này, bạn đang dùng bản `docker-compose.yml` cũ — `git pull` là xong.
+
+> **Vì sao ghim tag thay vì dùng `latest`:** chính sự cố này là ví dụ. Image `latest`
+> đổi dưới chân cả nhóm mà không ai gây ra thay đổi nào. Ngoài ra bản MinIO community
+> sau giữa 2025 đã bắt đầu cắt bớt giao diện web — ghim tag giữ cho MinIO Console ở
+> cổng 9001 vẫn dùng được suốt kỳ đồ án. Muốn nâng phiên bản thì nâng có chủ đích,
+> trong một PR riêng, và chạy thử lại `docker compose up` trước khi merge.
 
 ### `docker compose up` báo "port is already allocated"
 

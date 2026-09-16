@@ -576,11 +576,17 @@ if (result.personStatus === 'UNDETERMINED') {
 ### Cài một lần
 
 ```bash
-pnpm install          # cài husky hook
-cd services/ai-service && pip install -e ".[dev]"
+pnpm install          # cài dependency JS + husky hook
+pnpm setup:ai         # tạo venv + cài dependency Python
 ```
 
 ### Chạy trước khi mở PR
+
+```bash
+pnpm check:all        # chạy hết: Prettier, ESLint, TS, test, OpenAPI, ruff, pytest
+```
+
+Hoặc từng phần:
 
 ```bash
 pnpm format           # Prettier tự sửa
@@ -589,9 +595,14 @@ pnpm typecheck        # TypeScript
 pnpm test             # Jest + Vitest
 pnpm api:lint         # OpenAPI
 
-cd services/ai-service
-ruff check --fix . && ruff format . && pytest
+pnpm lint:ai:fix      # ruff check --fix
+pnpm format:ai        # ruff format
+pnpm test:ai          # pytest
 ```
+
+> `ruff` và `pytest` chỉ nằm trong venv, không có trên PATH. Các script `pnpm *:ai`
+> tự tìm Python trong venv nên chạy được ở mọi shell mà không cần activate —
+> xem [DEV_ONBOARDING.md](../DEV_ONBOARDING.md#kiểm-tra-tất-cả-chạy-được).
 
 ### Git hook tự động
 
