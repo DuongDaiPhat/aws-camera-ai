@@ -25,7 +25,6 @@ permissions:
 env:
   NODE_VERSION: "22"
   PYTHON_VERSION: "3.11"
-  PNPM_VERSION: "9"
 
 jobs:
   # -------------------------------------------------------------------
@@ -38,18 +37,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # KHONG khai `version` o day: pnpm/action-setup tu doc truong
+      # `packageManager` trong package.json. Khai ca hai noi se gay loi
+      # ERR_PNPM_BAD_PM_VERSION. Doi phien ban pnpm => sua package.json.
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
-      # TODO(Sprint 1): khi da commit pnpm-lock.yaml, doi thanh --frozen-lockfile
+      # --frozen-lockfile: CI se DO neu pnpm-lock.yaml khong khop package.json.
+      # Day la co y — nguoi them dependency phai commit ca lockfile.
       - name: Cai dependency
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Kiem tra dinh dang (Prettier)
         run: pnpm format:check
@@ -89,6 +90,8 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
+          # Chi ro file de cache khong doan nham khi repo co them file Python khac
+          cache-dependency-path: services/ai-service/pyproject.toml
 
       - name: Cai dependency
         run: |
@@ -114,12 +117,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
 
+      - name: Cai dependency
+        run: pnpm install --frozen-lockfile
+
+      # Dung `pnpm api:lint` (redocly ghim trong lockfile) chu KHONG phai
+      # `npx @redocly/cli@latest`: ban latest co the them quy tac moi va lam
+      # CI do vi mot thay doi ma khong ai trong nhom gay ra.
       - name: Lint spec orchestrator va AI service
-        run: npx --yes @redocly/cli@latest lint api/openapi.yaml api/openapi-ai-service.yaml
+        run: pnpm api:lint
 
   # -------------------------------------------------------------------
   # 4. Database — migration phai chay duoc tren Postgres sach
@@ -205,15 +217,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      # KHONG khai `version` o day: pnpm/action-setup tu doc truong
+      # `packageManager` trong package.json. Khai ca hai noi se gay loi
+      # ERR_PNPM_BAD_PM_VERSION. Doi phien ban pnpm => sua package.json.
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
       - name: Kiem tra commit trong PR
         run: >-
