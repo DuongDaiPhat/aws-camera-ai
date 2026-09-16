@@ -104,9 +104,12 @@ services:
     image: bluenviron/mediamtx:latest
     container_name: camerai-mediamtx
     restart: unless-stopped
+    environment:
+      MTX_WEBRTCADDITIONALHOSTS: ${MEDIAMTX_WEBRTC_ADDITIONAL_HOSTS:-localhost}
     ports:
       - "${PORT_RTSP:-8554}:8554"
-      - "8889:8889"
+      - "${PORT_WEBRTC_HTTP:-8889}:8889"
+      - "${PORT_WEBRTC_ICE:-8189}:8189/udp"
     volumes:
       - ./infra/mediamtx/mediamtx.yml:/mediamtx.yml:ro
     logging: *default-logging
