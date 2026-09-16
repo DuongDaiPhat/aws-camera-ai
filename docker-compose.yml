@@ -61,7 +61,9 @@ services:
   # 3. MinIO - object storage local, Sprint 4 thay bang S3 (US-23)
   # ------------------------------------------------------------------
   minio:
-    image: minio/minio:latest
+    # MinIO khong con publish len Docker Hub — phai dung quay.io.
+    # Ghim tag de image khong tu doi giua ky du an (xem docs/DEV_ONBOARDING.md).
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: camerai-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
@@ -80,7 +82,7 @@ services:
 
   # Job chay 1 lan: tao bucket + lifecycle 7 ngay (FR-DAT-01)
   minio-init:
-    image: minio/mc:latest
+    image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
     container_name: camerai-minio-init
     depends_on:
       minio:

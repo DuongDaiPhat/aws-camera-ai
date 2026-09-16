@@ -5,11 +5,11 @@ RUN corepack enable
 WORKDIR /workspace
 
 FROM base AS deps
-COPY package.json pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json apps/web/
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/eslint-config/package.json packages/eslint-config/
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 FROM deps AS development
 COPY . .

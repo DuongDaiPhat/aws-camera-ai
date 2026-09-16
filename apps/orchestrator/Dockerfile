@@ -8,11 +8,11 @@ WORKDIR /workspace
 
 # ---------- deps ----------
 FROM base AS deps
-COPY package.json pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/orchestrator/package.json apps/orchestrator/
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/eslint-config/package.json packages/eslint-config/
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 # ---------- development ----------
 FROM deps AS development

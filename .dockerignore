@@ -1,0 +1,26 @@
+# Build context cua apps/orchestrator va apps/web la ROOT cua monorepo.
+# Khong loai tru thi Docker phai tai len ca node_modules va .venv (hang tram MB).
+
+.git
+.github
+node_modules
+**/node_modules
+**/.venv
+**/dist
+**/.next
+**/coverage
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+
+# Khong bao gio dua secret vao image
+.env
+.env.*
+!.env.example
+
+# Khong can trong image
+docs
+datasets
+infra/**/data
+*.md
+!README.md
