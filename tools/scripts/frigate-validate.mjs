@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * Kiem tra config Frigate bang CHINH validator cua image dang ghim trong docker-compose.yml.
+ * Kiểm tra config Frigate bằng CHÍNH validator của image đang ghim trong docker-compose.yml.
  *
- *   pnpm frigate:validate                                      # config.yml, khong co thi file mau
+ *   pnpm frigate:validate                                      # config.yml, không có thì file mẫu
  *   pnpm frigate:validate -- infra/frigate/config.example.yml
  *
- * Unit test (pnpm test:tools) chi kiem rang buoc cua du an; schema that cua Frigate
- * chi image Frigate moi biet. Khong can container Frigate dang chay.
+ * Unit test (pnpm test:tools) chỉ kiểm ràng buộc của dự án; schema thật của Frigate
+ * chỉ image Frigate mới biết. Không cần container Frigate đang chạy.
  */
 
 import { spawnSync } from 'node:child_process';
@@ -16,32 +16,36 @@ import { fileURLToPath } from 'node:url';
 
 import { parse } from 'yaml';
 
-import { phanTichKetQuaValidate } from './lib/frigate-config.mjs';
+import { parseValidationOutput } from './lib/frigate-config.mjs';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-// Lan dau phai tai image Frigate vai GB
-const THOI_GIAN_CHO_TOI_DA_MS = 10 * 60 * 1000;
+const ROOT_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+// Lần đầu phải tải image Frigate vài GB
+const DOCKER_RUN_TIMEOUT_MS = 10 * 60 * 1000;
+// Không tách được lỗi (docker/image hỏng) thì in phần cuối output để tự đọc
+const RAW_OUTPUT_TAIL_CHARS = 2000;
 
-const laFile = (duongDan) => existsSync(duongDan) && statSync(duongDan).isFile();
+const isFile = (path) => existsSync(path) && statSync(path).isFile();
 
-function chonFileConfig(doiSo) {
-  if (doiSo) return resolve(doiSo);
-  const configMay = join(ROOT, 'infra', 'frigate', 'config.yml');
-  return laFile(configMay) ? configMay : join(ROOT, 'infra', 'frigate', 'config.example.yml');
+function resolveConfigPath(pathArg) {
+  if (pathArg) return resolve(pathArg);
+  const localConfigPath = join(ROOT_DIR, 'infra', 'frigate', 'config.yml');
+  return isFile(localConfigPath)
+    ? localConfigPath
+    : join(ROOT_DIR, 'infra', 'frigate', 'config.example.yml');
 }
 
-const [doiSoFile] = process.argv.slice(2).filter((doiSo) => doiSo !== '--');
-const fileConfig = chonFileConfig(doiSoFile);
-if (!laFile(fileConfig)) {
-  console.error(`\n  Khong tim thay file config: ${fileConfig}\n`);
+const [pathArg] = process.argv.slice(2).filter((arg) => arg !== '--');
+const configPath = resolveConfigPath(pathArg);
+if (!isFile(configPath)) {
+  console.error(`\n  Không tìm thấy file config: ${configPath}\n`);
   process.exit(1);
 }
 
-const compose = parse(readFileSync(join(ROOT, 'docker-compose.yml'), 'utf8'));
-const image = compose.services.frigate.image;
-console.log(`\n  Kiem tra ${relative(ROOT, fileConfig)} bang ${image} ...\n`);
+const compose = parse(readFileSync(join(ROOT_DIR, 'docker-compose.yml'), 'utf8'));
+const frigateImage = compose.services.frigate.image;
+console.log(`\n  Kiểm tra ${relative(ROOT_DIR, configPath)} bằng ${frigateImage} ...\n`);
 
-const ketQua = spawnSync(
+const dockerRun = spawnSync(
   'docker',
   [
     'run',
@@ -49,31 +53,30 @@ const ketQua = spawnSync(
     '--entrypoint',
     'sh',
     '-v',
-    `${fileConfig}:/config/config.yml:ro`,
-    image,
+    `${configPath}:/config/config.yml:ro`,
+    frigateImage,
     '-c',
     'cd /opt/frigate && python3 -u -m frigate --validate-config 2>&1',
   ],
-  { encoding: 'utf8', timeout: THOI_GIAN_CHO_TOI_DA_MS },
+  { encoding: 'utf8', timeout: DOCKER_RUN_TIMEOUT_MS },
 );
 
-if (ketQua.error) {
-  console.error(`  Khong chay duoc docker: ${ketQua.error.message}\n`);
+if (dockerRun.error) {
+  console.error(`  Không chạy được docker: ${dockerRun.error.message}\n`);
   process.exit(1);
 }
 
-const output = `${ketQua.stdout}${ketQua.stderr}`;
-const { hopLe, loi } = phanTichKetQuaValidate(output);
-if (hopLe) {
-  console.log('  HOP LE: Frigate chap nhan cau hinh.\n');
+const output = `${dockerRun.stdout}${dockerRun.stderr}`;
+const { isValid, errors } = parseValidationOutput(output);
+if (isValid) {
+  console.log('  HỢP LỆ: Frigate chấp nhận cấu hình.\n');
   process.exit(0);
 }
 
-console.error('  KHONG HOP LE:');
-for (const { dong, khoa, giaTri, thongDiep } of loi) {
-  console.error(`    - dong ${dong} · ${khoa} = ${giaTri} -> ${thongDiep}`);
+console.error('  KHÔNG HỢP LỆ:');
+for (const { line, key, value, message } of errors) {
+  console.error(`    - dòng ${line} · ${key} = ${value} → ${message}`);
 }
-// Khong tach duoc loi (docker/image hong) -> in phan cuoi output de tu doc
-if (loi.length === 0) console.error(output.slice(-2000));
+if (errors.length === 0) console.error(output.slice(-RAW_OUTPUT_TAIL_CHARS));
 console.error('');
 process.exit(1);

@@ -2,16 +2,16 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
-  docThamSo,
-  kiemTraMessage,
-  MAC_DINH,
-  taoBoNghiemThu,
-  TIMEOUT_TOI_DA_GIAY,
-  tomTat,
+  createAcceptanceChecker,
+  DEFAULT_OPTIONS,
+  formatEventSummary,
+  MAX_TIMEOUT_SECONDS,
+  parseCliArgs,
+  validateEventMessage,
 } from '../lib/frigate-events.mjs';
 
-/** Message `new` bat duoc that tu Frigate 0.18 tren may dev (da luoc truong khong dung). */
-function taoMessageMau({ type = 'new', ...ghiDeAfter } = {}) {
+/** Message `new` bắt được thật từ Frigate 0.18 trên máy dev (đã lược trường không dùng). */
+function buildSampleMessage({ type = 'new', ...afterOverrides } = {}) {
   return {
     type,
     before: { id: '1789613958.41477-np9fac', false_positive: true },
@@ -32,21 +32,21 @@ function taoMessageMau({ type = 'new', ...ghiDeAfter } = {}) {
       has_clip: true,
       start_time: 1789613958.41477,
       end_time: type === 'end' ? 1789613980.5 : null,
-      ...ghiDeAfter,
+      ...afterOverrides,
     },
   };
 }
 
-const dong = (message) => JSON.stringify(message);
+const toLine = (message) => JSON.stringify(message);
 
 // ---------------------------------------------------------------------------
 
-describe('docThamSo', () => {
+describe('parseCliArgs', () => {
   it('trả giá trị mặc định khi không truyền tham số', () => {
-    const { thamSo, loi } = docThamSo([]);
+    const { options, errors } = parseCliArgs([]);
 
-    assert.deepEqual(thamSo, { ...MAC_DINH });
-    assert.deepEqual(loi, []);
+    assert.deepEqual(options, { ...DEFAULT_OPTIONS });
+    assert.deepEqual(errors, []);
   });
 
   it('đọc đủ 4 tham số và bỏ qua dấu -- do pnpm chuyển tiếp', () => {
@@ -62,125 +62,136 @@ describe('docThamSo', () => {
       't/x',
     ];
 
-    const { thamSo, loi } = docThamSo(argv);
+    const { options, errors } = parseCliArgs(argv);
 
-    assert.deepEqual(loi, []);
-    assert.deepEqual(thamSo, { camera: 'cam_test', timeout: 30, label: 'car', topic: 't/x' });
+    assert.deepEqual(errors, []);
+    assert.deepEqual(options, {
+      camera: 'cam_test',
+      timeoutSeconds: 30,
+      label: 'car',
+      topic: 't/x',
+    });
   });
 
-  it('không làm hỏng MAC_DINH giữa các lần gọi', () => {
-    docThamSo(['--camera', 'cam_a']);
+  it('không làm hỏng DEFAULT_OPTIONS giữa các lần gọi', () => {
+    parseCliArgs(['--camera', 'cam_a']);
 
-    assert.equal(docThamSo([]).thamSo.camera, null);
-    assert.ok(Object.isFrozen(MAC_DINH));
+    assert.equal(parseCliArgs([]).options.camera, null);
+    assert.ok(Object.isFrozen(DEFAULT_OPTIONS));
   });
 
   it('báo lỗi khi tham số thiếu giá trị thay vì nuốt tham số kế tiếp làm giá trị', () => {
-    const { thamSo, loi } = docThamSo(['--camera', '--timeout', '5']);
+    const { options, errors } = parseCliArgs(['--camera', '--timeout', '5']);
 
-    assert.deepEqual(loi, ['--camera thieu gia tri']);
-    assert.equal(thamSo.camera, null);
-    assert.equal(thamSo.timeout, 5);
+    assert.deepEqual(errors, ['--camera thiếu giá trị']);
+    assert.equal(options.camera, null);
+    assert.equal(options.timeoutSeconds, 5);
   });
 
   it('báo lỗi khi tham số cuối cùng thiếu giá trị', () => {
-    const { loi } = docThamSo(['--camera']);
+    const { errors } = parseCliArgs(['--camera']);
 
-    assert.deepEqual(loi, ['--camera thieu gia tri']);
+    assert.deepEqual(errors, ['--camera thiếu giá trị']);
   });
 
   it('báo lỗi khi gõ nhầm tên tham số thay vì lặng lẽ nghe mọi camera', () => {
-    const { loi } = docThamSo(['--camra', 'cam_test']);
+    const { errors } = parseCliArgs(['--camra', 'cam_test']);
 
-    assert.ok(loi.includes('tham so khong ho tro: --camra'));
+    assert.ok(errors.includes('Tham số không hỗ trợ: --camra'));
+  });
+
+  it('không nhận tên khóa nội bộ như --timeoutSeconds', () => {
+    const { errors } = parseCliArgs(['--timeoutSeconds', '5']);
+
+    assert.ok(errors.includes('Tham số không hỗ trợ: --timeoutSeconds'));
   });
 
   it('không nhận thuộc tính kế thừa của Object như --toString, --constructor', () => {
-    const { thamSo, loi } = docThamSo(['--toString', 'x', '--constructor', 'y']);
+    const { options, errors } = parseCliArgs(['--toString', 'x', '--constructor', 'y']);
 
-    assert.equal(loi.length, 4); // 2 ten khong ho tro + 2 gia tri le loi
-    assert.equal(Object.hasOwn(thamSo, 'toString'), false);
+    assert.equal(errors.length, 4); // 2 tên không hỗ trợ + 2 giá trị lẻ loi
+    assert.equal(Object.hasOwn(options, 'toString'), false);
   });
 
   it('báo lỗi với đối số không bắt đầu bằng --', () => {
-    const { loi } = docThamSo(['cam_test']);
+    const { errors } = parseCliArgs(['cam_test']);
 
-    assert.deepEqual(loi, ['tham so khong ho tro: cam_test']);
+    assert.deepEqual(errors, ['Tham số không hỗ trợ: cam_test']);
   });
 
-  for (const giaTri of ['abc', '0', '-5', 'NaN', 'Infinity', '']) {
-    it(`từ chối --timeout "${giaTri}"`, () => {
-      const { loi } = docThamSo(['--timeout', giaTri]);
+  for (const value of ['abc', '0', '-5', 'NaN', 'Infinity', '']) {
+    it(`từ chối --timeout "${value}"`, () => {
+      const { errors } = parseCliArgs(['--timeout', value]);
 
-      assert.ok(loi.includes('--timeout phai la so giay > 0'), JSON.stringify(loi));
+      assert.ok(errors.includes('--timeout phải là số giây > 0'), JSON.stringify(errors));
     });
   }
 
   it('nhận --timeout là số thập phân', () => {
-    const { thamSo, loi } = docThamSo(['--timeout', '2.5']);
+    const { options, errors } = parseCliArgs(['--timeout', '2.5']);
 
-    assert.deepEqual(loi, []);
-    assert.equal(thamSo.timeout, 2.5);
+    assert.deepEqual(errors, []);
+    assert.equal(options.timeoutSeconds, 2.5);
   });
 
   it('từ chối --timeout vượt giới hạn setTimeout (nếu không sẽ hết giờ ngay lập tức)', () => {
-    const { loi } = docThamSo(['--timeout', '3000000']);
+    const { errors } = parseCliArgs(['--timeout', '3000000']);
 
-    assert.deepEqual(loi, [`--timeout toi da ${TIMEOUT_TOI_DA_GIAY} giay`]);
+    assert.deepEqual(errors, [`--timeout tối đa ${MAX_TIMEOUT_SECONDS} giây`]);
   });
 
   it('nhận --timeout đúng bằng giới hạn và giới hạn không tràn setTimeout', () => {
-    const { loi } = docThamSo(['--timeout', String(TIMEOUT_TOI_DA_GIAY)]);
+    const { errors } = parseCliArgs(['--timeout', String(MAX_TIMEOUT_SECONDS)]);
 
-    assert.deepEqual(loi, []);
-    assert.ok(TIMEOUT_TOI_DA_GIAY * 1000 <= 2 ** 31 - 1);
+    assert.deepEqual(errors, []);
+    assert.ok(MAX_TIMEOUT_SECONDS * 1000 <= 2 ** 31 - 1);
   });
 });
 
 // ---------------------------------------------------------------------------
 
-describe('kiemTraMessage', () => {
+describe('validateEventMessage', () => {
   it('chấp nhận message new thật từ Frigate 0.18', () => {
-    assert.deepEqual(kiemTraMessage(taoMessageMau()), []);
+    assert.deepEqual(validateEventMessage(buildSampleMessage()), []);
   });
 
   it('chấp nhận message update và end hợp lệ', () => {
-    assert.deepEqual(kiemTraMessage(taoMessageMau({ type: 'update' })), []);
-    assert.deepEqual(kiemTraMessage(taoMessageMau({ type: 'end' })), []);
+    assert.deepEqual(validateEventMessage(buildSampleMessage({ type: 'update' })), []);
+    assert.deepEqual(validateEventMessage(buildSampleMessage({ type: 'end' })), []);
   });
 
   it('chấp nhận zone có tên và snapshot chưa có', () => {
-    const message = taoMessageMau({
+    const message = buildSampleMessage({
       current_zones: ['restricted_stove'],
       entered_zones: ['restricted_stove'],
       has_snapshot: false,
     });
 
-    assert.deepEqual(kiemTraMessage(message), []);
+    assert.deepEqual(validateEventMessage(message), []);
   });
 
   for (const payload of [null, 42, 'chuoi', [], true]) {
     it(`từ chối payload không phải object: ${JSON.stringify(payload)}`, () => {
-      assert.deepEqual(kiemTraMessage(payload), ['payload khong phai JSON object']);
+      assert.deepEqual(validateEventMessage(payload), ['Payload không phải JSON object']);
     });
   }
 
   it('từ chối type lạ', () => {
-    const loi = kiemTraMessage(taoMessageMau({ type: 'created' }));
+    const errors = validateEventMessage(buildSampleMessage({ type: 'created' }));
 
-    assert.deepEqual(loi, ['type khong hop le: "created"']);
+    assert.deepEqual(errors, ['type không hợp lệ: "created"']);
   });
 
   for (const after of [undefined, null, [], 'x']) {
     it(`từ chối after = ${JSON.stringify(after)}`, () => {
-      const loi = kiemTraMessage({ type: 'new', after });
+      const errors = validateEventMessage({ type: 'new', after });
 
-      assert.deepEqual(loi, ['thieu object `after`']);
+      assert.deepEqual(errors, ['Thiếu object `after`']);
     });
   }
 
-  // Moi truong bat buoc theo AC: xoa di thi phai bao dung ten truong
-  const truongBatBuoc = {
+  // Mỗi trường bắt buộc theo AC: xóa đi thì phải báo đúng tên trường
+  const acNameByField = {
     camera: 'camera_id',
     label: 'label',
     id: 'track_id',
@@ -193,19 +204,19 @@ describe('kiemTraMessage', () => {
     start_time: 'start_time',
     has_snapshot: 'has_snapshot',
   };
-  for (const [truong, tenAC] of Object.entries(truongBatBuoc)) {
-    it(`báo thiếu ${tenAC} khi payload không có after.${truong}`, () => {
-      const message = taoMessageMau();
-      delete message.after[truong];
+  for (const [field, acName] of Object.entries(acNameByField)) {
+    it(`báo thiếu ${acName} khi payload không có after.${field}`, () => {
+      const message = buildSampleMessage();
+      delete message.after[field];
 
-      const loi = kiemTraMessage(message);
+      const errors = validateEventMessage(message);
 
-      assert.equal(loi.length, 1, JSON.stringify(loi));
-      assert.ok(loi[0].startsWith(`${tenAC} (after.${truong})`), loi[0]);
+      assert.equal(errors.length, 1, JSON.stringify(errors));
+      assert.ok(errors[0].startsWith(`${acName} (after.${field})`), errors[0]);
     });
   }
 
-  const giaTriSai = [
+  const invalidValues = [
     ['camera', ''],
     ['id', 123],
     ['current_zones', 'bep'],
@@ -222,143 +233,151 @@ describe('kiemTraMessage', () => {
     ['frame_time', '1789613958'],
     ['has_snapshot', 'true'],
   ];
-  for (const [truong, giaTri] of giaTriSai) {
-    it(`từ chối after.${truong} = ${JSON.stringify(giaTri)}`, () => {
-      const loi = kiemTraMessage(taoMessageMau({ [truong]: giaTri }));
+  for (const [field, value] of invalidValues) {
+    it(`từ chối after.${field} = ${JSON.stringify(value)}`, () => {
+      const errors = validateEventMessage(buildSampleMessage({ [field]: value }));
 
-      assert.equal(loi.length, 1, JSON.stringify(loi));
+      assert.equal(errors.length, 1, JSON.stringify(errors));
     });
   }
 
   it('chấp nhận biên điểm 0 và 1, box suy biến 1 điểm', () => {
-    const message = taoMessageMau({ score: 0, top_score: 1, box: [5, 5, 5, 5] });
+    const message = buildSampleMessage({ score: 0, top_score: 1, box: [5, 5, 5, 5] });
 
-    assert.deepEqual(kiemTraMessage(message), []);
+    assert.deepEqual(validateEventMessage(message), []);
   });
 
   it('từ chối message end thiếu end_time', () => {
-    const loi = kiemTraMessage(taoMessageMau({ type: 'end', end_time: null }));
+    const errors = validateEventMessage(buildSampleMessage({ type: 'end', end_time: null }));
 
-    assert.deepEqual(loi, ['message end thieu end_time: null']);
+    assert.deepEqual(errors, ['Message end thiếu end_time: null']);
   });
 
   it('từ chối message end có end_time trước start_time', () => {
-    const loi = kiemTraMessage(taoMessageMau({ type: 'end', start_time: 100, end_time: 50 }));
+    const errors = validateEventMessage(
+      buildSampleMessage({ type: 'end', start_time: 100, end_time: 50 }),
+    );
 
-    assert.deepEqual(loi, ['end_time (50) nho hon start_time (100)']);
+    assert.deepEqual(errors, ['end_time (50) nhỏ hơn start_time (100)']);
   });
 
   it('gom mọi lỗi trong một lần kiểm tra thay vì dừng ở lỗi đầu tiên', () => {
-    const loi = kiemTraMessage(taoMessageMau({ type: 'bogus', score: 9, box: null }));
+    const errors = validateEventMessage(buildSampleMessage({ type: 'bogus', score: 9, box: null }));
 
-    assert.equal(loi.length, 3);
+    assert.equal(errors.length, 3);
   });
 });
 
 // ---------------------------------------------------------------------------
 
-describe('tomTat', () => {
+describe('formatEventSummary', () => {
   it('in đủ camera, track, điểm, box và đường dẫn snapshot', () => {
-    const vanBan = tomTat(taoMessageMau());
+    const summary = formatEventSummary(buildSampleMessage());
 
-    assert.match(vanBan, /\[NEW\] cam_test · person · track 1789613958\.41477-np9fac/);
-    assert.match(vanBan, /score=0\.89 top_score=0\.89 box=\[957, 177, 1053, 297\]/);
-    assert.match(vanBan, /snapshot=\/api\/events\/1789613958\.41477-np9fac\/snapshot\.jpg/);
-    assert.doesNotMatch(vanBan, /end=/);
+    assert.match(summary, /\[NEW\] cam_test · person · track 1789613958\.41477-np9fac/);
+    assert.match(summary, /score=0\.89 top_score=0\.89 box=\[957, 177, 1053, 297\]/);
+    assert.match(summary, /snapshot=\/api\/events\/1789613958\.41477-np9fac\/snapshot\.jpg/);
+    assert.doesNotMatch(summary, /end=/);
   });
 
-  it('ghi (chua co) khi chưa có snapshot và in end_time với message end', () => {
-    const vanBan = tomTat(taoMessageMau({ type: 'end', has_snapshot: false, end_time: 0 }));
+  it('ghi (chưa có) khi chưa có snapshot và in end_time với message end', () => {
+    const summary = formatEventSummary(
+      buildSampleMessage({ type: 'end', has_snapshot: false, end_time: 0 }),
+    );
 
-    assert.match(vanBan, /snapshot=\(chua co\)/);
-    assert.match(vanBan, /end=1970-01-01T00:00:00\.000Z/);
+    assert.match(summary, /snapshot=\(chưa có\)/);
+    assert.match(summary, /end=1970-01-01T00:00:00\.000Z/);
   });
 });
 
 // ---------------------------------------------------------------------------
 
-describe('taoBoNghiemThu', () => {
-  const taoBo = (tuyChon = {}) => taoBoNghiemThu({ label: 'person', camera: null, ...tuyChon });
+describe('createAcceptanceChecker', () => {
+  const createChecker = (overrides = {}) =>
+    createAcceptanceChecker({ label: 'person', camera: null, ...overrides });
 
   it('thành công khi thấy new rồi end cùng track_id', () => {
-    const bo = taoBo();
+    const checker = createChecker();
 
-    const hanhDongNew = bo.xuLyDong(dong(taoMessageMau()));
-    const hanhDongUpdate = bo.xuLyDong(dong(taoMessageMau({ type: 'update' })));
-    const hanhDongEnd = bo.xuLyDong(dong(taoMessageMau({ type: 'end' })));
+    const newAction = checker.handleLine(toLine(buildSampleMessage()));
+    const updateAction = checker.handleLine(toLine(buildSampleMessage({ type: 'update' })));
+    const endAction = checker.handleLine(toLine(buildSampleMessage({ type: 'end' })));
 
-    assert.equal(hanhDongNew.loai, 'in');
-    assert.equal(hanhDongUpdate.loai, 'bo_qua');
-    assert.equal(hanhDongEnd.loai, 'thanh_cong');
-    assert.equal(hanhDongEnd.trackId, '1789613958.41477-np9fac');
-    assert.match(hanhDongEnd.thongDiep, /\[END\][\s\S]*THANH CONG/);
-    assert.deepEqual(bo.thongKe, { soMessage: 3, soLoi: 0 });
+    assert.equal(newAction.kind, 'print');
+    assert.equal(updateAction.kind, 'ignore');
+    assert.equal(endAction.kind, 'success');
+    assert.equal(endAction.trackId, '1789613958.41477-np9fac');
+    assert.match(endAction.message, /\[END\][\s\S]*THÀNH CÔNG/);
+    assert.deepEqual(checker.stats, { messageCount: 3, errorCount: 0 });
   });
 
   it('không thành công khi end thuộc track bắt đầu trước lúc script nghe', () => {
-    const bo = taoBo();
+    const checker = createChecker();
 
-    const hanhDong = bo.xuLyDong(dong(taoMessageMau({ type: 'end' })));
+    const action = checker.handleLine(toLine(buildSampleMessage({ type: 'end' })));
 
-    assert.equal(hanhDong.loai, 'in');
+    assert.equal(action.kind, 'print');
   });
 
   it('không ghép new và end của hai track khác nhau', () => {
-    const bo = taoBo();
-    bo.xuLyDong(dong(taoMessageMau({ id: 'track-a' })));
+    const checker = createChecker();
+    checker.handleLine(toLine(buildSampleMessage({ id: 'track-a' })));
 
-    const hanhDong = bo.xuLyDong(dong(taoMessageMau({ type: 'end', id: 'track-b' })));
+    const action = checker.handleLine(toLine(buildSampleMessage({ type: 'end', id: 'track-b' })));
 
-    assert.equal(hanhDong.loai, 'in');
+    assert.equal(action.kind, 'print');
   });
 
   it('bỏ qua message khác label hoặc khác camera và không đếm vào thống kê', () => {
-    const bo = taoBo({ camera: 'cam_test' });
+    const checker = createChecker({ camera: 'cam_test' });
 
-    assert.equal(bo.xuLyDong(dong(taoMessageMau({ label: 'car' }))).loai, 'bo_qua');
-    assert.equal(bo.xuLyDong(dong(taoMessageMau({ camera: 'cam_kitchen' }))).loai, 'bo_qua');
-    assert.deepEqual(bo.thongKe, { soMessage: 0, soLoi: 0 });
+    assert.equal(checker.handleLine(toLine(buildSampleMessage({ label: 'car' }))).kind, 'ignore');
+    assert.equal(
+      checker.handleLine(toLine(buildSampleMessage({ camera: 'cam_kitchen' }))).kind,
+      'ignore',
+    );
+    assert.deepEqual(checker.stats, { messageCount: 0, errorCount: 0 });
   });
 
   it('bỏ qua dòng trống', () => {
-    assert.equal(taoBo().xuLyDong('   ').loai, 'bo_qua');
+    assert.equal(createChecker().handleLine('   ').kind, 'ignore');
   });
 
   it('báo lỗi ngay khi payload không phải JSON', () => {
-    const bo = taoBo();
+    const checker = createChecker();
 
-    const hanhDong = bo.xuLyDong('{"type": "new", ');
+    const action = checker.handleLine('{"type": "new", ');
 
-    assert.equal(hanhDong.loai, 'loi');
-    assert.match(hanhDong.thongDiep, /payload khong phai JSON/);
-    assert.equal(bo.thongKe.soLoi, 1);
+    assert.equal(action.kind, 'error');
+    assert.match(action.message, /Payload không phải JSON/);
+    assert.equal(checker.stats.errorCount, 1);
   });
 
   it('báo lỗi message thiếu after thay vì lặng lẽ bỏ qua vì không lọc được label', () => {
-    const bo = taoBo({ camera: 'cam_test' });
+    const checker = createChecker({ camera: 'cam_test' });
 
-    const hanhDong = bo.xuLyDong('{"type":"new"}');
+    const action = checker.handleLine('{"type":"new"}');
 
-    assert.equal(hanhDong.loai, 'loi');
-    assert.match(hanhDong.thongDiep, /thieu object `after`/);
+    assert.equal(action.kind, 'error');
+    assert.match(action.message, /Thiếu object `after`/);
   });
 
   it('báo lỗi ngay với message sai dù trước đó có track hợp lệ đang mở', () => {
-    const bo = taoBo();
-    bo.xuLyDong(dong(taoMessageMau()));
+    const checker = createChecker();
+    checker.handleLine(toLine(buildSampleMessage()));
 
-    const hanhDong = bo.xuLyDong(dong(taoMessageMau({ type: 'end', score: 7.5 })));
+    const action = checker.handleLine(toLine(buildSampleMessage({ type: 'end', score: 7.5 })));
 
-    assert.equal(hanhDong.loai, 'loi');
-    assert.match(hanhDong.thongDiep, /score \(after\.score\) = 7\.5/);
+    assert.equal(action.kind, 'error');
+    assert.match(action.message, /score \(after\.score\) = 7\.5/);
   });
 
   it('gợi ý đúng nguyên nhân khi hết giờ', () => {
-    const boRong = taoBo();
-    const boCoNew = taoBo();
-    boCoNew.xuLyDong(dong(taoMessageMau()));
+    const emptyChecker = createChecker();
+    const checkerWithOpenTrack = createChecker();
+    checkerWithOpenTrack.handleLine(toLine(buildSampleMessage()));
 
-    assert.match(boRong.goiYHetGio(10), /het 10 s\. Khong co su kien nao/);
-    assert.match(boCoNew.goiYHetGio(10), /chua thay `end`/);
+    assert.match(emptyChecker.buildTimeoutMessage(10), /hết 10 s\. Không có sự kiện nào/);
+    assert.match(checkerWithOpenTrack.buildTimeoutMessage(10), /chưa thấy `end`/);
   });
 });

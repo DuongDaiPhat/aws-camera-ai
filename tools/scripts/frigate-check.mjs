@@ -1,96 +1,95 @@
 #!/usr/bin/env node
 /**
- * Kiem tra nghiem thu US-01 + US-02: Frigate phat hien "person" va publish len MQTT.
+ * Kiểm tra nghiệm thu US-01 + US-02: Frigate phát hiện "person" và publish lên MQTT.
  *
- *   pnpm frigate:check                          # cho toi da 180 s
+ *   pnpm frigate:check                          # chờ tối đa 180 s
  *   pnpm frigate:check -- --camera cam_test --timeout 300
  *
- * Nghe topic `frigate/events` qua mosquitto_sub BEN TRONG container (khong can cai
- * MQTT client tren may), kiem tra tung message co du truong ma AC yeu cau, va chi
- * thanh cong khi thay tron mot vong doi track: `new` -> `end` cung track_id.
- * Logic kiem tra nam o lib/frigate-events.mjs (co unit test).
+ * Nghe topic `frigate/events` qua mosquitto_sub BÊN TRONG container (không cần cài
+ * MQTT client trên máy), kiểm tra từng message có đủ trường mà AC yêu cầu, và chỉ
+ * thành công khi thấy trọn một vòng đời track: `new` → `end` cùng track_id.
+ * Logic kiểm tra nằm ở lib/frigate-events.mjs (có unit test).
  *
- * Can: docker compose --profile cv up -d  +  mot luong RTSP co nguoi (webcam/file).
+ * Cần: docker compose --profile cv up -d  +  một luồng RTSP có người (webcam/file).
  */
 
 import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';
 
-import { docThamSo, taoBoNghiemThu } from './lib/frigate-events.mjs';
+import { createAcceptanceChecker, parseCliArgs } from './lib/frigate-events.mjs';
 
-// Trung `container_name` cua service mosquitto trong docker-compose.yml
-const CONTAINER_MQTT = 'camerai-mosquitto';
-// mosquitto_sub trong container song lau hon script mot chut, roi tu thoat
-const DU_PHONG_MOSQUITTO_SUB_GIAY = 5;
+// Trùng `container_name` của service mosquitto trong docker-compose.yml
+const MQTT_CONTAINER_NAME = 'camerai-mosquitto';
+// mosquitto_sub trong container sống lâu hơn script một chút rồi tự thoát
+const MOSQUITTO_SUB_EXTRA_SECONDS = 5;
+const USAGE =
+  '  Cách dùng: pnpm frigate:check -- [--camera <slug>] [--timeout <giây>] [--label <nhãn>] [--topic <topic>]\n';
 
-const { thamSo, loi: loiThamSo } = docThamSo(process.argv.slice(2));
-if (loiThamSo.length > 0) {
-  console.error(`\n  ${loiThamSo.join('\n  ')}\n`);
-  console.error(
-    '  Dung: pnpm frigate:check -- [--camera <slug>] [--timeout <giay>] [--label <nhan>] [--topic <topic>]\n',
-  );
+const { options, errors: argErrors } = parseCliArgs(process.argv.slice(2));
+if (argErrors.length > 0) {
+  console.error(`\n  ${argErrors.join('\n  ')}\n`);
+  console.error(USAGE);
   process.exit(1);
 }
 
-const boNghiemThu = taoBoNghiemThu(thamSo);
+const checker = createAcceptanceChecker(options);
 
 console.log(
-  `\n  Dang nghe ${thamSo.topic} (label=${thamSo.label}` +
-    `${thamSo.camera ? `, camera=${thamSo.camera}` : ''}) toi da ${thamSo.timeout} s ...\n`,
+  `\n  Đang nghe ${options.topic} (label=${options.label}` +
+    `${options.camera ? `, camera=${options.camera}` : ''}) tối đa ${options.timeoutSeconds} s ...\n`,
 );
 
-// Goi thang `docker exec` thay vi `docker compose exec`: tren Windows, compose sinh them
-// tien trinh con `docker-compose.exe` ma sub.kill() khong diet duoc -> treo terminal.
-// `-W` bat mosquitto_sub trong container tu thoat, ke ca khi script bi Ctrl+C.
-const sub = spawn(
+// Gọi thẳng `docker exec` thay vì `docker compose exec`: trên Windows, compose sinh thêm
+// tiến trình con `docker-compose.exe` mà subscriber.kill() không diệt được → treo terminal.
+// `-W` bắt mosquitto_sub trong container tự thoát, kể cả khi script bị Ctrl+C.
+const subscriber = spawn(
   'docker',
   [
     'exec',
-    CONTAINER_MQTT,
+    MQTT_CONTAINER_NAME,
     'mosquitto_sub',
     '-t',
-    thamSo.topic,
+    options.topic,
     '-W',
-    String(Math.ceil(thamSo.timeout) + DU_PHONG_MOSQUITTO_SUB_GIAY),
+    String(Math.ceil(options.timeoutSeconds) + MOSQUITTO_SUB_EXTRA_SECONDS),
   ],
   { stdio: ['ignore', 'pipe', 'inherit'] },
 );
 
-function ketThuc(maThoat, thongDiep) {
-  clearTimeout(henGio);
-  sub.removeAllListeners('exit');
-  sub.kill();
-  const { soMessage, soLoi } = boNghiemThu.thongKe;
+function finish(exitCode, summary) {
+  clearTimeout(timeoutTimer);
+  // Gỡ listener trước khi kill, nếu không handler 'exit' bên dưới sẽ in nhầm lỗi mosquitto_sub
+  subscriber.removeAllListeners('exit');
+  subscriber.kill();
+  const { messageCount, errorCount } = checker.stats;
   console.log(
-    `\n  ${thongDiep}\n  Da nhan ${soMessage} message, ${soLoi} message sai dinh dang.\n`,
+    `\n  ${summary}\n  Đã nhận ${messageCount} message, ${errorCount} message sai định dạng.\n`,
   );
-  process.exit(maThoat);
+  process.exit(exitCode);
 }
 
-const henGio = setTimeout(
-  () => ketThuc(1, boNghiemThu.goiYHetGio(thamSo.timeout)),
-  thamSo.timeout * 1000,
+const timeoutTimer = setTimeout(
+  () => finish(1, checker.buildTimeoutMessage(options.timeoutSeconds)),
+  options.timeoutSeconds * 1000,
 );
 
-sub.on('error', (error) => {
-  clearTimeout(henGio);
-  console.error(`  Khong chay duoc docker: ${error.message}`);
+subscriber.on('error', (error) => {
+  clearTimeout(timeoutTimer);
+  console.error(`  Không chạy được docker: ${error.message}`);
   process.exit(1);
 });
 
-sub.on('exit', (code) => {
-  clearTimeout(henGio);
+subscriber.on('exit', (code) => {
+  clearTimeout(timeoutTimer);
   console.error(
-    `\n  mosquitto_sub dung (ma ${code}). Container ${CONTAINER_MQTT} co dang chay? docker compose ps\n`,
+    `\n  mosquitto_sub dừng (mã ${code}). Container ${MQTT_CONTAINER_NAME} có đang chạy? docker compose ps\n`,
   );
   process.exit(1);
 });
 
-createInterface({ input: sub.stdout }).on('line', (dong) => {
-  const hanhDong = boNghiemThu.xuLyDong(dong);
-  if (hanhDong.loai === 'in') console.log(hanhDong.thongDiep);
-  if (hanhDong.loai === 'thanh_cong') ketThuc(0, hanhDong.thongDiep.trimStart());
-  if (hanhDong.loai === 'loi') {
-    ketThuc(1, `THAT BAI: ${hanhDong.thongDiep}`);
-  }
+createInterface({ input: subscriber.stdout }).on('line', (line) => {
+  const action = checker.handleLine(line);
+  if (action.kind === 'print') console.log(action.message);
+  if (action.kind === 'success') finish(0, action.message.trimStart());
+  if (action.kind === 'error') finish(1, `THẤT BẠI: ${action.message}`);
 });

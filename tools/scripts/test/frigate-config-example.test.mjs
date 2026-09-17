@@ -1,7 +1,7 @@
 /**
- * Kiem tra tinh nhat quan cua infra/frigate/config.example.yml voi AC cua US-01/US-02
- * va voi cac file ha tang khac. Loi o day truoc day chi lo ra khi `docker compose up`
- * — Frigate chay voi cau hinh sai ma khong bao loi.
+ * Kiểm tra tính nhất quán của infra/frigate/config.example.yml với AC của US-01/US-02
+ * và với các file hạ tầng khác. Lỗi ở đây trước kia chỉ lộ ra khi `docker compose up`
+ * — Frigate chạy với cấu hình sai mà không báo lỗi.
  */
 
 import assert from 'node:assert/strict';
@@ -12,16 +12,16 @@ import { fileURLToPath } from 'node:url';
 
 import { parse } from 'yaml';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-const docTep = (...duongDan) => readFileSync(join(ROOT, ...duongDan), 'utf8');
+const ROOT_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+const readRepoFile = (...pathSegments) => readFileSync(join(ROOT_DIR, ...pathSegments), 'utf8');
 
-// Rang buoc tu tai lieu, dat ten de biet con so lay tu dau
-const AC_US01_NGUOI_XUAT_HIEN_TOI_THIEU_GIAY = 1;
-const AC_US01_MAT_FRAME_TOI_DA_GIAY = 30;
-const FRIGATE_WATCHDOG_KHONG_CO_FRAME_GIAY = 20; // hard-code trong frigate/video/ffmpeg.py
-const FRIGATE_MIN_INITIALIZED_TOI_THIEU = 2; // Field(ge=2) trong frigate/config/camera/detect.py
-const AC_US02_MIN_SCORE = 0.5; // DATA_FLOW Luong 1: "min_score 0.5"
-const SLUG_CAMERA = /^[a-z][a-z0-9_]{2,63}$/; // api/openapi.yaml + db cameras_slug_format
+// Ràng buộc lấy từ tài liệu, đặt tên để biết con số đến từ đâu
+const AC_US01_MIN_PRESENCE_SECONDS = 1;
+const AC_US01_MAX_FRAME_LOSS_SECONDS = 30;
+const FRIGATE_WATCHDOG_NO_FRAME_SECONDS = 20; // hard-code trong frigate/video/ffmpeg.py
+const FRIGATE_MIN_INITIALIZED_LOWER_BOUND = 2; // Field(ge=2) trong frigate/config/camera/detect.py
+const AC_US02_MIN_SCORE = 0.5; // DATA_FLOW Luồng 1: "min_score 0.5"
+const SLUG_PATTERN = /^[a-z][a-z0-9_]{2,63}$/; // api/openapi.yaml + db cameras_slug_format
 
 describe('config.example.yml của Frigate', () => {
   let config;
@@ -30,10 +30,10 @@ describe('config.example.yml của Frigate', () => {
   let mediamtx;
 
   before(() => {
-    config = parse(docTep('infra', 'frigate', 'config.example.yml'));
-    compose = parse(docTep('docker-compose.yml'));
+    config = parse(readRepoFile('infra', 'frigate', 'config.example.yml'));
+    compose = parse(readRepoFile('docker-compose.yml'));
     frigateService = compose.services.frigate;
-    mediamtx = parse(docTep('infra', 'mediamtx', 'mediamtx.yml'));
+    mediamtx = parse(readRepoFile('infra', 'mediamtx', 'mediamtx.yml'));
   });
 
   describe('phiên bản', () => {
@@ -54,28 +54,28 @@ describe('config.example.yml của Frigate', () => {
     });
 
     it('config.yml sinh ra bị gitignore', () => {
-      const dongGitignore = docTep('.gitignore').split(/\r?\n/);
+      const gitignoreLines = readRepoFile('.gitignore').split(/\r?\n/);
 
-      assert.ok(dongGitignore.includes('infra/frigate/config.yml'));
+      assert.ok(gitignoreLines.includes('infra/frigate/config.yml'));
     });
 
     it('DB của Frigate nằm trên một volume được mount', () => {
-      const thuMucDb = dirname(config.database.path);
+      const dbDirectory = dirname(config.database.path);
 
-      assert.ok(frigateService.volumes.some((volume) => volume.endsWith(`:${thuMucDb}`)));
+      assert.ok(frigateService.volumes.some((volume) => volume.endsWith(`:${dbDirectory}`)));
     });
   });
 
   describe('US-02 · MQTT', () => {
     it('bật MQTT và trỏ tới đúng service mosquitto trong compose', () => {
       assert.equal(config.mqtt.enabled, true);
-      assert.ok(compose.services[config.mqtt.host], `khong co service ${config.mqtt.host}`);
+      assert.ok(compose.services[config.mqtt.host], `không có service ${config.mqtt.host}`);
       assert.equal(config.mqtt.port, 1883);
       assert.ok(frigateService.depends_on[config.mqtt.host]);
     });
 
     it('topic sự kiện khớp MQTT_TOPIC_FRIGATE mà orchestrator subscribe', () => {
-      const topicOrchestrator = docTep('.env.example')
+      const topicOrchestrator = readRepoFile('.env.example')
         .match(/^MQTT_TOPIC_FRIGATE=(.+)$/m)[1]
         .trim();
 
@@ -89,19 +89,19 @@ describe('config.example.yml của Frigate', () => {
 
   describe('US-01 · phát hiện person', () => {
     it('theo dõi person với min_score theo AC và threshold không thấp hơn min_score', () => {
-      const boLoc = config.objects.filters.person;
+      const personFilter = config.objects.filters.person;
 
       assert.ok(config.objects.track.includes('person'));
-      assert.equal(boLoc.min_score, AC_US02_MIN_SCORE);
-      assert.ok(boLoc.threshold >= boLoc.min_score && boLoc.threshold <= 1);
-      assert.ok(boLoc.min_area > 0);
+      assert.equal(personFilter.min_score, AC_US02_MIN_SCORE);
+      assert.ok(personFilter.threshold >= personFilter.min_score && personFilter.threshold <= 1);
+      assert.ok(personFilter.min_area > 0);
     });
 
     it('chỉ tạo track khi người xuất hiện liên tục từ 1 giây', () => {
       const { fps, min_initialized: minInitialized } = config.detect;
 
-      assert.ok(minInitialized >= FRIGATE_MIN_INITIALIZED_TOI_THIEU);
-      assert.ok(minInitialized / fps >= AC_US01_NGUOI_XUAT_HIEN_TOI_THIEU_GIAY);
+      assert.ok(minInitialized >= FRIGATE_MIN_INITIALIZED_LOWER_BOUND);
+      assert.ok(minInitialized / fps >= AC_US01_MIN_PRESENCE_SECONDS);
     });
 
     it('max_disappeared dài hơn min_initialized để không cắt một người thành nhiều track', () => {
@@ -126,7 +126,7 @@ describe('config.example.yml của Frigate', () => {
       const retry = config.ffmpeg.retry_interval;
 
       assert.ok(retry > 0);
-      assert.ok(FRIGATE_WATCHDOG_KHONG_CO_FRAME_GIAY + retry <= AC_US01_MAT_FRAME_TOI_DA_GIAY);
+      assert.ok(FRIGATE_WATCHDOG_NO_FRAME_SECONDS + retry <= AC_US01_MAX_FRAME_LOSS_SECONDS);
     });
   });
 
@@ -138,23 +138,26 @@ describe('config.example.yml của Frigate', () => {
     });
 
     it('tên camera là slug hợp lệ theo DB và OpenAPI', () => {
-      for (const [ten] of cameras()) assert.match(ten, SLUG_CAMERA, ten);
+      for (const [cameraName] of cameras()) assert.match(cameraName, SLUG_PATTERN, cameraName);
     });
 
     it('mỗi camera có đúng một input vai trò detect', () => {
-      for (const [ten, camera] of cameras()) {
-        const soDetect = camera.ffmpeg.inputs.filter((input) => input.roles.includes('detect'));
-        assert.equal(soDetect.length, 1, ten);
+      for (const [cameraName, camera] of cameras()) {
+        const detectInputs = camera.ffmpeg.inputs.filter((input) => input.roles.includes('detect'));
+        assert.equal(detectInputs.length, 1, cameraName);
       }
     });
 
     it('input RTSP trỏ vào mediamtx với path đã khai trong mediamtx.yml', () => {
-      for (const [ten, camera] of cameras()) {
+      for (const [cameraName, camera] of cameras()) {
         for (const { path } of camera.ffmpeg.inputs) {
-          const khop = path.match(/^rtsp:\/\/mediamtx:8554\/([a-z0-9_]+)$/);
-          assert.ok(khop, `${ten}: ${path}`);
-          assert.ok(compose.services.mediamtx, 'thieu service mediamtx');
-          assert.ok(Object.hasOwn(mediamtx.paths, khop[1]), `mediamtx thieu path ${khop[1]}`);
+          const pathMatch = path.match(/^rtsp:\/\/mediamtx:8554\/([a-z0-9_]+)$/);
+          assert.ok(pathMatch, `${cameraName}: ${path}`);
+          assert.ok(compose.services.mediamtx, 'thiếu service mediamtx');
+          assert.ok(
+            Object.hasOwn(mediamtx.paths, pathMatch[1]),
+            `mediamtx thiếu path ${pathMatch[1]}`,
+          );
         }
       }
     });
@@ -166,15 +169,15 @@ describe('config.example.yml của Frigate', () => {
     });
 
     it('zone là đa giác ít nhất 3 điểm với tọa độ chuẩn hóa 0..1', () => {
-      for (const [ten, camera] of cameras()) {
-        for (const [tenZone, zone] of Object.entries(camera.zones ?? {})) {
-          assert.match(tenZone, SLUG_CAMERA, `${ten}.${tenZone}`);
-          const toaDo = String(zone.coordinates).split(',').map(Number);
-          assert.equal(toaDo.length % 2, 0, `${ten}.${tenZone}: so toa do le`);
-          assert.ok(toaDo.length >= 6, `${ten}.${tenZone}: it hon 3 diem`);
+      for (const [cameraName, camera] of cameras()) {
+        for (const [zoneName, zone] of Object.entries(camera.zones ?? {})) {
+          assert.match(zoneName, SLUG_PATTERN, `${cameraName}.${zoneName}`);
+          const coordinates = String(zone.coordinates).split(',').map(Number);
+          assert.equal(coordinates.length % 2, 0, `${cameraName}.${zoneName}: số tọa độ lẻ`);
+          assert.ok(coordinates.length >= 6, `${cameraName}.${zoneName}: ít hơn 3 điểm`);
           assert.ok(
-            toaDo.every((giaTri) => Number.isFinite(giaTri) && giaTri >= 0 && giaTri <= 1),
-            `${ten}.${tenZone}: toa do ngoai 0..1`,
+            coordinates.every((value) => Number.isFinite(value) && value >= 0 && value <= 1),
+            `${cameraName}.${zoneName}: tọa độ ngoài 0..1`,
           );
         }
       }

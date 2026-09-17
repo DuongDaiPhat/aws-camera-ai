@@ -14,124 +14,122 @@ import { dirname, join } from 'node:path';
 import { afterEach, beforeEach, describe, it } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { khoiTaoConfig, LoiKhoiTaoConfig } from '../lib/frigate-config.mjs';
+import { ConfigInitError, initConfig } from '../lib/frigate-config.mjs';
 
-const NOI_DUNG_MAU = 'mqtt:\n  enabled: true\nversion: 0.18-0\n';
+const TEMPLATE_CONTENT = 'mqtt:\n  enabled: true\nversion: 0.18-0\n';
 
-describe('khoiTaoConfig', () => {
-  let thuMuc;
-  let duongDanMau;
-  let duongDanMay;
+describe('initConfig', () => {
+  let tempDir;
+  let templatePath;
+  let targetPath;
 
   beforeEach(() => {
-    thuMuc = mkdtempSync(join(tmpdir(), 'frigate-init-'));
-    duongDanMau = join(thuMuc, 'config.example.yml');
-    duongDanMay = join(thuMuc, 'config.yml');
-    writeFileSync(duongDanMau, NOI_DUNG_MAU);
+    tempDir = mkdtempSync(join(tmpdir(), 'frigate-init-'));
+    templatePath = join(tempDir, 'config.example.yml');
+    targetPath = join(tempDir, 'config.yml');
+    writeFileSync(templatePath, TEMPLATE_CONTENT);
   });
 
-  afterEach(() => rmSync(thuMuc, { recursive: true, force: true }));
+  afterEach(() => rmSync(tempDir, { recursive: true, force: true }));
 
   it('tạo config.yml từ file mẫu khi chưa có', () => {
-    const ketQua = khoiTaoConfig({ duongDanMau, duongDanMay });
+    const outcome = initConfig({ templatePath, targetPath });
 
-    assert.deepEqual(ketQua, { daGoThuMucRong: false, ketQua: 'da_tao' });
-    assert.equal(readFileSync(duongDanMay, 'utf8'), NOI_DUNG_MAU);
+    assert.deepEqual(outcome, { hasRemovedEmptyDirectory: false, result: 'created' });
+    assert.equal(readFileSync(targetPath, 'utf8'), TEMPLATE_CONTENT);
   });
 
   it('giữ nguyên config.yml đã chỉnh tay khi không có --force', () => {
-    writeFileSync(duongDanMay, 'cau hinh rieng cua may');
+    writeFileSync(targetPath, 'cấu hình riêng của máy');
 
-    const ketQua = khoiTaoConfig({ duongDanMau, duongDanMay });
+    const outcome = initConfig({ templatePath, targetPath });
 
-    assert.equal(ketQua.ketQua, 'giu_nguyen');
-    assert.equal(readFileSync(duongDanMay, 'utf8'), 'cau hinh rieng cua may');
+    assert.equal(outcome.result, 'unchanged');
+    assert.equal(readFileSync(targetPath, 'utf8'), 'cấu hình riêng của máy');
   });
 
   it('ghi đè config.yml khi có --force', () => {
-    writeFileSync(duongDanMay, 'cau hinh cu 0.14');
+    writeFileSync(targetPath, 'cấu hình cũ 0.14');
 
-    const ketQua = khoiTaoConfig({ duongDanMau, duongDanMay, ghiDe: true });
+    const outcome = initConfig({ templatePath, targetPath, shouldOverwrite: true });
 
-    assert.equal(ketQua.ketQua, 'da_ghi_de');
-    assert.equal(readFileSync(duongDanMay, 'utf8'), NOI_DUNG_MAU);
+    assert.equal(outcome.result, 'overwritten');
+    assert.equal(readFileSync(targetPath, 'utf8'), TEMPLATE_CONTENT);
   });
 
   it('gỡ thư mục rỗng Docker tạo nhầm rồi tạo file', () => {
-    mkdirSync(duongDanMay);
+    mkdirSync(targetPath);
 
-    const ketQua = khoiTaoConfig({ duongDanMau, duongDanMay });
+    const outcome = initConfig({ templatePath, targetPath });
 
-    assert.deepEqual(ketQua, { daGoThuMucRong: true, ketQua: 'da_tao' });
-    assert.ok(statSync(duongDanMay).isFile());
+    assert.deepEqual(outcome, { hasRemovedEmptyDirectory: true, result: 'created' });
+    assert.ok(statSync(targetPath).isFile());
   });
 
-  it('không xóa thư mục config.yml có nội dung, ném LoiKhoiTaoConfig', () => {
-    mkdirSync(duongDanMay);
-    writeFileSync(join(duongDanMay, 'quan-trong.txt'), 'du lieu');
+  it('không xóa thư mục config.yml có nội dung, ném ConfigInitError', () => {
+    mkdirSync(targetPath);
+    writeFileSync(join(targetPath, 'quan-trong.txt'), 'dữ liệu');
 
     assert.throws(
-      () => khoiTaoConfig({ duongDanMau, duongDanMay, ghiDe: true }),
-      (error) => error instanceof LoiKhoiTaoConfig && /khong rong/.test(error.message),
+      () => initConfig({ templatePath, targetPath, shouldOverwrite: true }),
+      (error) => error instanceof ConfigInitError && /không rỗng/.test(error.message),
     );
-    assert.ok(existsSync(join(duongDanMay, 'quan-trong.txt')));
+    assert.ok(existsSync(join(targetPath, 'quan-trong.txt')));
   });
 
-  it('ném LoiKhoiTaoConfig dễ hiểu khi thiếu file mẫu thay vì stack trace của fs', () => {
-    rmSync(duongDanMau);
+  it('ném ConfigInitError dễ hiểu khi thiếu file mẫu thay vì stack trace của fs', () => {
+    rmSync(templatePath);
 
     assert.throws(
-      () => khoiTaoConfig({ duongDanMau, duongDanMay }),
-      (error) => error instanceof LoiKhoiTaoConfig && /Khong tim thay file mau/.test(error.message),
+      () => initConfig({ templatePath, targetPath }),
+      (error) => error instanceof ConfigInitError && /Không tìm thấy file mẫu/.test(error.message),
     );
-    assert.equal(existsSync(duongDanMay), false);
+    assert.equal(existsSync(targetPath), false);
   });
 
-  it('ném LoiKhoiTaoConfig khi đường dẫn file mẫu là thư mục', () => {
-    rmSync(duongDanMau);
-    mkdirSync(duongDanMau);
+  it('ném ConfigInitError khi đường dẫn file mẫu là thư mục', () => {
+    rmSync(templatePath);
+    mkdirSync(templatePath);
 
-    assert.throws(() => khoiTaoConfig({ duongDanMau, duongDanMay }), LoiKhoiTaoConfig);
+    assert.throws(() => initConfig({ templatePath, targetPath }), ConfigInitError);
   });
 
   it('chạy lại lần hai không đổi gì (idempotent)', () => {
-    khoiTaoConfig({ duongDanMau, duongDanMay });
+    initConfig({ templatePath, targetPath });
 
-    const lanHai = khoiTaoConfig({ duongDanMau, duongDanMay });
+    const secondOutcome = initConfig({ templatePath, targetPath });
 
-    assert.deepEqual(lanHai, { daGoThuMucRong: false, ketQua: 'giu_nguyen' });
+    assert.deepEqual(secondOutcome, { hasRemovedEmptyDirectory: false, result: 'unchanged' });
   });
 });
 
 describe('frigate-init.mjs (CLI)', () => {
-  const SCRIPT = join(dirname(fileURLToPath(import.meta.url)), '..', 'frigate-init.mjs');
+  const SCRIPTS_DIR = join(dirname(fileURLToPath(import.meta.url)), '..');
 
   it('thoát mã 1 với thông báo gọn, không stack trace, khi repo thiếu file mẫu', () => {
-    // Chep script + lib vao repo gia chi co infra/frigate rong
-    const repoGia = mkdtempSync(join(tmpdir(), 'frigate-init-cli-'));
+    // Chép script + lib vào một repo giả chỉ có infra/frigate rỗng
+    const fakeRepoDir = mkdtempSync(join(tmpdir(), 'frigate-init-cli-'));
     try {
-      mkdirSync(join(repoGia, 'tools', 'scripts', 'lib'), { recursive: true });
-      mkdirSync(join(repoGia, 'infra', 'frigate'), { recursive: true });
-      for (const tep of ['frigate-init.mjs', join('lib', 'frigate-config.mjs')]) {
+      mkdirSync(join(fakeRepoDir, 'tools', 'scripts', 'lib'), { recursive: true });
+      mkdirSync(join(fakeRepoDir, 'infra', 'frigate'), { recursive: true });
+      for (const relativePath of ['frigate-init.mjs', join('lib', 'frigate-config.mjs')]) {
         writeFileSync(
-          join(repoGia, 'tools', 'scripts', tep),
-          readFileSync(join(dirname(SCRIPT), tep)),
+          join(fakeRepoDir, 'tools', 'scripts', relativePath),
+          readFileSync(join(SCRIPTS_DIR, relativePath)),
         );
       }
 
-      const ketQua = spawnSync(
+      const cliRun = spawnSync(
         process.execPath,
-        [join(repoGia, 'tools', 'scripts', 'frigate-init.mjs')],
-        {
-          encoding: 'utf8',
-        },
+        [join(fakeRepoDir, 'tools', 'scripts', 'frigate-init.mjs')],
+        { encoding: 'utf8' },
       );
 
-      assert.equal(ketQua.status, 1);
-      assert.match(ketQua.stderr, /Khong tim thay file mau/);
-      assert.doesNotMatch(ketQua.stderr, /at .*\(node:/);
+      assert.equal(cliRun.status, 1);
+      assert.match(cliRun.stderr, /Không tìm thấy file mẫu/);
+      assert.doesNotMatch(cliRun.stderr, /at .*\(node:/);
     } finally {
-      rmSync(repoGia, { recursive: true, force: true });
+      rmSync(fakeRepoDir, { recursive: true, force: true });
     }
   });
 });

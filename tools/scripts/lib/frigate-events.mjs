@@ -1,205 +1,215 @@
 /**
- * Logic thuan (khong I/O) cua `pnpm frigate:check` — tach rieng de unit test.
- * Nghiem thu US-01 + US-02: payload `frigate/events` du truong AC, vong doi new -> end.
+ * Logic thuần (không I/O) của `pnpm frigate:check` — tách riêng để unit test.
+ * Nghiệm thu US-01 + US-02: payload `frigate/events` đủ trường AC, vòng đời new → end.
  */
 
-export const MAC_DINH = Object.freeze({
+export const DEFAULT_OPTIONS = Object.freeze({
   topic: 'frigate/events',
-  timeout: 180,
+  timeoutSeconds: 180,
   camera: null,
   label: 'person',
 });
 
-/**
- * setTimeout cua Node chi nhan toi da 2^31-1 ms (~24,8 ngay); lon hon thi Node
- * canh bao va cho chay NGAY sau 1 ms -> script bao that bai tuc thi.
- */
-export const TIMEOUT_TOI_DA_GIAY = Math.floor(2 ** 31 / 1000) - 1;
+/** Tên cờ dòng lệnh → khóa trong options. Cờ giữ nguyên `--timeout` cho ngắn gọn. */
+const CLI_FLAG_TO_OPTION = Object.freeze({
+  topic: 'topic',
+  timeout: 'timeoutSeconds',
+  camera: 'camera',
+  label: 'label',
+});
 
 /**
- * Doc tham so dong lenh. Khong goi process.exit — tra `loi` de noi goi tu quyet.
- * @returns {{ thamSo: typeof MAC_DINH, loi: string[] }}
+ * setTimeout của Node chỉ nhận tối đa 2^31-1 ms (~24,8 ngày); lớn hơn thì Node
+ * cảnh báo và cho chạy NGAY sau 1 ms → script báo thất bại tức thì.
  */
-export function docThamSo(argv) {
-  const thamSo = { ...MAC_DINH };
-  const loi = [];
+export const MAX_TIMEOUT_SECONDS = Math.floor(2 ** 31 / 1000) - 1;
 
-  for (let i = 0; i < argv.length; i += 1) {
-    const doiSo = argv[i];
-    // pnpm chuyen tiep ca dau `--` phan cach: `pnpm frigate:check -- --camera x`
-    if (doiSo === '--') continue;
+/**
+ * Đọc tham số dòng lệnh. Không gọi process.exit — trả `errors` để nơi gọi tự quyết.
+ * @returns {{ options: typeof DEFAULT_OPTIONS, errors: string[] }}
+ */
+export function parseCliArgs(argv) {
+  const options = { ...DEFAULT_OPTIONS };
+  const errors = [];
 
-    const ten = doiSo.startsWith('--') ? doiSo.slice(2) : null;
-    // Object.hasOwn: tranh `--toString`, `--constructor` lot qua toan tu `in`
-    if (ten === null || !Object.hasOwn(MAC_DINH, ten)) {
-      loi.push(`tham so khong ho tro: ${doiSo}`);
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    // pnpm chuyển tiếp cả dấu `--` phân cách: `pnpm frigate:check -- --camera x`
+    if (arg === '--') continue;
+
+    const flag = arg.startsWith('--') ? arg.slice(2) : null;
+    // Object.hasOwn: tránh `--toString`, `--constructor` lọt qua toán tử `in`
+    if (flag === null || !Object.hasOwn(CLI_FLAG_TO_OPTION, flag)) {
+      errors.push(`Tham số không hỗ trợ: ${arg}`);
       continue;
     }
 
-    const giaTri = argv[i + 1];
-    if (giaTri === undefined || giaTri.startsWith('--')) {
-      loi.push(`--${ten} thieu gia tri`);
+    const value = argv[index + 1];
+    if (value === undefined || value.startsWith('--')) {
+      errors.push(`--${flag} thiếu giá trị`);
       continue;
     }
-    thamSo[ten] = ten === 'timeout' ? Number(giaTri) : giaTri;
-    i += 1;
+    const optionKey = CLI_FLAG_TO_OPTION[flag];
+    options[optionKey] = optionKey === 'timeoutSeconds' ? Number(value) : value;
+    index += 1;
   }
 
-  if (!Number.isFinite(thamSo.timeout) || thamSo.timeout <= 0) {
-    loi.push('--timeout phai la so giay > 0');
-  } else if (thamSo.timeout > TIMEOUT_TOI_DA_GIAY) {
-    loi.push(`--timeout toi da ${TIMEOUT_TOI_DA_GIAY} giay`);
+  if (!Number.isFinite(options.timeoutSeconds) || options.timeoutSeconds <= 0) {
+    errors.push('--timeout phải là số giây > 0');
+  } else if (options.timeoutSeconds > MAX_TIMEOUT_SECONDS) {
+    errors.push(`--timeout tối đa ${MAX_TIMEOUT_SECONDS} giây`);
   }
 
-  return { thamSo, loi };
+  return { options, errors };
 }
 
-const laChuoi = (v) => typeof v === 'string' && v.length > 0;
-const laSo = (v) => typeof v === 'number' && Number.isFinite(v);
-const laMangChuoi = (v) => Array.isArray(v) && v.every((x) => typeof x === 'string');
-const laDiem = (v) => laSo(v) && v >= 0 && v <= 1;
-const laBox = (v) =>
-  Array.isArray(v) &&
-  v.length === 4 &&
-  v.every((toaDo) => laSo(toaDo) && toaDo >= 0) &&
-  v[0] <= v[2] &&
-  v[1] <= v[3];
+const isNonEmptyString = (value) => typeof value === 'string' && value.length > 0;
+const isFiniteNumber = (value) => typeof value === 'number' && Number.isFinite(value);
+const isStringArray = (value) =>
+  Array.isArray(value) && value.every((item) => typeof item === 'string');
+const isScore = (value) => isFiniteNumber(value) && value >= 0 && value <= 1;
+// Frigate trả box dạng [x1, y1, x2, y2] pixel theo khung detect nên không thể âm hay ngược
+const isValidBox = (value) =>
+  Array.isArray(value) &&
+  value.length === 4 &&
+  value.every((coordinate) => isFiniteNumber(coordinate) && coordinate >= 0) &&
+  value[0] <= value[2] &&
+  value[1] <= value[3];
 
-export const LOAI_HOP_LE = Object.freeze(['new', 'update', 'end']);
+export const VALID_EVENT_TYPES = Object.freeze(['new', 'update', 'end']);
 
 /**
- * Truong bat buoc theo AC cua US-01/US-02, cot dau la ten trong AC.
- * `after.id` chinh la track ID (docs/architecture/DATA_FLOW.md).
+ * Trường bắt buộc theo AC của US-01/US-02; `acName` là tên gọi trong AC.
+ * `after.id` chính là track ID (docs/architecture/DATA_FLOW.md).
  */
-export const TRUONG_BAT_BUOC = Object.freeze([
-  ['camera_id', 'camera', laChuoi],
-  ['label', 'label', laChuoi],
-  ['track_id', 'id', laChuoi],
-  ['zones[]', 'current_zones', laMangChuoi],
-  ['entered_zones[]', 'entered_zones', laMangChuoi],
-  ['score', 'score', laDiem],
-  ['top_score', 'top_score', laDiem],
-  ['bounding box', 'box', laBox],
-  ['timestamp', 'frame_time', laSo],
-  ['start_time', 'start_time', laSo],
-  ['has_snapshot', 'has_snapshot', (v) => typeof v === 'boolean'],
+export const REQUIRED_FIELDS = Object.freeze([
+  { acName: 'camera_id', field: 'camera', isValid: isNonEmptyString },
+  { acName: 'label', field: 'label', isValid: isNonEmptyString },
+  { acName: 'track_id', field: 'id', isValid: isNonEmptyString },
+  { acName: 'zones[]', field: 'current_zones', isValid: isStringArray },
+  { acName: 'entered_zones[]', field: 'entered_zones', isValid: isStringArray },
+  { acName: 'score', field: 'score', isValid: isScore },
+  { acName: 'top_score', field: 'top_score', isValid: isScore },
+  { acName: 'bounding box', field: 'box', isValid: isValidBox },
+  { acName: 'timestamp', field: 'frame_time', isValid: isFiniteNumber },
+  { acName: 'start_time', field: 'start_time', isValid: isFiniteNumber },
+  { acName: 'has_snapshot', field: 'has_snapshot', isValid: (value) => typeof value === 'boolean' },
 ]);
 
-/** Tra ve danh sach loi; mang rong nghia la message hop le. */
-export function kiemTraMessage(message) {
-  if (typeof message !== 'object' || message === null || Array.isArray(message)) {
-    return ['payload khong phai JSON object'];
+const isPlainObject = (value) =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/** Trả về danh sách lỗi; mảng rỗng nghĩa là message hợp lệ. */
+export function validateEventMessage(message) {
+  if (!isPlainObject(message)) return ['Payload không phải JSON object'];
+
+  const errors = [];
+  if (!VALID_EVENT_TYPES.includes(message.type)) {
+    errors.push(`type không hợp lệ: ${JSON.stringify(message.type)}`);
   }
 
-  const loi = [];
-  if (!LOAI_HOP_LE.includes(message.type)) {
-    loi.push(`type khong hop le: ${JSON.stringify(message.type)}`);
-  }
+  const { after } = message;
+  if (!isPlainObject(after)) return [...errors, 'Thiếu object `after`'];
 
-  const after = message.after;
-  if (typeof after !== 'object' || after === null || Array.isArray(after)) {
-    return [...loi, 'thieu object `after`'];
-  }
-
-  for (const [tenAC, truong, hopLe] of TRUONG_BAT_BUOC) {
-    if (!hopLe(after[truong])) {
-      loi.push(`${tenAC} (after.${truong}) = ${JSON.stringify(after[truong])}`);
+  for (const { acName, field, isValid } of REQUIRED_FIELDS) {
+    if (!isValid(after[field])) {
+      errors.push(`${acName} (after.${field}) = ${JSON.stringify(after[field])}`);
     }
   }
 
   if (message.type === 'end') {
-    if (!laSo(after.end_time)) {
-      loi.push(`message end thieu end_time: ${JSON.stringify(after.end_time)}`);
-    } else if (laSo(after.start_time) && after.end_time < after.start_time) {
-      loi.push(`end_time (${after.end_time}) nho hon start_time (${after.start_time})`);
+    if (!isFiniteNumber(after.end_time)) {
+      errors.push(`Message end thiếu end_time: ${JSON.stringify(after.end_time)}`);
+    } else if (isFiniteNumber(after.start_time) && after.end_time < after.start_time) {
+      errors.push(`end_time (${after.end_time}) nhỏ hơn start_time (${after.start_time})`);
     }
   }
-  return loi;
+  return errors;
 }
 
-const gio = (epochGiay) => new Date(epochGiay * 1000).toISOString();
+const formatEpochSeconds = (epochSeconds) => new Date(epochSeconds * 1000).toISOString();
 
-/** Chi goi voi message da qua kiemTraMessage. */
-export function tomTat(message) {
-  const a = message.after;
-  const snapshot = a.has_snapshot ? `/api/events/${a.id}/snapshot.jpg` : '(chua co)';
-  const zones = a.current_zones.join(', ');
-  const dong = [
-    `  [${message.type.toUpperCase()}] ${a.camera} · ${a.label} · track ${a.id}`,
-    `      score=${a.score.toFixed(2)} top_score=${a.top_score.toFixed(2)} box=[${a.box.join(', ')}]`,
-    `      zones=[${zones}] start=${gio(a.start_time)} snapshot=${snapshot}`,
+/** Chỉ gọi với message đã qua validateEventMessage. */
+export function formatEventSummary(message) {
+  const { after } = message;
+  const snapshotPath = after.has_snapshot ? `/api/events/${after.id}/snapshot.jpg` : '(chưa có)';
+  const lines = [
+    `  [${message.type.toUpperCase()}] ${after.camera} · ${after.label} · track ${after.id}`,
+    `      score=${after.score.toFixed(2)} top_score=${after.top_score.toFixed(2)} box=[${after.box.join(', ')}]`,
+    `      zones=[${after.current_zones.join(', ')}] start=${formatEpochSeconds(after.start_time)} snapshot=${snapshotPath}`,
   ];
-  if (message.type === 'end') dong.push(`      end=${gio(a.end_time)}`);
-  return dong.join('\n');
+  if (message.type === 'end') lines.push(`      end=${formatEpochSeconds(after.end_time)}`);
+  return lines.join('\n');
 }
 
 /**
- * Bo nghiem thu: nhan tung dong stdout cua mosquitto_sub, tra ve hanh dong.
- *   { loai: 'bo_qua' }                     - khong lien quan (label/camera khac, update)
- *   { loai: 'loi', thongDiep }             - message sai dinh dang -> THAT BAI ngay
- *   { loai: 'in', thongDiep }              - new/end hop le, in tom tat
- *   { loai: 'thanh_cong', thongDiep, trackId }
+ * Bộ nghiệm thu: nhận từng dòng stdout của mosquitto_sub, trả về hành động.
+ *   { kind: 'ignore' }                    - không liên quan (label/camera khác, update)
+ *   { kind: 'error', message }            - message sai định dạng → THẤT BẠI ngay
+ *   { kind: 'print', message }            - new/end hợp lệ, in tóm tắt
+ *   { kind: 'success', message, trackId }
  *
- * Message sai dinh dang lam that bai NGAY: truoc day loi chi duoc dem, script tiep tuc
- * cho toi het timeout roi bao "chua thay end" — sai nguyen nhan, mat thoi gian.
+ * Message sai định dạng làm thất bại NGAY: trước đây lỗi chỉ được đếm, script tiếp tục
+ * chờ tới hết timeout rồi báo "chưa thấy end" — sai nguyên nhân, mất thời gian.
  */
-export function taoBoNghiemThu({ label, camera }) {
-  const trackDaMo = new Set();
-  const thongKe = { soMessage: 0, soLoi: 0 };
+export function createAcceptanceChecker({ label, camera }) {
+  const openTrackIds = new Set();
+  const stats = { messageCount: 0, errorCount: 0 };
 
-  function xuLyDong(dong) {
-    if (dong.trim() === '') return { loai: 'bo_qua' };
+  function handleLine(line) {
+    if (line.trim() === '') return { kind: 'ignore' };
 
     let message;
     try {
-      message = JSON.parse(dong);
+      message = JSON.parse(line);
     } catch {
-      thongKe.soLoi += 1;
-      return { loai: 'loi', thongDiep: `payload khong phai JSON: ${dong.slice(0, 120)}` };
+      stats.errorCount += 1;
+      return { kind: 'error', message: `Payload không phải JSON: ${line.slice(0, 120)}` };
     }
 
     const after = message?.after;
-    // Message khong co `after` hop le thi khong loc duoc theo label/camera:
-    // day la loi dinh dang, KHONG duoc am tham bo qua.
-    const coAfter = typeof after === 'object' && after !== null && !Array.isArray(after);
-    if (coAfter) {
-      if (after.label !== label) return { loai: 'bo_qua' };
-      if (camera && after.camera !== camera) return { loai: 'bo_qua' };
+    // Message không có `after` hợp lệ thì không lọc được theo label/camera:
+    // đây là lỗi định dạng, KHÔNG được âm thầm bỏ qua.
+    if (isPlainObject(after)) {
+      if (after.label !== label) return { kind: 'ignore' };
+      if (camera && after.camera !== camera) return { kind: 'ignore' };
     }
-    thongKe.soMessage += 1;
+    stats.messageCount += 1;
 
-    const loi = kiemTraMessage(message);
-    if (loi.length > 0) {
-      thongKe.soLoi += 1;
+    const errors = validateEventMessage(message);
+    if (errors.length > 0) {
+      stats.errorCount += 1;
       return {
-        loai: 'loi',
-        thongDiep: `message ${message?.type} thieu/sai truong:\n    - ${loi.join('\n    - ')}`,
+        kind: 'error',
+        message: `Message ${message?.type} thiếu/sai trường:\n    - ${errors.join('\n    - ')}`,
       };
     }
 
-    if (message.type === 'update') return { loai: 'bo_qua' };
+    if (message.type === 'update') return { kind: 'ignore' };
 
     if (message.type === 'new') {
-      trackDaMo.add(after.id);
-      return { loai: 'in', thongDiep: tomTat(message) };
+      openTrackIds.add(after.id);
+      return { kind: 'print', message: formatEventSummary(message) };
     }
 
-    // type === 'end'. Track bat dau truoc khi script nghe thi khong du vong doi.
-    if (!trackDaMo.has(after.id)) return { loai: 'in', thongDiep: tomTat(message) };
+    // type === 'end'. Track bắt đầu trước khi script nghe thì không đủ vòng đời.
+    if (!openTrackIds.has(after.id)) {
+      return { kind: 'print', message: formatEventSummary(message) };
+    }
     return {
-      loai: 'thanh_cong',
+      kind: 'success',
       trackId: after.id,
-      thongDiep: `${tomTat(message)}\n\n  THANH CONG: track ${after.id} di du vong doi new -> end, moi message dung dinh dang.`,
+      message: `${formatEventSummary(message)}\n\n  THÀNH CÔNG: track ${after.id} đi đủ vòng đời new → end, mọi message đúng định dạng.`,
     };
   }
 
-  function goiYHetGio(timeoutGiay) {
-    const goiY =
-      trackDaMo.size > 0
-        ? 'Da co `new` nhung chua thay `end` — de nguoi roi khoi khung hinh hoac tang --timeout.'
-        : 'Khong co su kien nao. Kiem tra luong RTSP dang phat va Frigate UI http://localhost:5000.';
-    return `THAT BAI: het ${timeoutGiay} s. ${goiY}`;
+  function buildTimeoutMessage(timeoutSeconds) {
+    const hint =
+      openTrackIds.size > 0
+        ? 'Đã có `new` nhưng chưa thấy `end` — để người rời khỏi khung hình hoặc tăng --timeout.'
+        : 'Không có sự kiện nào. Kiểm tra luồng RTSP đang phát và Frigate UI http://localhost:5000.';
+    return `THẤT BẠI: hết ${timeoutSeconds} s. ${hint}`;
   }
 
-  return { xuLyDong, goiYHetGio, thongKe };
+  return { handleLine, buildTimeoutMessage, stats };
 }
