@@ -10,39 +10,39 @@
  * tao mot THU MUC rong ten `config.yml` de bind mount. Frigate khi do chay voi cau
  * hinh mac dinh (0 camera, MQTT tat) ma khong bao loi, va lenh `cp` sau do se chep
  * file mau VAO trong thu muc do. Script nay nhan ra va go thu muc rong truoc.
+ * Logic nam o lib/frigate-config.mjs (co unit test).
  */
 
-import { copyFileSync, existsSync, readdirSync, rmdirSync, statSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { khoiTaoConfig, LoiKhoiTaoConfig } from './lib/frigate-config.mjs';
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const FRIGATE_DIR = join(ROOT, 'infra', 'frigate');
-const CONFIG_MAU = join(FRIGATE_DIR, 'config.example.yml');
-const CONFIG_MAY = join(FRIGATE_DIR, 'config.yml');
+const duongDanMay = join(FRIGATE_DIR, 'config.yml');
+const tenTuongDoi = relative(ROOT, duongDanMay);
 
-const ghiDe = process.argv.includes('--force');
-const tenTuongDoi = relative(ROOT, CONFIG_MAY);
+try {
+  const { daGoThuMucRong, ketQua } = khoiTaoConfig({
+    duongDanMau: join(FRIGATE_DIR, 'config.example.yml'),
+    duongDanMay,
+    ghiDe: process.argv.includes('--force'),
+  });
 
-if (existsSync(CONFIG_MAY) && statSync(CONFIG_MAY).isDirectory()) {
-  if (readdirSync(CONFIG_MAY).length > 0) {
-    console.error(
-      `\n  ${tenTuongDoi} dang la THU MUC va khong rong — khong dam tu xoa.\n` +
-        '  Kiem tra noi dung, xoa thu cong roi chay lai: pnpm frigate:init\n',
-    );
-    process.exit(1);
+  if (daGoThuMucRong) {
+    console.log(`  Da go thu muc rong ${tenTuongDoi} (do Docker tao nham khi file chua ton tai).`);
   }
-  rmdirSync(CONFIG_MAY);
-  console.log(`  Da go thu muc rong ${tenTuongDoi} (do Docker tao nham khi file chua ton tai).`);
+  if (ketQua === 'giu_nguyen') {
+    console.log(`  ${tenTuongDoi} da ton tai — giu nguyen. Dung --force de tao lai tu file mau.`);
+  } else {
+    console.log(
+      `  Da ${ketQua === 'da_ghi_de' ? 'ghi de' : 'tao'} ${tenTuongDoi}.\n` +
+        '  Khoi dong lai Frigate de nhan cau hinh:  docker compose --profile cv up -d --force-recreate frigate\n',
+    );
+  }
+} catch (error) {
+  if (!(error instanceof LoiKhoiTaoConfig)) throw error;
+  console.error(`\n  ${error.message}\n`);
+  process.exit(1);
 }
-
-if (existsSync(CONFIG_MAY) && !ghiDe) {
-  console.log(`  ${tenTuongDoi} da ton tai — giu nguyen. Dung --force de tao lai tu file mau.`);
-  process.exit(0);
-}
-
-copyFileSync(CONFIG_MAU, CONFIG_MAY);
-console.log(
-  `  Da tao ${tenTuongDoi}.\n` +
-    '  Khoi dong lai Frigate de nhan cau hinh:  docker compose --profile cv up -d --force-recreate frigate\n',
-);
