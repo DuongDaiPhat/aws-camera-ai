@@ -124,6 +124,31 @@ Kết quả thật trên máy dev:
 | `--label`   | `person`         | Nhãn object cần kiểm tra               |
 | `--topic`   | `frigate/events` | Topic MQTT                             |
 
+### Kiểm tra config và unit test
+
+```powershell
+# Frigate có chấp nhận config không — dùng chính validator của image đang ghim
+pnpm frigate:validate                                   # config.yml, chưa có thì file mẫu
+pnpm frigate:validate -- infra/frigate/config.example.yml
+
+# Unit test logic nghiệm thu + tính nhất quán config với AC (chạy cả trong CI)
+pnpm test:tools
+```
+
+> **Không tin mã thoát của `frigate --validate-config`.** Với config sai, Frigate 0.18 in lỗi,
+> chuyển sang safe mode rồi **vẫn** in `Your config file is valid.` và thoát 0.
+> `pnpm frigate:validate` đọc nội dung output nên không bị lừa.
+
+| File test                                            | Kiểm tra gì                                                                |
+| ---------------------------------------------------- | -------------------------------------------------------------------------- |
+| `tools/scripts/test/frigate-events.test.mjs`         | Tham số dòng lệnh, đủ/sai trường AC, vòng đời `new` → `end`, lỗi dừng ngay |
+| `tools/scripts/test/frigate-config-example.test.mjs` | Config mẫu khớp AC (≥1 s, min_score 0.5, ≤30 s), compose, mediamtx, `.env` |
+| `tools/scripts/test/frigate-init.test.mjs`           | Tạo/giữ/ghi đè config, gỡ thư mục Docker tạo nhầm, thiếu file mẫu          |
+| `tools/scripts/test/frigate-validate.test.mjs`       | Đọc đúng output validator, kể cả trường hợp safe mode in "valid"           |
+
+`pnpm frigate:check` dừng và báo **THẤT BẠI ngay** khi gặp message sai định dạng (điểm ngoài 0..1,
+box ngược, `end_time` trước `start_time`, thiếu `after`...), không chờ tới hết giờ.
+
 Xem message thô khi cần gỡ lỗi:
 
 ```powershell
