@@ -79,12 +79,18 @@ ffmpeg -hide_banner -f dshow -list_options true -i video="Tên camera máy"
 
 Thay `Tên camera máy` bằng đúng tên webcam trên máy của bạn.
 
+
+## chạy docker trước khi phát webcam 
+
+  docker compose up -d mediamtx
+  docker compose ps mediamtx
+
 ## 4. Phát webcam thành RTSP
 
 Lệnh cơ bản:
 
 ```powershell
-ffmpeg -hide_banner -f dshow -i video="Tên webcam của bạn" `
+ffmpeg -hide_banner -f dshow -i video="ACER HD User Facing" `
   -c:v libx264 -preset ultrafast -tune zerolatency `
   -pix_fmt yuv420p -f rtsp -rtsp_transport tcp `
   rtsp://localhost:8554/cam_living_room
