@@ -79,13 +79,15 @@ ffmpeg -hide_banner -f dshow -list_options true -i video="Tên camera máy"
 
 Thay `Tên camera máy` bằng đúng tên webcam trên máy của bạn.
 
-
-## chạy docker trước khi phát webcam 
-
-  docker compose up -d mediamtx
-  docker compose ps mediamtx
-
 ## 4. Phát webcam thành RTSP
+
+> **Bật MediaMTX trước khi phát** (xem [mục 2](#2-khởi-động-mediamtx)). Nếu container chưa chạy,
+> FFmpeg sẽ báo lỗi kết nối tới `rtsp://localhost:8554`:
+>
+> ```powershell
+> docker compose up -d mediamtx
+> docker compose ps mediamtx
+> ```
 
 Lệnh cơ bản:
 

@@ -84,6 +84,12 @@ sequenceDiagram
 > `after.id` chính là **track ID**, dùng làm `events.track_id`.
 > `box` là **pixel** theo khung `detect`, phải chuẩn hóa chia cho `detect_width`/`detect_height`
 > trước khi lưu vào `ai_results`.
+> Payload **không** chứa đường dẫn snapshot: khi `after.has_snapshot = true`, lấy ảnh qua
+> `GET http://frigate:5000/api/events/{after.id}/snapshot.jpg`.
+> Khi track kết thúc, Frigate gửi thêm một message `"type": "end"` cùng `after.id`, có `after.end_time`.
+>
+> Cấu hình Frigate, cách chạy thử và bảng ánh xạ trường AC ↔ payload:
+> [FRIGATE_MQTT_SETUP.md](../FRIGATE_MQTT_SETUP.md) (US-01, US-02).
 
 ### Bản ghi `events` sau khi orchestrator xử lý
 

@@ -343,7 +343,7 @@ Bắn message MQTT giả để test consumer — xem lệnh ở [mục 5](#5-l�
 
 ```bash
 # Tạo cấu hình Frigate riêng cho máy mình (file này bị gitignore)
-cp infra/frigate/config.example.yml infra/frigate/config.yml
+pnpm frigate:init
 
 docker compose --profile cv up -d
 docker compose logs -f frigate
@@ -351,8 +351,17 @@ docker compose logs -f frigate
 
 Frigate UI: http://localhost:5000
 
-> **Máy yếu?** Trong `config.yml` hạ `fps` xuống 5 và chỉ bật một camera (rủi ro R4).
-> Detector CPU chạy được mọi máy nhưng chậm; máy có CPU Intel gen 6+ thì thử `openvino`.
+Kiểm tra Frigate phát hiện người và bắn sự kiện lên MQTT (US-01, US-02):
+
+```bash
+pnpm frigate:check -- --camera cam_test
+```
+
+Hướng dẫn đầy đủ: [FRIGATE_MQTT_SETUP.md](FRIGATE_MQTT_SETUP.md).
+
+> **Máy yếu?** Trong `config.yml` giữ `fps: 5` và chỉ bật một camera (rủi ro R4).
+> Detector mặc định là OpenVINO trên CPU; máy không nạp được OpenVINO thì đổi sang detector
+> `cpu` theo comment trong file cấu hình.
 
 ### D, E — AI service
 
@@ -441,6 +450,13 @@ Nếu vẫn gặp lỗi này, bạn đang dùng bản `docker-compose.yml` cũ �
 > sau giữa 2025 đã bắt đầu cắt bớt giao diện web — ghim tag giữ cho MinIO Console ở
 > cổng 9001 vẫn dùng được suốt kỳ đồ án. Muốn nâng phiên bản thì nâng có chủ đích,
 > trong một PR riêng, và chạy thử lại `docker compose up` trước khi merge.
+
+### Frigate chạy nhưng không có camera nào
+
+`infra/frigate/config.yml` bị Docker tạo thành **thư mục** vì bạn bật profile `cv` trước khi
+tạo file cấu hình. Chạy `pnpm frigate:init` rồi
+`docker compose --profile cv up -d --force-recreate frigate`.
+Chi tiết: [FRIGATE_MQTT_SETUP.md § 7](FRIGATE_MQTT_SETUP.md#7-gỡ-rối).
 
 ### `docker compose up` báo "port is already allocated"
 
