@@ -136,7 +136,7 @@ Mọi tham số đều cấu hình được qua API, không hard-code.
 | 0.3 | Thiết kế ERD                              | B        | ✅         |
 | 0.4 | OpenAPI spec (contract-first)             | A, B     | ✅         |
 | 0.5 | Monorepo + docker-compose + CI            | C        | ✅         |
-| 0.6 | mediamtx + ffmpeg giả lập RTSP            | C        | ⬜         |
+| 0.6 | mediamtx + ffmpeg giả lập RTSP            | C        | ✅         |
 | 0.7 | **Thu thập bộ dữ liệu test** (đường găng) | E, D     | ⬜         |
 | 0.8 | AWS account, IAM, Budget Alert $10, MFA   | C        | ⬜         |
 | 0.9 | Coding convention, quy trình Git, mẫu PR  | B        | ✅         |
