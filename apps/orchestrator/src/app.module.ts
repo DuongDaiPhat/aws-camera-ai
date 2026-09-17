@@ -4,6 +4,8 @@ import { DatabaseModule } from './database/database.module';
 import { EventsModule } from './events/events.module';
 import { HealthModule } from './health/health.module';
 import { IngestionModule } from './ingestion/ingestion.module';
+import { MediaModule } from './media/media.module';
+import { StorageModule } from './storage/storage.module';
 
 /**
  * Module goc.
@@ -19,7 +21,9 @@ import { IngestionModule } from './ingestion/ingestion.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env'] }),
     DatabaseModule,
+    StorageModule,
     EventsModule,
+    MediaModule,
     IngestionModule,
     HealthModule,
   ],

@@ -2,16 +2,31 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { MqttConsumerService } from '../src/ingestion/mqtt-consumer.service';
 import { EventsRepository } from '../src/events/events.repository';
+import { MediaService } from '../src/media/media.service';
+import { EventMediaRepository } from '../src/media/event-media.repository';
 
-describe('MqttConsumerService (US-03)', () => {
+describe('MqttConsumerService (US-03, US-04)', () => {
   let service: MqttConsumerService;
   let eventsRepository: jest.Mocked<EventsRepository>;
+  let mediaService: jest.Mocked<MediaService>;
+  let eventMediaRepository: jest.Mocked<EventMediaRepository>;
 
   beforeEach(async () => {
     const mockEventsRepository = {
       findCameraBySlug: jest.fn(),
       findZoneByCameraAndSlug: jest.fn(),
       createEvent: jest.fn(),
+    };
+
+    const mockMediaService = {
+      downloadAndStoreSnapshot: jest.fn(),
+      downloadAndStoreClip: jest.fn(),
+    };
+
+    const mockEventMediaRepository = {
+      findEventByTrackId: jest.fn(),
+      createEventMedia: jest.fn(),
+      findMediaByEventId: jest.fn(),
     };
 
     const mockConfigService = {
@@ -26,12 +41,16 @@ describe('MqttConsumerService (US-03)', () => {
       providers: [
         MqttConsumerService,
         { provide: EventsRepository, useValue: mockEventsRepository },
+        { provide: MediaService, useValue: mockMediaService },
+        { provide: EventMediaRepository, useValue: mockEventMediaRepository },
         { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
     service = module.get<MqttConsumerService>(MqttConsumerService);
     eventsRepository = module.get(EventsRepository);
+    mediaService = module.get(MediaService);
+    eventMediaRepository = module.get(EventMediaRepository);
   });
 
   it('khoi tao thanh cong', () => {
@@ -265,6 +284,100 @@ describe('MqttConsumerService (US-03)', () => {
         expect.objectContaining({
           dedupKey: 'cam_living_room:track-dup-1:PERSON_DETECTED:172638720',
         }),
+      );
+    });
+  });
+
+  describe('US-04: Luu media su kien (Snapshot & Clip)', () => {
+    it('tu dong goi downloadAndStoreSnapshot khi su kien moi co has_snapshot=true', async () => {
+      const payload = {
+        type: 'new',
+        after: {
+          id: 'track-snap-1',
+          camera: 'cam_living_room',
+          frame_time: 1726387200.0,
+          label: 'person',
+          score: 0.88,
+          current_zones: [],
+          has_snapshot: true,
+        },
+      };
+
+      eventsRepository.findCameraBySlug.mockResolvedValueOnce({
+        id: 'cam-uuid-1',
+        name: 'Phong khach',
+        slug: 'cam_living_room',
+      });
+
+      eventsRepository.createEvent.mockResolvedValueOnce({
+        id: 'event-uuid-snap',
+        camera_id: 'cam-uuid-1',
+        zone_id: null,
+        event_type: 'PERSON_DETECTED',
+        status: 'DETECTED',
+        priority: 'P3',
+        source: 'FRIGATE',
+        track_id: 'track-snap-1',
+        dedup_key: 'dedup-snap',
+        confidence: 0.88,
+        ai_results: [],
+        correlation_id: 'corr-snap',
+        detected_at: new Date(1726387200000),
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+
+      await service.handleMessage('frigate/events', Buffer.from(JSON.stringify(payload)));
+
+      expect(mediaService.downloadAndStoreSnapshot).toHaveBeenCalledWith(
+        'event-uuid-snap',
+        'track-snap-1',
+        expect.any(Date),
+      );
+    });
+
+    it('tu dong goi downloadAndStoreClip khi track end co has_clip=true cho su kien P1', async () => {
+      const payload = {
+        type: 'end',
+        after: {
+          id: 'track-clip-1',
+          camera: 'cam_kitchen',
+          frame_time: 1726387215.0,
+          start_time: 1726387200.0,
+          end_time: 1726387215.0,
+          label: 'person',
+          score: 0.9,
+          current_zones: [],
+          has_clip: true,
+        },
+      };
+
+      eventMediaRepository.findEventByTrackId.mockResolvedValueOnce({
+        id: 'event-uuid-clip',
+        camera_id: 'cam-uuid-kitchen',
+        zone_id: 'zone-stove',
+        event_type: 'RESTRICTED_ZONE',
+        status: 'DETECTED',
+        priority: 'P1',
+        source: 'FRIGATE',
+        track_id: 'track-clip-1',
+        dedup_key: 'dedup-clip',
+        confidence: 0.9,
+        ai_results: [],
+        correlation_id: 'corr-clip',
+        detected_at: new Date(1726387200000),
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+
+      await service.handleMessage('frigate/events', Buffer.from(JSON.stringify(payload)));
+
+      expect(eventMediaRepository.findEventByTrackId).toHaveBeenCalledWith('track-clip-1');
+      expect(mediaService.downloadAndStoreClip).toHaveBeenCalledWith(
+        'event-uuid-clip',
+        'track-clip-1',
+        expect.any(Date),
+        15000,
       );
     });
   });

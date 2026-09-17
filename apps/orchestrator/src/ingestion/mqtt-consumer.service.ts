@@ -10,6 +10,8 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { EventType, PriorityLevel } from '@cam/contracts';
 import { CameraRecord, EventsRepository } from '../events/events.repository';
+import { MediaService } from '../media/media.service';
+import { EventMediaRepository } from '../media/event-media.repository';
 import {
   FrigateEventAfterDto,
   FrigateEventMessageDto,
@@ -23,6 +25,8 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly configService: ConfigService,
     private readonly eventsRepository: EventsRepository,
+    private readonly mediaService: MediaService,
+    private readonly eventMediaRepository: EventMediaRepository,
   ) {}
 
   onModuleInit(): void {
@@ -135,7 +139,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Xử lý lưu sự kiện vào DB và áp dụng khử trùng lặp (AC1, AC3).
+   * Xử lý lưu sự kiện vào DB, khử trùng lặp và kích hoạt tải snapshot (US-03, US-04).
    */
   private async processEvent(after: FrigateEventAfterDto): Promise<void> {
     const inZone = Boolean(after.current_zones && after.current_zones.length > 0);
@@ -174,12 +178,46 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
         },
         'Da ghi nhan su kien moi vao bang events',
       );
+
+      // US-04: Tự động tải snapshot và lưu vào MinIO/S3 nếu có snapshot
+      if (after.has_snapshot) {
+        void this.mediaService.downloadAndStoreSnapshot(
+          createdEvent.id,
+          after.id,
+          createdEvent.detected_at,
+        );
+      }
     } else {
       this.logger.debug(
         { dedupKey, trackId: after.id },
         'Bo qua su kien trung lap theo dedup_key (Deduplicated)',
       );
     }
+  }
+
+  /**
+   * Xử lý khi track kết thúc (US-04): Tải clip video nếu là sự kiện P0 hoặc P1.
+   */
+  private async handleTrackEnd(after: FrigateEventAfterDto): Promise<void> {
+    if (!after.has_clip) {
+      return;
+    }
+
+    const event = await this.eventMediaRepository.findEventByTrackId(after.id);
+    if (!event || (event.priority !== 'P0' && event.priority !== 'P1')) {
+      return;
+    }
+
+    const startTime = after.start_time || after.frame_time;
+    const endTime = after.end_time || after.frame_time;
+    const durationMs = Math.round((endTime - startTime) * 1000);
+
+    void this.mediaService.downloadAndStoreClip(
+      event.id,
+      after.id,
+      event.detected_at,
+      durationMs > 0 ? durationMs : 10000,
+    );
   }
 
   /**
@@ -193,7 +231,11 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     }
 
     try {
-      await this.processEvent(dto.after);
+      if (dto.type === 'end') {
+        await this.handleTrackEnd(dto.after);
+      } else {
+        await this.processEvent(dto.after);
+      }
     } catch (error) {
       this.logger.error(
         { trackId: dto.after.id, err: (error as Error).message },
