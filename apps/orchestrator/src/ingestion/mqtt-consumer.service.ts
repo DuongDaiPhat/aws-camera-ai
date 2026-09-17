@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import mqtt, { MqttClient } from 'mqtt';
 import { plainToInstance } from 'class-transformer';
@@ -12,10 +7,7 @@ import { EventType, PriorityLevel } from '@cam/contracts';
 import { CameraRecord, EventsRepository } from '../events/events.repository';
 import { MediaService } from '../media/media.service';
 import { EventMediaRepository } from '../media/event-media.repository';
-import {
-  FrigateEventAfterDto,
-  FrigateEventMessageDto,
-} from './dto/frigate-event.dto';
+import { FrigateEventAfterDto, FrigateEventMessageDto } from './dto/frigate-event.dto';
 
 @Injectable()
 export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {

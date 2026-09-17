@@ -1,18 +1,7 @@
-import {
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  IStorageService,
-  STORAGE_SERVICE,
-} from '../storage/storage.interface';
-import {
-  EventMediaRecord,
-  EventMediaRepository,
-} from './event-media.repository';
+import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
+import { EventMediaRecord, EventMediaRepository } from './event-media.repository';
 import { EventMediaResponseDto } from './dto/event-media-response.dto';
 
 @Injectable()
@@ -28,7 +17,9 @@ export class MediaService {
     @Inject(STORAGE_SERVICE) private readonly storageService: IStorageService,
   ) {
     this.frigateBaseUrl = this.configService.get<string>('FRIGATE_URL', 'http://localhost:5000');
-    this.storageProvider = this.configService.get<string>('STORAGE_PROVIDER', 'MINIO').toUpperCase();
+    this.storageProvider = this.configService
+      .get<string>('STORAGE_PROVIDER', 'MINIO')
+      .toUpperCase();
     this.storageBucket = this.configService.get<string>('STORAGE_BUCKET', 'camerai-media');
   }
 

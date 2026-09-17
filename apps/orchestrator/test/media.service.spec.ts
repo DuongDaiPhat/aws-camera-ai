@@ -88,7 +88,9 @@ describe('MediaService (US-04)', () => {
         new Date('2026-09-18T10:00:00Z'),
       );
 
-      expect(global.fetch).toHaveBeenCalledWith('http://localhost:5000/api/events/track-1/snapshot.jpg');
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://localhost:5000/api/events/track-1/snapshot.jpg',
+      );
       expect(storageService.upload).toHaveBeenCalledWith(
         'events/2026/09/18/evt-1/snapshot.jpg',
         expect.any(Buffer),
@@ -161,7 +163,9 @@ describe('MediaService (US-04)', () => {
         12000,
       );
 
-      expect(global.fetch).toHaveBeenCalledWith('http://localhost:5000/api/events/track-2/clip.mp4');
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://localhost:5000/api/events/track-2/clip.mp4',
+      );
       expect(storageService.upload).toHaveBeenCalledWith(
         'events/2026/09/18/evt-2/clip.mp4',
         expect.any(Buffer),
