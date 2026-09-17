@@ -32,8 +32,8 @@ export interface paths {
         put?: never;
         /**
          * Dang nhap bang email va mat khau
-         * @description FR-AUT-03: sau 5 lan sai lien tiep, tai khoan bi khoa 15 phut
-         *     va tra ve `423 Locked`.
+         * @description FR-AUT-03: nam lan sai dau tra ve `401`. Lan thu sau tai khoan bi khoa
+         *     15 phut, ghi audit log va tra ve `423 Locked`.
          */
         post: operations["login"];
         delete?: never;
@@ -51,7 +51,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Lam moi access token */
+        /**
+         * Lam moi access token
+         * @description Refresh token co the gui trong body hoac cookie HttpOnly `camerai_refresh`.
+         *     Sau khi dung, token cu bi thu hoi va duoc thay bang mot refresh token moi.
+         */
         post: operations["refreshToken"];
         delete?: never;
         options?: never;
@@ -1324,10 +1328,10 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": {
-                    refreshToken: string;
+                    refreshToken?: string;
                 };
             };
         };
