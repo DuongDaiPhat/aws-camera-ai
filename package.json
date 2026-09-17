@@ -40,6 +40,7 @@
     "@redocly/cli": "^1.25.0",
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
+    "pg": "^8.23.0",
     "prettier": "^3.3.3"
   },
   "lint-staged": {
