@@ -48,6 +48,7 @@ người mới vào dự án.
 | [DEV_ONBOARDING.md](DEV_ONBOARDING.md)                               | Cài đặt môi trường, cấu trúc monorepo, lệnh hay dùng, gỡ rối | 0.5          | C     |
 | [FFMPEG_MEDIAMTX_SETUP.md](FFMPEG_MEDIAMTX_SETUP.md)                 | Phát webcam / file video thành luồng RTSP qua MediaMTX       | 0.6          | C     |
 | [FRIGATE_MQTT_SETUP.md](FRIGATE_MQTT_SETUP.md)                       | Frigate phát hiện người, sự kiện MQTT, tự kết nối lại        | US-01, US-02 | C     |
+| [MQTT_VISUAL_TEST.md](MQTT_VISUAL_TEST.md)                           | Kiểm thử trực quan: Debug View Frigate, xem/bắn message MQTT | US-01, US-02 | C     |
 | [conventions/CODING_CONVENTION.md](conventions/CODING_CONVENTION.md) | Đặt tên, quy ước TS/Python/SQL, log, test, comment           | 0.9          | B     |
 | [conventions/GIT_WORKFLOW.md](conventions/GIT_WORKFLOW.md)           | Mô hình nhánh, commit message, PR, review, xử lý xung đột    | 0.9          | B     |
 

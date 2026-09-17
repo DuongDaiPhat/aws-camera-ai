@@ -153,6 +153,9 @@ pnpm test:tools
 `pnpm frigate:check` dừng và báo **THẤT BẠI ngay** khi gặp message sai định dạng (điểm ngoài 0..1,
 box ngược, `end_time` trước `start_time`, thiếu `after`...), không chờ tới hết giờ.
 
+Muốn **tận mắt** xem khung bao người và từng message trên MQTT (Debug View, MQTT Explorer,
+bắn message giả): [MQTT_VISUAL_TEST.md](MQTT_VISUAL_TEST.md).
+
 Xem message thô khi cần gỡ lỗi:
 
 ```powershell
@@ -321,5 +324,6 @@ nghĩa là detector không theo kịp (rủi ro R4 trong kế hoạch).
 ## Xem tiếp
 
 - [FFMPEG_MEDIAMTX_SETUP.md](FFMPEG_MEDIAMTX_SETUP.md) — phát webcam/file thành RTSP
+- [MQTT_VISUAL_TEST.md](MQTT_VISUAL_TEST.md) — kiểm thử trực quan, xem message trên MQTT
 - [DATA_FLOW.md § Luồng 1](architecture/DATA_FLOW.md#luồng-1--phát-hiện-người-walking-skeleton-sprint-1) — orchestrator dùng payload này thế nào
 - [Tài liệu Frigate — MQTT](https://docs.frigate.video/integrations/mqtt)
