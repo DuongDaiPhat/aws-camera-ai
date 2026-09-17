@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { HealthModule } from './health/health.module';
+import { AuthModule } from './auth/auth.module';
+import { DatabaseModule } from './database/database.module';
 
 /**
  * Module goc.
@@ -13,6 +15,11 @@ import { HealthModule } from './health/health.module';
  * Xem docs/architecture/C4_ARCHITECTURE.md muc "C3 - Component".
  */
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env'] }), HealthModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '../../.env'] }),
+    DatabaseModule,
+    AuthModule,
+    HealthModule,
+  ],
 })
 export class AppModule {}
