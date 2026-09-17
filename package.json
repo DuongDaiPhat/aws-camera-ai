@@ -32,6 +32,7 @@
     "db:migrate": "node tools/scripts/migrate.mjs up",
     "db:reset": "node tools/scripts/migrate.mjs reset",
     "seed": "node tools/scripts/seed.mjs",
+    "frigate:init": "node tools/scripts/frigate-init.mjs",
     "prepare": "husky || true"
   },
   "devDependencies": {
