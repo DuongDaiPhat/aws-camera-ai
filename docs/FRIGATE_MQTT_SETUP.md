@@ -1,6 +1,6 @@
 # Frigate phát hiện người và bắn sự kiện lên MQTT
 
-> **US-01** (3 SP) · **US-02** (1 SP) · Epic 1 · Sprint 1 · Người phụ trách: **C**
+> **US-01** (3 SP) · **US-02** (1 SP) · Epic 1 · Sprint 1 · Người phụ trách: **Duong Dai Phat**
 > Yêu cầu: FR-ING-01, FR-ING-02, FR-ING-03, FR-ING-04 · Luồng: [DATA_FLOW.md § Luồng 1](architecture/DATA_FLOW.md#luồng-1--phát-hiện-người-walking-skeleton-sprint-1) bước 1 → 4
 
 ```text
