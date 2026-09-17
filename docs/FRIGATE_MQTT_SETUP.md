@@ -106,15 +106,19 @@ khi thấy trọn vòng đời một track: `new` → `end` cùng `track_id`.
 Kết quả thật trên máy dev:
 
 ```text
-  [NEW] cam_test · person · track 1789613719.133709-zt43gu
-      score=0.77 top_score=0.88 box=[965, 176, 1042, 286]
-      zones=[] start=2026-09-17T02:55:19.133Z snapshot=/api/events/1789613719.133709-zt43gu/snapshot.jpg
-  [END] cam_test · person · track 1789613719.133709-zt43gu
-      score=0.87 top_score=0.94 box=[594, 199, 765, 285]
-      zones=[] start=2026-09-17T02:55:19.133Z snapshot=/api/events/1789613719.133709-zt43gu/snapshot.jpg
-      end=2026-09-17T02:55:40.322Z
+  Đang nghe frigate/events (label=person, camera=cam_test) tối đa 180 s ...
 
-  THANH CONG: track 1789613719.133709-zt43gu di du vong doi new -> end, moi message dung dinh dang.
+  [NEW] cam_test · person · track 1789625260.447541-kxf91t
+      score=0.98 top_score=0.79 box=[780, 198, 911, 296]
+      zones=[] start=2026-09-17T06:07:40.447Z snapshot=/api/events/1789625260.447541-kxf91t/snapshot.jpg
+
+  [END] cam_test · person · track 1789625260.447541-kxf91t
+      score=0.88 top_score=0.95 box=[602, 198, 770, 287]
+      zones=[] start=2026-09-17T06:07:40.447Z snapshot=/api/events/1789625260.447541-kxf91t/snapshot.jpg
+      end=2026-09-17T06:08:04.031Z
+
+  THÀNH CÔNG: track 1789625260.447541-kxf91t đi đủ vòng đời new → end, mọi message đúng định dạng.
+  Đã nhận 20 message, 0 message sai định dạng.
 ```
 
 | Tham số     | Mặc định         | Ý nghĩa                                |
