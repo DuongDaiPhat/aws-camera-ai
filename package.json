@@ -24,7 +24,7 @@
     "format:ai:check": "node tools/scripts/py.mjs ruff format --check .",
     "test:ai": "node tools/scripts/py.mjs pytest",
     "check:ai": "pnpm lint:ai && pnpm format:ai:check && pnpm test:ai",
-    "check:all": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm api:lint && pnpm check:ai",
+    "check:all": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm test:tools && pnpm api:lint && pnpm check:ai",
     "typecheck": "pnpm -r typecheck",
     "api:lint": "redocly lint api/openapi.yaml api/openapi-ai-service.yaml",
     "api:preview": "redocly preview-docs api/openapi.yaml",
@@ -32,6 +32,10 @@
     "db:migrate": "node tools/scripts/migrate.mjs up",
     "db:reset": "node tools/scripts/migrate.mjs reset",
     "seed": "node tools/scripts/seed.mjs",
+    "frigate:init": "node tools/scripts/frigate-init.mjs",
+    "frigate:check": "node tools/scripts/frigate-check.mjs",
+    "frigate:validate": "node tools/scripts/frigate-validate.mjs",
+    "test:tools": "node --test \"tools/scripts/test/*.test.mjs\"",
     "prepare": "husky || true"
   },
   "devDependencies": {
@@ -41,7 +45,8 @@
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
     "pg": "^8.23.0",
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "yaml": "^2.9.1"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

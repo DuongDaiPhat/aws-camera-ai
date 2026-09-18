@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
+import { EventsModule } from './events/events.module';
+import { HealthModule } from './health/health.module';
+import { IngestionModule } from './ingestion/ingestion.module';
+import { MediaModule } from './media/media.module';
+import { StorageModule } from './storage/storage.module';
 
 /**
  * Module goc.
@@ -19,6 +23,10 @@ import { DatabaseModule } from './database/database.module';
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '../../.env'] }),
     DatabaseModule,
     AuthModule,
+    StorageModule,
+    EventsModule,
+    MediaModule,
+    IngestionModule,
     HealthModule,
   ],
 })

@@ -64,6 +64,10 @@ jobs:
       - name: Unit test
         run: pnpm test
 
+      # Script ha tang o thu muc goc khong thuoc package nao nen `pnpm -r test` khong chay
+      - name: Unit test cong cu (Frigate config + su kien MQTT)
+        run: pnpm test:tools
+
       - name: Upload bao cao coverage
         if: always()
         uses: actions/upload-artifact@v4

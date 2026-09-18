@@ -1,83 +1,138 @@
 # ---------------------------------------------------------------------
-# Frigate - cau hinh mau cho moi truong DEV
-# Copy sang infra/frigate/config.yml roi chinh theo may cua ban.
-# config.yml bi gitignore vi chua URL RTSP that.
-#   cp infra/frigate/config.example.yml infra/frigate/config.yml
+# Frigate 0.18 - cau hinh mau cho moi truong DEV (US-01, US-02)
+# Tao config.yml cho may cua ban (file nay bi gitignore):
+#   pnpm frigate:init
+# Huong dan day du: docs/FRIGATE_MQTT_SETUP.md
+#
+# config.yml duoc mount read-only, nen `version` PHAI trung voi phien ban
+# image dang ghim trong docker-compose.yml. Lech version -> Frigate co
+# tu migrate (ghi de file) va khong khoi dong duoc.
 # ---------------------------------------------------------------------
 
+# US-02: moi tracked object duoc publish len topic `frigate/events`
+#   type=new    -> object vua qua nguong (min_score / threshold / min_initialized)
+#   type=update -> object thay doi (score, zone, box ...)
+#   type=end    -> Frigate ket thuc track, co `end_time`
 mqtt:
   enabled: true
   host: mosquitto
   port: 1883
   topic_prefix: frigate
   client_id: frigate
+  stats_interval: 60
 
-# Detector: chon 1 trong 3 tuy suc may (rui ro R4 trong ke hoach)
-#   cpu      - chay moi may, cham nhat  -> mac dinh cho Sprint 0/1
-#   openvino - CPU Intel the he 6+
-#   tensorrt - GPU NVIDIA
+# DB cua Frigate nam tren volume rieng de khong mat lich su event khi tao lai container
+database:
+  path: /db/frigate.db
+
+# Detector: chon 1 tuy suc may (rui ro R4 trong ke hoach)
+#   openvino (CPU) - model co san trong image, chay tren CPU x86 bat ky -> mac dinh
+#   cpu            - tflite, cham hon nhieu; chi dung khi openvino loi
+#   tensorrt/onnx  - GPU NVIDIA
 detectors:
-  cpu1:
-    type: cpu
-    num_threads: 3
+  ov:
+    type: openvino
+    device: CPU
+
+model:
+  width: 300
+  height: 300
+  input_tensor: nhwc
+  input_pixel_format: bgr
+  path: /openvino-model/ssdlite_mobilenet_v2.xml
+  labelmap_path: /openvino-model/coco_91cl_bkgr.txt
+
+# Doi sang detector CPU thuan: xoa 2 khoi `detectors` + `model` o tren, dung:
+# detectors:
+#   cpu1:
+#     type: cpu
+#     num_threads: 3
 
 objects:
   track:
     - person
   filters:
     person:
+      # Diem cua 1 frame thap hon min_score -> bo qua frame do
       min_score: 0.5
+      # Trung vi diem cua ca track phai >= threshold moi publish type=new
       threshold: 0.7
+      # Dien tich box toi thieu (pixel cua khung detect) - loc bong nguoi o xa
       min_area: 1500
+
+# Mac dinh cho moi camera; camera co the ghi de
+detect:
+  enabled: true
+  width: 1280
+  height: 720
+  # 5 fps du cho nguoi di bo, giam tai CPU (ghi chu ky thuat US-01)
+  fps: 5
+  # US-01: nguoi phai xuat hien lien tuc >= 1 giay moi tao track
+  #   min_initialized = fps x 1 giay = 5 frame
+  min_initialized: 5
+  # Mat dau 5 giay (25 frame o 5 fps) moi coi la da roi khung hinh -> type=end
+  max_disappeared: 25
+
+ffmpeg:
+  # US-01 / FR-ING-03: mat luong -> Frigate tu ket noi lai, khong crash.
+  #   - ffmpeg timeout 10 s (preset-rtsp-restream)
+  #   - watchdog Frigate khoi dong lai ffmpeg neu 20 s khong co frame
+  #   - retry_interval: so giay cho giua 2 lan thu ket noi lai
+  retry_interval: 10
+  input_args: preset-rtsp-restream
 
 snapshots:
   enabled: true
   timestamp: true
   bounding_box: true
   retain:
-    default: 2 # ngay - media that nam o MinIO/S3, day chi la ban dem
+    default: 2 # ngay - media that nam o MinIO/S3 (US-04), day chi la ban dem
 
 record:
   enabled: true
-  retain:
+  continuous:
+    days: 0
+  motion:
     days: 1
-    mode: motion
   alerts:
+    retain:
+      days: 2
+  detections:
     retain:
       days: 2
 
 cameras:
+  # Webcam: ffmpeg -f dshow ... rtsp://localhost:8554/cam_living_room
   cam_living_room:
     enabled: true
     ffmpeg:
       inputs:
         - path: rtsp://mediamtx:8554/cam_living_room
           roles: [detect, record]
-      input_args: preset-rtsp-restream
-    detect:
-      width: 1280
-      height: 720
-      fps: 5 # giam con 5 fps khi may yeu
     zones:
-      # Toa do o day la pixel cua khung detect.
-      # Nguon su that cua zone la bang `zones` trong Postgres (toa do chuan hoa 0-1);
+      # Toa do chuan hoa 0..1 theo khung detect.
+      # Nguon su that cua zone la bang `zones` trong Postgres;
       # orchestrator sinh lai khoi nay khi admin ve zone tren dashboard (US-12).
       rest_area_sofa:
         coordinates: 0.05,0.55,0.45,0.55,0.45,0.95,0.05,0.95
 
-  cam_kitchen:
+  # File video lap vo han: ffmpeg -re -stream_loop -1 -i datasets/xxx.mp4 ... /cam_test
+  cam_test:
     enabled: true
+    ffmpeg:
+      inputs:
+        - path: rtsp://mediamtx:8554/cam_test
+          roles: [detect, record]
+
+  # Chua co nguon phat - bat len khi co camera thu 2
+  cam_kitchen:
+    enabled: false
     ffmpeg:
       inputs:
         - path: rtsp://mediamtx:8554/cam_kitchen
           roles: [detect, record]
-      input_args: preset-rtsp-restream
-    detect:
-      width: 1280
-      height: 720
-      fps: 5
     zones:
       restricted_stove:
         coordinates: 0.40,0.30,0.95,0.30,0.95,0.90,0.40,0.90
 
-version: 0.14
+version: 0.18-0

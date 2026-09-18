@@ -118,23 +118,28 @@ services:
   # 5. Frigate - detector "person" + zone + snapshot/clip
   #    profile "cv": chi bat khi may du khoe (docker compose --profile cv up)
   # ------------------------------------------------------------------
+  #    Tao config truoc khi bat: pnpm frigate:init (docs/FRIGATE_MQTT_SETUP.md)
   frigate:
-    image: ghcr.io/blakeblackshear/frigate:stable
+    # Ghim phien ban: `version` trong config.yml phai khop voi image,
+    # tag `stable` tu nhay phien ban se lam config read-only khong khoi dong duoc.
+    image: ghcr.io/blakeblackshear/frigate:0.18.0
     container_name: camerai-frigate
     restart: unless-stopped
     profiles: ["cv"]
     depends_on:
       mosquitto:
         condition: service_healthy
+      mediamtx:
+        condition: service_started
     shm_size: "256mb"
     environment:
-      FRIGATE_MQTT_HOST: mosquitto
+      TZ: ${TZ}
     ports:
       - "${PORT_FRIGATE:-5000}:5000"
     volumes:
       - ./infra/frigate/config.yml:/config/config.yml:ro
+      - frigatedb:/db
       - frigatemedia:/media/frigate
-      - /etc/localtime:/etc/localtime:ro
     logging: *default-logging
 
   # ------------------------------------------------------------------
@@ -225,6 +230,7 @@ volumes:
   pgdata:
   mqttdata:
   miniodata:
+  frigatedb:
   frigatemedia:
 
 networks:
