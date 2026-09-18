@@ -76,12 +76,25 @@ cd aws-camera-ai
 # 2. Tạo file cấu hình từ mẫu
 cp .env.example .env            # Windows CMD: copy .env.example .env
 
+# 2a. Tạo secret JWT local (Node.js đã được cài ở bước 1)
+node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"
+# Dán kết quả vào JWT_SECRET trong .env
+
 # 3. Khởi động hạ tầng
 docker compose up -d
 
 # 4. Chờ mọi container healthy (~60 giây lần đầu vì phải tải image)
 docker compose ps
 ```
+
+Tạo tài khoản demo sau khi PostgreSQL đã sẵn sàng:
+
+```bash
+docker compose exec orchestrator sh -lc "cd /workspace && pnpm seed"
+```
+
+Đăng nhập tại `http://localhost:3000/login` bằng
+`admin@camerai.local` / `Admin@12345`. Đây là tài khoản chỉ dành cho môi trường dev.
 
 Mong đợi:
 
@@ -287,6 +300,10 @@ docker compose exec postgres psql -U camerai -d camerai -c '\d+ events'
 
 # Reset sạch và chạy lại migration
 docker compose down -v && docker compose up -d postgres
+
+# Database đã tồn tại: áp dụng migration refresh token của US-05 một lần
+docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U camerai -d camerai \
+  -f /docker-entrypoint-initdb.d/0003_auth_refresh_tokens.sql
 ```
 
 ### MQTT
