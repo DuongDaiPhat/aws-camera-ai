@@ -60,5 +60,6 @@ desktop.ini
 # ---- Logs ----
 *.log
 logs/
+artifacts/
 npm-debug.log*
 pnpm-debug.log*

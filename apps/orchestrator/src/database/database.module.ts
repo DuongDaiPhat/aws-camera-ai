@@ -1,6 +1,7 @@
-import { Global, Module, OnApplicationShutdown, Inject, Logger } from '@nestjs/common';
+import { Global, Inject, Logger, Module, type OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Pool, PoolConfig } from 'pg';
+import { Pool, type PoolConfig } from 'pg';
+import { DatabaseService } from './database.service';
 
 export const PG_POOL = Symbol('PG_POOL');
 
@@ -38,8 +39,13 @@ export const PG_POOL = Symbol('PG_POOL');
         return pool;
       },
     },
+    {
+      provide: DatabaseService,
+      inject: [PG_POOL],
+      useFactory: (pool: Pool): DatabaseService => new DatabaseService(pool),
+    },
   ],
-  exports: [PG_POOL],
+  exports: [PG_POOL, DatabaseService],
 })
 export class DatabaseModule implements OnApplicationShutdown {
   private readonly logger = new Logger(DatabaseModule.name);
