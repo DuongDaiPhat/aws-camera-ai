@@ -30,13 +30,7 @@ function EventsListSection({
   }
 
   if (events.length === 0) {
-    return (
-      <EmptyState
-        title="Không có sự kiện nào phù hợp"
-        message="Không tìm thấy sự kiện nào trong bộ lọc hoặc khu vực bạn đã chọn."
-        onResetFilter={onResetFilter}
-      />
-    );
+    return <EmptyState onResetFilter={onResetFilter} />;
   }
 
   return (
