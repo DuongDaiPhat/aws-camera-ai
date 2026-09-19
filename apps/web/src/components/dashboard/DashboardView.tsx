@@ -6,7 +6,7 @@ import { useAuth, useEvents } from '@/hooks';
 import { Sidebar, TopHeader } from '@/components/layout';
 import { MetricCards } from '@/components/dashboard/MetricCards';
 import { EventCard, EventDetailModal, EventFilter } from '@/components/events';
-import { EmptyState } from '@/components/ui';
+import { EmptyState, Pagination } from '@/components/ui';
 import styles from './dashboard-view.module.css';
 
 function EventsListSection({
@@ -46,6 +46,13 @@ export function DashboardView() {
   const { user, handleLogout } = useAuth();
   const {
     filteredEvents,
+    paginatedEvents,
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    totalPages,
+    totalFilteredItems,
     counts,
     isLoading,
     activeFilterTab,
@@ -112,10 +119,21 @@ export function DashboardView() {
 
             <EventsListSection
               isLoading={isLoading}
-              events={filteredEvents}
+              events={paginatedEvents}
               onViewDetail={setSelectedEventForModal}
               onResetFilter={resetFilters}
             />
+
+            {!isLoading && filteredEvents.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalFilteredItems}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setPageSize}
+              />
+            )}
           </section>
         </main>
       </div>

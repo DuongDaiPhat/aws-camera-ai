@@ -98,6 +98,50 @@ function useEventFilters(events: UIEventItem[]) {
   };
 }
 
+function useEventPagination(
+  filteredEvents: UIEventItem[],
+  activeFilterTab: string,
+  selectedZone: string,
+) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilterTab, selectedZone]);
+
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(filteredEvents.length / pageSize)),
+    [filteredEvents.length, pageSize],
+  );
+
+  const effectivePage = Math.min(currentPage, totalPages);
+
+  const paginatedEvents = useMemo(() => {
+    const start = (effectivePage - 1) * pageSize;
+    return filteredEvents.slice(start, start + pageSize);
+  }, [filteredEvents, effectivePage, pageSize]);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const handlePageSizeChange = useCallback((newSize: number) => {
+    setPageSize(newSize);
+    setCurrentPage(1);
+  }, []);
+
+  return {
+    currentPage: effectivePage,
+    setCurrentPage: handlePageChange,
+    pageSize,
+    setPageSize: handlePageSizeChange,
+    totalPages,
+    paginatedEvents,
+    totalFilteredItems: filteredEvents.length,
+  };
+}
+
 function useEventsSubscription(
   setEvents: React.Dispatch<React.SetStateAction<UIEventItem[]>>,
   setLiveNoticeText: React.Dispatch<React.SetStateAction<string | null>>,
@@ -129,6 +173,11 @@ export function useEvents() {
   const [isLoading, setLoading] = useState(true);
   const [liveNoticeText, setLiveNoticeText] = useState<string | null>(null);
   const filterState = useEventFilters(events);
+  const paginationState = useEventPagination(
+    filterState.filteredEvents,
+    filterState.activeFilterTab,
+    filterState.selectedZone,
+  );
 
   useEventsSubscription(setEvents, setLiveNoticeText, setLoading);
 
@@ -167,5 +216,6 @@ export function useEvents() {
     confirmHelp,
     toggleFalseAlarm,
     ...filterState,
+    ...paginationState,
   };
 }
