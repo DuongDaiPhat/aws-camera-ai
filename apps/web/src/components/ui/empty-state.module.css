@@ -1,0 +1,61 @@
+.emptyContainer {
+  background-color: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: 16px 0;
+}
+
+.iconWrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.iconWrapper svg {
+  width: 28px;
+  height: 28px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px;
+}
+
+.description {
+  font-size: 13px;
+  color: #64748b;
+  max-width: 380px;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+.resetButton {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background-color: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #dbeafe;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.resetButton:hover {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}

@@ -1,0 +1,239 @@
+.sidebar {
+  width: 256px;
+  min-width: 256px;
+  background-color: #ffffff;
+  border-right: 1px solid #eef0f4;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 16px;
+  min-height: 100vh;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px 24px;
+}
+
+.brandIconWrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.brandIconWrapper svg {
+  width: 22px;
+  height: 22px;
+}
+
+.brandTitles {
+  display: flex;
+  flex-direction: column;
+}
+
+.brandHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.brandName {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+}
+
+.proBadge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #2563eb;
+  background-color: #eff6ff;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid #dbeafe;
+}
+
+.brandSubtitle {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.navGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.navItem:hover {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+.navItemActive {
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.navItemActive:hover {
+  background-color: #e0edff;
+  color: #1d4ed8;
+}
+
+.navItemContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navIcon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  line-height: 1.2;
+}
+
+.badgeRed {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.badgeNeutral {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+.navDivider {
+  height: 1px;
+  background-color: #f1f5f9;
+  margin: 16px 8px;
+}
+
+.userFooter {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 16px;
+  margin-top: 12px;
+}
+
+.userCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background-color: #f8fafc;
+  border: 1px solid #f1f5f9;
+}
+
+.userMain {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #0f172a;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.userName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userRole {
+  font-size: 11px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logoutBtn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.logoutBtn:hover {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.logoutBtn svg {
+  width: 16px;
+  height: 16px;
+}
