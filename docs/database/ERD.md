@@ -215,12 +215,12 @@ erDiagram
 
 ### Vì sao có 5 bảng ngoài danh sách 10 bảng ban đầu
 
-| Bảng                   | Sinh ra từ                  | Nếu không có thì sao                                                                                               |
-| ---------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `event_status_history` | FR-EVT-05, FR-ESC-09        | Không trả lời được "ai xác nhận, lúc nào, qua kênh nào" — một mục trong tiêu chí demo                              |
-| `emergency_contacts`   | FR-NOT-09, FR-NOT-10        | Không gọi tuần tự 3 liên hệ được; nhồi số điện thoại vào `users` là sai mô hình (liên hệ khẩn không cần tài khoản) |
-| `wellness_schedules`   | FR-DET-M5-01                | Lịch kiểm tra phải hard-code — vi phạm "mọi tham số cấu hình được"                                                 |
-| `audit_logs`           | FR-LOG-01                   | Không chứng minh được đã ghi nhận hành vi nhạy cảm (xóa dữ liệu sinh trắc học) — phần Đạo đức của báo cáo sẽ hổng  |
+| Bảng                   | Sinh ra từ                  | Nếu không có thì sao                                                                                                 |
+| ---------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `event_status_history` | FR-EVT-05, FR-ESC-09        | Không trả lời được "ai xác nhận, lúc nào, qua kênh nào" — một mục trong tiêu chí demo                                |
+| `emergency_contacts`   | FR-NOT-09, FR-NOT-10        | Không gọi tuần tự 3 liên hệ được; nhồi số điện thoại vào `users` là sai mô hình (liên hệ khẩn không cần tài khoản)   |
+| `wellness_schedules`   | FR-DET-M5-01                | Lịch kiểm tra phải hard-code — vi phạm "mọi tham số cấu hình được"                                                   |
+| `audit_logs`           | FR-LOG-01                   | Không chứng minh được đã ghi nhận hành vi nhạy cảm (xóa dữ liệu sinh trắc học) — phần Đạo đức của báo cáo sẽ hổng    |
 | `auth_refresh_tokens`  | US-05, FR-AUT-02, FR-AUT-04 | Không thể thu hồi JWT khi đăng xuất, không thể xoay vòng Refresh Token (Token Rotation) an toàn chống đánh cắp phiên |
 
 ---
@@ -526,20 +526,21 @@ hành động của họ.
 Quản lý phiên đăng nhập và vòng đời Refresh Token (US-05, FR-AUT-02, FR-AUT-04).
 DDL thực thi: [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql).
 
-| Cột                    | Ý nghĩa & Ghi chú                                                                                                            |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `id`                   | UUID khóa chính                                                                                                              |
-| `user_id`              | Người dùng sở hữu token (`ON DELETE CASCADE` khi xóa tài khoản)                                                              |
-| `token_hash`           | Chuỗi `CHAR(64)` lưu băm **SHA-256** của refresh token thô. **Không bao giờ lưu token thô** trong DB                         |
-| `expires_at`           | Thời điểm hết hạn (mặc định 7 ngày)                                                                                          |
-| `revoked_at`           | Thời điểm thu hồi (khi người dùng Đăng xuất hoặc bị thu hồi phiên). `NULL` = còn hiệu lực                                    |
+| Cột                    | Ý nghĩa & Ghi chú                                                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `id`                   | UUID khóa chính                                                                                                                |
+| `user_id`              | Người dùng sở hữu token (`ON DELETE CASCADE` khi xóa tài khoản)                                                                |
+| `token_hash`           | Chuỗi `CHAR(64)` lưu băm **SHA-256** của refresh token thô. **Không bao giờ lưu token thô** trong DB                           |
+| `expires_at`           | Thời điểm hết hạn (mặc định 7 ngày)                                                                                            |
+| `revoked_at`           | Thời điểm thu hồi (khi người dùng Đăng xuất hoặc bị thu hồi phiên). `NULL` = còn hiệu lực                                      |
 | `replaced_by_token_id` | Khóa ngoại tự tham chiếu (`REFERENCES auth_refresh_tokens (id) ON DELETE SET NULL`). Lưu ID token kế nhiệm khi xoay vòng token |
-| `created_at`           | Thời điểm phát hành token                                                                                                    |
+| `created_at`           | Thời điểm phát hành token                                                                                                      |
 
 #### Cơ chế bảo mật và thu hồi phiên (Token Rotation):
+
 - **Không lưu token thô:** Chỉ lưu hash SHA-256 (`CHAR(64)`), đảm bảo nếu database bị rò rỉ kẻ xấu cũng không thể giả mạo Refresh Token.
-- **Phát hiện tái sử dụng (*Reuse Detection*):** Khi một refresh token cũ đã bị thay thế (`replaced_by_token_id IS NOT NULL`) mà vẫn được gửi lên để refresh, hệ thống nhận diện nguy cơ token bị đánh cắp và lập tức thu hồi toàn bộ chuỗi token của user đó.
-- **Chỉ mục một phần (*Partial Index*):**
+- **Phát hiện tái sử dụng (_Reuse Detection_):** Khi một refresh token cũ đã bị thay thế (`replaced_by_token_id IS NOT NULL`) mà vẫn được gửi lên để refresh, hệ thống nhận diện nguy cơ token bị đánh cắp và lập tức thu hồi toàn bộ chuỗi token của user đó.
+- **Chỉ mục một phần (_Partial Index_):**
   ```sql
   CREATE INDEX idx_auth_refresh_tokens_active
       ON auth_refresh_tokens (user_id, expires_at)
@@ -580,23 +581,23 @@ DDL thực thi: [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migratio
 Index không miễn phí: mỗi cái làm `INSERT` chậm đi một chút. Danh sách dưới đây đều có
 truy vấn cụ thể biện minh.
 
-| Index                            | Phục vụ truy vấn                                         | US/FR     |
-| -------------------------------- | -------------------------------------------------------- | --------- |
-| `uq_events_dedup_key`            | Chống trùng lặp khi ghi                                  | FR-ING-07 |
-| `idx_events_detected_at_desc`    | "20 sự kiện mới nhất" — trang chủ                        | US-06     |
-| `idx_events_camera_detected`     | Lọc theo camera + thời gian                              | US-21     |
-| `idx_events_type_detected`       | Lọc theo loại + thời gian                                | US-21     |
-| `idx_events_status`              | Đếm sự kiện theo trạng thái                              | US-21     |
-| `idx_events_dang_cho_escalate`   | **Quét timer mỗi 10 giây** (partial — chỉ vài chục dòng) | FR-ESC-07 |
-| `idx_events_correlation`         | Truy vết một sự kiện xuyên service                       | FR-LOG-02 |
-| `idx_events_ai_results_gin`      | Tìm sự kiện theo nhãn AI cụ thể                          | US-22     |
-| `uq_confirmations_lan_dau_tien`  | Chỉ lần xác nhận đầu tiên có hiệu lực                    | US-14     |
-| `idx_notifications_can_retry`    | Tìm thông báo cần gửi lại (partial)                      | FR-NOT-03 |
-| `idx_notifications_provider_msg` | Ánh xạ callback Telegram về notification                 | US-14     |
-| `idx_event_media_het_han`        | Dọn media quá hạn                                        | FR-DAT-01 |
-| `idx_known_faces_owner`          | Nạp danh sách người quen cho AI service                  | US-10     |
-| `auth_refresh_tokens_token_hash_key` | Chống trùng lặp và tra cứu O(1) theo SHA-256          | US-05     |
-| `idx_auth_refresh_tokens_active` | **Tìm token hợp lệ còn sống** (partial: revoked_at IS NULL) | US-05, FR-AUT-02 |
+| Index                                | Phục vụ truy vấn                                            | US/FR            |
+| ------------------------------------ | ----------------------------------------------------------- | ---------------- |
+| `uq_events_dedup_key`                | Chống trùng lặp khi ghi                                     | FR-ING-07        |
+| `idx_events_detected_at_desc`        | "20 sự kiện mới nhất" — trang chủ                           | US-06            |
+| `idx_events_camera_detected`         | Lọc theo camera + thời gian                                 | US-21            |
+| `idx_events_type_detected`           | Lọc theo loại + thời gian                                   | US-21            |
+| `idx_events_status`                  | Đếm sự kiện theo trạng thái                                 | US-21            |
+| `idx_events_dang_cho_escalate`       | **Quét timer mỗi 10 giây** (partial — chỉ vài chục dòng)    | FR-ESC-07        |
+| `idx_events_correlation`             | Truy vết một sự kiện xuyên service                          | FR-LOG-02        |
+| `idx_events_ai_results_gin`          | Tìm sự kiện theo nhãn AI cụ thể                             | US-22            |
+| `uq_confirmations_lan_dau_tien`      | Chỉ lần xác nhận đầu tiên có hiệu lực                       | US-14            |
+| `idx_notifications_can_retry`        | Tìm thông báo cần gửi lại (partial)                         | FR-NOT-03        |
+| `idx_notifications_provider_msg`     | Ánh xạ callback Telegram về notification                    | US-14            |
+| `idx_event_media_het_han`            | Dọn media quá hạn                                           | FR-DAT-01        |
+| `idx_known_faces_owner`              | Nạp danh sách người quen cho AI service                     | US-10            |
+| `auth_refresh_tokens_token_hash_key` | Chống trùng lặp và tra cứu O(1) theo SHA-256                | US-05            |
+| `idx_auth_refresh_tokens_active`     | **Tìm token hợp lệ còn sống** (partial: revoked_at IS NULL) | US-05, FR-AUT-02 |
 
 ---
 

@@ -4,10 +4,7 @@ import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
 import { TOKEN_SERVICE, type TokenService } from '../auth/auth.types';
 import { EventsRepository, type EventListItemRecord } from './events.repository';
 import type { ListEventsQueryDto } from './dto/list-events-query.dto';
-import type {
-  EventSummaryDto,
-  PaginatedEventsResponseDto,
-} from './dto/event-summary-response.dto';
+import type { EventSummaryDto, PaginatedEventsResponseDto } from './dto/event-summary-response.dto';
 
 const PRESIGNED_URL_TTL_SECONDS = 900; // 15 phút (FR-EVT-07)
 
@@ -69,7 +66,10 @@ export class EventsService {
         );
         thumbnailUrl = presigned.url;
       } catch (err) {
-        this.logger.warn(`Không thể tạo presigned URL cho thumbnail ${record.thumbnail_object_key}`, err);
+        this.logger.warn(
+          `Không thể tạo presigned URL cho thumbnail ${record.thumbnail_object_key}`,
+          err,
+        );
       }
     }
 
@@ -115,7 +115,10 @@ export class EventsService {
       this.tokenService.verifyAccessToken(token);
     } catch {
       throw new UnauthorizedException({
-        error: { code: 'INVALID_TOKEN', message: 'Token cho SSE stream không hợp lệ hoặc đã hết hạn.' },
+        error: {
+          code: 'INVALID_TOKEN',
+          message: 'Token cho SSE stream không hợp lệ hoặc đã hết hạn.',
+        },
       });
     }
 

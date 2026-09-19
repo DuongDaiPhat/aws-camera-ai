@@ -26,7 +26,8 @@ export class EventsController {
   @Sse('stream')
   @ApiOperation({
     summary: 'Luồng sự kiện thời gian thực Server-Sent Events (US-06)',
-    description: 'Dashboard tự cập nhật khi có sự kiện mới không cần F5. Nhận token qua query ?token=',
+    description:
+      'Dashboard tự cập nhật khi có sự kiện mới không cần F5. Nhận token qua query ?token=',
   })
   @ApiResponse({ status: 200, description: 'Luồng SSE' })
   @ApiResponse({ status: 401, description: 'Token không hợp lệ hoặc thiếu' })

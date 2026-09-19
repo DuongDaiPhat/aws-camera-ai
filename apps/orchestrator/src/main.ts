@@ -8,7 +8,10 @@ import { AppModule } from './app.module';
 const API_PREFIX = 'api/v1';
 
 function parseAllowedOrigins(configuredOrigin: string): string[] {
-  const origins = configuredOrigin.split(',').map((o) => o.trim()).filter(Boolean);
+  const origins = configuredOrigin
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
   return Array.from(
     new Set([
       ...origins,
