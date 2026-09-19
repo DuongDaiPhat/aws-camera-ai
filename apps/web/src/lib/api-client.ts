@@ -11,14 +11,25 @@ interface RefreshResponse {
   accessToken: string;
 }
 
+const ACCESS_TOKEN_KEY = 'camerai_access_token';
 let accessToken: string | null = null;
 let refreshRequest: Promise<string> | null = null;
 
 export function setAccessToken(token: string | null): void {
   accessToken = token;
+  if (typeof window !== 'undefined' && window.sessionStorage) {
+    if (token) {
+      window.sessionStorage.setItem(ACCESS_TOKEN_KEY, token);
+    } else {
+      window.sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+    }
+  }
 }
 
 export function getAccessToken(): string | null {
+  if (!accessToken && typeof window !== 'undefined' && window.sessionStorage) {
+    accessToken = window.sessionStorage.getItem(ACCESS_TOKEN_KEY);
+  }
   return accessToken;
 }
 
@@ -80,13 +91,15 @@ function canRefreshRequest(path: string): boolean {
 function redirectToLogin(): void {
   if (typeof window === 'undefined' || window.location.pathname === '/login') return;
   document.cookie = 'camerai_session=; Path=/; Max-Age=0; SameSite=Lax';
+  if (window.sessionStorage) window.sessionStorage.removeItem(ACCESS_TOKEN_KEY);
   window.location.assign('/login');
 }
 
 function buildHeaders(headers?: HeadersInit): HeadersInit {
+  const token = getAccessToken();
   return {
     'Content-Type': 'application/json',
-    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(headers ?? {}),
   };
 }
