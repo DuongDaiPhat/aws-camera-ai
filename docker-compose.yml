@@ -194,6 +194,7 @@ services:
     env_file: .env
     environment:
       PORT: 3001
+      FRIGATE_URL: ${FRIGATE_URL:-http://frigate:5000}
     ports:
       - "${PORT_ORCHESTRATOR:-3001}:3001"
     volumes:

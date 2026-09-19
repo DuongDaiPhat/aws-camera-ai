@@ -2,7 +2,8 @@
 module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
-  testRegex: '.*\.spec\.ts$',
+  // Integration test dùng Docker được chạy riêng bằng `pnpm test:integration`.
+  testRegex: '^(?!.*\\.integration\\.spec\\.ts$).*\\.spec\\.ts$',
   transform: { '^.+\.ts$': 'ts-jest' },
   collectCoverageFrom: ['src/**/*.ts', '!src/main.ts', '!src/**/*.module.ts'],
   coverageDirectory: './coverage',

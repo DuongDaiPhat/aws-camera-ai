@@ -36,23 +36,32 @@ sequenceDiagram
     CAM->>MTX: ffmpeg đẩy luồng
     MTX->>FRG: RTSP
     FRG->>FRG: Phát hiện "person"<br/>(min_score 0.5)
-    FRG->>MQ: publish frigate/events {type:"new"}
+    FRG->>MQ: publish frigate/events {type:"new|update|end"}
     MQ->>ORC: message JSON
 
     ORC->>ORC: Parse + kiểm tra schema
-    ORC->>ORC: Tính dedup_key<br/>cam:track:type:bucket10s
+    ORC->>ORC: Tính dedup_key ổn định<br/>frigate:camera:track
 
-    alt dedup_key đã tồn tại
-        ORC->>ORC: Bỏ qua (FR-ING-07)
-    else sự kiện mới
+    alt Chưa có event của track
         ORC->>PG: INSERT events (status=DETECTED)
+    else Event của track đã tồn tại
+        ORC->>PG: UPDATE cùng event<br/>(confidence, zone, priority)
+    end
+
+    opt after.has_snapshot = true
         ORC->>FRG: GET /api/events/{id}/snapshot.jpg
         ORC->>OBJ: PUT events/2026/09/15/{id}/snapshot.jpg
-        ORC->>PG: INSERT event_media
-        ORC->>WEB: SSE event.created
-        WEB->>WEB: Chèn lên đầu danh sách
+        ORC->>PG: UPSERT event_media (SNAPSHOT)
     end
+
+    Note over ORC,WEB: SSE event.created và danh sách Dashboard thuộc US-06, hiện chưa triển khai
 ```
+
+Consumer xử lý tuần tự các message của cùng kết nối MQTT. Một `after.id` của Frigate luôn ánh xạ
+vào đúng một hàng `events`; các message `update` và `end` chỉ cập nhật hàng đó. Snapshot thường chưa
+sẵn sàng ở message `new`, nên orchestrator thử lưu khi bất kỳ message nào báo
+`after.has_snapshot = true`. Việc lưu media là idempotent: nếu snapshot/clip đã tồn tại thì không tải
+và upload lại.
 
 ### Payload MQTT từ Frigate (rút gọn những trường nhóm thực sự dùng)
 
@@ -98,12 +107,12 @@ sequenceDiagram
   "id": "0192f8a1-...",
   "camera_id": "<uuid của cam_kitchen>",
   "zone_id": "<uuid của restricted_stove>",
-  "event_type": "PERSON_DETECTED",
+  "event_type": "RESTRICTED_ZONE",
   "status": "DETECTED",
-  "priority": "P3",
+  "priority": "P1",
   "source": "FRIGATE",
   "track_id": "1726387200.123456-abc123",
-  "dedup_key": "cam_kitchen:1726387200.123456-abc123:PERSON_DETECTED:172638720",
+  "dedup_key": "frigate:cam_kitchen:1726387200.123456-abc123",
   "confidence": 0.84,
   "ai_results": [],
   "correlation_id": "c0ffee00-...",
@@ -113,14 +122,18 @@ sequenceDiagram
 
 ### Quy tắc khử trùng lặp (FR-ING-07)
 
-Frigate bắn nhiều message cho cùng một track khi đối tượng di chuyển. Công thức:
+Frigate bắn nhiều message `new`, `update`, `end` cho cùng một track khi đối tượng di chuyển. Công
+thức dùng khóa ổn định theo track:
 
 ```
-dedup_key = "{camera_slug}:{track_id}:{event_type}:{floor(frame_time / 10)}"
+dedup_key = "frigate:{camera_slug}:{track_id}"
 ```
 
 Cột `dedup_key` có **unique index**, nên chống trùng lặp được đảm bảo ở tầng database —
-kể cả khi chạy hai instance orchestrator song song. Không dựa vào kiểm tra trong code.
+kể cả khi message đi qua ranh giới 10 giây hoặc chạy hai instance orchestrator song song. Nếu khóa đã
+tồn tại, orchestrator cập nhật chính event đó thay vì tạo thêm hàng mới. Quy tắc này đáp ứng yêu cầu
+FR-ING-07 “cùng `track_id` trong 10 giây chỉ tạo một sự kiện” và còn chặt hơn: toàn bộ vòng đời của
+một track chỉ có một event.
 
 ---
 
