@@ -1,10 +1,11 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import mqtt, { MqttClient } from 'mqtt';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { EventType, PriorityLevel } from '@cam/contracts';
 import { CameraRecord, EventsRepository } from '../events/events.repository';
+import { EventsService } from '../events/events.service';
 import { MediaService } from '../media/media.service';
 import { EventMediaRepository } from '../media/event-media.repository';
 import { FrigateEventAfterDto, FrigateEventMessageDto } from './dto/frigate-event.dto';
@@ -19,6 +20,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     private readonly eventsRepository: EventsRepository,
     private readonly mediaService: MediaService,
     private readonly eventMediaRepository: EventMediaRepository,
+    @Optional() private readonly eventsService?: EventsService,
   ) {}
 
   onModuleInit(): void {
@@ -178,6 +180,17 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
           after.id,
           createdEvent.detected_at,
         );
+      }
+
+      // US-06: Phát sự kiện mới lên SSE stream cho dashboard (FR-DSH-02)
+      if (this.eventsService) {
+        void this.eventsRepository.findEventSummaryById(createdEvent.id).then((summaryRec) => {
+          if (summaryRec && this.eventsService) {
+            void this.eventsService.toEventSummary(summaryRec).then((summaryDto) => {
+              this.eventsService?.emitEvent(summaryDto);
+            });
+          }
+        });
       }
     } else {
       this.logger.debug(
