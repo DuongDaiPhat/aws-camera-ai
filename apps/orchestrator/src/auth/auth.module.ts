@@ -48,7 +48,7 @@ import { JwtTokenService } from './jwt-token.service';
     },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
   ],
-  exports: [AuthService],
+  exports: [AuthService, TOKEN_SERVICE],
 })
 export class AuthModule {}
 

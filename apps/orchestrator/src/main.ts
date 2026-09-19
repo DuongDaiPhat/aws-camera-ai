@@ -7,6 +7,19 @@ import { AppModule } from './app.module';
 
 const API_PREFIX = 'api/v1';
 
+function parseAllowedOrigins(configuredOrigin: string): string[] {
+  const origins = configuredOrigin.split(',').map((o) => o.trim()).filter(Boolean);
+  return Array.from(
+    new Set([
+      ...origins,
+      'http://localhost:3000',
+      'http://localhost:3002',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3002',
+    ]),
+  );
+}
+
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
@@ -15,8 +28,9 @@ async function bootstrap(): Promise<void> {
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
   );
+  const webOrigin = configService.get<string>('WEB_ORIGIN') ?? 'http://localhost:3000';
   app.enableCors({
-    origin: configService.getOrThrow<string>('WEB_ORIGIN'),
+    origin: parseAllowedOrigins(webOrigin),
     credentials: true,
   });
 
