@@ -14,6 +14,7 @@ describe('MediaService (US-04)', () => {
     const mockEventMediaRepository = {
       createEventMedia: jest.fn(),
       findMediaByEventId: jest.fn(),
+      findMediaByEventIdAndType: jest.fn().mockResolvedValue(null),
       findEventById: jest.fn(),
       findEventByTrackId: jest.fn(),
     };
@@ -120,6 +121,37 @@ describe('MediaService (US-04)', () => {
       );
 
       expect(result).toBeNull();
+      expect(storageService.upload).not.toHaveBeenCalled();
+    });
+
+    it('không tải và upload lại snapshot đã tồn tại', async () => {
+      const existingMedia = {
+        id: 'media-existing',
+        event_id: 'evt-1',
+        media_type: 'SNAPSHOT' as const,
+        storage_provider: 'MINIO',
+        bucket: 'camerai-media',
+        object_key: 'events/2026/09/18/evt-1/snapshot.jpg',
+        content_type: 'image/jpeg',
+        size_bytes: 4,
+        width: null,
+        height: null,
+        duration_ms: null,
+        checksum_sha256: null,
+        expires_at: null,
+        created_at: new Date(),
+      };
+      eventMediaRepository.findMediaByEventIdAndType.mockResolvedValueOnce(existingMedia);
+      const fetchSpy = jest.spyOn(global, 'fetch');
+
+      const result = await service.downloadAndStoreSnapshot(
+        'evt-1',
+        'track-1',
+        new Date('2026-09-18T10:00:00Z'),
+      );
+
+      expect(result).toBe(existingMedia);
+      expect(fetchSpy).not.toHaveBeenCalled();
       expect(storageService.upload).not.toHaveBeenCalled();
     });
   });

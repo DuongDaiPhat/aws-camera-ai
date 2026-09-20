@@ -404,11 +404,13 @@ Bảng trung tâm. Mọi thứ khác xoay quanh nó.
 Frigate bắn nhiều message cho cùng một track khi đối tượng di chuyển. Công thức app tính:
 
 ```
-dedup_key = "{camera_slug}:{track_id}:{event_type}:{floor(frame_time / 10)}"
+dedup_key = "frigate:{camera_slug}:{track_id}"
 ```
 
 Có `UNIQUE INDEX` trên cột này, nên `INSERT` thứ hai bị từ chối — không phải nhờ code kiểm tra
-mà nhờ ràng buộc DB. Điều này vẫn đúng ngay cả khi chạy hai instance orchestrator song song.
+mà nhờ ràng buộc DB. Orchestrator sau đó cập nhật hàng đã có cho các message `update` và `end`.
+Vì khóa không phụ thuộc bucket thời gian hoặc loại sự kiện, một Frigate track chỉ có một hàng
+`events`, kể cả khi track đi qua ranh giới 10 giây hoặc chạy hai instance orchestrator song song.
 
 #### `escalation_deadline_at` — khôi phục sau restart
 

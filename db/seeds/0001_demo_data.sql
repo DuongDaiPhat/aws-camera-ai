@@ -1,20 +1,40 @@
 BEGIN;
 
--- 1. Thêm Users (Mật khẩu là dev123)
+-- 1. Thêm Users (Mật khẩu dev là Admin@12345, hash bằng Argon2id theo 0001_demo_users.sql)
 INSERT INTO users (id, email, password_hash, full_name, role) VALUES 
-('00000000-0000-0000-0000-000000000001', 'admin@camerai.local', crypt('dev123', gen_salt('bf')), 'Admin User', 'ADMIN'),
-('00000000-0000-0000-0000-000000000002', 'caregiver@camerai.local', crypt('dev123', gen_salt('bf')), 'Caregiver User', 'CAREGIVER')
-ON CONFLICT (email) DO NOTHING;
+(
+    '11111111-1111-4111-8111-111111111111',
+    'admin@camerai.local',
+    '$argon2id$v=19$m=65536,p=4,t=3$t/FGrLv6QCsVGRNKlgaoPA$VEX5Op2XTiAYQEvy1dUIbsuGGAqE98grgmHV3Y90gyo',
+    'Quản trị CameraAI',
+    'ADMIN'
+),
+(
+    '00000000-0000-0000-0000-000000000002',
+    'caregiver@camerai.local',
+    '$argon2id$v=19$m=65536,p=4,t=3$t/FGrLv6QCsVGRNKlgaoPA$VEX5Op2XTiAYQEvy1dUIbsuGGAqE98grgmHV3Y90gyo',
+    'Caregiver User',
+    'CAREGIVER'
+)
+ON CONFLICT (email) DO UPDATE
+SET password_hash = EXCLUDED.password_hash,
+    full_name = EXCLUDED.full_name,
+    role = EXCLUDED.role,
+    is_active = TRUE,
+    failed_login_count = 0,
+    locked_until = NULL;
+
 
 -- 2. Thêm Devices
 INSERT INTO devices (id, owner_user_id, name, device_type, status) VALUES 
-('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000001', 'Gateway Nha', 'EDGE_GATEWAY', 'ONLINE')
+('11111111-1111-1111-1111-111111111111', '11111111-1111-4111-8111-111111111111', 'Gateway Nha', 'EDGE_GATEWAY', 'ONLINE')
 ON CONFLICT (id) DO NOTHING;
 
 -- 3. Thêm Cameras
 INSERT INTO cameras (id, device_id, name, slug, rtsp_url, detect_width, detect_height, fps) VALUES 
 ('22222222-2222-2222-2222-222222222221', '11111111-1111-1111-1111-111111111111', 'Phong khach', 'cam_living_room', 'rtsp://localhost:8554/cam_living_room', 1280, 720, 5),
-('22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'Bep', 'cam_kitchen', 'rtsp://localhost:8554/cam_kitchen', 1280, 720, 5)
+('22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'Bep', 'cam_kitchen', 'rtsp://localhost:8554/cam_kitchen', 1280, 720, 5),
+('22222222-2222-2222-2222-222222222223', '11111111-1111-1111-1111-111111111111', 'test', 'cam_video', 'rtsp://localhost:8554/test_cam', 1280, 720, 5)
 ON CONFLICT (slug) DO NOTHING;
 
 -- 4. Thêm Zones
@@ -26,11 +46,11 @@ ON CONFLICT (camera_id, slug) DO NOTHING;
 
 -- 5. Thêm Known Faces
 INSERT INTO known_faces (owner_user_id, person_name, relationship, provider, embedding, embedding_dim) VALUES 
-('00000000-0000-0000-0000-000000000001', 'Ong Noi', 'Ong', 'LOCAL', decode('00', 'hex'), 128),
-('00000000-0000-0000-0000-000000000001', 'Ba Ngoai', 'Ba', 'LOCAL', decode('00', 'hex'), 128),
-('00000000-0000-0000-0000-000000000001', 'Con Trai', 'Con', 'LOCAL', decode('00', 'hex'), 128),
-('00000000-0000-0000-0000-000000000001', 'Con Gai', 'Con', 'LOCAL', decode('00', 'hex'), 128),
-('00000000-0000-0000-0000-000000000001', 'Nguoi Giup Viec', 'Giup Viec', 'LOCAL', decode('00', 'hex'), 128)
+('11111111-1111-4111-8111-111111111111', 'Ong Noi', 'Ong', 'LOCAL', decode('00', 'hex'), 128),
+('11111111-1111-4111-8111-111111111111', 'Ba Ngoai', 'Ba', 'LOCAL', decode('00', 'hex'), 128),
+('11111111-1111-4111-8111-111111111111', 'Con Trai', 'Con', 'LOCAL', decode('00', 'hex'), 128),
+('11111111-1111-4111-8111-111111111111', 'Con Gai', 'Con', 'LOCAL', decode('00', 'hex'), 128),
+('11111111-1111-4111-8111-111111111111', 'Nguoi Giup Viec', 'Giup Viec', 'LOCAL', decode('00', 'hex'), 128)
 ON CONFLICT (owner_user_id, person_name) DO NOTHING;
 
 -- 6. Thêm Escalation Rules

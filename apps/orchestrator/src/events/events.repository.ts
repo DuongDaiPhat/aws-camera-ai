@@ -33,6 +33,43 @@ export interface EventListItemRecord {
   thumbnail_object_key: string | null;
 }
 
+const CREATE_EVENT_QUERY = `
+  INSERT INTO events (
+    camera_id,
+    zone_id,
+    event_type,
+    status,
+    priority,
+    source,
+    track_id,
+    dedup_key,
+    confidence,
+    ai_results,
+    correlation_id,
+    detected_at
+  ) VALUES (
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+    COALESCE($11, gen_random_uuid()),
+    $12
+  )
+  ON CONFLICT (dedup_key) WHERE dedup_key IS NOT NULL DO NOTHING
+  RETURNING id,
+            camera_id,
+            zone_id,
+            event_type,
+            status,
+            priority,
+            source,
+            track_id,
+            dedup_key,
+            confidence,
+            ai_results,
+            correlation_id,
+            detected_at,
+            created_at,
+            updated_at;
+`;
+
 export interface CameraRecord {
   id: string;
   name: string;
@@ -80,6 +117,15 @@ export interface EventRecord {
   updated_at: Date;
 }
 
+export interface UpdateEventInput {
+  eventId: string;
+  cameraId: string | null;
+  zoneId: string | null;
+  eventType: EventType;
+  priority: PriorityLevel;
+  confidence: number;
+}
+
 @Injectable()
 export class EventsRepository {
   private readonly logger = new Logger(EventsRepository.name);
@@ -120,29 +166,6 @@ export class EventsRepository {
    * Trả về EventRecord nếu tạo mới thành công, null nếu bị trùng lặp (deduplicated).
    */
   async createEvent(input: CreateEventInput): Promise<EventRecord | null> {
-    const query = `
-      INSERT INTO events (
-        camera_id,
-        zone_id,
-        event_type,
-        status,
-        priority,
-        source,
-        track_id,
-        dedup_key,
-        confidence,
-        ai_results,
-        correlation_id,
-        detected_at
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-        COALESCE($11, gen_random_uuid()),
-        $12
-      )
-      ON CONFLICT (dedup_key) WHERE dedup_key IS NOT NULL DO NOTHING
-      RETURNING *;
-    `;
-
     const values = [
       input.cameraId,
       input.zoneId,
@@ -159,7 +182,7 @@ export class EventsRepository {
     ];
 
     try {
-      const res = await this.pool.query<EventRecord>(query, values);
+      const res = await this.pool.query<EventRecord>(CREATE_EVENT_QUERY, values);
       if (res.rows.length === 0) {
         // Bị trùng lặp theo dedup_key
         return null;
@@ -172,6 +195,79 @@ export class EventsRepository {
       );
       throw error;
     }
+  }
+
+  /**
+   * Tra cứu event Frigate theo dedup_key ổn định của track.
+   */
+  async findEventByDedupKey(dedupKey: string): Promise<EventRecord | null> {
+    const query = `
+      SELECT id,
+             camera_id,
+             zone_id,
+             event_type,
+             status,
+             priority,
+             source,
+             track_id,
+             dedup_key,
+             confidence,
+             ai_results,
+             correlation_id,
+             detected_at,
+             created_at,
+             updated_at
+      FROM events
+      WHERE dedup_key = $1
+      LIMIT 1;
+    `;
+
+    const result = await this.pool.query<EventRecord>(query, [dedupKey]);
+    return result.rows[0] ?? null;
+  }
+
+  /**
+   * Đồng bộ dữ liệu mới nhất của một track vào event đã tồn tại.
+   */
+  async updateEvent(input: UpdateEventInput): Promise<EventRecord | null> {
+    const query = `
+      UPDATE events
+      SET camera_id = COALESCE(camera_id, $2),
+          zone_id = COALESCE($3, zone_id),
+          event_type = $4,
+          priority = $5,
+          confidence = CASE
+            WHEN confidence IS NULL THEN $6
+            ELSE GREATEST(confidence, $6)
+          END
+      WHERE id = $1
+      RETURNING id,
+                camera_id,
+                zone_id,
+                event_type,
+                status,
+                priority,
+                source,
+                track_id,
+                dedup_key,
+                confidence,
+                ai_results,
+                correlation_id,
+                detected_at,
+                created_at,
+                updated_at;
+    `;
+
+    const values = [
+      input.eventId,
+      input.cameraId,
+      input.zoneId,
+      input.eventType,
+      input.priority,
+      input.confidence,
+    ];
+    const result = await this.pool.query<EventRecord>(query, values);
+    return result.rows[0] ?? null;
   }
 
   /**

@@ -4,12 +4,19 @@ import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
 import { EventMediaRecord, EventMediaRepository } from './event-media.repository';
 import { EventMediaResponseDto } from './dto/event-media-response.dto';
 
+const DEFAULT_CLIP_DURATION_MS = 10_000;
+const PRESIGNED_URL_TTL_SECONDS = 900;
+const DEFAULT_EVENT_MEDIA_LIST_LIMIT = 100;
+
 @Injectable()
 export class MediaService {
   private readonly logger = new Logger(MediaService.name);
   private readonly frigateBaseUrl: string;
   private readonly storageProvider: string;
   private readonly storageBucket: string;
+  private readonly defaultClipDurationMs: number;
+  private readonly presignedUrlTtlSeconds: number;
+  private readonly eventMediaListLimit: number;
 
   constructor(
     private readonly configService: ConfigService,
@@ -21,6 +28,24 @@ export class MediaService {
       .get<string>('STORAGE_PROVIDER', 'MINIO')
       .toUpperCase();
     this.storageBucket = this.configService.get<string>('STORAGE_BUCKET', 'camerai-media');
+    this.defaultClipDurationMs = Number(
+      this.configService.get<string | number>(
+        'FRIGATE_DEFAULT_CLIP_DURATION_MS',
+        DEFAULT_CLIP_DURATION_MS,
+      ),
+    );
+    this.presignedUrlTtlSeconds = Number(
+      this.configService.get<string | number>(
+        'STORAGE_PRESIGN_TTL_SECONDS',
+        PRESIGNED_URL_TTL_SECONDS,
+      ),
+    );
+    this.eventMediaListLimit = Number(
+      this.configService.get<string | number>(
+        'EVENT_MEDIA_LIST_LIMIT',
+        DEFAULT_EVENT_MEDIA_LIST_LIMIT,
+      ),
+    );
   }
 
   /**
@@ -41,6 +66,14 @@ export class MediaService {
     trackId: string,
     eventDate: Date,
   ): Promise<EventMediaRecord | null> {
+    const existingMedia = await this.eventMediaRepository.findMediaByEventIdAndType(
+      eventId,
+      'SNAPSHOT',
+    );
+    if (existingMedia) {
+      return existingMedia;
+    }
+
     const snapshotUrl = `${this.frigateBaseUrl}/api/events/${trackId}/snapshot.jpg`;
     const objectKey = this.buildObjectKey(eventDate, eventId, 'snapshot.jpg');
 
@@ -80,6 +113,14 @@ export class MediaService {
     eventDate: Date,
     durationMs?: number,
   ): Promise<EventMediaRecord | null> {
+    const existingMedia = await this.eventMediaRepository.findMediaByEventIdAndType(
+      eventId,
+      'CLIP',
+    );
+    if (existingMedia) {
+      return existingMedia;
+    }
+
     const clipUrl = `${this.frigateBaseUrl}/api/events/${trackId}/clip.mp4`;
     const objectKey = this.buildObjectKey(eventDate, eventId, 'clip.mp4');
 
@@ -103,7 +144,7 @@ export class MediaService {
         objectKey,
         contentType: 'video/mp4',
         sizeBytes: buffer.length,
-        durationMs: durationMs && durationMs > 0 ? durationMs : 10000,
+        durationMs: durationMs && durationMs > 0 ? durationMs : this.defaultClipDurationMs,
       });
     } catch (error) {
       this.logger.error(`Loi khi tai/luu clip cho event ${eventId}`, error);
@@ -120,11 +161,17 @@ export class MediaService {
       throw new NotFoundException(`Khong tim thay su kien co id ${eventId}`);
     }
 
-    const records = await this.eventMediaRepository.findMediaByEventId(eventId);
+    const records = await this.eventMediaRepository.findMediaByEventId(
+      eventId,
+      this.eventMediaListLimit,
+    );
     const results: EventMediaResponseDto[] = [];
 
     for (const record of records) {
-      const { url, expiresAt } = await this.storageService.getPresignedUrl(record.object_key, 900);
+      const { url, expiresAt } = await this.storageService.getPresignedUrl(
+        record.object_key,
+        this.presignedUrlTtlSeconds,
+      );
       results.push({
         id: record.id,
         mediaType: record.media_type,

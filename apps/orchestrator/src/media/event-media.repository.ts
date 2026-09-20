@@ -4,6 +4,41 @@ import { PG_POOL } from '../database/database.module';
 import { MediaType } from '@cam/contracts';
 import { EventRecord } from '../events/events.repository';
 
+const EVENT_MEDIA_COLUMNS = `
+  id,
+  event_id,
+  media_type,
+  storage_provider,
+  bucket,
+  object_key,
+  content_type,
+  size_bytes,
+  width,
+  height,
+  duration_ms,
+  checksum_sha256,
+  expires_at,
+  created_at
+`;
+
+const EVENT_COLUMNS = `
+  id,
+  camera_id,
+  zone_id,
+  event_type,
+  status,
+  priority,
+  source,
+  track_id,
+  dedup_key,
+  confidence,
+  ai_results,
+  correlation_id,
+  detected_at,
+  created_at,
+  updated_at
+`;
+
 export interface CreateEventMediaInput {
   eventId: string;
   mediaType: MediaType;
@@ -66,7 +101,7 @@ export class EventMediaRepository {
       ON CONFLICT (storage_provider, bucket, object_key) DO UPDATE
       SET size_bytes = EXCLUDED.size_bytes,
           duration_ms = EXCLUDED.duration_ms
-      RETURNING *;
+      RETURNING ${EVENT_MEDIA_COLUMNS};
     `;
 
     const values = [
@@ -99,16 +134,33 @@ export class EventMediaRepository {
   /**
    * Lấy danh sách media của một sự kiện theo eventId.
    */
-  async findMediaByEventId(eventId: string): Promise<EventMediaRecord[]> {
+  async findMediaByEventId(eventId: string, limit: number): Promise<EventMediaRecord[]> {
     const query = `
-      SELECT *
+      SELECT ${EVENT_MEDIA_COLUMNS}
       FROM event_media
       WHERE event_id = $1
-      ORDER BY created_at ASC;
+      ORDER BY created_at ASC
+      LIMIT $2;
     `;
 
-    const res = await this.pool.query<EventMediaRecord>(query, [eventId]);
+    const res = await this.pool.query<EventMediaRecord>(query, [eventId, limit]);
     return res.rows;
+  }
+
+  async findMediaByEventIdAndType(
+    eventId: string,
+    mediaType: MediaType,
+  ): Promise<EventMediaRecord | null> {
+    const query = `
+      SELECT ${EVENT_MEDIA_COLUMNS}
+      FROM event_media
+      WHERE event_id = $1 AND media_type = $2
+      ORDER BY created_at ASC
+      LIMIT 1;
+    `;
+
+    const result = await this.pool.query<EventMediaRecord>(query, [eventId, mediaType]);
+    return result.rows[0] ?? null;
   }
 
   /**
@@ -116,7 +168,7 @@ export class EventMediaRepository {
    */
   async findEventByTrackId(trackId: string): Promise<EventRecord | null> {
     const query = `
-      SELECT *
+      SELECT ${EVENT_COLUMNS}
       FROM events
       WHERE track_id = $1
       ORDER BY detected_at DESC
@@ -132,7 +184,7 @@ export class EventMediaRepository {
    */
   async findEventById(eventId: string): Promise<EventRecord | null> {
     const query = `
-      SELECT *
+      SELECT ${EVENT_COLUMNS}
       FROM events
       WHERE id = $1
       LIMIT 1;

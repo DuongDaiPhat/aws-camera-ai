@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
+  IsIn,
   IsNumber,
   IsOptional,
   IsString,
@@ -62,8 +63,8 @@ export class FrigateEventAfterDto {
 }
 
 export class FrigateEventMessageDto {
-  @IsString()
-  type!: string; // 'new' | 'update' | 'end'
+  @IsIn(['new', 'update', 'end'])
+  type!: 'new' | 'update' | 'end';
 
   @ValidateNested()
   @Type(() => FrigateEventAfterDto)

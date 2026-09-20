@@ -1,25 +1,45 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import mqtt, { MqttClient } from 'mqtt';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
+import mqtt, { MqttClient } from 'mqtt';
+
 import { EventType, PriorityLevel } from '@cam/contracts';
-import { CameraRecord, EventsRepository } from '../events/events.repository';
+
+import { EventRecord, EventsRepository } from '../events/events.repository';
 import { EventsService } from '../events/events.service';
 import { MediaService } from '../media/media.service';
-import { EventMediaRepository } from '../media/event-media.repository';
 import { FrigateEventAfterDto, FrigateEventMessageDto } from './dto/frigate-event.dto';
+
+const DEFAULT_MQTT_CONNECT_TIMEOUT_MS = 10_000;
+const DEFAULT_MQTT_RECONNECT_PERIOD_MS = 3_000;
+
+type FrigateMessageType = FrigateEventMessageDto['type'];
+
+interface EventContext {
+  cameraId: string | null;
+  zoneId: string | null;
+  eventType: EventType;
+  priority: PriorityLevel;
+  dedupKey: string;
+  detectedAt: Date;
+}
+
+interface SynchronizedEvent {
+  event: EventRecord;
+  isCreated: boolean;
+}
 
 @Injectable()
 export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(MqttConsumerService.name);
   private client: MqttClient | null = null;
+  private processingQueue: Promise<void> = Promise.resolve();
 
   constructor(
     private readonly configService: ConfigService,
     private readonly eventsRepository: EventsRepository,
     private readonly mediaService: MediaService,
-    private readonly eventMediaRepository: EventMediaRepository,
     @Optional() private readonly eventsService?: EventsService,
   ) {}
 
@@ -31,9 +51,6 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     this.disconnect();
   }
 
-  /**
-   * Kết nối tới MQTT Broker và đăng ký lắng nghe topic.
-   */
   connect(): void {
     const mqttUrl = this.configService.get<string>('MQTT_URL', 'mqtt://localhost:1883');
     const clientId = this.configService.get<string>(
@@ -43,6 +60,18 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     const username = this.configService.get<string>('MQTT_USERNAME');
     const password = this.configService.get<string>('MQTT_PASSWORD');
     const topic = this.configService.get<string>('MQTT_TOPIC_FRIGATE', 'frigate/events');
+    const reconnectPeriodMs = Number(
+      this.configService.get<string | number>(
+        'MQTT_RECONNECT_PERIOD_MS',
+        DEFAULT_MQTT_RECONNECT_PERIOD_MS,
+      ),
+    );
+    const connectTimeoutMs = Number(
+      this.configService.get<string | number>(
+        'MQTT_CONNECT_TIMEOUT_MS',
+        DEFAULT_MQTT_CONNECT_TIMEOUT_MS,
+      ),
+    );
 
     this.logger.log(`Dang ket noi MQTT Broker tai ${mqttUrl} (clientId: ${clientId})...`);
 
@@ -50,200 +79,263 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       clientId,
       username: username || undefined,
       password: password || undefined,
-      reconnectPeriod: 3000,
-      connectTimeout: 10000,
+      reconnectPeriod: reconnectPeriodMs,
+      connectTimeout: connectTimeoutMs,
     });
 
     this.client.on('connect', () => {
       this.logger.log(`Da ket noi MQTT Broker thanh cong. Dang subscribe topic: ${topic}`);
-      this.client?.subscribe(topic, (err) => {
-        if (err) {
-          this.logger.error(`Subscribe topic ${topic} that bai:`, err);
-        } else {
-          this.logger.log(`Da subscribe topic ${topic}`);
+      this.client?.subscribe(topic, (error) => {
+        if (error) {
+          this.logger.error(`Subscribe topic ${topic} that bai:`, error);
+          return;
         }
+        this.logger.log(`Da subscribe topic ${topic}`);
       });
     });
 
-    this.client.on('error', (err) => {
-      this.logger.error('Loi ket noi MQTT:', err.message);
+    this.client.on('error', (error) => {
+      this.logger.error('Loi ket noi MQTT:', error.message);
     });
 
-    this.client.on('message', async (receivedTopic, buffer) => {
-      await this.handleMessage(receivedTopic, buffer);
+    this.client.on('message', (receivedTopic, buffer) => {
+      this.processingQueue = this.processingQueue
+        .then(() => this.handleMessage(receivedTopic, buffer))
+        .catch((error: unknown) => {
+          this.logger.error(
+            'Loi khong mong doi trong hang doi xu ly MQTT',
+            error instanceof Error ? error.stack : String(error),
+          );
+        });
     });
   }
 
   disconnect(): void {
-    if (this.client) {
-      this.logger.log('Ngat ket noi MQTT Client...');
-      this.client.end();
-      this.client = null;
+    if (!this.client) {
+      return;
     }
+
+    this.logger.log('Ngat ket noi MQTT Client...');
+    this.client.end();
+    this.client = null;
   }
 
-  /**
-   * Parse và validate payload thô nhận được từ MQTT (AC2 - Dead-letter).
-   */
   private async parseAndValidate(rawContent: string): Promise<FrigateEventMessageDto | null> {
     try {
       const parsedJson = JSON.parse(rawContent) as unknown;
-      const dto = plainToInstance(FrigateEventMessageDto, parsedJson);
-      const errors = await validate(dto);
+      const message = plainToInstance(FrigateEventMessageDto, parsedJson);
+      const validationErrors = await validate(message);
 
-      if (errors.length > 0 || !dto.after) {
+      if (validationErrors.length > 0 || !message.after) {
         this.logger.warn(
-          { rawContent, validationErrors: errors },
+          { rawContent, validationErrors },
           'Dead-letter: Message MQTT thieu truong bat buoc hoac sai schema',
         );
         return null;
       }
-      return dto;
-    } catch (parseErr) {
+
+      return message;
+    } catch (error) {
       this.logger.warn(
-        { rawContent, err: (parseErr as Error).message },
+        { rawContent, err: error instanceof Error ? error.message : String(error) },
         'Dead-letter: Message MQTT khong phai la JSON hop le',
       );
       return null;
     }
   }
 
-  /**
-   * Tra cứu camera và zone tương ứng từ DB.
-   */
-  private async resolveCameraAndZone(
-    cameraSlug: string,
-    currentZones?: string[],
-  ): Promise<{ camera: CameraRecord | null; zoneId: string | null }> {
-    const camera = await this.eventsRepository.findCameraBySlug(cameraSlug);
+  private getZoneSlugs(after: FrigateEventAfterDto): string[] {
+    const currentZones = after.current_zones ?? [];
+    return currentZones.length > 0 ? currentZones : (after.entered_zones ?? []);
+  }
+
+  private async findZoneId(cameraId: string | null, zoneSlugs: string[]): Promise<string | null> {
+    const firstZoneSlug = zoneSlugs[0];
+    if (!cameraId || !firstZoneSlug) {
+      return null;
+    }
+
+    const zone = await this.eventsRepository.findZoneByCameraAndSlug(cameraId, firstZoneSlug);
+    return zone?.id ?? null;
+  }
+
+  private async buildEventContext(after: FrigateEventAfterDto): Promise<EventContext> {
+    const zoneSlugs = this.getZoneSlugs(after);
+    const camera = await this.eventsRepository.findCameraBySlug(after.camera);
+    const cameraId = camera?.id ?? null;
+    const zoneId = await this.findZoneId(cameraId, zoneSlugs);
+
     if (!camera) {
       this.logger.warn(
-        `Camera "${cameraSlug}" chua co trong DB hoac bi disabled. Ghi camera_id=null.`,
+        `Camera "${after.camera}" chua co trong DB hoac bi disabled. Ghi camera_id=null.`,
       );
-      return { camera: null, zoneId: null };
     }
 
-    let zoneId: string | null = null;
-    if (currentZones && currentZones.length > 0 && currentZones[0]) {
-      const zone = await this.eventsRepository.findZoneByCameraAndSlug(camera.id, currentZones[0]);
-      zoneId = zone?.id ?? null;
-    }
+    const isRestrictedZone = zoneSlugs.length > 0;
 
-    return { camera, zoneId };
+    return {
+      cameraId,
+      zoneId,
+      eventType: isRestrictedZone ? 'RESTRICTED_ZONE' : 'PERSON_DETECTED',
+      priority: isRestrictedZone ? 'P1' : 'P3',
+      dedupKey: `frigate:${after.camera}:${after.id}`,
+      detectedAt: new Date((after.start_time ?? after.frame_time) * 1_000),
+    };
   }
 
-  /**
-   * Xử lý lưu sự kiện vào DB, khử trùng lặp và kích hoạt tải snapshot (US-03, US-04).
-   */
-  private async processEvent(after: FrigateEventAfterDto): Promise<void> {
-    const inZone = Boolean(after.current_zones && after.current_zones.length > 0);
-    const eventType: EventType = inZone ? 'RESTRICTED_ZONE' : 'PERSON_DETECTED';
-    const priority: PriorityLevel = inZone ? 'P1' : 'P3';
-
-    // AC3: Tính dedup_key theo track_id trong cửa sổ 10 giây (FR-ING-07)
-    const timeBucket = Math.floor(after.frame_time / 10);
-    const dedupKey = `${after.camera}:${after.id}:${eventType}:${timeBucket}`;
-
-    const { camera, zoneId } = await this.resolveCameraAndZone(after.camera, after.current_zones);
-    const detectedAt = new Date(after.frame_time * 1000);
-
-    const createdEvent = await this.eventsRepository.createEvent({
-      cameraId: camera?.id ?? null,
-      zoneId,
-      eventType,
+  private async createEvent(
+    context: EventContext,
+    after: FrigateEventAfterDto,
+  ): Promise<EventRecord | null> {
+    return await this.eventsRepository.createEvent({
+      cameraId: context.cameraId,
+      zoneId: context.zoneId,
+      eventType: context.eventType,
       status: 'DETECTED',
-      priority,
+      priority: context.priority,
       source: 'FRIGATE',
       trackId: after.id,
-      dedupKey,
+      dedupKey: context.dedupKey,
       confidence: after.score,
       aiResults: [],
-      detectedAt,
+      detectedAt: context.detectedAt,
+    });
+  }
+
+  private async updateExistingEvent(
+    event: EventRecord,
+    context: EventContext,
+    after: FrigateEventAfterDto,
+  ): Promise<EventRecord> {
+    const isRestrictedZone =
+      event.event_type === 'RESTRICTED_ZONE' || context.eventType === 'RESTRICTED_ZONE';
+    const updatedEvent = await this.eventsRepository.updateEvent({
+      eventId: event.id,
+      cameraId: context.cameraId,
+      zoneId: context.zoneId,
+      eventType: isRestrictedZone ? 'RESTRICTED_ZONE' : 'PERSON_DETECTED',
+      priority: isRestrictedZone ? 'P1' : 'P3',
+      confidence: after.score,
     });
 
-    if (createdEvent) {
-      this.logger.log(
-        {
-          eventId: createdEvent.id,
-          trackId: createdEvent.track_id,
-          eventType: createdEvent.event_type,
-          camera: after.camera,
-          dedupKey,
-        },
-        'Da ghi nhan su kien moi vao bang events',
-      );
-
-      // US-04: Tự động tải snapshot và lưu vào MinIO/S3 nếu có snapshot
-      if (after.has_snapshot) {
-        void this.mediaService.downloadAndStoreSnapshot(
-          createdEvent.id,
-          after.id,
-          createdEvent.detected_at,
-        );
-      }
-
-      // US-06: Phát sự kiện mới lên SSE stream cho dashboard (FR-DSH-02)
-      if (this.eventsService) {
-        void this.eventsRepository.findEventSummaryById(createdEvent.id).then((summaryRec) => {
-          if (summaryRec && this.eventsService) {
-            void this.eventsService.toEventSummary(summaryRec).then((summaryDto) => {
-              this.eventsService?.emitEvent(summaryDto);
-            });
-          }
-        });
-      }
-    } else {
-      this.logger.debug(
-        { dedupKey, trackId: after.id },
-        'Bo qua su kien trung lap theo dedup_key (Deduplicated)',
-      );
+    if (!updatedEvent) {
+      throw new Error(`Khong the cap nhat event ${event.id} cho track ${after.id}`);
     }
+    return updatedEvent;
   }
 
-  /**
-   * Xử lý khi track kết thúc (US-04): Tải clip video nếu là sự kiện P0 hoặc P1.
-   */
-  private async handleTrackEnd(after: FrigateEventAfterDto): Promise<void> {
-    if (!after.has_clip) {
-      return;
+  private async synchronizeEvent(
+    messageType: FrigateMessageType,
+    after: FrigateEventAfterDto,
+  ): Promise<SynchronizedEvent> {
+    const context = await this.buildEventContext(after);
+    let event =
+      messageType === 'new'
+        ? null
+        : await this.eventsRepository.findEventByDedupKey(context.dedupKey);
+    let isCreated = false;
+
+    if (!event) {
+      event = await this.createEvent(context, after);
+      isCreated = event !== null;
     }
 
-    const event = await this.eventMediaRepository.findEventByTrackId(after.id);
-    if (!event || (event.priority !== 'P0' && event.priority !== 'P1')) {
-      return;
+    if (!event) {
+      event = await this.eventsRepository.findEventByDedupKey(context.dedupKey);
     }
 
-    const startTime = after.start_time || after.frame_time;
-    const endTime = after.end_time || after.frame_time;
-    const durationMs = Math.round((endTime - startTime) * 1000);
+    if (!event) {
+      throw new Error(`Khong the tao hoac tim event cho track ${after.id}`);
+    }
 
-    void this.mediaService.downloadAndStoreClip(
-      event.id,
-      after.id,
-      event.detected_at,
-      durationMs > 0 ? durationMs : 10000,
+    if (!isCreated) {
+      event = await this.updateExistingEvent(event, context, after);
+    }
+
+    this.logger.log(
+      {
+        correlationId: event.correlation_id,
+        eventId: event.id,
+        trackId: after.id,
+        messageType,
+        eventType: event.event_type,
+        camera: after.camera,
+        dedupKey: context.dedupKey,
+      },
+      isCreated
+        ? 'Da ghi nhan su kien moi vao bang events'
+        : 'Da cap nhat su kien theo vong doi Frigate track',
     );
+
+    return { event, isCreated };
+  }
+
+  private async synchronizeMedia(
+    messageType: FrigateMessageType,
+    event: EventRecord,
+    after: FrigateEventAfterDto,
+  ): Promise<void> {
+    if (after.has_snapshot) {
+      await this.mediaService.downloadAndStoreSnapshot(event.id, after.id, event.detected_at);
+    }
+
+    if (
+      messageType === 'end' &&
+      after.has_clip &&
+      (event.priority === 'P0' || event.priority === 'P1')
+    ) {
+      const startAt = new Date((after.start_time ?? after.frame_time) * 1_000);
+      const endAt = after.end_time ? new Date(after.end_time * 1_000) : new Date();
+      const measuredDurationMs = Math.round(endAt.getTime() - startAt.getTime());
+      const durationMs = measuredDurationMs > 0 ? measuredDurationMs : undefined;
+
+      await this.mediaService.downloadAndStoreClip(
+        event.id,
+        after.id,
+        event.detected_at,
+        durationMs,
+      );
+    }
   }
 
   /**
-   * Điểm tiếp nhận chính cho message từ topic MQTT (AC1, AC2, AC3).
+   * US-06: Phat su kien moi len SSE stream cho dashboard (FR-DSH-02).
    */
-  async handleMessage(_topic: string, buffer: Buffer): Promise<void> {
-    const rawContent = buffer.toString('utf-8');
-    const dto = await this.parseAndValidate(rawContent);
-    if (!dto || dto.after.label !== 'person') {
+  private async emitCreatedEvent(eventId: string): Promise<void> {
+    if (!this.eventsService) {
       return;
     }
 
     try {
-      if (dto.type === 'end') {
-        await this.handleTrackEnd(dto.after);
-      } else {
-        await this.processEvent(dto.after);
+      const summaryRecord = await this.eventsRepository.findEventSummaryById(eventId);
+      if (!summaryRecord) {
+        return;
+      }
+      this.eventsService.emitEvent(await this.eventsService.toEventSummary(summaryRecord));
+    } catch (error) {
+      this.logger.error(
+        { eventId, err: error instanceof Error ? error.message : String(error) },
+        'Loi khi phat su kien len SSE stream',
+      );
+    }
+  }
+
+  async handleMessage(_topic: string, buffer: Buffer): Promise<void> {
+    const message = await this.parseAndValidate(buffer.toString('utf8'));
+    if (!message || message.after.label !== 'person') {
+      return;
+    }
+
+    try {
+      const { event, isCreated } = await this.synchronizeEvent(message.type, message.after);
+      await this.synchronizeMedia(message.type, event, message.after);
+
+      if (isCreated) {
+        await this.emitCreatedEvent(event.id);
       }
     } catch (error) {
       this.logger.error(
-        { trackId: dto.after.id, err: (error as Error).message },
+        { trackId: message.after.id, err: error instanceof Error ? error.message : String(error) },
         'Loi khi xu ly message MQTT tu Frigate',
       );
     }
