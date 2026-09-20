@@ -34,7 +34,7 @@ async function layDanhSachFile() {
 }
 
 async function ketNoi() {
-  const url = process.env.DATABASE_URL;
+  const url = process.env.DATABASE_URL?.replace('@postgres:5432', '@localhost:5432');
   if (!url) {
     console.error('Thieu DATABASE_URL. Chay: cp .env.example .env');
     process.exit(1);
