@@ -7,3 +7,4 @@
  *   3. Chi viet tay trong `src/enums.ts` nhung gia tri dung chung ca runtime.
  */
 export * from './enums';
+export type { components, operations, paths } from './generated/orchestrator';

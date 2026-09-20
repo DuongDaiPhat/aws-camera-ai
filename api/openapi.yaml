@@ -18,7 +18,7 @@ info:
     API cua he thong camera giam sat hanh vi ung dung AI va AWS.
 
     ## Quy uoc chung
-    - Tat ca endpoint (tru `/health` va `/auth/*`) yeu cau header
+    - Tat ca endpoint (tru `/health`, `/auth/login` va `/auth/refresh`) yeu cau header
       `Authorization: Bearer <access_token>`.
     - Thoi gian luon la ISO-8601 co mui gio (`2026-09-15T08:30:00+07:00`).
     - Danh sach luon tra ve dang `{ data: [...], meta: { page, pageSize, total } }`.
@@ -103,8 +103,8 @@ paths:
       tags: [auth]
       summary: Dang nhap bang email va mat khau
       description: |
-        FR-AUT-03: sau 5 lan sai lien tiep, tai khoan bi khoa 15 phut
-        va tra ve `423 Locked`.
+        FR-AUT-03: nam lan sai dau tra ve `401`. Lan thu sau tai khoan bi khoa
+        15 phut, ghi audit log va tra ve `423 Locked`.
       operationId: login
       security: []
       requestBody:
@@ -134,15 +134,17 @@ paths:
     post:
       tags: [auth]
       summary: Lam moi access token
+      description: |
+        Refresh token co the gui trong body hoac cookie HttpOnly `camerai_refresh`.
+        Sau khi dung, token cu bi thu hoi va duoc thay bang mot refresh token moi.
       operationId: refreshToken
       security: []
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
               type: object
-              required: [refreshToken]
               properties:
                 refreshToken: { type: string }
       responses:
