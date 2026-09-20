@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -7,6 +7,7 @@ import mqtt, { MqttClient } from 'mqtt';
 import { EventType, PriorityLevel } from '@cam/contracts';
 
 import { EventRecord, EventsRepository } from '../events/events.repository';
+import { EventsService } from '../events/events.service';
 import { MediaService } from '../media/media.service';
 import { FrigateEventAfterDto, FrigateEventMessageDto } from './dto/frigate-event.dto';
 
@@ -39,6 +40,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     private readonly configService: ConfigService,
     private readonly eventsRepository: EventsRepository,
     private readonly mediaService: MediaService,
+    @Optional() private readonly eventsService?: EventsService,
   ) {}
 
   onModuleInit(): void {
@@ -296,6 +298,28 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  /**
+   * US-06: Phat su kien moi len SSE stream cho dashboard (FR-DSH-02).
+   */
+  private async emitCreatedEvent(eventId: string): Promise<void> {
+    if (!this.eventsService) {
+      return;
+    }
+
+    try {
+      const summaryRecord = await this.eventsRepository.findEventSummaryById(eventId);
+      if (!summaryRecord) {
+        return;
+      }
+      this.eventsService.emitEvent(await this.eventsService.toEventSummary(summaryRecord));
+    } catch (error) {
+      this.logger.error(
+        { eventId, err: error instanceof Error ? error.message : String(error) },
+        'Loi khi phat su kien len SSE stream',
+      );
+    }
+  }
+
   async handleMessage(_topic: string, buffer: Buffer): Promise<void> {
     const message = await this.parseAndValidate(buffer.toString('utf8'));
     if (!message || message.after.label !== 'person') {
@@ -303,8 +327,12 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     }
 
     try {
-      const { event } = await this.synchronizeEvent(message.type, message.after);
+      const { event, isCreated } = await this.synchronizeEvent(message.type, message.after);
       await this.synchronizeMedia(message.type, event, message.after);
+
+      if (isCreated) {
+        await this.emitCreatedEvent(event.id);
+      }
     } catch (error) {
       this.logger.error(
         { trackId: message.after.id, err: error instanceof Error ? error.message : String(error) },

@@ -1,0 +1,322 @@
+/*
+ * Trang đăng nhập: hai cột — bảng giới thiệu sản phẩm bên trái, form bên phải.
+ * Mobile (<= 920px) ẩn cột giới thiệu để form xuất hiện ngay đầu trang.
+ */
+.page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(420px, 0.85fr);
+}
+
+.productRail {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding: clamp(28px, 4vw, 56px);
+  background: #e9f0f9;
+  border-right: 1px solid var(--border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.brandMark {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--accent);
+}
+
+.brandMark span {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+
+.productMessage {
+  max-width: 480px;
+  margin: auto 0;
+}
+
+.context {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.productMessage h1 {
+  margin: 0 0 14px;
+  font-size: clamp(26px, 2.6vw, 32px);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.lead {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-secondary);
+}
+
+.features {
+  margin: 36px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 16px;
+}
+
+.features li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+
+.featureIcon {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--accent);
+}
+
+.featureIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.railFooter {
+  margin: auto 0 0;
+  font-size: 12.5px;
+  color: var(--ink-muted);
+}
+
+.authArea {
+  display: flex;
+  flex-direction: column;
+  padding: 40px clamp(24px, 4vw, 64px);
+  background: var(--surface);
+}
+
+.mobileHeader {
+  display: none;
+}
+
+.authContent {
+  width: min(100%, 360px);
+  margin: auto;
+}
+
+.authHeading h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.authHeading p {
+  margin: 6px 0 32px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+/* Phần dưới dùng chung cho LoginForm.tsx */
+.form {
+  display: grid;
+  gap: 18px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+
+.field input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--ink);
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.field input::placeholder {
+  color: var(--ink-muted);
+}
+
+.field input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.passwordField {
+  position: relative;
+}
+
+.passwordField input {
+  padding-right: 68px;
+}
+
+.visibilityButton {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.visibilityButton:hover {
+  color: var(--ink);
+}
+
+.visibilityButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 13px;
+  border: 1px solid #f0d6cf;
+  border-left: 3px solid var(--danger);
+  border-radius: var(--radius-control);
+  background: var(--danger-soft);
+  color: #8a3527;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.error span {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.error p {
+  margin: 0;
+}
+
+.submitButton {
+  height: 46px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.submitButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.submitButton:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.securityNote {
+  margin: -2px 0 0;
+  font-size: 13px;
+  text-align: center;
+  color: var(--ink-muted);
+}
+
+@media (max-width: 920px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .productRail {
+    display: none;
+  }
+
+  .authArea {
+    justify-content: flex-start;
+    padding: 28px 22px;
+  }
+
+  .authContent {
+    width: 100%;
+    margin: 0;
+  }
+
+  .authHeading p {
+    margin-bottom: 24px;
+  }
+
+  .mobileHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 40px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 380px) {
+  .authArea {
+    padding: 24px 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field input,
+  .submitButton {
+    transition: none;
+  }
+}

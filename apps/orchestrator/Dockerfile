@@ -10,7 +10,8 @@ WORKDIR /workspace
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/orchestrator/package.json apps/orchestrator/
-COPY packages/contracts/package.json packages/contracts/
+COPY packages/contracts/package.json packages/contracts/tsconfig.json packages/contracts/tsconfig.build.json packages/contracts/
+COPY packages/contracts/src packages/contracts/src/
 COPY packages/eslint-config/package.json packages/eslint-config/
 RUN pnpm install --frozen-lockfile
 
