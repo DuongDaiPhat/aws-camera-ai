@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { Body, Controller, Get, HttpCode, Inject, Post, Req, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import type { AuthenticatedRequest } from './jwt-auth.guard';
 import { Public } from './public.decorator';
@@ -15,6 +16,8 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 const REFRESH_TOKEN_COOKIE = 'camerai_refresh';
+
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -26,6 +29,17 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(200)
+  @ApiOperation({
+    summary: 'Đăng nhập người dùng (US-05)',
+    description:
+      'Xác thực bằng email và mật khẩu, trả về accessToken và thiết lập cookie refreshToken.',
+  })
+  @ApiResponse({ status: 200, description: 'Đăng nhập thành công' })
+  @ApiResponse({ status: 401, description: 'Email hoặc mật khẩu không đúng' })
+  @ApiResponse({
+    status: 423,
+    description: 'Tài khoản đang bị khóa tạm thời do nhập sai quá nhiều lần',
+  })
   async login(
     @Body() credentials: LoginDto,
     @Req() request: Request,
@@ -39,6 +53,12 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(200)
+  @ApiOperation({
+    summary: 'Làm mới token (US-05)',
+    description: 'Cấp cặp token mới bằng refreshToken từ body hoặc cookie.',
+  })
+  @ApiResponse({ status: 200, description: 'Làm mới token thành công' })
+  @ApiResponse({ status: 401, description: 'Refresh token không hợp lệ hoặc đã hết hạn' })
   async refresh(
     @Body() body: RefreshTokenDto,
     @Req() request: Request,
@@ -51,6 +71,12 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(204)
+  @ApiBearerAuth('bearer')
+  @ApiOperation({
+    summary: 'Đăng xuất người dùng (US-05)',
+    description: 'Thu hồi refresh token và xóa cookie xác thực.',
+  })
+  @ApiResponse({ status: 204, description: 'Đăng xuất thành công' })
   async logout(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
@@ -61,6 +87,13 @@ export class AuthController {
   }
 
   @Get('me')
+  @ApiBearerAuth('bearer')
+  @ApiOperation({
+    summary: 'Lấy thông tin tài khoản hiện tại (US-05)',
+    description: 'Trả về thông tin hồ sơ của người dùng đang đăng nhập.',
+  })
+  @ApiResponse({ status: 200, description: 'Thông tin người dùng' })
+  @ApiResponse({ status: 401, description: 'Chưa xác thực hoặc token không hợp lệ' })
   getCurrentUser(@Req() request: AuthenticatedRequest): Promise<PublicUser> {
     return this.authService.getCurrentUser(request.auth?.email ?? '');
   }
