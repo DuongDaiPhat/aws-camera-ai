@@ -8,6 +8,7 @@ import { EventType, PriorityLevel } from '@cam/contracts';
 
 import { EventRecord, EventsRepository } from '../events/events.repository';
 import { EventsService } from '../events/events.service';
+import { EventMediaRepository } from '../media/event-media.repository';
 import { MediaService } from '../media/media.service';
 import { FrigateEventAfterDto, FrigateEventMessageDto } from './dto/frigate-event.dto';
 
@@ -39,6 +40,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly configService: ConfigService,
     private readonly eventsRepository: EventsRepository,
+    private readonly eventMediaRepository: EventMediaRepository,
     private readonly mediaService: MediaService,
     @Optional() private readonly eventsService?: EventsService,
   ) {}
@@ -270,13 +272,29 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     return { event, isCreated };
   }
 
+  /**
+   * Tai snapshot/clip ve storage.
+   * Tra ve `true` khi snapshot vua duoc luu lan dau — dashboard can biet de thay anh
+   * cho su kien da hien thi truoc do (Frigate thuong chua co snapshot o message `new`).
+   */
   private async synchronizeMedia(
     messageType: FrigateMessageType,
     event: EventRecord,
     after: FrigateEventAfterDto,
-  ): Promise<void> {
+  ): Promise<boolean> {
+    let hasNewSnapshot = false;
+
     if (after.has_snapshot) {
-      await this.mediaService.downloadAndStoreSnapshot(event.id, after.id, event.detected_at);
+      const existingSnapshot = await this.eventMediaRepository.findMediaByEventIdAndType(
+        event.id,
+        'SNAPSHOT',
+      );
+      const snapshot = await this.mediaService.downloadAndStoreSnapshot(
+        event.id,
+        after.id,
+        event.detected_at,
+      );
+      hasNewSnapshot = !existingSnapshot && snapshot !== null;
     }
 
     if (
@@ -296,12 +314,14 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
         durationMs,
       );
     }
+
+    return hasNewSnapshot;
   }
 
   /**
-   * US-06: Phat su kien moi len SSE stream cho dashboard (FR-DSH-02).
+   * US-06: Phat su kien len SSE stream cho dashboard (FR-DSH-02).
    */
-  private async emitCreatedEvent(eventId: string): Promise<void> {
+  private async emitEventToStream(eventId: string, sseEventType: string): Promise<void> {
     if (!this.eventsService) {
       return;
     }
@@ -311,10 +331,11 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       if (!summaryRecord) {
         return;
       }
-      this.eventsService.emitEvent(await this.eventsService.toEventSummary(summaryRecord));
+      const summary = await this.eventsService.toEventSummary(summaryRecord);
+      this.eventsService.emitEvent(summary, sseEventType);
     } catch (error) {
       this.logger.error(
-        { eventId, err: error instanceof Error ? error.message : String(error) },
+        { eventId, sseEventType, err: error instanceof Error ? error.message : String(error) },
         'Loi khi phat su kien len SSE stream',
       );
     }
@@ -328,10 +349,14 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
 
     try {
       const { event, isCreated } = await this.synchronizeEvent(message.type, message.after);
-      await this.synchronizeMedia(message.type, event, message.after);
+      const hasNewSnapshot = await this.synchronizeMedia(message.type, event, message.after);
 
       if (isCreated) {
-        await this.emitCreatedEvent(event.id);
+        await this.emitEventToStream(event.id, 'event.created');
+      } else if (hasNewSnapshot) {
+        // Anh vua ve toi sau khi the su kien da hien tren dashboard: day ban cap nhat
+        // de nguoi dung thay snapshot ma khong phai F5 (FR-DSH-02).
+        await this.emitEventToStream(event.id, 'event.updated');
       }
     } catch (error) {
       this.logger.error(

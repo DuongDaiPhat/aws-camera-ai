@@ -1,12 +1,55 @@
-import { Inject, Injectable, Logger, MessageEvent, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  MessageEvent,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Subject, Observable } from 'rxjs';
 import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
 import { TOKEN_SERVICE, type TokenService } from '../auth/auth.types';
-import { EventsRepository, type EventListItemRecord } from './events.repository';
+import { MediaService } from '../media/media.service';
+import {
+  EventsRepository,
+  type EventDetailRecord,
+  type EventListItemRecord,
+  type EventStatsRecords,
+  type EventStatusHistoryRecord,
+} from './events.repository';
 import type { ListEventsQueryDto } from './dto/list-events-query.dto';
 import type { EventSummaryDto, PaginatedEventsResponseDto } from './dto/event-summary-response.dto';
+import type {
+  AiResultItem,
+  EventDetailDto,
+  EventStatusHistoryEntry,
+} from './dto/event-detail-response.dto';
+import type { EventStatsResponseDto } from './dto/event-stats-response.dto';
+import { DEFAULT_STATS_WINDOW_HOURS } from './dto/get-event-stats-query.dto';
 
 const PRESIGNED_URL_TTL_SECONDS = 900; // 15 phút (FR-EVT-07)
+const STATUS_HISTORY_LIMIT = 50;
+const STATS_GROUP_LIMIT = 20;
+const MILLISECONDS_PER_HOUR = 60 * 60 * 1000;
+
+/**
+ * `ai_results` nam trong cot JSONB nen phai kiem tra hinh dang truoc khi tin (FR-EVT-04).
+ */
+function toAiResultItems(rawResults: unknown): AiResultItem[] {
+  if (!Array.isArray(rawResults)) {
+    return [];
+  }
+
+  return rawResults.filter((item): item is AiResultItem => {
+    if (typeof item !== 'object' || item === null) return false;
+    const candidate = item as Partial<AiResultItem>;
+    return typeof candidate.label === 'string' && typeof candidate.confidence === 'number';
+  });
+}
+
+function toIsoStringOrNull(value: Date | null): string | null {
+  return value ? value.toISOString() : null;
+}
 
 @Injectable()
 export class EventsService {
@@ -15,6 +58,7 @@ export class EventsService {
 
   constructor(
     private readonly eventsRepository: EventsRepository,
+    private readonly mediaService: MediaService,
     @Inject(STORAGE_SERVICE) private readonly storageService: IStorageService,
     @Inject(TOKEN_SERVICE) private readonly tokenService: TokenService,
   ) {}
@@ -50,6 +94,103 @@ export class EventsService {
         total,
         totalPages,
       },
+    };
+  }
+
+  /**
+   * Lấy chi tiết một sự kiện kèm media, kết quả AI và lịch sử trạng thái (US-21).
+   */
+  async getEvent(eventId: string): Promise<EventDetailDto> {
+    const record = await this.eventsRepository.findEventDetailById(eventId);
+    if (!record) {
+      throw new NotFoundException({
+        error: { code: 'EVENT_NOT_FOUND', message: `Không tìm thấy sự kiện ${eventId}.` },
+      });
+    }
+
+    const [summary, media, statusHistory] = await Promise.all([
+      this.toEventSummary(record),
+      this.mediaService.listEventMediaWithUrls(eventId),
+      this.eventsRepository.listStatusHistoryByEventId(eventId, STATUS_HISTORY_LIMIT),
+    ]);
+
+    return this.toEventDetail(record, summary, media, statusHistory);
+  }
+
+  private toEventDetail(
+    record: EventDetailRecord,
+    summary: EventSummaryDto,
+    media: EventDetailDto['media'],
+    statusHistory: EventStatusHistoryRecord[],
+  ): EventDetailDto {
+    return {
+      ...summary,
+      source: record.source,
+      trackId: record.track_id,
+      aiLabel: record.ai_label,
+      aiModelVersion: record.ai_model_version,
+      aiResults: toAiResultItems(record.ai_results),
+      retain: record.retain,
+      correlationId: record.correlation_id,
+      escalationDeadlineAt: toIsoStringOrNull(record.escalation_deadline_at),
+      notifiedAt: toIsoStringOrNull(record.notified_at),
+      escalatedAt: toIsoStringOrNull(record.escalated_at),
+      resolvedAt: toIsoStringOrNull(record.resolved_at),
+      closedAt: toIsoStringOrNull(record.closed_at),
+      media,
+      statusHistory: statusHistory.map((entry) => this.toStatusHistoryEntry(entry)),
+    };
+  }
+
+  private toStatusHistoryEntry(record: EventStatusHistoryRecord): EventStatusHistoryEntry {
+    return {
+      fromStatus: record.from_status ?? undefined,
+      toStatus: record.to_status,
+      reason: record.reason,
+      actorType: record.actor_type as EventStatusHistoryEntry['actorType'],
+      actorName: record.actor_name,
+      channel: (record.channel ?? undefined) as EventStatusHistoryEntry['channel'],
+      createdAt: record.created_at.toISOString(),
+    };
+  }
+
+  /**
+   * Số liệu tổng hợp cho các thẻ trên đầu dashboard (FR-DSH-01, US-06).
+   */
+  async getStats(windowHours: number = DEFAULT_STATS_WINDOW_HOURS): Promise<EventStatsResponseDto> {
+    const since = new Date(Date.now() - windowHours * MILLISECONDS_PER_HOUR);
+    const records = await this.eventsRepository.getEventStats(since, STATS_GROUP_LIMIT);
+    return this.toEventStats(windowHours, records);
+  }
+
+  private toEventStats(windowHours: number, records: EventStatsRecords): EventStatsResponseDto {
+    const { aggregate, cameras, latestPendingEvent } = records;
+
+    return {
+      windowHours,
+      totalEvents: aggregate.total_events,
+      personDetectedCount: aggregate.person_detected_count,
+      pendingCount: aggregate.pending_count,
+      resolvedCount: aggregate.resolved_count,
+      falseAlarmCount: aggregate.false_alarm_count,
+      cameraOnlineCount: cameras.online_count,
+      cameraTotalCount: cameras.total_count,
+      latestEventAt: toIsoStringOrNull(aggregate.latest_event_at),
+      latestPendingEvent: latestPendingEvent
+        ? {
+            id: latestPendingEvent.id,
+            eventType: latestPendingEvent.event_type,
+            priority: latestPendingEvent.priority,
+            cameraName: latestPendingEvent.camera_name,
+            zoneName: latestPendingEvent.zone_name,
+            detectedAt: latestPendingEvent.detected_at.toISOString(),
+          }
+        : null,
+      byType: records.byType.map((row) => ({ eventType: row.event_type, count: row.count })),
+      byPriority: records.byPriority.map((row) => ({
+        priority: row.priority,
+        count: row.count,
+      })),
     };
   }
 

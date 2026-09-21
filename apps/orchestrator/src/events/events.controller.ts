@@ -1,10 +1,13 @@
-import { Controller, Get, Query, Sse, MessageEvent } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, ParseUUIDPipe, Query, Sse, MessageEvent } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 import { Public } from '../auth/public.decorator';
 import { EventsService } from './events.service';
 import { ListEventsQueryDto } from './dto/list-events-query.dto';
+import { GetEventStatsQueryDto } from './dto/get-event-stats-query.dto';
 import { PaginatedEventsResponseDto } from './dto/event-summary-response.dto';
+import { EventDetailDto } from './dto/event-detail-response.dto';
+import { EventStatsResponseDto } from './dto/event-stats-response.dto';
 
 @ApiTags('events')
 @Controller('events')
@@ -22,6 +25,18 @@ export class EventsController {
     return await this.eventsService.listEvents(query);
   }
 
+  // Phải khai báo TRƯỚC `:eventId`, nếu không Nest sẽ coi "stats" là một eventId.
+  @Get('stats')
+  @ApiOperation({
+    summary: 'Số liệu tổng hợp cho dashboard (US-06)',
+    description: 'FR-DSH-01 — đếm sự kiện và camera trong cửa sổ windowHours giờ gần nhất.',
+  })
+  @ApiResponse({ status: 200, type: EventStatsResponseDto })
+  @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  async getEventStats(@Query() query: GetEventStatsQueryDto): Promise<EventStatsResponseDto> {
+    return await this.eventsService.getStats(query.windowHours);
+  }
+
   @Public()
   @Sse('stream')
   @ApiOperation({
@@ -33,5 +48,16 @@ export class EventsController {
   @ApiResponse({ status: 401, description: 'Token không hợp lệ hoặc thiếu' })
   streamEvents(@Query('token') token?: string): Observable<MessageEvent> {
     return this.eventsService.streamEvents(token);
+  }
+
+  @Get(':eventId')
+  @ApiOperation({
+    summary: 'Chi tiết sự kiện kèm media, kết quả AI và lịch sử trạng thái (US-21)',
+  })
+  @ApiParam({ name: 'eventId', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, type: EventDetailDto })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy sự kiện' })
+  async getEvent(@Param('eventId', ParseUUIDPipe) eventId: string): Promise<EventDetailDto> {
+    return await this.eventsService.getEvent(eventId);
   }
 }

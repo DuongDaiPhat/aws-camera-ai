@@ -16,6 +16,85 @@ export interface ListEventsFilters {
   isFalseAlarm?: boolean;
 }
 
+/** Cac trang thai con cho nguoi dung xu ly (FR-DSH-01). */
+export const PENDING_EVENT_STATUSES: EventStatus[] = ['DETECTED', 'NOTIFIED', 'ESCALATED'];
+
+/** Cac trang thai da khep lai. */
+export const CLOSED_EVENT_STATUSES: EventStatus[] = ['RESOLVED', 'CLOSED'];
+
+/** Cac loai su kien sinh ra tu viec nhin thay nguoi (US-03). */
+export const PERSON_EVENT_TYPES: EventType[] = [
+  'PERSON_DETECTED',
+  'UNKNOWN_PERSON',
+  'RESTRICTED_ZONE',
+];
+
+export interface EventDetailRecord extends EventListItemRecord {
+  source: string;
+  track_id: string | null;
+  ai_label: string | null;
+  ai_model_version: string | null;
+  ai_results: unknown[];
+  retain: boolean;
+  correlation_id: string;
+  escalation_deadline_at: Date | null;
+  notified_at: Date | null;
+  escalated_at: Date | null;
+  resolved_at: Date | null;
+  closed_at: Date | null;
+}
+
+export interface EventStatusHistoryRecord {
+  from_status: EventStatus | null;
+  to_status: EventStatus;
+  reason: string | null;
+  actor_type: string;
+  actor_name: string | null;
+  channel: string | null;
+  created_at: Date;
+}
+
+export interface EventStatsAggregateRecord {
+  total_events: number;
+  person_detected_count: number;
+  pending_count: number;
+  resolved_count: number;
+  false_alarm_count: number;
+  latest_event_at: Date | null;
+}
+
+export interface EventTypeCountRecord {
+  event_type: EventType;
+  count: number;
+}
+
+export interface EventPriorityCountRecord {
+  priority: PriorityLevel;
+  count: number;
+}
+
+export interface CameraAvailabilityRecord {
+  online_count: number;
+  total_count: number;
+}
+
+export interface LatestPendingEventRecord {
+  id: string;
+  event_type: EventType;
+  priority: PriorityLevel;
+  camera_name: string | null;
+  zone_name: string | null;
+  detected_at: Date;
+}
+
+export interface EventStatsRecords {
+  aggregate: EventStatsAggregateRecord;
+  byType: EventTypeCountRecord[];
+  byPriority: EventPriorityCountRecord[];
+  cameras: CameraAvailabilityRecord;
+  latestPendingEvent: LatestPendingEventRecord | null;
+}
+
 export interface EventListItemRecord {
   id: string;
   event_type: EventType;
@@ -32,6 +111,42 @@ export interface EventListItemRecord {
   matched_person_name: string | null;
   thumbnail_object_key: string | null;
 }
+
+/** Cot dung chung cho moi truy van tra ve EventSummary (US-06). */
+const EVENT_SUMMARY_PROJECTION = `
+    e.id,
+    e.event_type,
+    e.status,
+    e.priority,
+    e.confidence,
+    e.person_status,
+    e.is_false_alarm,
+    e.detected_at,
+    c.id AS camera_id,
+    c.name AS camera_name,
+    z.id AS zone_id,
+    z.name AS zone_name,
+    kf.person_name AS matched_person_name,
+    em.object_key AS thumbnail_object_key
+`;
+
+/**
+ * Nguon du lieu dung chung cho EventSummary.
+ * LATERAL uu tien THUMBNAIL truoc SNAPSHOT de the su kien tai anh nhe hon.
+ */
+const EVENT_SUMMARY_SOURCE = `
+  FROM events e
+  LEFT JOIN cameras c ON c.id = e.camera_id
+  LEFT JOIN zones z ON z.id = e.zone_id
+  LEFT JOIN known_faces kf ON kf.id = e.matched_known_face_id
+  LEFT JOIN LATERAL (
+    SELECT object_key
+    FROM event_media
+    WHERE event_id = e.id AND media_type IN ('THUMBNAIL', 'SNAPSHOT')
+    ORDER BY CASE WHEN media_type = 'THUMBNAIL' THEN 1 ELSE 2 END
+    LIMIT 1
+  ) em ON true
+`;
 
 const CREATE_EVENT_QUERY = `
   INSERT INTO events (
@@ -284,32 +399,8 @@ export class EventsRepository {
     const offset = (filters.page - 1) * filters.pageSize;
     const dataParams = [...params, filters.pageSize, offset];
     const dataQuery = `
-      SELECT
-        e.id,
-        e.event_type,
-        e.status,
-        e.priority,
-        e.confidence,
-        e.person_status,
-        e.is_false_alarm,
-        e.detected_at,
-        c.id AS camera_id,
-        c.name AS camera_name,
-        z.id AS zone_id,
-        z.name AS zone_name,
-        kf.person_name AS matched_person_name,
-        em.object_key AS thumbnail_object_key
-      FROM events e
-      LEFT JOIN cameras c ON e.camera_id = c.id
-      LEFT JOIN zones z ON e.zone_id = z.id
-      LEFT JOIN known_faces kf ON e.matched_known_face_id = kf.id
-      LEFT JOIN LATERAL (
-        SELECT object_key
-        FROM event_media
-        WHERE event_id = e.id AND media_type IN ('THUMBNAIL', 'SNAPSHOT')
-        ORDER BY CASE WHEN media_type = 'THUMBNAIL' THEN 1 ELSE 2 END
-        LIMIT 1
-      ) em ON true
+      SELECT ${EVENT_SUMMARY_PROJECTION}
+      ${EVENT_SUMMARY_SOURCE}
       ${whereClause}
       ORDER BY e.detected_at DESC
       LIMIT $${nextIdx} OFFSET $${nextIdx + 1};
@@ -324,36 +415,171 @@ export class EventsRepository {
    */
   async findEventSummaryById(id: string): Promise<EventListItemRecord | null> {
     const query = `
-      SELECT
-        e.id,
-        e.event_type,
-        e.status,
-        e.priority,
-        e.confidence,
-        e.person_status,
-        e.is_false_alarm,
-        e.detected_at,
-        c.id AS camera_id,
-        c.name AS camera_name,
-        z.id AS zone_id,
-        z.name AS zone_name,
-        kf.person_name AS matched_person_name,
-        em.object_key AS thumbnail_object_key
-      FROM events e
-      LEFT JOIN cameras c ON e.camera_id = c.id
-      LEFT JOIN zones z ON e.zone_id = z.id
-      LEFT JOIN known_faces kf ON e.matched_known_face_id = kf.id
-      LEFT JOIN LATERAL (
-        SELECT object_key
-        FROM event_media
-        WHERE event_id = e.id AND media_type IN ('THUMBNAIL', 'SNAPSHOT')
-        ORDER BY CASE WHEN media_type = 'THUMBNAIL' THEN 1 ELSE 2 END
-        LIMIT 1
-      ) em ON true
+      SELECT ${EVENT_SUMMARY_PROJECTION}
+      ${EVENT_SUMMARY_SOURCE}
       WHERE e.id = $1
       LIMIT 1;
     `;
     const res = await this.pool.query<EventListItemRecord>(query, [id]);
+    return res.rows[0] ?? null;
+  }
+
+  /**
+   * Tra cuu day du mot su kien de dung cho man hinh chi tiet (US-21).
+   */
+  async findEventDetailById(id: string): Promise<EventDetailRecord | null> {
+    const query = `
+      SELECT ${EVENT_SUMMARY_PROJECTION},
+             e.source,
+             e.track_id,
+             e.ai_label,
+             e.ai_model_version,
+             e.ai_results,
+             e.retain,
+             e.correlation_id,
+             e.escalation_deadline_at,
+             e.notified_at,
+             e.escalated_at,
+             e.resolved_at,
+             e.closed_at
+      ${EVENT_SUMMARY_SOURCE}
+      WHERE e.id = $1
+      LIMIT 1;
+    `;
+    const res = await this.pool.query<EventDetailRecord>(query, [id]);
+    return res.rows[0] ?? null;
+  }
+
+  /**
+   * Lich su chuyen trang thai cua mot su kien (FR-EVT-05).
+   */
+  async listStatusHistoryByEventId(
+    eventId: string,
+    limit: number,
+  ): Promise<EventStatusHistoryRecord[]> {
+    const query = `
+      SELECT h.from_status,
+             h.to_status,
+             h.reason,
+             h.actor_type,
+             u.full_name AS actor_name,
+             h.channel,
+             h.created_at
+      FROM event_status_history h
+      LEFT JOIN users u ON u.id = h.actor_user_id
+      WHERE h.event_id = $1
+      ORDER BY h.created_at ASC
+      LIMIT $2;
+    `;
+    const res = await this.pool.query<EventStatusHistoryRecord>(query, [eventId, limit]);
+    return res.rows;
+  }
+
+  /**
+   * Dem so lieu tong hop cho dashboard trong cua so `since` -> hien tai (FR-DSH-01).
+   * Cac truy van doc lap nen chay song song de dashboard tai nhanh.
+   */
+  async getEventStats(since: Date, groupLimit: number): Promise<EventStatsRecords> {
+    const [aggregate, byType, byPriority, cameras, latestPendingEvent] = await Promise.all([
+      this.aggregateEventStats(since),
+      this.countEventsByType(since, groupLimit),
+      this.countEventsByPriority(since, groupLimit),
+      this.countCameraAvailability(),
+      this.findLatestPendingEvent(since),
+    ]);
+
+    return { aggregate, byType, byPriority, cameras, latestPendingEvent };
+  }
+
+  private async aggregateEventStats(since: Date): Promise<EventStatsAggregateRecord> {
+    const query = `
+      SELECT COUNT(*)::int AS total_events,
+             COUNT(*) FILTER (WHERE event_type = ANY($2))::int AS person_detected_count,
+             COUNT(*) FILTER (WHERE status = ANY($3))::int AS pending_count,
+             COUNT(*) FILTER (WHERE status = ANY($4))::int AS resolved_count,
+             COUNT(*) FILTER (WHERE is_false_alarm)::int AS false_alarm_count,
+             MAX(detected_at) AS latest_event_at
+      FROM events
+      WHERE detected_at >= $1;
+    `;
+    const res = await this.pool.query<EventStatsAggregateRecord>(query, [
+      since,
+      PERSON_EVENT_TYPES,
+      PENDING_EVENT_STATUSES,
+      CLOSED_EVENT_STATUSES,
+    ]);
+
+    return (
+      res.rows[0] ?? {
+        total_events: 0,
+        person_detected_count: 0,
+        pending_count: 0,
+        resolved_count: 0,
+        false_alarm_count: 0,
+        latest_event_at: null,
+      }
+    );
+  }
+
+  private async countEventsByType(since: Date, limit: number): Promise<EventTypeCountRecord[]> {
+    const query = `
+      SELECT event_type, COUNT(*)::int AS count
+      FROM events
+      WHERE detected_at >= $1
+      GROUP BY event_type
+      ORDER BY count DESC
+      LIMIT $2;
+    `;
+    const res = await this.pool.query<EventTypeCountRecord>(query, [since, limit]);
+    return res.rows;
+  }
+
+  private async countEventsByPriority(
+    since: Date,
+    limit: number,
+  ): Promise<EventPriorityCountRecord[]> {
+    const query = `
+      SELECT priority, COUNT(*)::int AS count
+      FROM events
+      WHERE detected_at >= $1
+      GROUP BY priority
+      ORDER BY priority ASC
+      LIMIT $2;
+    `;
+    const res = await this.pool.query<EventPriorityCountRecord>(query, [since, limit]);
+    return res.rows;
+  }
+
+  private async countCameraAvailability(): Promise<CameraAvailabilityRecord> {
+    const query = `
+      SELECT COUNT(*)::int AS total_count,
+             COUNT(*) FILTER (WHERE c.is_enabled AND d.status = 'ONLINE')::int AS online_count
+      FROM cameras c
+      JOIN devices d ON d.id = c.device_id;
+    `;
+    const res = await this.pool.query<CameraAvailabilityRecord>(query);
+    return res.rows[0] ?? { online_count: 0, total_count: 0 };
+  }
+
+  private async findLatestPendingEvent(since: Date): Promise<LatestPendingEventRecord | null> {
+    const query = `
+      SELECT e.id,
+             e.event_type,
+             e.priority,
+             c.name AS camera_name,
+             z.name AS zone_name,
+             e.detected_at
+      FROM events e
+      LEFT JOIN cameras c ON c.id = e.camera_id
+      LEFT JOIN zones z ON z.id = e.zone_id
+      WHERE e.detected_at >= $1 AND e.status = ANY($2)
+      ORDER BY e.priority ASC, e.detected_at DESC
+      LIMIT 1;
+    `;
+    const res = await this.pool.query<LatestPendingEventRecord>(query, [
+      since,
+      PENDING_EVENT_STATUSES,
+    ]);
     return res.rows[0] ?? null;
   }
 }
