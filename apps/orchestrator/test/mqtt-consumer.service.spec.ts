@@ -2,7 +2,9 @@ import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { EventRecord, EventsRepository } from '../src/events/events.repository';
+import { EventsService } from '../src/events/events.service';
 import { MqttConsumerService } from '../src/ingestion/mqtt-consumer.service';
+import { EventMediaRecord, EventMediaRepository } from '../src/media/event-media.repository';
 import { MediaService } from '../src/media/media.service';
 
 function createEvent(overrides: Partial<EventRecord> = {}): EventRecord {
@@ -26,10 +28,48 @@ function createEvent(overrides: Partial<EventRecord> = {}): EventRecord {
   };
 }
 
+function createSnapshotMedia(): EventMediaRecord {
+  return {
+    id: 'media-snapshot-1',
+    event_id: 'event-uuid-1',
+    media_type: 'SNAPSHOT',
+    storage_provider: 'MINIO',
+    bucket: 'camerai-media',
+    object_key: 'events/2026/09/18/event-uuid-1/snapshot.jpg',
+    content_type: 'image/jpeg',
+    size_bytes: 1024,
+    width: null,
+    height: null,
+    duration_ms: null,
+    checksum_sha256: null,
+    expires_at: null,
+    created_at: new Date(),
+  };
+}
+
+function buildSnapshotUpdateMessage(trackId: string): Buffer {
+  return Buffer.from(
+    JSON.stringify({
+      type: 'update',
+      after: {
+        id: trackId,
+        camera: 'cam_living_room',
+        frame_time: 1_726_387_205,
+        label: 'person',
+        score: 0.9,
+        current_zones: [],
+        has_snapshot: true,
+      },
+    }),
+  );
+}
+
 describe('MqttConsumerService (US-03, US-04)', () => {
   let service: MqttConsumerService;
   let eventsRepository: jest.Mocked<EventsRepository>;
   let mediaService: jest.Mocked<MediaService>;
+  let eventMediaRepository: jest.Mocked<EventMediaRepository>;
+  let eventsService: jest.Mocked<EventsService>;
 
   beforeEach(async () => {
     const mockEventsRepository = {
@@ -38,10 +78,18 @@ describe('MqttConsumerService (US-03, US-04)', () => {
       createEvent: jest.fn(),
       findEventByDedupKey: jest.fn(),
       updateEvent: jest.fn(),
+      findEventSummaryById: jest.fn().mockResolvedValue(null),
     };
     const mockMediaService = {
       downloadAndStoreSnapshot: jest.fn(),
       downloadAndStoreClip: jest.fn(),
+    };
+    const mockEventMediaRepository = {
+      findMediaByEventIdAndType: jest.fn().mockResolvedValue(null),
+    };
+    const mockEventsService = {
+      toEventSummary: jest.fn(),
+      emitEvent: jest.fn(),
     };
     const mockConfigService = {
       get: jest.fn((_key: string, defaultValue?: unknown) => defaultValue),
@@ -52,6 +100,8 @@ describe('MqttConsumerService (US-03, US-04)', () => {
         MqttConsumerService,
         { provide: EventsRepository, useValue: mockEventsRepository },
         { provide: MediaService, useValue: mockMediaService },
+        { provide: EventMediaRepository, useValue: mockEventMediaRepository },
+        { provide: EventsService, useValue: mockEventsService },
         { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
@@ -59,6 +109,8 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     service = module.get(MqttConsumerService);
     eventsRepository = module.get(EventsRepository);
     mediaService = module.get(MediaService);
+    eventMediaRepository = module.get(EventMediaRepository);
+    eventsService = module.get(EventsService);
   });
 
   it('khởi tạo thành công', () => {
@@ -290,6 +342,53 @@ describe('MqttConsumerService (US-03, US-04)', () => {
       'track-snapshot',
       existingEvent.detected_at,
     );
+  });
+
+  it('phát event.updated lên SSE khi snapshot vừa về cho sự kiện đã hiển thị', async () => {
+    const existingEvent = createEvent({ track_id: 'track-late-snapshot' });
+    const summary = { id: existingEvent.id, thumbnailUrl: 'https://minio/snapshot.jpg' };
+    eventsRepository.findCameraBySlug.mockResolvedValueOnce({
+      id: 'cam-uuid-1',
+      name: 'Phong khach',
+      slug: 'cam_living_room',
+    });
+    eventsRepository.findEventByDedupKey.mockResolvedValueOnce(existingEvent);
+    eventsRepository.updateEvent.mockResolvedValueOnce(existingEvent);
+    eventMediaRepository.findMediaByEventIdAndType.mockResolvedValueOnce(null);
+    mediaService.downloadAndStoreSnapshot.mockResolvedValueOnce(createSnapshotMedia());
+    eventsRepository.findEventSummaryById.mockResolvedValueOnce(
+      summary as unknown as Awaited<ReturnType<EventsRepository['findEventSummaryById']>>,
+    );
+    eventsService.toEventSummary.mockResolvedValueOnce(
+      summary as unknown as Awaited<ReturnType<EventsService['toEventSummary']>>,
+    );
+
+    await service.handleMessage(
+      'frigate/events',
+      buildSnapshotUpdateMessage('track-late-snapshot'),
+    );
+
+    expect(eventsService.emitEvent).toHaveBeenCalledWith(summary, 'event.updated');
+  });
+
+  it('không phát lại SSE khi snapshot đã được lưu từ trước', async () => {
+    const existingEvent = createEvent({ track_id: 'track-have-snapshot' });
+    eventsRepository.findCameraBySlug.mockResolvedValueOnce({
+      id: 'cam-uuid-1',
+      name: 'Phong khach',
+      slug: 'cam_living_room',
+    });
+    eventsRepository.findEventByDedupKey.mockResolvedValueOnce(existingEvent);
+    eventsRepository.updateEvent.mockResolvedValueOnce(existingEvent);
+    eventMediaRepository.findMediaByEventIdAndType.mockResolvedValueOnce(createSnapshotMedia());
+    mediaService.downloadAndStoreSnapshot.mockResolvedValueOnce(createSnapshotMedia());
+
+    await service.handleMessage(
+      'frigate/events',
+      buildSnapshotUpdateMessage('track-have-snapshot'),
+    );
+
+    expect(eventsService.emitEvent).not.toHaveBeenCalled();
   });
 
   it('cập nhật track end và lưu clip cho event P1', async () => {

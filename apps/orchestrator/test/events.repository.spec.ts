@@ -118,6 +118,89 @@ describe('EventsRepository (US-03, US-06)', () => {
     });
   });
 
+  describe('findEventDetailById', () => {
+    it('lay du cot chi tiet cua su kien', async () => {
+      const record = { id: 'evt-123', source: 'FRIGATE', ai_results: [] };
+      mockPool.query.mockResolvedValueOnce({ rows: [record] });
+
+      const res = await repository.findEventDetailById('evt-123');
+
+      expect(res).toEqual(record);
+      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('e.correlation_id'), [
+        'evt-123',
+      ]);
+    });
+
+    it('tra ve null khi khong tim thay', async () => {
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
+      expect(await repository.findEventDetailById('none')).toBeNull();
+    });
+  });
+
+  describe('listStatusHistoryByEventId', () => {
+    it('gioi han so ban ghi lich su tra ve', async () => {
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
+
+      await repository.listStatusHistoryByEventId('evt-1', 50);
+
+      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('LIMIT $2'), [
+        'evt-1',
+        50,
+      ]);
+    });
+  });
+
+  describe('getEventStats', () => {
+    it('gop ket qua cua nam truy van thanh mot ban ghi thong ke', async () => {
+      const aggregate = {
+        total_events: 5,
+        person_detected_count: 4,
+        pending_count: 2,
+        resolved_count: 3,
+        false_alarm_count: 0,
+        latest_event_at: new Date('2026-09-19T10:00:00Z'),
+      };
+      const byType = [{ event_type: 'PERSON_DETECTED', count: 4 }];
+      const byPriority = [{ priority: 'P3', count: 4 }];
+      const cameras = { online_count: 2, total_count: 3 };
+      const latestPending = {
+        id: 'evt-1',
+        event_type: 'PERSON_DETECTED',
+        priority: 'P3',
+        camera_name: 'Camera bep',
+        zone_name: null,
+        detected_at: new Date('2026-09-19T09:00:00Z'),
+      };
+
+      // getEventStats chay 5 truy van song song nen thu tu tra ve phai khop theo query
+      mockPool.query.mockImplementation((sql: string) => {
+        if (sql.includes('person_detected_count')) return Promise.resolve({ rows: [aggregate] });
+        if (sql.includes('GROUP BY event_type')) return Promise.resolve({ rows: byType });
+        if (sql.includes('GROUP BY priority')) return Promise.resolve({ rows: byPriority });
+        if (sql.includes('FROM cameras c')) return Promise.resolve({ rows: [cameras] });
+        return Promise.resolve({ rows: [latestPending] });
+      });
+
+      const stats = await repository.getEventStats(new Date('2026-09-18T10:00:00Z'), 20);
+
+      expect(stats.aggregate).toEqual(aggregate);
+      expect(stats.byType).toEqual(byType);
+      expect(stats.byPriority).toEqual(byPriority);
+      expect(stats.cameras).toEqual(cameras);
+      expect(stats.latestPendingEvent).toEqual(latestPending);
+    });
+
+    it('tra ve gia tri 0 khi chua co du lieu nao', async () => {
+      mockPool.query.mockResolvedValue({ rows: [] });
+
+      const stats = await repository.getEventStats(new Date('2026-09-18T10:00:00Z'), 20);
+
+      expect(stats.aggregate.total_events).toBe(0);
+      expect(stats.cameras).toEqual({ online_count: 0, total_count: 0 });
+      expect(stats.latestPendingEvent).toBeNull();
+    });
+  });
+
   describe('findEventSummaryById', () => {
     it('tra ve event record khi tim thay', async () => {
       const record = { id: 'evt-123' };
