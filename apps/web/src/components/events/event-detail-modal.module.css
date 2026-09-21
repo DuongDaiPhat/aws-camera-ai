@@ -101,6 +101,8 @@
 .snapshotContainer {
   width: 100%;
   height: 220px;
+  /* .modalBody la flex column: khong cho khung anh bi bop lai khi man hinh thap */
+  flex-shrink: 0;
   background: radial-gradient(circle at center, #1e293b 0%, #0b1329 100%);
   border-radius: 10px;
   position: relative;
@@ -109,6 +111,76 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Anh snapshot that lay tu presigned URL cua MinIO/S3 */
+.snapshotImage {
+  /* Dat tuyet doi de khong bi flex cua .snapshotContainer bop lai */
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #0b1329;
+}
+
+.snapshotMissing {
+  color: #94a3b8;
+  font-size: 13px;
+  text-align: center;
+  padding: 0 24px;
+  z-index: 1;
+}
+
+.clipPlayer {
+  width: 100%;
+  max-height: 320px;
+  border-radius: 10px;
+  background-color: #0b1329;
+  border: 1px solid #334155;
+}
+
+.inlineNotice {
+  margin: 0;
+  font-size: 13px;
+  color: #475569;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.inlineNoticeError {
+  margin: 0;
+  font-size: 13px;
+  color: #b91c1c;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.historyList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.historyItem {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: #334155;
+  border-left: 2px solid #cbd5e1;
+  padding-left: 10px;
+}
+
+.historyTime {
+  font-family: monospace;
+  color: #64748b;
+  white-space: nowrap;
 }
 
 .snapshotGrid {

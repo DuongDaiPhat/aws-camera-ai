@@ -5,6 +5,8 @@ import { fetchEvents, subscribeEventsStream } from '@/lib/events-client';
 import { generateSimulatedLiveEvent } from '@/lib/mock-events';
 import type { UIEventItem, FilterTabKey, FilterTabCounts } from '@/types';
 
+const LIVE_NOTICE_DURATION_MS = 4000;
+
 const ZONE_KEYWORDS: Record<string, string[]> = {
   bep: ['bếp'],
   'phong-khach': ['sofa', 'khách'],
@@ -61,16 +63,8 @@ function updateItem(
   return items.map((item) => (item.id === id ? transform(item) : item));
 }
 
-function handleIncomingStreamEvent(
-  newEvent: UIEventItem,
-  setEvents: React.Dispatch<React.SetStateAction<UIEventItem[]>>,
-  setLiveNoticeText: React.Dispatch<React.SetStateAction<string | null>>,
-) {
-  setEvents((prev) => [newEvent, ...prev.filter((e) => e.id !== newEvent.id)]);
-  const camName = newEvent.camera?.name ?? 'Camera';
-  setLiveNoticeText(`⚡ Nhận sự kiện mới: ${camName} (${newEvent.aiTag})`);
-  setTimeout(() => setLiveNoticeText(null), 4000);
-}
+type EventsSetter = React.Dispatch<React.SetStateAction<UIEventItem[]>>;
+type NoticeSetter = React.Dispatch<React.SetStateAction<string | null>>;
 
 function useEventFilters(events: UIEventItem[]) {
   const [activeFilterTab, setActiveFilterTab] = useState<FilterTabKey>('ALL');
@@ -142,36 +136,89 @@ function useEventPagination(
   };
 }
 
-function useEventsSubscription(
-  setEvents: React.Dispatch<React.SetStateAction<UIEventItem[]>>,
-  setLiveNoticeText: React.Dispatch<React.SetStateAction<string | null>>,
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>,
-) {
+/** Sự kiện mới: chèn lên đầu danh sách và báo cho người dùng biết. */
+function prependEvent(newEvent: UIEventItem, setEvents: EventsSetter, setNotice: NoticeSetter) {
+  setEvents((prev) => [newEvent, ...prev.filter((e) => e.id !== newEvent.id)]);
+  const cameraName = newEvent.camera?.name ?? 'Camera';
+  setNotice(`⚡ ${newEvent.aiTag} · ${cameraName}`);
+  setTimeout(() => setNotice(null), LIVE_NOTICE_DURATION_MS);
+}
+
+/**
+ * Sự kiện được cập nhật (thường là ảnh snapshot vừa tải xong): thay tại chỗ,
+ * không đẩy lên đầu để danh sách không nhảy dưới tay người đang đọc.
+ */
+function replaceEvent(updatedEvent: UIEventItem, setEvents: EventsSetter) {
+  setEvents((prev) => {
+    const exists = prev.some((e) => e.id === updatedEvent.id);
+    return exists
+      ? prev.map((e) => (e.id === updatedEvent.id ? { ...e, ...updatedEvent } : e))
+      : [updatedEvent, ...prev];
+  });
+}
+
+interface EventsSource {
+  events: UIEventItem[];
+  setEvents: EventsSetter;
+  isLoading: boolean;
+  error: string | null;
+  reload: () => void;
+  liveNoticeText: string | null;
+  setLiveNoticeText: NoticeSetter;
+}
+
+function useEventsSource(): EventsSource {
+  const [events, setEvents] = useState<UIEventItem[]>([]);
+  const [isLoading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [liveNoticeText, setLiveNoticeText] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
+
+  const reload = useCallback(() => {
+    setReloadToken((token) => token + 1);
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
+    setLoading(true);
+
     fetchEvents()
-      .then((data) => {
-        if (isMounted) setEvents(data);
+      .then(({ events: loadedEvents }) => {
+        if (!isMounted) return;
+        setEvents(loadedEvents);
+        setError(null);
+      })
+      .catch((err: unknown) => {
+        if (!isMounted) return;
+        setError(
+          err instanceof Error
+            ? `Không tải được danh sách sự kiện: ${err.message}`
+            : 'Không tải được danh sách sự kiện.',
+        );
       })
       .finally(() => {
         if (isMounted) setLoading(false);
       });
 
-    const unsubscribe = subscribeEventsStream((event) => {
-      if (isMounted) handleIncomingStreamEvent(event, setEvents, setLiveNoticeText);
-    });
-
     return () => {
       isMounted = false;
-      unsubscribe();
     };
-  }, [setEvents, setLiveNoticeText, setLoading]);
+  }, [reloadToken]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeEventsStream({
+      onCreated: (event) => prependEvent(event, setEvents, setLiveNoticeText),
+      onUpdated: (event) => replaceEvent(event, setEvents),
+    });
+    return unsubscribe;
+  }, []);
+
+  return { events, setEvents, isLoading, error, reload, liveNoticeText, setLiveNoticeText };
 }
 
 export function useEvents() {
-  const [events, setEvents] = useState<UIEventItem[]>([]);
-  const [isLoading, setLoading] = useState(true);
-  const [liveNoticeText, setLiveNoticeText] = useState<string | null>(null);
+  const { events, setEvents, isLoading, error, reload, liveNoticeText, setLiveNoticeText } =
+    useEventsSource();
   const filterState = useEventFilters(events);
   const paginationState = useEventPagination(
     filterState.filteredEvents,
@@ -179,37 +226,45 @@ export function useEvents() {
     filterState.selectedZone,
   );
 
-  useEventsSubscription(setEvents, setLiveNoticeText, setLoading);
-
   const simulateNewEvent = useCallback(() => {
-    const newEvent = generateSimulatedLiveEvent();
-    handleIncomingStreamEvent(newEvent, setEvents, setLiveNoticeText);
-  }, []);
+    prependEvent(generateSimulatedLiveEvent(), setEvents, setLiveNoticeText);
+  }, [setEvents, setLiveNoticeText]);
 
-  const confirmOk = useCallback((id: string) => {
-    setEvents((prev) =>
-      updateItem(prev, id, (e) => ({
-        ...e,
-        status: 'RESOLVED',
-        aiTag: 'An toàn',
-        aiTagColor: 'success',
-      })),
-    );
-  }, []);
+  const confirmOk = useCallback(
+    (id: string) => {
+      setEvents((prev) =>
+        updateItem(prev, id, (e) => ({
+          ...e,
+          status: 'RESOLVED',
+          aiTag: 'An toàn',
+          aiTagColor: 'success',
+        })),
+      );
+    },
+    [setEvents],
+  );
 
-  const confirmHelp = useCallback((id: string) => {
-    setEvents((prev) =>
-      updateItem(prev, id, (e) => ({ ...e, status: 'ESCALATED', priority: 'P0' })),
-    );
-  }, []);
+  const confirmHelp = useCallback(
+    (id: string) => {
+      setEvents((prev) =>
+        updateItem(prev, id, (e) => ({ ...e, status: 'ESCALATED', priority: 'P0' })),
+      );
+    },
+    [setEvents],
+  );
 
-  const toggleFalseAlarm = useCallback((id: string) => {
-    setEvents((prev) => updateItem(prev, id, (e) => ({ ...e, isFalseAlarm: !e.isFalseAlarm })));
-  }, []);
+  const toggleFalseAlarm = useCallback(
+    (id: string) => {
+      setEvents((prev) => updateItem(prev, id, (e) => ({ ...e, isFalseAlarm: !e.isFalseAlarm })));
+    },
+    [setEvents],
+  );
 
   return {
     events,
     isLoading,
+    error,
+    reload,
     liveNoticeText,
     simulateNewEvent,
     confirmOk,

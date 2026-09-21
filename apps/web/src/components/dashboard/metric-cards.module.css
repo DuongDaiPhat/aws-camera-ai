@@ -129,3 +129,14 @@
 .dotRed {
   background-color: #ef4444;
 }
+
+/* Bao loi khi khong doc duoc so lieu tong hop tu API */
+.errorNotice {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #b91c1c;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 10px 14px;
+}

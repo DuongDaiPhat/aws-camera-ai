@@ -2,23 +2,27 @@
 
 import { useState } from 'react';
 import type { UIEventItem } from '@/types';
-import { useAuth, useEvents } from '@/hooks';
+import { useAuth, useEvents, useEventStats } from '@/hooks';
 import { Sidebar, TopHeader } from '@/components/layout';
 import { MetricCards } from '@/components/dashboard/MetricCards';
 import { EventCard, EventDetailModal, EventFilter } from '@/components/events';
-import { EmptyState, Pagination } from '@/components/ui';
+import { EmptyState, ErrorState, Pagination } from '@/components/ui';
 import styles from './dashboard-view.module.css';
 
 function EventsListSection({
   isLoading,
+  error,
   events,
   onViewDetail,
   onResetFilter,
+  onRetry,
 }: {
   isLoading: boolean;
+  error: string | null;
   events: UIEventItem[];
   onViewDetail: (e: UIEventItem) => void;
   onResetFilter: () => void;
+  onRetry: () => void;
 }) {
   if (isLoading) {
     return (
@@ -26,6 +30,15 @@ function EventsListSection({
         <span className={styles.spinner} aria-hidden="true" />
         <span>Đang đồng bộ sự kiện camera…</span>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <ErrorState
+        message={`${error} Kiểm tra xem Orchestrator đã chạy chưa, sau đó bấm thử lại.`}
+        onRetry={onRetry}
+      />
     );
   }
 
@@ -45,6 +58,7 @@ function EventsListSection({
 export function DashboardView() {
   const { user, handleLogout } = useAuth();
   const {
+    events,
     filteredEvents,
     paginatedEvents,
     currentPage,
@@ -55,6 +69,8 @@ export function DashboardView() {
     totalFilteredItems,
     counts,
     isLoading,
+    error,
+    reload,
     activeFilterTab,
     setActiveFilterTab,
     selectedZone,
@@ -67,6 +83,10 @@ export function DashboardView() {
     resetFilters,
   } = useEvents();
 
+  // Sự kiện mới tới qua SSE làm số liệu cũ đi ngay, nên dùng số sự kiện đang giữ
+  // làm mốc để tải lại các thẻ tổng hợp.
+  const { stats, isLoading: isStatsLoading, error: statsError } = useEventStats(events.length);
+
   const [activeNav, setActiveNav] = useState('dashboard');
   const [selectedEventForModal, setSelectedEventForModal] = useState<UIEventItem | null>(null);
 
@@ -77,8 +97,8 @@ export function DashboardView() {
         activeNav={activeNav}
         onSelectNav={setActiveNav}
         onLogout={handleLogout}
-        unresolvedEventCount={counts.urgent}
-        onlineCameraCount={4}
+        unresolvedEventCount={stats?.pendingCount ?? counts.urgent}
+        onlineCameraCount={stats?.cameraOnlineCount ?? 0}
       />
 
       <div className={styles.mainContent}>
@@ -97,7 +117,7 @@ export function DashboardView() {
             </div>
           )}
 
-          <MetricCards unresolvedCount={counts.urgent > 0 ? 1 : 0} />
+          <MetricCards stats={stats} isLoading={isStatsLoading} error={statsError} />
 
           <section className={styles.eventsSection} aria-labelledby="events-title">
             <div className={styles.sectionHeader}>
@@ -119,12 +139,14 @@ export function DashboardView() {
 
             <EventsListSection
               isLoading={isLoading}
+              error={error}
               events={paginatedEvents}
               onViewDetail={setSelectedEventForModal}
               onResetFilter={resetFilters}
+              onRetry={reload}
             />
 
-            {!isLoading && filteredEvents.length > 0 && (
+            {!isLoading && !error && filteredEvents.length > 0 && (
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}

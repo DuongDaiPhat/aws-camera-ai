@@ -12,6 +12,9 @@ export type { EventType, EventStatus, PriorityLevel, UserRole, ConfirmationRespo
 
 export type EventSummary = components['schemas']['EventSummary'];
 export type EventDetail = components['schemas']['EventDetail'];
+export type EventMedia = components['schemas']['EventMedia'];
+export type EventStats = components['schemas']['EventStats'];
+export type AiResultItem = components['schemas']['AiResultItem'];
 
 export type AiTagColor = 'danger' | 'warning' | 'info' | 'success' | 'neutral';
 
