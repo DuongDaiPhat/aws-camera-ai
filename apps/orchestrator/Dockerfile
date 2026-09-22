@@ -35,4 +35,4 @@ COPY --from=build /workspace/node_modules ./node_modules
 COPY --from=build /workspace/apps/orchestrator/node_modules ./apps/orchestrator/node_modules
 EXPOSE 3001
 USER node
-CMD ["node", "dist/apps/orchestrator/src/main.js"]
+CMD ["node", "dist/main.js"]

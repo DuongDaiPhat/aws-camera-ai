@@ -4,9 +4,9 @@
   "private": true,
   "description": "NestJS orchestrator: MQTT consumer, escalation engine, REST API",
   "scripts": {
-    "dev": "nest start --watch",
+    "dev": "nest start --watch -p tsconfig.build.json",
     "build": "nest build",
-    "start:prod": "node dist/apps/orchestrator/src/main.js",
+    "start:prod": "node dist/main.js",
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" \"test/**/*.ts\" --fix",
     "typecheck": "tsc --noEmit",
