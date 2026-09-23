@@ -150,13 +150,16 @@ export interface components {
             message: string;
         } | null;
         EmbedResponse: {
+            /** @enum {string} */
+            provider: "local" | "rekognition";
+            selectedFaceIndex: number | null;
             /** @description float32 array da pack, base64. Null khi co loi. */
-            embeddingBase64?: string | null;
-            embeddingDim?: number | null;
+            embeddingBase64: string | null;
+            embeddingDim: number | null;
             /** @description Co nhieu phan tu khi anh chua nhieu khuon mat (US-09). */
-            faces?: components["schemas"]["BoundingBox"][];
+            faces: components["schemas"]["BoundingBox"][];
             modelVersion: string;
-            error?: components["schemas"]["InferenceError"];
+            error: components["schemas"]["InferenceError"];
         };
         /** @description Technical error has null personStatus and score. No-face/poor quality is UNDETERMINED with error=null. Loaded empty collection is UNKNOWN with similarity=null and labelConfidence=1 under empty-collection-v1; collection unavailable is a technical error. */
         MatchResponse: {

@@ -487,7 +487,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Danh sach nguoi quen */
+        /**
+         * Danh sach nguoi quen
+         * @description Danh sach thuoc user trong access token; khong suy dien quyen ho gia dinh.
+         */
         get: operations["listKnownFaces"];
         put?: never;
         /**
@@ -495,7 +498,9 @@ export interface paths {
          * @description FR-DEV-06: anh khong phat hien duoc khuon mat -> `422` voi
          *     `code = NO_FACE_DETECTED`.
          *     Anh co nhieu hon 1 khuon mat -> `422` voi `code = MULTIPLE_FACES`
-         *     kem `details.faces[]` de nguoi dung chon.
+         *     kem `details.images[]` de nguoi dung chon cho tung anh.
+         *     Chi ADMIN duoc tao. Owner lay tu access token, khong nhan tu client.
+         *     faceSelections la JSON array trong mot multipart text field.
          *     FR-DEV-08: he thong chi luu embedding, KHONG luu anh goc.
          */
         post: operations["createKnownFace"];
@@ -1344,6 +1349,8 @@ export interface components {
          *     va embedding khong bao gio duoc tra ra ngoai qua API.
          */
         KnownFace: {
+            /** @enum {string} */
+            recognitionStatus?: "READY" | "SYNC_PENDING";
             /** Format: uuid */
             id: string;
             personName: string;
@@ -1357,6 +1364,21 @@ export interface components {
             isActive: boolean;
             /** Format: date-time */
             createdAt: string;
+        };
+        FaceSelectionDetails: {
+            images: {
+                imageIndex: number;
+                code?: string;
+                faces: {
+                    faceIndex: number;
+                    boundingBox: {
+                        x: number;
+                        y: number;
+                        width: number;
+                        height: number;
+                    };
+                }[];
+            }[];
         };
         EventSummary: {
             /** Format: uuid */
@@ -2852,9 +2874,63 @@ export interface operations {
                     "application/json": components["schemas"]["KnownFace"];
                 };
             };
-            409: components["responses"]["Conflict"];
-            /** @description Anh khong dung yeu cau (FR-DEV-06) */
+            /** @description INVALID_IMAGE */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description KNOWN_FACE_NAME_EXISTS or KNOWN_FACE_LIMIT */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description IMAGE_TOO_LARGE */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NO_FACE_DETECTED, MULTIPLE_FACES, FACE_SELECTION_INVALID, FACE_IMAGES_INCONSISTENT. details follows FaceSelectionDetails when images require correction. */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description RATE_LIMITED */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FACE_PROVIDER_UNAVAILABLE */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2875,14 +2951,41 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Da xoa vinh vien */
+            /** @description Da xoa DB va ghi audit; collection dang cho dong bo. Khong coi la da xoa hoan tat. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        recognitionStatus: "SYNC_PENDING";
+                    };
+                };
+            };
+            /** @description Da xoa DB va dong bo collection */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
+            401: components["responses"]["Unauthorized"];
+            /** @description Chi ADMIN duoc xoa */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             404: components["responses"]["NotFound"];
+            /** @description FACE_PROVIDER_UNAVAILABLE */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     listEvents: {

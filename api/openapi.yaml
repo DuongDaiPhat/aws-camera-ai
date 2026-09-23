@@ -744,6 +744,7 @@ paths:
       tags: [known-faces]
       summary: Danh sach nguoi quen
       operationId: listKnownFaces
+      description: Danh sach thuoc user trong access token; khong suy dien quyen ho gia dinh.
       responses:
         "200":
           description: Danh sach nguoi quen
@@ -763,7 +764,9 @@ paths:
         FR-DEV-06: anh khong phat hien duoc khuon mat -> `422` voi
         `code = NO_FACE_DETECTED`.
         Anh co nhieu hon 1 khuon mat -> `422` voi `code = MULTIPLE_FACES`
-        kem `details.faces[]` de nguoi dung chon.
+        kem `details.images[]` de nguoi dung chon cho tung anh.
+        Chi ADMIN duoc tao. Owner lay tu access token, khong nhan tu client.
+        faceSelections la JSON array trong mot multipart text field.
         FR-DEV-08: he thong chi luu embedding, KHONG luu anh goc.
       operationId: createKnownFace
       requestBody:
@@ -774,7 +777,7 @@ paths:
               type: object
               required: [personName, images]
               properties:
-                personName: { type: string, maxLength: 120 }
+                personName: { type: string, minLength: 1, maxLength: 120 }
                 relationship: { type: string, maxLength: 60 }
                 linkedUserId: { type: string, format: uuid }
                 faceSelections:
@@ -793,9 +796,45 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/KnownFace" }
-        "409": { $ref: "#/components/responses/Conflict" }
+        "400":
+          {
+            description: INVALID_IMAGE,
+            content:
+              { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          {
+            description: FORBIDDEN,
+            content:
+              { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+          }
+        "409":
+          {
+            description: KNOWN_FACE_NAME_EXISTS or KNOWN_FACE_LIMIT,
+            content:
+              { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+          }
+        "413":
+          {
+            description: IMAGE_TOO_LARGE,
+            content:
+              { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+          }
+        "429":
+          {
+            description: RATE_LIMITED,
+            content:
+              { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+          }
+        "503":
+          {
+            description: FACE_PROVIDER_UNAVAILABLE,
+            content:
+              { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+          }
         "422":
-          description: Anh khong dung yeu cau (FR-DEV-06)
+          description: NO_FACE_DETECTED, MULTIPLE_FACES, FACE_SELECTION_INVALID, FACE_IMAGES_INCONSISTENT. details follows FaceSelectionDetails when images require correction.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorResponse" }
@@ -814,7 +853,19 @@ paths:
         Collection neu dang dung. Khong soft-delete. Ghi audit log.
       operationId: deleteKnownFace
       responses:
-        "204": { description: Da xoa vinh vien }
+        "204": { description: Da xoa DB va dong bo collection }
+        "202":
+          description: Da xoa DB va ghi audit; collection dang cho dong bo. Khong coi la da xoa hoan tat.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [recognitionStatus]
+                properties:
+                  recognitionStatus: { type: string, enum: [SYNC_PENDING] }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: Chi ADMIN duoc xoa }
+        "503": { description: FACE_PROVIDER_UNAVAILABLE }
         "404": { $ref: "#/components/responses/NotFound" }
 
   # ===================================================================
@@ -1975,6 +2026,9 @@ components:
       type: object
       required: [id, personName, provider, isActive, createdAt]
       properties:
+        recognitionStatus:
+          type: string
+          enum: [READY, SYNC_PENDING]
         id: { type: string, format: uuid }
         personName: { type: string }
         relationship: { type: ["string", "null"] }
@@ -1987,6 +2041,34 @@ components:
       description: |
         Khong co truong anh: FR-DEV-08 cam luu anh goc, chi luu embedding
         va embedding khong bao gio duoc tra ra ngoai qua API.
+
+    FaceSelectionDetails:
+      type: object
+      required: [images]
+      properties:
+        images:
+          type: array
+          items:
+            type: object
+            required: [imageIndex, faces]
+            properties:
+              imageIndex: { type: integer, minimum: 0, maximum: 4 }
+              code: { type: string }
+              faces:
+                type: array
+                items:
+                  type: object
+                  required: [faceIndex, boundingBox]
+                  properties:
+                    faceIndex: { type: integer, minimum: 0 }
+                    boundingBox:
+                      type: object
+                      required: [x, y, width, height]
+                      properties:
+                        x: { type: number, minimum: 0, maximum: 1 }
+                        y: { type: number, minimum: 0, maximum: 1 }
+                        width: { type: number, minimum: 0, maximum: 1 }
+                        height: { type: number, minimum: 0, maximum: 1 }
 
     # ---------------- Events ----------------
     EventSummary:
