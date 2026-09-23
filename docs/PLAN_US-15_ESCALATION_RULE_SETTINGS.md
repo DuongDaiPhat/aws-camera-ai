@@ -9,7 +9,7 @@
 - [US-11](PLAN_US-11_EVENT_AI_LABELS.md) cung cấp nhãn/confidence đúng module; [US-13](PLAN_US-13_ESCALATION_STATE_MACHINE.md) là consumer duy nhất quyết định trạng thái và deadline.
 - US-15 không trực tiếp gửi Telegram, cập nhật event status hoặc sửa deadline của event đang chờ.
 - Bảng `escalation_rules` và dữ liệu mặc định đã có trong [0001_init.sql](../db/migrations/0001_init.sql) và [0002_seed_escalation_rules.sql](../db/migrations/0002_seed_escalation_rules.sql); không tạo bảng/seed thứ hai và không sửa migration đã chạy.
-- Contract hiện có: `GET /escalation-rules`, `PUT /escalation-rules/{eventType}`, EscalationRule và UpdateEscalationRuleRequest trong [api/openapi.yaml](../api/openapi.yaml).
+- Contract hiện có: `GET /escalation-rules`, `PATCH /escalation-rules/{eventType}`, EscalationRule và UpdateEscalationThresholdsRequest trong [api/openapi.yaml](../api/openapi.yaml).
 - Tuân thủ [CODING_CONVENTION.md](conventions/CODING_CONVENTION.md) và [GIT_WORKFLOW.md](conventions/GIT_WORKFLOW.md). Trước khi làm, đọc AGENTS.md nếu có và kiểm tra working tree để giữ thay đổi ngoài phạm vi.
 
 ## 2. Bảng mặc định chuẩn
@@ -76,7 +76,7 @@ Giữ các endpoint hiện có:
 
 ```text
 GET /escalation-rules
-PUT /escalation-rules/{eventType}
+PATCH /escalation-rules/{eventType}
 ```
 
 ### GET
@@ -85,15 +85,12 @@ PUT /escalation-rules/{eventType}
 - Trả danh sách sắp xếp ổn định theo priority rồi eventType.
 - Mỗi item gồm: eventType, displayName tiếng Việt, priority, tLow, tHigh, tWaitSeconds, effectiveHighWaitSeconds, skipLoggedOnly, isEnabled, version, updatedAt, updatedByName nullable.
 - Không trả raw database metadata hoặc kênh bí mật.
-- Không cache HTTP quá 60 giây; sau PUT thành công client revalidate ngay.
+- Không cache HTTP quá 60 giây; sau PATCH thành công client revalidate ngay.
 
-### PUT
+### PATCH thresholds
 
 - Chỉ ADMIN; backend dùng actor từ JWT và ghi updated_by_user_id.
-- Vì endpoint là PUT, request phải mô tả đầy đủ phần mutable được contract cho phép. Để UI US-15 không ghi đè channels/flags ngoài phạm vi, sửa contract theo một trong hai cách và chọn duy nhất một:
-  1. Khuyến nghị: thu hẹp UpdateEscalationRuleRequest cho US-15 thành `tLow`, `tHigh`, `tWaitSeconds`, `expectedVersion`; priority/channels/flags chỉ đọc.
-  2. Nếu phải giữ full PUT cho US-19/notification settings, frontend gửi toàn resource cùng `expectedVersion`; service merge có whitelist và optimistic concurrency.
-- Plan này chọn phương án 1 để giảm lost update và đúng user story. Nếu consumer khác đã dùng full PUT trước khi triển khai, đổi sang PATCH riêng thay vì breaking change; cập nhật OpenAPI trước code.
+- Settings dùng PATCH cùng đường dẫn theo UpdateEscalationThresholdsRequest trong OpenAPI. Giữ PUT hiện có cho full-resource compatibility; không thu hẹp request PUT và không gửi channels/flags từ form thresholds.
 - Response trả canonical rule và version mới. `400` validation, `401`, `403`, `404`, `409` version conflict.
 - Chạy `pnpm api:lint`, `pnpm contracts:generate`; frontend import @cam/contracts, không viết tay API type.
 
@@ -128,10 +125,10 @@ Phương án ưu tiên: US-13 đọc rule từ PostgreSQL ở mỗi lần đánh
 Nếu profiling chứng minh cần cache:
 
 - Cache TTL tối đa 30 giây, key theo eventType/version.
-- PUT evict cache local sau commit; instance khác tự refresh trong TTL.
+- PATCH evict cache local sau commit; instance khác tự refresh trong TTL.
 - Cache miss đọc DB; không dùng stale value vô hạn khi refresh lỗi. Giữ last-known-good tối đa theo policy và log/metric; health DEGRADED nếu vượt 60 giây.
 - Không dùng setTimeout duy nhất để reload. Poll/cache phải phục hồi sau restart và dùng DB làm nguồn chuẩn.
-- Integration test chạy ít nhất hai Orchestrator instances hoặc hai cache instances để chứng minh node không nhận PUT vẫn thấy rule mới <=60 giây.
+- Integration test chạy ít nhất hai Orchestrator instances hoặc hai cache instances để chứng minh node không nhận PATCH vẫn thấy rule mới <=60 giây.
 
 Rule snapshot phải được US-13 lưu lúc đánh giá, gồm version, thresholds, wait và computed effective wait. Thay đổi sau đó không kéo dài/rút deadline event đang NOTIFIED.
 
@@ -177,7 +174,7 @@ apps/web/src/lib/escalation-rules-client.ts
 - WELLNESS hiển thị “Không áp dụng” cho thresholds và khóa inputs.
 - Input number step=0.01, vẫn validate tối đa 3 decimals; T_wait có suffix “giây”.
 - Lưu từng rule độc lập để không block toàn trang và giảm conflict. Nút Save chỉ bật khi dirty/valid; Cancel khôi phục canonical response.
-- Hiển thị loading, empty, 401/403, retryable error. Khi PUT thành công cập nhật version và thông báo `role=status`; không reload trang.
+- Hiển thị loading, empty, 401/403, retryable error. Khi PATCH thành công cập nhật version và thông báo `role=status`; không reload trang.
 - 400 map vào đúng field; 409 giữ draft, hiển thị so sánh server/latest và nút tải lại. Không silently overwrite.
 - Non-ADMIN xem read-only hoặc bị điều hướng theo policy; backend vẫn chặn write.
 - Responsive từ 360px, CSS Modules và design tokens hiện có; không chỉ dùng màu cho priority/error.
@@ -191,9 +188,9 @@ apps/web/src/lib/escalation-rules-client.ts
 | T_low>T_high, ngoài range, NaN, field lạ | 400, DB/version/audit không đổi                                    |
 | WELLNESS có threshold hoặc chỉ một null  | Reject; canonical vẫn null/null                                    |
 | T_wait 1/3600/0/3601/decimal             | Chỉ giới hạn hợp lệ được lưu                                       |
-| User không phải ADMIN                    | GET theo policy, PUT 403                                           |
+| User không phải ADMIN                    | GET theo policy, PATCH 403                                         |
 | Hai ADMIN sửa cùng version               | Một thành công, một 409; không lost update                         |
-| PUT thành công                           | Audit before/after, actor và version đúng                          |
+| PATCH thành công                         | Audit before/after, actor và version đúng                          |
 | Node A cập nhật, node B đánh giá event   | Rule mới được dùng trong <=60 giây, không restart                  |
 | Event đã NOTIFIED rồi rule đổi           | Deadline/rule snapshot cũ giữ nguyên                               |
 | Event mới sau đổi rule                   | Dùng version mới và computed wait đúng                             |
