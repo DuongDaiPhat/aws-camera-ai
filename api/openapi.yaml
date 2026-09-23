@@ -441,7 +441,7 @@ paths:
           description: Presigned URL cua anh preview
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/MediaUrl" }
+              schema: { $ref: "#/components/schemas/CameraPreview" }
         "404": { $ref: "#/components/responses/NotFound" }
         "503":
           description: Camera dang offline, khong lay duoc frame
@@ -560,6 +560,11 @@ paths:
                 personName: { type: string, maxLength: 120 }
                 relationship: { type: string, maxLength: 60 }
                 linkedUserId: { type: string, format: uuid }
+                faceSelections:
+                  type: array
+                  maxItems: 5
+                  description: Same image order as images; null means auto-select only if exactly one face. Required selections for ambiguous images are returned by validation. Resubmit original files; server does not retain them between requests.
+                  items: { type: ["integer", "null"], minimum: 0 }
                 images:
                   type: array
                   minItems: 1
@@ -759,12 +764,15 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Confirmation" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
         "409":
           description: Su kien da duoc xu ly boi nguoi khac
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ErrorResponse" }
+              schema: { $ref: "#/components/schemas/ConfirmationConflict" }
 
   /events/{eventId}/media:
     parameters:
@@ -880,6 +888,30 @@ paths:
         in: path
         required: true
         schema: { $ref: "#/components/schemas/EventType" }
+    patch:
+      tags: [escalation-rules]
+      summary: Update thresholds only (US-15)
+      operationId: updateEscalationThresholds
+      description: ADMIN only. Atomic version check; preserve channels/priority/flags. New events see committed changes within 60 seconds.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateEscalationThresholdsRequest" }
+      responses:
+        "200":
+          description: Updated rule
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EscalationRule" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: RULE_VERSION_CONFLICT; reload canonical rule before retry.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
     put:
       tags: [escalation-rules]
       summary: Cap nhat nguong va thoi gian cho
@@ -1043,6 +1075,8 @@ paths:
       responses:
         "202":
           description: Da tiep nhan, dang chuyen cho escalation engine
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { $ref: "#/components/responses/Conflict" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
 
@@ -1361,13 +1395,56 @@ components:
         isEnabled: { type: boolean }
         detectionEnabled: { type: boolean }
         retentionDays: { type: integer }
+        sourceType: { $ref: "#/components/schemas/CameraSourceType" }
+        runtimeStatus: { $ref: "#/components/schemas/CameraRuntimeStatus" }
+        configVersion: { type: integer, minimum: 1 }
+        syncStatus: { type: string, enum: [PENDING, APPLIED, FAILED] }
         zoneCount: { type: integer }
         createdAt: { type: string, format: date-time }
 
+    CameraSourceType:
+      type: string
+      enum: [RTSP, BROWSER_WEBCAM, VIDEO_FILE]
+    CameraRuntimeStatus:
+      type: string
+      enum: [NOT_CONFIGURED, STARTING, ONLINE, OFFLINE, FAILED, STOPPED]
+    CameraPreview:
+      allOf:
+        - $ref: "#/components/schemas/MediaUrl"
+        - type: object
+          required: [cameraId, width, height, capturedAt]
+          properties:
+            cameraId: { type: string, format: uuid }
+            width: { type: integer, minimum: 1 }
+            height: { type: integer, minimum: 1 }
+            capturedAt: { type: string, format: date-time }
+    CameraSourceSettings:
+      type: object
+      description: ADMIN input only. VIDEO_FILE uses an uploaded object ID, never a server path or shell command.
+      required: [sourceType]
+      properties:
+        sourceType: { $ref: "#/components/schemas/CameraSourceType" }
+        rtspUrl: { type: string, writeOnly: true }
+        videoObjectId: { type: string, format: uuid }
+        videoLoop: { type: boolean, default: true }
+      oneOf:
+        - required: [rtspUrl]
+          properties:
+            sourceType: { const: RTSP }
+        - properties:
+            sourceType: { const: BROWSER_WEBCAM }
+        - required: [videoObjectId]
+          properties:
+            sourceType: { const: VIDEO_FILE }
+
     CreateCameraRequest:
       type: object
-      required: [deviceId, name, slug, rtspUrl]
+      required: [deviceId, name, slug]
+      anyOf:
+        - required: [rtspUrl]
+        - required: [source]
       properties:
+        source: { $ref: "#/components/schemas/CameraSourceSettings" }
         deviceId: { type: string, format: uuid }
         name: { type: string, maxLength: 120 }
         slug: { type: string, pattern: "^[a-z][a-z0-9_]{2,63}$" }
@@ -1381,6 +1458,7 @@ components:
       type: object
       description: Khong doi duoc `slug` — doi slug se lam dut lien ket voi Frigate.
       properties:
+        source: { $ref: "#/components/schemas/CameraSourceSettings" }
         name: { type: string }
         rtspUrl: { type: string }
         fps: { type: integer, minimum: 1, maximum: 30 }
@@ -1495,6 +1573,7 @@ components:
             source: { type: string, enum: [FRIGATE, AI_SERVICE, SCHEDULER, MANUAL] }
             trackId: { type: ["string", "null"] }
             aiLabel: { type: ["string", "null"] }
+            aiProcessedAt: { type: ["string", "null"], format: date-time }
             aiModelVersion: { type: ["string", "null"] }
             aiResults:
               type: array
@@ -1522,7 +1601,7 @@ components:
           type: string
           enum: [M1_FACE, M2A_FALL, M2B_POSTURE, M3_FIRE, M4_ZONE, M5_WELLNESS]
         label: { type: string }
-        confidence: { type: number, minimum: 0, maximum: 1 }
+        confidence: { type: ["number", "null"], minimum: 0, maximum: 1 }
         modelVersion: { type: string }
         boundingBox:
           type: ["object", "null"]
@@ -1634,7 +1713,12 @@ components:
     ConfirmEventRequest:
       type: object
       required: [response]
+      description: Actor and timestamp come from authenticated server context. IM_OK/NEED_HELP only in NOTIFIED; ACKNOWLEDGED only in ESCALATED by an authorized emergency handler. Confirmation phases are independent.
       properties:
+        commandId:
+          type: string
+          format: uuid
+          description: Stable per action/retry. Identical replay returns original confirmation; changed payload conflicts. Legacy requests without this field still use first-confirmation protection.
         response: { $ref: "#/components/schemas/ConfirmationResponse" }
         note: { type: string, maxLength: 500 }
 
@@ -1652,6 +1736,28 @@ components:
         resultingStatus:
           $ref: "#/components/schemas/EventStatus"
           description: IM_OK -> RESOLVED, NEED_HELP -> ESCALATED (FR-ESC-03/04).
+
+    ConfirmationConflict:
+      allOf:
+        - $ref: "#/components/schemas/ErrorResponse"
+        - type: object
+          properties:
+            error:
+              type: object
+              required: [details]
+              properties:
+                code:
+                  type: string
+                  enum: [ALREADY_CONFIRMED, INVALID_STATE, IDEMPOTENCY_CONFLICT]
+                details:
+                  type: object
+                  required: [canonicalStatus, confirmation]
+                  properties:
+                    canonicalStatus: { $ref: "#/components/schemas/EventStatus" }
+                    confirmation:
+                      oneOf:
+                        - $ref: "#/components/schemas/Confirmation"
+                        - type: "null"
 
     Notification:
       type: object
@@ -1676,6 +1782,8 @@ components:
       type: object
       required: [eventType, priority, tWaitSeconds, isEnabled]
       properties:
+        version: { type: integer, minimum: 1 }
+        effectiveHighWaitSeconds: { type: integer, minimum: 1, readOnly: true }
         eventType: { $ref: "#/components/schemas/EventType" }
         priority: { $ref: "#/components/schemas/PriorityLevel" }
         tLow:
@@ -1704,6 +1812,17 @@ components:
         maxEscalationLevel: { type: integer, minimum: 1, maximum: 3 }
         isEnabled: { type: boolean }
         updatedAt: { type: string, format: date-time }
+
+    UpdateEscalationThresholdsRequest:
+      type: object
+      additionalProperties: false
+      required: [tLow, tHigh, tWaitSeconds, expectedVersion]
+      properties:
+        tLow: { type: ["number", "null"], minimum: 0, maximum: 1 }
+        tHigh: { type: ["number", "null"], minimum: 0, maximum: 1 }
+        tWaitSeconds: { type: integer, minimum: 1, maximum: 3600 }
+        expectedVersion: { type: integer, minimum: 1 }
+      description: tLow <= tHigh; WELLNESS_TIMEOUT requires both null. Other alert types require both numbers. Updates only future evaluations.
 
     UpdateEscalationRuleRequest:
       type: object
@@ -1790,12 +1909,18 @@ components:
 
     # ---------------- Internal ----------------
     AiResultRequest:
+      oneOf:
+        - $ref: "#/components/schemas/FaceResultSubmission"
+        - $ref: "#/components/schemas/ZoneResultSubmission"
+        - $ref: "#/components/schemas/OtherAiResultSubmission"
+
+    OtherAiResultSubmission:
       type: object
       required: [module, results, modelVersion, processedAt]
       properties:
         module:
           type: string
-          enum: [M1_FACE, M2A_FALL, M2B_POSTURE, M3_FIRE, M4_ZONE, M5_WELLNESS]
+          enum: [M2A_FALL, M2B_POSTURE, M3_FIRE, M5_WELLNESS]
         modelVersion: { type: string }
         results:
           type: array
@@ -1806,8 +1931,159 @@ components:
         error:
           type: ["object", "null"]
           description: |
-            Co gia tri khi suy luan that bai — orchestrator dat
-            status = AI_FAILED va van giu su kien (US-10, FR-LOG-05).
+            Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline.
           properties:
             code: { type: string }
             message: { type: string }
+    ResultIdentity:
+      type: object
+      required:
+        [
+          schemaVersion,
+          resultId,
+          eventId,
+          observationId,
+          revision,
+          module,
+          modelVersion,
+          processedAt,
+        ]
+      properties:
+        schemaVersion: { type: integer, const: 1 }
+        resultId: { type: string, format: uuid }
+        eventId: { type: string, format: uuid }
+        observationId: { type: string, minLength: 1 }
+        revision: { type: integer, minimum: 1 }
+        module: { type: string }
+        modelVersion: { type: string, minLength: 1 }
+        processedAt: { type: string, format: date-time }
+      description: eventId must match path. Same resultId and payload is replay-safe; changed payload is IDEMPOTENCY_CONFLICT. Persist before 202. Older revisions cannot replace newer results.
+
+    FaceResultMetadata:
+      type: object
+      additionalProperties: false
+      required: [similarity, thresholdUsed, confidencePolicyVersion, qualityReason]
+      properties:
+        similarity: { type: ["number", "null"], minimum: 0, maximum: 1 }
+        thresholdUsed: { type: number, minimum: 0, maximum: 1, default: 0.6 }
+        confidencePolicyVersion: { type: string, minLength: 1 }
+        qualityReason: { type: ["string", "null"] }
+
+    FaceResultItem:
+      type: object
+      required: [module, label, confidence, boundingBox, metadata]
+      properties:
+        module: { type: string, const: M1_FACE }
+        label: { type: string, enum: [KNOWN, UNKNOWN, UNDETERMINED] }
+        confidence: { type: ["number", "null"], minimum: 0, maximum: 1 }
+        boundingBox:
+          oneOf:
+            - $ref: "#/components/schemas/NormalizedBox"
+            - type: "null"
+        metadata: { $ref: "#/components/schemas/FaceResultMetadata" }
+      description: KNOWN confidence=similarity; UNKNOWN=1-similarity; loaded empty collection uses similarity=null and confidence=1 with empty-collection-v1. UNDETERMINED has null confidence/similarity and a qualityReason. Scores are not calibrated probabilities.
+
+    NormalizedBox:
+      type: object
+      required: [x, y, width, height]
+      description: Normalized coordinates; x+width and y+height must not exceed 1.
+      properties:
+        x: { type: number, minimum: 0, maximum: 1 }
+        y: { type: number, minimum: 0, maximum: 1 }
+        width: { type: number, minimum: 0, maximum: 1 }
+        height: { type: number, minimum: 0, maximum: 1 }
+
+    FaceResultSubmission:
+      allOf:
+        - $ref: "#/components/schemas/ResultIdentity"
+        - type: object
+          required: [requestId, collectionVersion, matchedKnownFaceId, results, error]
+          properties:
+            module: { type: string, const: M1_FACE }
+            requestId: { type: string, format: uuid }
+            collectionVersion: { type: integer, minimum: 1 }
+            personStatus: { $ref: "#/components/schemas/PersonStatus" }
+            matchedKnownFaceId: { type: ["string", "null"], format: uuid }
+            results:
+              type: array
+              maxItems: 1
+              items: { $ref: "#/components/schemas/FaceResultItem" }
+            error:
+              oneOf:
+                - $ref: "#/components/schemas/ResultError"
+                - type: "null"
+          oneOf:
+            - required: [personStatus]
+              properties:
+                results: { minItems: 1 }
+                error: { type: "null" }
+            - not: { required: [personStatus] }
+              properties:
+                results: { maxItems: 0 }
+                matchedKnownFaceId: { type: "null" }
+                error: { $ref: "#/components/schemas/ResultError" }
+      description: Successful label equals personStatus. KNOWN requires matchedKnownFaceId; other labels require null. Technical errors omit personStatus; AI_FAILED is event state, never a person label. Server verifies owner/model/collection and resolves name.
+
+    ResultError:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string, minLength: 1 }
+        message: { type: string }
+      description: Sanitized error; never contains credentials, images or embeddings.
+
+    ZoneResultMetadata:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          zoneId,
+          zoneNameSnapshot,
+          cameraId,
+          trackId,
+          observedAt,
+          enteredAt,
+          dwellSeconds,
+          minDwellSeconds,
+          scheduleActive,
+          zoneConfigVersion,
+          scoreSource,
+        ]
+      properties:
+        zoneId: { type: string, format: uuid }
+        zoneNameSnapshot: { type: string }
+        cameraId: { type: string, format: uuid }
+        trackId: { type: string }
+        observedAt: { type: string, format: date-time }
+        enteredAt: { type: string, format: date-time }
+        dwellSeconds: { type: number, minimum: 0 }
+        minDwellSeconds: { type: integer, minimum: 0, maximum: 300 }
+        scheduleActive: { type: boolean, const: true }
+        zoneConfigVersion: { type: integer, minimum: 1 }
+        scoreSource: { type: string, const: FRIGATE_PERSON_DETECTION }
+
+    ZoneResultSubmission:
+      allOf:
+        - $ref: "#/components/schemas/ResultIdentity"
+        - type: object
+          required: [results, error]
+          properties:
+            module: { type: string, const: M4_ZONE }
+            error: { type: "null" }
+            results:
+              type: array
+              minItems: 1
+              maxItems: 1
+              items:
+                type: object
+                required: [module, label, confidence, boundingBox, metadata]
+                properties:
+                  module: { type: string, const: M4_ZONE }
+                  label: { type: string, const: RESTRICTED_ZONE }
+                  confidence: { type: number, minimum: 0, maximum: 1 }
+                  boundingBox:
+                    oneOf:
+                      - $ref: "#/components/schemas/NormalizedBox"
+                      - type: "null"
+                  metadata: { $ref: "#/components/schemas/ZoneResultMetadata" }
+      description: Only submit enabled RESTRICTED zones with proven dwell and active schedule. Score comes from the matching Frigate person observation, never fabricated as 1. Missing score is diagnostic, not a risk result. Deduplicate event/zone/track; modelVersion identifies detector and metadata identifies config.

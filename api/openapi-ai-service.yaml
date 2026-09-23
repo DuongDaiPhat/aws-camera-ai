@@ -89,6 +89,12 @@ paths:
               required: [image]
               properties:
                 image: { type: string, format: binary }
+                selectedFaceIndex:
+                  {
+                    type: integer,
+                    minimum: 0,
+                    description: Index in deterministic detected-face order; reject invalid selection.,
+                  }
       responses:
         "200":
           description: Ket qua trich xuat
@@ -117,12 +123,23 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required: [image, eventId]
+              required: [image, eventId, requestId, ownerScopeId, collectionVersion]
               properties:
                 image: { type: string, format: binary }
                 eventId: { type: string, format: uuid }
+                requestId: { type: string, format: uuid }
+                ownerScopeId:
+                  {
+                    type: string,
+                    format: uuid,
+                    description: Derived by orchestrator from camera owner; never browser supplied.,
+                  }
+                collectionVersion: { type: integer, minimum: 1 }
                 threshold:
                   type: number
+                  minimum: 0
+                  maximum: 1
+                  default: 0.6
                   description: Ghi de nguong mac dinh; de trong thi dung cau hinh service.
       responses:
         "200":
@@ -139,7 +156,7 @@ paths:
     post:
       tags: [face]
       summary: Nap lai danh sach embedding nguoi quen vao bo nho service
-      description: Orchestrator goi sau khi them/xoa nguoi quen.
+      description: Atomic full snapshot replacement per owner/model after create/delete. Reject older version with 409; same version with identical contents is replay-safe. Empty faces means loaded empty collection, not unavailable collection.
       operationId: syncFaceCollection
       requestBody:
         required: true
@@ -147,8 +164,12 @@ paths:
           application/json:
             schema:
               type: object
-              required: [faces]
+              required: [faces, ownerScopeId, version, modelVersion, embeddingDim]
               properties:
+                ownerScopeId: { type: string, format: uuid }
+                version: { type: integer, minimum: 1 }
+                modelVersion: { type: string, minLength: 1 }
+                embeddingDim: { type: integer, minimum: 1 }
                 faces:
                   type: array
                   items:
@@ -167,10 +188,14 @@ paths:
               schema:
                 type: object
                 properties:
+                  ownerScopeId: { type: string, format: uuid }
+                  version: { type: integer, minimum: 1 }
                   loaded: { type: integer }
                   provider: { type: string, enum: [local, rekognition] }
         "401":
           description: Thieu hoac sai X-Internal-Token
+        "409":
+          description: COLLECTION_VERSION_CONFLICT
         "422":
           description: Danh sach faces sai dinh dang
 
@@ -275,6 +300,9 @@ components:
             - MODEL_NOT_LOADED
             - PROVIDER_UNAVAILABLE
             - TIMEOUT
+            - COLLECTION_NOT_READY
+            - COLLECTION_VERSION_CONFLICT
+            - INVALID_FACE_SELECTION
         message: { type: string }
 
     EmbedResponse:
@@ -294,11 +322,29 @@ components:
 
     MatchResponse:
       type: object
-      required: [personStatus, modelVersion, processedAt]
+      required:
+        [
+          requestId,
+          collectionVersion,
+          personStatus,
+          modelVersion,
+          processedAt,
+          similarity,
+          labelConfidence,
+          confidencePolicyVersion,
+          qualityReason,
+          error,
+        ]
+      description: Technical error has null personStatus and score. No-face/poor quality is UNDETERMINED with error=null. Loaded empty collection is UNKNOWN with similarity=null and labelConfidence=1 under empty-collection-v1; collection unavailable is a technical error.
       properties:
+        requestId: { type: string, format: uuid }
+        collectionVersion: { type: integer, minimum: 1 }
+        labelConfidence: { type: ["number", "null"], minimum: 0, maximum: 1 }
+        confidencePolicyVersion: { type: string }
+        qualityReason: { type: ["string", "null"] }
         personStatus:
-          type: string
-          enum: [KNOWN, UNKNOWN, UNDETERMINED]
+          type: ["string", "null"]
+          enum: [KNOWN, UNKNOWN, UNDETERMINED, null]
         matchedKnownFaceId: { type: ["string", "null"], format: uuid }
         matchedPersonName: { type: ["string", "null"] }
         similarity:
@@ -307,7 +353,10 @@ components:
           maximum: 1
           description: Do tuong dong cosine voi ban ghi khop nhat.
         thresholdUsed: { type: number }
-        boundingBox: { $ref: "#/components/schemas/BoundingBox" }
+        boundingBox:
+          oneOf:
+            - $ref: "#/components/schemas/BoundingBox"
+            - type: "null"
         modelVersion: { type: string }
         provider: { type: string, enum: [local, rekognition] }
         fellBackToLocal:
