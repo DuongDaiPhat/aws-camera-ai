@@ -233,6 +233,7 @@ X-Telegram-Bot-Api-Secret-Token: <secret cấu hình khi đăng ký webhook>
 | ------ | ---------------------------- | ------------ | ------------------------------- |
 | GET    | `/events`                    | US-06, US-21 | Lọc + phân trang                |
 | GET    | `/events/stream`             | US-06        | SSE, cập nhật thời gian thực    |
+| GET    | `/events/stats`              | US-06        | Số liệu cho thẻ dashboard       |
 | GET    | `/events/{id}`               | US-21        | Kèm media, AI results, lịch sử  |
 | PATCH  | `/events/{id}`               | US-21        | Đánh dấu báo động giả / giữ lại |
 | POST   | `/events/{id}/confirm`       | US-13        | "Tôi ổn" / "Cần giúp đỡ"        |

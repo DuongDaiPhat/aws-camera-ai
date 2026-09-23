@@ -1,13 +1,26 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { setAccessToken } from './api-client';
-import { fetchEvents, subscribeEventsStream, toUIEventItem } from './events-client';
-import type { EventSummary } from '@/types';
+import {
+  fetchEventDetail,
+  fetchEvents,
+  fetchEventStats,
+  subscribeEventsStream,
+  toUIEventItem,
+} from './events-client';
+import type { EventStats, EventSummary } from '@/types';
 
 afterEach(() => {
   setAccessToken(null);
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
+
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
 
 describe('toUIEventItem', () => {
   it('chuyển đổi sự kiện khói/lửa chính xác với aiTag và nhãn nguy hiểm', () => {
@@ -44,6 +57,38 @@ describe('toUIEventItem', () => {
     expect(uiItem.cameraCode).toBe('CAM 01');
   });
 
+  it('gắn nhãn "Phát hiện người" kèm độ tin cậy cho sự kiện từ Frigate (US-03)', () => {
+    const summary: EventSummary = {
+      id: 'ev-person',
+      eventType: 'PERSON_DETECTED',
+      priority: 'P3',
+      status: 'DETECTED',
+      confidence: 0.84,
+      detectedAt: new Date().toISOString(),
+      camera: { id: 'cam-3', name: 'Camera 03' },
+      thumbnailUrl: 'https://minio.local/snapshot.jpg',
+    };
+
+    const uiItem = toUIEventItem(summary);
+    expect(uiItem.aiTag).toBe('Phát hiện người 84%');
+    expect(uiItem.aiTagColor).toBe('info');
+    expect(uiItem.cameraCode).toBe('CAM 03');
+    expect(uiItem.thumbnailUrl).toBe('https://minio.local/snapshot.jpg');
+  });
+
+  it('bỏ phần trăm khi backend chưa có confidence', () => {
+    const summary: EventSummary = {
+      id: 'ev-person-2',
+      eventType: 'PERSON_DETECTED',
+      priority: 'P3',
+      status: 'DETECTED',
+      confidence: null,
+      detectedAt: new Date().toISOString(),
+    };
+
+    expect(toUIEventItem(summary).aiTag).toBe('Phát hiện người');
+  });
+
   it('chuyển đổi sự kiện đã giải quyết thành nhãn An toàn', () => {
     const summary: EventSummary = {
       id: 'ev-3',
@@ -72,35 +117,67 @@ describe('fetchEvents', () => {
       },
     ];
 
-    const fetchMock = vi.fn<typeof fetch>().mockResolvedValueOnce(
-      new Response(JSON.stringify({ data: mockEvents }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
-    );
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ data: mockEvents, meta: { total: 1 } }));
     vi.stubGlobal('fetch', fetchMock);
 
     const result = await fetchEvents();
-    expect(result.length).toBe(1);
-    expect(result[0]?.id).toBe('ev-api-1');
-    expect(result[0]?.aiTag).toBe('Người lạ');
+    expect(result.events.length).toBe(1);
+    expect(result.total).toBe(1);
+    expect(result.events[0]?.id).toBe('ev-api-1');
+    expect(result.events[0]?.aiTag).toBe('Người lạ');
   });
 
-  it('fallback về mock data khi API gặp lỗi', async () => {
+  it('ném lỗi khi API hỏng để dashboard hiện trạng thái lỗi thay vì dữ liệu giả', async () => {
     const fetchMock = vi.fn<typeof fetch>().mockRejectedValueOnce(new Error('Network error'));
     vi.stubGlobal('fetch', fetchMock);
 
-    const result = await fetchEvents();
-    expect(result.length).toBeGreaterThan(0);
-    expect(result[0]?.id).toBeDefined();
+    await expect(fetchEvents()).rejects.toThrow('Network error');
+  });
+});
+
+describe('fetchEventDetail', () => {
+  it('gọi đúng endpoint chi tiết sự kiện', async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ id: 'ev-1', media: [] }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const detail = await fetchEventDetail('ev-1');
+
+    expect(detail.id).toBe('ev-1');
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('/events/ev-1');
+  });
+});
+
+describe('fetchEventStats', () => {
+  it('trả về số liệu tổng hợp cho các thẻ dashboard', async () => {
+    const stats: EventStats = {
+      windowHours: 24,
+      totalEvents: 7,
+      personDetectedCount: 5,
+      pendingCount: 2,
+      resolvedCount: 4,
+      falseAlarmCount: 1,
+      cameraOnlineCount: 3,
+      cameraTotalCount: 4,
+      byType: [{ eventType: 'PERSON_DETECTED', count: 5 }],
+      byPriority: [{ priority: 'P3', count: 5 }],
+    };
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValueOnce(jsonResponse(stats));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await fetchEventStats();
+
+    expect(result.personDetectedCount).toBe(5);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('/events/stats');
   });
 });
 
 describe('subscribeEventsStream', () => {
-  it('đăng ký lắng nghe SSE và gọi callback khi có message', () => {
-    setAccessToken('valid-token-123');
-
-    let capturedListener: ((event: MessageEvent) => void) | null = null;
+  function stubEventSource() {
+    const listeners = new Map<string, (event: MessageEvent) => void>();
     const mockClose = vi.fn();
 
     class MockEventSource {
@@ -109,9 +186,7 @@ describe('subscribeEventsStream', () => {
         this.url = url;
       }
       addEventListener(event: string, listener: (event: MessageEvent) => void): void {
-        if (event === 'event.created') {
-          capturedListener = listener;
-        }
+        listeners.set(event, listener);
       }
       close(): void {
         mockClose();
@@ -121,24 +196,49 @@ describe('subscribeEventsStream', () => {
     vi.stubGlobal('EventSource', MockEventSource);
     vi.stubGlobal('window', { EventSource: MockEventSource });
 
-    const onEvent = vi.fn();
-    const unsubscribe = subscribeEventsStream(onEvent);
+    return { listeners, mockClose };
+  }
 
-    expect(capturedListener).not.toBeNull();
+  const incoming: EventSummary = {
+    id: 'ev-stream-1',
+    eventType: 'PERSON_DETECTED',
+    priority: 'P3',
+    status: 'DETECTED',
+    detectedAt: new Date().toISOString(),
+  };
 
-    const incoming: EventSummary = {
-      id: 'ev-stream-1',
-      eventType: 'FIRE_SMOKE_DETECTED',
-      priority: 'P0',
-      status: 'DETECTED',
-      detectedAt: new Date().toISOString(),
-    };
+  it('gọi onCreated khi nhận message event.created', () => {
+    setAccessToken('valid-token-123');
+    const { listeners, mockClose } = stubEventSource();
 
-    capturedListener!({ data: JSON.stringify(incoming) } as MessageEvent);
-    expect(onEvent).toHaveBeenCalledTimes(1);
-    expect(onEvent).toHaveBeenCalledWith(expect.objectContaining({ id: 'ev-stream-1' }));
+    const onCreated = vi.fn();
+    const onUpdated = vi.fn();
+    const unsubscribe = subscribeEventsStream({ onCreated, onUpdated });
+
+    listeners.get('event.created')!({ data: JSON.stringify(incoming) } as MessageEvent);
+
+    expect(onCreated).toHaveBeenCalledWith(expect.objectContaining({ id: 'ev-stream-1' }));
+    expect(onUpdated).not.toHaveBeenCalled();
 
     unsubscribe();
     expect(mockClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('gọi onUpdated khi snapshot về muộn và backend phát event.updated', () => {
+    setAccessToken('valid-token-123');
+    const { listeners } = stubEventSource();
+
+    const onCreated = vi.fn();
+    const onUpdated = vi.fn();
+    subscribeEventsStream({ onCreated, onUpdated });
+
+    listeners.get('event.updated')!({
+      data: JSON.stringify({ ...incoming, thumbnailUrl: 'https://minio.local/snapshot.jpg' }),
+    } as MessageEvent);
+
+    expect(onUpdated).toHaveBeenCalledWith(
+      expect.objectContaining({ thumbnailUrl: 'https://minio.local/snapshot.jpg' }),
+    );
+    expect(onCreated).not.toHaveBeenCalled();
   });
 });

@@ -654,6 +654,27 @@ paths:
                         items: { $ref: "#/components/schemas/EventSummary" }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
+  /events/stats:
+    get:
+      tags: [events]
+      summary: So lieu tong hop cho dashboard
+      description: |
+        FR-DSH-01 — the so lieu tren dau dashboard (US-06).
+        Dem tren cua so `windowHours` gio gan nhat, mac dinh 24 gio.
+      operationId: getEventStats
+      parameters:
+        - name: windowHours
+          in: query
+          description: Cua so thong ke tinh nguoc tu hien tai.
+          schema: { type: integer, minimum: 1, maximum: 168, default: 24 }
+      responses:
+        "200":
+          description: So lieu tong hop
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EventStats" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
   /events/stream:
     get:
       tags: [events]
@@ -1548,6 +1569,67 @@ components:
         actorName: { type: ["string", "null"] }
         channel: { $ref: "#/components/schemas/NotificationChannel" }
         createdAt: { type: string, format: date-time }
+
+    EventStats:
+      type: object
+      description: FR-DSH-01 — so lieu tong hop cho cac the tren dau dashboard (US-06).
+      required:
+        - windowHours
+        - totalEvents
+        - personDetectedCount
+        - pendingCount
+        - resolvedCount
+        - falseAlarmCount
+        - cameraOnlineCount
+        - cameraTotalCount
+        - byType
+        - byPriority
+      properties:
+        windowHours:
+          type: integer
+          description: Cua so thong ke tinh nguoc tu hien tai.
+        totalEvents: { type: integer }
+        personDetectedCount:
+          type: integer
+          description: So su kien co nguoi (PERSON_DETECTED, UNKNOWN_PERSON, RESTRICTED_ZONE) — US-03.
+        pendingCount:
+          type: integer
+          description: DETECTED / NOTIFIED / ESCALATED — con cho nguoi dung xu ly.
+        resolvedCount:
+          type: integer
+          description: RESOLVED / CLOSED.
+        falseAlarmCount: { type: integer }
+        cameraOnlineCount:
+          type: integer
+          description: Camera dang bat va thuoc thiet bi co status ONLINE.
+        cameraTotalCount: { type: integer }
+        latestEventAt: { type: ["string", "null"], format: date-time }
+        latestPendingEvent:
+          type: ["object", "null"]
+          description: Su kien chua xu ly gan nhat, dung cho dong mo ta the "Can chu y ngay".
+          properties:
+            id: { type: string, format: uuid }
+            eventType: { $ref: "#/components/schemas/EventType" }
+            priority: { $ref: "#/components/schemas/PriorityLevel" }
+            cameraName: { type: ["string", "null"] }
+            zoneName: { type: ["string", "null"] }
+            detectedAt: { type: string, format: date-time }
+        byType:
+          type: array
+          items:
+            type: object
+            required: [eventType, count]
+            properties:
+              eventType: { $ref: "#/components/schemas/EventType" }
+              count: { type: integer }
+        byPriority:
+          type: array
+          items:
+            type: object
+            required: [priority, count]
+            properties:
+              priority: { $ref: "#/components/schemas/PriorityLevel" }
+              count: { type: integer }
 
     ConfirmEventRequest:
       type: object

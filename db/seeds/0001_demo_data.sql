@@ -34,7 +34,8 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO cameras (id, device_id, name, slug, rtsp_url, detect_width, detect_height, fps) VALUES 
 ('22222222-2222-2222-2222-222222222221', '11111111-1111-1111-1111-111111111111', 'Phong khach', 'cam_living_room', 'rtsp://localhost:8554/cam_living_room', 1280, 720, 5),
 ('22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'Bep', 'cam_kitchen', 'rtsp://localhost:8554/cam_kitchen', 1280, 720, 5),
-('22222222-2222-2222-2222-222222222223', '11111111-1111-1111-1111-111111111111', 'test', 'cam_video', 'rtsp://localhost:8554/test_cam', 1280, 720, 5)
+-- slug PHAI trung camera key trong infra/frigate/config.yml, neu khong event MQTT se mat camera_id
+('22222222-2222-2222-2222-222222222223', '11111111-1111-1111-1111-111111111111', 'Camera thu nghiem', 'cam_test', 'rtsp://localhost:8554/cam_test', 1280, 720, 5)
 ON CONFLICT (slug) DO NOTHING;
 
 -- 4. Thêm Zones

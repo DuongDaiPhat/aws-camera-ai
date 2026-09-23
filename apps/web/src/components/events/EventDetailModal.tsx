@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { UIEventItem, EventDetail } from '@/lib/mock-events';
-import { getMockEventDetail } from '@/lib/mock-events';
+import type { EventDetail, EventMedia, UIEventItem } from '@/types';
+import { fetchEventDetail } from '@/lib/events-client';
+import { formatExactTime, getEventTypeLabel, getPriorityInfo } from '@/lib/format';
 import styles from './event-detail-modal.module.css';
 
 interface EventDetailModalProps {
@@ -13,63 +14,197 @@ interface EventDetailModalProps {
   onToggleFalseAlarm?: (eventId: string) => void;
 }
 
-function SnapshotPreview({ event }: { event: UIEventItem }) {
+const PERSON_STATUS_LABELS: Record<string, string> = {
+  KNOWN: 'Người quen',
+  UNKNOWN: 'Người lạ',
+  UNDETERMINED: 'Chưa xác định được',
+};
+
+const EVENT_STATUS_LABELS: Record<string, string> = {
+  DETECTED: 'Vừa phát hiện',
+  LOGGED_ONLY: 'Chỉ ghi nhận',
+  NOTIFIED: 'Đã gửi cảnh báo',
+  ESCALATED: 'Đã leo thang',
+  RESOLVED: 'Đã xác nhận an toàn',
+  CLOSED: 'Đã đóng',
+  AI_FAILED: 'AI không phân tích được',
+};
+
+function findMediaByType(media: EventMedia[] | undefined, mediaType: EventMedia['mediaType']) {
+  return media?.find((item) => item.mediaType === mediaType) ?? null;
+}
+
+/**
+ * Khung ảnh/video của sự kiện. Ưu tiên ảnh snapshot đầy đủ lấy từ
+ * `/events/{id}/media`, nếu chưa có thì dùng thumbnail đã tải ở danh sách.
+ */
+function SnapshotPreview({ event, detail }: { event: UIEventItem; detail: EventDetail | null }) {
+  const [hasImageError, setImageError] = useState(false);
+  const snapshot = findMediaByType(detail?.media, 'SNAPSHOT');
+  const snapshotUrl = snapshot?.url ?? event.thumbnailUrl ?? null;
+
+  useEffect(() => {
+    setImageError(false);
+  }, [snapshotUrl]);
+
   return (
-    <div className={styles.snapshotContainer} aria-hidden="true">
-      <div className={styles.snapshotGrid} />
+    <div className={styles.snapshotContainer}>
+      {snapshotUrl && !hasImageError ? (
+        <img
+          className={styles.snapshotImage}
+          src={snapshotUrl}
+          alt={`Ảnh chụp sự kiện tại ${event.camera?.name ?? 'camera'}`}
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <>
+          <div className={styles.snapshotGrid} aria-hidden="true" />
+          <p className={styles.snapshotMissing}>
+            {hasImageError
+              ? 'Không tải được ảnh snapshot (liên kết có thể đã hết hạn).'
+              : 'Sự kiện này chưa có ảnh snapshot từ camera.'}
+          </p>
+        </>
+      )}
+
       <div className={styles.camWatermark}>
-        <span className={styles.liveRecDot} />
+        <span className={styles.liveRecDot} aria-hidden="true" />
         <span>
           {event.camera?.name || 'Camera'} • {event.cameraCode}
         </span>
       </div>
-      <div className={styles.boundingBox}>
-        <span className={styles.bboxLabel}>{event.aiTag}</span>
-      </div>
-      <div className={styles.timeWatermark}>
-        {new Date(event.detectedAt).toLocaleString('vi-VN')}
+      <div className={styles.timeWatermark}>{formatExactTime(event.detectedAt)}</div>
+    </div>
+  );
+}
+
+function ClipPlayer({ detail }: { detail: EventDetail | null }) {
+  const clip = findMediaByType(detail?.media, 'CLIP');
+  if (!clip) return null;
+
+  return (
+    <div className={styles.aiSection}>
+      <h3 className={styles.sectionTitle}>Video clip của sự kiện</h3>
+      {/* Clip ghi tu camera nen khong co phu de di kem */}
+      <video className={styles.clipPlayer} src={clip.url} controls preload="metadata" />
+    </div>
+  );
+}
+
+function DetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className={styles.detailItem}>
+      <span className={styles.detailLabel}>{label}</span>
+      <span className={styles.detailValue}>{value}</span>
+    </div>
+  );
+}
+
+function EventPropertyGrid({ event, detail }: { event: UIEventItem; detail: EventDetail | null }) {
+  const priorityInfo = getPriorityInfo(event.priority);
+  const confidenceText =
+    typeof event.confidence === 'number' ? `${Math.round(event.confidence * 100)}%` : 'Chưa có';
+  const personStatusText = event.personStatus
+    ? (PERSON_STATUS_LABELS[event.personStatus] ?? event.personStatus)
+    : 'Chưa phân tích';
+  const location = [event.camera?.name, event.zone?.name].filter(Boolean).join(' — ');
+
+  return (
+    <div className={styles.detailGrid}>
+      <DetailItem label="Loại sự kiện" value={getEventTypeLabel(event.eventType)} />
+      <DetailItem label="Mức độ ưu tiên" value={priorityInfo.label} />
+      <DetailItem label="Vị trí" value={location || 'Chưa gán camera'} />
+      <DetailItem label="Độ tin cậy AI" value={confidenceText} />
+      <DetailItem
+        label="Trạng thái hiện tại"
+        value={EVENT_STATUS_LABELS[event.status] ?? event.status}
+      />
+      <DetailItem label="Thời điểm phát hiện" value={formatExactTime(event.detectedAt)} />
+      <DetailItem label="Nhận diện người" value={personStatusText} />
+      <DetailItem label="Người quen khớp" value={event.matchedPersonName ?? 'Không'} />
+      <DetailItem label="Nguồn sự kiện" value={detail?.source ?? 'Đang tải…'} />
+      <DetailItem label="Mã track Frigate" value={detail?.trackId ?? 'Không có'} />
+    </div>
+  );
+}
+
+function AiResultSection({ detail }: { detail: EventDetail | null }) {
+  const results = detail?.aiResults ?? [];
+  if (results.length === 0) return null;
+
+  return (
+    <div className={styles.aiSection}>
+      <h3 className={styles.sectionTitle}>Kết quả phân tích mô hình AI</h3>
+      <div className={styles.aiPills}>
+        {results.map((result, index) => (
+          <div key={`${result.module}-${index}`} className={styles.aiPill}>
+            <span>{result.module}:</span>
+            <strong>{result.label}</strong>
+            <span>({Math.round(result.confidence * 100)}%)</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-function EventPropertyGrid({ event }: { event: UIEventItem }) {
+function StatusHistorySection({ detail }: { detail: EventDetail | null }) {
+  const history = detail?.statusHistory ?? [];
+  if (history.length === 0) return null;
+
   return (
-    <div className={styles.detailGrid}>
-      <div className={styles.detailItem}>
-        <span className={styles.detailLabel}>Loại sự kiện</span>
-        <span className={styles.detailValue}>{event.eventType}</span>
-      </div>
-      <div className={styles.detailItem}>
-        <span className={styles.detailLabel}>Mức độ ưu tiên</span>
-        <span className={styles.detailValue}>
-          {event.priority} {event.priority === 'P0' ? '(Khẩn cấp)' : '(Cảnh báo)'}
-        </span>
-      </div>
-      <div className={styles.detailItem}>
-        <span className={styles.detailLabel}>Vị trí</span>
-        <span className={styles.detailValue}>
-          {event.camera?.name} — {event.zone?.name || 'Khu vực chính'}
-        </span>
-      </div>
-      <div className={styles.detailItem}>
-        <span className={styles.detailLabel}>Độ tin cậy AI</span>
-        <span className={styles.detailValue}>
-          {event.confidence ? `${(event.confidence * 100).toFixed(0)}%` : 'N/A'}
-        </span>
-      </div>
-      <div className={styles.detailItem}>
-        <span className={styles.detailLabel}>Trạng thái hiện tại</span>
-        <span className={styles.detailValue}>{event.status}</span>
-      </div>
-      <div className={styles.detailItem}>
-        <span className={styles.detailLabel}>Thời điểm phát hiện</span>
-        <span className={styles.detailValue}>
-          {new Date(event.detectedAt).toLocaleString('vi-VN')}
-        </span>
-      </div>
+    <div className={styles.aiSection}>
+      <h3 className={styles.sectionTitle}>Lịch sử trạng thái</h3>
+      <ul className={styles.historyList}>
+        {history.map((entry, index) => (
+          <li key={`${entry.toStatus}-${index}`} className={styles.historyItem}>
+            <span className={styles.historyTime}>{formatExactTime(entry.createdAt)}</span>
+            <span>
+              {EVENT_STATUS_LABELS[entry.toStatus] ?? entry.toStatus}
+              {entry.reason ? ` — ${entry.reason}` : ''}
+              {entry.actorName ? ` (${entry.actorName})` : ''}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
+}
+
+function useEventDetail(event: UIEventItem | null) {
+  const [detail, setDetail] = useState<EventDetail | null>(null);
+  const [isLoading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!event) {
+      setDetail(null);
+      setError(null);
+      return;
+    }
+
+    let isMounted = true;
+    setLoading(true);
+    setError(null);
+
+    fetchEventDetail(event.id)
+      .then((data) => {
+        if (isMounted) setDetail(data);
+      })
+      .catch(() => {
+        // Vẫn hiển thị được các thông số đã có ở danh sách, chỉ thiếu phần chi tiết.
+        if (isMounted) setError('Không tải được chi tiết đầy đủ của sự kiện này.');
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [event]);
+
+  return { detail, isLoading, error };
 }
 
 export function EventDetailModal({
@@ -79,17 +214,9 @@ export function EventDetailModal({
   onConfirmHelp,
   onToggleFalseAlarm,
 }: EventDetailModalProps) {
-  const [detail, setDetail] = useState<EventDetail | null>(null);
+  const { detail, isLoading, error } = useEventDetail(event);
 
-  useEffect(() => {
-    if (!event) {
-      setDetail(null);
-      return;
-    }
-    setDetail(getMockEventDetail(event));
-  }, [event]);
-
-  if (!event || !detail) return null;
+  if (!event) return null;
 
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -109,21 +236,22 @@ export function EventDetailModal({
         </div>
 
         <div className={styles.modalBody}>
-          <SnapshotPreview event={event} />
-          <EventPropertyGrid event={event} />
+          {isLoading && (
+            <p className={styles.inlineNotice} role="status">
+              Đang tải chi tiết sự kiện…
+            </p>
+          )}
+          {error && (
+            <p className={styles.inlineNoticeError} role="alert">
+              {error}
+            </p>
+          )}
 
-          <div className={styles.aiSection}>
-            <h3 className={styles.sectionTitle}>Kết quả phân tích mô hình AI</h3>
-            <div className={styles.aiPills}>
-              {detail.aiResults?.map((res, i) => (
-                <div key={i} className={styles.aiPill}>
-                  <span>{res.module}:</span>
-                  <strong>{res.label}</strong>
-                  <span>({(res.confidence * 100).toFixed(0)}%)</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <SnapshotPreview event={event} detail={detail} />
+          <EventPropertyGrid event={event} detail={detail} />
+          <ClipPlayer detail={detail} />
+          <AiResultSection detail={detail} />
+          <StatusHistorySection detail={detail} />
         </div>
 
         <div className={styles.modalFooter}>

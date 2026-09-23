@@ -355,6 +355,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/events/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * So lieu tong hop cho dashboard
+         * @description FR-DSH-01 — the so lieu tren dau dashboard (US-06).
+         *     Dem tren cua so `windowHours` gio gan nhat, mac dinh 24 gio.
+         */
+        get: operations["getEventStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/stream": {
         parameters: {
             query?: never;
@@ -1048,6 +1069,43 @@ export interface components {
             channel?: components["schemas"]["NotificationChannel"];
             /** Format: date-time */
             createdAt: string;
+        };
+        /** @description FR-DSH-01 — so lieu tong hop cho cac the tren dau dashboard (US-06). */
+        EventStats: {
+            /** @description Cua so thong ke tinh nguoc tu hien tai. */
+            windowHours: number;
+            totalEvents: number;
+            /** @description So su kien co nguoi (PERSON_DETECTED, UNKNOWN_PERSON, RESTRICTED_ZONE) — US-03. */
+            personDetectedCount: number;
+            /** @description DETECTED / NOTIFIED / ESCALATED — con cho nguoi dung xu ly. */
+            pendingCount: number;
+            /** @description RESOLVED / CLOSED. */
+            resolvedCount: number;
+            falseAlarmCount: number;
+            /** @description Camera dang bat va thuoc thiet bi co status ONLINE. */
+            cameraOnlineCount: number;
+            cameraTotalCount: number;
+            /** Format: date-time */
+            latestEventAt?: string | null;
+            /** @description Su kien chua xu ly gan nhat, dung cho dong mo ta the "Can chu y ngay". */
+            latestPendingEvent?: {
+                /** Format: uuid */
+                id?: string;
+                eventType?: components["schemas"]["EventType"];
+                priority?: components["schemas"]["PriorityLevel"];
+                cameraName?: string | null;
+                zoneName?: string | null;
+                /** Format: date-time */
+                detectedAt?: string;
+            } | null;
+            byType: {
+                eventType: components["schemas"]["EventType"];
+                count: number;
+            }[];
+            byPriority: {
+                priority: components["schemas"]["PriorityLevel"];
+                count: number;
+            }[];
         };
         ConfirmEventRequest: {
             response: components["schemas"]["ConfirmationResponse"];
@@ -2005,6 +2063,30 @@ export interface operations {
                     "application/json": components["schemas"]["PaginatedResponse"] & {
                         data?: components["schemas"]["EventSummary"][];
                     };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getEventStats: {
+        parameters: {
+            query?: {
+                /** @description Cua so thong ke tinh nguoc tu hien tai. */
+                windowHours?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description So lieu tong hop */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventStats"];
                 };
             };
             401: components["responses"]["Unauthorized"];

@@ -273,7 +273,12 @@ describe('US-08 - Integration MQTT đến PostgreSQL', () => {
       new UnusedStorageService(),
     );
 
-    consumer = new MqttConsumerService(configService, eventsRepository, mediaService);
+    consumer = new MqttConsumerService(
+      configService,
+      eventsRepository,
+      eventMediaRepository,
+      mediaService,
+    );
     consumer.connect();
   }
 

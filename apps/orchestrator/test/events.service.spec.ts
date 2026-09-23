@@ -1,9 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToInstance } from 'class-transformer';
-import { UnauthorizedException } from '@nestjs/common';
+import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { EventsService } from '../src/events/events.service';
-import { EventsRepository, EventListItemRecord } from '../src/events/events.repository';
+import {
+  EventsRepository,
+  EventDetailRecord,
+  EventListItemRecord,
+} from '../src/events/events.repository';
 import { ListEventsQueryDto } from '../src/events/dto/list-events-query.dto';
+import { MediaService } from '../src/media/media.service';
 import { STORAGE_SERVICE, IStorageService } from '../src/storage/storage.interface';
 import { TOKEN_SERVICE, TokenService } from '../src/auth/auth.types';
 
@@ -12,6 +17,7 @@ describe('EventsService (US-06)', () => {
   let eventsRepository: jest.Mocked<EventsRepository>;
   let storageService: jest.Mocked<IStorageService>;
   let tokenService: jest.Mocked<TokenService>;
+  let mediaService: jest.Mocked<MediaService>;
 
   const mockRecord: EventListItemRecord = {
     id: '11111111-1111-1111-1111-111111111111',
@@ -34,6 +40,13 @@ describe('EventsService (US-06)', () => {
     const mockEventsRepository = {
       listEvents: jest.fn(),
       findEventSummaryById: jest.fn(),
+      findEventDetailById: jest.fn(),
+      listStatusHistoryByEventId: jest.fn(),
+      getEventStats: jest.fn(),
+    };
+
+    const mockMediaService = {
+      listEventMediaWithUrls: jest.fn().mockResolvedValue([]),
     };
 
     const mockStorageService = {
@@ -51,6 +64,7 @@ describe('EventsService (US-06)', () => {
       providers: [
         EventsService,
         { provide: EventsRepository, useValue: mockEventsRepository },
+        { provide: MediaService, useValue: mockMediaService },
         { provide: STORAGE_SERVICE, useValue: mockStorageService },
         { provide: TOKEN_SERVICE, useValue: mockTokenService },
       ],
@@ -60,6 +74,7 @@ describe('EventsService (US-06)', () => {
     eventsRepository = module.get(EventsRepository);
     storageService = module.get(STORAGE_SERVICE);
     tokenService = module.get(TOKEN_SERVICE);
+    mediaService = module.get(MediaService);
   });
 
   describe('listEvents', () => {
@@ -157,6 +172,151 @@ describe('EventsService (US-06)', () => {
       void service.toEventSummary(mockRecord).then((dto) => {
         service.emitEvent(dto);
       });
+    });
+  });
+
+  describe('getEvent', () => {
+    const mockDetailRecord: EventDetailRecord = {
+      ...mockRecord,
+      source: 'FRIGATE',
+      track_id: 'track-101',
+      ai_label: 'person',
+      ai_model_version: 'yolo-v8s',
+      ai_results: [
+        { module: 'M1_FACE', label: 'UNKNOWN', confidence: 0.82 },
+        'khong phai object',
+        { label: 'thieu confidence' },
+      ],
+      retain: false,
+      correlation_id: 'corr-1',
+      escalation_deadline_at: null,
+      notified_at: new Date('2026-09-19T10:00:05Z'),
+      escalated_at: null,
+      resolved_at: null,
+      closed_at: null,
+    };
+
+    it('tra ve chi tiet su kien kem media, ket qua AI va lich su trang thai', async () => {
+      eventsRepository.findEventDetailById.mockResolvedValueOnce(mockDetailRecord);
+      eventsRepository.listStatusHistoryByEventId.mockResolvedValueOnce([
+        {
+          from_status: null,
+          to_status: 'DETECTED',
+          reason: 'Frigate phat hien nguoi',
+          actor_type: 'SYSTEM',
+          actor_name: null,
+          channel: null,
+          created_at: new Date('2026-09-19T10:00:00Z'),
+        },
+      ]);
+      mediaService.listEventMediaWithUrls.mockResolvedValueOnce([
+        {
+          id: 'media-1',
+          mediaType: 'SNAPSHOT',
+          url: 'https://minio.local/presigned-snapshot.jpg',
+          expiresAt: new Date().toISOString(),
+          contentType: 'image/jpeg',
+          sizeBytes: 1024,
+          width: null,
+          height: null,
+          durationMs: null,
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      storageService.getPresignedUrl.mockResolvedValueOnce({
+        url: 'https://minio.local/presigned-thumb.jpg',
+        expiresAt: new Date(Date.now() + 900 * 1000),
+      });
+
+      const detail = await service.getEvent(mockDetailRecord.id);
+
+      expect(detail.id).toBe(mockDetailRecord.id);
+      expect(detail.thumbnailUrl).toBe('https://minio.local/presigned-thumb.jpg');
+      expect(detail.media).toHaveLength(1);
+      expect(detail.media[0].url).toBe('https://minio.local/presigned-snapshot.jpg');
+      expect(detail.statusHistory[0].toStatus).toBe('DETECTED');
+      expect(detail.notifiedAt).toBe('2026-09-19T10:00:05.000Z');
+    });
+
+    it('bo qua phan tu ai_results sai hinh dang trong cot JSONB', async () => {
+      eventsRepository.findEventDetailById.mockResolvedValueOnce(mockDetailRecord);
+      eventsRepository.listStatusHistoryByEventId.mockResolvedValueOnce([]);
+      storageService.getPresignedUrl.mockResolvedValueOnce({
+        url: 'https://minio.local/presigned-thumb.jpg',
+        expiresAt: new Date(Date.now() + 900 * 1000),
+      });
+
+      const detail = await service.getEvent(mockDetailRecord.id);
+
+      expect(detail.aiResults).toHaveLength(1);
+      expect(detail.aiResults[0].label).toBe('UNKNOWN');
+    });
+
+    it('nem NotFoundException khi khong tim thay su kien', async () => {
+      eventsRepository.findEventDetailById.mockResolvedValueOnce(null);
+      await expect(service.getEvent('khong-ton-tai')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('getStats', () => {
+    it('quy doi ban ghi thong ke sang DTO cho dashboard', async () => {
+      eventsRepository.getEventStats.mockResolvedValueOnce({
+        aggregate: {
+          total_events: 12,
+          person_detected_count: 9,
+          pending_count: 3,
+          resolved_count: 8,
+          false_alarm_count: 1,
+          latest_event_at: new Date('2026-09-19T10:00:00Z'),
+        },
+        byType: [{ event_type: 'PERSON_DETECTED', count: 9 }],
+        byPriority: [{ priority: 'P3', count: 9 }],
+        cameras: { online_count: 3, total_count: 4 },
+        latestPendingEvent: {
+          id: 'evt-pending',
+          event_type: 'PERSON_DETECTED',
+          priority: 'P3',
+          camera_name: 'Camera bếp',
+          zone_name: 'Khu vực bếp nấu',
+          detected_at: new Date('2026-09-19T09:59:00Z'),
+        },
+      });
+
+      const stats = await service.getStats(24);
+
+      expect(stats.windowHours).toBe(24);
+      expect(stats.totalEvents).toBe(12);
+      expect(stats.personDetectedCount).toBe(9);
+      expect(stats.cameraOnlineCount).toBe(3);
+      expect(stats.cameraTotalCount).toBe(4);
+      expect(stats.latestEventAt).toBe('2026-09-19T10:00:00.000Z');
+      expect(stats.latestPendingEvent?.cameraName).toBe('Camera bếp');
+      expect(stats.byType).toEqual([{ eventType: 'PERSON_DETECTED', count: 9 }]);
+    });
+
+    it('tinh cua so thong ke nguoc tu hien tai theo windowHours', async () => {
+      eventsRepository.getEventStats.mockResolvedValueOnce({
+        aggregate: {
+          total_events: 0,
+          person_detected_count: 0,
+          pending_count: 0,
+          resolved_count: 0,
+          false_alarm_count: 0,
+          latest_event_at: null,
+        },
+        byType: [],
+        byPriority: [],
+        cameras: { online_count: 0, total_count: 0 },
+        latestPendingEvent: null,
+      });
+
+      const beforeCall = Date.now();
+      const stats = await service.getStats(1);
+      const since = eventsRepository.getEventStats.mock.calls[0][0];
+
+      expect(stats.latestPendingEvent).toBeNull();
+      expect(beforeCall - since.getTime()).toBeGreaterThanOrEqual(60 * 60 * 1000);
+      expect(beforeCall - since.getTime()).toBeLessThan(61 * 60 * 1000);
     });
   });
 

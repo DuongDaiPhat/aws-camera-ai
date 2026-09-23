@@ -8,6 +8,12 @@ const DEFAULT_CLIP_DURATION_MS = 10_000;
 const PRESIGNED_URL_TTL_SECONDS = 900;
 const DEFAULT_EVENT_MEDIA_LIST_LIMIT = 100;
 
+function toNumberOrNull(value: number | null): number | null {
+  if (value === null || value === undefined) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 @Injectable()
 export class MediaService {
   private readonly logger = new Logger(MediaService.name);
@@ -178,7 +184,8 @@ export class MediaService {
         url,
         expiresAt: expiresAt.toISOString(),
         contentType: record.content_type,
-        sizeBytes: record.size_bytes,
+        // Driver pg tra BIGINT duoi dang chuoi, hop dong API khai bao integer.
+        sizeBytes: toNumberOrNull(record.size_bytes),
         width: record.width,
         height: record.height,
         durationMs: record.duration_ms,
