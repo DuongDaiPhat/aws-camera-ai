@@ -239,6 +239,13 @@ function SidebarNavLinks({
         />
 
         <NavItem
+          label="Người quen"
+          active={activeNav === 'known-faces'}
+          onClick={() => onSelectNav('known-faces')}
+          icon={<EventsIcon />}
+        />
+
+        <NavItem
           label="Khu vực"
           active={activeNav === 'zones'}
           onClick={() => onSelectNav('zones')}

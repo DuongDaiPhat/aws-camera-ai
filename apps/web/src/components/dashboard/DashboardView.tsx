@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { KnownFacesView } from '@/components/known-faces/KnownFacesView';
 import type { UIEventItem } from '@/types';
 import { useAuth, useEvents, useEventStats } from '@/hooks';
 import { Sidebar, TopHeader } from '@/components/layout';
@@ -116,6 +117,8 @@ export function DashboardView() {
             <CameraView user={user} />
           ) : activeNav === 'settings' ? (
             <SettingsView user={user} />
+          ) : activeNav === 'known-faces' ? (
+            <KnownFacesView isAdmin={user?.role === 'ADMIN'} />
           ) : (
             <>
               {liveNoticeText && (

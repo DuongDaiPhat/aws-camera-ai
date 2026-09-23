@@ -1,0 +1,19 @@
+.root { display: grid; gap: 1rem; color: var(--text-primary, #182332); }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.root button { cursor: pointer; padding: .65rem 1rem; border: 1px solid #64748b; border-radius: .5rem; background: white; color: #182332; }
+.root button:disabled { opacity: .55; cursor: wait; }
+.root button:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 1rem; padding: 0; list-style: none; }
+.card, .form, .previewCard { padding: 1rem; border: 1px solid #cbd5e1; border-radius: .75rem; background: white; overflow-wrap: anywhere; }
+.card { display: grid; gap: .5rem; }
+.form { display: grid; gap: 1rem; }
+.form label { display: grid; gap: .5rem; }
+.form input { min-width: 0; width: 100%; box-sizing: border-box; padding: .7rem; }
+.avatar { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; background: #dbeafe; font-weight: 700; }
+.preview { position: relative; line-height: 0; }
+.preview img { display: block; width: 100%; height: auto; image-orientation: from-image; }
+.root .faceBox { position: absolute; padding: 0; border: 3px solid #2563eb; background: #ffffff30; color: #111827; font-weight: 700; min-width: 1.5rem; min-height: 1.5rem; }
+.root .faceBox[aria-pressed='true'] { border-style: double; border-width: 5px; background: #ffffff80; }
+.dialog { max-width: min(90vw, 480px); border: 1px solid #64748b; border-radius: .75rem; padding: 1.5rem; }
+.dialog::backdrop { background: #0008; }
+.root .destructive { background: #b91c1c; color: white; }
