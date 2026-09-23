@@ -570,7 +570,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Update thresholds only (US-15)
+         * @description ADMIN only. Atomic version check; preserve channels/priority/flags. New events see committed changes within 60 seconds.
+         */
+        patch: operations["updateEscalationThresholds"];
         trace?: never;
     };
     "/wellness-schedules": {
@@ -858,16 +862,52 @@ export interface components {
             isEnabled: boolean;
             detectionEnabled?: boolean;
             retentionDays?: number;
+            sourceType?: components["schemas"]["CameraSourceType"];
+            runtimeStatus?: components["schemas"]["CameraRuntimeStatus"];
+            configVersion?: number;
+            /** @enum {string} */
+            syncStatus?: "PENDING" | "APPLIED" | "FAILED";
             zoneCount?: number;
             /** Format: date-time */
             createdAt: string;
         };
+        /** @enum {string} */
+        CameraSourceType: "RTSP" | "BROWSER_WEBCAM" | "VIDEO_FILE";
+        /** @enum {string} */
+        CameraRuntimeStatus: "NOT_CONFIGURED" | "STARTING" | "ONLINE" | "OFFLINE" | "FAILED" | "STOPPED";
+        CameraPreview: components["schemas"]["MediaUrl"] & {
+            /** Format: uuid */
+            cameraId: string;
+            width: number;
+            height: number;
+            /** Format: date-time */
+            capturedAt: string;
+        };
+        /** @description ADMIN input only. VIDEO_FILE uses an uploaded object ID, never a server path or shell command. */
+        CameraSourceSettings: {
+            sourceType: components["schemas"]["CameraSourceType"];
+            rtspUrl?: string;
+            /** Format: uuid */
+            videoObjectId?: string;
+            /** @default true */
+            videoLoop: boolean;
+        } & ({
+            /** @constant */
+            sourceType?: "RTSP";
+        } | {
+            /** @constant */
+            sourceType?: "BROWSER_WEBCAM";
+        } | {
+            /** @constant */
+            sourceType?: "VIDEO_FILE";
+        });
         CreateCameraRequest: {
+            source?: components["schemas"]["CameraSourceSettings"];
             /** Format: uuid */
             deviceId: string;
             name: string;
             slug: string;
-            rtspUrl: string;
+            rtspUrl?: string;
             /** @default 1280 */
             detectWidth: number;
             /** @default 720 */
@@ -876,9 +916,10 @@ export interface components {
             fps: number;
             /** @default Asia/Ho_Chi_Minh */
             timezone: string;
-        };
+        } | unknown | unknown;
         /** @description Khong doi duoc `slug` — doi slug se lam dut lien ket voi Frigate. */
         UpdateCameraRequest: {
+            source?: components["schemas"]["CameraSourceSettings"];
             name?: string;
             rtspUrl?: string;
             fps?: number;
@@ -993,6 +1034,8 @@ export interface components {
             source?: "FRIGATE" | "AI_SERVICE" | "SCHEDULER" | "MANUAL";
             trackId?: string | null;
             aiLabel?: string | null;
+            /** Format: date-time */
+            aiProcessedAt?: string | null;
             aiModelVersion?: string | null;
             /** @description FR-EVT-04 — giu du chi tiet tung nhan AI. */
             aiResults?: components["schemas"]["AiResultItem"][];
@@ -1016,7 +1059,7 @@ export interface components {
             /** @enum {string} */
             module: "M1_FACE" | "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M4_ZONE" | "M5_WELLNESS";
             label: string;
-            confidence: number;
+            confidence: number | null;
             modelVersion?: string;
             /** @description Toa do chuan hoa 0..1. */
             boundingBox?: {
@@ -1107,7 +1150,13 @@ export interface components {
                 count: number;
             }[];
         };
+        /** @description Actor and timestamp come from authenticated server context. IM_OK/NEED_HELP only in NOTIFIED; ACKNOWLEDGED only in ESCALATED by an authorized emergency handler. Confirmation phases are independent. */
         ConfirmEventRequest: {
+            /**
+             * Format: uuid
+             * @description Stable per action/retry. Identical replay returns original confirmation; changed payload conflicts. Legacy requests without this field still use first-confirmation protection.
+             */
+            commandId?: string;
             response: components["schemas"]["ConfirmationResponse"];
             note?: string;
         };
@@ -1124,6 +1173,16 @@ export interface components {
             respondedAt: string;
             /** @description IM_OK -> RESOLVED, NEED_HELP -> ESCALATED (FR-ESC-03/04). */
             resultingStatus: components["schemas"]["EventStatus"];
+        };
+        ConfirmationConflict: components["schemas"]["ErrorResponse"] & {
+            error?: {
+                /** @enum {string} */
+                code?: "ALREADY_CONFIRMED" | "INVALID_STATE" | "IDEMPOTENCY_CONFLICT";
+                details: {
+                    canonicalStatus: components["schemas"]["EventStatus"];
+                    confirmation: components["schemas"]["Confirmation"] | null;
+                };
+            };
         };
         Notification: {
             /** Format: uuid */
@@ -1144,6 +1203,8 @@ export interface components {
             createdAt: string;
         };
         EscalationRule: {
+            version?: number;
+            readonly effectiveHighWaitSeconds?: number;
             eventType: components["schemas"]["EventType"];
             priority: components["schemas"]["PriorityLevel"];
             /** @description Duoi nguong nay -> LOGGED_ONLY, khong lam phien ai. */
@@ -1160,6 +1221,13 @@ export interface components {
             isEnabled: boolean;
             /** Format: date-time */
             updatedAt?: string;
+        };
+        /** @description tLow <= tHigh; WELLNESS_TIMEOUT requires both null. Other alert types require both numbers. Updates only future evaluations. */
+        UpdateEscalationThresholdsRequest: {
+            tLow: number | null;
+            tHigh: number | null;
+            tWaitSeconds: number;
+            expectedVersion: number;
         };
         UpdateEscalationRuleRequest: {
             priority: components["schemas"]["PriorityLevel"];
@@ -1225,9 +1293,10 @@ export interface components {
             email?: string;
             priorityOrder: number;
         };
-        AiResultRequest: {
+        AiResultRequest: components["schemas"]["FaceResultSubmission"] | components["schemas"]["ZoneResultSubmission"] | components["schemas"]["OtherAiResultSubmission"];
+        OtherAiResultSubmission: {
             /** @enum {string} */
-            module: "M1_FACE" | "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M4_ZONE" | "M5_WELLNESS";
+            module: "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M5_WELLNESS";
             modelVersion: string;
             results: components["schemas"]["AiResultItem"][];
             personStatus?: components["schemas"]["PersonStatus"];
@@ -1235,14 +1304,109 @@ export interface components {
             matchedKnownFaceId?: string | null;
             /** Format: date-time */
             processedAt: string;
-            /**
-             * @description Co gia tri khi suy luan that bai — orchestrator dat
-             *     status = AI_FAILED va van giu su kien (US-10, FR-LOG-05).
-             */
+            /** @description Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline. */
             error?: {
                 code?: string;
                 message?: string;
             } | null;
+        };
+        /** @description eventId must match path. Same resultId and payload is replay-safe; changed payload is IDEMPOTENCY_CONFLICT. Persist before 202. Older revisions cannot replace newer results. */
+        ResultIdentity: {
+            /** @constant */
+            schemaVersion: 1;
+            /** Format: uuid */
+            resultId: string;
+            /** Format: uuid */
+            eventId: string;
+            observationId: string;
+            revision: number;
+            module: string;
+            modelVersion: string;
+            /** Format: date-time */
+            processedAt: string;
+        };
+        FaceResultMetadata: {
+            similarity: number | null;
+            /** @default 0.6 */
+            thresholdUsed: number;
+            confidencePolicyVersion: string;
+            qualityReason: string | null;
+        };
+        /** @description KNOWN confidence=similarity; UNKNOWN=1-similarity; loaded empty collection uses similarity=null and confidence=1 with empty-collection-v1. UNDETERMINED has null confidence/similarity and a qualityReason. Scores are not calibrated probabilities. */
+        FaceResultItem: {
+            /** @constant */
+            module: "M1_FACE";
+            /** @enum {string} */
+            label: "KNOWN" | "UNKNOWN" | "UNDETERMINED";
+            confidence: number | null;
+            boundingBox: components["schemas"]["NormalizedBox"] | null;
+            metadata: components["schemas"]["FaceResultMetadata"];
+        };
+        /** @description Normalized coordinates; x+width and y+height must not exceed 1. */
+        NormalizedBox: {
+            x: number;
+            y: number;
+            width: number;
+            height: number;
+        };
+        /** @description Successful label equals personStatus. KNOWN requires matchedKnownFaceId; other labels require null. Technical errors omit personStatus; AI_FAILED is event state, never a person label. Server verifies owner/model/collection and resolves name. */
+        FaceResultSubmission: components["schemas"]["ResultIdentity"] & ({
+            /** @constant */
+            module?: "M1_FACE";
+            /** Format: uuid */
+            requestId: string;
+            collectionVersion: number;
+            personStatus?: components["schemas"]["PersonStatus"];
+            /** Format: uuid */
+            matchedKnownFaceId: string | null;
+            results: components["schemas"]["FaceResultItem"][];
+            error: components["schemas"]["ResultError"] | null;
+        } & ({
+            results?: unknown;
+            error?: null;
+        } | {
+            results?: unknown;
+            matchedKnownFaceId?: null;
+            error?: components["schemas"]["ResultError"];
+        }));
+        /** @description Sanitized error; never contains credentials, images or embeddings. */
+        ResultError: {
+            code: string;
+            message: string;
+        };
+        ZoneResultMetadata: {
+            /** Format: uuid */
+            zoneId: string;
+            zoneNameSnapshot: string;
+            /** Format: uuid */
+            cameraId: string;
+            trackId: string;
+            /** Format: date-time */
+            observedAt: string;
+            /** Format: date-time */
+            enteredAt: string;
+            dwellSeconds: number;
+            minDwellSeconds: number;
+            /** @constant */
+            scheduleActive: true;
+            zoneConfigVersion: number;
+            /** @constant */
+            scoreSource: "FRIGATE_PERSON_DETECTION";
+        };
+        /** @description Only submit enabled RESTRICTED zones with proven dwell and active schedule. Score comes from the matching Frigate person observation, never fabricated as 1. Missing score is diagnostic, not a risk result. Deduplicate event/zone/track; modelVersion identifies detector and metadata identifies config. */
+        ZoneResultSubmission: components["schemas"]["ResultIdentity"] & {
+            /** @constant */
+            module?: "M4_ZONE";
+            error: null;
+            results: {
+                /** @constant */
+                module: "M4_ZONE";
+                /** @constant */
+                label: "RESTRICTED_ZONE";
+                confidence: number;
+                boundingBox: components["schemas"]["NormalizedBox"] | null;
+                metadata: components["schemas"]["ZoneResultMetadata"];
+            }[];
         };
     };
     responses: {
@@ -1832,7 +1996,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MediaUrl"];
+                    "application/json": components["schemas"]["CameraPreview"];
                 };
             };
             404: components["responses"]["NotFound"];
@@ -1985,6 +2149,8 @@ export interface operations {
                     relationship?: string;
                     /** Format: uuid */
                     linkedUserId?: string;
+                    /** @description Same image order as images; null means auto-select only if exactly one face. Required selections for ambiguous images are returned by validation. Resubmit original files; server does not retain them between requests. */
+                    faceSelections?: (number | null)[];
                     images: string[];
                 };
             };
@@ -2192,6 +2358,9 @@ export interface operations {
                     "application/json": components["schemas"]["Confirmation"];
                 };
             };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             /** @description Su kien da duoc xu ly boi nguoi khac */
             409: {
@@ -2199,7 +2368,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["ConfirmationConflict"];
                 };
             };
         };
@@ -2361,6 +2530,44 @@ export interface operations {
             };
             400: components["responses"]["BadRequest"];
             403: components["responses"]["Forbidden"];
+        };
+    };
+    updateEscalationThresholds: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventType: components["schemas"]["EventType"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateEscalationThresholdsRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated rule */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EscalationRule"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            /** @description RULE_VERSION_CONFLICT; reload canonical rule before retry. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
     listWellnessSchedules: {
@@ -2551,8 +2758,10 @@ export interface operations {
                 };
                 content?: never;
             };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
         };
     };
     telegramWebhook: {
