@@ -43,7 +43,14 @@ function toAiResultItems(rawResults: unknown): AiResultItem[] {
   return rawResults.filter((item): item is AiResultItem => {
     if (typeof item !== 'object' || item === null) return false;
     const candidate = item as Partial<AiResultItem>;
-    return typeof candidate.label === 'string' && typeof candidate.confidence === 'number';
+    return (
+      typeof candidate.label === 'string' &&
+      (candidate.confidence === null ||
+        (typeof candidate.confidence === 'number' &&
+          Number.isFinite(candidate.confidence) &&
+          candidate.confidence >= 0 &&
+          candidate.confidence <= 1))
+    );
   });
 }
 

@@ -3,6 +3,22 @@
 Mục lục toàn bộ tài liệu. Bắt đầu từ [Hướng dẫn cài đặt](DEV_ONBOARDING.md) nếu bạn là
 người mới vào dự án.
 
+## Plan thực thi cho AI Agent
+
+Mỗi tính năng có một plan riêng; các file mô tả công việc cần làm, không xác nhận tính năng đã triển khai.
+
+- [Giao diện Camera, nguồn phát và Debug View](<Plan Giao diện Camera.md>)
+- [US-09 — Đăng ký khuôn mặt người quen](US_09_FACE_REGISTER.md)
+- [US-10 — Crop person và so khớp người quen](PLAN_US-10_PERSON_CROP_FACE_MATCH.md)
+- [US-11 — Gắn nhãn AI, confidence và tổng hợp ưu tiên](PLAN_US-11_EVENT_AI_LABELS.md)
+- [US-12 — Cấu hình vùng theo camera](PLAN_US_12_ZONE_CONFIGURATION.md)
+- [US-13 — Escalation state machine](PLAN_US-13_ESCALATION_STATE_MACHINE.md)
+- [US-14 — Cảnh báo Telegram](PLAN_US-14_TELEGRAM_ALERTS.md)
+- [US-15 — Cấu hình ngưỡng confidence và thời gian chờ](PLAN_US-15_ESCALATION_RULE_SETTINGS.md)
+- [Kế hoạch tích hợp và phân công Agile cho 5 thành viên](PLAN_AGILE_5_MEMBER_EXECUTION.md)
+
+Khi các plan đề xuất trùng module hoặc hạ tầng, dùng quyết định ownership và thứ tự tích hợp trong kế hoạch 5 thành viên. Có thể kiểm thử từng module bằng adapter/fixture; nghiệm thu end-to-end phải dùng các thành phần thật mà acceptance criteria yêu cầu.
+
 ---
 
 ## Đọc theo thứ tự nào

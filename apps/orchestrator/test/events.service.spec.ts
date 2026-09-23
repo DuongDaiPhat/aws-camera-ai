@@ -252,6 +252,26 @@ describe('EventsService (US-06)', () => {
       expect(detail.aiResults[0].label).toBe('UNKNOWN');
     });
 
+    it('giu UNDETERMINED null score va bo diem khong hop le', async () => {
+      eventsRepository.findEventDetailById.mockResolvedValueOnce({
+        ...mockDetailRecord,
+        ai_results: [
+          { module: 'M1_FACE', label: 'UNDETERMINED', confidence: null },
+          { module: 'M1_FACE', label: 'UNKNOWN', confidence: Number.NaN },
+          { module: 'M1_FACE', label: 'UNKNOWN', confidence: 1.1 },
+        ],
+      });
+      eventsRepository.listStatusHistoryByEventId.mockResolvedValueOnce([]);
+      storageService.getPresignedUrl.mockResolvedValueOnce({
+        url: 'https://minio.local/snapshot.jpg',
+        expiresAt: new Date(),
+      });
+      const detail = await service.getEvent(mockDetailRecord.id);
+      expect(detail.aiResults).toEqual([
+        { module: 'M1_FACE', label: 'UNDETERMINED', confidence: null },
+      ]);
+    });
+
     it('nem NotFoundException khi khong tim thay su kien', async () => {
       eventsRepository.findEventDetailById.mockResolvedValueOnce(null);
       await expect(service.getEvent('khong-ton-tai')).rejects.toThrow(NotFoundException);
