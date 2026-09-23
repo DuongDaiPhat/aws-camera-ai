@@ -140,7 +140,11 @@ function AiResultSection({ detail }: { detail: EventDetail | null }) {
           <div key={`${result.module}-${index}`} className={styles.aiPill}>
             <span>{result.module}:</span>
             <strong>{result.label}</strong>
-            <span>({Math.round(result.confidence * 100)}%)</span>
+            <span>
+              {result.confidence === null
+                ? '(Chưa xác định)'
+                : `(${Math.round(result.confidence * 100)}%)`}
+            </span>
           </div>
         ))}
       </div>
