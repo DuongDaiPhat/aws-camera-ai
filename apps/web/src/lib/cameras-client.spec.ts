@@ -1,0 +1,240 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { setAccessToken } from './api-client';
+import {
+  createBrowserPublishSession,
+  deleteCamera,
+  fetchCamera,
+  fetchCameras,
+  fetchCameraSnapshot,
+  fetchCameraSource,
+  retryFrigateSync,
+  updateCamera,
+  updateCameraSource,
+  updateCameraState,
+} from './cameras-client';
+import type { Camera, CameraSourceDetail } from '@/types';
+
+afterEach(() => {
+  setAccessToken(null);
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+const mockCamera: Camera = {
+  id: 'c1111111-1111-1111-1111-111111111111',
+  deviceId: 'd1111111-1111-1111-1111-111111111111',
+  name: 'Camera Cổng Chính',
+  slug: 'camera_cong_chinh',
+  rtspUrl: 'rtsp://admin:***@192.168.1.100:554/stream1',
+  detectWidth: 1280,
+  detectHeight: 720,
+  fps: 5,
+  timezone: 'Asia/Ho_Chi_Minh',
+  isEnabled: true,
+  detectionEnabled: true,
+  retentionDays: 7,
+  sourceType: 'RTSP',
+  runtimeStatus: 'ONLINE',
+  configVersion: 1,
+  syncStatus: 'APPLIED',
+  zoneCount: 2,
+  createdAt: '2026-03-01T00:00:00.000Z',
+};
+
+describe('cameras-client (Slice CAM)', () => {
+  describe('fetchCameras', () => {
+    it('goi dung API /cameras va tra ve danh sach camera', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ data: [mockCamera] }));
+      vi.stubGlobal('fetch', fetchMock);
+
+      const cameras = await fetchCameras();
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining('/cameras'),
+        expect.any(Object),
+      );
+      expect(cameras).toHaveLength(1);
+      expect(cameras[0].id).toBe(mockCamera.id);
+    });
+
+    it('them query params deviceId va isEnabled vao URL', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ data: [] }));
+      vi.stubGlobal('fetch', fetchMock);
+
+      await fetchCameras({ deviceId: 'dev-1', isEnabled: true });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining('deviceId=dev-1&isEnabled=true'),
+        expect.any(Object),
+      );
+    });
+  });
+
+  describe('fetchCamera', () => {
+    it('goi dung URL /cameras/:id', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(jsonResponse(mockCamera));
+      vi.stubGlobal('fetch', fetchMock);
+
+      const camera = await fetchCamera(mockCamera.id);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining(`/cameras/${mockCamera.id}`),
+        expect.any(Object),
+      );
+      expect(camera.name).toBe(mockCamera.name);
+    });
+  });
+
+  describe('updateCameraState', () => {
+    it('gui PUT /cameras/:id/state voi payload { isEnabled }', async () => {
+      const updated = { ...mockCamera, isEnabled: false };
+      const fetchMock = vi.fn().mockResolvedValue(jsonResponse(updated));
+      vi.stubGlobal('fetch', fetchMock);
+
+      const res = await updateCameraState(mockCamera.id, false);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining(`/cameras/${mockCamera.id}/state`),
+        expect.objectContaining({
+          method: 'PUT',
+          body: JSON.stringify({ isEnabled: false }),
+        }),
+      );
+      expect(res.isEnabled).toBe(false);
+    });
+  });
+
+  describe('updateCamera & deleteCamera', () => {
+    it('updateCamera gui PATCH /cameras/:id voi body data', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(jsonResponse(mockCamera));
+      vi.stubGlobal('fetch', fetchMock);
+
+      await updateCamera(mockCamera.id, { name: 'Ten moi' });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining(`/cameras/${mockCamera.id}`),
+        expect.objectContaining({
+          method: 'PATCH',
+          body: JSON.stringify({ name: 'Ten moi' }),
+        }),
+      );
+    });
+
+    it('deleteCamera gui DELETE /cameras/:id', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+      vi.stubGlobal('fetch', fetchMock);
+
+      await deleteCamera(mockCamera.id);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining(`/cameras/${mockCamera.id}`),
+        expect.objectContaining({ method: 'DELETE' }),
+      );
+    });
+  });
+
+  describe('Source & Frigate Sync', () => {
+    it('fetchCameraSnapshot goi GET /cameras/:id/snapshot', async () => {
+      const mockSnapshot = {
+        url: 'http://localhost/snap.jpg',
+        expiresAt: '2026-03-01T01:00:00.000Z',
+        cameraId: mockCamera.id,
+        width: 1280,
+        height: 720,
+        capturedAt: '2026-03-01T00:00:00.000Z',
+      };
+      const fetchMock = vi.fn().mockResolvedValue(jsonResponse(mockSnapshot));
+      vi.stubGlobal('fetch', fetchMock);
+
+      const res = await fetchCameraSnapshot(mockCamera.id);
+      expect(res.url).toBe(mockSnapshot.url);
+    });
+
+    it('fetchCameraSource goi GET /cameras/:id/source', async () => {
+      const mockSource: CameraSourceDetail = {
+        id: 's1',
+        cameraId: mockCamera.id,
+        sourceType: 'RTSP',
+        rtspUrl: 'rtsp://192.168.1.100',
+        videoOriginalName: null,
+        videoLoop: true,
+        transport: 'TCP',
+        inputFormat: null,
+        webcamDeviceLabel: null,
+        status: 'ONLINE',
+        lastErrorCode: null,
+        lastErrorMessage: null,
+        startedAt: null,
+        stoppedAt: null,
+        updatedAt: '2026-03-01T00:00:00.000Z',
+      };
+      const fetchMock = vi.fn().mockResolvedValue(jsonResponse(mockSource));
+      vi.stubGlobal('fetch', fetchMock);
+
+      const res = await fetchCameraSource(mockCamera.id);
+      expect(res.sourceType).toBe('RTSP');
+    });
+
+    it('updateCameraSource goi PUT /cameras/:id/source voi payload', async () => {
+      const mockSource: CameraSourceDetail = {
+        id: 's1',
+        cameraId: mockCamera.id,
+        sourceType: 'BROWSER_WEBCAM',
+        rtspUrl: null,
+        videoOriginalName: null,
+        videoLoop: true,
+        transport: 'TCP',
+        inputFormat: null,
+        webcamDeviceLabel: 'HD Webcam',
+        status: 'NOT_CONFIGURED',
+        lastErrorCode: null,
+        lastErrorMessage: null,
+        startedAt: null,
+        stoppedAt: null,
+        updatedAt: '2026-03-01T00:00:00.000Z',
+      };
+      const fetchMock = vi.fn().mockResolvedValue(jsonResponse(mockSource));
+      vi.stubGlobal('fetch', fetchMock);
+
+      const res = await updateCameraSource(mockCamera.id, {
+        sourceType: 'BROWSER_WEBCAM',
+        videoLoop: true,
+        transport: 'TCP',
+      });
+      expect(res.sourceType).toBe('BROWSER_WEBCAM');
+    });
+
+    it('createBrowserPublishSession goi POST /cameras/:id/source/browser-session', async () => {
+      const mockSession = {
+        publishUrl: 'http://localhost:8889/cam/whip',
+        streamKey: 'cam',
+        expiresAt: '2026-03-01T01:00:00.000Z',
+      };
+      const fetchMock = vi.fn().mockResolvedValue(jsonResponse(mockSession));
+      vi.stubGlobal('fetch', fetchMock);
+
+      const res = await createBrowserPublishSession(mockCamera.id);
+      expect(res.publishUrl).toContain('/whip');
+    });
+
+    it('retryFrigateSync goi POST /cameras/:id/frigate-sync/retry', async () => {
+      const mockRetry = {
+        cameraId: mockCamera.id,
+        configVersion: 2,
+        syncStatus: 'SYNCED' as const,
+      };
+      const fetchMock = vi.fn().mockResolvedValue(jsonResponse(mockRetry));
+      vi.stubGlobal('fetch', fetchMock);
+
+      const res = await retryFrigateSync(mockCamera.id);
+      expect(res.syncStatus).toBe('SYNCED');
+    });
+  });
+});

@@ -1,0 +1,62 @@
+import React from 'react';
+import { describe, expect, it, vi } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { CameraCard } from './CameraCard';
+import type { Camera } from '@/types';
+
+const mockCam: Camera = {
+  id: 'c1',
+  deviceId: 'd1',
+  name: 'Camera Sanh Chinh',
+  slug: 'cam_sanh_chinh',
+  rtspUrl: 'rtsp://192.168.1.100',
+  detectWidth: 1280,
+  detectHeight: 720,
+  fps: 5,
+  timezone: 'Asia/Ho_Chi_Minh',
+  isEnabled: true,
+  detectionEnabled: true,
+  retentionDays: 7,
+  sourceType: 'RTSP',
+  runtimeStatus: 'ONLINE',
+  configVersion: 1,
+  syncStatus: 'APPLIED',
+  zoneCount: 3,
+  createdAt: '2026-03-01T00:00:00.000Z',
+};
+
+describe('CameraCard component', () => {
+  it('hien thi day du ten, slug, nguon, fps, so zone', () => {
+    const html = renderToStaticMarkup(
+      <CameraCard
+        camera={mockCam}
+        isSelected={false}
+        isAdmin={true}
+        onSelect={vi.fn()}
+        onToggleState={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain('Camera Sanh Chinh');
+    expect(html).toContain('cam_sanh_chinh');
+    expect(html).toContain('5 FPS');
+    expect(html).toContain('3 vùng');
+    expect(html).toContain('Đang bật');
+  });
+
+  it('an switch toggle neu nguoi dung khong phai ADMIN', () => {
+    const html = renderToStaticMarkup(
+      <CameraCard
+        camera={mockCam}
+        isSelected={false}
+        isAdmin={false}
+        onSelect={vi.fn()}
+        onToggleState={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain('Camera Sanh Chinh');
+    expect(html).not.toContain('checkbox');
+    expect(html).not.toContain('Điều khiển:');
+  });
+});
