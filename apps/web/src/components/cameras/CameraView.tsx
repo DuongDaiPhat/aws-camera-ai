@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import type { Camera, CurrentUser } from '@/types';
 import { useCameras } from '@/hooks/useCameras';
 import { CameraList } from './CameraList';
+import { CameraSourceForm } from './CameraSourceForm';
 import styles from './camera-view.module.css';
 
 interface CameraViewProps {
@@ -50,11 +51,13 @@ function CameraDetailPanel({
   isAdmin,
   isToggling,
   onToggleState,
+  onRefreshCameras,
 }: {
   camera: Camera | null;
   isAdmin: boolean;
   isToggling: boolean;
   onToggleState: (id: string, isEnabled: boolean) => void;
+  onRefreshCameras?: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<'preview' | 'source' | 'frigate'>('preview');
 
@@ -146,10 +149,14 @@ function CameraDetailPanel({
       )}
 
       {activeTab === 'source' && (
-        <div className={styles.infoNotice}>
-          <strong>Cấu hình nguồn phát:</strong> Camera này hiện đang cấu hình theo loại <code>{camera.sourceType}</code>. 
-          Các form nhập RTSP an toàn, WebRTC publish cho Webcam và upload Video runner sẽ được tích hợp ở Bước 3.2.
-        </div>
+        <CameraSourceForm
+          cameraId={camera.id}
+          slug={camera.slug}
+          initialSourceType={camera.sourceType}
+          initialRtspUrl={camera.rtspUrl}
+          isAdmin={isAdmin}
+          onSourceUpdated={onRefreshCameras}
+        />
       )}
 
       {activeTab === 'frigate' && (
@@ -250,6 +257,7 @@ export function CameraView({ user }: CameraViewProps) {
           isAdmin={isAdmin}
           isToggling={Boolean(selectedCamera && toggleLoadingMap[selectedCamera.id])}
           onToggleState={(id, isEnabled) => void toggleCamera(id, isEnabled)}
+          onRefreshCameras={() => void loadCameras()}
         />
       </div>
     </div>
