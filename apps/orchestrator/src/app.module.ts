@@ -5,6 +5,7 @@ import { CameraSourcesModule } from './camera-sources/camera-sources.module';
 import { CamerasModule } from './cameras/cameras.module';
 import { DatabaseModule } from './database/database.module';
 import { EventsModule } from './events/events.module';
+import { FrigateModule } from './frigate/frigate.module';
 import { HealthModule } from './health/health.module';
 import { IngestionModule } from './ingestion/ingestion.module';
 import { MediaModule } from './media/media.module';
@@ -28,6 +29,7 @@ import { EscalationRulesModule } from './escalation-rules/escalation-rules.modul
     AuthModule,
     StorageModule,
     CameraSourcesModule,
+    FrigateModule,
     CamerasModule,
     EventsModule,
     MediaModule,

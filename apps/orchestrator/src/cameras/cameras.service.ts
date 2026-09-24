@@ -26,6 +26,7 @@ import type { UpdateCameraDto } from './dto/update-camera.dto';
 import type { UpdateCameraSourceDto } from './dto/update-camera-source.dto';
 
 import { CameraSourcesService } from '../camera-sources/camera-sources.service';
+import { FrigateSyncService } from '../frigate/frigate-sync.service';
 
 const DEFAULT_PREVIEW_WIDTH = 1280;
 const DEFAULT_PREVIEW_HEIGHT = 720;
@@ -39,6 +40,7 @@ export class CamerasService implements CameraConfigPortV1 {
     private readonly camerasRepository: CamerasRepository,
     @Inject(STORAGE_SERVICE) private readonly storageService: IStorageService,
     private readonly cameraSourcesService: CameraSourcesService,
+    private readonly frigateSyncService: FrigateSyncService,
   ) {}
 
   // -------------------------------------------------------------------
@@ -140,20 +142,27 @@ export class CamerasService implements CameraConfigPortV1 {
       };
     }
 
-    // Áp dụng cấu hình và đánh dấu APPLIED
-    const updated = await this.camerasRepository.updateFrigateSettings(command.cameraId, {
-      applied_version: currentVersion,
-      sync_status: 'SYNCED',
-      sync_error_code: null,
-      sync_error_message: null,
-    });
+    const syncResult = await this.frigateSyncService.syncCamera(
+      command.cameraId,
+      command.expectedConfigVersion,
+    );
+
+    if (syncResult.success) {
+      return {
+        cameraId: command.cameraId,
+        configVersion: syncResult.configVersion,
+        status: 'APPLIED',
+        appliedAt: new Date().toISOString(),
+        errorCode: null,
+      };
+    }
 
     return {
       cameraId: command.cameraId,
-      configVersion: updated.config_version,
-      status: 'APPLIED',
-      appliedAt: new Date().toISOString(),
-      errorCode: null,
+      configVersion: syncResult.configVersion,
+      status: 'FAILED',
+      appliedAt: null,
+      errorCode: syncResult.errorCode ?? 'FRIGATE_SYNC_FAILED',
     };
   }
 
@@ -207,6 +216,10 @@ export class CamerasService implements CameraConfigPortV1 {
     } else {
       await this.cameraSourcesService.stopCameraSource(id);
     }
+
+    await this.frigateSyncService.syncCamera(id).catch((err) => {
+      this.logger.warn(`Đồng bộ Frigate khi updateCameraState cho camera ${id} thất bại:`, err);
+    });
 
     this.logger.log(`Camera ${existing.slug} (${id}) đã chuyển trạng thái isEnabled = ${isEnabled}`);
     return this.mapToCameraDto(updated, role);
@@ -320,20 +333,12 @@ export class CamerasService implements CameraConfigPortV1 {
       });
     }
 
-    const settings = await this.camerasRepository.findFrigateSettingsByCameraId(cameraId);
-    const configVersion = (settings?.config_version ?? 1) + 1;
-
-    const updated = await this.camerasRepository.updateFrigateSettings(cameraId, {
-      sync_status: 'SYNCED',
-      applied_version: configVersion,
-      sync_error_code: null,
-      sync_error_message: null,
-    });
+    const syncResult = await this.frigateSyncService.syncCamera(cameraId);
 
     return {
       cameraId,
-      configVersion: updated.config_version,
-      syncStatus: 'SYNCED',
+      configVersion: syncResult.configVersion,
+      syncStatus: syncResult.syncStatus,
     };
   }
 

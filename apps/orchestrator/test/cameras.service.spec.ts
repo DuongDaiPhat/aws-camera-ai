@@ -4,12 +4,14 @@ import { CamerasService } from '../src/cameras/cameras.service';
 import { CamerasRepository } from '../src/cameras/cameras.repository';
 import { STORAGE_SERVICE } from '../src/storage/storage.interface';
 import { CameraSourcesService } from '../src/camera-sources/camera-sources.service';
+import { FrigateSyncService } from '../src/frigate/frigate-sync.service';
 import type { CameraAggregateRecord } from '../src/cameras/cameras.types';
 
 describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
   let service: CamerasService;
   let repository: jest.Mocked<CamerasRepository>;
   let storageService: { getPresignedUrl: jest.Mock };
+  let mockFrigateSyncService: { syncCamera: jest.Mock };
 
   const mockCamera: CameraAggregateRecord = {
     id: 'c1111111-1111-1111-1111-111111111111',
@@ -70,12 +72,22 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
       }),
     };
 
+    mockFrigateSyncService = {
+      syncCamera: jest.fn().mockImplementation(async (cameraId: string, version?: number) => ({
+        success: true,
+        cameraId,
+        configVersion: version ?? 2,
+        syncStatus: 'SYNCED',
+      })),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CamerasService,
         { provide: CamerasRepository, useValue: mockRepo },
         { provide: STORAGE_SERVICE, useValue: storageService },
         { provide: CameraSourcesService, useValue: mockCameraSourcesService },
+        { provide: FrigateSyncService, useValue: mockFrigateSyncService },
       ],
     }).compile();
 
@@ -289,49 +301,13 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
       expect(session.streamKey).toBe(mockCamera.slug);
     });
 
-    it('retryFrigateSync goi updateFrigateSettings cho ADMIN', async () => {
+    it('retryFrigateSync goi frigateSyncService cho ADMIN', async () => {
       repository.findById.mockResolvedValueOnce(mockCamera);
-      repository.findFrigateSettingsByCameraId.mockResolvedValueOnce({
-        camera_id: mockCamera.id,
-        detect_width: 1280,
-        detect_height: 720,
-        detect_fps: 5,
-        min_initialized_frames: 3,
-        max_disappeared_frames: 10,
-        person_min_score: 0.5,
-        person_threshold: 0.7,
-        person_min_area: 500,
-        snapshots_enabled: true,
-        snapshot_bounding_box: true,
-        recording_enabled: false,
-        detection_retention_days: 7,
-        config_version: 2,
-        applied_version: 1,
-        sync_status: 'FAILED',
-        sync_error_code: 'TIMEOUT',
-        sync_error_message: 'Frigate restart timeout',
-        updated_at: new Date(),
-      });
-      repository.updateFrigateSettings.mockResolvedValueOnce({
-        camera_id: mockCamera.id,
-        detect_width: 1280,
-        detect_height: 720,
-        detect_fps: 5,
-        min_initialized_frames: 3,
-        max_disappeared_frames: 10,
-        person_min_score: 0.5,
-        person_threshold: 0.7,
-        person_min_area: 500,
-        snapshots_enabled: true,
-        snapshot_bounding_box: true,
-        recording_enabled: false,
-        detection_retention_days: 7,
-        config_version: 3,
-        applied_version: 3,
-        sync_status: 'SYNCED',
-        sync_error_code: null,
-        sync_error_message: null,
-        updated_at: new Date(),
+      mockFrigateSyncService.syncCamera.mockResolvedValueOnce({
+        success: true,
+        cameraId: mockCamera.id,
+        configVersion: 3,
+        syncStatus: 'SYNCED',
       });
 
       const res = await service.retryFrigateSync(mockCamera.id, 'ADMIN');
