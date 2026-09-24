@@ -314,7 +314,7 @@ export class CamerasRepository {
       SELECT em.object_key 
       FROM event_media em
       JOIN events e ON e.id = em.event_id
-      WHERE e.camera_id = $1 AND em.media_type = 'IMAGE_SNAPSHOT'
+      WHERE e.camera_id = $1 AND em.media_type = 'SNAPSHOT'
       ORDER BY em.created_at DESC
       LIMIT 1
     `;

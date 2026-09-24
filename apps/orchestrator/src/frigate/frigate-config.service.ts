@@ -32,7 +32,7 @@ export class FrigateConfigService {
       height: settings?.detect_height ?? camera.detect_height ?? 720,
       fps: settings?.detect_fps ?? camera.fps ?? 5,
       enabled: camera.detection_enabled,
-      min_initialized: settings?.min_initialized_frames ?? 1,
+      min_initialized: Math.max(2, settings?.min_initialized_frames ?? 2),
       max_disappeared: settings?.max_disappeared_frames ?? 25,
     };
     const existingObjects = (existingCamera.objects as Record<string, unknown> | undefined) ?? {};
@@ -40,7 +40,13 @@ export class FrigateConfigService {
     const existingPerson = (existingFilters.person as Record<string, unknown> | undefined) ?? {};
     const snapshots = (existingCamera.snapshots as Record<string, unknown> | undefined) ?? {};
     const record = (existingCamera.record as Record<string, unknown> | undefined) ?? {};
-    const retain = (record.retain as Record<string, unknown> | undefined) ?? {};
+    const recordOptions = { ...record };
+    delete recordOptions.retain;
+    const detections = (record.detections as Record<string, unknown> | undefined) ?? {};
+    const detectionRetain = (detections.retain as Record<string, unknown> | undefined) ?? {};
+    const alerts = (record.alerts as Record<string, unknown> | undefined) ?? {};
+    const alertRetain = (alerts.retain as Record<string, unknown> | undefined) ?? {};
+    const retentionDays = settings?.detection_retention_days ?? camera.retention_days;
 
     // 4. Sinh cấu hình mới cho camera mà không ghi đè zone
     cameras[slug] = {
@@ -76,11 +82,15 @@ export class FrigateConfigService {
         bounding_box: settings?.snapshot_bounding_box ?? snapshots.bounding_box ?? true,
       },
       record: {
-        ...record,
+        ...recordOptions,
         enabled: settings?.recording_enabled ?? record.enabled ?? true,
-        retain: {
-          ...retain,
-          days: settings?.detection_retention_days ?? retain.days ?? camera.retention_days,
+        detections: {
+          ...detections,
+          retain: { ...detectionRetain, days: retentionDays },
+        },
+        alerts: {
+          ...alerts,
+          retain: { ...alertRetain, days: retentionDays },
         },
       },
       zones: preservedZones, // Bảo toàn 100% zones của Thành viên C

@@ -20,7 +20,14 @@ export class FrigateClientService {
         throw new Error(`Frigate trả về mã lỗi: ${response.status}`);
       }
 
-      return await response.text();
+      const body = await response.text();
+      // Frigate 0.18 trả chuỗi YAML mã hóa JSON dù Content-Type là text/plain.
+      try {
+        const decoded: unknown = JSON.parse(body);
+        return typeof decoded === 'string' ? decoded : body;
+      } catch {
+        return body;
+      }
     } catch (error) {
       this.logger.warn(`Không thể lấy cấu hình từ Frigate API (${this.frigateUrl}):`, error);
       throw error;
@@ -41,7 +48,7 @@ export class FrigateClientService {
 
   async saveConfig(rawYaml: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.frigateUrl}/api/config/save`, {
+      const response = await fetch(`${this.frigateUrl}/api/config/save?save_option=restart`, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
         body: rawYaml,

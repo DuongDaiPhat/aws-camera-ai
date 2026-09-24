@@ -54,6 +54,10 @@ describe('FrigateConfigService', () => {
     expect(parsed.cameras.camera_cong_chinh.enabled).toBe(true);
     expect(parsed.cameras.camera_cong_chinh.ffmpeg.inputs[0].path).toBe(mockCamera.rtsp_url);
     expect(parsed.cameras.camera_cong_chinh.detect.fps).toBe(5);
+    expect(parsed.cameras.camera_cong_chinh.detect.min_initialized).toBeGreaterThanOrEqual(2);
+    expect(parsed.cameras.camera_cong_chinh.record.retain).toBeUndefined();
+    expect(parsed.cameras.camera_cong_chinh.record.detections.retain.days).toBe(7);
+    expect(parsed.cameras.camera_cong_chinh.record.alerts.retain.days).toBe(7);
   });
 
   it('BAO TOAN 100% polygon zones cua Thanh vien C (US-12)', () => {

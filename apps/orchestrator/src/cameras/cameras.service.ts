@@ -388,6 +388,15 @@ export class CamerasService implements CameraConfigPortV1 {
       });
     }
 
+    if (!camera.is_enabled || camera.source_type_val !== 'BROWSER_WEBCAM') {
+      throw new BadRequestException({
+        error: {
+          code: 'SOURCE_NOT_CONFIGURED',
+          message: 'Hãy bật camera và chọn nguồn Webcam Trình duyệt trước khi truyền phát.',
+        },
+      });
+    }
+
     return this.cameraSourcesService.createBrowserSession(camera.slug, cameraId);
   }
 

@@ -329,12 +329,31 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
 
   describe('Browser Session & Frigate Retry & Debug Stream', () => {
     it('createBrowserPublishSession tra ve WHIP endpoint kem token cho ADMIN', async () => {
-      repository.findById.mockResolvedValueOnce(mockCamera);
+      repository.findById.mockResolvedValueOnce({
+        ...mockCamera,
+        source_type_val: 'BROWSER_WEBCAM',
+      });
 
       const session = await service.createBrowserPublishSession(mockCamera.id, 'ADMIN');
       expect(session.publishUrl).toBe(`http://localhost:8889/${mockCamera.slug}/whip`);
       expect(session.streamKey).toBe(mockCamera.slug);
       expect(session.token).toBe('tok-uuid-12345');
+    });
+
+    it('khong cap phien WHIP khi camera chua chon webcam hoac dang tat', async () => {
+      repository.findById.mockResolvedValueOnce(mockCamera);
+      await expect(service.createBrowserPublishSession(mockCamera.id, 'ADMIN')).rejects.toMatchObject({
+        response: { error: { code: 'SOURCE_NOT_CONFIGURED' } },
+      });
+
+      repository.findById.mockResolvedValueOnce({
+        ...mockCamera,
+        source_type_val: 'BROWSER_WEBCAM',
+        is_enabled: false,
+      });
+      await expect(service.createBrowserPublishSession(mockCamera.id, 'ADMIN')).rejects.toMatchObject({
+        response: { error: { code: 'SOURCE_NOT_CONFIGURED' } },
+      });
     });
 
     it('revokeBrowserPublishSession thu hoi session thanh cong', async () => {

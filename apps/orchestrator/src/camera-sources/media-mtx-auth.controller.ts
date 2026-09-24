@@ -24,16 +24,15 @@ export class MediaMtxAuthController {
   @HttpCode(204)
   async authorize(@Body() body: MediaMtxAuthRequest): Promise<void> {
     const slug = body.path?.split('/')[0] ?? '';
-    if (this.isBrowserPublish(body, slug)) return;
+    if (await this.isBrowserPublish(body, slug)) return;
     if (await this.isInternalRtspRequest(body, slug)) return;
     throw new UnauthorizedException();
   }
 
-  private isBrowserPublish(body: MediaMtxAuthRequest, slug: string): boolean {
-    return body.action === 'publish' &&
-      body.protocol === 'webrtc' &&
-      Boolean(body.token) &&
-      this.mediaMtxService.verifyBrowserSession(slug, body.token!);
+  private async isBrowserPublish(body: MediaMtxAuthRequest, slug: string): Promise<boolean> {
+    if (body.action !== 'publish' || body.protocol !== 'webrtc' || !body.token) return false;
+    if (!this.mediaMtxService.verifyBrowserSession(slug, body.token)) return false;
+    return await this.cameraSourcesRepository.isEnabledMediaPath(slug, 'publish_browser');
   }
 
   private async isInternalRtspRequest(body: MediaMtxAuthRequest, slug: string): Promise<boolean> {

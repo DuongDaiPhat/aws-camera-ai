@@ -69,7 +69,15 @@ describe('FrigateSyncService', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn().mockReturnValue('rtsp://localhost:8554'),
+            get: jest.fn((key: string, fallback: string) => {
+              const values: Record<string, string> = {
+                MEDIAMTX_RTSP_URL: 'rtsp://mediamtx:8554',
+                FRIGATE_URL: 'http://frigate:5000',
+                MEDIAMTX_PUBLISH_USERNAME: 'cam-internal',
+                MEDIAMTX_PUBLISH_PASSWORD: 'local-secret',
+              };
+              return values[key] ?? fallback;
+            }),
           },
         },
         { provide: CamerasRepository, useValue: mockRepo },
@@ -142,6 +150,50 @@ describe('FrigateSyncService', () => {
     expect(camerasRepository.updateFrigateSettings).toHaveBeenCalledWith(
       mockCamera.id,
       expect.objectContaining({ sync_status: 'SYNCED' }),
+    );
+  });
+
+  it('truyen RTSP base URL co credential va khong lap camera slug cho nguon webcam', async () => {
+    const browserCamera: CameraAggregateRecord = {
+      ...mockCamera,
+      source_type_val: 'BROWSER_WEBCAM',
+      rtsp_url: '',
+      source_rtsp_url: null,
+    };
+    camerasRepository.findById.mockResolvedValueOnce(browserCamera);
+    camerasRepository.findFrigateSettingsByCameraId.mockResolvedValue({
+      camera_id: browserCamera.id,
+      detect_width: 1280,
+      detect_height: 720,
+      detect_fps: 5,
+      min_initialized_frames: 3,
+      max_disappeared_frames: 10,
+      person_min_score: 0.5,
+      person_threshold: 0.7,
+      person_min_area: 500,
+      snapshots_enabled: true,
+      snapshot_bounding_box: true,
+      recording_enabled: false,
+      detection_retention_days: 7,
+      config_version: 2,
+      applied_version: 1,
+      sync_status: 'PENDING',
+      sync_error_code: null,
+      sync_error_message: null,
+      updated_at: new Date(),
+    });
+    frigateClient.getRawConfig.mockResolvedValueOnce('mqtt: {}');
+    frigateConfig.generateUpdatedConfig.mockReturnValueOnce('cameras: {}');
+    frigateClient.saveConfig.mockResolvedValueOnce(true);
+    camerasRepository.updateFrigateSettings.mockResolvedValueOnce({} as any);
+
+    await service.syncCamera(browserCamera.id);
+
+    expect(frigateConfig.generateUpdatedConfig).toHaveBeenCalledWith(
+      'mqtt: {}',
+      expect.objectContaining({
+        mediamtxRtspBaseUrl: 'rtsp://cam-internal:local-secret@mediamtx:8554',
+      }),
     );
   });
 

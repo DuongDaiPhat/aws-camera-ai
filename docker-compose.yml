@@ -137,7 +137,7 @@ services:
     ports:
       - "${PORT_FRIGATE:-5000}:5000"
     volumes:
-      - ./infra/frigate/config.yml:/config/config.yml:ro
+      - ./infra/frigate/config.yml:/config/config.yml:rw
       - frigatedb:/db
       - frigatemedia:/media/frigate
     logging: *default-logging

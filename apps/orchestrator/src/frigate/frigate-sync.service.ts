@@ -141,7 +141,7 @@ export class FrigateSyncService {
       const updatedConfig = this.frigateConfig.generateUpdatedConfig(rawConfig, {
         camera,
         settings: currentSettings,
-        mediamtxRtspBaseUrl: this.getMediaMtxCameraUrl(camera.source_type_val, camera.slug),
+        mediamtxRtspBaseUrl: this.getMediaMtxRtspBaseUrl(camera.source_type_val),
       });
 
       // 3. Gửi cấu hình đã cập nhật xuống Frigate
@@ -187,9 +187,9 @@ export class FrigateSyncService {
     }
   }
 
-  private getMediaMtxCameraUrl(sourceType: string | null, slug: string): string {
+  private getMediaMtxRtspBaseUrl(sourceType: string | null): string {
     if (sourceType === 'RTSP') return this.mediamtxRtspBaseUrl;
-    const url = new URL(`${this.mediamtxRtspBaseUrl.replace(/\/$/, '')}/${slug}`);
+    const url = new URL(this.mediamtxRtspBaseUrl);
     url.username = this.mediaMtxPublishUsername;
     url.password = this.mediaMtxPublishPassword;
     return url.toString().replace(/\/$/, '');
