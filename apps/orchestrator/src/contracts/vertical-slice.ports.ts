@@ -52,6 +52,8 @@ export interface ApplyFrigateConfigResultV1 {
   errorCode: string | null;
 }
 
+export const CAMERA_CONFIG_PORT_V1 = 'CAMERA_CONFIG_PORT_V1';
+
 export interface CameraConfigPortV1 {
   getCameraContext(cameraId: string): Promise<CameraContextV1>;
   getPreview(cameraId: string): Promise<CameraPreviewV1>;
