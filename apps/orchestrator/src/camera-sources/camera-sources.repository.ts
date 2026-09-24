@@ -22,12 +22,12 @@ export class CameraSourcesRepository {
   ): Promise<void> {
     const query = `
       UPDATE camera_sources
-      SET status = $1,
-          process_id = CASE WHEN $1 IN ('STOPPED', 'OFFLINE', 'FAILED') THEN NULL ELSE COALESCE($2, process_id) END,
+      SET status = $1::camera_source_status_enum,
+          process_id = CASE WHEN $1::camera_source_status_enum IN ('STOPPED', 'OFFLINE', 'FAILED') THEN NULL ELSE COALESCE($2, process_id) END,
           last_error_code = $3,
           last_error_message = $4,
-          started_at = CASE WHEN $1 = 'ONLINE' THEN now() ELSE started_at END,
-          stopped_at = CASE WHEN $1 IN ('STOPPED', 'OFFLINE', 'FAILED') THEN now() ELSE stopped_at END,
+          started_at = CASE WHEN $1::camera_source_status_enum = 'ONLINE' THEN now() ELSE started_at END,
+          stopped_at = CASE WHEN $1::camera_source_status_enum IN ('STOPPED', 'OFFLINE', 'FAILED') THEN now() ELSE stopped_at END,
           updated_at = now()
       WHERE camera_id = $5
     `;

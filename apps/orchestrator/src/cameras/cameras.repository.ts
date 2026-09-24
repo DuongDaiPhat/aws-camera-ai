@@ -275,7 +275,7 @@ export class CamerasRepository {
       ) VALUES ($1, 1280, 720, 5, 1, 0, 'PENDING')
       ON CONFLICT (camera_id) DO UPDATE SET
         config_version = COALESCE($6, camera_frigate_settings.config_version),
-        sync_status = COALESCE($2, 'PENDING'),
+        sync_status = $2::frigate_sync_status_enum,
         sync_error_code = $3,
         sync_error_message = $4,
         applied_version = COALESCE($5, camera_frigate_settings.applied_version),
