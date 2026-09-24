@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { components } from '@cam/contracts';
 import {
@@ -15,6 +15,8 @@ import { faceError } from './face-error';
 
 @Injectable()
 export class KnownFacesService {
+  private readonly logger = new Logger(KnownFacesService.name);
+
   constructor(
     private readonly repository: KnownFacesRepository,
     @Inject(FACE_INFERENCE) private readonly inference: IFaceInference,
@@ -33,7 +35,7 @@ export class KnownFacesService {
         Number(this.config.get('FACE_MAX_IMAGE_BYTES', 5242880)),
         Number(this.config.get('FACE_MAX_REQUEST_BYTES', 26214400)),
       );
-      console.log(`[KnownFacesService] Received ${files.length} images for registration`);
+      this.logger.log(`Received ${files.length} images for registration`);
       const indexes = selections(dto.faceSelections, files.length);
       const results: EmbeddingResult[] = [];
       for (const [index, file] of files.entries())
