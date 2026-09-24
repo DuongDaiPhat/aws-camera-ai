@@ -449,6 +449,90 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorResponse" }
 
+  /cameras/{cameraId}/state:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    put:
+      tags: [cameras]
+      summary: Bat hoac tat camera (desired state)
+      operationId: updateCameraState
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateCameraStateRequest" }
+      responses:
+        "200":
+          description: Trang thai camera sau khi cap nhat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Camera" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    get:
+      tags: [cameras]
+      summary: Chi tiet nguon phat cua camera
+      operationId: getCameraSource
+      responses:
+        "200":
+          description: Thong tin chi tiet nguon phat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [cameras]
+      summary: Cap nhat cau hinh nguon phat camera
+      operationId: updateCameraSource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateCameraSourceRequest" }
+      responses:
+        "200":
+          description: Nguon phat sau khi cap nhat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source/browser-session:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Cap phien publish WebRTC/WHIP cho webcam trinh duyet
+      operationId: createBrowserPublishSession
+      responses:
+        "200":
+          description: Thong tin publish WebRTC
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BrowserPublishSession" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/frigate-sync/retry:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Thu lai dong bo cau hinh xuong Frigate
+      operationId: retryFrigateSync
+      responses:
+        "200":
+          description: Ket qua thu lai dong bo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FrigateSyncResult" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
   # ===================================================================
   # ZONES — US-12
   # ===================================================================
@@ -1465,6 +1549,64 @@ components:
         isEnabled: { type: boolean }
         detectionEnabled: { type: boolean }
         retentionDays: { type: integer, minimum: 1, maximum: 90 }
+
+    UpdateCameraStateRequest:
+      type: object
+      required: [isEnabled]
+      properties:
+        isEnabled: { type: boolean }
+
+    CameraSourceDetail:
+      type: object
+      required: [id, cameraId, sourceType, status, transport, videoLoop]
+      properties:
+        id: { type: string, format: uuid }
+        cameraId: { type: string, format: uuid }
+        sourceType: { $ref: "#/components/schemas/CameraSourceType" }
+        rtspUrl:
+          type: ["string", "null"]
+          description: Chi tra ve gia tri da che credential cho role ADMIN.
+        videoOriginalName: { type: ["string", "null"] }
+        videoLoop: { type: boolean, default: true }
+        transport: { type: string, enum: [TCP, UDP], default: TCP }
+        inputFormat: { type: ["string", "null"] }
+        webcamDeviceLabel: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/CameraRuntimeStatus" }
+        lastErrorCode: { type: ["string", "null"] }
+        lastErrorMessage: { type: ["string", "null"] }
+        startedAt: { type: ["string", "null"], format: date-time }
+        stoppedAt: { type: ["string", "null"], format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    UpdateCameraSourceRequest:
+      type: object
+      required: [sourceType]
+      properties:
+        sourceType: { $ref: "#/components/schemas/CameraSourceType" }
+        rtspUrl: { type: string, writeOnly: true }
+        videoObjectId: { type: string, format: uuid }
+        videoLoop: { type: boolean, default: true }
+        transport: { type: string, enum: [TCP, UDP], default: TCP }
+        inputFormat: { type: string }
+        webcamDeviceLabel: { type: string }
+
+    BrowserPublishSession:
+      type: object
+      required: [publishUrl, streamKey, expiresAt]
+      properties:
+        publishUrl: { type: string, description: "URL WebRTC WHIP publish endpoint" }
+        streamKey: { type: string, description: "Camera slug hoac stream key" }
+        expiresAt: { type: string, format: date-time }
+
+    FrigateSyncResult:
+      type: object
+      required: [cameraId, configVersion, syncStatus]
+      properties:
+        cameraId: { type: string, format: uuid }
+        configVersion: { type: integer, minimum: 1 }
+        syncStatus: { type: string, enum: [PENDING, APPLIED, FAILED] }
+        errorCode: { type: ["string", "null"] }
+        errorMessage: { type: ["string", "null"] }
 
     # ---------------- Zones ----------------
     Polygon:

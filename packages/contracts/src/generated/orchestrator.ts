@@ -243,6 +243,83 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cameras/{cameraId}/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Bat hoac tat camera (desired state) */
+        put: operations["updateCameraState"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/source": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        /** Chi tiet nguon phat cua camera */
+        get: operations["getCameraSource"];
+        /** Cap nhat cau hinh nguon phat camera */
+        put: operations["updateCameraSource"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/source/browser-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cap phien publish WebRTC/WHIP cho webcam trinh duyet */
+        post: operations["createBrowserPublishSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/frigate-sync/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Thu lai dong bo cau hinh xuong Frigate */
+        post: operations["retryFrigateSync"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cameras/{cameraId}/zones": {
         parameters: {
             query?: never;
@@ -926,6 +1003,69 @@ export interface components {
             isEnabled?: boolean;
             detectionEnabled?: boolean;
             retentionDays?: number;
+        };
+        UpdateCameraStateRequest: {
+            isEnabled: boolean;
+        };
+        CameraSourceDetail: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            cameraId: string;
+            sourceType: components["schemas"]["CameraSourceType"];
+            /** @description Chi tra ve gia tri da che credential cho role ADMIN. */
+            rtspUrl?: string | null;
+            videoOriginalName?: string | null;
+            /** @default true */
+            videoLoop: boolean;
+            /**
+             * @default TCP
+             * @enum {string}
+             */
+            transport: "TCP" | "UDP";
+            inputFormat?: string | null;
+            webcamDeviceLabel?: string | null;
+            status: components["schemas"]["CameraRuntimeStatus"];
+            lastErrorCode?: string | null;
+            lastErrorMessage?: string | null;
+            /** Format: date-time */
+            startedAt?: string | null;
+            /** Format: date-time */
+            stoppedAt?: string | null;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        UpdateCameraSourceRequest: {
+            sourceType: components["schemas"]["CameraSourceType"];
+            rtspUrl?: string;
+            /** Format: uuid */
+            videoObjectId?: string;
+            /** @default true */
+            videoLoop: boolean;
+            /**
+             * @default TCP
+             * @enum {string}
+             */
+            transport: "TCP" | "UDP";
+            inputFormat?: string;
+            webcamDeviceLabel?: string;
+        };
+        BrowserPublishSession: {
+            /** @description URL WebRTC WHIP publish endpoint */
+            publishUrl: string;
+            /** @description Camera slug hoac stream key */
+            streamKey: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
+        FrigateSyncResult: {
+            /** Format: uuid */
+            cameraId: string;
+            configVersion: number;
+            /** @enum {string} */
+            syncStatus: "PENDING" | "APPLIED" | "FAILED";
+            errorCode?: string | null;
+            errorMessage?: string | null;
         };
         /**
          * @description Da giac voi toa do CHUAN HOA 0..1 theo [x, y].
@@ -2013,6 +2153,132 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+        };
+    };
+    updateCameraState: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCameraStateRequest"];
+            };
+        };
+        responses: {
+            /** @description Trang thai camera sau khi cap nhat */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Camera"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getCameraSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thong tin chi tiet nguon phat */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraSourceDetail"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updateCameraSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCameraSourceRequest"];
+            };
+        };
+        responses: {
+            /** @description Nguon phat sau khi cap nhat */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraSourceDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    createBrowserPublishSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thong tin publish WebRTC */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BrowserPublishSession"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    retryFrigateSync: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ket qua thu lai dong bo */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrigateSyncResult"];
+                };
+            };
+            404: components["responses"]["NotFound"];
         };
     };
     listZones: {
