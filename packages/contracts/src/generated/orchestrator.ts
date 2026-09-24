@@ -1440,6 +1440,7 @@ export interface components {
             aiModelVersion?: string | null;
             /** @description FR-EVT-04 — giu du chi tiet tung nhan AI. */
             aiResults?: components["schemas"]["AiResultItem"][];
+            aggregateVersion?: number;
             retain?: boolean;
             /** Format: uuid */
             correlationId?: string;
@@ -1462,11 +1463,20 @@ export interface components {
             triggeringResults?: components["schemas"]["AiResultItem"][];
         };
         AiResultItem: {
+            /** Format: uuid */
+            resultId: string;
+            observationId: string;
+            revision: number;
             /** @enum {string} */
             module: "M1_FACE" | "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M4_ZONE" | "M5_WELLNESS";
-            label: string;
+            label: string | null;
             confidence: number | null;
-            modelVersion?: string;
+            modelVersion: string;
+            /** Format: date-time */
+            processedAt: string;
+            /** @enum {string} */
+            status: "SUCCESS" | "ERROR";
+            error?: components["schemas"]["ResultError"] | null;
             /** @description Toa do chuan hoa 0..1. */
             boundingBox?: {
                 x?: number;
@@ -1711,21 +1721,29 @@ export interface components {
             priorityOrder: number;
         };
         AiResultRequest: components["schemas"]["FaceResultSubmission"] | components["schemas"]["ZoneResultSubmission"] | components["schemas"]["OtherAiResultSubmission"];
-        OtherAiResultSubmission: {
+        AiResultAccepted: {
+            /** Format: uuid */
+            resultId: string;
+            /** @enum {string} */
+            disposition: "ACCEPTED" | "DUPLICATE" | "STALE";
+            aggregateVersion: number;
+        };
+        /** @description Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline. */
+        OtherAiResultSubmission: components["schemas"]["ResultIdentity"] & {
+            /** @enum {string} */
+            module?: "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M5_WELLNESS";
+            results: components["schemas"]["OtherAiResultItem"][];
+            error: components["schemas"]["ResultError"] | null;
+        };
+        OtherAiResultItem: {
             /** @enum {string} */
             module: "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M5_WELLNESS";
-            modelVersion: string;
-            results: components["schemas"]["AiResultItem"][];
-            personStatus?: components["schemas"]["PersonStatus"];
-            /** Format: uuid */
-            matchedKnownFaceId?: string | null;
-            /** Format: date-time */
-            processedAt: string;
-            /** @description Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline. */
-            error?: {
-                code?: string;
-                message?: string;
-            } | null;
+            label: string;
+            confidence: number | null;
+            boundingBox: components["schemas"]["NormalizedBox"] | null;
+            metadata: {
+                [key: string]: unknown;
+            };
         };
         /** @description eventId must match path. Same resultId and payload is replay-safe; changed payload is IDEMPOTENCY_CONFLICT. Persist before 202. Older revisions cannot replace newer results. */
         ResultIdentity: {
@@ -3622,7 +3640,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiResultAccepted"];
+                };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];

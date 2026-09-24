@@ -125,6 +125,11 @@ function EventPropertyGrid({ event, detail }: { event: UIEventItem; detail: Even
       <DetailItem label="Người quen khớp" value={event.matchedPersonName ?? 'Không'} />
       <DetailItem label="Nguồn sự kiện" value={detail?.source ?? 'Đang tải…'} />
       <DetailItem label="Mã track Frigate" value={detail?.trackId ?? 'Không có'} />
+      <DetailItem label="Mô hình đại diện" value={detail?.aiModelVersion ?? 'Chưa có'} />
+      <DetailItem
+        label="AI xử lý lúc"
+        value={detail?.aiProcessedAt ? formatExactTime(detail.aiProcessedAt) : 'Chưa có'}
+      />
     </div>
   );
 }
@@ -137,15 +142,18 @@ function AiResultSection({ detail }: { detail: EventDetail | null }) {
     <div className={styles.aiSection}>
       <h3 className={styles.sectionTitle}>Kết quả phân tích mô hình AI</h3>
       <div className={styles.aiPills}>
-        {results.map((result, index) => (
-          <div key={`${result.module}-${index}`} className={styles.aiPill}>
+        {results.map((result) => (
+          <div key={result.resultId} className={styles.aiPill}>
             <span>{result.module}:</span>
-            <strong>{result.label}</strong>
+            <strong>
+              {result.status === 'ERROR' ? `Lỗi ${result.error?.code ?? 'AI'}` : result.label}
+            </strong>
             <span>
               {result.confidence === null
                 ? '(Chưa xác định)'
                 : `(${Math.round(result.confidence * 100)}%)`}
             </span>
+            <span>• {formatExactTime(result.processedAt)}</span>
           </div>
         ))}
       </div>

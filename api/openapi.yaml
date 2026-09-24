@@ -1374,6 +1374,9 @@ paths:
       responses:
         "202":
           description: Da tiep nhan, dang chuyen cho escalation engine
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AiResultAccepted" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "409": { $ref: "#/components/responses/Conflict" }
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -2146,6 +2149,7 @@ components:
               type: array
               description: FR-EVT-04 — giu du chi tiet tung nhan AI.
               items: { $ref: "#/components/schemas/AiResultItem" }
+            aggregateVersion: { type: integer, minimum: 0 }
             retain: { type: boolean }
             correlationId: { type: string, format: uuid }
             escalationDeadlineAt: { type: ["string", "null"], format: date-time }
@@ -2167,14 +2171,34 @@ components:
 
     AiResultItem:
       type: object
-      required: [module, label, confidence]
+      required:
+        [
+          resultId,
+          observationId,
+          revision,
+          module,
+          label,
+          confidence,
+          modelVersion,
+          processedAt,
+          status,
+        ]
       properties:
+        resultId: { type: string, format: uuid }
+        observationId: { type: string }
+        revision: { type: integer, minimum: 1 }
         module:
           type: string
           enum: [M1_FACE, M2A_FALL, M2B_POSTURE, M3_FIRE, M4_ZONE, M5_WELLNESS]
-        label: { type: string }
+        label: { type: ["string", "null"] }
         confidence: { type: ["number", "null"], minimum: 0, maximum: 1 }
         modelVersion: { type: string }
+        processedAt: { type: string, format: date-time }
+        status: { type: string, enum: [SUCCESS, ERROR] }
+        error:
+          oneOf:
+            - $ref: "#/components/schemas/ResultError"
+            - type: "null"
         boundingBox:
           type: ["object", "null"]
           description: Toa do chuan hoa 0..1.
@@ -2502,27 +2526,50 @@ components:
         - $ref: "#/components/schemas/ZoneResultSubmission"
         - $ref: "#/components/schemas/OtherAiResultSubmission"
 
-    OtherAiResultSubmission:
+    AiResultAccepted:
       type: object
-      required: [module, results, modelVersion, processedAt]
+      required: [resultId, disposition, aggregateVersion]
+      properties:
+        resultId: { type: string, format: uuid }
+        disposition: { type: string, enum: [ACCEPTED, DUPLICATE, STALE] }
+        aggregateVersion: { type: integer, minimum: 0 }
+
+    OtherAiResultSubmission:
+      allOf:
+        - $ref: "#/components/schemas/ResultIdentity"
+        - type: object
+          required: [results, error]
+          properties:
+            module:
+              type: string
+              enum: [M2A_FALL, M2B_POSTURE, M3_FIRE, M5_WELLNESS]
+            results:
+              type: array
+              maxItems: 20
+              items: { $ref: "#/components/schemas/OtherAiResultItem" }
+            error:
+              oneOf:
+                - $ref: "#/components/schemas/ResultError"
+                - type: "null"
+      description: Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline.
+
+    OtherAiResultItem:
+      type: object
+      required: [module, label, confidence, boundingBox, metadata]
       properties:
         module:
           type: string
           enum: [M2A_FALL, M2B_POSTURE, M3_FIRE, M5_WELLNESS]
-        modelVersion: { type: string }
-        results:
-          type: array
-          items: { $ref: "#/components/schemas/AiResultItem" }
-        personStatus: { $ref: "#/components/schemas/PersonStatus" }
-        matchedKnownFaceId: { type: ["string", "null"], format: uuid }
-        processedAt: { type: string, format: date-time }
-        error:
-          type: ["object", "null"]
-          description: |
-            Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline.
-          properties:
-            code: { type: string }
-            message: { type: string }
+        label: { type: string }
+        confidence: { type: ["number", "null"], minimum: 0, maximum: 1 }
+        boundingBox:
+          oneOf:
+            - $ref: "#/components/schemas/NormalizedBox"
+            - type: "null"
+        metadata:
+          type: object
+          additionalProperties: true
+
     ResultIdentity:
       type: object
       required:

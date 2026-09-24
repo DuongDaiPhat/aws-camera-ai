@@ -34,7 +34,9 @@ export interface EventDetailRecord extends EventListItemRecord {
   track_id: string | null;
   ai_label: string | null;
   ai_model_version: string | null;
+  ai_processed_at: Date | null;
   ai_results: unknown[];
+  aggregate_version: number;
   retain: boolean;
   correlation_id: string;
   escalation_deadline_at: Date | null;
@@ -162,13 +164,13 @@ const CREATE_EVENT_QUERY = `
     track_id,
     dedup_key,
     confidence,
+    detection_confidence,
     ai_results,
     correlation_id,
     detected_at
   ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-    COALESCE($11, gen_random_uuid()),
-    $12
+    $1, $2, $3, $4, $5, $6, $7, $8, NULL, $9, $10,
+    COALESCE($11, gen_random_uuid()), $12
   )
   ON CONFLICT (dedup_key) WHERE dedup_key IS NOT NULL DO NOTHING
   RETURNING id,
@@ -181,6 +183,7 @@ const CREATE_EVENT_QUERY = `
             track_id,
             dedup_key,
             confidence,
+            detection_confidence,
             ai_results,
             correlation_id,
             detected_at,
@@ -211,7 +214,7 @@ export interface CreateEventInput {
   source?: string;
   trackId: string;
   dedupKey: string;
-  confidence: number;
+  detectionConfidence: number;
   aiResults?: unknown[];
   correlationId?: string;
   detectedAt: Date;
@@ -228,6 +231,7 @@ export interface EventRecord {
   track_id: string | null;
   dedup_key: string | null;
   confidence: number | null;
+  detection_confidence?: number | null;
   ai_results: unknown[];
   correlation_id: string;
   detected_at: Date;
@@ -241,7 +245,7 @@ export interface UpdateEventInput {
   zoneId: string | null;
   eventType: EventType;
   priority: PriorityLevel;
-  confidence: number;
+  detectionConfidence: number;
 }
 
 @Injectable()
@@ -293,7 +297,7 @@ export class EventsRepository {
       input.source ?? 'FRIGATE',
       input.trackId,
       input.dedupKey,
-      input.confidence,
+      input.detectionConfidence,
       JSON.stringify(input.aiResults ?? []),
       input.correlationId ?? null,
       input.detectedAt,
@@ -330,6 +334,7 @@ export class EventsRepository {
              track_id,
              dedup_key,
              confidence,
+             detection_confidence,
              ai_results,
              correlation_id,
              detected_at,
@@ -352,11 +357,11 @@ export class EventsRepository {
       UPDATE events
       SET camera_id = COALESCE(camera_id, $2),
           zone_id = COALESCE($3, zone_id),
-          event_type = $4,
-          priority = $5,
-          confidence = CASE
-            WHEN confidence IS NULL THEN $6
-            ELSE GREATEST(confidence, $6)
+          event_type = CASE WHEN ai_processed_at IS NULL THEN $4 ELSE event_type END,
+          priority = CASE WHEN ai_processed_at IS NULL THEN $5 ELSE priority END,
+          detection_confidence = CASE
+            WHEN detection_confidence IS NULL THEN $6
+            ELSE GREATEST(detection_confidence, $6)
           END
       WHERE id = $1
       RETURNING id,
@@ -369,6 +374,7 @@ export class EventsRepository {
                 track_id,
                 dedup_key,
                 confidence,
+                detection_confidence,
                 ai_results,
                 correlation_id,
                 detected_at,
@@ -382,7 +388,7 @@ export class EventsRepository {
       input.zoneId,
       input.eventType,
       input.priority,
-      input.confidence,
+      input.detectionConfidence,
     ];
     const result = await this.pool.query<EventRecord>(query, values);
     return result.rows[0] ?? null;
@@ -437,7 +443,9 @@ export class EventsRepository {
              e.track_id,
              e.ai_label,
              e.ai_model_version,
+             e.ai_processed_at,
              e.ai_results,
+             e.aggregate_version,
              e.retain,
              e.correlation_id,
              e.escalation_deadline_at,

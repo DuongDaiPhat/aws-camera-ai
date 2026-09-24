@@ -14,7 +14,9 @@ export class EventDetailDto extends EventSummaryDto {
   trackId!: string | null;
   aiLabel!: string | null;
   aiModelVersion!: string | null;
+  aiProcessedAt!: string | null;
   aiResults!: AiResultItem[];
+  aggregateVersion!: number;
   retain!: boolean;
   correlationId!: string;
   escalationDeadlineAt!: string | null;

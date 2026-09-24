@@ -43,18 +43,36 @@ function toAiResultItems(rawResults: unknown): AiResultItem[] {
     return [];
   }
 
-  return rawResults.filter((item): item is AiResultItem => {
-    if (typeof item !== 'object' || item === null) return false;
-    const candidate = item as Partial<AiResultItem>;
-    return (
-      typeof candidate.label === 'string' &&
-      (candidate.confidence === null ||
-        (typeof candidate.confidence === 'number' &&
-          Number.isFinite(candidate.confidence) &&
-          candidate.confidence >= 0 &&
-          candidate.confidence <= 1))
-    );
-  });
+  return rawResults.filter(isAiResultItem);
+}
+
+function isAiResultItem(item: unknown): item is AiResultItem {
+  if (typeof item !== 'object' || item === null) return false;
+  const candidate = item as Partial<AiResultItem>;
+  return hasAiResultIdentity(candidate) && hasValidAiResultValue(candidate);
+}
+
+function hasAiResultIdentity(candidate: Partial<AiResultItem>): boolean {
+  return (
+    typeof candidate.resultId === 'string' &&
+    typeof candidate.observationId === 'string' &&
+    typeof candidate.revision === 'number' &&
+    typeof candidate.module === 'string' &&
+    typeof candidate.modelVersion === 'string' &&
+    typeof candidate.processedAt === 'string'
+  );
+}
+
+function hasValidAiResultValue(candidate: Partial<AiResultItem>): boolean {
+  const hasValidLabel = candidate.label === null || typeof candidate.label === 'string';
+  const hasValidStatus = candidate.status === 'SUCCESS' || candidate.status === 'ERROR';
+  const hasValidConfidence =
+    candidate.confidence === null ||
+    (typeof candidate.confidence === 'number' &&
+      Number.isFinite(candidate.confidence) &&
+      candidate.confidence >= 0 &&
+      candidate.confidence <= 1);
+  return hasValidLabel && hasValidStatus && hasValidConfidence;
 }
 
 function toIsoStringOrNull(value: Date | null): string | null {
@@ -187,7 +205,9 @@ export class EventsService {
       trackId: record.track_id,
       aiLabel: record.ai_label,
       aiModelVersion: record.ai_model_version,
+      aiProcessedAt: toIsoStringOrNull(record.ai_processed_at),
       aiResults: toAiResultItems(record.ai_results),
+      aggregateVersion: Number(record.aggregate_version),
       retain: record.retain,
       correlationId: record.correlation_id,
       escalationDeadlineAt: toIsoStringOrNull(record.escalation_deadline_at),
@@ -284,7 +304,7 @@ export class EventsService {
         ? { id: record.camera_id, name: record.camera_name ?? undefined }
         : null,
       zone: record.zone_id ? { id: record.zone_id, name: record.zone_name ?? undefined } : null,
-      confidence: record.confidence ? Number(record.confidence) : null,
+      confidence: record.confidence !== null ? Number(record.confidence) : null,
       personStatus: record.person_status ?? undefined,
       matchedPersonName: record.matched_person_name ?? null,
       thumbnailUrl,

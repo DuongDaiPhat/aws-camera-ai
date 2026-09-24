@@ -1,7 +1,7 @@
 # Thiết kế cơ sở dữ liệu — ERD
 
 > **Task 0.3** · Người phụ trách: **B** (Backend Lead) · Sprint 0
-> DDL thực thi: [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`db/migrations/0002_seed_escalation_rules.sql`](../../db/migrations/0002_seed_escalation_rules.sql), [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql), [`db/migrations/0005_escalation_rules_version_and_constraints.sql`](../../db/migrations/0005_escalation_rules_version_and_constraints.sql), [`db/migrations/0006_camera_sources_and_frigate_settings.sql`](../../db/migrations/0006_camera_sources_and_frigate_settings.sql), [`db/migrations/0007_face_collection_sync.sql`](../../db/migrations/0007_face_collection_sync.sql)
+> DDL thực thi: [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`db/migrations/0002_seed_escalation_rules.sql`](../../db/migrations/0002_seed_escalation_rules.sql), [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql), [`db/migrations/0004_document_frigate_dedup_key.sql`](../../db/migrations/0004_document_frigate_dedup_key.sql), [`db/migrations/0005_escalation_rules_version_and_constraints.sql`](../../db/migrations/0005_escalation_rules_version_and_constraints.sql), [`db/migrations/0006_camera_sources_and_frigate_settings.sql`](../../db/migrations/0006_camera_sources_and_frigate_settings.sql), [`db/migrations/0007_face_collection_sync.sql`](../../db/migrations/0007_face_collection_sync.sql), [`db/migrations/0008_escalation_state_machine.sql`](../../db/migrations/0008_escalation_state_machine.sql), [`db/migrations/0009_event_ai_result_receipts.sql`](../../db/migrations/0009_event_ai_result_receipts.sql)
 > Tài liệu này giải thích **vì sao** thiết kế như vậy. File SQL là nguồn sự thật về **cấu trúc**.
 
 ## Mục lục
@@ -19,7 +19,7 @@
 ## 1. Sơ đồ tổng thể
 
 17 bảng: **10 bảng chính** theo yêu cầu task 0.3, cộng **7 bảng bổ trợ** sinh ra từ các
-yêu cầu chức năng (FR-EVT-05, FR-NOT-10, FR-DET-M5-01, FR-LOG-01, FR-AUT-02 và CAM).
+yêu cầu chức năng (FR-EVT-05, FR-NOT-10, FR-DET-M5-01, FR-LOG-01, FR-AUT-02, CAM, US-11).
 
 ```mermaid
 erDiagram
@@ -49,6 +49,8 @@ erDiagram
     events ||--o{ notifications : "kích hoạt"
     events ||--o{ confirmations : "được xác nhận bởi"
     events ||--o{ event_status_history : "ghi lại"
+    events ||--o{ event_ai_result_receipts : "nhận kết quả AI"
+    events ||--o{ outbox_messages : "phát thay đổi"
 
     notifications ||--o{ confirmations : "được trả lời qua"
     emergency_contacts ||--o{ notifications : "nhận"
@@ -156,8 +158,10 @@ erDiagram
         priority_level priority
         text track_id
         text dedup_key UK
+        numeric detection_confidence "score Frigate"
         numeric confidence
         jsonb ai_results
+        bigint aggregate_version
         person_status person_status
         boolean is_false_alarm
         uuid correlation_id
@@ -176,6 +180,30 @@ erDiagram
         text bucket
         text object_key
         timestamptz expires_at
+    }
+
+    event_ai_result_receipts {
+        uuid result_id PK
+        uuid event_id FK
+        text module
+        text observation_id
+        int revision
+        char payload_hash
+        jsonb payload
+        text status
+        timestamptz received_at
+        timestamptz processed_at
+    }
+
+    outbox_messages {
+        uuid id PK
+        uuid event_id FK
+        bigint aggregate_version
+        text message_type
+        jsonb payload
+        text status
+        int attempt_count
+        timestamptz available_at
     }
 
     notifications {
@@ -509,7 +537,36 @@ Tách thành bảng `event_ai_results` sẽ chuẩn hơn về lý thuyết, như
 cùng lúc với sự kiện** và không bao giờ truy vấn độc lập. JSONB + index GIN là đủ, mà tiết kiệm
 được một JOIN trên đường nóng nhất của hệ thống.
 
-### 3.8 `event_media`
+#### `detection_confidence` và `confidence` — hai score khác nghĩa
+
+`detection_confidence` giữ score phát hiện người của Frigate. `confidence` chỉ giữ score của
+đúng nhãn AI đại diện (`ai_label`). Khi chưa có inference, `confidence` là `NULL`; hệ thống không
+lấy score Frigate để giả làm score UNKNOWN/KNOWN. Migration 0005 chuyển score của event cũ chưa
+có `ai_label` sang `detection_confidence`.
+
+#### `aggregate_version` — thứ tự projection và handoff
+
+Mỗi AI result thực sự được áp dụng làm tăng `aggregate_version`. SSE và escalation handoff dùng
+`(event_id, aggregate_version, message_type)` làm khóa chống phát lặp; replay/stale result không
+làm tăng version.
+
+### 3.8 `event_ai_result_receipts`
+
+Durable inbox của US-11. `result_id` là khóa idempotency; `payload_hash` phân biệt replay cùng nội
+dung với việc tái sử dụng ID cho nội dung khác. Mỗi receipt giữ module, observation, revision và
+payload đã validate. Revision cũ vẫn được lưu với `status = IGNORED` cùng lý do để audit, nhưng
+không thay projection hiện tại. Bảng bị xóa theo event (`ON DELETE CASCADE`), nên retention đi cùng
+chính sách retention của event và không giữ dữ liệu nhạy cảm lâu hơn sự kiện.
+
+### 3.9 `outbox_messages`
+
+Transactional outbox dùng chung cho `event.updated` và `evaluate-escalation`. Bản ghi outbox được
+commit cùng receipt và projection; network/SSE chỉ chạy sau commit. Unique key
+`(event_id, aggregate_version, message_type)` chặn tạo hai handoff cho cùng một version. Lease và
+`attempt_count` cho phép worker khác nhận lại sau crash; US-13 tái sử dụng bảng này thay vì tạo
+outbox thứ hai.
+
+### 3.10 `event_media`
 
 Metadata của ảnh/clip. File thật ở MinIO/S3.
 
@@ -524,7 +581,7 @@ Tiền tố theo ngày giúp lifecycle rule của S3 hoạt động hiệu quả
 
 `expires_at` là `NULL` khi `events.retain = TRUE` (FR-DAT-02).
 
-### 3.9 `emergency_contacts`
+### 3.11 `emergency_contacts`
 
 Tối đa 3 liên hệ, gọi tuần tự theo `priority_order` (FR-NOT-09). Ràng buộc
 `emergency_contacts_thu_tu_duy_nhat` chặn hai liên hệ cùng thứ tự 1 — nếu không, thứ tự gọi
@@ -533,7 +590,7 @@ phụ thuộc vào may rủi của planner.
 `is_verified` phản ánh giới hạn thật: SNS sandbox và Connect chỉ gửi tới số đã verify.
 FR-NOT-06 yêu cầu ghi log rõ lý do thất bại, không im lặng bỏ qua.
 
-### 3.10 `notifications`
+### 3.12 `notifications`
 
 Mỗi lần gửi là một bản ghi, kể cả gửi lại (FR-NOT-04).
 
@@ -547,7 +604,7 @@ Mỗi lần gửi là một bản ghi, kể cả gửi lại (FR-NOT-04).
 Ràng buộc `notifications_co_nguoi_nhan`: phải có ít nhất một trong `recipient_user_id`
 hoặc `emergency_contact_id`.
 
-### 3.11 `confirmations`
+### 3.13 `confirmations`
 
 Ai bấm nút gì, lúc nào, qua kênh nào.
 
@@ -563,7 +620,7 @@ CREATE UNIQUE INDEX uq_confirmations_lan_dau_tien ON confirmations (event_id)
 Partial unique index: mỗi sự kiện chỉ có **một** xác nhận `is_authoritative = TRUE`. Các lần
 sau ghi với `FALSE`. Ai bấm trước thắng — do database quyết định, không do thứ tự chạy của code.
 
-### 3.12 `event_status_history`
+### 3.14 `event_status_history`
 
 Nhật ký chuyển trạng thái (FR-EVT-05). Ghi một dòng cho **mọi** lần đổi `events.status`,
 kể cả do hệ thống tự làm.
@@ -577,7 +634,7 @@ ESCALATED → CLOSED    reason='CONTACT_ACKNOWLEDGED'    actor=EMERGENCY_CONTACT
 Đây là nguồn dữ liệu cho phần "lịch sử chuyển trạng thái" ở trang chi tiết sự kiện (US-21)
 và cũng là bằng chứng khi hội đồng hỏi "làm sao biết hệ thống đã leo thang đúng".
 
-### 3.13 `wellness_schedules`
+### 3.15 `wellness_schedules`
 
 Lịch kiểm tra hiện diện (US-20). `days_of_week` dùng `SMALLINT[]` với quy ước ISO:
 **1 = Thứ Hai … 7 = Chủ Nhật**.
@@ -585,14 +642,14 @@ Lịch kiểm tra hiện diện (US-20). `days_of_week` dùng `SMALLINT[]` với
 `camera_ids UUID[]` rỗng nghĩa là xét mọi camera của hộ. Dùng mảng thay vì bảng nối vì
 danh sách rất ngắn và luôn đọc trọn gói.
 
-### 3.14 `audit_logs`
+### 3.16 `audit_logs`
 
 Hành động nhạy cảm (FR-LOG-01): đăng nhập, xóa dữ liệu khuôn mặt, đổi cấu hình ngưỡng.
 
 `actor_user_id` dùng `ON DELETE SET NULL` — xóa người dùng **không** được xóa mất dấu vết
 hành động của họ.
 
-### 3.15 `auth_refresh_tokens`
+### 3.17 `auth_refresh_tokens`
 
 Quản lý phiên đăng nhập và vòng đời Refresh Token (US-05, FR-AUT-02, FR-AUT-04).
 DDL thực thi: [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql).

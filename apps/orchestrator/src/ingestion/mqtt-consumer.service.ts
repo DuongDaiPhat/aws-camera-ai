@@ -175,13 +175,13 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       );
     }
 
-    const isRestrictedZone = zoneSlugs.length > 0;
-
     return {
       cameraId,
       zoneId,
-      eventType: isRestrictedZone ? 'RESTRICTED_ZONE' : 'PERSON_DETECTED',
-      priority: isRestrictedZone ? 'P1' : 'P3',
+      // US-11/US-12: current_zones chi la observation. M4 moi duoc quyen xac nhan
+      // RESTRICTED_ZONE sau khi kiem tra zone type, lich va dwell.
+      eventType: 'PERSON_DETECTED',
+      priority: 'P3',
       dedupKey: `frigate:${after.camera}:${after.id}`,
       detectedAt: new Date((after.start_time ?? after.frame_time) * 1_000),
     };
@@ -200,7 +200,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       source: 'FRIGATE',
       trackId: after.id,
       dedupKey: context.dedupKey,
-      confidence: after.score,
+      detectionConfidence: after.score,
       aiResults: [],
       detectedAt: context.detectedAt,
     });
@@ -211,15 +211,13 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     context: EventContext,
     after: FrigateEventAfterDto,
   ): Promise<EventRecord> {
-    const isRestrictedZone =
-      event.event_type === 'RESTRICTED_ZONE' || context.eventType === 'RESTRICTED_ZONE';
     const updatedEvent = await this.eventsRepository.updateEvent({
       eventId: event.id,
       cameraId: context.cameraId,
       zoneId: context.zoneId,
-      eventType: isRestrictedZone ? 'RESTRICTED_ZONE' : 'PERSON_DETECTED',
-      priority: isRestrictedZone ? 'P1' : 'P3',
-      confidence: after.score,
+      eventType: 'PERSON_DETECTED',
+      priority: 'P3',
+      detectionConfidence: after.score,
     });
 
     if (!updatedEvent) {
