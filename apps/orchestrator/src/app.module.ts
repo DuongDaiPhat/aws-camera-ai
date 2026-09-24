@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { CameraSourcesModule } from './camera-sources/camera-sources.module';
 import { CamerasModule } from './cameras/cameras.module';
 import { DatabaseModule } from './database/database.module';
 import { EventsModule } from './events/events.module';
@@ -26,6 +27,7 @@ import { EscalationRulesModule } from './escalation-rules/escalation-rules.modul
     DatabaseModule,
     AuthModule,
     StorageModule,
+    CameraSourcesModule,
     CamerasModule,
     EventsModule,
     MediaModule,

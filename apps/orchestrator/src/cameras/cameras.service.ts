@@ -25,6 +25,8 @@ import type { ListCamerasQueryDto } from './dto/list-cameras-query.dto';
 import type { UpdateCameraDto } from './dto/update-camera.dto';
 import type { UpdateCameraSourceDto } from './dto/update-camera-source.dto';
 
+import { CameraSourcesService } from '../camera-sources/camera-sources.service';
+
 const DEFAULT_PREVIEW_WIDTH = 1280;
 const DEFAULT_PREVIEW_HEIGHT = 720;
 const PRESIGNED_URL_TTL_SECONDS = 900;
@@ -36,6 +38,7 @@ export class CamerasService implements CameraConfigPortV1 {
   constructor(
     private readonly camerasRepository: CamerasRepository,
     @Inject(STORAGE_SERVICE) private readonly storageService: IStorageService,
+    private readonly cameraSourcesService: CameraSourcesService,
   ) {}
 
   // -------------------------------------------------------------------
@@ -190,6 +193,21 @@ export class CamerasService implements CameraConfigPortV1 {
       });
     }
 
+    if (isEnabled) {
+      await this.cameraSourcesService.startCameraSource(
+        id,
+        existing.slug,
+        existing.source_type_val ?? 'RTSP',
+        {
+          videoKey: existing.source_video_key,
+          loop: existing.source_video_loop ?? true,
+          rtspUrl: existing.rtsp_url,
+        },
+      );
+    } else {
+      await this.cameraSourcesService.stopCameraSource(id);
+    }
+
     this.logger.log(`Camera ${existing.slug} (${id}) đã chuyển trạng thái isEnabled = ${isEnabled}`);
     return this.mapToCameraDto(updated, role);
   }
@@ -287,14 +305,7 @@ export class CamerasService implements CameraConfigPortV1 {
       });
     }
 
-    const publishUrl = `http://localhost:8889/${camera.slug}/whip`;
-    const expiresAt = new Date(Date.now() + 3600 * 1000).toISOString();
-
-    return {
-      publishUrl,
-      streamKey: camera.slug,
-      expiresAt,
-    };
+    return this.cameraSourcesService.createBrowserSession(camera.slug);
   }
 
   async retryFrigateSync(

@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CamerasService } from '../src/cameras/cameras.service';
 import { CamerasRepository } from '../src/cameras/cameras.repository';
 import { STORAGE_SERVICE } from '../src/storage/storage.interface';
+import { CameraSourcesService } from '../src/camera-sources/camera-sources.service';
 import type { CameraAggregateRecord } from '../src/cameras/cameras.types';
 
 describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
@@ -59,11 +60,22 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
       getPresignedUrl: jest.fn(),
     };
 
+    const mockCameraSourcesService = {
+      startCameraSource: jest.fn(),
+      stopCameraSource: jest.fn(),
+      createBrowserSession: jest.fn().mockReturnValue({
+        publishUrl: `http://localhost:8889/${mockCamera.slug}/whip`,
+        streamKey: mockCamera.slug,
+        expiresAt: '2026-03-01T01:00:00.000Z',
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CamerasService,
         { provide: CamerasRepository, useValue: mockRepo },
         { provide: STORAGE_SERVICE, useValue: storageService },
+        { provide: CameraSourcesService, useValue: mockCameraSourcesService },
       ],
     }).compile();
 
