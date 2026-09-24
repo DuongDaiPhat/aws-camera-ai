@@ -132,3 +132,27 @@ export function retryFrigateSync(cameraId: string): Promise<FrigateSyncRetryResp
     },
   );
 }
+
+export interface CameraZone {
+  id: string;
+  cameraId: string;
+  name: string;
+  slug: string;
+  zoneType: 'RESTRICTED' | 'REST_AREA' | 'NORMAL';
+  polygon: number[][];
+  isEnabled: boolean;
+}
+
+/**
+ * Lấy danh sách vùng giám sát (Zones) của camera.
+ */
+export async function fetchCameraZones(cameraId: string): Promise<CameraZone[]> {
+  try {
+    const res = await apiFetch<{ data: CameraZone[] }>(
+      `/cameras/${encodeURIComponent(cameraId)}/zones`,
+    );
+    return Array.isArray(res.data) ? res.data : [];
+  } catch {
+    return [];
+  }
+}

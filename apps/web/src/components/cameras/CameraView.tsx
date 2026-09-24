@@ -5,6 +5,8 @@ import type { Camera, CurrentUser } from '@/types';
 import { useCameras } from '@/hooks/useCameras';
 import { CameraList } from './CameraList';
 import { CameraSourceForm } from './CameraSourceForm';
+import { DebugView } from './DebugView';
+import { FrigateSettingsPanel } from './FrigateSettingsPanel';
 import styles from './camera-view.module.css';
 
 interface CameraViewProps {
@@ -123,30 +125,7 @@ function CameraDetailPanel({
         </button>
       </div>
 
-      {activeTab === 'preview' && (
-        <div className={styles.previewPlaceholder}>
-          <div className={styles.previewOverlayBadges}>
-            <span className={styles.overlayBadge}>Live · MediaMTX</span>
-            <span className={styles.overlayBadge}>Debug View: Sẵn sàng</span>
-          </div>
-          <svg
-            className={styles.previewPlaceholderIcon}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            <path d="M23 7l-7 5 7 5V7z" />
-            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-          </svg>
-          <span className={styles.previewLabel}>
-            Khung hiển thị luồng stream cho {camera.name}
-          </span>
-          <small style={{ color: '#64748b' }}>
-            (Sẽ được tích hợp WebRTC player và 2 toggle Debug View ở Bước 4.2)
-          </small>
-        </div>
-      )}
+      {activeTab === 'preview' && <DebugView camera={camera} />}
 
       {activeTab === 'source' && (
         <CameraSourceForm
@@ -160,10 +139,11 @@ function CameraDetailPanel({
       )}
 
       {activeTab === 'frigate' && (
-        <div className={styles.infoNotice}>
-          <strong>Cài đặt đồng bộ Frigate:</strong> Độ phân giải {resolution}, {camera.fps} FPS, Version {camera.configVersion}. 
-          Cơ chế đồng bộ bảo toàn polygon zones của Thành viên C sẽ được tích hợp ở Bước 4.1.
-        </div>
+        <FrigateSettingsPanel
+          camera={camera}
+          isAdmin={isAdmin}
+          onSynced={onRefreshCameras}
+        />
       )}
     </div>
   );

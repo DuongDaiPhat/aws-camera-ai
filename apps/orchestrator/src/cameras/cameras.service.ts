@@ -342,6 +342,27 @@ export class CamerasService implements CameraConfigPortV1 {
     };
   }
 
+  async getCameraZones(cameraId: string): Promise<
+    Array<{
+      id: string;
+      cameraId: string;
+      name: string;
+      slug: string;
+      zoneType: string;
+      polygon: number[][];
+      isEnabled: boolean;
+    }>
+  > {
+    const camera = await this.camerasRepository.findById(cameraId);
+    if (!camera) {
+      throw new NotFoundException({
+        error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${cameraId}` },
+      });
+    }
+
+    return await this.camerasRepository.findZonesByCameraId(cameraId);
+  }
+
   // -------------------------------------------------------------------
   // Helpers
   // -------------------------------------------------------------------

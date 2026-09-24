@@ -56,6 +56,7 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
       findFrigateSettingsByCameraId: jest.fn(),
       updateFrigateSettings: jest.fn(),
       findLatestSnapshotKey: jest.fn(),
+      findZonesByCameraId: jest.fn(),
     };
 
     storageService = {
@@ -313,6 +314,26 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
       const res = await service.retryFrigateSync(mockCamera.id, 'ADMIN');
       expect(res.syncStatus).toBe('SYNCED');
       expect(res.configVersion).toBe(3);
+    });
+
+    it('getCameraZones tra ve danh sach polygon zones cua camera', async () => {
+      repository.findById.mockResolvedValueOnce(mockCamera);
+      const mockZones = [
+        {
+          id: 'z1',
+          cameraId: mockCamera.id,
+          name: 'Khu vực bếp',
+          slug: 'zone_bep',
+          zoneType: 'RESTRICTED',
+          polygon: [[0.1, 0.1], [0.9, 0.9]],
+          isEnabled: true,
+        },
+      ];
+      repository.findZonesByCameraId.mockResolvedValueOnce(mockZones);
+
+      const res = await service.getCameraZones(mockCamera.id);
+      expect(res).toEqual(mockZones);
+      expect(repository.findZonesByCameraId).toHaveBeenCalledWith(mockCamera.id);
     });
   });
 });

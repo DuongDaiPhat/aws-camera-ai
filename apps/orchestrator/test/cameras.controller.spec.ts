@@ -51,6 +51,7 @@ describe('CamerasController (Slice CAM)', () => {
       updateCameraSource: jest.fn(),
       createBrowserPublishSession: jest.fn(),
       retryFrigateSync: jest.fn(),
+      getCameraZones: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -120,5 +121,24 @@ describe('CamerasController (Slice CAM)', () => {
 
     expect(service.retryFrigateSync).toHaveBeenCalledWith(mockCameraDto.id, 'ADMIN');
     expect(result.syncStatus).toBe('SYNCED');
+  });
+
+  it('getCameraZones tra ve danh sach polygon zones cua camera', async () => {
+    const mockZones = [
+      {
+        id: 'z1',
+        cameraId: mockCameraDto.id,
+        name: 'Khu vực bếp',
+        slug: 'zone_bep',
+        zoneType: 'RESTRICTED',
+        polygon: [[0.1, 0.1], [0.9, 0.9]],
+        isEnabled: true,
+      },
+    ];
+    service.getCameraZones.mockResolvedValueOnce(mockZones);
+
+    const result = await controller.getCameraZones(mockCameraDto.id);
+    expect(service.getCameraZones).toHaveBeenCalledWith(mockCameraDto.id);
+    expect(result.data).toEqual(mockZones);
   });
 });

@@ -290,4 +290,25 @@ export class CamerasRepository {
     const result = await this.pool.query<{ object_key: string }>(query, [cameraId]);
     return result.rows[0]?.object_key ?? null;
   }
+
+  async findZonesByCameraId(cameraId: string): Promise<
+    Array<{
+      id: string;
+      cameraId: string;
+      name: string;
+      slug: string;
+      zoneType: string;
+      polygon: number[][];
+      isEnabled: boolean;
+    }>
+  > {
+    const query = `
+      SELECT id, camera_id AS "cameraId", name, slug, zone_type AS "zoneType", polygon, is_enabled AS "isEnabled"
+      FROM zones
+      WHERE camera_id = $1
+      ORDER BY name ASC
+    `;
+    const result = await this.pool.query(query, [cameraId]);
+    return result.rows;
+  }
 }
