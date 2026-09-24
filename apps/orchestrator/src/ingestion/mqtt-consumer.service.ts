@@ -226,7 +226,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       source: 'FRIGATE',
       trackId: after.id,
       dedupKey: context.dedupKey,
-      confidence: after.score,
+      detectionConfidence: after.score,
       aiResults: [],
       detectedAt: context.detectedAt,
     });
@@ -246,7 +246,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       zoneName: context.zoneName,
       eventType: isRestrictedZone ? 'RESTRICTED_ZONE' : 'PERSON_DETECTED',
       priority: isRestrictedZone ? 'P1' : 'P3',
-      confidence: after.score,
+      detectionConfidence: after.score,
     });
 
     if (!updatedEvent) {

@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { CameraSourcesModule } from './camera-sources/camera-sources.module';
 import { CamerasModule } from './cameras/cameras.module';
+import { AiResultsModule } from './ai-results/ai-results.module';
 import { DatabaseModule } from './database/database.module';
 import { EventsModule } from './events/events.module';
 import { FrigateModule } from './frigate/frigate.module';
@@ -42,6 +43,7 @@ import { BullModule } from '@nestjs/bullmq';
     DatabaseModule,
     AuthModule,
     KnownFacesModule,
+    AiResultsModule,
     StorageModule,
     CameraSourcesModule,
     FrigateModule,

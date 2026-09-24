@@ -192,8 +192,21 @@ describe('EventsService (US-06)', () => {
       track_id: 'track-101',
       ai_label: 'person',
       ai_model_version: 'yolo-v8s',
+      ai_processed_at: new Date('2026-09-19T10:00:02Z'),
+      aggregate_version: 1,
       ai_results: [
-        { module: 'M1_FACE', label: 'UNKNOWN', confidence: 0.82 },
+        {
+          resultId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+          observationId: 'frame-1',
+          revision: 1,
+          module: 'M1_FACE',
+          label: 'UNKNOWN',
+          confidence: 0.82,
+          modelVersion: 'face-v1',
+          processedAt: '2026-09-19T10:00:02.000Z',
+          status: 'SUCCESS',
+          error: null,
+        },
         'khong phai object',
         { label: 'thieu confidence' },
       ],
@@ -269,9 +282,39 @@ describe('EventsService (US-06)', () => {
       eventsRepository.findEventDetailById.mockResolvedValueOnce({
         ...mockDetailRecord,
         ai_results: [
-          { module: 'M1_FACE', label: 'UNDETERMINED', confidence: null },
-          { module: 'M1_FACE', label: 'UNKNOWN', confidence: Number.NaN },
-          { module: 'M1_FACE', label: 'UNKNOWN', confidence: 1.1 },
+          {
+            resultId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+            observationId: 'frame-1',
+            revision: 1,
+            module: 'M1_FACE',
+            label: 'UNDETERMINED',
+            confidence: null,
+            modelVersion: 'face-v1',
+            processedAt: '2026-09-19T10:00:02.000Z',
+            status: 'SUCCESS',
+          },
+          {
+            resultId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+            observationId: 'frame-2',
+            revision: 1,
+            module: 'M1_FACE',
+            label: 'UNKNOWN',
+            confidence: Number.NaN,
+            modelVersion: 'face-v1',
+            processedAt: '2026-09-19T10:00:02.000Z',
+            status: 'SUCCESS',
+          },
+          {
+            resultId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3',
+            observationId: 'frame-3',
+            revision: 1,
+            module: 'M1_FACE',
+            label: 'UNKNOWN',
+            confidence: 1.1,
+            modelVersion: 'face-v1',
+            processedAt: '2026-09-19T10:00:02.000Z',
+            status: 'SUCCESS',
+          },
         ],
       });
       eventsRepository.listStatusHistoryByEventId.mockResolvedValueOnce([]);
@@ -281,7 +324,11 @@ describe('EventsService (US-06)', () => {
       });
       const detail = await service.getEvent(mockDetailRecord.id);
       expect(detail.aiResults).toEqual([
-        { module: 'M1_FACE', label: 'UNDETERMINED', confidence: null },
+        expect.objectContaining({
+          module: 'M1_FACE',
+          label: 'UNDETERMINED',
+          confidence: null,
+        }),
       ]);
     });
 

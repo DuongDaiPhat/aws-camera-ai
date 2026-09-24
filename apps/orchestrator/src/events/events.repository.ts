@@ -34,7 +34,9 @@ export interface EventDetailRecord extends EventListItemRecord {
   track_id: string | null;
   ai_label: string | null;
   ai_model_version: string | null;
+  ai_processed_at: Date | null;
   ai_results: unknown[];
+  aggregate_version: number;
   retain: boolean;
   correlation_id: string;
   escalation_deadline_at: Date | null;
@@ -163,13 +165,13 @@ const CREATE_EVENT_QUERY = `
     track_id,
     dedup_key,
     confidence,
+    detection_confidence,
     ai_results,
     correlation_id,
     detected_at
   ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
-    COALESCE($12, gen_random_uuid()),
-    $13
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, NULL, $10, $11,
+    COALESCE($12, gen_random_uuid()), $13
   )
   ON CONFLICT (dedup_key) WHERE dedup_key IS NOT NULL DO NOTHING
   RETURNING id,
@@ -183,6 +185,7 @@ const CREATE_EVENT_QUERY = `
             track_id,
             dedup_key,
             confidence,
+            detection_confidence,
             ai_results,
             correlation_id,
             detected_at,
@@ -221,7 +224,7 @@ export interface CreateEventInput {
   source?: string;
   trackId: string;
   dedupKey: string;
-  confidence: number;
+  detectionConfidence: number;
   aiResults?: unknown[];
   correlationId?: string;
   detectedAt: Date;
@@ -239,6 +242,7 @@ export interface EventRecord {
   track_id: string | null;
   dedup_key: string | null;
   confidence: number | null;
+  detection_confidence?: number | null;
   ai_results: unknown[];
   correlation_id: string;
   detected_at: Date;
@@ -253,7 +257,7 @@ export interface UpdateEventInput {
   zoneName?: string | null;
   eventType: EventType;
   priority: PriorityLevel;
-  confidence: number;
+  detectionConfidence: number;
 }
 
 @Injectable()
@@ -327,7 +331,7 @@ export class EventsRepository {
       input.source ?? 'FRIGATE',
       input.trackId,
       input.dedupKey,
-      input.confidence,
+      input.detectionConfidence,
       JSON.stringify(input.aiResults ?? []),
       input.correlationId ?? null,
       input.detectedAt,
@@ -365,6 +369,7 @@ export class EventsRepository {
              track_id,
              dedup_key,
              confidence,
+             detection_confidence,
              ai_results,
              correlation_id,
              detected_at,
@@ -395,16 +400,16 @@ export class EventsRepository {
             ELSE zone_name
           END,
           event_type = CASE
-            WHEN event_type = 'RESTRICTED_ZONE' THEN event_type
+            WHEN event_type = 'RESTRICTED_ZONE' OR ai_processed_at IS NOT NULL THEN event_type
             ELSE $5::event_type
           END,
           priority = CASE
-            WHEN event_type = 'RESTRICTED_ZONE' THEN priority
+            WHEN event_type = 'RESTRICTED_ZONE' OR ai_processed_at IS NOT NULL THEN priority
             ELSE $6::priority_level
           END,
-          confidence = CASE
-            WHEN confidence IS NULL THEN $7
-            ELSE GREATEST(confidence, $7)
+          detection_confidence = CASE
+            WHEN detection_confidence IS NULL THEN $7
+            ELSE GREATEST(detection_confidence, $7)
           END
       WHERE id = $1
       RETURNING id,
@@ -418,6 +423,7 @@ export class EventsRepository {
                 track_id,
                 dedup_key,
                 confidence,
+                detection_confidence,
                 ai_results,
                 correlation_id,
                 detected_at,
@@ -432,7 +438,7 @@ export class EventsRepository {
       input.zoneName ?? null,
       input.eventType,
       input.priority,
-      input.confidence,
+      input.detectionConfidence,
     ];
     const result = await this.pool.query<EventRecord>(query, values);
     return result.rows[0] ?? null;
@@ -514,7 +520,9 @@ export class EventsRepository {
              e.track_id,
              e.ai_label,
              e.ai_model_version,
+             e.ai_processed_at,
              e.ai_results,
+             e.aggregate_version,
              e.retain,
              e.correlation_id,
              e.escalation_deadline_at,

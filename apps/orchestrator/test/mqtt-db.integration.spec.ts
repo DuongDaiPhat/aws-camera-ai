@@ -39,7 +39,8 @@ interface PersistedEventRow {
   source: string;
   track_id: string;
   dedup_key: string;
-  confidence: string;
+  confidence: string | null;
+  detection_confidence: string;
   camera_id: string | null;
   detected_at: Date;
 }
@@ -349,6 +350,7 @@ describe('US-08 - Integration MQTT đến PostgreSQL', () => {
               track_id,
               dedup_key,
               confidence,
+              detection_confidence,
               camera_id,
               detected_at
        FROM events
@@ -367,7 +369,8 @@ describe('US-08 - Integration MQTT đến PostgreSQL', () => {
       camera_id: cameraId,
     });
     expect(result.rows[0]?.dedup_key).toBe(`frigate:cam_living_room:${trackId}`);
-    expect(Number(result.rows[0]?.confidence)).toBe(0.84);
+    expect(result.rows[0]?.confidence).toBeNull();
+    expect(Number(result.rows[0]?.detection_confidence)).toBe(0.84);
     expect(result.rows[0]?.detected_at.getTime()).toBeCloseTo(frameTime * 1000, 0);
   });
 
@@ -404,12 +407,12 @@ describe('US-08 - Integration MQTT đến PostgreSQL', () => {
     await publish(publisher, MQTT_TOPIC_FRIGATE, createPayload('end', 12, 0.8));
 
     await waitUntil(async () => {
-      const queryResult = await pool.query<{ confidence: string }>(
-        'SELECT confidence FROM events WHERE track_id = $1;',
+      const queryResult = await pool.query<{ detection_confidence: string }>(
+        'SELECT detection_confidence FROM events WHERE track_id = $1;',
         [trackId],
       );
-      return Number(queryResult.rows[0]?.confidence) === 0.9;
-    }, 'Event khong duoc cap nhat confidence lon nhat');
+      return Number(queryResult.rows[0]?.detection_confidence) === 0.9;
+    }, 'Event khong duoc cap nhat detection confidence lon nhat');
 
     expect(await countEventsByTrackId(trackId)).toBe(1);
     const result = await pool.query<PersistedEventRow>(
@@ -420,6 +423,7 @@ describe('US-08 - Integration MQTT đến PostgreSQL', () => {
               track_id,
               dedup_key,
               confidence,
+              detection_confidence,
               camera_id,
               detected_at
        FROM events
@@ -428,7 +432,8 @@ describe('US-08 - Integration MQTT đến PostgreSQL', () => {
     );
     expect(result.rows).toHaveLength(1);
     expect(result.rows[0]?.dedup_key).toBe(`frigate:cam_living_room:${trackId}`);
-    expect(Number(result.rows[0]?.confidence)).toBe(0.9);
+    expect(result.rows[0]?.confidence).toBeNull();
+    expect(Number(result.rows[0]?.detection_confidence)).toBe(0.9);
   });
 
   it('không ghi message lỗi và consumer vẫn xử lý message hợp lệ tiếp theo', async () => {
