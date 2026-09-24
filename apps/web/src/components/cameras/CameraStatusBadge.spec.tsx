@@ -30,10 +30,9 @@ describe('CameraStatusBadge component', () => {
 
   it('hien thi Da tat khi isEnabled la false', () => {
     const html = renderToStaticMarkup(
-      <CameraStatusBadge isEnabled={false} runtimeStatus="STOPPED" showConfigBadge={true} />,
+      <CameraStatusBadge isEnabled={false} runtimeStatus="DISABLED" showConfigBadge={true} />,
     );
     expect(html).toContain('Đã tắt');
     expect(html).toContain('badgeConfigOff');
-    expect(html).toContain('Đã dừng');
   });
 });

@@ -3,8 +3,24 @@ import type { components } from '@cam/contracts';
 export type Schema = components['schemas'];
 export type CameraSourceType = Schema['CameraSourceType'];
 export type CameraRuntimeStatus = Schema['CameraRuntimeStatus'];
+export type CameraSourceRuntimeStatus = Schema['CameraSourceRuntimeStatus'];
 export type CameraSourceDetail = Schema['CameraSourceDetail'];
+export type CameraSourceInfo = Schema['CameraSourceInfo'];
+export type CameraFrigateSyncInfo = Schema['CameraFrigateSyncInfo'];
+export type CameraDebugCapabilities = Schema['CameraDebugCapabilities'];
+export type CameraRuntimeStatusResponse = Schema['CameraRuntimeStatusResponse'];
+export type CameraDebugStream = Schema['CameraDebugStream'];
+export type CameraDebugDetection = Schema['CameraDebugDetection'];
 export type CameraDto = Schema['Camera'];
+
+export interface UploadedVideoFile {
+  fieldname?: string;
+  originalname: string;
+  encoding?: string;
+  mimetype?: string;
+  size: number;
+  buffer: Buffer;
+}
 
 export interface CameraRecord {
   id: string;
@@ -34,7 +50,7 @@ export interface CameraSourceRecord {
   transport: 'TCP' | 'UDP';
   input_format: string | null;
   webcam_device_label: string | null;
-  status: CameraRuntimeStatus;
+  status: CameraSourceRuntimeStatus;
   last_error_code: string | null;
   last_error_message: string | null;
   process_id: string | null;
@@ -74,10 +90,13 @@ export interface CameraAggregateRecord extends CameraRecord {
   source_video_name: string | null;
   source_video_loop: boolean | null;
   source_transport: 'TCP' | 'UDP' | null;
-  source_status: CameraRuntimeStatus | null;
+  source_status: CameraSourceRuntimeStatus | null;
   source_error_code: string | null;
   source_error_msg: string | null;
   config_version: number | null;
+  applied_version: number | null;
   sync_status: 'PENDING' | 'SYNCED' | 'FAILED' | null;
+  sync_error_code: string | null;
+  sync_error_message: string | null;
   zone_count: string | number;
 }

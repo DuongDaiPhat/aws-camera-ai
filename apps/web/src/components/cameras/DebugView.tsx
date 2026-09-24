@@ -2,47 +2,16 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Camera } from '@/types';
-import type { CameraZone } from '@/lib/cameras-client';
-import { fetchCameraZones } from '@/lib/cameras-client';
+import type { CameraDebugStream, CameraZone } from '@/lib/cameras-client';
+import { fetchCameraDebugStream, fetchCameraZones } from '@/lib/cameras-client';
 import { DebugControlsBar } from './DebugControlsBar';
 import { ZonePolygonLayer } from './ZonePolygonLayer';
 import { PersonBoxLayer, type DetectedPerson } from './PersonBoxLayer';
-import { isPointInPolygon } from './geometry-utils';
 import styles from './debug-view.module.css';
 
 interface DebugViewProps {
   camera: Camera;
 }
-
-const DEFAULT_PERSON: DetectedPerson = {
-  x: 0.18,
-  y: 0.25,
-  width: 0.14,
-  height: 0.42,
-  confidence: 0.88,
-  label: 'person',
-};
-
-const SAMPLE_ZONES: CameraZone[] = [
-  {
-    id: 'sample-zone-1',
-    cameraId: '',
-    name: 'Khu vực bếp',
-    slug: 'zone_bep',
-    zoneType: 'RESTRICTED',
-    polygon: [[0.08, 0.15], [0.42, 0.15], [0.42, 0.82], [0.08, 0.82]],
-    isEnabled: true,
-  },
-  {
-    id: 'sample-zone-2',
-    cameraId: '',
-    name: 'Ghế sofa',
-    slug: 'zone_sofa',
-    zoneType: 'REST_AREA',
-    polygon: [[0.58, 0.25], [0.92, 0.25], [0.92, 0.85], [0.58, 0.85]],
-    isEnabled: true,
-  },
-];
 
 function useStoredToggle(key: string, defaultValue: boolean): [boolean, () => void] {
   const [val, setVal] = useState<boolean>(() => {
@@ -70,56 +39,56 @@ export function DebugView({ camera }: DebugViewProps) {
   const [showZone, toggleZone] = useStoredToggle(`cam_debug_zone_${camera.id}`, true);
 
   const [zones, setZones] = useState<CameraZone[]>([]);
-  const [isSimulating, setIsSimulating] = useState(false);
-  const [simPerson, setSimPerson] = useState<DetectedPerson>(DEFAULT_PERSON);
+  const [debugData, setDebugData] = useState<CameraDebugStream | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   // Tải danh sách zones thực tế từ DB/API, nếu rỗng thì dùng sample zones
   useEffect(() => {
     let isCancelled = false;
-    fetchCameraZones(camera.id).then((data) => {
-      if (!isCancelled) {
-        setZones(data.length > 0 ? data : SAMPLE_ZONES);
-      }
+    const loadDebugData = () =>
+      fetchCameraDebugStream(camera.id)
+        .then((stream) => {
+          if (!isCancelled) {
+            setDebugData(stream);
+            setLoadError(false);
+          }
+        })
+        .catch(() => {
+          if (!isCancelled) setLoadError(true);
+        });
+
+    void fetchCameraZones(camera.id).then((cameraZones) => {
+      if (!isCancelled) setZones(cameraZones.filter((zone) => zone.isEnabled));
     });
+    void loadDebugData();
+    const refreshTimer = camera.isEnabled ? setInterval(() => void loadDebugData(), 3000) : null;
     return () => {
       isCancelled = true;
+      if (refreshTimer) clearInterval(refreshTimer);
     };
-  }, [camera.id]);
+  }, [camera.id, camera.isEnabled]);
 
-  // Vòng lặp mô phỏng di chuyển đối tượng người
-  useEffect(() => {
-    if (!isSimulating) return;
-
-    let step = 0;
-    const interval = setInterval(() => {
-      step += 0.05;
-      const x = 0.25 + 0.45 * Math.abs(Math.sin(step));
-      const y = 0.22 + 0.1 * Math.cos(step * 0.7);
-      setSimPerson((prev) => ({
-        ...prev,
-        x,
-        y,
-        confidence: 0.85 + 0.1 * Math.sin(step),
-      }));
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [isSimulating]);
-
-  // Tính toán vùng nào đang có điểm chân đế (Foot-point) nằm bên trong
   const activeZoneSlugs = useMemo(() => {
-    const footPoint: [number, number] = [
-      simPerson.x + simPerson.width / 2,
-      simPerson.y + simPerson.height,
-    ];
-    const active = new Set<string>();
-    for (const z of zones) {
-      if (isPointInPolygon(footPoint, z.polygon)) {
-        active.add(z.slug);
-      }
-    }
-    return active;
-  }, [simPerson, zones]);
+    return new Set(debugData?.activeZones ?? []);
+  }, [debugData]);
+
+  const detectedPeople = useMemo<DetectedPerson[]>(
+    () =>
+      (debugData?.detections ?? [])
+        .filter((item) => item.label === 'person' && item.box.length === 4)
+        .map((item) => {
+          const [yMin, xMin, yMax, xMax] = item.box;
+          return {
+            x: xMin,
+            y: yMin,
+            width: xMax - xMin,
+            height: yMax - yMin,
+            confidence: item.confidence,
+            label: item.label,
+          };
+        }),
+    [debugData],
+  );
 
   const resolution =
     camera.detectWidth && camera.detectHeight
@@ -132,24 +101,35 @@ export function DebugView({ camera }: DebugViewProps) {
         debugEnabled={debugEnabled}
         showPerson={showPerson}
         showZone={showZone}
-        isSimulating={isSimulating}
         onToggleDebug={toggleDebug}
         onTogglePerson={togglePerson}
         onToggleZone={toggleZone}
-        onToggleSimulate={() => setIsSimulating((prev) => !prev)}
       />
 
       <div className={styles.videoWrapper}>
-        <div className={styles.videoPlaceholder}>
-          <div className={styles.placeholderGrid} />
-          <span style={{ fontSize: '13px', zIndex: 1 }}>
-            {camera.isEnabled ? 'Đang kết nối luồng MediaMTX/WebRTC...' : 'Camera đang tắt'}
-          </span>
-        </div>
+        {debugData?.snapshotUrl && camera.isEnabled ? (
+          <img
+            className={styles.videoElement}
+            src={debugData.snapshotUrl}
+            alt={`Snapshot ${camera.name}`}
+          />
+        ) : (
+          <div className={styles.videoPlaceholder}>
+            <div className={styles.placeholderGrid} />
+            <span style={{ fontSize: '13px', zIndex: 1 }}>
+              {loadError
+                ? 'Không tải được dữ liệu camera'
+                : camera.isEnabled
+                  ? 'Chưa có snapshot camera'
+                  : 'Camera đang tắt'}
+            </span>
+          </div>
+        )}
 
         <div className={styles.hudBadges}>
           <span className={styles.hudBadge}>
-            <span className={styles.hudLiveDot} /> LIVE
+            {camera.runtimeStatus === 'ONLINE' && <span className={styles.hudLiveDot} />}
+            {camera.runtimeStatus}
           </span>
           <span className={styles.hudBadge}>RES: {resolution}</span>
           <span className={styles.hudBadge}>FPS: {camera.fps}</span>
@@ -158,22 +138,27 @@ export function DebugView({ camera }: DebugViewProps) {
 
         {debugEnabled && (
           <svg className={styles.svgOverlay} viewBox="0 0 1000 562.5">
-            {showZone && (
-              <ZonePolygonLayer zones={zones} activeZoneSlugs={activeZoneSlugs} />
-            )}
-            {showPerson && (
-              <PersonBoxLayer person={simPerson} showFootpoint={showZone} />
-            )}
+            {showZone && <ZonePolygonLayer zones={zones} activeZoneSlugs={activeZoneSlugs} />}
+            {showPerson &&
+              detectedPeople.map((person, index) => (
+                <PersonBoxLayer
+                  key={`${person.label}-${index}`}
+                  person={person}
+                  showFootpoint={showZone}
+                />
+              ))}
           </svg>
         )}
       </div>
 
       <div className={styles.infoFootnote}>
         <span>
-          Frigate Foot-point Logic: Tọa độ điểm chân đế = giữa cạnh dưới bounding box (x + w/2, y + h).
+          {detectedPeople.length > 0
+            ? `${detectedPeople.length} person detection(s) from Frigate`
+            : 'No current person detections'}
         </span>
         <span className={styles.footpointLegend}>
-          <span className={styles.footpointDot} /> Điểm kích hoạt Zone
+          <span className={styles.footpointDot} /> Camera zones
         </span>
       </div>
     </div>

@@ -470,6 +470,21 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "404": { $ref: "#/components/responses/NotFound" }
 
+  /cameras/{cameraId}/runtime-status:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    get:
+      tags: [cameras]
+      summary: Lay trang thai runtime thuc te cua camera
+      operationId: getCameraRuntimeStatus
+      responses:
+        "200":
+          description: Trang thai runtime thuc te
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraRuntimeStatusResponse" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
   /cameras/{cameraId}/source:
     parameters:
       - $ref: "#/components/parameters/CameraId"
@@ -502,6 +517,76 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "404": { $ref: "#/components/responses/NotFound" }
 
+  /cameras/{cameraId}/source/video:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Upload file video nguon phat cho camera
+      operationId: uploadCameraVideo
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: File video (MP4 hoac MKV, toi da theo CAMERA_VIDEO_MAX_BYTES)
+                loop:
+                  type: boolean
+                  default: true
+      responses:
+        "200":
+          description: Nguon phat video sau khi upload
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [cameras]
+      summary: Xoa file video nguon phat cua camera
+      operationId: deleteCameraVideo
+      responses:
+        "204":
+          description: Da xoa file video thanh cong
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source/start:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Bat dau phat nguon camera (video publisher / webcam)
+      operationId: startCameraSource
+      responses:
+        "200":
+          description: Nguon phat da khoi dong
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source/stop:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Dung phat nguon camera
+      operationId: stopCameraSource
+      responses:
+        "200":
+          description: Nguon phat da dung
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
   /cameras/{cameraId}/source/browser-session:
     parameters:
       - $ref: "#/components/parameters/CameraId"
@@ -517,6 +602,14 @@ paths:
               schema: { $ref: "#/components/schemas/BrowserPublishSession" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [cameras]
+      summary: Thu hoi phien publish WebRTC/WHIP cho webcam trinh duyet
+      operationId: revokeBrowserPublishSession
+      responses:
+        "204":
+          description: Da thu hoi phien publish thanh cong
+        "404": { $ref: "#/components/responses/NotFound" }
 
   /cameras/{cameraId}/frigate-sync/retry:
     parameters:
@@ -531,6 +624,21 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/FrigateSyncResult" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/debug-stream:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    get:
+      tags: [cameras]
+      summary: Lay thong tin luong debug va du lieu detection thuc te
+      operationId: getCameraDebugStream
+      responses:
+        "200":
+          description: Thong tin luong debug va du lieu detection
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraDebugStream" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   # ===================================================================
@@ -1340,9 +1448,7 @@ components:
           required: [code, message, traceId]
           properties:
             code:
-              type: string
-              description: Ma loi on dinh de FE xu ly, vi du TOKEN_EXPIRED.
-              examples: [NO_FACE_DETECTED]
+              $ref: "#/components/schemas/CameraErrorCode"
             message:
               type: string
               description: Thong diep tieng Viet hien thi duoc cho nguoi dung.
@@ -1352,6 +1458,34 @@ components:
             traceId:
               type: string
               description: FR-LOG-02 — dung de tra log xuyen service.
+
+    CameraErrorCode:
+      type: string
+      enum:
+        - ACCOUNT_LOCKED
+        - CAMERA_NOT_FOUND
+        - CAMERA_SOURCE_NOT_FOUND
+        - SOURCE_NOT_CONFIGURED
+        - SOURCE_UNAVAILABLE
+        - WEBCAM_PERMISSION_DENIED
+        - WEBCAM_PUBLISH_FAILED
+        - VIDEO_INVALID_FORMAT
+        - VIDEO_TOO_LARGE
+        - VIDEO_NOT_FOUND
+        - FFMPEG_START_FAILED
+        - FRIGATE_SYNC_FAILED
+        - FRIGATE_UNAVAILABLE
+        - MEDIAMTX_UNAVAILABLE
+        - CAMERA_ALREADY_TRANSITIONING
+        - CONFIG_VERSION_CONFLICT
+        - FORBIDDEN
+        - INVALID_CREDENTIALS
+        - INVALID_REFRESH_TOKEN
+        - INVALID_SLUG
+        - INVALID_TOKEN
+        - EVENT_NOT_FOUND
+        - UNAUTHORIZED
+      description: Stable errors returned by camera source, runtime and Frigate operations.
 
     PaginatedResponse:
       type: object
@@ -1460,7 +1594,19 @@ components:
     # ---------------- Cameras ----------------
     Camera:
       type: object
-      required: [id, deviceId, name, slug, isEnabled, createdAt]
+      required:
+        [
+          id,
+          deviceId,
+          name,
+          slug,
+          isEnabled,
+          runtimeStatus,
+          source,
+          frigateSync,
+          debugCapabilities,
+          createdAt,
+        ]
       properties:
         id: { type: string, format: uuid }
         deviceId: { type: string, format: uuid }
@@ -1481,15 +1627,48 @@ components:
         retentionDays: { type: integer }
         sourceType: { $ref: "#/components/schemas/CameraSourceType" }
         runtimeStatus: { $ref: "#/components/schemas/CameraRuntimeStatus" }
+        source: { $ref: "#/components/schemas/CameraSourceInfo" }
+        frigateSync: { $ref: "#/components/schemas/CameraFrigateSyncInfo" }
+        debugCapabilities: { $ref: "#/components/schemas/CameraDebugCapabilities" }
         configVersion: { type: integer, minimum: 1 }
-        syncStatus: { type: string, enum: [PENDING, APPLIED, FAILED] }
+        syncStatus: { type: string, enum: [PENDING, SYNCED, FAILED] }
         zoneCount: { type: integer }
         createdAt: { type: string, format: date-time }
+
+    CameraSourceInfo:
+      type: object
+      required: [type, isPublishing, requiresBrowserPublisher]
+      properties:
+        type: { $ref: "#/components/schemas/CameraSourceType" }
+        displayName: { type: ["string", "null"] }
+        isPublishing: { type: boolean }
+        lastError: { type: ["string", "null"] }
+        requiresBrowserPublisher: { type: boolean }
+
+    CameraFrigateSyncInfo:
+      type: object
+      required: [status, configVersion]
+      properties:
+        status: { type: string, enum: [PENDING, SYNCED, FAILED] }
+        configVersion: { type: integer, minimum: 1 }
+        appliedVersion: { type: ["integer", "null"] }
+        errorCode: { type: ["string", "null"] }
+        errorMessage: { type: ["string", "null"] }
+
+    CameraDebugCapabilities:
+      type: object
+      required: [personBoundary, zoneBoundary]
+      properties:
+        personBoundary: { type: boolean }
+        zoneBoundary: { type: boolean }
 
     CameraSourceType:
       type: string
       enum: [RTSP, BROWSER_WEBCAM, VIDEO_FILE]
     CameraRuntimeStatus:
+      type: string
+      enum: [ONLINE, OFFLINE, STARTING, FAILED, DISABLED]
+    CameraSourceRuntimeStatus:
       type: string
       enum: [NOT_CONFIGURED, STARTING, ONLINE, OFFLINE, FAILED, STOPPED]
     CameraPreview:
@@ -1571,7 +1750,7 @@ components:
         transport: { type: string, enum: [TCP, UDP], default: TCP }
         inputFormat: { type: ["string", "null"] }
         webcamDeviceLabel: { type: ["string", "null"] }
-        status: { $ref: "#/components/schemas/CameraRuntimeStatus" }
+        status: { $ref: "#/components/schemas/CameraSourceRuntimeStatus" }
         lastErrorCode: { type: ["string", "null"] }
         lastErrorMessage: { type: ["string", "null"] }
         startedAt: { type: ["string", "null"], format: date-time }
@@ -1590,12 +1769,58 @@ components:
         inputFormat: { type: string }
         webcamDeviceLabel: { type: string }
 
+    CameraRuntimeStatusResponse:
+      type: object
+      required: [cameraId, runtimeStatus, isPublishing, frigateSyncStatus, lastCheckedAt]
+      properties:
+        cameraId: { type: string, format: uuid }
+        runtimeStatus: { $ref: "#/components/schemas/CameraRuntimeStatus" }
+        isPublishing: { type: boolean }
+        frigateSyncStatus: { type: string, enum: [PENDING, SYNCED, FAILED] }
+        lastCheckedAt: { type: string, format: date-time }
+        details:
+          type: object
+          properties:
+            sourceType: { $ref: "#/components/schemas/CameraSourceType" }
+            errorCode: { type: ["string", "null"] }
+            errorMessage: { type: ["string", "null"] }
+
+    CameraDebugDetection:
+      type: object
+      required: [label, confidence, box]
+      properties:
+        label: { type: string }
+        confidence: { type: number }
+        box:
+          type: array
+          items: { type: number }
+          description: "[ymin, xmin, ymax, xmax] normalized 0..1"
+        footPoint:
+          type: array
+          items: { type: number }
+          description: "[x, y] normalized 0..1"
+
+    CameraDebugStream:
+      type: object
+      required: [cameraId, streamUrl, detections, activeZones]
+      properties:
+        cameraId: { type: string, format: uuid }
+        streamUrl: { type: string }
+        snapshotUrl: { type: ["string", "null"] }
+        detections:
+          type: array
+          items: { $ref: "#/components/schemas/CameraDebugDetection" }
+        activeZones:
+          type: array
+          items: { type: string }
+
     BrowserPublishSession:
       type: object
-      required: [publishUrl, streamKey, expiresAt]
+      required: [publishUrl, streamKey, token, expiresAt]
       properties:
         publishUrl: { type: string, description: "URL WebRTC WHIP publish endpoint" }
         streamKey: { type: string, description: "Camera slug hoac stream key" }
+        token: { type: string, description: "Token bao mat phien publish ngan han" }
         expiresAt: { type: string, format: date-time }
 
     FrigateSyncResult:
@@ -1604,7 +1829,7 @@ components:
       properties:
         cameraId: { type: string, format: uuid }
         configVersion: { type: integer, minimum: 1 }
-        syncStatus: { type: string, enum: [PENDING, APPLIED, FAILED] }
+        syncStatus: { type: string, enum: [PENDING, SYNCED, FAILED] }
         errorCode: { type: ["string", "null"] }
         errorMessage: { type: ["string", "null"] }
 

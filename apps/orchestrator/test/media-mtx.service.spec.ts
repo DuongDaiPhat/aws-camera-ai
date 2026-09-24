@@ -16,10 +16,7 @@ describe('MediaMtxService (Slice CAM)', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        MediaMtxService,
-        { provide: ConfigService, useValue: mockConfigService },
-      ],
+      providers: [MediaMtxService, { provide: ConfigService, useValue: mockConfigService }],
     }).compile();
 
     service = module.get<MediaMtxService>(MediaMtxService);
@@ -31,24 +28,41 @@ describe('MediaMtxService (Slice CAM)', () => {
 
       expect(session.publishUrl).toBe('http://localhost:8889/cam_living_room/whip');
       expect(session.streamKey).toBe('cam_living_room');
+      expect(session.token).toBeDefined();
+      expect(session.token.length).toBeGreaterThan(10);
       expect(new Date(session.expiresAt).getTime()).toBeGreaterThan(Date.now());
     });
 
     it('nem BadRequestException khi slug chua ky tu khong hop le', () => {
-      expect(() => service.createBrowserSession('Cam Living Room')).toThrow(
-        BadRequestException,
-      );
-      expect(() => service.createBrowserSession('123_invalid')).toThrow(
-        BadRequestException,
-      );
+      expect(() => service.createBrowserSession('Cam Living Room')).toThrow(BadRequestException);
+      expect(() => service.createBrowserSession('123_invalid')).toThrow(BadRequestException);
       expect(() => service.createBrowserSession('a')).toThrow(BadRequestException);
+    });
+  });
+
+  describe('Session Token Security & Revocation', () => {
+    it('verifyBrowserSession tra ve true voi token hop le', () => {
+      const session = service.createBrowserSession('cam_test', 'camera-id-1');
+      expect(service.verifyBrowserSession('cam_test', session.token)).toBe(true);
+    });
+
+    it('verifyBrowserSession tra ve false voi token sai hoac slug khac', () => {
+      const session = service.createBrowserSession('cam_test', 'camera-id-1');
+      expect(service.verifyBrowserSession('cam_other', session.token)).toBe(false);
+      expect(service.verifyBrowserSession('cam_test', 'invalid-token')).toBe(false);
+    });
+
+    it('revokeBrowserSession thu hoi session thanh cong', () => {
+      const session = service.createBrowserSession('cam_test', 'camera-id-1');
+      expect(service.revokeBrowserSession('camera-id-1')).toBe(true);
+      expect(service.verifyBrowserSession('cam_test', session.token)).toBe(false);
     });
   });
 
   describe('getPublishRtspUrl', () => {
     it('tra ve URL RTSP publish len MediaMTX', () => {
       const url = service.getPublishRtspUrl('cam_test');
-      expect(url).toBe('rtsp://localhost:8554/cam_test');
+      expect(url).toBe('rtsp://cam-internal:local-dev-password@localhost:8554/cam_test');
     });
   });
 });

@@ -7,22 +7,18 @@ interface DebugControlsBarProps {
   debugEnabled: boolean;
   showPerson: boolean;
   showZone: boolean;
-  isSimulating: boolean;
   onToggleDebug: () => void;
   onTogglePerson: () => void;
   onToggleZone: () => void;
-  onToggleSimulate: () => void;
 }
 
 export function DebugControlsBar({
   debugEnabled,
   showPerson,
   showZone,
-  isSimulating,
   onToggleDebug,
   onTogglePerson,
   onToggleZone,
-  onToggleSimulate,
 }: DebugControlsBarProps) {
   return (
     <div className={styles.controlsBar}>
@@ -61,19 +57,6 @@ export function DebugControlsBar({
           </>
         )}
       </div>
-
-      {debugEnabled && (
-        <div className={styles.toggleGroup}>
-          <button
-            type="button"
-            className={`${styles.toggleBtn} ${isSimulating ? styles.toggleBtnSimulateActive : ''}`}
-            onClick={onToggleSimulate}
-            title="Mô phỏng người di chuyển để kiểm tra kích hoạt Zone và Foot-point"
-          >
-            ⚡ {isSimulating ? 'Dừng mô phỏng' : 'Mô phỏng phát hiện'}
-          </button>
-        </div>
-      )}
     </div>
   );
 }

@@ -31,7 +31,10 @@ describe('FrigateConfigService', () => {
     source_error_code: null,
     source_error_msg: null,
     config_version: 1,
+    applied_version: 1,
     sync_status: 'SYNCED',
+    sync_error_code: null,
+    sync_error_message: null,
     zone_count: 1,
   };
 

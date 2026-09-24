@@ -4,8 +4,10 @@ import { MediaMtxService } from './media-mtx.service';
 import { FfmpegSourceRunnerService } from './ffmpeg-source-runner.service';
 import { CameraSourcesRepository } from './camera-sources.repository';
 import { CameraSourcesService } from './camera-sources.service';
+import { MediaMtxAuthController } from './media-mtx-auth.controller';
 
 @Module({
+  controllers: [MediaMtxAuthController],
   providers: [
     MediaMtxService,
     CameraSourcesRepository,

@@ -42,8 +42,26 @@ const mockCamera: Camera = {
   retentionDays: 7,
   sourceType: 'RTSP',
   runtimeStatus: 'ONLINE',
+  source: {
+    type: 'RTSP',
+    displayName: 'rtsp://admin:***@192.168.1.100:554/stream1',
+    isPublishing: true,
+    lastError: null,
+    requiresBrowserPublisher: false,
+  },
+  frigateSync: {
+    status: 'SYNCED',
+    configVersion: 1,
+    appliedVersion: 1,
+    errorCode: null,
+    errorMessage: null,
+  },
+  debugCapabilities: {
+    personBoundary: true,
+    zoneBoundary: true,
+  },
   configVersion: 1,
-  syncStatus: 'APPLIED',
+  syncStatus: 'SYNCED',
   zoneCount: 2,
   createdAt: '2026-03-01T00:00:00.000Z',
 };

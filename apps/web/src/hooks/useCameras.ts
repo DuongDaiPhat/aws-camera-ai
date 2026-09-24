@@ -34,7 +34,7 @@ async function executeCameraToggle(params: ToggleParams): Promise<boolean> {
   setCameras((prev) =>
     prev.map((c) =>
       c.id === cameraId
-        ? { ...c, isEnabled: target, runtimeStatus: target ? 'ONLINE' : 'STOPPED' }
+        ? { ...c, isEnabled: target, runtimeStatus: target ? 'ONLINE' : 'DISABLED' }
         : c,
     ),
   );

@@ -1,4 +1,5 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CamerasService } from '../src/cameras/cameras.service';
 import { CamerasRepository } from '../src/cameras/cameras.repository';
@@ -11,7 +12,7 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
   let service: CamerasService;
   let repository: jest.Mocked<CamerasRepository>;
   let storageService: { getPresignedUrl: jest.Mock };
-  let mockFrigateSyncService: { syncCamera: jest.Mock };
+  let mockFrigateSyncService: { syncCamera: jest.Mock; waitForCameraFrames: jest.Mock };
 
   const mockCamera: CameraAggregateRecord = {
     id: 'c1111111-1111-1111-1111-111111111111',
@@ -39,7 +40,10 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
     source_error_code: null,
     source_error_msg: null,
     config_version: 1,
+    applied_version: 1,
     sync_status: 'SYNCED',
+    sync_error_code: null,
+    sync_error_message: null,
     zone_count: 2,
   };
 
@@ -55,6 +59,7 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
       upsertSource: jest.fn(),
       findFrigateSettingsByCameraId: jest.fn(),
       updateFrigateSettings: jest.fn(),
+      bumpFrigateConfigVersion: jest.fn().mockResolvedValue(2),
       findLatestSnapshotKey: jest.fn(),
       findZonesByCameraId: jest.fn(),
     };
@@ -69,17 +74,30 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
       createBrowserSession: jest.fn().mockReturnValue({
         publishUrl: `http://localhost:8889/${mockCamera.slug}/whip`,
         streamKey: mockCamera.slug,
+        token: 'tok-uuid-12345',
         expiresAt: '2026-03-01T01:00:00.000Z',
       }),
+      revokeBrowserSession: jest.fn(),
+      markCameraOnline: jest.fn(),
     };
 
     mockFrigateSyncService = {
+      waitForCameraFrames: jest.fn().mockResolvedValue(false),
       syncCamera: jest.fn().mockImplementation(async (cameraId: string, version?: number) => ({
         success: true,
         cameraId,
         configVersion: version ?? 2,
         syncStatus: 'SYNCED',
       })),
+    };
+
+    const mockConfigService = {
+      get: jest.fn((key: string, defaultVal: unknown) => {
+        if (key === 'MEDIAMTX_WEBRTC_URL') return 'http://localhost:8889';
+        if (key === 'CAMERA_VIDEO_STORAGE_PATH') return './storage/videos';
+        if (key === 'CAMERA_VIDEO_MAX_BYTES') return 524288000;
+        return defaultVal;
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -89,6 +107,7 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
         { provide: STORAGE_SERVICE, useValue: storageService },
         { provide: CameraSourcesService, useValue: mockCameraSourcesService },
         { provide: FrigateSyncService, useValue: mockFrigateSyncService },
+        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
@@ -123,9 +142,7 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
     it('nem NotFoundException neu khong tim thay camera', async () => {
       repository.findById.mockResolvedValueOnce(null);
 
-      await expect(service.getCameraContext('invalid-id')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.getCameraContext('invalid-id')).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -142,10 +159,7 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
 
       expect(preview.url).toContain('https://s3.amazonaws.com');
       expect(preview.cameraId).toBe(mockCamera.id);
-      expect(storageService.getPresignedUrl).toHaveBeenCalledWith(
-        'snapshots/camera-1.jpg',
-        900,
-      );
+      expect(storageService.getPresignedUrl).toHaveBeenCalledWith('snapshots/camera-1.jpg', 900);
     });
 
     it('fallback ve dia chi placeholder Frigate khi chua co snapshot', async () => {
@@ -269,18 +283,24 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
 
       const res = await service.listCameras({}, 'VIEWER');
       expect(res.data[0].rtspUrl).toBeNull();
+      expect(res.data[0].source.displayName).not.toContain('admin:');
+      expect(res.data[0].source.displayName).not.toContain('192.168.1.100');
     });
   });
 
   describe('updateCameraState', () => {
     it('chan quyen neu role khong phai ADMIN', async () => {
-      await expect(
-        service.updateCameraState(mockCamera.id, false, 'CAREGIVER'),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(service.updateCameraState(mockCamera.id, false, 'CAREGIVER')).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('cho phep ADMIN bat/tat camera thanh cong', async () => {
-      repository.findById.mockResolvedValueOnce(mockCamera);
+      repository.findById.mockResolvedValueOnce(mockCamera).mockResolvedValueOnce({
+        ...mockCamera,
+        is_enabled: false,
+        source_status: 'STOPPED',
+      });
       repository.updateState.mockResolvedValueOnce({
         ...mockCamera,
         is_enabled: false,
@@ -289,17 +309,74 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
 
       const res = await service.updateCameraState(mockCamera.id, false, 'ADMIN');
       expect(res.isEnabled).toBe(false);
+      expect(res.runtimeStatus).toBe('DISABLED');
       expect(repository.updateState).toHaveBeenCalledWith(mockCamera.id, false);
+    });
+
+    it('chan chuyen trang thai neu dang transitioning', async () => {
+      repository.findById.mockResolvedValue(mockCamera);
+      repository.updateState.mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve(mockCamera), 50)),
+      );
+
+      const p1 = service.updateCameraState(mockCamera.id, false, 'ADMIN');
+      await expect(service.updateCameraState(mockCamera.id, false, 'ADMIN')).rejects.toMatchObject({
+        response: { error: { code: 'CAMERA_ALREADY_TRANSITIONING' } },
+      });
+      await p1;
     });
   });
 
-  describe('Browser Session & Frigate Retry', () => {
-    it('createBrowserPublishSession tra ve WHIP endpoint cho ADMIN', async () => {
+  describe('Browser Session & Frigate Retry & Debug Stream', () => {
+    it('createBrowserPublishSession tra ve WHIP endpoint kem token cho ADMIN', async () => {
       repository.findById.mockResolvedValueOnce(mockCamera);
 
       const session = await service.createBrowserPublishSession(mockCamera.id, 'ADMIN');
       expect(session.publishUrl).toBe(`http://localhost:8889/${mockCamera.slug}/whip`);
       expect(session.streamKey).toBe(mockCamera.slug);
+      expect(session.token).toBe('tok-uuid-12345');
+    });
+
+    it('revokeBrowserPublishSession thu hoi session thanh cong', async () => {
+      repository.findById.mockResolvedValueOnce(mockCamera);
+      await service.revokeBrowserPublishSession(mockCamera.id, 'ADMIN');
+      expect(repository.upsertSource).toHaveBeenCalledWith(mockCamera.id, { status: 'OFFLINE' });
+    });
+
+    it('getCameraRuntimeStatus tra ve trang thai runtime dung chuẩn', async () => {
+      repository.findById.mockResolvedValueOnce(mockCamera);
+
+      const status = await service.getCameraRuntimeStatus(mockCamera.id);
+      expect(status.cameraId).toBe(mockCamera.id);
+      expect(status.runtimeStatus).toBe('ONLINE');
+      expect(status.isPublishing).toBe(true);
+    });
+
+    it('getCameraDebugStream tra ve thong tin debug stream', async () => {
+      repository.findById.mockResolvedValueOnce(mockCamera);
+      repository.findZonesByCameraId.mockResolvedValueOnce([
+        {
+          id: 'z1',
+          cameraId: mockCamera.id,
+          name: 'Vùng 1',
+          slug: 'vung_1',
+          zoneType: 'SAFE',
+          polygon: [
+            [0, 0],
+            [1, 1],
+          ],
+          isEnabled: true,
+        },
+      ]);
+      storageService.getPresignedUrl.mockResolvedValueOnce({
+        url: 'http://minio/snapshot.jpg',
+        expiresAt: new Date(),
+      });
+
+      const debug = await service.getCameraDebugStream(mockCamera.id);
+      expect(debug.cameraId).toBe(mockCamera.id);
+      expect(debug.streamUrl).toBe(`http://localhost:8889/${mockCamera.slug}`);
+      expect(debug.activeZones).toEqual([]);
     });
 
     it('retryFrigateSync goi frigateSyncService cho ADMIN', async () => {
@@ -325,7 +402,10 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
           name: 'Khu vực bếp',
           slug: 'zone_bep',
           zoneType: 'RESTRICTED',
-          polygon: [[0.1, 0.1], [0.9, 0.9]],
+          polygon: [
+            [0.1, 0.1],
+            [0.9, 0.9],
+          ],
           isEnabled: true,
         },
       ];

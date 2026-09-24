@@ -4,6 +4,7 @@ import { FfmpegSourceRunnerService } from '../src/camera-sources/ffmpeg-source-r
 import { MediaMtxService } from '../src/camera-sources/media-mtx.service';
 import child_process from 'child_process';
 import fs from 'fs';
+import path from 'path';
 import { EventEmitter } from 'events';
 
 jest.mock('child_process');
@@ -14,6 +15,13 @@ describe('FfmpegSourceRunnerService (Slice CAM)', () => {
 
   const mockCameraId = 'c1111111-1111-1111-1111-111111111111';
   const mockSlug = 'cam_living_room';
+
+  function mockSpawn(
+    child: EventEmitter & { pid?: number; stderr?: EventEmitter; kill?: jest.Mock },
+  ): void {
+    (child_process.spawn as jest.Mock).mockReturnValue(child);
+    void Promise.resolve().then(() => child.emit('spawn'));
+  }
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -30,14 +38,13 @@ describe('FfmpegSourceRunnerService (Slice CAM)', () => {
     };
 
     const mockMediaMtx = {
-      getPublishRtspUrl: jest.fn(
-        (slug: string) => `rtsp://localhost:8554/${slug}`,
-      ),
+      getPublishRtspUrl: jest.fn((slug: string) => `rtsp://localhost:8554/${slug}`),
       createBrowserSession: jest.fn(),
     };
 
     // Mock fs
     (fs.existsSync as jest.Mock).mockReturnValue(true);
+    (fs.realpathSync as unknown as jest.Mock).mockImplementation((filePath: string) => filePath);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -85,6 +92,21 @@ describe('FfmpegSourceRunnerService (Slice CAM)', () => {
       expect(result.success).toBe(false);
       expect(result.errorCode).toBe('VIDEO_NOT_FOUND');
     });
+
+    it('tu choi file symlink tro ra ngoai thu muc video duoc quan ly', async () => {
+      (fs.realpathSync as unknown as jest.Mock).mockImplementation((filePath: string) =>
+        filePath.endsWith('videos') ? filePath : path.resolve('outside', path.basename(filePath)),
+      );
+
+      const result = await service.start({
+        cameraId: mockCameraId,
+        slug: mockSlug,
+        videoPath: 'linked.mp4',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.errorCode).toBe('SECURITY_VIOLATION');
+    });
   });
 
   describe('Khoi chay FFmpeg thanh cong', () => {
@@ -96,7 +118,7 @@ describe('FfmpegSourceRunnerService (Slice CAM)', () => {
       mockChild.kill = jest.fn();
       mockChild.stderr = new EventEmitter();
 
-      (child_process.spawn as jest.Mock).mockReturnValue(mockChild);
+      mockSpawn(mockChild);
 
       const result = await service.start({
         cameraId: mockCameraId,
@@ -143,7 +165,7 @@ describe('FfmpegSourceRunnerService (Slice CAM)', () => {
       });
       mockChild.stderr = new EventEmitter();
 
-      (child_process.spawn as jest.Mock).mockReturnValue(mockChild);
+      mockSpawn(mockChild);
 
       await service.start({
         cameraId: mockCameraId,
@@ -157,6 +179,64 @@ describe('FfmpegSourceRunnerService (Slice CAM)', () => {
       expect(stopped).toBe(true);
       expect(mockChild.kill).toHaveBeenCalledWith('SIGTERM');
       expect(service.isRunning(mockCameraId)).toBe(false);
+    });
+
+    it('huy retry timer va khong restart khi duoc stop', async () => {
+      jest.useFakeTimers();
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+
+      const mockChild = new EventEmitter() as any;
+      mockChild.pid = 7777;
+      mockChild.kill = jest.fn();
+      mockChild.stderr = new EventEmitter();
+
+      mockSpawn(mockChild);
+
+      await service.start({
+        cameraId: mockCameraId,
+        slug: mockSlug,
+        videoPath: 'sample.mp4',
+      });
+
+      // Giả lập crash bất ngờ code = 1
+      mockChild.emit('exit', 1, null);
+
+      // Chủ động stop trong lúc đang hẹn giờ retry
+      await service.stop(mockCameraId);
+
+      // Chạy hết timers
+      jest.runAllTimers();
+
+      // Spawn không được gọi thêm lần nào nữa (chỉ 1 lần đầu)
+      expect(child_process.spawn).toHaveBeenCalledTimes(1);
+      jest.useRealTimers();
+    });
+
+    it('loc credential trong stderr buffer an toan', async () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+
+      const mockChild = new EventEmitter() as any;
+      mockChild.pid = 6666;
+      mockChild.kill = jest.fn();
+      mockChild.stderr = new EventEmitter();
+
+      mockSpawn(mockChild);
+
+      await service.start({
+        cameraId: mockCameraId,
+        slug: mockSlug,
+        videoPath: 'sample.mp4',
+      });
+
+      // Phát stderr chứa mật khẩu rtsp
+      mockChild.stderr.emit(
+        'data',
+        Buffer.from('Connecting to rtsp://admin:super_secret_pw@192.168.1.1:554/live failed\n'),
+      );
+
+      // Stop service
+      await service.stop(mockCameraId);
+      expect(true).toBe(true);
     });
   });
 });

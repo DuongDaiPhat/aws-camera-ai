@@ -14,7 +14,10 @@ export class CamerasRepository {
 
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
-  async findAll(filter?: { deviceId?: string; isEnabled?: boolean }): Promise<CameraAggregateRecord[]> {
+  async findAll(filter?: {
+    deviceId?: string;
+    isEnabled?: boolean;
+  }): Promise<CameraAggregateRecord[]> {
     const conditions: string[] = [];
     const values: unknown[] = [];
 
@@ -46,7 +49,10 @@ export class CamerasRepository {
         s.last_error_code AS source_error_code,
         s.last_error_message AS source_error_msg,
         f.config_version,
+        f.applied_version,
         f.sync_status,
+        f.sync_error_code,
+        f.sync_error_message,
         (SELECT COUNT(*)::int FROM zones z WHERE z.camera_id = c.id) AS zone_count
       FROM cameras c
       LEFT JOIN camera_sources s ON s.camera_id = c.id
@@ -76,7 +82,10 @@ export class CamerasRepository {
         s.last_error_code AS source_error_code,
         s.last_error_message AS source_error_msg,
         f.config_version,
+        f.applied_version,
         f.sync_status,
+        f.sync_error_code,
+        f.sync_error_message,
         (SELECT COUNT(*)::int FROM zones z WHERE z.camera_id = c.id) AS zone_count
       FROM cameras c
       LEFT JOIN camera_sources s ON s.camera_id = c.id
@@ -105,7 +114,10 @@ export class CamerasRepository {
         s.last_error_code AS source_error_code,
         s.last_error_message AS source_error_msg,
         f.config_version,
+        f.applied_version,
         f.sync_status,
+        f.sync_error_code,
+        f.sync_error_message,
         (SELECT COUNT(*)::int FROM zones z WHERE z.camera_id = c.id) AS zone_count
       FROM cameras c
       LEFT JOIN camera_sources s ON s.camera_id = c.id
@@ -122,10 +134,10 @@ export class CamerasRepository {
     try {
       await client.query('BEGIN');
 
-      await client.query(
-        `UPDATE cameras SET is_enabled = $1, updated_at = now() WHERE id = $2`,
-        [isEnabled, id],
-      );
+      await client.query(`UPDATE cameras SET is_enabled = $1, updated_at = now() WHERE id = $2`, [
+        isEnabled,
+        id,
+      ]);
 
       // Cập nhật trạng thái nguồn phát tương ứng
       const newSourceStatus = isEnabled ? 'ONLINE' : 'STOPPED';
@@ -206,7 +218,10 @@ export class CamerasRepository {
     return result.rows[0] ?? null;
   }
 
-  async upsertSource(cameraId: string, data: Partial<CameraSourceRecord>): Promise<CameraSourceRecord> {
+  async upsertSource(
+    cameraId: string,
+    data: Partial<CameraSourceRecord>,
+  ): Promise<CameraSourceRecord> {
     const query = `
       INSERT INTO camera_sources (
         camera_id, source_type, rtsp_url, video_object_key, 
@@ -241,7 +256,9 @@ export class CamerasRepository {
     return result.rows[0];
   }
 
-  async findFrigateSettingsByCameraId(cameraId: string): Promise<CameraFrigateSettingsRecord | null> {
+  async findFrigateSettingsByCameraId(
+    cameraId: string,
+  ): Promise<CameraFrigateSettingsRecord | null> {
     const query = `SELECT * FROM camera_frigate_settings WHERE camera_id = $1`;
     const result = await this.pool.query<CameraFrigateSettingsRecord>(query, [cameraId]);
     return result.rows[0] ?? null;
@@ -257,7 +274,7 @@ export class CamerasRepository {
         config_version, applied_version, sync_status
       ) VALUES ($1, 1280, 720, 5, 1, 0, 'PENDING')
       ON CONFLICT (camera_id) DO UPDATE SET
-        config_version = camera_frigate_settings.config_version + 1,
+        config_version = COALESCE($6, camera_frigate_settings.config_version),
         sync_status = COALESCE($2, 'PENDING'),
         sync_error_code = $3,
         sync_error_message = $4,
@@ -272,10 +289,24 @@ export class CamerasRepository {
       patch.sync_error_code ?? null,
       patch.sync_error_message ?? null,
       patch.applied_version ?? null,
+      patch.config_version ?? null,
     ];
 
     const result = await this.pool.query<CameraFrigateSettingsRecord>(query, values);
     return result.rows[0];
+  }
+
+  async bumpFrigateConfigVersion(cameraId: string): Promise<number> {
+    const result = await this.pool.query<{ config_version: number }>(
+      `INSERT INTO camera_frigate_settings (camera_id, detect_width, detect_height, detect_fps, config_version, applied_version, sync_status)
+       VALUES ($1, 1280, 720, 5, 2, 0, 'PENDING')
+       ON CONFLICT (camera_id) DO UPDATE SET
+         config_version = camera_frigate_settings.config_version + 1,
+         sync_status = 'PENDING', sync_error_code = NULL, sync_error_message = NULL, updated_at = now()
+       RETURNING config_version`,
+      [cameraId],
+    );
+    return result.rows[0].config_version;
   }
 
   async findLatestSnapshotKey(cameraId: string): Promise<string | null> {

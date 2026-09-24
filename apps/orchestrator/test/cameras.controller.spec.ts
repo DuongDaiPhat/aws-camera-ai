@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CamerasController } from '../src/cameras/cameras.controller';
 import { CamerasService } from '../src/cameras/cameras.service';
 import type { AuthenticatedRequest } from '../src/auth/jwt-auth.guard';
-import type { CameraDto } from '../src/cameras/cameras.types';
+import type { CameraDto, CameraSourceDetail } from '../src/cameras/cameras.types';
 
 describe('CamerasController (Slice CAM)', () => {
   let controller: CamerasController;
@@ -33,10 +33,46 @@ describe('CamerasController (Slice CAM)', () => {
     retentionDays: 7,
     sourceType: 'RTSP',
     runtimeStatus: 'ONLINE',
+    source: {
+      type: 'RTSP',
+      displayName: 'rtsp://admin:***@192.168.1.100:554/stream1',
+      isPublishing: true,
+      lastError: null,
+      requiresBrowserPublisher: false,
+    },
+    frigateSync: {
+      status: 'SYNCED',
+      configVersion: 1,
+      appliedVersion: 1,
+      errorCode: null,
+      errorMessage: null,
+    },
+    debugCapabilities: {
+      personBoundary: true,
+      zoneBoundary: true,
+    },
     configVersion: 1,
-    syncStatus: 'APPLIED',
+    syncStatus: 'SYNCED',
     zoneCount: 0,
     createdAt: '2026-03-01T00:00:00.000Z',
+  };
+
+  const mockSourceDetail: CameraSourceDetail = {
+    id: 's1111111-1111-1111-1111-111111111111',
+    cameraId: mockCameraDto.id,
+    sourceType: 'RTSP',
+    rtspUrl: 'rtsp://admin:***@192.168.1.100:554/stream1',
+    videoOriginalName: null,
+    videoLoop: true,
+    transport: 'TCP',
+    inputFormat: null,
+    webcamDeviceLabel: null,
+    status: 'ONLINE',
+    lastErrorCode: null,
+    lastErrorMessage: null,
+    startedAt: '2026-03-01T00:00:00.000Z',
+    stoppedAt: null,
+    updatedAt: '2026-03-01T00:00:00.000Z',
   };
 
   beforeEach(async () => {
@@ -50,6 +86,13 @@ describe('CamerasController (Slice CAM)', () => {
       getCameraSource: jest.fn(),
       updateCameraSource: jest.fn(),
       createBrowserPublishSession: jest.fn(),
+      revokeBrowserPublishSession: jest.fn(),
+      getCameraRuntimeStatus: jest.fn(),
+      uploadCameraVideo: jest.fn(),
+      deleteCameraVideo: jest.fn(),
+      startCameraSource: jest.fn(),
+      stopCameraSource: jest.fn(),
+      getCameraDebugStream: jest.fn(),
       retryFrigateSync: jest.fn(),
       getCameraZones: jest.fn(),
     };
@@ -99,6 +142,7 @@ describe('CamerasController (Slice CAM)', () => {
     const mockSession = {
       publishUrl: 'http://localhost:8889/camera_cong_chinh/whip',
       streamKey: 'camera_cong_chinh',
+      token: 'test-token-uuid-12345',
       expiresAt: '2026-03-01T01:00:00.000Z',
     };
     service.createBrowserPublishSession.mockResolvedValueOnce(mockSession);
@@ -107,6 +151,76 @@ describe('CamerasController (Slice CAM)', () => {
 
     expect(service.createBrowserPublishSession).toHaveBeenCalledWith(mockCameraDto.id, 'ADMIN');
     expect(result.publishUrl).toContain('/whip');
+    expect(result.token).toBe('test-token-uuid-12345');
+  });
+
+  it('revokeBrowserPublishSession goi service thu hoi session', async () => {
+    service.revokeBrowserPublishSession.mockResolvedValueOnce(undefined);
+
+    await controller.revokeBrowserPublishSession(mockCameraDto.id, adminReq);
+    expect(service.revokeBrowserPublishSession).toHaveBeenCalledWith(mockCameraDto.id, 'ADMIN');
+  });
+
+  it('getCameraRuntimeStatus goi service va tra ve trang thai thuc te', async () => {
+    const mockRuntime = {
+      cameraId: mockCameraDto.id,
+      runtimeStatus: 'ONLINE' as const,
+      isPublishing: true,
+      frigateSyncStatus: 'SYNCED' as const,
+      lastCheckedAt: new Date().toISOString(),
+      details: { sourceType: 'RTSP' as const, errorCode: null, errorMessage: null },
+    };
+    service.getCameraRuntimeStatus.mockResolvedValueOnce(mockRuntime);
+
+    const result = await controller.getCameraRuntimeStatus(mockCameraDto.id);
+    expect(service.getCameraRuntimeStatus).toHaveBeenCalledWith(mockCameraDto.id);
+    expect(result.runtimeStatus).toBe('ONLINE');
+  });
+
+  it('uploadCameraVideo goi service upload video nguon', async () => {
+    const mockFile = {
+      originalname: 'test.mp4',
+      buffer: Buffer.from('fake-video'),
+      size: 10,
+    };
+    service.uploadCameraVideo.mockResolvedValueOnce(mockSourceDetail);
+
+    const result = await controller.uploadCameraVideo(mockCameraDto.id, mockFile, true, adminReq);
+    expect(service.uploadCameraVideo).toHaveBeenCalledWith(mockCameraDto.id, mockFile, true, 'ADMIN');
+    expect(result.sourceType).toBe('RTSP');
+  });
+
+  it('deleteCameraVideo goi service xoa video nguon', async () => {
+    service.deleteCameraVideo.mockResolvedValueOnce(undefined);
+
+    await controller.deleteCameraVideo(mockCameraDto.id, adminReq);
+    expect(service.deleteCameraVideo).toHaveBeenCalledWith(mockCameraDto.id, 'ADMIN');
+  });
+
+  it('startCameraSource va stopCameraSource dieu khien nguon phat', async () => {
+    service.startCameraSource.mockResolvedValueOnce(mockSourceDetail);
+    service.stopCameraSource.mockResolvedValueOnce(mockSourceDetail);
+
+    await controller.startCameraSource(mockCameraDto.id, adminReq);
+    expect(service.startCameraSource).toHaveBeenCalledWith(mockCameraDto.id, 'ADMIN');
+
+    await controller.stopCameraSource(mockCameraDto.id, adminReq);
+    expect(service.stopCameraSource).toHaveBeenCalledWith(mockCameraDto.id, 'ADMIN');
+  });
+
+  it('getCameraDebugStream goi service lay luong debug va detection', async () => {
+    const mockDebugStream = {
+      cameraId: mockCameraDto.id,
+      streamUrl: 'http://localhost:8889/camera_cong_chinh',
+      snapshotUrl: null,
+      detections: [],
+      activeZones: ['Khu vực bếp'],
+    };
+    service.getCameraDebugStream.mockResolvedValueOnce(mockDebugStream);
+
+    const result = await controller.getCameraDebugStream(mockCameraDto.id);
+    expect(service.getCameraDebugStream).toHaveBeenCalledWith(mockCameraDto.id);
+    expect(result.streamUrl).toContain('/camera_cong_chinh');
   });
 
   it('retryFrigateSync goi service retry sync', async () => {

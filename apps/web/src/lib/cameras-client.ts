@@ -1,6 +1,7 @@
 import { apiFetch } from './api-client';
 import type {
   Camera,
+  components,
   CameraPreview,
   CameraSourceDetail,
   UpdateCameraRequest,
@@ -20,6 +21,7 @@ export interface ListCamerasQuery {
 export interface BrowserPublishSession {
   publishUrl: string;
   streamKey: string;
+  token: string;
   expiresAt: string;
 }
 
@@ -27,6 +29,12 @@ export interface FrigateSyncRetryResponse {
   cameraId: string;
   configVersion: number;
   syncStatus: 'PENDING' | 'SYNCED' | 'FAILED';
+}
+
+export type CameraDebugStream = components['schemas']['CameraDebugStream'];
+
+export function fetchCameraDebugStream(cameraId: string): Promise<CameraDebugStream> {
+  return apiFetch<CameraDebugStream>(`/cameras/${encodeURIComponent(cameraId)}/debug-stream`);
 }
 
 /**

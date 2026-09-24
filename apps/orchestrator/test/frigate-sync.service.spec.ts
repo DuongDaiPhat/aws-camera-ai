@@ -38,7 +38,10 @@ describe('FrigateSyncService', () => {
     source_error_code: null,
     source_error_msg: null,
     config_version: 2,
+    applied_version: 2,
     sync_status: 'SYNCED',
+    sync_error_code: null,
+    sync_error_message: null,
     zone_count: 0,
   };
 
@@ -83,7 +86,7 @@ describe('FrigateSyncService', () => {
 
   it('dong bo thanh cong va cap nhat Database trang thai SYNCED', async () => {
     camerasRepository.findById.mockResolvedValueOnce(mockCamera);
-    camerasRepository.findFrigateSettingsByCameraId.mockResolvedValueOnce({
+    camerasRepository.findFrigateSettingsByCameraId.mockResolvedValue({
       camera_id: mockCamera.id,
       detect_width: 1280,
       detect_height: 720,

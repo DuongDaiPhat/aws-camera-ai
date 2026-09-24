@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_POOL } from '../database/database.module';
-import type { CameraRuntimeStatus } from '../cameras/cameras.types';
+import type { CameraSourceRuntimeStatus } from '../cameras/cameras.types';
 
 export interface ActiveVideoSourceItem {
   cameraId: string;
@@ -16,14 +16,14 @@ export class CameraSourcesRepository {
 
   async updateRuntimeStatus(
     cameraId: string,
-    status: CameraRuntimeStatus,
+    status: CameraSourceRuntimeStatus,
     pid?: number | null,
     error?: { code?: string; message?: string },
   ): Promise<void> {
     const query = `
       UPDATE camera_sources
       SET status = $1,
-          process_id = COALESCE($2, process_id),
+          process_id = CASE WHEN $1 IN ('STOPPED', 'OFFLINE', 'FAILED') THEN NULL ELSE COALESCE($2, process_id) END,
           last_error_code = $3,
           last_error_message = $4,
           started_at = CASE WHEN $1 = 'ONLINE' THEN now() ELSE started_at END,
@@ -68,5 +68,19 @@ export class CameraSourcesRepository {
       videoObjectKey: r.video_object_key,
       videoLoop: r.video_loop ?? true,
     }));
+  }
+
+  async isEnabledMediaPath(slug: string, action: string): Promise<boolean> {
+    const result = await this.pool.query<{ allowed: boolean }>(
+      `SELECT EXISTS (
+         SELECT 1 FROM cameras c
+         JOIN camera_sources s ON s.camera_id = c.id
+         WHERE c.slug = $1 AND c.is_enabled = true
+           AND s.source_type IN ('VIDEO_FILE', 'BROWSER_WEBCAM')
+           AND ($2 = 'read' OR s.source_type = 'VIDEO_FILE')
+       ) AS allowed`,
+      [slug, action],
+    );
+    return result.rows[0]?.allowed ?? false;
   }
 }

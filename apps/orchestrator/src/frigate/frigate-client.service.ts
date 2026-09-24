@@ -7,10 +7,7 @@ export class FrigateClientService {
   private readonly frigateUrl: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.frigateUrl = this.configService.get<string>(
-      'FRIGATE_URL',
-      'http://localhost:5000',
-    );
+    this.frigateUrl = this.configService.get<string>('FRIGATE_URL', 'http://localhost:5000');
   }
 
   async getRawConfig(): Promise<string> {
@@ -28,6 +25,18 @@ export class FrigateClientService {
       this.logger.warn(`Không thể lấy cấu hình từ Frigate API (${this.frigateUrl}):`, error);
       throw error;
     }
+  }
+
+  async isCameraReceivingFrames(slug: string): Promise<boolean> {
+    const response = await fetch(`${this.frigateUrl}/api/stats`, {
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!response.ok) return false;
+
+    const payload = (await response.json()) as {
+      cameras?: Record<string, { camera_fps?: number }>;
+    };
+    return (payload.cameras?.[slug]?.camera_fps ?? 0) > 0;
   }
 
   async saveConfig(rawYaml: string): Promise<boolean> {

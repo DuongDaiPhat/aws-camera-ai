@@ -24,8 +24,26 @@ const mockCamera: Camera = {
   retentionDays: 7,
   sourceType: 'RTSP',
   runtimeStatus: 'ONLINE',
+  source: {
+    type: 'RTSP',
+    displayName: 'rtsp://admin:***@192.168.1.100:554/stream1',
+    isPublishing: true,
+    lastError: null,
+    requiresBrowserPublisher: false,
+  },
+  frigateSync: {
+    status: 'SYNCED',
+    configVersion: 1,
+    appliedVersion: 1,
+    errorCode: null,
+    errorMessage: null,
+  },
+  debugCapabilities: {
+    personBoundary: true,
+    zoneBoundary: true,
+  },
   configVersion: 1,
-  syncStatus: 'APPLIED',
+  syncStatus: 'SYNCED',
   zoneCount: 2,
   createdAt: '2026-03-01T00:00:00Z',
 };
@@ -37,7 +55,12 @@ const mockZones: CameraZone[] = [
     name: 'Khu vực bếp',
     slug: 'zone_bep',
     zoneType: 'RESTRICTED',
-    polygon: [[0.1, 0.1], [0.4, 0.1], [0.4, 0.8], [0.1, 0.8]],
+    polygon: [
+      [0.1, 0.1],
+      [0.4, 0.1],
+      [0.4, 0.8],
+      [0.1, 0.8],
+    ],
     isEnabled: true,
   },
   {
@@ -46,7 +69,12 @@ const mockZones: CameraZone[] = [
     name: 'Sofa phòng khách',
     slug: 'zone_sofa',
     zoneType: 'REST_AREA',
-    polygon: [[0.5, 0.2], [0.9, 0.2], [0.9, 0.8], [0.5, 0.8]],
+    polygon: [
+      [0.5, 0.2],
+      [0.9, 0.2],
+      [0.9, 0.8],
+      [0.5, 0.8],
+    ],
     isEnabled: true,
   },
 ];
@@ -58,11 +86,12 @@ describe('DebugView & 2 Toggle Overlay Components', () => {
     expect(html).toContain('Debug View: BẬT');
     expect(html).toContain('Person boundary: ON');
     expect(html).toContain('Zone boundary: ON');
-    expect(html).toContain('Mô phỏng phát hiện');
-    expect(html).toContain('LIVE');
+    expect(html).toContain('No current person detections');
+    expect(html).toContain('ONLINE');
     expect(html).toContain('RES: 1280x720');
     expect(html).toContain('FPS: 5');
-    expect(html).toContain('foot-point');
+    expect(html).toContain('Camera zones');
+    expect(html).not.toContain('foot-point');
   });
 
   it('DebugControlsBar hien thi dung trang thai khi Debug View BAT', () => {
@@ -71,18 +100,15 @@ describe('DebugView & 2 Toggle Overlay Components', () => {
         debugEnabled={true}
         showPerson={true}
         showZone={false}
-        isSimulating={false}
         onToggleDebug={vi.fn()}
         onTogglePerson={vi.fn()}
         onToggleZone={vi.fn()}
-        onToggleSimulate={vi.fn()}
       />,
     );
 
     expect(html).toContain('Debug View: BẬT');
     expect(html).toContain('Person boundary: ON');
     expect(html).toContain('Zone boundary: OFF');
-    expect(html).toContain('Mô phỏng phát hiện');
   });
 
   it('DebugControlsBar an cac toggle con khi Debug View TAT', () => {
@@ -91,18 +117,15 @@ describe('DebugView & 2 Toggle Overlay Components', () => {
         debugEnabled={false}
         showPerson={false}
         showZone={false}
-        isSimulating={false}
         onToggleDebug={vi.fn()}
         onTogglePerson={vi.fn()}
         onToggleZone={vi.fn()}
-        onToggleSimulate={vi.fn()}
       />,
     );
 
     expect(html).toContain('Debug View: TẮT');
     expect(html).not.toContain('Person boundary');
     expect(html).not.toContain('Zone boundary');
-    expect(html).not.toContain('Mô phỏng phát hiện');
   });
 
   it('ZonePolygonLayer ve da giac va nhan ten cac vung giam sat', () => {
@@ -151,14 +174,12 @@ describe('DebugView & 2 Toggle Overlay Components', () => {
   });
 
   it('FrigateSettingsPanel hien thi thong tin cau hinh va nut dong bo cho ADMIN', () => {
-    const html = renderToStaticMarkup(
-      <FrigateSettingsPanel camera={mockCamera} isAdmin={true} />,
-    );
+    const html = renderToStaticMarkup(<FrigateSettingsPanel camera={mockCamera} isAdmin={true} />);
 
     expect(html).toContain('Bảo toàn Polygon Zones');
     expect(html).toContain('1280x720');
     expect(html).toContain('v1');
-    expect(html).toContain('APPLIED');
+    expect(html).toContain('SYNCED');
     expect(html).toContain('Đồng bộ lại xuống Frigate');
   });
 });

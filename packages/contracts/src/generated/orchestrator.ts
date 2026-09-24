@@ -262,6 +262,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cameras/{cameraId}/runtime-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        /** Lay trang thai runtime thuc te cua camera */
+        get: operations["getCameraRuntimeStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cameras/{cameraId}/source": {
         parameters: {
             query?: never;
@@ -282,6 +301,64 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cameras/{cameraId}/source/video": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload file video nguon phat cho camera */
+        post: operations["uploadCameraVideo"];
+        /** Xoa file video nguon phat cua camera */
+        delete: operations["deleteCameraVideo"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/source/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Bat dau phat nguon camera (video publisher / webcam) */
+        post: operations["startCameraSource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/source/stop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dung phat nguon camera */
+        post: operations["stopCameraSource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cameras/{cameraId}/source/browser-session": {
         parameters: {
             query?: never;
@@ -295,7 +372,8 @@ export interface paths {
         put?: never;
         /** Cap phien publish WebRTC/WHIP cho webcam trinh duyet */
         post: operations["createBrowserPublishSession"];
-        delete?: never;
+        /** Thu hoi phien publish WebRTC/WHIP cho webcam trinh duyet */
+        delete: operations["revokeBrowserPublishSession"];
         options?: never;
         head?: never;
         patch?: never;
@@ -314,6 +392,25 @@ export interface paths {
         put?: never;
         /** Thu lai dong bo cau hinh xuong Frigate */
         post: operations["retryFrigateSync"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/debug-stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        /** Lay thong tin luong debug va du lieu detection thuc te */
+        get: operations["getCameraDebugStream"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -824,11 +921,7 @@ export interface components {
         DeviceStatus: "ONLINE" | "OFFLINE" | "DEGRADED" | "DISABLED";
         ErrorResponse: {
             error: {
-                /**
-                 * @description Ma loi on dinh de FE xu ly, vi du TOKEN_EXPIRED.
-                 * @example NO_FACE_DETECTED
-                 */
-                code: string;
+                code: components["schemas"]["CameraErrorCode"];
                 /** @description Thong diep tieng Viet hien thi duoc cho nguoi dung. */
                 message: string;
                 details?: {
@@ -838,6 +931,11 @@ export interface components {
                 traceId: string;
             };
         };
+        /**
+         * @description Stable errors returned by camera source, runtime and Frigate operations.
+         * @enum {string}
+         */
+        CameraErrorCode: "ACCOUNT_LOCKED" | "CAMERA_NOT_FOUND" | "CAMERA_SOURCE_NOT_FOUND" | "SOURCE_NOT_CONFIGURED" | "SOURCE_UNAVAILABLE" | "WEBCAM_PERMISSION_DENIED" | "WEBCAM_PUBLISH_FAILED" | "VIDEO_INVALID_FORMAT" | "VIDEO_TOO_LARGE" | "VIDEO_NOT_FOUND" | "FFMPEG_START_FAILED" | "FRIGATE_SYNC_FAILED" | "FRIGATE_UNAVAILABLE" | "MEDIAMTX_UNAVAILABLE" | "CAMERA_ALREADY_TRANSITIONING" | "CONFIG_VERSION_CONFLICT" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "INVALID_REFRESH_TOKEN" | "INVALID_SLUG" | "INVALID_TOKEN" | "EVENT_NOT_FOUND" | "UNAUTHORIZED";
         PaginatedResponse: {
             data: unknown[];
             meta: {
@@ -940,18 +1038,42 @@ export interface components {
             detectionEnabled?: boolean;
             retentionDays?: number;
             sourceType?: components["schemas"]["CameraSourceType"];
-            runtimeStatus?: components["schemas"]["CameraRuntimeStatus"];
+            runtimeStatus: components["schemas"]["CameraRuntimeStatus"];
+            source: components["schemas"]["CameraSourceInfo"];
+            frigateSync: components["schemas"]["CameraFrigateSyncInfo"];
+            debugCapabilities: components["schemas"]["CameraDebugCapabilities"];
             configVersion?: number;
             /** @enum {string} */
-            syncStatus?: "PENDING" | "APPLIED" | "FAILED";
+            syncStatus?: "PENDING" | "SYNCED" | "FAILED";
             zoneCount?: number;
             /** Format: date-time */
             createdAt: string;
         };
+        CameraSourceInfo: {
+            type: components["schemas"]["CameraSourceType"];
+            displayName?: string | null;
+            isPublishing: boolean;
+            lastError?: string | null;
+            requiresBrowserPublisher: boolean;
+        };
+        CameraFrigateSyncInfo: {
+            /** @enum {string} */
+            status: "PENDING" | "SYNCED" | "FAILED";
+            configVersion: number;
+            appliedVersion?: number | null;
+            errorCode?: string | null;
+            errorMessage?: string | null;
+        };
+        CameraDebugCapabilities: {
+            personBoundary: boolean;
+            zoneBoundary: boolean;
+        };
         /** @enum {string} */
         CameraSourceType: "RTSP" | "BROWSER_WEBCAM" | "VIDEO_FILE";
         /** @enum {string} */
-        CameraRuntimeStatus: "NOT_CONFIGURED" | "STARTING" | "ONLINE" | "OFFLINE" | "FAILED" | "STOPPED";
+        CameraRuntimeStatus: "ONLINE" | "OFFLINE" | "STARTING" | "FAILED" | "DISABLED";
+        /** @enum {string} */
+        CameraSourceRuntimeStatus: "NOT_CONFIGURED" | "STARTING" | "ONLINE" | "OFFLINE" | "FAILED" | "STOPPED";
         CameraPreview: components["schemas"]["MediaUrl"] & {
             /** Format: uuid */
             cameraId: string;
@@ -1025,7 +1147,7 @@ export interface components {
             transport: "TCP" | "UDP";
             inputFormat?: string | null;
             webcamDeviceLabel?: string | null;
-            status: components["schemas"]["CameraRuntimeStatus"];
+            status: components["schemas"]["CameraSourceRuntimeStatus"];
             lastErrorCode?: string | null;
             lastErrorMessage?: string | null;
             /** Format: date-time */
@@ -1050,11 +1172,44 @@ export interface components {
             inputFormat?: string;
             webcamDeviceLabel?: string;
         };
+        CameraRuntimeStatusResponse: {
+            /** Format: uuid */
+            cameraId: string;
+            runtimeStatus: components["schemas"]["CameraRuntimeStatus"];
+            isPublishing: boolean;
+            /** @enum {string} */
+            frigateSyncStatus: "PENDING" | "SYNCED" | "FAILED";
+            /** Format: date-time */
+            lastCheckedAt: string;
+            details?: {
+                sourceType?: components["schemas"]["CameraSourceType"];
+                errorCode?: string | null;
+                errorMessage?: string | null;
+            };
+        };
+        CameraDebugDetection: {
+            label: string;
+            confidence: number;
+            /** @description [ymin, xmin, ymax, xmax] normalized 0..1 */
+            box: number[];
+            /** @description [x, y] normalized 0..1 */
+            footPoint?: number[];
+        };
+        CameraDebugStream: {
+            /** Format: uuid */
+            cameraId: string;
+            streamUrl: string;
+            snapshotUrl?: string | null;
+            detections: components["schemas"]["CameraDebugDetection"][];
+            activeZones: string[];
+        };
         BrowserPublishSession: {
             /** @description URL WebRTC WHIP publish endpoint */
             publishUrl: string;
             /** @description Camera slug hoac stream key */
             streamKey: string;
+            /** @description Token bao mat phien publish ngan han */
+            token: string;
             /** Format: date-time */
             expiresAt: string;
         };
@@ -1063,7 +1218,7 @@ export interface components {
             cameraId: string;
             configVersion: number;
             /** @enum {string} */
-            syncStatus: "PENDING" | "APPLIED" | "FAILED";
+            syncStatus: "PENDING" | "SYNCED" | "FAILED";
             errorCode?: string | null;
             errorMessage?: string | null;
         };
@@ -2183,6 +2338,29 @@ export interface operations {
             404: components["responses"]["NotFound"];
         };
     };
+    getCameraRuntimeStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Trang thai runtime thuc te */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraRuntimeStatusResponse"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
     getCameraSource: {
         parameters: {
             query?: never;
@@ -2234,6 +2412,110 @@ export interface operations {
             404: components["responses"]["NotFound"];
         };
     };
+    uploadCameraVideo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description File video (MP4 hoac MKV, toi da theo CAMERA_VIDEO_MAX_BYTES)
+                     */
+                    file: string;
+                    /** @default true */
+                    loop?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description Nguon phat video sau khi upload */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraSourceDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteCameraVideo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Da xoa file video thanh cong */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    startCameraSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Nguon phat da khoi dong */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraSourceDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    stopCameraSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Nguon phat da dung */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraSourceDetail"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
     createBrowserPublishSession: {
         parameters: {
             query?: never;
@@ -2258,6 +2540,27 @@ export interface operations {
             404: components["responses"]["NotFound"];
         };
     };
+    revokeBrowserPublishSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Da thu hoi phien publish thanh cong */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
     retryFrigateSync: {
         parameters: {
             query?: never;
@@ -2276,6 +2579,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FrigateSyncResult"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getCameraDebugStream: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thong tin luong debug va du lieu detection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraDebugStream"];
                 };
             };
             404: components["responses"]["NotFound"];

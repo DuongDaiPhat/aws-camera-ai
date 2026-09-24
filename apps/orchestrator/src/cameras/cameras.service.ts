@@ -1,18 +1,31 @@
 import {
+  BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'crypto';
+import path from 'path';
+import fs from 'fs';
 import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
 import { CamerasRepository } from './cameras.repository';
 import type {
   CameraAggregateRecord,
+  CameraDebugStream,
   CameraDto,
+  CameraFrigateSyncInfo,
+  CameraRuntimeStatus,
+  CameraRuntimeStatusResponse,
   CameraSourceDetail,
+  CameraSourceInfo,
   CameraSourceRecord,
+  UploadedVideoFile,
 } from './cameras.types';
+import type { BrowserSessionResult } from '../camera-sources/media-mtx.service';
 import type { UserRole } from '../auth/auth.types';
 import type {
   ApplyFrigateConfigCommandV1,
@@ -35,12 +48,14 @@ const PRESIGNED_URL_TTL_SECONDS = 900;
 @Injectable()
 export class CamerasService implements CameraConfigPortV1 {
   private readonly logger = new Logger(CamerasService.name);
+  private readonly transitioningCameras = new Set<string>();
 
   constructor(
     private readonly camerasRepository: CamerasRepository,
     @Inject(STORAGE_SERVICE) private readonly storageService: IStorageService,
     private readonly cameraSourcesService: CameraSourcesService,
     private readonly frigateSyncService: FrigateSyncService,
+    private readonly configService: ConfigService,
   ) {}
 
   // -------------------------------------------------------------------
@@ -68,7 +83,7 @@ export class CamerasService implements CameraConfigPortV1 {
       isEnabled: camera.is_enabled,
       detectionEnabled: camera.detection_enabled,
       sourceType: camera.source_type_val ?? 'RTSP',
-      runtimeStatus: camera.source_status ?? (camera.is_enabled ? 'ONLINE' : 'STOPPED'),
+      runtimeStatus: this.calculateRuntimeStatus(camera.is_enabled, camera.source_status),
       configVersion: camera.config_version ?? 1,
     };
   }
@@ -125,7 +140,9 @@ export class CamerasService implements CameraConfigPortV1 {
       };
     }
 
-    const currentSettings = await this.camerasRepository.findFrigateSettingsByCameraId(command.cameraId);
+    const currentSettings = await this.camerasRepository.findFrigateSettingsByCameraId(
+      command.cameraId,
+    );
     const currentVersion = currentSettings?.config_version ?? 1;
 
     // Version conflict check
@@ -188,41 +205,91 @@ export class CamerasService implements CameraConfigPortV1 {
 
   async updateCameraState(id: string, isEnabled: boolean, role: UserRole): Promise<CameraDto> {
     this.assertAdmin(role);
-    const existing = await this.camerasRepository.findById(id);
-    if (!existing) {
-      throw new NotFoundException({
-        error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${id}` },
-      });
-    }
 
-    const updated = await this.camerasRepository.updateState(id, isEnabled);
-    if (!updated) {
-      throw new NotFoundException({
-        error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${id}` },
-      });
-    }
-
-    if (isEnabled) {
-      await this.cameraSourcesService.startCameraSource(
-        id,
-        existing.slug,
-        existing.source_type_val ?? 'RTSP',
-        {
-          videoKey: existing.source_video_key,
-          loop: existing.source_video_loop ?? true,
-          rtspUrl: existing.rtsp_url,
+    if (this.transitioningCameras.has(id)) {
+      throw new ConflictException({
+        error: {
+          code: 'CAMERA_ALREADY_TRANSITIONING',
+          message: 'Camera đang trong quá trình chuyển trạng thái, vui lòng thử lại sau.',
         },
-      );
-    } else {
-      await this.cameraSourcesService.stopCameraSource(id);
+      });
     }
 
-    await this.frigateSyncService.syncCamera(id).catch((err) => {
-      this.logger.warn(`Đồng bộ Frigate khi updateCameraState cho camera ${id} thất bại:`, err);
-    });
+    this.transitioningCameras.add(id);
+    try {
+      const existing = await this.camerasRepository.findById(id);
+      if (!existing) {
+        throw new NotFoundException({
+          error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${id}` },
+        });
+      }
 
-    this.logger.log(`Camera ${existing.slug} (${id}) đã chuyển trạng thái isEnabled = ${isEnabled}`);
-    return this.mapToCameraDto(updated, role);
+      if (isEnabled) {
+        this.assertValidSourceForStartup(existing);
+      }
+
+      await this.camerasRepository.updateState(id, isEnabled);
+      await this.camerasRepository.bumpFrigateConfigVersion(id);
+
+      if (isEnabled) {
+        await this.cameraSourcesService.startCameraSource(
+          id,
+          existing.slug,
+          existing.source_type_val ?? 'RTSP',
+          {
+            videoKey: existing.source_video_key,
+            loop: existing.source_video_loop ?? true,
+            rtspUrl: existing.rtsp_url,
+          },
+        );
+      }
+
+      const syncResult = await this.frigateSyncService.syncCamera(id).catch((err) => {
+        this.logger.warn(`Đồng bộ Frigate khi updateCameraState cho camera ${id} thất bại:`, err);
+        return null;
+      });
+      if (isEnabled && syncResult?.success && existing.source_type_val !== 'BROWSER_WEBCAM') {
+        if (await this.frigateSyncService.waitForCameraFrames(existing.slug)) {
+          await this.cameraSourcesService.markCameraOnline(id);
+        } else {
+          await this.cameraSourcesService.markCameraFailed(
+            id,
+            'SOURCE_UNAVAILABLE',
+            'Frigate chưa nhận được frame từ nguồn camera trong thời gian chờ.',
+          );
+        }
+      }
+      if (!isEnabled) {
+        await this.cameraSourcesService.stopCameraSource(id);
+      }
+
+      this.logger.log(
+        `Camera ${existing.slug} (${id}) đã chuyển trạng thái isEnabled = ${isEnabled}`,
+      );
+      const refreshed = await this.camerasRepository.findById(id);
+      return this.mapToCameraDto(refreshed ?? existing, role);
+    } finally {
+      this.transitioningCameras.delete(id);
+    }
+  }
+
+  private assertValidSourceForStartup(existing: CameraAggregateRecord): void {
+    if (existing.source_type_val === 'VIDEO_FILE' && !existing.source_video_key) {
+      throw new BadRequestException({
+        error: {
+          code: 'SOURCE_NOT_CONFIGURED',
+          message: 'Chưa tải lên file video nguồn phát cho camera này.',
+        },
+      });
+    }
+    if (existing.source_type_val === 'RTSP' && !existing.rtsp_url && !existing.source_rtsp_url) {
+      throw new BadRequestException({
+        error: {
+          code: 'SOURCE_NOT_CONFIGURED',
+          message: 'Chưa cấu hình URL RTSP cho camera này.',
+        },
+      });
+    }
   }
 
   async updateCamera(id: string, dto: UpdateCameraDto, role: UserRole): Promise<CameraDto> {
@@ -242,6 +309,8 @@ export class CamerasService implements CameraConfigPortV1 {
       detection_enabled: dto.detectionEnabled,
       retention_days: dto.retentionDays,
     });
+
+    await this.camerasRepository.bumpFrigateConfigVersion(id);
 
     return this.mapToCameraDto(updated ?? existing, role);
   }
@@ -272,7 +341,7 @@ export class CamerasService implements CameraConfigPortV1 {
       source = await this.camerasRepository.upsertSource(cameraId, {
         source_type: 'RTSP',
         rtsp_url: camera.rtsp_url,
-        status: camera.is_enabled ? 'ONLINE' : 'STOPPED',
+        status: camera.is_enabled ? 'STARTING' : 'STOPPED',
       });
     }
 
@@ -301,6 +370,7 @@ export class CamerasService implements CameraConfigPortV1 {
       webcam_device_label: dto.webcamDeviceLabel,
       status: 'NOT_CONFIGURED',
     });
+    await this.camerasRepository.bumpFrigateConfigVersion(cameraId);
 
     this.logger.log(`Cập nhật nguồn phát cho camera ${camera.slug} sang ${dto.sourceType}`);
     return this.mapToSourceDetail(updatedSource, role);
@@ -309,7 +379,7 @@ export class CamerasService implements CameraConfigPortV1 {
   async createBrowserPublishSession(
     cameraId: string,
     role: UserRole,
-  ): Promise<{ publishUrl: string; streamKey: string; expiresAt: string }> {
+  ): Promise<BrowserSessionResult> {
     this.assertAdmin(role);
     const camera = await this.camerasRepository.findById(cameraId);
     if (!camera) {
@@ -318,13 +388,272 @@ export class CamerasService implements CameraConfigPortV1 {
       });
     }
 
-    return this.cameraSourcesService.createBrowserSession(camera.slug);
+    return this.cameraSourcesService.createBrowserSession(camera.slug, cameraId);
+  }
+
+  async revokeBrowserPublishSession(cameraId: string, role: UserRole): Promise<void> {
+    this.assertAdmin(role);
+    const camera = await this.camerasRepository.findById(cameraId);
+    if (!camera) {
+      throw new NotFoundException({
+        error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${cameraId}` },
+      });
+    }
+
+    this.cameraSourcesService.revokeBrowserSession(cameraId);
+    await this.camerasRepository.upsertSource(cameraId, { status: 'OFFLINE' });
+  }
+
+  async getCameraRuntimeStatus(cameraId: string): Promise<CameraRuntimeStatusResponse> {
+    const camera = await this.camerasRepository.findById(cameraId);
+    if (!camera) {
+      throw new NotFoundException({
+        error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${cameraId}` },
+      });
+    }
+
+    let runtimeStatus = this.calculateRuntimeStatus(camera.is_enabled, camera.source_status);
+    if (
+      runtimeStatus === 'STARTING' &&
+      (await this.frigateSyncService.isCameraReceivingFrames(camera.slug))
+    ) {
+      await this.cameraSourcesService.markCameraOnline(cameraId);
+      runtimeStatus = 'ONLINE';
+    }
+
+    return {
+      cameraId: camera.id,
+      runtimeStatus,
+      isPublishing: camera.is_enabled && runtimeStatus === 'ONLINE',
+      frigateSyncStatus: this.calculateSyncStatus(camera.sync_status),
+      lastCheckedAt: new Date().toISOString(),
+      details: {
+        sourceType: camera.source_type_val ?? 'RTSP',
+        errorCode: camera.source_error_code ?? null,
+        errorMessage: camera.source_error_msg ?? null,
+      },
+    };
+  }
+
+  async uploadCameraVideo(
+    cameraId: string,
+    file: UploadedVideoFile,
+    loop: boolean = true,
+    role: UserRole = 'ADMIN',
+  ): Promise<CameraSourceDetail> {
+    this.assertAdmin(role);
+    const camera = await this.camerasRepository.findById(cameraId);
+    if (!camera) {
+      throw new NotFoundException({
+        error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${cameraId}` },
+      });
+    }
+
+    this.validateVideoUpload(file);
+
+    const ext = path.extname(file.originalname).toLowerCase();
+    const fileUuid = `${randomUUID()}${ext}`;
+    const storagePath = path.resolve(
+      this.configService.get('CAMERA_VIDEO_STORAGE_PATH', './storage/videos'),
+    );
+
+    if (!fs.existsSync(storagePath)) {
+      fs.mkdirSync(storagePath, { recursive: true });
+    }
+
+    const newPath = path.resolve(storagePath, fileUuid);
+    await fs.promises.writeFile(newPath, file.buffer);
+
+    let updated: CameraSourceRecord;
+    try {
+      updated = await this.camerasRepository.upsertSource(cameraId, {
+        source_type: 'VIDEO_FILE',
+        video_object_key: fileUuid,
+        video_original_name: file.originalname,
+        video_loop: loop,
+        status: camera.is_enabled ? 'STARTING' : 'OFFLINE',
+      });
+      await this.camerasRepository.bumpFrigateConfigVersion(cameraId);
+    } catch (error) {
+      await fs.promises.unlink(newPath).catch(() => undefined);
+      throw error;
+    }
+
+    if (camera.source_video_key) {
+      const oldPath = path.resolve(storagePath, path.basename(camera.source_video_key));
+      if (fs.existsSync(oldPath)) {
+        await fs.promises.unlink(oldPath).catch(() => undefined);
+      }
+    }
+
+    if (camera.is_enabled) {
+      await this.cameraSourcesService.startCameraSource(cameraId, camera.slug, 'VIDEO_FILE', {
+        videoKey: fileUuid,
+        loop,
+      });
+    }
+
+    const refreshed = await this.camerasRepository.findSourceByCameraId(cameraId);
+    return this.mapToSourceDetail(refreshed ?? updated, role);
+  }
+
+  private validateVideoUpload(file?: UploadedVideoFile): void {
+    if (!file || !file.buffer) {
+      throw new BadRequestException({
+        error: { code: 'VIDEO_NOT_FOUND', message: 'Vui lòng chọn file video nguồn phát.' },
+      });
+    }
+
+    const maxBytes = Number(this.configService.get('CAMERA_VIDEO_MAX_BYTES', 524288000));
+    if (file.size > maxBytes) {
+      throw new BadRequestException({
+        error: {
+          code: 'VIDEO_TOO_LARGE',
+          message: `Dung lượng video vượt quá giới hạn (${Math.round(maxBytes / (1024 * 1024))}MB)`,
+        },
+      });
+    }
+
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!['.mp4', '.mkv'].includes(ext)) {
+      throw new BadRequestException({
+        error: {
+          code: 'VIDEO_INVALID_FORMAT',
+          message: 'Định dạng video không được hỗ trợ. Chỉ chấp nhận MP4 hoặc MKV',
+        },
+      });
+    }
+  }
+
+  async deleteCameraVideo(cameraId: string, role: UserRole): Promise<void> {
+    this.assertAdmin(role);
+    const camera = await this.camerasRepository.findById(cameraId);
+    if (!camera) {
+      throw new NotFoundException({
+        error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${cameraId}` },
+      });
+    }
+
+    await this.cameraSourcesService.stopCameraSource(cameraId);
+
+    if (camera.source_video_key) {
+      const storagePath = path.resolve(
+        this.configService.get('CAMERA_VIDEO_STORAGE_PATH', './storage/videos'),
+      );
+      const targetPath = path.resolve(storagePath, path.basename(camera.source_video_key));
+      if (fs.existsSync(targetPath)) {
+        try {
+          fs.unlinkSync(targetPath);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+
+    await this.camerasRepository.upsertSource(cameraId, {
+      video_object_key: null,
+      video_original_name: null,
+      status: 'NOT_CONFIGURED',
+    });
+    await this.camerasRepository.bumpFrigateConfigVersion(cameraId);
+  }
+
+  async startCameraSource(cameraId: string, role: UserRole): Promise<CameraSourceDetail> {
+    this.assertAdmin(role);
+    const camera = await this.camerasRepository.findById(cameraId);
+    if (!camera) {
+      throw new NotFoundException({
+        error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${cameraId}` },
+      });
+    }
+
+    const source = await this.camerasRepository.findSourceByCameraId(cameraId);
+    if (!source) {
+      throw new NotFoundException({
+        error: {
+          code: 'CAMERA_SOURCE_NOT_FOUND',
+          message: 'Chưa cấu hình nguồn phát cho camera này',
+        },
+      });
+    }
+
+    if (source.source_type === 'VIDEO_FILE' && !source.video_object_key) {
+      throw new BadRequestException({
+        error: { code: 'SOURCE_NOT_CONFIGURED', message: 'Chưa tải lên file video nguồn phát' },
+      });
+    }
+
+    if (source.source_type === 'RTSP' && !source.rtsp_url) {
+      throw new BadRequestException({
+        error: { code: 'SOURCE_NOT_CONFIGURED', message: 'Chưa cấu hình URL RTSP' },
+      });
+    }
+
+    await this.cameraSourcesService.startCameraSource(cameraId, camera.slug, source.source_type, {
+      videoKey: source.video_object_key,
+      loop: source.video_loop,
+      rtspUrl: source.rtsp_url,
+    });
+
+    const refreshed = await this.camerasRepository.findSourceByCameraId(cameraId);
+    return this.mapToSourceDetail(refreshed ?? source, role);
+  }
+
+  async stopCameraSource(cameraId: string, role: UserRole): Promise<CameraSourceDetail> {
+    this.assertAdmin(role);
+    const camera = await this.camerasRepository.findById(cameraId);
+    if (!camera) {
+      throw new NotFoundException({
+        error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${cameraId}` },
+      });
+    }
+
+    await this.cameraSourcesService.stopCameraSource(cameraId);
+
+    const refreshed = await this.camerasRepository.findSourceByCameraId(cameraId);
+    if (!refreshed) {
+      throw new NotFoundException({
+        error: { code: 'CAMERA_SOURCE_NOT_FOUND', message: 'Không tìm thấy nguồn phát' },
+      });
+    }
+
+    return this.mapToSourceDetail(refreshed, role);
+  }
+
+  async getCameraDebugStream(cameraId: string): Promise<CameraDebugStream> {
+    const camera = await this.camerasRepository.findById(cameraId);
+    if (!camera) {
+      throw new NotFoundException({
+        error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${cameraId}` },
+      });
+    }
+
+    const latestSnapshotKey = await this.camerasRepository.findLatestSnapshotKey(cameraId);
+
+    const webrtcBaseUrl = this.configService.get('MEDIAMTX_WEBRTC_URL', 'http://localhost:8889');
+    const streamUrl = `${webrtcBaseUrl}/${camera.slug}`;
+
+    const snapshotResult = latestSnapshotKey
+      ? await this.storageService.getPresignedUrl(latestSnapshotKey).catch(() => null)
+      : null;
+
+    return {
+      cameraId: camera.id,
+      streamUrl,
+      snapshotUrl: snapshotResult?.url ?? null,
+      detections: [],
+      activeZones: [],
+    };
   }
 
   async retryFrigateSync(
     cameraId: string,
     role: UserRole,
-  ): Promise<{ cameraId: string; configVersion: number; syncStatus: 'PENDING' | 'SYNCED' | 'FAILED' }> {
+  ): Promise<{
+    cameraId: string;
+    configVersion: number;
+    syncStatus: 'PENDING' | 'SYNCED' | 'FAILED';
+  }> {
     this.assertAdmin(role);
     const camera = await this.camerasRepository.findById(cameraId);
     if (!camera) {
@@ -378,6 +707,49 @@ export class CamerasService implements CameraConfigPortV1 {
     }
   }
 
+  private calculateRuntimeStatus(
+    isEnabled: boolean,
+    sourceStatus: string | null,
+  ): CameraRuntimeStatus {
+    if (!isEnabled) return 'DISABLED';
+    if (sourceStatus === 'ONLINE') return 'ONLINE';
+    if (sourceStatus === 'STARTING') return 'STARTING';
+    if (sourceStatus === 'FAILED') return 'FAILED';
+    return 'OFFLINE';
+  }
+
+  private calculateSyncStatus(status: string | null): 'PENDING' | 'SYNCED' | 'FAILED' {
+    if (status === 'SYNCED' || status === 'FAILED') return status;
+    return 'PENDING';
+  }
+
+  private buildSourceInfo(r: CameraAggregateRecord): CameraSourceInfo {
+    const isPublishing = r.is_enabled && r.source_status === 'ONLINE';
+    // A source URL can contain credentials. Keep it out of display metadata for every role.
+    const displayName = r.source_video_name ?? (r.source_type_val ? r.name : null);
+    return {
+      type: r.source_type_val ?? 'RTSP',
+      displayName,
+      isPublishing,
+      lastError: r.source_error_msg ?? null,
+      requiresBrowserPublisher: r.source_type_val === 'BROWSER_WEBCAM',
+    };
+  }
+
+  private buildFrigateSyncInfo(
+    r: CameraAggregateRecord,
+    syncStatus: 'PENDING' | 'SYNCED' | 'FAILED',
+  ): CameraFrigateSyncInfo {
+    const configVer = r.config_version ?? 1;
+    return {
+      status: syncStatus,
+      configVersion: configVer,
+      appliedVersion: r.applied_version ?? null,
+      errorCode: r.sync_error_code ?? null,
+      errorMessage: r.sync_error_message ?? null,
+    };
+  }
+
   private mapToCameraDto(r: CameraAggregateRecord, role: UserRole): CameraDto {
     const isMasked = role !== 'ADMIN';
     const maskedRtsp = isMasked
@@ -385,6 +757,9 @@ export class CamerasService implements CameraConfigPortV1 {
       : r.rtsp_url
         ? r.rtsp_url.replace(/(rtsp:\/\/[^:]+:)[^@]+(@.*)/, '$1***$2')
         : null;
+
+    const runtimeStatus = this.calculateRuntimeStatus(r.is_enabled, r.source_status);
+    const syncStatus = this.calculateSyncStatus(r.sync_status);
 
     return {
       id: r.id,
@@ -400,9 +775,15 @@ export class CamerasService implements CameraConfigPortV1 {
       detectionEnabled: r.detection_enabled,
       retentionDays: r.retention_days,
       sourceType: r.source_type_val ?? 'RTSP',
-      runtimeStatus: r.source_status ?? (r.is_enabled ? 'ONLINE' : 'STOPPED'),
+      runtimeStatus,
+      source: this.buildSourceInfo(r),
+      frigateSync: this.buildFrigateSyncInfo(r, syncStatus),
+      debugCapabilities: {
+        personBoundary: true,
+        zoneBoundary: true,
+      },
       configVersion: r.config_version ?? 1,
-      syncStatus: r.sync_status === 'SYNCED' ? 'APPLIED' : (r.sync_status ?? 'PENDING'),
+      syncStatus,
       zoneCount: Number(r.zone_count ?? 0),
       createdAt: r.created_at ? r.created_at.toISOString() : new Date().toISOString(),
     };

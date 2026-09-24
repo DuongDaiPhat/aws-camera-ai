@@ -66,7 +66,7 @@ export function FrigateSettingsPanel({
         </div>
         <div className={styles.summaryCard}>
           <span className={styles.summaryLabel}>Trạng thái đồng bộ</span>
-          <span className={`${styles.summaryValue} ${camera.syncStatus === 'APPLIED' ? styles.summaryValueOnline : styles.summaryValueErrors}`}>
+          <span className={`${styles.summaryValue} ${camera.syncStatus === 'SYNCED' ? styles.summaryValueOnline : styles.summaryValueErrors}`}>
             {camera.syncStatus}
           </span>
         </div>

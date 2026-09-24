@@ -30,13 +30,9 @@ export function CameraStatusBadge({
       badgeStyle = styles.badgeError;
       statusText = 'Lỗi kết nối';
       break;
-    case 'STOPPED':
+    case 'DISABLED':
       badgeStyle = styles.badgeOffline;
-      statusText = 'Đã dừng';
-      break;
-    case 'NOT_CONFIGURED':
-      badgeStyle = styles.badgeOffline;
-      statusText = 'Chưa cấu hình';
+      statusText = 'Đã tắt';
       break;
     default:
       badgeStyle = styles.badgeOffline;

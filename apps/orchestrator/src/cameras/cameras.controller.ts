@@ -11,9 +11,13 @@ import {
   Put,
   Query,
   Req,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -26,7 +30,14 @@ import { ListCamerasQueryDto } from './dto/list-cameras-query.dto';
 import { UpdateCameraDto } from './dto/update-camera.dto';
 import { UpdateCameraStateDto } from './dto/update-camera-state.dto';
 import { UpdateCameraSourceDto } from './dto/update-camera-source.dto';
-import type { CameraDto, CameraSourceDetail } from './cameras.types';
+import type {
+  CameraDebugStream,
+  CameraDto,
+  CameraRuntimeStatusResponse,
+  CameraSourceDetail,
+  UploadedVideoFile,
+} from './cameras.types';
+import type { BrowserSessionResult } from '../camera-sources/media-mtx.service';
 import type { CameraPreviewV1 } from '../contracts/vertical-slice.ports';
 
 @ApiTags('cameras')
@@ -130,6 +141,18 @@ export class CamerasController {
     return await this.camerasService.updateCameraState(cameraId, dto.isEnabled, role);
   }
 
+  @Get(':cameraId/runtime-status')
+  @ApiOperation({ summary: 'Lấy trạng thái runtime thực tế của camera' })
+  @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Trạng thái runtime thực tế' })
+  @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
+  async getCameraRuntimeStatus(
+    @Param('cameraId', ParseUUIDPipe) cameraId: string,
+  ): Promise<CameraRuntimeStatusResponse> {
+    return await this.camerasService.getCameraRuntimeStatus(cameraId);
+  }
+
   @Get(':cameraId/source')
   @ApiOperation({ summary: 'Chi tiết nguồn phát của camera' })
   @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
@@ -160,21 +183,121 @@ export class CamerasController {
     return await this.camerasService.updateCameraSource(cameraId, dto, role);
   }
 
+  @Post(':cameraId/source/video')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 524288000 } }))
+  @ApiOperation({ summary: 'Upload file video nguồn phát cho camera (chỉ ADMIN)' })
+  @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ status: 200, description: 'Nguồn phát video sau khi upload' })
+  @ApiResponse({ status: 400, description: 'File không hợp lệ hoặc quá lớn' })
+  @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
+  async uploadCameraVideo(
+    @Param('cameraId', ParseUUIDPipe) cameraId: string,
+    @UploadedFile() file: UploadedVideoFile,
+    @Body('loop') loop: string | boolean,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<CameraSourceDetail> {
+    const role = this.extractRole(request);
+    const isLoop = loop === 'false' ? false : Boolean(loop ?? true);
+    return await this.camerasService.uploadCameraVideo(cameraId, file, isLoop, role);
+  }
+
+  @Delete(':cameraId/source/video')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Xóa file video nguồn phát của camera (chỉ ADMIN)' })
+  @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 204, description: 'Đã xóa file video thành công' })
+  @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
+  async deleteCameraVideo(
+    @Param('cameraId', ParseUUIDPipe) cameraId: string,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<void> {
+    const role = this.extractRole(request);
+    await this.camerasService.deleteCameraVideo(cameraId, role);
+  }
+
+  @Post(':cameraId/source/start')
+  @ApiOperation({ summary: 'Bắt đầu phát nguồn camera (video publisher / webcam) (chỉ ADMIN)' })
+  @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Nguồn phát đã khởi động' })
+  @ApiResponse({ status: 400, description: 'Nguồn chưa được cấu hình' })
+  @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
+  async startCameraSource(
+    @Param('cameraId', ParseUUIDPipe) cameraId: string,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<CameraSourceDetail> {
+    const role = this.extractRole(request);
+    return await this.camerasService.startCameraSource(cameraId, role);
+  }
+
+  @Post(':cameraId/source/stop')
+  @ApiOperation({ summary: 'Dừng phát nguồn camera (chỉ ADMIN)' })
+  @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Nguồn phát đã dừng' })
+  @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
+  async stopCameraSource(
+    @Param('cameraId', ParseUUIDPipe) cameraId: string,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<CameraSourceDetail> {
+    const role = this.extractRole(request);
+    return await this.camerasService.stopCameraSource(cameraId, role);
+  }
+
   @Post(':cameraId/source/browser-session')
   @ApiOperation({
     summary: 'Cấp phiên publish WebRTC/WHIP cho webcam trình duyệt (chỉ ADMIN)',
   })
   @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Thông tin publish WebRTC/WHIP' })
+  @ApiResponse({ status: 200, description: 'Thông tin publish WebRTC/WHIP kèm token' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
   @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
   async createBrowserPublishSession(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
     @Req() request: AuthenticatedRequest,
-  ): Promise<{ publishUrl: string; streamKey: string; expiresAt: string }> {
+  ): Promise<BrowserSessionResult> {
     const role = this.extractRole(request);
     return await this.camerasService.createBrowserPublishSession(cameraId, role);
+  }
+
+  @Delete(':cameraId/source/browser-session')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Thu hồi phiên publish WebRTC/WHIP cho webcam trình duyệt (chỉ ADMIN)',
+  })
+  @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 204, description: 'Đã thu hồi phiên publish thành công' })
+  @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
+  async revokeBrowserPublishSession(
+    @Param('cameraId', ParseUUIDPipe) cameraId: string,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<void> {
+    const role = this.extractRole(request);
+    await this.camerasService.revokeBrowserPublishSession(cameraId, role);
+  }
+
+  @Get(':cameraId/debug-stream')
+  @ApiOperation({
+    summary: 'Lấy thông tin luồng debug và dữ liệu detection thực tế',
+  })
+  @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Thông tin luồng debug và dữ liệu detection' })
+  @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
+  async getCameraDebugStream(
+    @Param('cameraId', ParseUUIDPipe) cameraId: string,
+  ): Promise<CameraDebugStream> {
+    return await this.camerasService.getCameraDebugStream(cameraId);
   }
 
   @Post(':cameraId/frigate-sync/retry')
@@ -189,7 +312,11 @@ export class CamerasController {
   async retryFrigateSync(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
     @Req() request: AuthenticatedRequest,
-  ): Promise<{ cameraId: string; configVersion: number; syncStatus: 'PENDING' | 'SYNCED' | 'FAILED' }> {
+  ): Promise<{
+    cameraId: string;
+    configVersion: number;
+    syncStatus: 'PENDING' | 'SYNCED' | 'FAILED';
+  }> {
     const role = this.extractRole(request);
     return await this.camerasService.retryFrigateSync(cameraId, role);
   }
@@ -203,9 +330,7 @@ export class CamerasController {
   @ApiResponse({ status: 200, description: 'Danh sách các vùng giám sát' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
-  async getCameraZones(
-    @Param('cameraId', ParseUUIDPipe) cameraId: string,
-  ): Promise<{
+  async getCameraZones(@Param('cameraId', ParseUUIDPipe) cameraId: string): Promise<{
     data: Array<{
       id: string;
       cameraId: string;

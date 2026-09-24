@@ -1,10 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import YAML from 'yaml';
 import type { CameraAggregateRecord } from '../cameras/cameras.types';
+import type { CameraFrigateSettingsRecord } from '../cameras/cameras.types';
 
 export interface CameraFrigateData {
   camera: CameraAggregateRecord;
   mediamtxRtspBaseUrl?: string;
+  settings?: CameraFrigateSettingsRecord | null;
 }
 
 @Injectable()
@@ -12,7 +14,7 @@ export class FrigateConfigService {
   private readonly logger = new Logger(FrigateConfigService.name);
 
   generateUpdatedConfig(rawYaml: string, data: CameraFrigateData): string {
-    const { camera, mediamtxRtspBaseUrl = 'rtsp://mediamtx:8554' } = data;
+    const { camera, settings, mediamtxRtspBaseUrl = 'rtsp://mediamtx:8554' } = data;
     const slug = camera.slug;
 
     const parsedConfig = this.parseConfig(rawYaml);
@@ -24,6 +26,21 @@ export class FrigateConfigService {
     const existingCamera = cameras[slug] ?? {};
     const preservedZones = existingCamera.zones ?? {};
     const streamUrl = this.resolveStreamUrl(camera, mediamtxRtspBaseUrl);
+    const detect = {
+      ...((existingCamera.detect as Record<string, unknown> | undefined) ?? {}),
+      width: settings?.detect_width ?? camera.detect_width ?? 1280,
+      height: settings?.detect_height ?? camera.detect_height ?? 720,
+      fps: settings?.detect_fps ?? camera.fps ?? 5,
+      enabled: camera.detection_enabled,
+      min_initialized: settings?.min_initialized_frames ?? 1,
+      max_disappeared: settings?.max_disappeared_frames ?? 25,
+    };
+    const existingObjects = (existingCamera.objects as Record<string, unknown> | undefined) ?? {};
+    const existingFilters = (existingObjects.filters as Record<string, unknown> | undefined) ?? {};
+    const existingPerson = (existingFilters.person as Record<string, unknown> | undefined) ?? {};
+    const snapshots = (existingCamera.snapshots as Record<string, unknown> | undefined) ?? {};
+    const record = (existingCamera.record as Record<string, unknown> | undefined) ?? {};
+    const retain = (record.retain as Record<string, unknown> | undefined) ?? {};
 
     // 4. Sinh cấu hình mới cho camera mà không ghi đè zone
     cameras[slug] = {
@@ -37,10 +54,34 @@ export class FrigateConfigService {
           },
         ],
       },
-      detect: {
-        width: camera.detect_width || 1280,
-        height: camera.detect_height || 720,
-        fps: camera.fps || 5,
+      detect,
+      objects: {
+        ...existingObjects,
+        track: Array.from(
+          new Set([...((existingObjects.track as string[] | undefined) ?? []), 'person']),
+        ),
+        filters: {
+          ...existingFilters,
+          person: {
+            ...existingPerson,
+            min_score: settings?.person_min_score ?? existingPerson.min_score ?? 0.5,
+            threshold: settings?.person_threshold ?? existingPerson.threshold ?? 0.7,
+            min_area: settings?.person_min_area ?? existingPerson.min_area ?? 1500,
+          },
+        },
+      },
+      snapshots: {
+        ...snapshots,
+        enabled: settings?.snapshots_enabled ?? snapshots.enabled ?? true,
+        bounding_box: settings?.snapshot_bounding_box ?? snapshots.bounding_box ?? true,
+      },
+      record: {
+        ...record,
+        enabled: settings?.recording_enabled ?? record.enabled ?? true,
+        retain: {
+          ...retain,
+          days: settings?.detection_retention_days ?? retain.days ?? camera.retention_days,
+        },
       },
       zones: preservedZones, // Bảo toàn 100% zones của Thành viên C
     };
@@ -59,8 +100,9 @@ export class FrigateConfigService {
   }
 
   private resolveStreamUrl(camera: CameraAggregateRecord, mediamtxRtspBaseUrl: string): string {
-    if (camera.source_type_val === 'RTSP' && camera.rtsp_url) {
-      return camera.rtsp_url;
+    if (camera.source_type_val === 'RTSP') {
+      const rtspUrl = camera.source_rtsp_url ?? camera.rtsp_url;
+      if (rtspUrl) return rtspUrl;
     }
     return `${mediamtxRtspBaseUrl}/${camera.slug}`;
   }

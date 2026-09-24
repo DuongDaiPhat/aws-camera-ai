@@ -11,6 +11,14 @@ webrtcAddress: :8889
 webrtcLocalUDPAddress: :8189
 hlsAddress: :8888
 
+# Each browser WHIP publish must present its short-lived camera-bound token.
+authMethod: http
+authHTTPAddress: http://orchestrator:3001/api/v1/mediamtx/authorize
+authHTTPExclude:
+  - action: api
+  - action: metrics
+  - action: pprof
+
 paths:
   cam_living_room:
     source: publisher

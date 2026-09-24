@@ -1,13 +1,5 @@
-import {
-  Inject,
-  Injectable,
-  Logger,
-  type OnModuleInit,
-} from '@nestjs/common';
-import {
-  SOURCE_RUNNER,
-  type ISourceRunner,
-} from './source-runner.interface';
+import { Inject, Injectable, Logger, type OnModuleInit } from '@nestjs/common';
+import { SOURCE_RUNNER, type ISourceRunner } from './source-runner.interface';
 import { MediaMtxService, type BrowserSessionResult } from './media-mtx.service';
 import { CameraSourcesRepository } from './camera-sources.repository';
 import type { CameraSourceType } from '../cameras/cameras.types';
@@ -43,7 +35,7 @@ export class CameraSourcesService implements OnModuleInit {
       });
 
       if (res.success) {
-        await this.repository.updateRuntimeStatus(cameraId, 'ONLINE', res.pid);
+        await this.repository.updateRuntimeStatus(cameraId, 'STARTING', res.pid);
       } else {
         await this.repository.updateRuntimeStatus(cameraId, 'FAILED', null, {
           code: res.errorCode,
@@ -54,8 +46,16 @@ export class CameraSourcesService implements OnModuleInit {
       // Khi bật camera webcam, đặt trạng thái STARTING chờ trình duyệt publish WHIP
       await this.repository.updateRuntimeStatus(cameraId, 'STARTING', null);
     } else if (sourceType === 'RTSP') {
-      await this.repository.updateRuntimeStatus(cameraId, 'ONLINE', null);
+      await this.repository.updateRuntimeStatus(cameraId, 'STARTING', null);
     }
+  }
+
+  async markCameraOnline(cameraId: string): Promise<void> {
+    await this.repository.updateRuntimeStatus(cameraId, 'ONLINE');
+  }
+
+  async markCameraFailed(cameraId: string, code: string, message: string): Promise<void> {
+    await this.repository.updateRuntimeStatus(cameraId, 'FAILED', null, { code, message });
   }
 
   async stopCameraSource(cameraId: string): Promise<void> {
@@ -63,11 +63,16 @@ export class CameraSourcesService implements OnModuleInit {
     if (this.sourceRunner.isRunning(cameraId)) {
       await this.sourceRunner.stop(cameraId);
     }
+    this.mediaMtxService.revokeBrowserSession(cameraId);
     await this.repository.updateRuntimeStatus(cameraId, 'STOPPED', null);
   }
 
-  createBrowserSession(slug: string): BrowserSessionResult {
-    return this.mediaMtxService.createBrowserSession(slug);
+  createBrowserSession(slug: string, cameraId?: string): BrowserSessionResult {
+    return this.mediaMtxService.createBrowserSession(slug, cameraId);
+  }
+
+  revokeBrowserSession(cameraId: string): boolean {
+    return this.mediaMtxService.revokeBrowserSession(cameraId);
   }
 
   async restoreActiveSources(): Promise<void> {
@@ -75,7 +80,9 @@ export class CameraSourcesService implements OnModuleInit {
       const activeVideos = await this.repository.findActiveVideoSources();
       if (activeVideos.length === 0) return;
 
-      this.logger.log(`Khôi phục ${activeVideos.length} nguồn video publisher sau khi khởi động server...`);
+      this.logger.log(
+        `Khôi phục ${activeVideos.length} nguồn video publisher sau khi khởi động server...`,
+      );
 
       for (const item of activeVideos) {
         await this.startCameraSource(item.cameraId, item.slug, 'VIDEO_FILE', {
