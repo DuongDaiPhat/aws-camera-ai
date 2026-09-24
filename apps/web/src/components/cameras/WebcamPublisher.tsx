@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { createBrowserPublishSession } from '@/lib/cameras-client';
+import { revokeBrowserPublishSession } from '@/lib/cameras-client';
+import { publishWebcam } from './webcam-publish';
 import styles from './camera-source-form.module.css';
 
 interface WebcamPublisherProps {
@@ -11,36 +12,57 @@ interface WebcamPublisherProps {
   onSourceUpdated?: () => void;
 }
 
-async function publishWhipStream(
-  cameraId: string,
-  stream: MediaStream,
-): Promise<RTCPeerConnection> {
-  const session = await createBrowserPublishSession(cameraId);
-  const pc = new RTCPeerConnection({
-    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-  });
+function WebcamDevicePicker({
+  devices,
+  value,
+  disabled,
+  onChange,
+}: {
+  devices: MediaDeviceInfo[];
+  value: string;
+  disabled: boolean;
+  onChange: (deviceId: string) => void;
+}) {
+  return (
+    <div className={styles.formGroup}>
+      <label className={styles.formLabel}>Chọn thiết bị Webcam máy tính</label>
+      <select
+        className={styles.formSelect}
+        value={value}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {devices.map((device, index) => (
+          <option key={device.deviceId || index} value={device.deviceId}>
+            {device.label || `Camera ${index + 1}`}
+          </option>
+        ))}
+        {devices.length === 0 && <option value="">Mặc định trình duyệt</option>}
+      </select>
+    </div>
+  );
+}
 
-  stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+function WebcamNotice() {
+  return (
+    <div className={styles.webcamNotice}>
+      <span>⚠️</span>
+      <span>
+        <strong>Lưu ý:</strong> Luồng phát webcam trực tiếp từ trình duyệt sử dụng giao thức WebRTC (WHIP). Luồng sẽ dừng nếu bạn đóng tab hoặc rời khỏi trang này.
+      </span>
+    </div>
+  );
+}
 
-  const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
-
-  const res = await fetch(session.publishUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/sdp' },
-    body: offer.sdp,
-  });
-
-  if (!res.ok) throw new Error(`Lỗi kết nối WebRTC server (${res.status})`);
-  const answerSdp = await res.text();
-  await pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: answerSdp }));
-
-  return pc;
+function openWebcam(deviceId: string): Promise<MediaStream> {
+  const video = deviceId ? { deviceId: { exact: deviceId } } : true;
+  return navigator.mediaDevices.getUserMedia({ video });
 }
 
 export function WebcamPublisher({
   cameraId,
   isAdmin,
+  onSourceUpdated,
 }: WebcamPublisherProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
@@ -50,6 +72,7 @@ export function WebcamPublisher({
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
   const [isPreviewing, setIsPreviewing] = useState<boolean>(false);
   const [isPublishing, setIsPublishing] = useState<boolean>(false);
+  const [isStarting, setIsStarting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,6 +91,7 @@ export function WebcamPublisher({
   }, []);
 
   const stopAll = useCallback(() => {
+    const hadPublisher = pcRef.current !== null;
     if (pcRef.current) {
       pcRef.current.close();
       pcRef.current = null;
@@ -79,17 +103,19 @@ export function WebcamPublisher({
     if (videoRef.current) videoRef.current.srcObject = null;
     setIsPreviewing(false);
     setIsPublishing(false);
-  }, []);
+    if (hadPublisher) {
+      void revokeBrowserPublishSession(cameraId).catch(() => {
+        console.warn('Không thể thu hồi phiên truyền phát webcam');
+      });
+    }
+  }, [cameraId]);
 
   useEffect(() => () => stopAll(), [stopAll]);
 
   const startPreview = async () => {
     setError(null);
     try {
-      const constraints: MediaStreamConstraints = {
-        video: selectedDeviceId ? { deviceId: { exact: selectedDeviceId } } : true,
-      };
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      const stream = await openWebcam(selectedDeviceId);
       streamRef.current = stream;
       if (videoRef.current) videoRef.current.srcObject = stream;
       setIsPreviewing(true);
@@ -99,47 +125,42 @@ export function WebcamPublisher({
   };
 
   const startPublish = async () => {
-    if (!isAdmin) return;
+    if (!isAdmin || isStarting) return;
+    setIsStarting(true);
     setError(null);
     try {
       if (!streamRef.current) await startPreview();
       const stream = streamRef.current;
       if (!stream) throw new Error('Không có luồng video');
-      pcRef.current = await publishWhipStream(cameraId, stream);
+      const pc = await publishWebcam(cameraId, stream);
+      pcRef.current = pc;
+      pc.addEventListener('connectionstatechange', () => {
+        if (pc.connectionState !== 'failed') return;
+        setError('Kết nối webcam tới MediaMTX đã thất bại');
+        stopAll();
+      });
       setIsPublishing(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi truyền phát WHIP');
       stopAll();
+    } finally {
+      setIsStarting(false);
+      onSourceUpdated?.();
     }
   };
 
   return (
     <div className={styles.formSection}>
-      <div className={styles.webcamNotice}>
-        <span>⚠️</span>
-        <span>
-          <strong>Lưu ý:</strong> Luồng phát webcam trực tiếp từ trình duyệt sử dụng giao thức WebRTC (WHIP). Luồng sẽ dừng nếu bạn đóng tab hoặc rời khỏi trang này.
-        </span>
-      </div>
+      <WebcamNotice />
 
       {error && <div className={styles.errorAlert}>{error}</div>}
 
-      <div className={styles.formGroup}>
-        <label className={styles.formLabel}>Chọn thiết bị Webcam máy tính</label>
-        <select
-          className={styles.formSelect}
-          value={selectedDeviceId}
-          disabled={isPreviewing || isPublishing}
-          onChange={(e) => setSelectedDeviceId(e.target.value)}
-        >
-          {devices.map((d, idx) => (
-            <option key={d.deviceId || idx} value={d.deviceId}>
-              {d.label || `Camera ${idx + 1}`}
-            </option>
-          ))}
-          {devices.length === 0 && <option value="">Mặc định trình duyệt</option>}
-        </select>
-      </div>
+      <WebcamDevicePicker
+        devices={devices}
+        value={selectedDeviceId}
+        disabled={isPreviewing || isPublishing}
+        onChange={setSelectedDeviceId}
+      />
 
       <div className={styles.webcamBox}>
         <video ref={videoRef} className={styles.videoPreview} autoPlay playsInline muted />
@@ -156,8 +177,8 @@ export function WebcamPublisher({
           )}
 
           {isAdmin && isPreviewing && !isPublishing && (
-            <button type="button" className={styles.submitBtn} onClick={() => void startPublish()}>
-              Bắt đầu truyền phát WHIP
+            <button type="button" className={styles.submitBtn} disabled={isStarting} onClick={() => void startPublish()}>
+              {isStarting ? 'Đang kết nối...' : 'Bắt đầu truyền phát WHIP'}
             </button>
           )}
 

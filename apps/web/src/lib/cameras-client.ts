@@ -129,6 +129,12 @@ export function createBrowserPublishSession(cameraId: string): Promise<BrowserPu
   );
 }
 
+export function revokeBrowserPublishSession(cameraId: string): Promise<void> {
+  return apiFetch<void>(`/cameras/${encodeURIComponent(cameraId)}/source/browser-session`, {
+    method: 'DELETE',
+  });
+}
+
 /**
  * Thử lại đồng bộ cấu hình camera xuống Frigate.
  */
