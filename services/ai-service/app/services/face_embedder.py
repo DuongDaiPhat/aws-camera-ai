@@ -81,7 +81,7 @@ class FaceEmbedder:
         det_height, det_width = det_image.shape[:2]
         self._detector.setInputSize((det_width, det_height))
         _, detected = self._detector.detect(det_image)
-        
+
         faces = []
         if detected is not None:
             for face in detected:
