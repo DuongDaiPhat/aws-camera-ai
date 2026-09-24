@@ -4,9 +4,8 @@
 #   pnpm frigate:init
 # Huong dan day du: docs/FRIGATE_MQTT_SETUP.md
 #
-# config.yml duoc mount read-only, nen `version` PHAI trung voi phien ban
-# image dang ghim trong docker-compose.yml. Lech version -> Frigate co
-# tu migrate (ghi de file) va khong khoi dong duoc.
+# config.yml duoc mount read-write de Orchestrator dong bo cau hinh qua Frigate API.
+# Giu `version` khop voi image dang ghim trong docker-compose.yml.
 # ---------------------------------------------------------------------
 
 # US-02: moi tracked object duoc publish len topic `frigate/events`

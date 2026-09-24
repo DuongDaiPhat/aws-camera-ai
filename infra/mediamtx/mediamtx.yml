@@ -1,9 +1,6 @@
-# mediamtx - gia lap camera RTSP (task 0.6)
-# Publish webcam len luong:
-#   ffmpeg -f dshow -i video="<ten webcam>" -c:v libx264 -preset ultrafast \
-#          -tune zerolatency -f rtsp rtsp://localhost:8554/cam_living_room
-# Publish file mp4 (dung cho dataset te nga / chay khoi) lap vo han:
-#   ffmpeg -re -stream_loop -1 -i fall_01.mp4 -c copy -f rtsp rtsp://localhost:8554/cam_test
+# Webcam trinh duyet publish qua WHIP voi token ngan han do Orchestrator cap.
+# Video upload duoc Source Runner publish RTSP voi tai khoan noi bo.
+# Lenh FFmpeg thu cong vao duong dan camera RTSP se bi authHTTPAddress tu choi.
 
 logLevel: info
 rtspAddress: :8554
