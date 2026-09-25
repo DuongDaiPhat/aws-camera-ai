@@ -200,6 +200,7 @@ services:
     volumes:
       - ./apps/orchestrator/src:/workspace/apps/orchestrator/src
       - ./packages/contracts/src:/workspace/packages/contracts/src
+      - ./packages/contracts/dist:/workspace/packages/contracts/dist
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3001/api/v1/health || exit 1"]
       <<: *hc
@@ -225,6 +226,7 @@ services:
       - "${PORT_WEB:-3000}:3000"
     volumes:
       - ./apps/web/src:/workspace/apps/web/src
+      - ./packages/contracts/dist:/workspace/packages/contracts/dist
     logging: *default-logging
 
 volumes:
