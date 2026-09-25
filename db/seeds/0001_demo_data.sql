@@ -56,7 +56,7 @@ ON CONFLICT (owner_user_id, person_name) DO NOTHING;
 
 -- 6. Thêm Escalation Rules
 INSERT INTO escalation_rules (event_type, priority, t_low, t_high, t_wait_seconds, skip_logged_only) VALUES
-('FIRE_SMOKE_DETECTED', 'P0', NULL, 0.5, 30, TRUE),
+('FIRE_SMOKE_DETECTED', 'P0', 0.5, 0.7, 30, TRUE),
 ('FALL_DETECTED', 'P1', 0.4, 0.8, 60, FALSE),
 ('UNKNOWN_PERSON', 'P2', 0.6, 0.85, 120, FALSE),
 ('RESTRICTED_ZONE', 'P2', NULL, NULL, 60, FALSE),
