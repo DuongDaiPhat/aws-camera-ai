@@ -1,8 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  fetchEscalationRules,
-  updateEscalationThresholds,
-} from './escalation-rules-client';
+import { fetchEscalationRules, updateEscalationThresholds } from './escalation-rules-client';
 import * as apiClient from './api-client';
 
 describe('escalation-rules-client', () => {
@@ -23,9 +20,7 @@ describe('escalation-rules-client', () => {
       },
     ];
 
-    const spy = vi
-      .spyOn(apiClient, 'apiFetch')
-      .mockResolvedValueOnce({ data: mockRules });
+    const spy = vi.spyOn(apiClient, 'apiFetch').mockResolvedValueOnce({ data: mockRules });
 
     const result = await fetchEscalationRules();
     expect(spy).toHaveBeenCalledWith('/escalation-rules');
@@ -48,9 +43,7 @@ describe('escalation-rules-client', () => {
       isEnabled: true,
     };
 
-    const spy = vi
-      .spyOn(apiClient, 'apiFetch')
-      .mockResolvedValueOnce(mockResponse);
+    const spy = vi.spyOn(apiClient, 'apiFetch').mockResolvedValueOnce(mockResponse);
 
     const result = await updateEscalationThresholds('FALL_DETECTED', payload);
     expect(spy).toHaveBeenCalledWith('/escalation-rules/FALL_DETECTED', {

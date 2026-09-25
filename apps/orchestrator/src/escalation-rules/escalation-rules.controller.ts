@@ -1,14 +1,12 @@
+import { Body, Controller, Get, Param, Patch, Put, Req, UseGuards } from '@nestjs/common';
 import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Put,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { EscalationRulesService } from './escalation-rules.service';
 import { MANAGED_ALERT_EVENT_TYPES } from './escalation-rule-policy';
 import { UpdateEscalationThresholdsDto } from './dto/update-escalation-thresholds.dto';
@@ -99,7 +97,8 @@ export class EscalationRulesController {
   @Roles('ADMIN')
   @ApiOperation({
     summary: 'Cập nhật ngưỡng và thời gian chờ (Tương thích OpenAPI)',
-    description: 'Chỉ ADMIN mới có quyền sửa. Cập nhật T_low, T_high, T_wait_seconds với kiểm tra version chống ghi đè song song.',
+    description:
+      'Chỉ ADMIN mới có quyền sửa. Cập nhật T_low, T_high, T_wait_seconds với kiểm tra version chống ghi đè song song.',
   })
   @ApiParam({
     name: 'eventType',
@@ -122,4 +121,3 @@ export class EscalationRulesController {
     return await this.updateThresholds(eventType, dto, req);
   }
 }
-

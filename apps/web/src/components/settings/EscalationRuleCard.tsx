@@ -49,9 +49,7 @@ export function EscalationRuleCard({
       draft.tLow > draft.tHigh);
 
   const isWaitInvalid =
-    typeof draft.tWaitSeconds !== 'number' ||
-    draft.tWaitSeconds < 1 ||
-    draft.tWaitSeconds > 3600;
+    typeof draft.tWaitSeconds !== 'number' || draft.tWaitSeconds < 1 || draft.tWaitSeconds > 3600;
 
   const canSave = isAdmin && isDirty && !isThresholdInvalid && !isWaitInvalid && !isSaving;
 
@@ -59,10 +57,10 @@ export function EscalationRuleCard({
     rule.priority === 'P0'
       ? styles.priorityP0
       : rule.priority === 'P1'
-      ? styles.priorityP1
-      : rule.priority === 'P2'
-      ? styles.priorityP2
-      : styles.priorityP3;
+        ? styles.priorityP1
+        : rule.priority === 'P2'
+          ? styles.priorityP2
+          : styles.priorityP3;
 
   const formatDateTime = (dateStr?: string | null) => {
     if (!dateStr) return '—';
@@ -112,10 +110,7 @@ export function EscalationRuleCard({
         ) : (
           <div className={styles.inputsGrid}>
             <div className={styles.fieldGroup}>
-              <label
-                htmlFor={`tLow-${rule.eventType}`}
-                className={styles.fieldLabel}
-              >
+              <label htmlFor={`tLow-${rule.eventType}`} className={styles.fieldLabel}>
                 <span>Ngưỡng tối thiểu (T_low)</span>
                 {draft.tLow !== null && !Number.isNaN(draft.tLow) && (
                   <span style={{ color: '#2563eb', fontWeight: 600, fontSize: 12 }}>
@@ -124,7 +119,8 @@ export function EscalationRuleCard({
                 )}
               </label>
               <span className={styles.fieldHint}>
-                Đơn vị từ 0.00 đến 1.00. Dưới mức này AI chỉ âm thầm ghi log, không nhắn tin làm phiền.
+                Đơn vị từ 0.00 đến 1.00. Dưới mức này AI chỉ âm thầm ghi log, không nhắn tin làm
+                phiền.
               </span>
               <div className={styles.inputWrapper}>
                 <input
@@ -145,10 +141,7 @@ export function EscalationRuleCard({
             </div>
 
             <div className={styles.fieldGroup}>
-              <label
-                htmlFor={`tHigh-${rule.eventType}`}
-                className={styles.fieldLabel}
-              >
+              <label htmlFor={`tHigh-${rule.eventType}`} className={styles.fieldLabel}>
                 <span>Ngưỡng tin cậy cao (T_high)</span>
                 {draft.tHigh !== null && !Number.isNaN(draft.tHigh) && (
                   <span style={{ color: '#c2410c', fontWeight: 600, fontSize: 12 }}>
@@ -157,7 +150,8 @@ export function EscalationRuleCard({
                 )}
               </label>
               <span className={styles.fieldHint}>
-                Đơn vị từ 0.00 đến 1.00. Đạt mức này AI rất chắc chắn, kích hoạt hẹn giờ rút ngắn khẩn cấp.
+                Đơn vị từ 0.00 đến 1.00. Đạt mức này AI rất chắc chắn, kích hoạt hẹn giờ rút ngắn
+                khẩn cấp.
               </span>
               <div className={styles.inputWrapper}>
                 <input
@@ -181,10 +175,7 @@ export function EscalationRuleCard({
 
         <div className={styles.inputsGrid}>
           <div className={styles.fieldGroup}>
-            <label
-              htmlFor={`tWait-${rule.eventType}`}
-              className={styles.fieldLabel}
-            >
+            <label htmlFor={`tWait-${rule.eventType}`} className={styles.fieldLabel}>
               <span>Thời gian chờ phản hồi (T_wait)</span>
               {draft.tWaitSeconds >= 60 && (
                 <span style={{ color: '#64748b', fontWeight: 500, fontSize: 12 }}>
@@ -193,7 +184,8 @@ export function EscalationRuleCard({
               )}
             </label>
             <span className={styles.fieldHint}>
-              Đơn vị: <strong>giây</strong> (1–3600 giây). Hết thời gian này nếu chưa có ai phản hồi sẽ tự động gọi điện khẩn cấp.
+              Đơn vị: <strong>giây</strong> (1–3600 giây). Hết thời gian này nếu chưa có ai phản hồi
+              sẽ tự động gọi điện khẩn cấp.
             </span>
             <div className={styles.inputWrapper}>
               <input
@@ -207,17 +199,12 @@ export function EscalationRuleCard({
                 value={draft.tWaitSeconds}
                 onChange={(e) => {
                   const val = parseInt(e.target.value, 10);
-                  onUpdateDraft(
-                    rule.eventType,
-                    'tWaitSeconds',
-                    Number.isNaN(val) ? 0 : val,
-                  );
+                  onUpdateDraft(rule.eventType, 'tWaitSeconds', Number.isNaN(val) ? 0 : val);
                 }}
               />
               <span className={styles.inputSuffix}>giây</span>
             </div>
           </div>
-
 
           <div className={styles.fieldGroup}>
             <span className={styles.fieldLabel}>Chờ ưu tiên tự động (computed)</span>
@@ -234,8 +221,7 @@ export function EscalationRuleCard({
         {/* Validation warning inline */}
         {isThresholdInvalid && (
           <div className={`${styles.feedbackMessage} ${styles.feedbackError}`} role="alert">
-            Ngưỡng thấp (T_low) phải nằm trong khoảng 0–1 và nhỏ hơn hoặc bằng ngưỡng cao
-            (T_high).
+            Ngưỡng thấp (T_low) phải nằm trong khoảng 0–1 và nhỏ hơn hoặc bằng ngưỡng cao (T_high).
           </div>
         )}
         {isWaitInvalid && (
@@ -249,11 +235,7 @@ export function EscalationRuleCard({
           <div className={`${styles.feedbackMessage} ${styles.feedbackError}`} role="alert">
             <span>{errorMessage}</span>
             {errorMessage.includes('tải lại') && (
-              <button
-                type="button"
-                className={styles.btnReloadInline}
-                onClick={onReload}
-              >
+              <button type="button" className={styles.btnReloadInline} onClick={onReload}>
                 Tải lại ngay
               </button>
             )}
@@ -261,10 +243,7 @@ export function EscalationRuleCard({
         )}
 
         {successMessage && (
-          <div
-            className={`${styles.feedbackMessage} ${styles.feedbackSuccess}`}
-            role="status"
-          >
+          <div className={`${styles.feedbackMessage} ${styles.feedbackSuccess}`} role="status">
             <span>{successMessage}</span>
           </div>
         )}

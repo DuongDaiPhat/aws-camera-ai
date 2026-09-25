@@ -126,9 +126,7 @@ export function useEscalationRules() {
           expectedVersion: canonical.version ?? 1,
         });
 
-        setRules((prev) =>
-          prev.map((r) => (r.eventType === eventType ? updated : r)),
-        );
+        setRules((prev) => prev.map((r) => (r.eventType === eventType ? updated : r)));
 
         setDrafts((prev) => ({
           ...prev,
@@ -148,8 +146,7 @@ export function useEscalationRules() {
           if (err.status === 409) {
             setErrorMap((prev) => ({
               ...prev,
-              [eventType]:
-                'Cấu hình đã thay đổi bởi người khác. Hãy bấm tải lại trước khi lưu.',
+              [eventType]: 'Cấu hình đã thay đổi bởi người khác. Hãy bấm tải lại trước khi lưu.',
             }));
           } else {
             setErrorMap((prev) => ({

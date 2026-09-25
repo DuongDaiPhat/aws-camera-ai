@@ -117,8 +117,7 @@ export class EscalationRulesService {
       version: record.version,
       effectiveHighWaitSeconds: computeEffectiveHighWaitSeconds(record.t_wait_seconds),
       eventType: record.event_type as EventType,
-      displayName:
-        EVENT_TYPE_DISPLAY_NAMES[record.event_type as EventType] ?? record.event_type,
+      displayName: EVENT_TYPE_DISPLAY_NAMES[record.event_type as EventType] ?? record.event_type,
       priority: record.priority,
       tLow: record.t_low !== null ? Number(record.t_low) : null,
       tHigh: record.t_high !== null ? Number(record.t_high) : null,
@@ -128,7 +127,10 @@ export class EscalationRulesService {
       escalateChannels: record.escalate_channels,
       maxEscalationLevel: record.max_escalation_level,
       isEnabled: record.is_enabled,
-      updatedAt: record.updated_at instanceof Date ? record.updated_at.toISOString() : new Date(record.updated_at).toISOString(),
+      updatedAt:
+        record.updated_at instanceof Date
+          ? record.updated_at.toISOString()
+          : new Date(record.updated_at).toISOString(),
       updatedByName: record.updated_by_name,
     };
   }

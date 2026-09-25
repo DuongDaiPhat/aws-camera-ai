@@ -166,4 +166,3 @@ export function validateThresholdUpdate(input: ThresholdValidationInput): Valida
 
   return { isValid: true };
 }
-

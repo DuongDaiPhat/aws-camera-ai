@@ -69,7 +69,9 @@
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   overflow: hidden;
 }
 
@@ -211,7 +213,9 @@
   border-radius: 6px;
   color: #0f172a;
   background-color: #ffffff;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .inputNumber:focus {
@@ -298,7 +302,9 @@
   border: 1px solid #cbd5e1;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.15s, color 0.15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 }
 
 .btnCancel:hover:not(:disabled) {

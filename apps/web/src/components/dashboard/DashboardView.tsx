@@ -131,7 +131,8 @@ export function DashboardView() {
                       Sự kiện gần đây
                     </h2>
                     <p className={styles.sectionSubtitle}>
-                      Những hoạt động mới nhất được camera và cảm biến ghi nhận trong thời gian thực.
+                      Những hoạt động mới nhất được camera và cảm biến ghi nhận trong thời gian
+                      thực.
                     </p>
                   </div>
 

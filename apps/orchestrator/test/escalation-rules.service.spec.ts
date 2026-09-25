@@ -71,9 +71,7 @@ describe('EscalationRulesService (US-15)', () => {
     it('ném NotFoundException khi không tìm thấy', async () => {
       repository.findByEventType.mockResolvedValue(null);
 
-      await expect(service.getRuleByEventType('NON_EXISTENT')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.getRuleByEventType('NON_EXISTENT')).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -176,9 +174,7 @@ describe('EscalationRulesService (US-15)', () => {
     });
 
     it('ném ConflictException khi gặp lỗi version conflict (409)', async () => {
-      repository.updateThresholdsAtomic.mockRejectedValue(
-        new RuleVersionConflictError(2),
-      );
+      repository.updateThresholdsAtomic.mockRejectedValue(new RuleVersionConflictError(2));
 
       await expect(
         service.updateThresholds(
