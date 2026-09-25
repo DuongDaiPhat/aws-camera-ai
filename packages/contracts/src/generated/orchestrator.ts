@@ -1217,10 +1217,14 @@ export interface components {
             skipLoggedOnly?: boolean;
             notifyChannels?: components["schemas"]["NotificationChannel"][];
             escalateChannels?: components["schemas"]["NotificationChannel"][];
+            /** @description Tên hiển thị tiếng Việt của loại sự kiện. */
+            displayName?: string;
             maxEscalationLevel?: number;
             isEnabled: boolean;
             /** Format: date-time */
             updatedAt?: string;
+            /** @description Tên người dùng cập nhật gần nhất. */
+            updatedByName?: string | null;
         };
         /** @description tLow <= tHigh; WELLNESS_TIMEOUT requires both null. Other alert types require both numbers. Updates only future evaluations. */
         UpdateEscalationThresholdsRequest: {

@@ -7,6 +7,7 @@ import { HealthModule } from './health/health.module';
 import { IngestionModule } from './ingestion/ingestion.module';
 import { MediaModule } from './media/media.module';
 import { StorageModule } from './storage/storage.module';
+import { EscalationRulesModule } from './escalation-rules/escalation-rules.module';
 
 /**
  * Module goc.
@@ -28,6 +29,7 @@ import { StorageModule } from './storage/storage.module';
     MediaModule,
     IngestionModule,
     HealthModule,
+    EscalationRulesModule,
   ],
 })
 export class AppModule {}
