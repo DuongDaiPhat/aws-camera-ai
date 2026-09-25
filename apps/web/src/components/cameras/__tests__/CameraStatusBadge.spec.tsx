@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { CameraStatusBadge } from './CameraStatusBadge';
+import { CameraStatusBadge } from '../CameraStatusBadge';
 
 describe('CameraStatusBadge component', () => {
   it('hien thi badge Online khi runtimeStatus la ONLINE', () => {

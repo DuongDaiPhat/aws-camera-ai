@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import type { Camera } from '@/types';
 import { CameraCard } from './CameraCard';
-import styles from './camera-view.module.css';
+import styles from './styles/camera-view.module.css';
 
 export type FilterTab = 'ALL' | 'ACTIVE' | 'INACTIVE' | 'ERROR';
 
@@ -32,11 +32,7 @@ export function CameraList({
       // 1. Lọc theo tab
       if (filterTab === 'ACTIVE' && !cam.isEnabled) return false;
       if (filterTab === 'INACTIVE' && cam.isEnabled) return false;
-      if (
-        filterTab === 'ERROR' &&
-        cam.runtimeStatus !== 'FAILED' &&
-        cam.syncStatus !== 'FAILED'
-      ) {
+      if (filterTab === 'ERROR' && cam.runtimeStatus !== 'FAILED' && cam.syncStatus !== 'FAILED') {
         return false;
       }
 
@@ -101,7 +97,14 @@ export function CameraList({
       <div className={styles.cameraCardsList}>
         {filteredCameras.length === 0 ? (
           <div className={styles.emptyState}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
               <circle cx="12" cy="12" r="10" />
               <line x1="8" y1="12" x2="16" y2="12" />
             </svg>

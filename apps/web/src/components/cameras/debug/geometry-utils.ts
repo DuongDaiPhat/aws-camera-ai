@@ -11,8 +11,7 @@ export function isPointInPolygon(point: [number, number], polygon: number[][]): 
     const [xi, yi] = polygon[i];
     const [xj, yj] = polygon[j];
 
-    const intersect =
-      yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+    const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
     if (intersect) {
       inside = !inside;
     }
@@ -24,15 +23,9 @@ export function isPointInPolygon(point: [number, number], polygon: number[][]): 
 /**
  * Định dạng mảng tọa độ chuẩn hóa [0..1] sang chuỗi points cho thẻ SVG <polygon>.
  */
-export function formatPolygonPoints(
-  polygon: number[][],
-  width = 1000,
-  height = 562.5,
-): string {
+export function formatPolygonPoints(polygon: number[][], width = 1000, height = 562.5): string {
   if (!polygon || polygon.length === 0) return '';
-  return polygon
-    .map(([x, y]) => `${(x * width).toFixed(1)},${(y * height).toFixed(1)}`)
-    .join(' ');
+  return polygon.map(([x, y]) => `${(x * width).toFixed(1)},${(y * height).toFixed(1)}`).join(' ');
 }
 
 /**

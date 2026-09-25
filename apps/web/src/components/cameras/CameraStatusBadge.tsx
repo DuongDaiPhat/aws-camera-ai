@@ -1,7 +1,7 @@
 'use client';
 
 import type { CameraRuntimeStatus } from '@/types';
-import styles from './camera-view.module.css';
+import styles from './styles/camera-view.module.css';
 
 interface CameraStatusBadgeProps {
   isEnabled: boolean;
@@ -44,7 +44,11 @@ export function CameraStatusBadge({
       {showConfigBadge && (
         <span
           className={isEnabled ? styles.badgeConfigOn : styles.badgeConfigOff}
-          title={isEnabled ? 'Camera đã được kích hoạt trong cấu hình' : 'Camera đang bị tắt trong cấu hình'}
+          title={
+            isEnabled
+              ? 'Camera đã được kích hoạt trong cấu hình'
+              : 'Camera đang bị tắt trong cấu hình'
+          }
         >
           {isEnabled ? 'Đã bật' : 'Đã tắt'}
         </span>

@@ -5,5 +5,6 @@ export { CameraStatusBadge } from './CameraStatusBadge';
 export { CameraSourceForm } from './CameraSourceForm';
 export { WebcamPublisher } from './WebcamPublisher';
 export { VideoSourceUploader } from './VideoSourceUploader';
-export { DebugView } from './DebugView';
-export { FrigateSettingsPanel } from './FrigateSettingsPanel';
+export { CameraPreview } from './CameraPreview';
+export { CameraSettingsPanel } from './CameraSettingsPanel';
+export { CameraDebugToolbar } from './CameraDebugToolbar';

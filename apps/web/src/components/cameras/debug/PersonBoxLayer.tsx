@@ -45,21 +45,8 @@ export function PersonBoxLayer({
       />
 
       {/* Header nhãn nhận diện */}
-      <rect
-        x={px}
-        y={py - 22}
-        width={100}
-        height={22}
-        rx={3}
-        fill="#0284c7"
-      />
-      <text
-        x={px + 6}
-        y={py - 7}
-        fill="#ffffff"
-        fontSize="11"
-        fontWeight="bold"
-      >
+      <rect x={px} y={py - 22} width={100} height={22} rx={3} fill="#0284c7" />
+      <text x={px + 6} y={py - 7} fill="#ffffff" fontSize="11" fontWeight="bold">
         👤 {person.label ?? 'person'} {(person.confidence * 100).toFixed(0)}%
       </text>
 
@@ -77,14 +64,7 @@ export function PersonBoxLayer({
             strokeDasharray="4 2"
           />
           {/* Điểm chân đế chính giữa cạnh đáy */}
-          <circle
-            cx={footX}
-            cy={footY}
-            r={6}
-            fill="#f43f5e"
-            stroke="#ffffff"
-            strokeWidth="2"
-          />
+          <circle cx={footX} cy={footY} r={6} fill="#f43f5e" stroke="#ffffff" strokeWidth="2" />
           <text
             x={footX}
             y={footY + 16}

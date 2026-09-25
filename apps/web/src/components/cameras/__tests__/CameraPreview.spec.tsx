@@ -1,11 +1,11 @@
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { DebugView } from './DebugView';
-import { DebugControlsBar } from './DebugControlsBar';
-import { ZonePolygonLayer } from './ZonePolygonLayer';
-import { PersonBoxLayer } from './PersonBoxLayer';
-import { FrigateSettingsPanel } from './FrigateSettingsPanel';
+import { CameraPreview } from '../CameraPreview';
+import { CameraDebugToolbar } from '../CameraDebugToolbar';
+import { CameraSettingsPanel } from '../CameraSettingsPanel';
+import { ZonePolygonLayer } from '../debug/ZonePolygonLayer';
+import { PersonBoxLayer } from '../debug/PersonBoxLayer';
 import type { Camera } from '@/types';
 import type { CameraZone } from '@/lib/cameras-client';
 
@@ -79,9 +79,9 @@ const mockZones: CameraZone[] = [
   },
 ];
 
-describe('DebugView & 2 Toggle Overlay Components', () => {
-  it('DebugView render day du layout, badges va control toolbar', () => {
-    const html = renderToStaticMarkup(<DebugView camera={mockCamera} />);
+describe('CameraPreview & 2 Toggle Overlay Components', () => {
+  it('CameraPreview render day du layout, badges va control toolbar', () => {
+    const html = renderToStaticMarkup(<CameraPreview camera={mockCamera} />);
 
     expect(html).toContain('Debug View: BẬT');
     expect(html).toContain('Person boundary: ON');
@@ -94,9 +94,9 @@ describe('DebugView & 2 Toggle Overlay Components', () => {
     expect(html).not.toContain('foot-point');
   });
 
-  it('DebugControlsBar hien thi dung trang thai khi Debug View BAT', () => {
+  it('CameraDebugToolbar hien thi dung trang thai khi Debug View BAT', () => {
     const html = renderToStaticMarkup(
-      <DebugControlsBar
+      <CameraDebugToolbar
         debugEnabled={true}
         showPerson={true}
         showZone={false}
@@ -111,9 +111,9 @@ describe('DebugView & 2 Toggle Overlay Components', () => {
     expect(html).toContain('Zone boundary: OFF');
   });
 
-  it('DebugControlsBar an cac toggle con khi Debug View TAT', () => {
+  it('CameraDebugToolbar an cac toggle con khi Debug View TAT', () => {
     const html = renderToStaticMarkup(
-      <DebugControlsBar
+      <CameraDebugToolbar
         debugEnabled={false}
         showPerson={false}
         showZone={false}
@@ -173,8 +173,8 @@ describe('DebugView & 2 Toggle Overlay Components', () => {
     expect(htmlWithoutFootpoint).not.toContain('foot-point');
   });
 
-  it('FrigateSettingsPanel hien thi thong tin cau hinh va nut dong bo cho ADMIN', () => {
-    const html = renderToStaticMarkup(<FrigateSettingsPanel camera={mockCamera} isAdmin={true} />);
+  it('CameraSettingsPanel hien thi thong tin cau hinh va nut dong bo cho ADMIN', () => {
+    const html = renderToStaticMarkup(<CameraSettingsPanel camera={mockCamera} isAdmin={true} />);
 
     expect(html).toContain('Bảo toàn Polygon Zones');
     expect(html).toContain('1280x720');

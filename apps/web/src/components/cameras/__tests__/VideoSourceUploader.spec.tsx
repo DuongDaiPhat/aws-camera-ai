@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { VideoSourceUploader } from './VideoSourceUploader';
+import { VideoSourceUploader } from '../VideoSourceUploader';
 
 describe('VideoSourceUploader component', () => {
   it('hien thi hop chon file, tuy chon phat lap va nut luu cho ADMIN', () => {

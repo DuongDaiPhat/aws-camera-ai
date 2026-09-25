@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { CameraList } from './CameraList';
+import { CameraList } from '../CameraList';
 import type { Camera } from '@/types';
 
 const mockCameras: Camera[] = [

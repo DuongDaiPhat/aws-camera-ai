@@ -1,7 +1,7 @@
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { CameraView } from './CameraView';
+import { CameraView } from '../CameraView';
 import * as camerasClient from '@/lib/cameras-client';
 import type { Camera } from '@/types';
 

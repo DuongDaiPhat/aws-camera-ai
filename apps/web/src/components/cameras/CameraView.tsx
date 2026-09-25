@@ -5,9 +5,9 @@ import type { Camera, CurrentUser } from '@/types';
 import { useCameras } from '@/hooks/useCameras';
 import { CameraList } from './CameraList';
 import { CameraSourceForm } from './CameraSourceForm';
-import { DebugView } from './DebugView';
-import { FrigateSettingsPanel } from './FrigateSettingsPanel';
-import styles from './camera-view.module.css';
+import { CameraPreview } from './CameraPreview';
+import { CameraSettingsPanel } from './CameraSettingsPanel';
+import styles from './styles/camera-view.module.css';
 
 interface CameraViewProps {
   user: CurrentUser | null;
@@ -125,7 +125,7 @@ function CameraDetailPanel({
         </button>
       </div>
 
-      {activeTab === 'preview' && <DebugView camera={camera} />}
+      {activeTab === 'preview' && <CameraPreview camera={camera} />}
 
       {activeTab === 'source' && (
         <CameraSourceForm
@@ -139,11 +139,7 @@ function CameraDetailPanel({
       )}
 
       {activeTab === 'frigate' && (
-        <FrigateSettingsPanel
-          camera={camera}
-          isAdmin={isAdmin}
-          onSynced={onRefreshCameras}
-        />
+        <CameraSettingsPanel camera={camera} isAdmin={isAdmin} onSynced={onRefreshCameras} />
       )}
     </div>
   );
@@ -180,7 +176,8 @@ export function CameraView({ user }: CameraViewProps) {
         <div className={styles.titles}>
           <h1 className={styles.title}>Quản lý Camera & Nguồn phát</h1>
           <p className={styles.subtitle}>
-            Giám sát trạng thái hoạt động, cấu hình nguồn cấp (RTSP, Webcam, Video) và kiểm thử Debug View.
+            Giám sát trạng thái hoạt động, cấu hình nguồn cấp (RTSP, Webcam, Video) và kiểm thử
+            Debug View.
           </p>
         </div>
 
@@ -195,7 +192,14 @@ export function CameraView({ user }: CameraViewProps) {
             {isLoading ? (
               <span className={styles.spinner} />
             ) : (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <path d="M23 4v6h-6" />
                 <path d="M1 20v-6h6" />
                 <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />

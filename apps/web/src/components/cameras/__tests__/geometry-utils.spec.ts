@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  formatPolygonPoints,
-  getPolygonCenter,
-  isPointInPolygon,
-} from './geometry-utils';
+import { formatPolygonPoints, getPolygonCenter, isPointInPolygon } from '../debug/geometry-utils';
 
 describe('geometry-utils', () => {
   // Hình vuông từ (0.1, 0.1) tới (0.9, 0.9)
@@ -26,14 +22,29 @@ describe('geometry-utils', () => {
     });
 
     it('tra ve false khi da giac co it hon 3 dinh', () => {
-      expect(isPointInPolygon([0.5, 0.5], [[0, 0], [1, 1]])).toBe(false);
+      expect(
+        isPointInPolygon(
+          [0.5, 0.5],
+          [
+            [0, 0],
+            [1, 1],
+          ],
+        ),
+      ).toBe(false);
       expect(isPointInPolygon([0.5, 0.5], [])).toBe(false);
     });
   });
 
   describe('formatPolygonPoints', () => {
     it('chuyen doi toa do normalized sang chuoi SVG points', () => {
-      const points = formatPolygonPoints([[0.1, 0.2], [0.5, 0.8]], 1000, 500);
+      const points = formatPolygonPoints(
+        [
+          [0.1, 0.2],
+          [0.5, 0.8],
+        ],
+        1000,
+        500,
+      );
       expect(points).toBe('100.0,100.0 500.0,400.0');
     });
 

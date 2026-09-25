@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { CameraSourceForm } from './CameraSourceForm';
+import { CameraSourceForm } from '../CameraSourceForm';
 
 describe('CameraSourceForm component (Slice CAM)', () => {
   it('hien thi day du 3 tab nguon va form RTSP mac dinh', () => {

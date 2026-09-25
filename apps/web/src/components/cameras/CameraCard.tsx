@@ -2,7 +2,7 @@
 
 import type { Camera } from '@/types';
 import { CameraStatusBadge } from './CameraStatusBadge';
-import styles from './camera-view.module.css';
+import styles from './styles/camera-view.module.css';
 
 interface CameraCardProps {
   camera: Camera;
@@ -61,9 +61,7 @@ export function CameraCard({
           Nguồn: <strong>{sourceTypeLabel}</strong>
         </span>
         <span>{camera.fps} FPS</span>
-        {camera.zoneCount !== undefined && (
-          <span>{camera.zoneCount} vùng</span>
-        )}
+        {camera.zoneCount !== undefined && <span>{camera.zoneCount} vùng</span>}
       </div>
 
       {isAdmin && (
@@ -78,14 +76,10 @@ export function CameraCard({
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          <span style={{ fontSize: '12px', color: 'var(--ink-secondary)' }}>
-            Điều khiển:
-          </span>
+          <span style={{ fontSize: '12px', color: 'var(--ink-secondary)' }}>Điều khiển:</span>
           <label className={styles.switchWrapper}>
             {isToggling && <span className={styles.spinner} />}
-            <span className={styles.switchLabel}>
-              {camera.isEnabled ? 'Đang bật' : 'Đang tắt'}
-            </span>
+            <span className={styles.switchLabel}>{camera.isEnabled ? 'Đang bật' : 'Đang tắt'}</span>
             <input
               type="checkbox"
               className={styles.switchInput}

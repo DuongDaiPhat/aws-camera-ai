@@ -4,12 +4,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Camera } from '@/types';
 import type { CameraDebugStream, CameraZone } from '@/lib/cameras-client';
 import { fetchCameraDebugStream, fetchCameraZones } from '@/lib/cameras-client';
-import { DebugControlsBar } from './DebugControlsBar';
-import { ZonePolygonLayer } from './ZonePolygonLayer';
-import { PersonBoxLayer, type DetectedPerson } from './PersonBoxLayer';
-import styles from './debug-view.module.css';
+import { CameraDebugToolbar } from './CameraDebugToolbar';
+import { ZonePolygonLayer } from './debug/ZonePolygonLayer';
+import { PersonBoxLayer, type DetectedPerson } from './debug/PersonBoxLayer';
+import styles from './styles/camera-preview.module.css';
 
-interface DebugViewProps {
+interface CameraPreviewProps {
   camera: Camera;
 }
 
@@ -33,7 +33,7 @@ function useStoredToggle(key: string, defaultValue: boolean): [boolean, () => vo
   return [val, toggle];
 }
 
-export function DebugView({ camera }: DebugViewProps) {
+export function CameraPreview({ camera }: CameraPreviewProps) {
   const [debugEnabled, toggleDebug] = useStoredToggle(`cam_debug_enabled_${camera.id}`, true);
   const [showPerson, togglePerson] = useStoredToggle(`cam_debug_person_${camera.id}`, true);
   const [showZone, toggleZone] = useStoredToggle(`cam_debug_zone_${camera.id}`, true);
@@ -97,7 +97,7 @@ export function DebugView({ camera }: DebugViewProps) {
 
   return (
     <div className={styles.debugContainer}>
-      <DebugControlsBar
+      <CameraDebugToolbar
         debugEnabled={debugEnabled}
         showPerson={showPerson}
         showZone={showZone}

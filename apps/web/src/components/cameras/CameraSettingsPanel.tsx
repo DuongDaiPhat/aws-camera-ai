@@ -3,19 +3,15 @@
 import React, { useState } from 'react';
 import type { Camera } from '@/types';
 import { retryFrigateSync } from '@/lib/cameras-client';
-import styles from './camera-view.module.css';
+import styles from './styles/camera-view.module.css';
 
-interface FrigateSettingsPanelProps {
+interface CameraSettingsPanelProps {
   camera: Camera;
   isAdmin: boolean;
   onSynced?: () => void;
 }
 
-export function FrigateSettingsPanel({
-  camera,
-  isAdmin,
-  onSynced,
-}: FrigateSettingsPanelProps) {
+export function CameraSettingsPanel({ camera, isAdmin, onSynced }: CameraSettingsPanelProps) {
   const [isRetrying, setIsRetrying] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -48,10 +44,18 @@ export function FrigateSettingsPanel({
     <div className={styles.sourceFormContainer} style={{ marginTop: '16px' }}>
       <div className={styles.infoNotice}>
         <strong>🛡️ Bảo toàn Polygon Zones (US-12 Handoff):</strong> Cấu hình Frigate của camera này
-        được đồng bộ an toàn qua Mutex Lock, bảo toàn 100% các vùng đa giác do Thành viên C thiết lập.
+        được đồng bộ an toàn qua Mutex Lock, bảo toàn 100% các vùng đa giác do Thành viên C thiết
+        lập.
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '16px' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '16px',
+          marginTop: '16px',
+        }}
+      >
         <div className={styles.summaryCard}>
           <span className={styles.summaryLabel}>Độ phân giải nhận diện</span>
           <span className={styles.summaryValue}>{resolution}</span>
@@ -66,20 +70,38 @@ export function FrigateSettingsPanel({
         </div>
         <div className={styles.summaryCard}>
           <span className={styles.summaryLabel}>Trạng thái đồng bộ</span>
-          <span className={`${styles.summaryValue} ${camera.syncStatus === 'SYNCED' ? styles.summaryValueOnline : styles.summaryValueErrors}`}>
+          <span
+            className={`${styles.summaryValue} ${camera.syncStatus === 'SYNCED' ? styles.summaryValueOnline : styles.summaryValueErrors}`}
+          >
             {camera.syncStatus}
           </span>
         </div>
       </div>
 
       {successMsg && (
-        <div className={styles.infoNotice} style={{ background: 'rgba(16, 185, 129, 0.1)', borderColor: '#10b981', color: '#10b981', marginTop: '16px' }}>
+        <div
+          className={styles.infoNotice}
+          style={{
+            background: 'rgba(16, 185, 129, 0.1)',
+            borderColor: '#10b981',
+            color: '#10b981',
+            marginTop: '16px',
+          }}
+        >
           {successMsg}
         </div>
       )}
 
       {errorMsg && (
-        <div className={styles.infoNotice} style={{ background: 'rgba(239, 68, 68, 0.1)', borderColor: '#ef4444', color: '#ef4444', marginTop: '16px' }}>
+        <div
+          className={styles.infoNotice}
+          style={{
+            background: 'rgba(239, 68, 68, 0.1)',
+            borderColor: '#ef4444',
+            color: '#ef4444',
+            marginTop: '16px',
+          }}
+        >
           {errorMsg}
         </div>
       )}

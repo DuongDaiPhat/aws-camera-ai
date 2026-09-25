@@ -4,7 +4,7 @@ import {
   updateCameraSource,
   updateCameraState,
 } from '@/lib/cameras-client';
-import { publishWebcam } from './webcam-publish';
+import { publishWebcam } from '../source/webcam-publish';
 
 vi.mock('@/lib/cameras-client', () => ({
   createBrowserPublishSession: vi.fn(),
@@ -26,9 +26,7 @@ describe('publishWebcam', () => {
     });
     vi.mocked(updateCameraState).mockImplementation(async () => {
       calls.push('state');
-      return { frigateSync: { status: 'SYNCED' } } as Awaited<
-        ReturnType<typeof updateCameraState>
-      >;
+      return { frigateSync: { status: 'SYNCED' } } as Awaited<ReturnType<typeof updateCameraState>>;
     });
     vi.mocked(createBrowserPublishSession).mockImplementation(async () => {
       calls.push('session');
@@ -50,7 +48,12 @@ describe('publishWebcam', () => {
       localDescription = { sdp: 'offer-sdp' };
     }
     vi.stubGlobal('RTCPeerConnection', FakePeerConnection);
-    vi.stubGlobal('RTCSessionDescription', class { constructor(public description: unknown) {} });
+    vi.stubGlobal(
+      'RTCSessionDescription',
+      class {
+        constructor(public description: unknown) {}
+      },
+    );
     const fetchMock = vi.fn().mockImplementation(async () => {
       calls.push('whip');
       return { ok: true, text: async () => 'answer-sdp' };
@@ -78,7 +81,9 @@ describe('publishWebcam', () => {
   });
 
   it('does not publish when Frigate fails to accept the camera configuration', async () => {
-    vi.mocked(updateCameraSource).mockResolvedValue({} as Awaited<ReturnType<typeof updateCameraSource>>);
+    vi.mocked(updateCameraSource).mockResolvedValue(
+      {} as Awaited<ReturnType<typeof updateCameraSource>>,
+    );
     vi.mocked(updateCameraState).mockResolvedValue({
       frigateSync: { status: 'FAILED', errorMessage: 'Frigate unavailable' },
     } as Awaited<ReturnType<typeof updateCameraState>>);

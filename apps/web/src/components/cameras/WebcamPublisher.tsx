@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { revokeBrowserPublishSession } from '@/lib/cameras-client';
-import { publishWebcam } from './webcam-publish';
-import styles from './camera-source-form.module.css';
+import { publishWebcam } from './source/webcam-publish';
+import styles from './styles/camera-source-form.module.css';
 
 interface WebcamPublisherProps {
   cameraId: string;
@@ -48,7 +48,8 @@ function WebcamNotice() {
     <div className={styles.webcamNotice}>
       <span>⚠️</span>
       <span>
-        <strong>Lưu ý:</strong> Luồng phát webcam trực tiếp từ trình duyệt sử dụng giao thức WebRTC (WHIP). Luồng sẽ dừng nếu bạn đóng tab hoặc rời khỏi trang này.
+        <strong>Lưu ý:</strong> Luồng phát webcam trực tiếp từ trình duyệt sử dụng giao thức WebRTC
+        (WHIP). Luồng sẽ dừng nếu bạn đóng tab hoặc rời khỏi trang này.
       </span>
     </div>
   );
@@ -59,11 +60,7 @@ function openWebcam(deviceId: string): Promise<MediaStream> {
   return navigator.mediaDevices.getUserMedia({ video });
 }
 
-export function WebcamPublisher({
-  cameraId,
-  isAdmin,
-  onSourceUpdated,
-}: WebcamPublisherProps) {
+export function WebcamPublisher({ cameraId, isAdmin, onSourceUpdated }: WebcamPublisherProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -177,7 +174,12 @@ export function WebcamPublisher({
           )}
 
           {isAdmin && isPreviewing && !isPublishing && (
-            <button type="button" className={styles.submitBtn} disabled={isStarting} onClick={() => void startPublish()}>
+            <button
+              type="button"
+              className={styles.submitBtn}
+              disabled={isStarting}
+              onClick={() => void startPublish()}
+            >
               {isStarting ? 'Đang kết nối...' : 'Bắt đầu truyền phát WHIP'}
             </button>
           )}

@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import styles from './debug-view.module.css';
+import styles from './styles/camera-preview.module.css';
 
-interface DebugControlsBarProps {
+interface CameraDebugToolbarProps {
   debugEnabled: boolean;
   showPerson: boolean;
   showZone: boolean;
@@ -12,14 +12,14 @@ interface DebugControlsBarProps {
   onToggleZone: () => void;
 }
 
-export function DebugControlsBar({
+export function CameraDebugToolbar({
   debugEnabled,
   showPerson,
   showZone,
   onToggleDebug,
   onTogglePerson,
   onToggleZone,
-}: DebugControlsBarProps) {
+}: CameraDebugToolbarProps) {
   return (
     <div className={styles.controlsBar}>
       <div className={styles.toggleGroup}>

@@ -5,7 +5,7 @@ import type { CameraSourceType } from '@/types';
 import { updateCameraSource } from '@/lib/cameras-client';
 import { WebcamPublisher } from './WebcamPublisher';
 import { VideoSourceUploader } from './VideoSourceUploader';
-import styles from './camera-source-form.module.css';
+import styles from './styles/camera-source-form.module.css';
 
 interface RtspFormProps {
   cameraId: string;
@@ -14,12 +14,7 @@ interface RtspFormProps {
   onSourceUpdated?: () => void;
 }
 
-function RtspSourceForm({
-  cameraId,
-  initialRtspUrl,
-  isAdmin,
-  onSourceUpdated,
-}: RtspFormProps) {
+function RtspSourceForm({ cameraId, initialRtspUrl, isAdmin, onSourceUpdated }: RtspFormProps) {
   const [rtspUrl, setRtspUrl] = useState<string>(initialRtspUrl ?? '');
   const [transport, setTransport] = useState<'TCP' | 'UDP'>('TCP');
   const [isSaving, setIsSaving] = useState<boolean>(false);

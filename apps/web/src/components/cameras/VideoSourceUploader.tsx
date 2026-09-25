@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { updateCameraSource } from '@/lib/cameras-client';
-import styles from './camera-source-form.module.css';
+import styles from './styles/camera-source-form.module.css';
 
 interface VideoSourceUploaderProps {
   cameraId: string;
@@ -59,7 +59,8 @@ export function VideoSourceUploader({
   return (
     <div className={styles.formSection}>
       <p className={styles.formHint}>
-        Nguồn video cho phép mô phỏng luồng camera thực tế bằng cách phát lặp lại một file video mẫu qua FFmpeg.
+        Nguồn video cho phép mô phỏng luồng camera thực tế bằng cách phát lặp lại một file video mẫu
+        qua FFmpeg.
       </p>
 
       {successMsg && <div className={styles.successAlert}>{successMsg}</div>}
@@ -75,7 +76,14 @@ export function VideoSourceUploader({
             onChange={handleFileChange}
             disabled={!isAdmin || isSaving}
           />
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="17 8 12 3 7 8" />
             <line x1="12" y1="3" x2="12" y2="15" />
