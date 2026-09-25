@@ -321,6 +321,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cameras/{cameraId}/source/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Kiem tra ket noi toi nguon RTSP ma khong luu cau hinh */
+        post: operations["testCameraRtspConnection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cameras/{cameraId}/source/start": {
         parameters: {
             query?: never;
@@ -1041,6 +1060,7 @@ export interface components {
             runtimeStatus: components["schemas"]["CameraRuntimeStatus"];
             source: components["schemas"]["CameraSourceInfo"];
             frigateSync: components["schemas"]["CameraFrigateSyncInfo"];
+            frigateSettings: components["schemas"]["CameraFrigateSettings"];
             debugCapabilities: components["schemas"]["CameraDebugCapabilities"];
             configVersion?: number;
             /** @enum {string} */
@@ -1063,6 +1083,22 @@ export interface components {
             appliedVersion?: number | null;
             errorCode?: string | null;
             errorMessage?: string | null;
+        };
+        CameraFrigateSettings: {
+            detectWidth: number;
+            detectHeight: number;
+            detectFps: number;
+            minInitializedFrames: number;
+            maxDisappearedFrames: number;
+            /** Format: float */
+            personMinScore: number;
+            /** Format: float */
+            personThreshold: number;
+            personMinArea: number;
+            snapshotsEnabled: boolean;
+            snapshotBoundingBox: boolean;
+            recordingEnabled: boolean;
+            detectionRetentionDays: number;
         };
         CameraDebugCapabilities: {
             personBoundary: boolean;
@@ -1122,9 +1158,32 @@ export interface components {
             name?: string;
             rtspUrl?: string;
             fps?: number;
+            detectWidth?: number;
+            detectHeight?: number;
             isEnabled?: boolean;
             detectionEnabled?: boolean;
             retentionDays?: number;
+            minInitializedFrames?: number;
+            maxDisappearedFrames?: number;
+            /** Format: float */
+            personMinScore?: number;
+            /** Format: float */
+            personThreshold?: number;
+            personMinArea?: number;
+            snapshotsEnabled?: boolean;
+            snapshotBoundingBox?: boolean;
+            recordingEnabled?: boolean;
+            detectionRetentionDays?: number;
+        };
+        RtspConnectionTestRequest: {
+            rtspUrl: string;
+            /** @enum {string} */
+            transport: "TCP" | "UDP";
+        };
+        RtspConnectionTestResult: {
+            success: boolean;
+            message: string;
+            latencyMs: number | null;
         };
         UpdateCameraStateRequest: {
             isEnabled: boolean;
@@ -2335,6 +2394,8 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -2466,6 +2527,36 @@ export interface operations {
                 };
                 content?: never;
             };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    testCameraRtspConnection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RtspConnectionTestRequest"];
+            };
+        };
+        responses: {
+            /** @description Ket qua kiem tra RTSP */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RtspConnectionTestResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };

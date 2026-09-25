@@ -468,6 +468,8 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Camera" }
         "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /cameras/{cameraId}/runtime-status:
@@ -554,6 +556,29 @@ paths:
       responses:
         "204":
           description: Da xoa file video thanh cong
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source/test:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Kiem tra ket noi toi nguon RTSP ma khong luu cau hinh
+      operationId: testCameraRtspConnection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RtspConnectionTestRequest" }
+      responses:
+        "200":
+          description: Ket qua kiem tra RTSP
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RtspConnectionTestResult" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /cameras/{cameraId}/source/start:
@@ -1604,6 +1629,7 @@ components:
           runtimeStatus,
           source,
           frigateSync,
+          frigateSettings,
           debugCapabilities,
           createdAt,
         ]
@@ -1629,6 +1655,7 @@ components:
         runtimeStatus: { $ref: "#/components/schemas/CameraRuntimeStatus" }
         source: { $ref: "#/components/schemas/CameraSourceInfo" }
         frigateSync: { $ref: "#/components/schemas/CameraFrigateSyncInfo" }
+        frigateSettings: { $ref: "#/components/schemas/CameraFrigateSettings" }
         debugCapabilities: { $ref: "#/components/schemas/CameraDebugCapabilities" }
         configVersion: { type: integer, minimum: 1 }
         syncStatus: { type: string, enum: [PENDING, SYNCED, FAILED] }
@@ -1654,6 +1681,37 @@ components:
         appliedVersion: { type: ["integer", "null"] }
         errorCode: { type: ["string", "null"] }
         errorMessage: { type: ["string", "null"] }
+
+    CameraFrigateSettings:
+      type: object
+      required:
+        [
+          detectWidth,
+          detectHeight,
+          detectFps,
+          minInitializedFrames,
+          maxDisappearedFrames,
+          personMinScore,
+          personThreshold,
+          personMinArea,
+          snapshotsEnabled,
+          snapshotBoundingBox,
+          recordingEnabled,
+          detectionRetentionDays,
+        ]
+      properties:
+        detectWidth: { type: integer, minimum: 160, maximum: 7680 }
+        detectHeight: { type: integer, minimum: 120, maximum: 4320 }
+        detectFps: { type: integer, minimum: 1, maximum: 30 }
+        minInitializedFrames: { type: integer, minimum: 1, maximum: 300 }
+        maxDisappearedFrames: { type: integer, minimum: 1, maximum: 300 }
+        personMinScore: { type: number, format: float, minimum: 0, maximum: 1 }
+        personThreshold: { type: number, format: float, minimum: 0, maximum: 1 }
+        personMinArea: { type: integer, minimum: 0, maximum: 10000000 }
+        snapshotsEnabled: { type: boolean }
+        snapshotBoundingBox: { type: boolean }
+        recordingEnabled: { type: boolean }
+        detectionRetentionDays: { type: integer, minimum: 0, maximum: 90 }
 
     CameraDebugCapabilities:
       type: object
@@ -1725,9 +1783,35 @@ components:
         name: { type: string }
         rtspUrl: { type: string }
         fps: { type: integer, minimum: 1, maximum: 30 }
+        detectWidth: { type: integer, minimum: 160, maximum: 7680 }
+        detectHeight: { type: integer, minimum: 120, maximum: 4320 }
         isEnabled: { type: boolean }
         detectionEnabled: { type: boolean }
         retentionDays: { type: integer, minimum: 1, maximum: 90 }
+        minInitializedFrames: { type: integer, minimum: 1, maximum: 300 }
+        maxDisappearedFrames: { type: integer, minimum: 1, maximum: 300 }
+        personMinScore: { type: number, format: float, minimum: 0, maximum: 1 }
+        personThreshold: { type: number, format: float, minimum: 0, maximum: 1 }
+        personMinArea: { type: integer, minimum: 0, maximum: 10000000 }
+        snapshotsEnabled: { type: boolean }
+        snapshotBoundingBox: { type: boolean }
+        recordingEnabled: { type: boolean }
+        detectionRetentionDays: { type: integer, minimum: 0, maximum: 90 }
+
+    RtspConnectionTestRequest:
+      type: object
+      required: [rtspUrl, transport]
+      properties:
+        rtspUrl: { type: string, pattern: "^rtsps?://", writeOnly: true }
+        transport: { type: string, enum: [TCP, UDP] }
+
+    RtspConnectionTestResult:
+      type: object
+      required: [success, message, latencyMs]
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        latencyMs: { type: ["integer", "null"], minimum: 0 }
 
     UpdateCameraStateRequest:
       type: object
