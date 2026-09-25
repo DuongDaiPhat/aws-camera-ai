@@ -31,6 +31,7 @@ erDiagram
     users ||--o{ notifications : "nhận"
     users ||--o{ audit_logs : "thực hiện"
     users ||--o{ auth_refresh_tokens : "sở hữu"
+    users ||--o{ face_collection_sync : "sở hữu"
     auth_refresh_tokens ||--o| auth_refresh_tokens : "thay thế bởi"
 
     devices ||--o{ cameras : "chứa"
@@ -241,6 +242,15 @@ erDiagram
         timestamptz revoked_at
         uuid replaced_by_token_id FK
         timestamptz created_at
+    }
+
+    face_collection_sync {
+        uuid owner_user_id PK,FK
+        text model_version PK
+        smallint embedding_dim
+        integer version
+        integer synced_version
+        timestamptz last_synced_at
     }
 ```
 
@@ -604,6 +614,21 @@ DDL thực thi: [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migratio
       WHERE revoked_at IS NULL;
   ```
   Chỉ chứa các token còn hoạt động (`revoked_at IS NULL`), tối ưu tuyệt đối tốc độ xác thực và gia hạn phiên đăng nhập.
+
+### 3.16 `face_collection_sync`
+
+Bảng quản lý trạng thái đồng bộ (synchronization) đặc trưng khuôn mặt (embedding) từ CSDL Postgres sang bộ nhớ (in-memory collection) của AI Service. Được sinh ra ở US-09.
+
+| Cột              | Ghi chú                                                                     |
+| ---------------- | --------------------------------------------------------------------------- |
+| `owner_user_id`  | Người dùng sở hữu bộ sưu tập mặt (`ON DELETE CASCADE` khi xóa tài khoản)    |
+| `model_version`  | Phiên bản model AI (mỗi model có một collection riêng rẽ)                   |
+| `embedding_dim`  | Số chiều của vector (ví dụ 128) để khởi tạo index trong AI Service          |
+| `version`        | Tăng lên 1 mỗi khi có thêm khuôn mặt mới được người dùng đăng ký            |
+| `synced_version` | Trạng thái AI Service báo về đã đồng bộ đến version nào (để tải thay đổi)   |
+| `last_synced_at` | Thời điểm AI Service đồng bộ thành công gần nhất                            |
+
+**Thiết kế bền vững:** Việc quản lý `version` và `synced_version` trực tiếp trong Database giúp chống mất mát dữ liệu (Data Loss) nếu AI Service bị sập ngang, tránh việc phải dùng hàng đợi (Message Queue) phức tạp mà dễ lỗi cho việc đồng bộ khuôn mặt.
 
 ---
 
