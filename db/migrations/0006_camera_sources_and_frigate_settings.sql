@@ -1,5 +1,5 @@
 -- =====================================================================
--- Migration 0005: Quan ly nguon phat camera va cau hinh dong bo Frigate
+-- Migration 0006: Quan ly nguon phat camera va cau hinh dong bo Frigate
 -- Slice: CAM (Thanh vien A)
 -- Tham chieu: docs/Plan Giao dien Camera.md & docs/PLAN_CAM_CAMERA_MANAGEMENT_EXECUTION.md
 -- =====================================================================
