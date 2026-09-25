@@ -6,6 +6,7 @@ import { useAuth, useEvents, useEventStats } from '@/hooks';
 import { Sidebar, TopHeader } from '@/components/layout';
 import { MetricCards } from '@/components/dashboard/MetricCards';
 import { EventCard, EventDetailModal, EventFilter } from '@/components/events';
+import { CameraView } from '@/components/cameras';
 import { EmptyState, ErrorState, Pagination } from '@/components/ui';
 import { SettingsView } from '@/components/settings';
 import styles from './dashboard-view.module.css';
@@ -111,7 +112,9 @@ export function DashboardView() {
         />
 
         <main className={styles.workspace}>
-          {activeNav === 'settings' ? (
+          {activeNav === 'cameras' ? (
+            <CameraView user={user} />
+          ) : activeNav === 'settings' ? (
             <SettingsView user={user} />
           ) : (
             <>

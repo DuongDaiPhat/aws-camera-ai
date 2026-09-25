@@ -449,6 +449,223 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorResponse" }
 
+  /cameras/{cameraId}/state:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    put:
+      tags: [cameras]
+      summary: Bat hoac tat camera (desired state)
+      operationId: updateCameraState
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateCameraStateRequest" }
+      responses:
+        "200":
+          description: Trang thai camera sau khi cap nhat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Camera" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/runtime-status:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    get:
+      tags: [cameras]
+      summary: Lay trang thai runtime thuc te cua camera
+      operationId: getCameraRuntimeStatus
+      responses:
+        "200":
+          description: Trang thai runtime thuc te
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraRuntimeStatusResponse" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    get:
+      tags: [cameras]
+      summary: Chi tiet nguon phat cua camera
+      operationId: getCameraSource
+      responses:
+        "200":
+          description: Thong tin chi tiet nguon phat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [cameras]
+      summary: Cap nhat cau hinh nguon phat camera
+      operationId: updateCameraSource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateCameraSourceRequest" }
+      responses:
+        "200":
+          description: Nguon phat sau khi cap nhat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source/video:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Upload file video nguon phat cho camera
+      operationId: uploadCameraVideo
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: File video (MP4 hoac MKV, toi da theo CAMERA_VIDEO_MAX_BYTES)
+                loop:
+                  type: boolean
+                  default: true
+      responses:
+        "200":
+          description: Nguon phat video sau khi upload
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [cameras]
+      summary: Xoa file video nguon phat cua camera
+      operationId: deleteCameraVideo
+      responses:
+        "204":
+          description: Da xoa file video thanh cong
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source/test:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Kiem tra ket noi toi nguon RTSP ma khong luu cau hinh
+      operationId: testCameraRtspConnection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RtspConnectionTestRequest" }
+      responses:
+        "200":
+          description: Ket qua kiem tra RTSP
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RtspConnectionTestResult" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source/start:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Bat dau phat nguon camera (video publisher / webcam)
+      operationId: startCameraSource
+      responses:
+        "200":
+          description: Nguon phat da khoi dong
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source/stop:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Dung phat nguon camera
+      operationId: stopCameraSource
+      responses:
+        "200":
+          description: Nguon phat da dung
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source/browser-session:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Cap phien publish WebRTC/WHIP cho webcam trinh duyet
+      operationId: createBrowserPublishSession
+      responses:
+        "200":
+          description: Thong tin publish WebRTC
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BrowserPublishSession" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [cameras]
+      summary: Thu hoi phien publish WebRTC/WHIP cho webcam trinh duyet
+      operationId: revokeBrowserPublishSession
+      responses:
+        "204":
+          description: Da thu hoi phien publish thanh cong
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/frigate-sync/retry:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Thu lai dong bo cau hinh xuong Frigate
+      operationId: retryFrigateSync
+      responses:
+        "200":
+          description: Ket qua thu lai dong bo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FrigateSyncResult" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/debug-stream:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    get:
+      tags: [cameras]
+      summary: Lay thong tin luong debug va du lieu detection thuc te
+      operationId: getCameraDebugStream
+      responses:
+        "200":
+          description: Thong tin luong debug va du lieu detection
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraDebugStream" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
   # ===================================================================
   # ZONES — US-12
   # ===================================================================
@@ -1256,9 +1473,7 @@ components:
           required: [code, message, traceId]
           properties:
             code:
-              type: string
-              description: Ma loi on dinh de FE xu ly, vi du TOKEN_EXPIRED.
-              examples: [NO_FACE_DETECTED]
+              $ref: "#/components/schemas/CameraErrorCode"
             message:
               type: string
               description: Thong diep tieng Viet hien thi duoc cho nguoi dung.
@@ -1268,6 +1483,34 @@ components:
             traceId:
               type: string
               description: FR-LOG-02 — dung de tra log xuyen service.
+
+    CameraErrorCode:
+      type: string
+      enum:
+        - ACCOUNT_LOCKED
+        - CAMERA_NOT_FOUND
+        - CAMERA_SOURCE_NOT_FOUND
+        - SOURCE_NOT_CONFIGURED
+        - SOURCE_UNAVAILABLE
+        - WEBCAM_PERMISSION_DENIED
+        - WEBCAM_PUBLISH_FAILED
+        - VIDEO_INVALID_FORMAT
+        - VIDEO_TOO_LARGE
+        - VIDEO_NOT_FOUND
+        - FFMPEG_START_FAILED
+        - FRIGATE_SYNC_FAILED
+        - FRIGATE_UNAVAILABLE
+        - MEDIAMTX_UNAVAILABLE
+        - CAMERA_ALREADY_TRANSITIONING
+        - CONFIG_VERSION_CONFLICT
+        - FORBIDDEN
+        - INVALID_CREDENTIALS
+        - INVALID_REFRESH_TOKEN
+        - INVALID_SLUG
+        - INVALID_TOKEN
+        - EVENT_NOT_FOUND
+        - UNAUTHORIZED
+      description: Stable errors returned by camera source, runtime and Frigate operations.
 
     PaginatedResponse:
       type: object
@@ -1376,7 +1619,20 @@ components:
     # ---------------- Cameras ----------------
     Camera:
       type: object
-      required: [id, deviceId, name, slug, isEnabled, createdAt]
+      required:
+        [
+          id,
+          deviceId,
+          name,
+          slug,
+          isEnabled,
+          runtimeStatus,
+          source,
+          frigateSync,
+          frigateSettings,
+          debugCapabilities,
+          createdAt,
+        ]
       properties:
         id: { type: string, format: uuid }
         deviceId: { type: string, format: uuid }
@@ -1397,15 +1653,80 @@ components:
         retentionDays: { type: integer }
         sourceType: { $ref: "#/components/schemas/CameraSourceType" }
         runtimeStatus: { $ref: "#/components/schemas/CameraRuntimeStatus" }
+        source: { $ref: "#/components/schemas/CameraSourceInfo" }
+        frigateSync: { $ref: "#/components/schemas/CameraFrigateSyncInfo" }
+        frigateSettings: { $ref: "#/components/schemas/CameraFrigateSettings" }
+        debugCapabilities: { $ref: "#/components/schemas/CameraDebugCapabilities" }
         configVersion: { type: integer, minimum: 1 }
-        syncStatus: { type: string, enum: [PENDING, APPLIED, FAILED] }
+        syncStatus: { type: string, enum: [PENDING, SYNCED, FAILED] }
         zoneCount: { type: integer }
         createdAt: { type: string, format: date-time }
+
+    CameraSourceInfo:
+      type: object
+      required: [type, isPublishing, requiresBrowserPublisher]
+      properties:
+        type: { $ref: "#/components/schemas/CameraSourceType" }
+        displayName: { type: ["string", "null"] }
+        isPublishing: { type: boolean }
+        lastError: { type: ["string", "null"] }
+        requiresBrowserPublisher: { type: boolean }
+
+    CameraFrigateSyncInfo:
+      type: object
+      required: [status, configVersion]
+      properties:
+        status: { type: string, enum: [PENDING, SYNCED, FAILED] }
+        configVersion: { type: integer, minimum: 1 }
+        appliedVersion: { type: ["integer", "null"] }
+        errorCode: { type: ["string", "null"] }
+        errorMessage: { type: ["string", "null"] }
+
+    CameraFrigateSettings:
+      type: object
+      required:
+        [
+          detectWidth,
+          detectHeight,
+          detectFps,
+          minInitializedFrames,
+          maxDisappearedFrames,
+          personMinScore,
+          personThreshold,
+          personMinArea,
+          snapshotsEnabled,
+          snapshotBoundingBox,
+          recordingEnabled,
+          detectionRetentionDays,
+        ]
+      properties:
+        detectWidth: { type: integer, minimum: 160, maximum: 7680 }
+        detectHeight: { type: integer, minimum: 120, maximum: 4320 }
+        detectFps: { type: integer, minimum: 1, maximum: 30 }
+        minInitializedFrames: { type: integer, minimum: 1, maximum: 300 }
+        maxDisappearedFrames: { type: integer, minimum: 1, maximum: 300 }
+        personMinScore: { type: number, format: float, minimum: 0, maximum: 1 }
+        personThreshold: { type: number, format: float, minimum: 0, maximum: 1 }
+        personMinArea: { type: integer, minimum: 0, maximum: 10000000 }
+        snapshotsEnabled: { type: boolean }
+        snapshotBoundingBox: { type: boolean }
+        recordingEnabled: { type: boolean }
+        detectionRetentionDays: { type: integer, minimum: 0, maximum: 90 }
+
+    CameraDebugCapabilities:
+      type: object
+      required: [personBoundary, zoneBoundary]
+      properties:
+        personBoundary: { type: boolean }
+        zoneBoundary: { type: boolean }
 
     CameraSourceType:
       type: string
       enum: [RTSP, BROWSER_WEBCAM, VIDEO_FILE]
     CameraRuntimeStatus:
+      type: string
+      enum: [ONLINE, OFFLINE, STARTING, FAILED, DISABLED]
+    CameraSourceRuntimeStatus:
       type: string
       enum: [NOT_CONFIGURED, STARTING, ONLINE, OFFLINE, FAILED, STOPPED]
     CameraPreview:
@@ -1462,9 +1783,139 @@ components:
         name: { type: string }
         rtspUrl: { type: string }
         fps: { type: integer, minimum: 1, maximum: 30 }
+        detectWidth: { type: integer, minimum: 160, maximum: 7680 }
+        detectHeight: { type: integer, minimum: 120, maximum: 4320 }
         isEnabled: { type: boolean }
         detectionEnabled: { type: boolean }
         retentionDays: { type: integer, minimum: 1, maximum: 90 }
+        minInitializedFrames: { type: integer, minimum: 1, maximum: 300 }
+        maxDisappearedFrames: { type: integer, minimum: 1, maximum: 300 }
+        personMinScore: { type: number, format: float, minimum: 0, maximum: 1 }
+        personThreshold: { type: number, format: float, minimum: 0, maximum: 1 }
+        personMinArea: { type: integer, minimum: 0, maximum: 10000000 }
+        snapshotsEnabled: { type: boolean }
+        snapshotBoundingBox: { type: boolean }
+        recordingEnabled: { type: boolean }
+        detectionRetentionDays: { type: integer, minimum: 0, maximum: 90 }
+
+    RtspConnectionTestRequest:
+      type: object
+      required: [rtspUrl, transport]
+      properties:
+        rtspUrl: { type: string, pattern: "^rtsps?://", writeOnly: true }
+        transport: { type: string, enum: [TCP, UDP] }
+
+    RtspConnectionTestResult:
+      type: object
+      required: [success, message, latencyMs]
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        latencyMs: { type: ["integer", "null"], minimum: 0 }
+
+    UpdateCameraStateRequest:
+      type: object
+      required: [isEnabled]
+      properties:
+        isEnabled: { type: boolean }
+
+    CameraSourceDetail:
+      type: object
+      required: [id, cameraId, sourceType, status, transport, videoLoop]
+      properties:
+        id: { type: string, format: uuid }
+        cameraId: { type: string, format: uuid }
+        sourceType: { $ref: "#/components/schemas/CameraSourceType" }
+        rtspUrl:
+          type: ["string", "null"]
+          description: Chi tra ve gia tri da che credential cho role ADMIN.
+        videoOriginalName: { type: ["string", "null"] }
+        videoLoop: { type: boolean, default: true }
+        transport: { type: string, enum: [TCP, UDP], default: TCP }
+        inputFormat: { type: ["string", "null"] }
+        webcamDeviceLabel: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/CameraSourceRuntimeStatus" }
+        lastErrorCode: { type: ["string", "null"] }
+        lastErrorMessage: { type: ["string", "null"] }
+        startedAt: { type: ["string", "null"], format: date-time }
+        stoppedAt: { type: ["string", "null"], format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    UpdateCameraSourceRequest:
+      type: object
+      required: [sourceType]
+      properties:
+        sourceType: { $ref: "#/components/schemas/CameraSourceType" }
+        rtspUrl: { type: string, writeOnly: true }
+        videoObjectId: { type: string, format: uuid }
+        videoLoop: { type: boolean, default: true }
+        transport: { type: string, enum: [TCP, UDP], default: TCP }
+        inputFormat: { type: string }
+        webcamDeviceLabel: { type: string }
+
+    CameraRuntimeStatusResponse:
+      type: object
+      required: [cameraId, runtimeStatus, isPublishing, frigateSyncStatus, lastCheckedAt]
+      properties:
+        cameraId: { type: string, format: uuid }
+        runtimeStatus: { $ref: "#/components/schemas/CameraRuntimeStatus" }
+        isPublishing: { type: boolean }
+        frigateSyncStatus: { type: string, enum: [PENDING, SYNCED, FAILED] }
+        lastCheckedAt: { type: string, format: date-time }
+        details:
+          type: object
+          properties:
+            sourceType: { $ref: "#/components/schemas/CameraSourceType" }
+            errorCode: { type: ["string", "null"] }
+            errorMessage: { type: ["string", "null"] }
+
+    CameraDebugDetection:
+      type: object
+      required: [label, confidence, box]
+      properties:
+        label: { type: string }
+        confidence: { type: number }
+        box:
+          type: array
+          items: { type: number }
+          description: "[ymin, xmin, ymax, xmax] normalized 0..1"
+        footPoint:
+          type: array
+          items: { type: number }
+          description: "[x, y] normalized 0..1"
+
+    CameraDebugStream:
+      type: object
+      required: [cameraId, streamUrl, detections, activeZones]
+      properties:
+        cameraId: { type: string, format: uuid }
+        streamUrl: { type: string }
+        snapshotUrl: { type: ["string", "null"] }
+        detections:
+          type: array
+          items: { $ref: "#/components/schemas/CameraDebugDetection" }
+        activeZones:
+          type: array
+          items: { type: string }
+
+    BrowserPublishSession:
+      type: object
+      required: [publishUrl, streamKey, token, expiresAt]
+      properties:
+        publishUrl: { type: string, description: "URL WebRTC WHIP publish endpoint" }
+        streamKey: { type: string, description: "Camera slug hoac stream key" }
+        token: { type: string, description: "Token bao mat phien publish ngan han" }
+        expiresAt: { type: string, format: date-time }
+
+    FrigateSyncResult:
+      type: object
+      required: [cameraId, configVersion, syncStatus]
+      properties:
+        cameraId: { type: string, format: uuid }
+        configVersion: { type: integer, minimum: 1 }
+        syncStatus: { type: string, enum: [PENDING, SYNCED, FAILED] }
+        errorCode: { type: ["string", "null"] }
+        errorMessage: { type: ["string", "null"] }
 
     # ---------------- Zones ----------------
     Polygon:

@@ -517,31 +517,31 @@ Không render dashboard sự kiện bên dưới trang Camera.
 
 **8.2. Cấu trúc file**
 
+```text
 apps/web/src/components/cameras/
-
-CameraView.tsx
-
-CameraList.tsx
-
-CameraCard.tsx
-
-CameraPreview.tsx
-
-CameraSettingsPanel.tsx
-
-CameraSourceForm.tsx
-
-WebcamPublisher.tsx
-
-VideoSourceUploader.tsx
-
-CameraDebugToolbar.tsx
-
-CameraStatusBadge.tsx
-
-camera-\*.module.css
-
-index.ts
+├── CameraView.tsx
+├── CameraList.tsx
+├── CameraCard.tsx
+├── CameraPreview.tsx
+├── CameraSettingsPanel.tsx
+├── CameraSourceForm.tsx
+├── WebcamPublisher.tsx
+├── VideoSourceUploader.tsx
+├── CameraDebugToolbar.tsx
+├── CameraStatusBadge.tsx
+├── debug/                    # Lớp SVG và hàm tính tọa độ cho Debug View
+│   ├── PersonBoxLayer.tsx
+│   ├── ZonePolygonLayer.tsx
+│   └── geometry-utils.ts
+├── source/                   # Chi tiết giao thức phát nguồn camera
+│   └── webcam-publish.ts
+├── styles/                   # CSS Module của tính năng camera
+│   ├── camera-view.module.css
+│   ├── camera-preview.module.css
+│   └── camera-source-form.module.css
+├── __tests__/                # Test đặt cùng phạm vi tính năng, tách khỏi code production
+└── index.ts                  # Public exports của tính năng camera
+```
 
 apps/web/src/hooks/
 

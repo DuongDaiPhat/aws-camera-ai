@@ -1,7 +1,7 @@
 # Thiết kế cơ sở dữ liệu — ERD
 
 > **Task 0.3** · Người phụ trách: **B** (Backend Lead) · Sprint 0
-> DDL thực thi: [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`db/migrations/0002_seed_escalation_rules.sql`](../../db/migrations/0002_seed_escalation_rules.sql), [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql), [`db/migrations/0005_escalation_rules_version_and_constraints.sql`](../../db/migrations/0005_escalation_rules_version_and_constraints.sql)
+> DDL thực thi: [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`db/migrations/0002_seed_escalation_rules.sql`](../../db/migrations/0002_seed_escalation_rules.sql), [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql), [`db/migrations/0005_escalation_rules_version_and_constraints.sql`](../../db/migrations/0005_escalation_rules_version_and_constraints.sql), [`db/migrations/0006_camera_sources_and_frigate_settings.sql`](../../db/migrations/0006_camera_sources_and_frigate_settings.sql)
 > Tài liệu này giải thích **vì sao** thiết kế như vậy. File SQL là nguồn sự thật về **cấu trúc**.
 
 ## Mục lục
@@ -18,8 +18,8 @@
 
 ## 1. Sơ đồ tổng thể
 
-15 bảng: **10 bảng chính** theo yêu cầu task 0.3, cộng **5 bảng bổ trợ** sinh ra từ các
-yêu cầu chức năng (FR-EVT-05, FR-NOT-10, FR-DET-M5-01, FR-LOG-01, FR-AUT-02).
+17 bảng: **10 bảng chính** theo yêu cầu task 0.3, cộng **7 bảng bổ trợ** sinh ra từ các
+yêu cầu chức năng (FR-EVT-05, FR-NOT-10, FR-DET-M5-01, FR-LOG-01, FR-AUT-02 và CAM).
 
 ```mermaid
 erDiagram
@@ -34,6 +34,8 @@ erDiagram
     auth_refresh_tokens ||--o| auth_refresh_tokens : "thay thế bởi"
 
     devices ||--o{ cameras : "chứa"
+    cameras ||--o| camera_sources : "có nguồn phát"
+    cameras ||--o| camera_frigate_settings : "cấu hình Frigate"
     cameras ||--o{ zones : "được chia thành"
     cameras ||--o{ events : "sinh ra"
     zones   ||--o{ events : "xảy ra trong"
@@ -80,6 +82,34 @@ erDiagram
         text rtsp_url "không trả ra API"
         smallint fps
         smallint retention_days
+    }
+
+    camera_sources {
+        uuid id PK
+        uuid camera_id FK,UK
+        camera_source_type_enum source_type
+        text rtsp_url "chỉ trả dạng đã che"
+        text video_object_key
+        text video_original_name
+        boolean video_loop
+        camera_transport_enum transport
+        camera_source_status_enum status
+        text last_error_code
+        text process_id
+    }
+
+    camera_frigate_settings {
+        uuid camera_id PK,FK
+        int detect_width
+        int detect_height
+        smallint detect_fps
+        numeric person_min_score
+        numeric person_threshold
+        boolean snapshots_enabled
+        boolean recording_enabled
+        int config_version
+        int applied_version
+        frigate_sync_status_enum sync_status
     }
 
     zones {
@@ -214,15 +244,17 @@ erDiagram
     }
 ```
 
-### Vì sao có 5 bảng ngoài danh sách 10 bảng ban đầu
+### Vì sao có 7 bảng ngoài danh sách 10 bảng ban đầu
 
-| Bảng                   | Sinh ra từ                  | Nếu không có thì sao                                                                                                 |
-| ---------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `event_status_history` | FR-EVT-05, FR-ESC-09        | Không trả lời được "ai xác nhận, lúc nào, qua kênh nào" — một mục trong tiêu chí demo                                |
-| `emergency_contacts`   | FR-NOT-09, FR-NOT-10        | Không gọi tuần tự 3 liên hệ được; nhồi số điện thoại vào `users` là sai mô hình (liên hệ khẩn không cần tài khoản)   |
-| `wellness_schedules`   | FR-DET-M5-01                | Lịch kiểm tra phải hard-code — vi phạm "mọi tham số cấu hình được"                                                   |
-| `audit_logs`           | FR-LOG-01                   | Không chứng minh được đã ghi nhận hành vi nhạy cảm (xóa dữ liệu sinh trắc học) — phần Đạo đức của báo cáo sẽ hổng    |
-| `auth_refresh_tokens`  | US-05, FR-AUT-02, FR-AUT-04 | Không thể thu hồi JWT khi đăng xuất, không thể xoay vòng Refresh Token (Token Rotation) an toàn chống đánh cắp phiên |
+| Bảng                      | Sinh ra từ                  | Nếu không có thì sao                                                                                                 |
+| ------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `event_status_history`    | FR-EVT-05, FR-ESC-09        | Không trả lời được "ai xác nhận, lúc nào, qua kênh nào" — một mục trong tiêu chí demo                                |
+| `emergency_contacts`      | FR-NOT-09, FR-NOT-10        | Không gọi tuần tự 3 liên hệ được; nhồi số điện thoại vào `users` là sai mô hình (liên hệ khẩn không cần tài khoản)   |
+| `wellness_schedules`      | FR-DET-M5-01                | Lịch kiểm tra phải hard-code — vi phạm "mọi tham số cấu hình được"                                                   |
+| `audit_logs`              | FR-LOG-01                   | Không chứng minh được đã ghi nhận hành vi nhạy cảm (xóa dữ liệu sinh trắc học) — phần Đạo đức của báo cáo sẽ hổng    |
+| `auth_refresh_tokens`     | US-05, FR-AUT-02, FR-AUT-04 | Không thể thu hồi JWT khi đăng xuất, không thể xoay vòng Refresh Token (Token Rotation) an toàn chống đánh cắp phiên |
+| `camera_sources`          | CAM                         | Không thể quản lý thống nhất RTSP, webcam trình duyệt và video giả lập hoặc theo dõi vòng đời publisher              |
+| `camera_frigate_settings` | CAM                         | Không thể lưu version, trạng thái đồng bộ và cấu hình detect/snapshot/recording riêng cho từng camera                |
 
 ---
 
@@ -321,6 +353,26 @@ phải chuyển quyền sở hữu trước.
 | `rtsp_url`       | Chứa credential camera. API **không** trả về cho role khác ADMIN (NFR-09)                                                                         |
 | `fps`            | Giới hạn 1–30. Máy yếu thì hạ xuống 5 (rủi ro R4)                                                                                                 |
 | `retention_days` | Cơ sở tính `event_media.expires_at` (FR-DAT-01)                                                                                                   |
+
+#### 3.3.1 `camera_sources`
+
+Mỗi camera có tối đa một nguồn đang cấu hình. `source_type` phân biệt camera RTSP thật,
+webcam publish từ trình duyệt và video upload dùng để giả lập camera. URL RTSP có thể
+chứa credential nên API chỉ trả bản đã che; log và response lỗi không được chứa URL gốc.
+
+`video_object_key` chỉ lưu tên file do backend sinh trong thư mục được quản lý. File video
+không nằm trong Git và được giữ trong Docker volume `camera-videos`. `status` phản ánh
+publisher/nguồn đang chạy, độc lập với trạng thái cấu hình mong muốn `cameras.is_enabled`.
+
+#### 3.3.2 `camera_frigate_settings`
+
+Bảng này lưu cấu hình detect, person, snapshot và recording của từng camera. Database là
+nguồn cấu hình của ứng dụng; Orchestrator sinh phần cấu hình camera rồi đồng bộ xuống
+Frigate.
+
+`config_version` tăng mỗi khi cấu hình thay đổi. `applied_version` chỉ tăng sau khi Frigate
+áp dụng thành công. Khi đồng bộ lỗi, cấu hình mới vẫn được giữ trong database,
+`sync_status = FAILED` và giao diện cho phép người dùng thử lại.
 
 ### 3.4 `zones`
 

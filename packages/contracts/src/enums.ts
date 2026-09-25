@@ -65,3 +65,28 @@ export const DEFAULT_ESCALATION_RULES: Record<
   WELLNESS_TIMEOUT: { priority: 'P2', tLow: null, tHigh: null, tWaitSeconds: 300 },
   PERSON_DETECTED: { priority: 'P3', tLow: null, tHigh: null, tWaitSeconds: 0 },
 };
+
+export const CAMERA_SOURCE_TYPES = ['RTSP', 'BROWSER_WEBCAM', 'VIDEO_FILE'] as const;
+export type CameraSourceType = (typeof CAMERA_SOURCE_TYPES)[number];
+
+export const CAMERA_RUNTIME_STATUSES = [
+  'ONLINE',
+  'OFFLINE',
+  'STARTING',
+  'FAILED',
+  'DISABLED',
+] as const;
+export type CameraRuntimeStatus = (typeof CAMERA_RUNTIME_STATUSES)[number];
+
+export const CAMERA_SOURCE_RUNTIME_STATUSES = [
+  'NOT_CONFIGURED',
+  'STARTING',
+  'ONLINE',
+  'OFFLINE',
+  'FAILED',
+  'STOPPED',
+] as const;
+export type CameraSourceRuntimeStatus = (typeof CAMERA_SOURCE_RUNTIME_STATUSES)[number];
+
+export const FRIGATE_SYNC_STATUSES = ['PENDING', 'SYNCED', 'FAILED'] as const;
+export type FrigateSyncStatus = (typeof FRIGATE_SYNC_STATUSES)[number];

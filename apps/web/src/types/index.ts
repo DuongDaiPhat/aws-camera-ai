@@ -48,3 +48,15 @@ export interface MetricCardData {
 export type CurrentUser = components['schemas']['User'];
 export type LoginRequest = components['schemas']['LoginRequest'];
 export type AuthTokens = components['schemas']['AuthTokens'];
+
+export type Camera = components['schemas']['Camera'];
+export type CameraSourceType = components['schemas']['CameraSourceType'];
+export type CameraRuntimeStatus = components['schemas']['CameraRuntimeStatus'];
+export type CameraSourceDetail = components['schemas']['CameraSourceDetail'];
+export type CameraPreview = components['schemas']['CameraPreview'];
+export type CameraFrigateSettings = components['schemas']['CameraFrigateSettings'];
+export type UpdateCameraRequest = components['schemas']['UpdateCameraRequest'];
+export type UpdateCameraStateRequest = components['schemas']['UpdateCameraStateRequest'];
+export type UpdateCameraSourceRequest = components['schemas']['UpdateCameraSourceRequest'];
+export type RtspConnectionTestRequest = components['schemas']['RtspConnectionTestRequest'];
+export type RtspConnectionTestResult = components['schemas']['RtspConnectionTestResult'];
