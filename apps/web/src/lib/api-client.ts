@@ -39,6 +39,7 @@ export class ApiError extends Error {
     readonly code: string,
     message: string,
     readonly traceId?: string,
+    readonly details?: unknown,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -63,7 +64,7 @@ export async function apiUpload<T>(
 async function request<T>(path: string, init: RequestInit, canRefresh: boolean): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
-    headers: buildHeaders(init.headers),
+    headers: buildHeaders(init.headers, init.body instanceof FormData),
     credentials: 'include',
   });
 
@@ -81,13 +82,14 @@ async function request<T>(path: string, init: RequestInit, canRefresh: boolean):
 
   if (!response.ok) {
     const body = (await response.json().catch(() => ({}))) as {
-      error?: { code?: string; message?: string; traceId?: string };
+      error?: { code?: string; message?: string; traceId?: string; details?: unknown };
     };
     throw new ApiError(
       response.status,
       body.error?.code ?? 'UNKNOWN',
       body.error?.message ?? response.statusText,
       body.error?.traceId,
+      body.error?.details,
     );
   }
 
@@ -183,12 +185,16 @@ function redirectToLogin(): void {
   window.location.assign('/login');
 }
 
-function buildHeaders(headers?: HeadersInit): HeadersInit {
+function buildHeaders(headers?: HeadersInit, multipart = false): HeadersInit {
   const token = getAccessToken();
+  const result = new Headers(headers);
+  if (multipart) result.delete('Content-Type');
+  else if (!result.has('Content-Type')) result.set('Content-Type', 'application/json');
+  const authorization = result.get('Authorization') ?? (token ? `Bearer ${token}` : null);
+  result.delete('Authorization');
   return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(headers ?? {}),
+    ...Object.fromEntries(result.entries()),
+    ...(authorization ? { Authorization: authorization } : {}),
   };
 }
 

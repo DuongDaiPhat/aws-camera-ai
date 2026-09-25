@@ -307,8 +307,11 @@ components:
 
     EmbedResponse:
       type: object
-      required: [modelVersion]
+      required:
+        [modelVersion, embeddingBase64, embeddingDim, faces, error, provider, selectedFaceIndex]
       properties:
+        provider: { type: string, enum: [local, rekognition] }
+        selectedFaceIndex: { type: [integer, "null"], minimum: 0 }
         embeddingBase64:
           type: ["string", "null"]
           description: float32 array da pack, base64. Null khi co loi.

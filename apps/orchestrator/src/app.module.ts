@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { KnownFacesModule } from './known-faces/known-faces.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { CameraSourcesModule } from './camera-sources/camera-sources.module';
@@ -27,6 +28,7 @@ import { EscalationRulesModule } from './escalation-rules/escalation-rules.modul
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '../../.env'] }),
     DatabaseModule,
     AuthModule,
+    KnownFacesModule,
     StorageModule,
     CameraSourcesModule,
     FrigateModule,
