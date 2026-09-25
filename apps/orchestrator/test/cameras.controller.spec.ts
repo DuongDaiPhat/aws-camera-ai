@@ -47,6 +47,20 @@ describe('CamerasController (Slice CAM)', () => {
       errorCode: null,
       errorMessage: null,
     },
+    frigateSettings: {
+      detectWidth: 1280,
+      detectHeight: 720,
+      detectFps: 5,
+      minInitializedFrames: 5,
+      maxDisappearedFrames: 25,
+      personMinScore: 0.5,
+      personThreshold: 0.7,
+      personMinArea: 1500,
+      snapshotsEnabled: true,
+      snapshotBoundingBox: true,
+      recordingEnabled: true,
+      detectionRetentionDays: 7,
+    },
     debugCapabilities: {
       personBoundary: true,
       zoneBoundary: true,
@@ -85,6 +99,7 @@ describe('CamerasController (Slice CAM)', () => {
       updateCameraState: jest.fn(),
       getCameraSource: jest.fn(),
       updateCameraSource: jest.fn(),
+      testRtspConnection: jest.fn(),
       createBrowserPublishSession: jest.fn(),
       revokeBrowserPublishSession: jest.fn(),
       getCameraRuntimeStatus: jest.fn(),
@@ -154,6 +169,27 @@ describe('CamerasController (Slice CAM)', () => {
     expect(result.token).toBe('test-token-uuid-12345');
   });
 
+  it('testRtspConnection goi service voi URL va transport', async () => {
+    service.testRtspConnection.mockResolvedValueOnce({
+      success: true,
+      message: 'Kết nối RTSP thành công.',
+      latencyMs: 90,
+    });
+
+    const result = await controller.testRtspConnection(
+      mockCameraDto.id,
+      { rtspUrl: 'rtsp://camera.local/live', transport: 'TCP' },
+      adminReq,
+    );
+
+    expect(service.testRtspConnection).toHaveBeenCalledWith(
+      mockCameraDto.id,
+      { rtspUrl: 'rtsp://camera.local/live', transport: 'TCP' },
+      'ADMIN',
+    );
+    expect(result.success).toBe(true);
+  });
+
   it('revokeBrowserPublishSession goi service thu hoi session', async () => {
     service.revokeBrowserPublishSession.mockResolvedValueOnce(undefined);
 
@@ -186,7 +222,12 @@ describe('CamerasController (Slice CAM)', () => {
     service.uploadCameraVideo.mockResolvedValueOnce(mockSourceDetail);
 
     const result = await controller.uploadCameraVideo(mockCameraDto.id, mockFile, true, adminReq);
-    expect(service.uploadCameraVideo).toHaveBeenCalledWith(mockCameraDto.id, mockFile, true, 'ADMIN');
+    expect(service.uploadCameraVideo).toHaveBeenCalledWith(
+      mockCameraDto.id,
+      mockFile,
+      true,
+      'ADMIN',
+    );
     expect(result.sourceType).toBe('RTSP');
   });
 
@@ -245,7 +286,10 @@ describe('CamerasController (Slice CAM)', () => {
         name: 'Khu vực bếp',
         slug: 'zone_bep',
         zoneType: 'RESTRICTED',
-        polygon: [[0.1, 0.1], [0.9, 0.9]],
+        polygon: [
+          [0.1, 0.1],
+          [0.9, 0.9],
+        ],
         isEnabled: true,
       },
     ];

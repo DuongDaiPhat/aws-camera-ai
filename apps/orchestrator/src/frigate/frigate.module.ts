@@ -5,12 +5,7 @@ import { FrigateConfigService } from './frigate-config.service';
 import { FrigateSyncService } from './frigate-sync.service';
 
 @Module({
-  providers: [
-    CamerasRepository,
-    FrigateClientService,
-    FrigateConfigService,
-    FrigateSyncService,
-  ],
+  providers: [CamerasRepository, FrigateClientService, FrigateConfigService, FrigateSyncService],
   exports: [FrigateClientService, FrigateConfigService, FrigateSyncService],
 })
 export class FrigateModule {}

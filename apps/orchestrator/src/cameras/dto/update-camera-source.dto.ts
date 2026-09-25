@@ -22,7 +22,11 @@ export class UpdateCameraSourceDto {
   @IsBoolean({ message: 'videoLoop phải là boolean' })
   videoLoop?: boolean;
 
-  @ApiPropertyOptional({ description: 'Giao thức truyền tải (TCP hoặc UDP)', enum: ['TCP', 'UDP'], default: 'TCP' })
+  @ApiPropertyOptional({
+    description: 'Giao thức truyền tải (TCP hoặc UDP)',
+    enum: ['TCP', 'UDP'],
+    default: 'TCP',
+  })
   @IsOptional()
   @IsIn(['TCP', 'UDP'], { message: 'transport phải là TCP hoặc UDP' })
   transport?: 'TCP' | 'UDP';

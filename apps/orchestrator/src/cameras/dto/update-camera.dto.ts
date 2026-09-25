@@ -1,4 +1,4 @@
-import { IsBoolean, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsBoolean, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateCameraDto {
@@ -19,6 +19,20 @@ export class UpdateCameraDto {
   @Max(30, { message: 'fps tối đa là 30' })
   fps?: number;
 
+  @ApiPropertyOptional({ minimum: 160, maximum: 7680 })
+  @IsOptional()
+  @IsInt()
+  @Min(160)
+  @Max(7680)
+  detectWidth?: number;
+
+  @ApiPropertyOptional({ minimum: 120, maximum: 4320 })
+  @IsOptional()
+  @IsInt()
+  @Min(120)
+  @Max(4320)
+  detectHeight?: number;
+
   @ApiPropertyOptional({ description: 'Bật/tắt camera' })
   @IsOptional()
   @IsBoolean({ message: 'isEnabled phải là boolean' })
@@ -35,4 +49,61 @@ export class UpdateCameraDto {
   @Min(1, { message: 'retentionDays tối thiểu là 1' })
   @Max(90, { message: 'retentionDays tối đa là 90' })
   retentionDays?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 300 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(300)
+  minInitializedFrames?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 300 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(300)
+  maxDisappearedFrames?: number;
+
+  @ApiPropertyOptional({ minimum: 0, maximum: 1 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  personMinScore?: number;
+
+  @ApiPropertyOptional({ minimum: 0, maximum: 1 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  personThreshold?: number;
+
+  @ApiPropertyOptional({ minimum: 0, maximum: 10000000 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(10000000)
+  personMinArea?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  snapshotsEnabled?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  snapshotBoundingBox?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  recordingEnabled?: boolean;
+
+  @ApiPropertyOptional({ minimum: 0, maximum: 90 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(90)
+  detectionRetentionDays?: number;
 }

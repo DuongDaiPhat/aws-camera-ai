@@ -23,6 +23,17 @@ interface FrigateSyncRow {
   sync_error_code: string | null;
 }
 
+interface FrigateConfigurationRow {
+  config_version: number;
+  detect_width: number;
+  detect_height: number;
+  detect_fps: number;
+  person_min_score: string;
+  person_threshold: string;
+  recording_enabled: boolean;
+  snapshots_enabled: boolean;
+}
+
 async function runMigrations(pool: Pool): Promise<void> {
   const migrationsDirectory = resolve(__dirname, '../../../db/migrations');
   const migrationFiles = (await readdir(migrationsDirectory))
@@ -52,7 +63,12 @@ async function seedCameraState(pool: Pool): Promise<string> {
     `INSERT INTO cameras (device_id, name, slug, rtsp_url)
      VALUES ($1, $2, $3, $4)
      RETURNING id`,
-    [deviceResult.rows[0].id, 'Camera State', 'cam_state_test', 'rtsp://mediamtx:8554/cam_state_test'],
+    [
+      deviceResult.rows[0].id,
+      'Camera State',
+      'cam_state_test',
+      'rtsp://mediamtx:8554/cam_state_test',
+    ],
   );
   const cameraId = cameraResult.rows[0].id;
 
@@ -147,6 +163,38 @@ describe('Camera state repositories', () => {
     expect(result.rows[0]).toEqual({
       sync_error_code: 'FRIGATE_SYNC_FAILED',
       sync_status: 'FAILED',
+    });
+  });
+
+  it('persists Frigate camera settings and increments the configuration version', async () => {
+    await camerasRepository.saveFrigateConfiguration(cameraId, {
+      detect_fps: 8,
+      detect_height: 1080,
+      detect_width: 1920,
+      person_min_score: 0.55,
+      person_threshold: 0.8,
+      recording_enabled: false,
+      snapshots_enabled: false,
+    });
+
+    const result = await pool.query<FrigateConfigurationRow>(
+      `SELECT config_version, detect_width, detect_height, detect_fps,
+              person_min_score, person_threshold,
+              recording_enabled, snapshots_enabled
+       FROM camera_frigate_settings
+       WHERE camera_id = $1`,
+      [cameraId],
+    );
+
+    expect(result.rows[0]).toEqual({
+      config_version: 3,
+      detect_fps: 8,
+      detect_height: 1080,
+      detect_width: 1920,
+      person_min_score: '0.550',
+      person_threshold: '0.800',
+      recording_enabled: false,
+      snapshots_enabled: false,
     });
   });
 });

@@ -37,6 +37,8 @@ import type {
 import type { ListCamerasQueryDto } from './dto/list-cameras-query.dto';
 import type { UpdateCameraDto } from './dto/update-camera.dto';
 import type { UpdateCameraSourceDto } from './dto/update-camera-source.dto';
+import type { TestRtspSourceDto } from './dto/test-rtsp-source.dto';
+import type { RtspConnectionTestResult } from '../camera-sources/rtsp-source-tester.service';
 
 import { CameraSourcesService } from '../camera-sources/camera-sources.service';
 import { FrigateSyncService } from '../frigate/frigate-sync.service';
@@ -44,6 +46,10 @@ import { FrigateSyncService } from '../frigate/frigate-sync.service';
 const DEFAULT_PREVIEW_WIDTH = 1280;
 const DEFAULT_PREVIEW_HEIGHT = 720;
 const PRESIGNED_URL_TTL_SECONDS = 900;
+
+function valueOr<T>(value: T | null | undefined, fallback: T): T {
+  return value ?? fallback;
+}
 
 @Injectable()
 export class CamerasService implements CameraConfigPortV1 {
@@ -305,14 +311,61 @@ export class CamerasService implements CameraConfigPortV1 {
       name: dto.name,
       rtsp_url: dto.rtspUrl,
       fps: dto.fps,
+      detect_width: dto.detectWidth,
+      detect_height: dto.detectHeight,
       is_enabled: dto.isEnabled,
       detection_enabled: dto.detectionEnabled,
       retention_days: dto.retentionDays,
     });
 
-    await this.camerasRepository.bumpFrigateConfigVersion(id);
+    await this.syncUpdatedCamera(id, dto);
 
-    return this.mapToCameraDto(updated ?? existing, role);
+    const refreshed = await this.camerasRepository.findById(id);
+    return this.mapToCameraDto(refreshed ?? updated ?? existing, role);
+  }
+
+  private async syncUpdatedCamera(id: string, dto: UpdateCameraDto): Promise<void> {
+    const hasFrigateSettingsPatch = [
+      dto.detectWidth,
+      dto.detectHeight,
+      dto.fps,
+      dto.detectionEnabled,
+      dto.retentionDays,
+      dto.minInitializedFrames,
+      dto.maxDisappearedFrames,
+      dto.personMinScore,
+      dto.personThreshold,
+      dto.personMinArea,
+      dto.snapshotsEnabled,
+      dto.snapshotBoundingBox,
+      dto.recordingEnabled,
+      dto.detectionRetentionDays,
+    ].some((value) => value !== undefined);
+
+    if (hasFrigateSettingsPatch) {
+      const settings = await this.camerasRepository.saveFrigateConfiguration(id, {
+        detect_width: dto.detectWidth,
+        detect_height: dto.detectHeight,
+        detect_fps: dto.fps,
+        min_initialized_frames: dto.minInitializedFrames,
+        max_disappeared_frames: dto.maxDisappearedFrames,
+        person_min_score: dto.personMinScore,
+        person_threshold: dto.personThreshold,
+        person_min_area: dto.personMinArea,
+        snapshots_enabled: dto.snapshotsEnabled,
+        snapshot_bounding_box: dto.snapshotBoundingBox,
+        recording_enabled: dto.recordingEnabled,
+        detection_retention_days: dto.detectionRetentionDays ?? dto.retentionDays,
+      });
+      await this.frigateSyncService.syncCamera(id, settings.config_version).catch((error) => {
+        this.logger.warn(`Đồng bộ Frigate sau khi lưu cấu hình camera ${id} thất bại:`, error);
+      });
+    } else if (dto.rtspUrl !== undefined) {
+      const configVersion = await this.camerasRepository.bumpFrigateConfigVersion(id);
+      await this.frigateSyncService.syncCamera(id, configVersion).catch((error) => {
+        this.logger.warn(`Đồng bộ Frigate sau khi đổi RTSP camera ${id} thất bại:`, error);
+      });
+    }
   }
 
   async deleteCamera(id: string, role: UserRole): Promise<void> {
@@ -374,6 +427,21 @@ export class CamerasService implements CameraConfigPortV1 {
 
     this.logger.log(`Cập nhật nguồn phát cho camera ${camera.slug} sang ${dto.sourceType}`);
     return this.mapToSourceDetail(updatedSource, role);
+  }
+
+  async testRtspConnection(
+    cameraId: string,
+    dto: TestRtspSourceDto,
+    role: UserRole,
+  ): Promise<RtspConnectionTestResult> {
+    this.assertAdmin(role);
+    const camera = await this.camerasRepository.findById(cameraId);
+    if (!camera) {
+      throw new NotFoundException({
+        error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${cameraId}` },
+      });
+    }
+    return this.cameraSourcesService.testRtspConnection(dto.rtspUrl, dto.transport);
   }
 
   async createBrowserPublishSession(
@@ -740,9 +808,34 @@ export class CamerasService implements CameraConfigPortV1 {
       type: r.source_type_val ?? 'RTSP',
       displayName,
       isPublishing,
-      lastError: r.source_error_msg ?? null,
+      lastError: this.redactCredentials(r.source_error_msg),
       requiresBrowserPublisher: r.source_type_val === 'BROWSER_WEBCAM',
     };
+  }
+
+  private buildFrigateSettings(r: CameraAggregateRecord): CameraDto['frigateSettings'] {
+    return {
+      detectWidth: valueOr(r.frigate_detect_width, valueOr(r.detect_width, DEFAULT_PREVIEW_WIDTH)),
+      detectHeight: valueOr(
+        r.frigate_detect_height,
+        valueOr(r.detect_height, DEFAULT_PREVIEW_HEIGHT),
+      ),
+      detectFps: valueOr(r.frigate_detect_fps, valueOr(r.fps, 5)),
+      minInitializedFrames: valueOr(r.min_initialized_frames, 5),
+      maxDisappearedFrames: valueOr(r.max_disappeared_frames, 25),
+      personMinScore: Number(valueOr(r.person_min_score, 0.5)),
+      personThreshold: Number(valueOr(r.person_threshold, 0.7)),
+      personMinArea: valueOr(r.person_min_area, 1500),
+      snapshotsEnabled: valueOr(r.snapshots_enabled, true),
+      snapshotBoundingBox: valueOr(r.snapshot_bounding_box, true),
+      recordingEnabled: valueOr(r.recording_enabled, true),
+      detectionRetentionDays: valueOr(r.detection_retention_days, valueOr(r.retention_days, 7)),
+    };
+  }
+
+  private redactCredentials(value: string | null): string | null {
+    if (!value) return null;
+    return value.replace(/(rtsps?:\/\/)[^:/@\s]+:[^@/\s]+@/gi, '$1***:***@');
   }
 
   private buildFrigateSyncInfo(
@@ -787,6 +880,7 @@ export class CamerasService implements CameraConfigPortV1 {
       runtimeStatus,
       source: this.buildSourceInfo(r),
       frigateSync: this.buildFrigateSyncInfo(r, syncStatus),
+      frigateSettings: this.buildFrigateSettings(r),
       debugCapabilities: {
         personBoundary: true,
         zoneBoundary: true,

@@ -8,6 +8,10 @@ import type {
   CameraSourceRecord,
 } from './cameras.types';
 
+function toNullable<T>(value: T | undefined): T | null {
+  return value === undefined ? null : value;
+}
+
 @Injectable()
 export class CamerasRepository {
   private readonly logger = new Logger(CamerasRepository.name);
@@ -48,6 +52,18 @@ export class CamerasRepository {
         s.status AS source_status,
         s.last_error_code AS source_error_code,
         s.last_error_message AS source_error_msg,
+        f.detect_width AS frigate_detect_width,
+        f.detect_height AS frigate_detect_height,
+        f.detect_fps AS frigate_detect_fps,
+        f.min_initialized_frames,
+        f.max_disappeared_frames,
+        f.person_min_score,
+        f.person_threshold,
+        f.person_min_area,
+        f.snapshots_enabled,
+        f.snapshot_bounding_box,
+        f.recording_enabled,
+        f.detection_retention_days,
         f.config_version,
         f.applied_version,
         f.sync_status,
@@ -81,6 +97,18 @@ export class CamerasRepository {
         s.status AS source_status,
         s.last_error_code AS source_error_code,
         s.last_error_message AS source_error_msg,
+        f.detect_width AS frigate_detect_width,
+        f.detect_height AS frigate_detect_height,
+        f.detect_fps AS frigate_detect_fps,
+        f.min_initialized_frames,
+        f.max_disappeared_frames,
+        f.person_min_score,
+        f.person_threshold,
+        f.person_min_area,
+        f.snapshots_enabled,
+        f.snapshot_bounding_box,
+        f.recording_enabled,
+        f.detection_retention_days,
         f.config_version,
         f.applied_version,
         f.sync_status,
@@ -113,6 +141,18 @@ export class CamerasRepository {
         s.status AS source_status,
         s.last_error_code AS source_error_code,
         s.last_error_message AS source_error_msg,
+        f.detect_width AS frigate_detect_width,
+        f.detect_height AS frigate_detect_height,
+        f.detect_fps AS frigate_detect_fps,
+        f.min_initialized_frames,
+        f.max_disappeared_frames,
+        f.person_min_score,
+        f.person_threshold,
+        f.person_min_area,
+        f.snapshots_enabled,
+        f.snapshot_bounding_box,
+        f.recording_enabled,
+        f.detection_retention_days,
         f.config_version,
         f.applied_version,
         f.sync_status,
@@ -177,6 +217,14 @@ export class CamerasRepository {
     if (patch.fps !== undefined) {
       values.push(patch.fps);
       fields.push(`fps = $${values.length}`);
+    }
+    if (patch.detect_width !== undefined) {
+      values.push(patch.detect_width);
+      fields.push(`detect_width = $${values.length}`);
+    }
+    if (patch.detect_height !== undefined) {
+      values.push(patch.detect_height);
+      fields.push(`detect_height = $${values.length}`);
     }
     if (patch.is_enabled !== undefined) {
       values.push(patch.is_enabled);
@@ -292,6 +340,63 @@ export class CamerasRepository {
       patch.config_version ?? null,
     ];
 
+    const result = await this.pool.query<CameraFrigateSettingsRecord>(query, values);
+    return result.rows[0];
+  }
+
+  async saveFrigateConfiguration(
+    cameraId: string,
+    patch: Partial<CameraFrigateSettingsRecord>,
+  ): Promise<CameraFrigateSettingsRecord> {
+    const query = `
+      INSERT INTO camera_frigate_settings (
+        camera_id, detect_width, detect_height, detect_fps,
+        min_initialized_frames, max_disappeared_frames,
+        person_min_score, person_threshold, person_min_area,
+        snapshots_enabled, snapshot_bounding_box, recording_enabled,
+        detection_retention_days, config_version, applied_version, sync_status
+      ) VALUES (
+        $1, COALESCE($2, 1280), COALESCE($3, 720), COALESCE($4, 5),
+        COALESCE($5, 5), COALESCE($6, 25),
+        COALESCE($7, 0.5), COALESCE($8, 0.7), COALESCE($9, 1500),
+        COALESCE($10, true), COALESCE($11, true), COALESCE($12, true),
+        COALESCE($13, 7), 1, 0, 'PENDING'
+      )
+      ON CONFLICT (camera_id) DO UPDATE SET
+        detect_width = COALESCE($2, camera_frigate_settings.detect_width),
+        detect_height = COALESCE($3, camera_frigate_settings.detect_height),
+        detect_fps = COALESCE($4, camera_frigate_settings.detect_fps),
+        min_initialized_frames = COALESCE($5, camera_frigate_settings.min_initialized_frames),
+        max_disappeared_frames = COALESCE($6, camera_frigate_settings.max_disappeared_frames),
+        person_min_score = COALESCE($7, camera_frigate_settings.person_min_score),
+        person_threshold = COALESCE($8, camera_frigate_settings.person_threshold),
+        person_min_area = COALESCE($9, camera_frigate_settings.person_min_area),
+        snapshots_enabled = COALESCE($10, camera_frigate_settings.snapshots_enabled),
+        snapshot_bounding_box = COALESCE($11, camera_frigate_settings.snapshot_bounding_box),
+        recording_enabled = COALESCE($12, camera_frigate_settings.recording_enabled),
+        detection_retention_days = COALESCE($13, camera_frigate_settings.detection_retention_days),
+        config_version = camera_frigate_settings.config_version + 1,
+        sync_status = 'PENDING',
+        sync_error_code = NULL,
+        sync_error_message = NULL,
+        updated_at = now()
+      RETURNING *
+    `;
+    const values = [
+      cameraId,
+      toNullable(patch.detect_width),
+      toNullable(patch.detect_height),
+      toNullable(patch.detect_fps),
+      toNullable(patch.min_initialized_frames),
+      toNullable(patch.max_disappeared_frames),
+      toNullable(patch.person_min_score),
+      toNullable(patch.person_threshold),
+      toNullable(patch.person_min_area),
+      toNullable(patch.snapshots_enabled),
+      toNullable(patch.snapshot_bounding_box),
+      toNullable(patch.recording_enabled),
+      toNullable(patch.detection_retention_days),
+    ];
     const result = await this.pool.query<CameraFrigateSettingsRecord>(query, values);
     return result.rows[0];
   }

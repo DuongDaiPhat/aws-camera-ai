@@ -13,6 +13,14 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
   let repository: jest.Mocked<CamerasRepository>;
   let storageService: { getPresignedUrl: jest.Mock };
   let mockFrigateSyncService: { syncCamera: jest.Mock; waitForCameraFrames: jest.Mock };
+  let mockCameraSourcesService: {
+    startCameraSource: jest.Mock;
+    stopCameraSource: jest.Mock;
+    createBrowserSession: jest.Mock;
+    revokeBrowserSession: jest.Mock;
+    markCameraOnline: jest.Mock;
+    testRtspConnection: jest.Mock;
+  };
 
   const mockCamera: CameraAggregateRecord = {
     id: 'c1111111-1111-1111-1111-111111111111',
@@ -39,6 +47,18 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
     source_status: 'ONLINE',
     source_error_code: null,
     source_error_msg: null,
+    frigate_detect_width: 1280,
+    frigate_detect_height: 720,
+    frigate_detect_fps: 5,
+    min_initialized_frames: 5,
+    max_disappeared_frames: 25,
+    person_min_score: 0.5,
+    person_threshold: 0.7,
+    person_min_area: 1500,
+    snapshots_enabled: true,
+    snapshot_bounding_box: true,
+    recording_enabled: true,
+    detection_retention_days: 7,
     config_version: 1,
     applied_version: 1,
     sync_status: 'SYNCED',
@@ -59,6 +79,7 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
       upsertSource: jest.fn(),
       findFrigateSettingsByCameraId: jest.fn(),
       updateFrigateSettings: jest.fn(),
+      saveFrigateConfiguration: jest.fn(),
       bumpFrigateConfigVersion: jest.fn().mockResolvedValue(2),
       findLatestSnapshotKey: jest.fn(),
       findZonesByCameraId: jest.fn(),
@@ -68,7 +89,7 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
       getPresignedUrl: jest.fn(),
     };
 
-    const mockCameraSourcesService = {
+    mockCameraSourcesService = {
       startCameraSource: jest.fn(),
       stopCameraSource: jest.fn(),
       createBrowserSession: jest.fn().mockReturnValue({
@@ -79,6 +100,7 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
       }),
       revokeBrowserSession: jest.fn(),
       markCameraOnline: jest.fn(),
+      testRtspConnection: jest.fn(),
     };
 
     mockFrigateSyncService = {
@@ -113,6 +135,84 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
 
     service = module.get<CamerasService>(CamerasService);
     repository = module.get(CamerasRepository);
+  });
+
+  describe('RTSP connection test', () => {
+    it('chi cho ADMIN kiem tra va khong luu URL vao database', async () => {
+      repository.findById.mockResolvedValueOnce(mockCamera);
+      mockCameraSourcesService.testRtspConnection.mockResolvedValueOnce({
+        success: true,
+        message: 'Kết nối RTSP thành công.',
+        latencyMs: 85,
+      });
+
+      const result = await service.testRtspConnection(
+        mockCamera.id,
+        { rtspUrl: 'rtsp://camera.local/live', transport: 'TCP' },
+        'ADMIN',
+      );
+
+      expect(result.success).toBe(true);
+      expect(mockCameraSourcesService.testRtspConnection).toHaveBeenCalledWith(
+        'rtsp://camera.local/live',
+        'TCP',
+      );
+      expect(repository.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Frigate settings', () => {
+    it('luu day du cau hinh, tang version va dong bo Frigate', async () => {
+      repository.findById.mockResolvedValueOnce(mockCamera).mockResolvedValueOnce({
+        ...mockCamera,
+        config_version: 2,
+        sync_status: 'SYNCED',
+        person_threshold: 0.8,
+      });
+      repository.update.mockResolvedValueOnce(mockCamera);
+      repository.saveFrigateConfiguration.mockResolvedValueOnce({
+        camera_id: mockCamera.id,
+        detect_width: 1280,
+        detect_height: 720,
+        detect_fps: 5,
+        min_initialized_frames: 5,
+        max_disappeared_frames: 25,
+        person_min_score: 0.5,
+        person_threshold: 0.8,
+        person_min_area: 1500,
+        snapshots_enabled: true,
+        snapshot_bounding_box: true,
+        recording_enabled: true,
+        detection_retention_days: 7,
+        config_version: 2,
+        applied_version: 1,
+        sync_status: 'PENDING',
+        sync_error_code: null,
+        sync_error_message: null,
+        updated_at: new Date(),
+      });
+
+      const result = await service.updateCamera(
+        mockCamera.id,
+        {
+          detectionEnabled: true,
+          detectWidth: 1280,
+          detectHeight: 720,
+          fps: 5,
+          personThreshold: 0.8,
+          recordingEnabled: true,
+          detectionRetentionDays: 7,
+        },
+        'ADMIN',
+      );
+
+      expect(repository.saveFrigateConfiguration).toHaveBeenCalledWith(
+        mockCamera.id,
+        expect.objectContaining({ person_threshold: 0.8, recording_enabled: true }),
+      );
+      expect(mockFrigateSyncService.syncCamera).toHaveBeenCalledWith(mockCamera.id, 2);
+      expect(result.frigateSettings.personThreshold).toBe(0.8);
+    });
   });
 
   describe('CameraConfigPortV1: getCameraContext', () => {
@@ -342,7 +442,9 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
 
     it('khong cap phien WHIP khi camera chua chon webcam hoac dang tat', async () => {
       repository.findById.mockResolvedValueOnce(mockCamera);
-      await expect(service.createBrowserPublishSession(mockCamera.id, 'ADMIN')).rejects.toMatchObject({
+      await expect(
+        service.createBrowserPublishSession(mockCamera.id, 'ADMIN'),
+      ).rejects.toMatchObject({
         response: { error: { code: 'SOURCE_NOT_CONFIGURED' } },
       });
 
@@ -351,7 +453,9 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
         source_type_val: 'BROWSER_WEBCAM',
         is_enabled: false,
       });
-      await expect(service.createBrowserPublishSession(mockCamera.id, 'ADMIN')).rejects.toMatchObject({
+      await expect(
+        service.createBrowserPublishSession(mockCamera.id, 'ADMIN'),
+      ).rejects.toMatchObject({
         response: { error: { code: 'SOURCE_NOT_CONFIGURED' } },
       });
     });

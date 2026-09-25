@@ -37,7 +37,9 @@ export class MediaMtxAuthController {
 
   private async isInternalRtspRequest(body: MediaMtxAuthRequest, slug: string): Promise<boolean> {
     if (body.protocol !== 'rtsp' || !['publish', 'read'].includes(body.action ?? '')) return false;
-    if (!this.mediaMtxService.verifyInternalStreamCredentials(body.user ?? '', body.password ?? '')) {
+    if (
+      !this.mediaMtxService.verifyInternalStreamCredentials(body.user ?? '', body.password ?? '')
+    ) {
       return false;
     }
     return await this.cameraSourcesRepository.isEnabledMediaPath(slug, body.action ?? '');

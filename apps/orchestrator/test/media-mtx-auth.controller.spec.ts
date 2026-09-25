@@ -45,12 +45,14 @@ describe('MediaMtxAuthController', () => {
     jest.mocked(mediaMtxService.verifyBrowserSession).mockReturnValue(true);
     jest.mocked(cameraSourcesRepository.isEnabledMediaPath).mockResolvedValue(false);
 
-    await expect(controller.authorize({
-      action: 'publish',
-      protocol: 'webrtc',
-      path: 'cam_front',
-      token: 'short-lived-token',
-    })).rejects.toThrow(UnauthorizedException);
+    await expect(
+      controller.authorize({
+        action: 'publish',
+        protocol: 'webrtc',
+        path: 'cam_front',
+        token: 'short-lived-token',
+      }),
+    ).rejects.toThrow(UnauthorizedException);
   });
 
   it('allows Frigate and FFmpeg RTSP access only with internal credentials on enabled paths', async () => {

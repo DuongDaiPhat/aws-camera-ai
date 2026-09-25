@@ -5,6 +5,7 @@ import { FfmpegSourceRunnerService } from './ffmpeg-source-runner.service';
 import { CameraSourcesRepository } from './camera-sources.repository';
 import { CameraSourcesService } from './camera-sources.service';
 import { MediaMtxAuthController } from './media-mtx-auth.controller';
+import { RtspSourceTesterService } from './rtsp-source-tester.service';
 
 @Module({
   controllers: [MediaMtxAuthController],
@@ -17,7 +18,8 @@ import { MediaMtxAuthController } from './media-mtx-auth.controller';
       useExisting: FfmpegSourceRunnerService,
     },
     CameraSourcesService,
+    RtspSourceTesterService,
   ],
-  exports: [CameraSourcesService, SOURCE_RUNNER, MediaMtxService],
+  exports: [CameraSourcesService, SOURCE_RUNNER, MediaMtxService, RtspSourceTesterService],
 })
 export class CameraSourcesModule {}

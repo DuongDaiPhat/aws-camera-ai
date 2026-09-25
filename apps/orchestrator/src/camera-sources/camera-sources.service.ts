@@ -3,6 +3,10 @@ import { SOURCE_RUNNER, type ISourceRunner } from './source-runner.interface';
 import { MediaMtxService, type BrowserSessionResult } from './media-mtx.service';
 import { CameraSourcesRepository } from './camera-sources.repository';
 import type { CameraSourceType } from '../cameras/cameras.types';
+import {
+  RtspSourceTesterService,
+  type RtspConnectionTestResult,
+} from './rtsp-source-tester.service';
 
 @Injectable()
 export class CameraSourcesService implements OnModuleInit {
@@ -12,6 +16,7 @@ export class CameraSourcesService implements OnModuleInit {
     @Inject(SOURCE_RUNNER) private readonly sourceRunner: ISourceRunner,
     private readonly mediaMtxService: MediaMtxService,
     private readonly repository: CameraSourcesRepository,
+    private readonly rtspSourceTester: RtspSourceTesterService,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -73,6 +78,10 @@ export class CameraSourcesService implements OnModuleInit {
 
   revokeBrowserSession(cameraId: string): boolean {
     return this.mediaMtxService.revokeBrowserSession(cameraId);
+  }
+
+  testRtspConnection(rtspUrl: string, transport: 'TCP' | 'UDP'): Promise<RtspConnectionTestResult> {
+    return this.rtspSourceTester.test(rtspUrl, transport);
   }
 
   async restoreActiveSources(): Promise<void> {

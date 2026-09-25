@@ -30,6 +30,8 @@ import { ListCamerasQueryDto } from './dto/list-cameras-query.dto';
 import { UpdateCameraDto } from './dto/update-camera.dto';
 import { UpdateCameraStateDto } from './dto/update-camera-state.dto';
 import { UpdateCameraSourceDto } from './dto/update-camera-source.dto';
+import { TestRtspSourceDto } from './dto/test-rtsp-source.dto';
+import type { RtspConnectionTestResult } from '../camera-sources/rtsp-source-tester.service';
 import type {
   CameraDebugStream,
   CameraDto,
@@ -181,6 +183,22 @@ export class CamerasController {
   ): Promise<CameraSourceDetail> {
     const role = this.extractRole(request);
     return await this.camerasService.updateCameraSource(cameraId, dto, role);
+  }
+
+  @Post(':cameraId/source/test')
+  @ApiOperation({ summary: 'Kiểm tra kết nối RTSP mà không lưu cấu hình (chỉ ADMIN)' })
+  @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Kết quả kiểm tra kết nối RTSP' })
+  @ApiResponse({ status: 400, description: 'URL RTSP không hợp lệ hoặc không thể kết nối' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
+  async testRtspConnection(
+    @Param('cameraId', ParseUUIDPipe) cameraId: string,
+    @Body() dto: TestRtspSourceDto,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<RtspConnectionTestResult> {
+    const role = this.extractRole(request);
+    return await this.camerasService.testRtspConnection(cameraId, dto, role);
   }
 
   @Post(':cameraId/source/video')

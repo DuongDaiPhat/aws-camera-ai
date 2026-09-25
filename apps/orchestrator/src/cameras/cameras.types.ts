@@ -93,6 +93,18 @@ export interface CameraAggregateRecord extends CameraRecord {
   source_status: CameraSourceRuntimeStatus | null;
   source_error_code: string | null;
   source_error_msg: string | null;
+  frigate_detect_width?: number | null;
+  frigate_detect_height?: number | null;
+  frigate_detect_fps?: number | null;
+  min_initialized_frames?: number | null;
+  max_disappeared_frames?: number | null;
+  person_min_score?: string | number | null;
+  person_threshold?: string | number | null;
+  person_min_area?: number | null;
+  snapshots_enabled?: boolean | null;
+  snapshot_bounding_box?: boolean | null;
+  recording_enabled?: boolean | null;
+  detection_retention_days?: number | null;
   config_version: number | null;
   applied_version: number | null;
   sync_status: 'PENDING' | 'SYNCED' | 'FAILED' | null;
