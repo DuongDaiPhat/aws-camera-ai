@@ -171,6 +171,30 @@
   background: #fee2e2;
 }
 
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 9px 16px;
+  background: var(--surface);
+  color: var(--ink-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondaryBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.secondaryBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Webcam Preview */
 .webcamBox {
   display: flex;
@@ -227,6 +251,15 @@
   background: #f8faff;
 }
 
+.hiddenFileInput {
+  display: none;
+}
+
+.filePrompt {
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .fileInfoCard {
   display: flex;
   align-items: center;
@@ -246,6 +279,120 @@
 .fileSize {
   font-size: 12px;
   color: var(--ink-muted);
+}
+
+.fileReadyLabel {
+  font-size: 11px;
+  color: var(--success);
+  font-weight: 600;
+}
+
+.progressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface-muted);
+}
+
+.progressBar::-webkit-progress-bar {
+  background: var(--surface-muted);
+}
+
+.progressBar::-webkit-progress-value {
+  background: var(--accent);
+}
+
+.settingsStatus {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.settingsStatus > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+}
+
+.settingsStatus span {
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+
+.settingsStatus strong {
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.settingsGroup {
+  min-width: 0;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+.settingsGroup legend {
+  padding: 0 7px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.toggleGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.toggleField {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+}
+
+.toggleField span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toggleField small {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+@media (max-width: 640px) {
+  .settingsStatus,
+  .settingsGrid,
+  .toggleGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .successAlert {

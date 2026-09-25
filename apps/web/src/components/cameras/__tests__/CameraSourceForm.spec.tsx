@@ -22,6 +22,7 @@ describe('CameraSourceForm component (Slice CAM)', () => {
     expect(html).toContain('RTSP Stream URL');
     expect(html).toContain('TCP (Độ tin cậy cao, khuyên dùng)');
     expect(html).toContain('Lưu cấu hình RTSP');
+    expect(html).toContain('Kiểm tra kết nối');
   });
 
   it('an nut luu khi khong phai ADMIN', () => {
@@ -36,6 +37,7 @@ describe('CameraSourceForm component (Slice CAM)', () => {
     );
 
     expect(html).not.toContain('Lưu cấu hình RTSP');
+    expect(html).not.toContain('Kiểm tra kết nối');
   });
 
   it('hien thi WebcamPublisher khi initialSourceType la BROWSER_WEBCAM', () => {
@@ -59,6 +61,7 @@ describe('CameraSourceForm component (Slice CAM)', () => {
         cameraId="c1"
         slug="cam_cong_chinh"
         initialSourceType="VIDEO_FILE"
+        initialVideoFileName="demo.mp4"
         isAdmin={true}
         onSourceUpdated={vi.fn()}
       />,
@@ -67,5 +70,6 @@ describe('CameraSourceForm component (Slice CAM)', () => {
     expect(html).toContain('Chọn file video mẫu');
     expect(html).toContain('Tự động phát lặp lại liên tục');
     expect(html).toContain('Lưu và kích hoạt nguồn Video');
+    expect(html).toContain('demo.mp4');
   });
 });

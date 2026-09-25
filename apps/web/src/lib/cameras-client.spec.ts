@@ -2,12 +2,15 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { setAccessToken } from './api-client';
 import {
   createBrowserPublishSession,
+  deleteCameraVideo,
   deleteCamera,
   fetchCamera,
   fetchCameras,
   fetchCameraSnapshot,
   fetchCameraSource,
   retryFrigateSync,
+  testRtspConnection,
+  uploadCameraVideo,
   updateCamera,
   updateCameraSource,
   updateCameraState,
@@ -55,6 +58,20 @@ const mockCamera: Camera = {
     appliedVersion: 1,
     errorCode: null,
     errorMessage: null,
+  },
+  frigateSettings: {
+    detectWidth: 1280,
+    detectHeight: 720,
+    detectFps: 5,
+    minInitializedFrames: 5,
+    maxDisappearedFrames: 25,
+    personMinScore: 0.5,
+    personThreshold: 0.7,
+    personMinArea: 1500,
+    snapshotsEnabled: true,
+    snapshotBoundingBox: true,
+    recordingEnabled: true,
+    detectionRetentionDays: 7,
   },
   debugCapabilities: {
     personBoundary: true,
@@ -253,6 +270,77 @@ describe('cameras-client (Slice CAM)', () => {
 
       const res = await retryFrigateSync(mockCamera.id);
       expect(res.syncStatus).toBe('SYNCED');
+    });
+
+    it('testRtspConnection gui URL va transport toi API kiem tra ket noi', async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse({ success: true, message: 'Kết nối RTSP thành công.', latencyMs: 120 }),
+        );
+      vi.stubGlobal('fetch', fetchMock);
+
+      const result = await testRtspConnection(mockCamera.id, {
+        rtspUrl: 'rtsp://camera.local/live',
+        transport: 'TCP',
+      });
+
+      expect(result.success).toBe(true);
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining(`/cameras/${mockCamera.id}/source/test`),
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ rtspUrl: 'rtsp://camera.local/live', transport: 'TCP' }),
+        }),
+      );
+    });
+
+    it('uploadCameraVideo gui file, loop va tien do bang multipart', async () => {
+      const progressValues: number[] = [];
+
+      class MockXMLHttpRequest {
+        status = 200;
+        responseText = JSON.stringify({ sourceType: 'VIDEO_FILE' });
+        statusText = 'OK';
+        withCredentials = false;
+        upload = { onprogress: null as ((event: ProgressEvent) => void) | null };
+        onload: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        open(_method: string, _url: string): void {}
+        setRequestHeader(_name: string, _value: string): void {}
+        send(body: FormData): void {
+          expect(body.get('file')).toBeInstanceOf(Blob);
+          expect(body.get('loop')).toBe('false');
+          this.upload.onprogress?.({
+            lengthComputable: true,
+            loaded: 75,
+            total: 100,
+          } as ProgressEvent);
+          this.onload?.();
+        }
+      }
+
+      vi.stubGlobal('XMLHttpRequest', MockXMLHttpRequest);
+      const file = new File(['video'], 'sample.mp4', { type: 'video/mp4' });
+
+      const result = await uploadCameraVideo(mockCamera.id, file, false, (progress) =>
+        progressValues.push(progress),
+      );
+
+      expect(result.sourceType).toBe('VIDEO_FILE');
+      expect(progressValues).toEqual([75]);
+    });
+
+    it('deleteCameraVideo gui DELETE toi endpoint video', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+      vi.stubGlobal('fetch', fetchMock);
+
+      await deleteCameraVideo(mockCamera.id);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining(`/cameras/${mockCamera.id}/source/video`),
+        expect.objectContaining({ method: 'DELETE' }),
+      );
     });
   });
 });

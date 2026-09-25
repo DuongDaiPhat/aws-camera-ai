@@ -33,6 +33,12 @@ export function CameraCard({
       : camera.sourceType === 'VIDEO_FILE'
         ? 'File Video'
         : 'RTSP';
+  const syncLabel =
+    camera.frigateSync.status === 'SYNCED'
+      ? 'Đã đồng bộ'
+      : camera.frigateSync.status === 'FAILED'
+        ? 'Lỗi'
+        : 'Đang chờ';
 
   return (
     <div
@@ -64,19 +70,20 @@ export function CameraCard({
         {camera.zoneCount !== undefined && <span>{camera.zoneCount} vùng</span>}
       </div>
 
+      <div className={styles.cardStatusRow}>
+        <span>Detection: {camera.detectionEnabled ? 'Bật' : 'Tắt'}</span>
+        <span>Frigate: {syncLabel}</span>
+      </div>
+
+      {camera.source.lastError && (
+        <p className={styles.cardError} title={camera.source.lastError}>
+          {camera.source.lastError}
+        </p>
+      )}
+
       {isAdmin && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingTop: '6px',
-            borderTop: '1px solid var(--border)',
-            marginTop: '4px',
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <span style={{ fontSize: '12px', color: 'var(--ink-secondary)' }}>Điều khiển:</span>
+        <div className={styles.cardControlRow} onClick={(e) => e.stopPropagation()}>
+          <span>Điều khiển:</span>
           <label className={styles.switchWrapper}>
             {isToggling && <span className={styles.spinner} />}
             <span className={styles.switchLabel}>{camera.isEnabled ? 'Đang bật' : 'Đang tắt'}</span>

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { CameraView } from '../CameraView';
@@ -34,6 +34,20 @@ const mockCameras: Camera[] = [
       appliedVersion: 1,
       errorCode: null,
       errorMessage: null,
+    },
+    frigateSettings: {
+      detectWidth: 1280,
+      detectHeight: 720,
+      detectFps: 5,
+      minInitializedFrames: 5,
+      maxDisappearedFrames: 25,
+      personMinScore: 0.5,
+      personThreshold: 0.7,
+      personMinArea: 1500,
+      snapshotsEnabled: true,
+      snapshotBoundingBox: true,
+      recordingEnabled: true,
+      detectionRetentionDays: 7,
     },
     debugCapabilities: {
       personBoundary: true,
@@ -72,6 +86,20 @@ const mockCameras: Camera[] = [
       appliedVersion: 1,
       errorCode: null,
       errorMessage: null,
+    },
+    frigateSettings: {
+      detectWidth: 1280,
+      detectHeight: 720,
+      detectFps: 5,
+      minInitializedFrames: 5,
+      maxDisappearedFrames: 25,
+      personMinScore: 0.5,
+      personThreshold: 0.7,
+      personMinArea: 1500,
+      snapshotsEnabled: true,
+      snapshotBoundingBox: true,
+      recordingEnabled: true,
+      detectionRetentionDays: 7,
     },
     debugCapabilities: {
       personBoundary: true,

@@ -33,6 +33,20 @@ const mockCam: Camera = {
     errorCode: null,
     errorMessage: null,
   },
+  frigateSettings: {
+    detectWidth: 1280,
+    detectHeight: 720,
+    detectFps: 5,
+    minInitializedFrames: 5,
+    maxDisappearedFrames: 25,
+    personMinScore: 0.5,
+    personThreshold: 0.7,
+    personMinArea: 1500,
+    snapshotsEnabled: true,
+    snapshotBoundingBox: true,
+    recordingEnabled: true,
+    detectionRetentionDays: 7,
+  },
   debugCapabilities: {
     personBoundary: true,
     zoneBoundary: true,
@@ -60,6 +74,27 @@ describe('CameraCard component', () => {
     expect(html).toContain('5 FPS');
     expect(html).toContain('3 vùng');
     expect(html).toContain('Đang bật');
+    expect(html).toContain('Detection: Bật');
+    expect(html).toContain('Frigate: Đã đồng bộ');
+  });
+
+  it('hien thi loi gan nhat da duoc backend lam sach', () => {
+    const html = renderToStaticMarkup(
+      <CameraCard
+        camera={{
+          ...mockCam,
+          runtimeStatus: 'FAILED',
+          source: { ...mockCam.source, lastError: 'Không thể kết nối rtsp://***:***@camera/live' },
+        }}
+        isSelected={false}
+        isAdmin={true}
+        onSelect={vi.fn()}
+        onToggleState={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain('Không thể kết nối');
+    expect(html).not.toContain('secret');
   });
 
   it('an switch toggle neu nguoi dung khong phai ADMIN', () => {

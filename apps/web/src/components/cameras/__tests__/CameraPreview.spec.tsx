@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { CameraPreview } from '../CameraPreview';
@@ -37,6 +37,20 @@ const mockCamera: Camera = {
     appliedVersion: 1,
     errorCode: null,
     errorMessage: null,
+  },
+  frigateSettings: {
+    detectWidth: 1280,
+    detectHeight: 720,
+    detectFps: 5,
+    minInitializedFrames: 5,
+    maxDisappearedFrames: 25,
+    personMinScore: 0.5,
+    personThreshold: 0.7,
+    personMinArea: 1500,
+    snapshotsEnabled: true,
+    snapshotBoundingBox: true,
+    recordingEnabled: true,
+    detectionRetentionDays: 7,
   },
   debugCapabilities: {
     personBoundary: true,
@@ -176,10 +190,10 @@ describe('CameraPreview & 2 Toggle Overlay Components', () => {
   it('CameraSettingsPanel hien thi thong tin cau hinh va nut dong bo cho ADMIN', () => {
     const html = renderToStaticMarkup(<CameraSettingsPanel camera={mockCamera} isAdmin={true} />);
 
-    expect(html).toContain('Bảo toàn Polygon Zones');
-    expect(html).toContain('1280x720');
+    expect(html).toContain('Chiều rộng detect');
+    expect(html).toContain('Chiều cao detect');
     expect(html).toContain('v1');
     expect(html).toContain('SYNCED');
-    expect(html).toContain('Đồng bộ lại xuống Frigate');
+    expect(html).toContain('Thử đồng bộ lại');
   });
 });

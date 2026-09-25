@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { CameraSourceType } from '@/types';
-import { updateCameraSource } from '@/lib/cameras-client';
+import { testRtspConnection, updateCameraSource } from '@/lib/cameras-client';
 import { WebcamPublisher } from './WebcamPublisher';
 import { VideoSourceUploader } from './VideoSourceUploader';
 import styles from './styles/camera-source-form.module.css';
@@ -18,6 +18,7 @@ function RtspSourceForm({ cameraId, initialRtspUrl, isAdmin, onSourceUpdated }: 
   const [rtspUrl, setRtspUrl] = useState<string>(initialRtspUrl ?? '');
   const [transport, setTransport] = useState<'TCP' | 'UDP'>('TCP');
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isTesting, setIsTesting] = useState<boolean>(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -44,6 +45,31 @@ function RtspSourceForm({ cameraId, initialRtspUrl, isAdmin, onSourceUpdated }: 
     }
   };
 
+  const handleTestConnection = async () => {
+    if (!isAdmin) return;
+    setSuccessMsg(null);
+    setErrorMsg(null);
+    if (rtspUrl.includes('***')) {
+      setErrorMsg('URL đang che mật khẩu. Hãy nhập lại mật khẩu thật trước khi kiểm tra kết nối.');
+      return;
+    }
+
+    setIsTesting(true);
+    try {
+      const result = await testRtspConnection(cameraId, { rtspUrl, transport });
+      if (result.success) {
+        const latency = result.latencyMs === null ? '' : ` (${result.latencyMs} ms)`;
+        setSuccessMsg(`${result.message}${latency}`);
+      } else {
+        setErrorMsg(result.message);
+      }
+    } catch (error) {
+      setErrorMsg(error instanceof Error ? error.message : 'Không thể kiểm tra kết nối RTSP.');
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
   return (
     <form className={styles.formSection} onSubmit={handleSave}>
       <p className={styles.formHint}>
@@ -61,7 +87,7 @@ function RtspSourceForm({ cameraId, initialRtspUrl, isAdmin, onSourceUpdated }: 
           placeholder="rtsp://admin:password@192.168.1.100:554/stream1"
           value={rtspUrl}
           onChange={(e) => setRtspUrl(e.target.value)}
-          disabled={!isAdmin || isSaving}
+          disabled={!isAdmin || isSaving || isTesting}
           required
         />
         <span className={styles.formHint}>
@@ -79,7 +105,7 @@ function RtspSourceForm({ cameraId, initialRtspUrl, isAdmin, onSourceUpdated }: 
               value="TCP"
               checked={transport === 'TCP'}
               onChange={() => setTransport('TCP')}
-              disabled={!isAdmin || isSaving}
+              disabled={!isAdmin || isSaving || isTesting}
             />
             <span>TCP (Độ tin cậy cao, khuyên dùng)</span>
           </label>
@@ -90,7 +116,7 @@ function RtspSourceForm({ cameraId, initialRtspUrl, isAdmin, onSourceUpdated }: 
               value="UDP"
               checked={transport === 'UDP'}
               onChange={() => setTransport('UDP')}
-              disabled={!isAdmin || isSaving}
+              disabled={!isAdmin || isSaving || isTesting}
             />
             <span>UDP (Độ trễ thấp)</span>
           </label>
@@ -98,9 +124,19 @@ function RtspSourceForm({ cameraId, initialRtspUrl, isAdmin, onSourceUpdated }: 
       </div>
 
       {isAdmin && (
-        <button type="submit" className={styles.submitBtn} disabled={isSaving}>
-          {isSaving ? 'Đang lưu...' : 'Lưu cấu hình RTSP'}
-        </button>
+        <div className={styles.actionsRow}>
+          <button type="submit" className={styles.submitBtn} disabled={isSaving || isTesting}>
+            {isSaving ? 'Đang lưu...' : 'Lưu cấu hình RTSP'}
+          </button>
+          <button
+            type="button"
+            className={styles.secondaryBtn}
+            disabled={isSaving || isTesting || !rtspUrl.trim()}
+            onClick={() => void handleTestConnection()}
+          >
+            {isTesting ? 'Đang kiểm tra...' : 'Kiểm tra kết nối'}
+          </button>
+        </div>
       )}
     </form>
   );
@@ -111,6 +147,7 @@ interface CameraSourceFormProps {
   slug: string;
   initialSourceType?: CameraSourceType;
   initialRtspUrl?: string | null;
+  initialVideoFileName?: string | null;
   isAdmin: boolean;
   onSourceUpdated?: () => void;
 }
@@ -120,6 +157,7 @@ export function CameraSourceForm({
   slug,
   initialSourceType = 'RTSP',
   initialRtspUrl,
+  initialVideoFileName,
   isAdmin,
   onSourceUpdated,
 }: CameraSourceFormProps) {
@@ -172,6 +210,7 @@ export function CameraSourceForm({
       {activeTab === 'VIDEO_FILE' && (
         <VideoSourceUploader
           cameraId={cameraId}
+          initialFileName={initialVideoFileName}
           isAdmin={isAdmin}
           onSourceUpdated={() => onSourceUpdated?.()}
         />

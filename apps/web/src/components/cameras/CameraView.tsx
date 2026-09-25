@@ -133,6 +133,9 @@ function CameraDetailPanel({
           slug={camera.slug}
           initialSourceType={camera.sourceType}
           initialRtspUrl={camera.rtspUrl}
+          initialVideoFileName={
+            camera.sourceType === 'VIDEO_FILE' ? camera.source.displayName : null
+          }
           isAdmin={isAdmin}
           onSourceUpdated={onRefreshCameras}
         />

@@ -1,9 +1,11 @@
-import { apiFetch } from './api-client';
+import { apiFetch, apiUpload } from './api-client';
 import type {
   Camera,
   components,
   CameraPreview,
   CameraSourceDetail,
+  RtspConnectionTestRequest,
+  RtspConnectionTestResult,
   UpdateCameraRequest,
   UpdateCameraSourceRequest,
   UpdateCameraStateRequest,
@@ -114,6 +116,42 @@ export function updateCameraSource(
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
+  });
+}
+
+export function testRtspConnection(
+  cameraId: string,
+  data: RtspConnectionTestRequest,
+): Promise<RtspConnectionTestResult> {
+  return apiFetch<RtspConnectionTestResult>(
+    `/cameras/${encodeURIComponent(cameraId)}/source/test`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    },
+  );
+}
+
+export function uploadCameraVideo(
+  cameraId: string,
+  file: File,
+  loop: boolean,
+  onProgress?: (progressPercent: number) => void,
+): Promise<CameraSourceDetail> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('loop', String(loop));
+  return apiUpload<CameraSourceDetail>(
+    `/cameras/${encodeURIComponent(cameraId)}/source/video`,
+    formData,
+    onProgress,
+  );
+}
+
+export function deleteCameraVideo(cameraId: string): Promise<void> {
+  return apiFetch<void>(`/cameras/${encodeURIComponent(cameraId)}/source/video`, {
+    method: 'DELETE',
   });
 }
 
