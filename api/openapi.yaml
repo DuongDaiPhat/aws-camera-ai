@@ -1042,6 +1042,37 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ConfirmationConflict" }
 
+  /events/{eventId}/close:
+    parameters:
+      - $ref: "#/components/parameters/EventId"
+    post:
+      tags: [events]
+      summary: Dong su kien khan cap sau khi tiep nhan xu ly
+      description: |
+        FR-ESC-04/09. Dong su kien dang o trang thai ESCALATED thanh CLOSED.
+        Ghi nhan nguoi dong, thoi diem va ly do dong su kien.
+      operationId: closeEvent
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CloseEventRequest" }
+      responses:
+        "200":
+          description: Da dong su kien thanh cong
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Confirmation" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Su kien khong o trang thai ESCALATED hoac da duoc dong
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConfirmationConflict" }
+
   /events/{eventId}/media:
     parameters:
       - $ref: "#/components/parameters/EventId"
@@ -1510,6 +1541,9 @@ components:
     ConfirmationResponse:
       type: string
       enum: [IM_OK, NEED_HELP, ACKNOWLEDGED]
+    ConfirmationPhase:
+      type: string
+      enum: [INITIAL, EMERGENCY]
     DeviceStatus:
       type: string
       enum: [ONLINE, OFFLINE, DEGRADED, DISABLED]
@@ -2125,6 +2159,11 @@ components:
             statusHistory:
               type: array
               items: { $ref: "#/components/schemas/EventStatusHistoryEntry" }
+            version: { type: integer, minimum: 1 }
+            ruleSnapshot: { type: ["object", "null"], additionalProperties: true }
+            triggeringResults:
+              type: array
+              items: { $ref: "#/components/schemas/AiResultItem" }
 
     AiResultItem:
       type: object
@@ -2255,12 +2294,22 @@ components:
         response: { $ref: "#/components/schemas/ConfirmationResponse" }
         note: { type: string, maxLength: 500 }
 
+    CloseEventRequest:
+      type: object
+      description: Dong su kien khan cap sau khi tiep nhan va xu ly.
+      properties:
+        commandId:
+          type: string
+          format: uuid
+        note: { type: string, maxLength: 500 }
+
     Confirmation:
       type: object
-      required: [id, eventId, response, channel, respondedAt, resultingStatus]
+      required: [id, eventId, phase, response, channel, respondedAt, resultingStatus]
       properties:
         id: { type: string, format: uuid }
         eventId: { type: string, format: uuid }
+        phase: { $ref: "#/components/schemas/ConfirmationPhase" }
         response: { $ref: "#/components/schemas/ConfirmationResponse" }
         channel: { $ref: "#/components/schemas/NotificationChannel" }
         confirmedByName: { type: ["string", "null"] }
@@ -2268,7 +2317,7 @@ components:
         respondedAt: { type: string, format: date-time }
         resultingStatus:
           $ref: "#/components/schemas/EventStatus"
-          description: IM_OK -> RESOLVED, NEED_HELP -> ESCALATED (FR-ESC-03/04).
+          description: IM_OK -> RESOLVED, NEED_HELP -> ESCALATED, ACKNOWLEDGED -> CLOSED (FR-ESC-03/04).
 
     ConfirmationConflict:
       allOf:
