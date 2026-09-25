@@ -1,4 +1,4 @@
-# Cập nhật, thiết lập và kiểm thử luồng Webcam Camera
+# Thiết lập và kiểm thử Camera RTSP, Webcam và Video
 
 Tài liệu này hướng dẫn thành viên trong nhóm cập nhật code, thiết lập môi trường và kiểm thử luồng webcam từ Dashboard đến Frigate.
 
@@ -36,6 +36,7 @@ MEDIAMTX_RTSP_URL=rtsp://mediamtx:8554
 MEDIAMTX_WEBRTC_URL=http://localhost:8889
 MEDIAMTX_PUBLISH_USERNAME=cam-internal
 MEDIAMTX_PUBLISH_PASSWORD=change-this-local-secret
+CAMERA_RTSP_TEST_TIMEOUT_MS=8000
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api/v1
 WEB_ORIGIN=http://localhost:3000
 ```
@@ -170,6 +171,42 @@ Dashboard thực hiện tuần tự:
 5. Gửi offer WHIP kèm Bearer token tới MediaMTX.
 6. Frigate đọc lại luồng RTSP nội bộ từ MediaMTX.
 
+### 6.1. Thử nguồn RTSP
+
+1. Chọn camera rồi mở tab **Cấu hình nguồn phát**.
+2. Chọn **Nguồn RTSP Trực tiếp**.
+3. Nhập URL RTSP và chọn transport TCP hoặc UDP.
+4. Bấm **Kiểm tra kết nối**. Backend dùng `ffprobe` trong container Orchestrator và
+   không lưu thay đổi khi chỉ kiểm tra.
+5. Khi kết nối thành công, bấm **Lưu cấu hình nguồn** rồi bật camera.
+
+URL có password chỉ được hiển thị ở dạng đã che. Thời gian chờ của phép thử đọc từ
+`CAMERA_RTSP_TEST_TIMEOUT_MS`.
+
+Nếu tự dùng FFmpeg để publish vào MediaMTX mà không truyền credential, lỗi
+`401 Unauthorized` là đúng theo thiết kế. Luồng webcam/video trên Dashboard tự xin
+credential hoặc token ngắn hạn; người dùng không cần chạy FFmpeg thủ công.
+
+### 6.2. Upload video giả lập camera
+
+1. Chọn **Phát lặp từ File Video**.
+2. Chọn file MP4 hoặc MKV, tối đa 500 MB theo cấu hình mặc định.
+3. Kiểm tra tên file, dung lượng, thời lượng và lựa chọn **Phát lặp video**.
+4. Bấm **Tải video lên** và chờ thanh tiến trình đạt 100%.
+5. Bật camera. Orchestrator tự chạy FFmpeg và publish vào đúng MediaMTX path.
+6. Kiểm tra `camera_fps > 0` trên Frigate và trạng thái `ONLINE` trên Dashboard.
+
+Video upload được đặt tên vật lý bằng UUID trong Docker volume `camera-videos`; file
+không được commit vào Git và vẫn còn sau khi container Orchestrator được tạo lại. Có thể
+dùng **Thay video** hoặc **Xóa video** ngay trên cùng tab.
+
+### 6.3. Chỉnh cấu hình Frigate
+
+Tab **Cài đặt Frigate & Đồng bộ** cho phép ADMIN chỉnh độ phân giải/FPS detect, ngưỡng
+person, snapshot, recording và retention. Bấm **Lưu cấu hình** rồi kiểm tra trạng thái
+đồng bộ cùng `configVersion`/`appliedVersion`. Nếu trạng thái là `FAILED`, xử lý lỗi được
+hiển thị rồi bấm **Thử lại đồng bộ**.
+
 ## 7. Xác nhận luồng đã đến Frigate
 
 Đợi khoảng 10–20 giây sau khi bắt đầu publish, rồi kiểm tra FPS:
@@ -228,6 +265,7 @@ Chạy riêng phần liên quan đến thay đổi camera:
 pnpm --filter @cam/orchestrator lint
 pnpm --filter @cam/orchestrator typecheck
 pnpm --filter @cam/orchestrator test
+pnpm --filter @cam/orchestrator test:integration
 
 pnpm --filter @cam/web lint
 pnpm --filter @cam/web typecheck
@@ -267,6 +305,7 @@ Nguyên nhân thường gặp:
 - Frigate đang dùng cấu hình cũ chưa có credential RTSP nội bộ.
 - `MEDIAMTX_PUBLISH_USERNAME` hoặc `MEDIAMTX_PUBLISH_PASSWORD` không đồng nhất.
 - Camera vẫn là nguồn `RTSP` trỏ tới MediaMTX nhưng chưa có publisher.
+- Lệnh FFmpeg thủ công publish vào MediaMTX không gửi username/password.
 
 Rebuild Orchestrator, sau đó chọn lại nguồn webcam trên Dashboard để đồng bộ lại Frigate:
 
@@ -325,8 +364,11 @@ Không thêm `-v` nếu muốn giữ dữ liệu PostgreSQL, MinIO và lịch s�
 - [ ] Migration và seed chạy thành công trên máy host.
 - [ ] Dashboard truy cập được webcam.
 - [ ] Nguồn camera chuyển thành `BROWSER_WEBCAM`.
+- [ ] RTSP kiểm tra kết nối thành công mà không làm thay đổi cấu hình đã lưu.
+- [ ] Video upload hiển thị tiến trình, phát được và còn sau khi tạo lại Orchestrator.
 - [ ] Dashboard hiển thị đang truyền phát lên MediaMTX.
 - [ ] Frigate `camera_fps > 0`.
+- [ ] Cấu hình Frigate lưu đủ field và `appliedVersion` bằng `configVersion` sau khi sync.
 - [ ] Debug View không trả HTTP 500.
 - [ ] Test backend và frontend đạt.
 
