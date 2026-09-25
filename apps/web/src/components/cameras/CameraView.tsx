@@ -7,6 +7,7 @@ import { CameraList } from './CameraList';
 import { CameraSourceForm } from './CameraSourceForm';
 import { CameraPreview } from './CameraPreview';
 import { CameraSettingsPanel } from './CameraSettingsPanel';
+import { CameraGridView } from './CameraGridView';
 import styles from './styles/camera-view.module.css';
 
 interface CameraViewProps {
@@ -161,6 +162,15 @@ export function CameraView({ user }: CameraViewProps) {
     toggleCamera,
   } = useCameras();
 
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+
+  const handleSetViewMode = (mode: 'list' | 'grid') => {
+    setViewMode(mode);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('camerai_view_mode', mode);
+    }
+  };
+
   const isAdmin = user?.role === 'ADMIN';
 
   const stats = useMemo(() => {
@@ -185,6 +195,54 @@ export function CameraView({ user }: CameraViewProps) {
         </div>
 
         <div className={styles.headerActions}>
+          {/* Nút toggle chuyển qua lại giữa Danh sách và Lưới toàn bộ cam */}
+          <div className={styles.viewModeGroup} role="group" aria-label="Chế độ xem camera">
+            <button
+              type="button"
+              className={`${styles.viewModeBtn} ${viewMode === 'list' ? styles.viewModeBtnActive : ''}`}
+              onClick={() => handleSetViewMode('list')}
+              title="Chế độ xem danh sách & cấu hình"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <line x1="8" y1="6" x2="21" y2="6" />
+                <line x1="8" y1="12" x2="21" y2="12" />
+                <line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" />
+                <line x1="3" y1="12" x2="3.01" y2="12" />
+                <line x1="3" y1="18" x2="3.01" y2="18" />
+              </svg>
+              Dạng danh sách
+            </button>
+            <button
+              type="button"
+              className={`${styles.viewModeBtn} ${viewMode === 'grid' ? styles.viewModeBtnActive : ''}`}
+              onClick={() => handleSetViewMode('grid')}
+              title="Chế độ lưới hiển thị toàn bộ camera"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+              </svg>
+              Lưới toàn bộ cam
+            </button>
+          </div>
+
           <button
             type="button"
             className={styles.refreshBtn}
@@ -229,24 +287,38 @@ export function CameraView({ user }: CameraViewProps) {
         errors={stats.errors}
       />
 
-      <div className={styles.contentGrid}>
-        <CameraList
+      {viewMode === 'grid' ? (
+        <CameraGridView
           cameras={cameras}
-          selectedId={selectedCameraId}
+          selectedCameraId={selectedCameraId}
           isAdmin={isAdmin}
-          toggleLoadingMap={toggleLoadingMap}
           onSelectCamera={selectCamera}
+          onSwitchToList={(id) => {
+            if (id) selectCamera(id);
+            handleSetViewMode('list');
+          }}
           onToggleState={(id, isEnabled) => void toggleCamera(id, isEnabled)}
         />
+      ) : (
+        <div className={styles.contentGrid}>
+          <CameraList
+            cameras={cameras}
+            selectedId={selectedCameraId}
+            isAdmin={isAdmin}
+            toggleLoadingMap={toggleLoadingMap}
+            onSelectCamera={selectCamera}
+            onToggleState={(id, isEnabled) => void toggleCamera(id, isEnabled)}
+          />
 
-        <CameraDetailPanel
-          camera={selectedCamera}
-          isAdmin={isAdmin}
-          isToggling={Boolean(selectedCamera && toggleLoadingMap[selectedCamera.id])}
-          onToggleState={(id, isEnabled) => void toggleCamera(id, isEnabled)}
-          onRefreshCameras={() => void loadCameras()}
-        />
-      </div>
+          <CameraDetailPanel
+            camera={selectedCamera}
+            isAdmin={isAdmin}
+            isToggling={Boolean(selectedCamera && toggleLoadingMap[selectedCamera.id])}
+            onToggleState={(id, isEnabled) => void toggleCamera(id, isEnabled)}
+            onRefreshCameras={() => void loadCameras()}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -1,0 +1,422 @@
+/* Container nền sáng phù hợp với giao diện Dashboard */
+.gridContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-panel, 12px);
+  padding: 20px;
+  box-shadow: var(--shadow-panel, 0 1px 3px rgba(0, 0, 0, 0.05));
+}
+
+.gridToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wallTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink, #0f172a);
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wallLiveDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+  animation: pulseLive 2s infinite ease-in-out;
+}
+
+@keyframes pulseLive {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+}
+
+.cameraCountBadge {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+}
+
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.segmentedGroup {
+  display: inline-flex;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.segBtn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.segBtn:hover {
+  color: #0f172a;
+}
+
+.segBtnActive {
+  background: #ffffff;
+  color: #2563eb;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  border: 1px solid #cbd5e1;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.actionBtn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.actionBtnActive {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #93c5fd;
+  font-weight: 600;
+}
+
+/* Lưới nền sáng chứa các thẻ camera */
+.matrixGrid {
+  display: grid;
+  gap: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  width: 100%;
+}
+
+.gridColsAuto {
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+}
+
+.gridCols2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.gridCols3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 900px) {
+  .gridCols2,
+  .gridCols3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Thẻ camera từng ô (Card nền trắng, màn hình video bên trong) */
+.tileCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tileCard:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.tileCardFocused {
+  border-color: #eab308;
+  box-shadow: 0 0 12px rgba(234, 179, 8, 0.35);
+}
+
+/* Tiêu đề trên đầu thẻ camera */
+.tileHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tileHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tileName {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.tileSlug {
+  font-size: 11px;
+  color: #64748b;
+  font-family: monospace;
+}
+
+/* Khung màn hình video 16:9 */
+.tileScreen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #000000;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.videoElement {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.noSignalWrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: repeating-linear-gradient(
+    0deg,
+    #050811,
+    #050811 2px,
+    #0b1021 2px,
+    #0b1021 4px
+  );
+  color: #64748b;
+  gap: 6px;
+  position: relative;
+}
+
+.noSignalText {
+  font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
+}
+
+.crosshair {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  border: 1px dashed rgba(100, 116, 139, 0.3);
+  pointer-events: none;
+}
+
+/* Lớp OSD On-Screen Display đè lên video */
+.osdOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow:
+    1px 1px 2px #000,
+    -1px -1px 2px #000,
+    1px -1px 2px #000,
+    -1px 1px 2px #000,
+    0 1px 3px rgba(0, 0, 0, 0.9);
+  line-height: 1.25;
+}
+
+.osdTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.osdCameraTitle {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #f8fafc;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.osdClock {
+  color: #fbbf24;
+  letter-spacing: 0.06em;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.osdBottomRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.osdStreamStats {
+  color: #cbd5e1;
+  font-size: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.osdLocationTag {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 2px 8px;
+  border-radius: 3px;
+  border-left: 2px solid #ef4444;
+}
+
+/* Lớp SVG hiển thị Bounding Box nhận diện AI */
+.detectionSvgOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Thanh chân thẻ camera chứa các nút bấm */
+.tileFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #ffffff;
+  border-top: 1px solid #f1f5f9;
+}
+
+.tileFooterMeta {
+  font-size: 11px;
+  color: #64748b;
+  display: flex;
+  gap: 8px;
+}
+
+.tileFooterActions {
+  display: flex;
+  gap: 6px;
+}
+
+.tileBtn {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tileBtn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.tileBtnPrimary {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
+.tileBtnPrimary:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* Trạng thái danh sách rỗng */
+.emptyState {
+  padding: 48px 24px;
+  text-align: center;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  border-radius: 8px;
+}
+
+.emptyStateTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+}

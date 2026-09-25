@@ -1,8 +1,7 @@
 import React from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { CameraView } from '../CameraView';
-import * as camerasClient from '@/lib/cameras-client';
+import { CameraGridView } from '../CameraGridView';
 import type { Camera } from '@/types';
 
 const mockCameras: Camera[] = [
@@ -112,66 +111,52 @@ const mockCameras: Camera[] = [
   },
 ];
 
-describe('CameraView component', () => {
-  beforeEach(() => {
-    vi.spyOn(camerasClient, 'fetchCameras').mockResolvedValue(mockCameras);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  it('hiển thị đầy đủ tiêu đề, các thẻ tóm tắt và danh sách camera', () => {
+describe('CameraGridView component', () => {
+  it('hiển thị đầy đủ thanh công cụ giám sát, số lượng camera và các ô camera', () => {
     const html = renderToStaticMarkup(
-      <CameraView
-        user={{
-          id: '1',
-          email: 'admin@camerai.local',
-          fullName: 'Admin User',
-          role: 'ADMIN',
-          isActive: true,
-          createdAt: '2026-09-24T00:00:00.000Z',
-        }}
+      <CameraGridView
+        cameras={mockCameras}
+        onSelectCamera={vi.fn()}
+        onSwitchToList={vi.fn()}
+        onToggleState={vi.fn()}
       />,
     );
 
-    expect(html).toContain('Quản lý Camera &amp; Nguồn phát');
-    expect(html).toContain('Tổng số camera');
-    expect(html).toContain('Làm mới');
-  });
-
-  it('render giao diện cho viewer bình thường', () => {
-    const html = renderToStaticMarkup(
-      <CameraView
-        user={{
-          id: '2',
-          email: 'viewer@camerai.local',
-          fullName: 'Viewer User',
-          role: 'VIEWER',
-          isActive: true,
-          createdAt: '2026-09-24T00:00:00.000Z',
-        }}
-      />,
-    );
-
-    expect(html).toContain('Quản lý Camera &amp; Nguồn phát');
-  });
-
-  it('hiển thị nút toggle chuyển đổi giữa Dạng danh sách và Lưới toàn bộ cam', () => {
-    const html = renderToStaticMarkup(
-      <CameraView
-        user={{
-          id: '1',
-          email: 'admin@camerai.local',
-          fullName: 'Admin User',
-          role: 'ADMIN',
-          isActive: true,
-          createdAt: '2026-09-24T00:00:00.000Z',
-        }}
-      />,
-    );
-
+    expect(html).toContain('Tường giám sát toàn bộ Camera');
+    expect(html).toContain('1/2 Camera đang online');
+    expect(html).toContain('Lưới 2x2');
+    expect(html).toContain('Lưới 3x2');
+    expect(html).toContain('Phòng khách');
+    expect(html).toContain('Bếp');
     expect(html).toContain('Dạng danh sách');
-    expect(html).toContain('Lưới toàn bộ cam');
+  });
+
+  it('hiển thị thông báo khi hệ thống chưa có camera nào', () => {
+    const html = renderToStaticMarkup(
+      <CameraGridView
+        cameras={[]}
+        onSelectCamera={vi.fn()}
+        onSwitchToList={vi.fn()}
+        onToggleState={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain('Chưa có camera nào trong hệ thống');
+    expect(html).toContain('Quay lại danh sách');
+  });
+
+  it('hiển thị đúng thông số kỹ thuật và trạng thái mất tín hiệu khi camera tắt', () => {
+    const html = renderToStaticMarkup(
+      <CameraGridView
+        cameras={mockCameras}
+        onSelectCamera={vi.fn()}
+        onSwitchToList={vi.fn()}
+        onToggleState={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain('CAMERA ĐANG TẮT');
+    expect(html).toContain('5 FPS');
+    expect(html).toContain('1280x720');
   });
 });

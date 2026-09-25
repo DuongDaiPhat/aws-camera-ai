@@ -8,3 +8,5 @@ export { VideoSourceUploader } from './VideoSourceUploader';
 export { CameraPreview } from './CameraPreview';
 export { CameraSettingsPanel } from './CameraSettingsPanel';
 export { CameraDebugToolbar } from './CameraDebugToolbar';
+export { CameraGridView } from './CameraGridView';
+export { CameraGridTile } from './CameraGridTile';
