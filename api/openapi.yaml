@@ -1809,9 +1809,15 @@ components:
         escalateChannels:
           type: array
           items: { $ref: "#/components/schemas/NotificationChannel" }
+        displayName:
+          type: string
+          description: Tên hiển thị tiếng Việt của loại sự kiện.
         maxEscalationLevel: { type: integer, minimum: 1, maximum: 3 }
         isEnabled: { type: boolean }
         updatedAt: { type: string, format: date-time }
+        updatedByName:
+          type: ["string", "null"]
+          description: Tên người dùng cập nhật gần nhất.
 
     UpdateEscalationThresholdsRequest:
       type: object
