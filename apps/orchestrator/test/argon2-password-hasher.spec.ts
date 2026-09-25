@@ -1,7 +1,10 @@
+jest.mock('argon2', () => ({
+  hash: jest.fn(),
+  verify: jest.fn(),
+}), { virtual: true });
+
 import { Argon2PasswordHasher } from '../src/auth/argon2-password-hasher';
 import * as argon2 from 'argon2';
-
-jest.mock('argon2');
 
 describe('Argon2PasswordHasher', () => {
   it('goi argon2.verify voi dung tham so', async () => {

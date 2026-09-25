@@ -12,6 +12,7 @@ import { IngestionModule } from './ingestion/ingestion.module';
 import { MediaModule } from './media/media.module';
 import { StorageModule } from './storage/storage.module';
 import { EscalationRulesModule } from './escalation-rules/escalation-rules.module';
+import { EscalationModule } from './escalation/escalation.module';
 
 /**
  * Module goc.
@@ -38,6 +39,7 @@ import { EscalationRulesModule } from './escalation-rules/escalation-rules.modul
     IngestionModule,
     HealthModule,
     EscalationRulesModule,
+    EscalationModule,
   ],
 })
 export class AppModule {}

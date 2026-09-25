@@ -10,6 +10,7 @@ import { Subject, Observable } from 'rxjs';
 import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
 import { TOKEN_SERVICE, type TokenService } from '../auth/auth.types';
 import { MediaService } from '../media/media.service';
+import { EscalationEngineService } from '../escalation/escalation-engine.service';
 import {
   EventsRepository,
   type EventDetailRecord,
@@ -25,6 +26,8 @@ import type {
   EventStatusHistoryEntry,
 } from './dto/event-detail-response.dto';
 import type { EventStatsResponseDto } from './dto/event-stats-response.dto';
+import type { ConfirmEventDto, CloseEventDto } from './dto/confirm-event.dto';
+import type { ConfirmationResponseDto } from './dto/confirmation-response.dto';
 import { DEFAULT_STATS_WINDOW_HOURS } from './dto/get-event-stats-query.dto';
 
 const PRESIGNED_URL_TTL_SECONDS = 900; // 15 phút (FR-EVT-07)
@@ -66,6 +69,7 @@ export class EventsService {
   constructor(
     private readonly eventsRepository: EventsRepository,
     private readonly mediaService: MediaService,
+    private readonly escalationEngineService: EscalationEngineService,
     @Inject(STORAGE_SERVICE) private readonly storageService: IStorageService,
     @Inject(TOKEN_SERVICE) private readonly tokenService: TokenService,
   ) {}
@@ -124,6 +128,53 @@ export class EventsService {
     return this.toEventDetail(record, summary, media, statusHistory);
   }
 
+  /**
+   * Xác nhận sự kiện ban đầu ("Tôi ổn" / "Cần giúp đỡ") - FR-ESC-03/04/09 (US-13).
+   */
+  async confirmEvent(
+    eventId: string,
+    actorUserId: string,
+    dto: ConfirmEventDto,
+  ): Promise<ConfirmationResponseDto> {
+    const result = await this.escalationEngineService.confirmInitial(eventId, actorUserId, {
+      response: dto.response,
+      note: dto.note,
+      commandId: dto.commandId,
+      channel: 'DASHBOARD',
+    });
+
+    const summary = await this.eventsRepository.findEventSummaryById(eventId);
+    if (summary) {
+      const summaryDto = await this.toEventSummary(summary);
+      this.emitEvent(summaryDto, 'event.updated');
+    }
+
+    return result;
+  }
+
+  /**
+   * Đóng sự kiện khẩn cấp sau khi đã tiếp nhận và can thiệp - FR-ESC-04/09 (US-13 Phase EMERGENCY).
+   */
+  async closeEvent(
+    eventId: string,
+    actorUserId: string,
+    dto: CloseEventDto,
+  ): Promise<ConfirmationResponseDto> {
+    const result = await this.escalationEngineService.closeEmergency(eventId, actorUserId, {
+      note: dto.note,
+      commandId: dto.commandId,
+      channel: 'DASHBOARD',
+    });
+
+    const summary = await this.eventsRepository.findEventSummaryById(eventId);
+    if (summary) {
+      const summaryDto = await this.toEventSummary(summary);
+      this.emitEvent(summaryDto, 'event.updated');
+    }
+
+    return result;
+  }
+
   private toEventDetail(
     record: EventDetailRecord,
     summary: EventSummaryDto,
@@ -146,6 +197,9 @@ export class EventsService {
       closedAt: toIsoStringOrNull(record.closed_at),
       media,
       statusHistory: statusHistory.map((entry) => this.toStatusHistoryEntry(entry)),
+      version: record.version ?? 1,
+      ruleSnapshot: record.rule_snapshot as Record<string, unknown> | null,
+      triggeringResults: toAiResultItems(record.triggering_results),
     };
   }
 

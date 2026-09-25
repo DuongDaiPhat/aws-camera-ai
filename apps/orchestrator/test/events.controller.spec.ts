@@ -11,6 +11,10 @@ describe('EventsController (US-06)', () => {
     const mockEventsService = {
       listEvents: jest.fn(),
       streamEvents: jest.fn(),
+      getEvent: jest.fn(),
+      getStats: jest.fn(),
+      confirmEvent: jest.fn(),
+      closeEvent: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -47,5 +51,49 @@ describe('EventsController (US-06)', () => {
       expect(val.type).toBe('event.created');
       done();
     });
+  });
+
+  it('confirmEvent goi service confirmEvent voi userId va dto', async () => {
+    const mockResult = {
+      id: 'conf-1',
+      eventId: 'evt-1',
+      phase: 'INITIAL' as const,
+      response: 'IM_OK' as const,
+      channel: 'DASHBOARD' as const,
+      confirmedByName: 'Admin',
+      note: 'Ổn',
+      respondedAt: new Date().toISOString(),
+      resultingStatus: 'RESOLVED' as const,
+    };
+    service.confirmEvent.mockResolvedValueOnce(mockResult);
+
+    const mockReq = { auth: { sub: 'user-1' } } as any;
+    const dto = { response: 'IM_OK' as const, note: 'Ổn' };
+
+    const result = await controller.confirmEvent('evt-1', dto, mockReq);
+    expect(service.confirmEvent).toHaveBeenCalledWith('evt-1', 'user-1', dto);
+    expect(result).toBe(mockResult);
+  });
+
+  it('closeEvent goi service closeEvent voi userId va dto', async () => {
+    const mockResult = {
+      id: 'conf-2',
+      eventId: 'evt-1',
+      phase: 'EMERGENCY' as const,
+      response: 'ACKNOWLEDGED' as const,
+      channel: 'DASHBOARD' as const,
+      confirmedByName: 'Admin',
+      note: 'Xong',
+      respondedAt: new Date().toISOString(),
+      resultingStatus: 'CLOSED' as const,
+    };
+    service.closeEvent.mockResolvedValueOnce(mockResult);
+
+    const mockReq = { auth: { sub: 'user-1' } } as any;
+    const dto = { note: 'Xong' };
+
+    const result = await controller.closeEvent('evt-1', dto, mockReq);
+    expect(service.closeEvent).toHaveBeenCalledWith('evt-1', 'user-1', dto);
+    expect(result).toBe(mockResult);
   });
 });

@@ -42,6 +42,9 @@ export interface EventDetailRecord extends EventListItemRecord {
   escalated_at: Date | null;
   resolved_at: Date | null;
   closed_at: Date | null;
+  version: number;
+  rule_snapshot: Record<string, unknown> | null;
+  triggering_results: unknown[];
 }
 
 export interface EventStatusHistoryRecord {
@@ -441,7 +444,10 @@ export class EventsRepository {
              e.notified_at,
              e.escalated_at,
              e.resolved_at,
-             e.closed_at
+             e.closed_at,
+             e.version,
+             e.rule_snapshot,
+             e.triggering_results
       ${EVENT_SUMMARY_SOURCE}
       WHERE e.id = $1
       LIMIT 1;
