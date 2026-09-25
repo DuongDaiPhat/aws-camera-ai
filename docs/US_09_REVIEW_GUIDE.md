@@ -26,6 +26,7 @@ FACE_MODEL_VERSION=yunet-2023mar-sface-2021dec
 FACE_MAX_IMAGE_BYTES=5242880
 FACE_MAX_PIXELS=12000000
 FACE_MAX_CONCURRENT=2
+AI_INTERNAL_TOKEN=change_me_local_face_internal_token
 ```
 
 ---
@@ -34,7 +35,19 @@ FACE_MAX_CONCURRENT=2
 
 Do US-09 có sinh mã giao tiếp tự động (Contracts) và thêm bảng Database mới (Migration 0007), bạn bắt buộc phải làm theo thứ tự sau:
 
-**Bước 1: Khởi động toàn bộ container bằng Docker Compose**
+**Bước 1: Tải tệp trọng số AI (ONNX Models)**
+
+Do các file model có dung lượng khá lớn nên chúng đã bị loại trừ khỏi Git (`.gitignore`). Bạn cần tải chúng về thư mục `services/ai-service/models/` trước khi chạy:
+
+```bash
+# Tải model YuNet (Phát hiện khuôn mặt)
+curl -L -o services/ai-service/models/face_detection_yunet_2023mar.onnx https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx
+
+# Tải model SFace (Trích xuất đặc trưng)
+curl -L -o services/ai-service/models/face_recognition_sface_2021dec.onnx https://github.com/opencv/opencv_zoo/raw/main/models/face_recognition_sface/face_recognition_sface_2021dec.onnx
+```
+
+**Bước 2: Khởi động toàn bộ container bằng Docker Compose**
 
 ```bash
 docker compose up -d
@@ -42,7 +55,7 @@ docker compose up -d
 
 _(Nếu Docker tải thiếu image `postgres:16-alpine`, hãy kiểm tra lại kết nối mạng hoặc thử chạy lại lệnh này)._
 
-**Bước 2: Chạy lại Migration DB (Tự động chạy, nhưng nếu bạn dùng DB cũ thì nên clean)**
+**Bước 3: Chạy lại Migration DB (Tự động chạy, nhưng nếu bạn dùng DB cũ thì nên clean)**
 Nếu bạn gặp lỗi schema, tốt nhất hãy xóa volume cũ và dựng lại:
 
 ```bash
@@ -50,7 +63,7 @@ docker compose down -v
 docker compose up -d
 ```
 
-**Bước 3: Biên dịch lại Contracts (Cực kỳ quan trọng)**
+**Bước 4: Biên dịch lại Contracts (Cực kỳ quan trọng)**
 Do chúng ta có thêm Interface OpenAPI mới, container Orchestrator cần được biên dịch lại gói `@cam/contracts` để hiểu code mới:
 
 ```bash
@@ -58,7 +71,7 @@ docker exec camerai-orchestrator pnpm --filter @cam/contracts build
 docker compose restart camerai-orchestrator
 ```
 
-**Bước 4: Cài đặt thư viện trên Frontend & Chạy Test (Tuỳ chọn)**
+**Bước 5: Cài đặt thư viện trên Frontend & Chạy Test (Tuỳ chọn)**
 Trên máy local của bạn:
 
 ```bash
