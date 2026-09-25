@@ -52,6 +52,7 @@ describe('EventsService (US-06)', () => {
     const mockStorageService = {
       upload: jest.fn(),
       getPresignedUrl: jest.fn(),
+      download: jest.fn(),
     };
 
     const mockTokenService = {

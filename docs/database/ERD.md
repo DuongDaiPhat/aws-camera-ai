@@ -1,7 +1,7 @@
 # Thiết kế cơ sở dữ liệu — ERD
 
 > **Task 0.3** · Người phụ trách: **B** (Backend Lead) · Sprint 0
-> DDL thực thi: [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`db/migrations/0002_seed_escalation_rules.sql`](../../db/migrations/0002_seed_escalation_rules.sql), [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql)
+> DDL thực thi: [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`db/migrations/0002_seed_escalation_rules.sql`](../../db/migrations/0002_seed_escalation_rules.sql), [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql), [`db/migrations/0007_telegram_delivery.sql`](../../db/migrations/0007_telegram_delivery.sql)
 > Tài liệu này giải thích **vì sao** thiết kế như vậy. File SQL là nguồn sự thật về **cấu trúc**.
 
 ## Mục lục
@@ -18,8 +18,8 @@
 
 ## 1. Sơ đồ tổng thể
 
-15 bảng: **10 bảng chính** theo yêu cầu task 0.3, cộng **5 bảng bổ trợ** sinh ra từ các
-yêu cầu chức năng (FR-EVT-05, FR-NOT-10, FR-DET-M5-01, FR-LOG-01, FR-AUT-02).
+17 bảng hiện được mô tả: **10 bảng chính** theo task 0.3, **5 bảng bổ trợ** từ Sprint 0–1
+và **2 bảng Telegram** của US-14.
 
 ```mermaid
 erDiagram
@@ -31,6 +31,7 @@ erDiagram
     users ||--o{ notifications : "nhận"
     users ||--o{ audit_logs : "thực hiện"
     users ||--o{ auth_refresh_tokens : "sở hữu"
+    users ||--o{ telegram_link_requests : "tạo mã liên kết"
     auth_refresh_tokens ||--o| auth_refresh_tokens : "thay thế bởi"
 
     devices ||--o{ cameras : "chứa"
@@ -59,6 +60,8 @@ erDiagram
         user_role role
         text phone_e164
         text telegram_chat_id
+        text telegram_user_id UK
+        timestamptz telegram_linked_at
         smallint failed_login_count
         timestamptz locked_until
     }
@@ -152,7 +155,12 @@ erDiagram
         notification_status status
         smallint escalation_level
         smallint attempt_count
+        smallint max_attempts
+        timestamptz next_retry_at
+        text provider_chat_id
         text provider_message_id
+        uuid lease_token
+        timestamptz lease_until
     }
 
     confirmations {
@@ -210,6 +218,21 @@ erDiagram
         timestamptz revoked_at
         uuid replaced_by_token_id FK
         timestamptz created_at
+    }
+
+    telegram_link_requests {
+        uuid id PK
+        uuid user_id FK
+        text token_hash UK
+        timestamptz expires_at
+        timestamptz consumed_at
+    }
+
+    telegram_webhook_inbox {
+        bigint update_id PK
+        jsonb update_body
+        text status
+        timestamptz processed_at
     }
 ```
 
@@ -707,6 +730,14 @@ WHERE id = $1 AND revoked_at IS NULL;
 ---
 
 ## 7. Quy trình thay đổi schema
+
+### US-14 · Telegram delivery (migration 0007)
+
+`users.telegram_user_id` và `telegram_linked_at` ghi nhận danh tính Telegram đã liên kết và xác minh trên server; `telegram_chat_id` riêng biệt là nơi nhận tin. Các user hiện chỉ có chat ID chưa được xem là đã xác minh. `notifications.provider_chat_id` đi cùng `provider_message_id` để định danh tin Telegram. `lease_token` và `lease_until` dùng claim công việc sau restart; số lần thử vẫn nằm ở `attempt_count`/`max_attempts`, lịch thử lại ở `next_retry_at`. Telegram dùng tối đa 4 attempts; default 3 của kênh khác không đổi.
+
+`telegram_link_requests` giữ SHA-256 của mã liên kết một lần, hạn dùng và thời điểm tiêu thụ. `telegram_webhook_inbox` có khóa duy nhất `update_id`, lưu bản tóm tắt update để tránh xử lý lặp và phục hồi callback đang chờ. Mã liên kết thô không được lưu trong DB.
+
+---
 
 ### Quy tắc bất di bất dịch
 

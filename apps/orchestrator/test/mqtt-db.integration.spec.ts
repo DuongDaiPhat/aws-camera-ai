@@ -44,6 +44,9 @@ interface PersistedEventRow {
 }
 
 class UnusedStorageService implements IStorageService {
+  download(_key: string): Promise<Buffer> {
+    throw new Error('Unused in this test');
+  }
   upload(_key: string, _body: Buffer, _contentType: string): Promise<UploadResult> {
     throw new Error('Storage không được gọi trong integration test US-08');
   }

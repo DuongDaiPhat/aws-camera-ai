@@ -6,6 +6,7 @@ import { EventsModule } from './events/events.module';
 import { HealthModule } from './health/health.module';
 import { IngestionModule } from './ingestion/ingestion.module';
 import { MediaModule } from './media/media.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { StorageModule } from './storage/storage.module';
 
 /**
@@ -26,6 +27,7 @@ import { StorageModule } from './storage/storage.module';
     StorageModule,
     EventsModule,
     MediaModule,
+    NotificationsModule,
     IngestionModule,
     HealthModule,
   ],

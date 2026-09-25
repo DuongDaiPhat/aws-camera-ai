@@ -1,7 +1,7 @@
 # Plan US-14 — Cảnh báo Telegram kèm ảnh và hai nút xác nhận
 
 > Phần giao với US-13, shared notifications/outbox, media và identity tuân theo [kế hoạch tích hợp 5 thành viên](PLAN_AGILE_5_MEMBER_EXECUTION.md).
-> Trạng thái: kế hoạch thực thi, chưa triển khai hay gửi tin nhắn thật.
+> Trạng thái: đang triển khai sender/retry, liên kết Telegram và webhook inbox trên nhánh US-14; callback xác nhận chờ confirmation service US-13. Chưa gửi tin nhắn thật.
 > Mục tiêu: gửi cảnh báo rõ ràng, nhận xác nhận đúng người, retry bền vững và không trì hoãn escalation.
 
 ## 1. Phạm vi và phụ thuộc

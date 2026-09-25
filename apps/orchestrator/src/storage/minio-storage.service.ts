@@ -61,6 +61,14 @@ export class MinioStorageService implements IStorageService {
     };
   }
 
+  async download(key: string): Promise<Buffer> {
+    const response = await this.s3Client.send(
+      new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+    );
+    if (!response.Body) throw new Error('Snapshot không có dữ liệu.');
+    return Buffer.from(await response.Body.transformToByteArray());
+  }
+
   async getPresignedUrl(
     key: string,
     expiresInSeconds = DEFAULT_PRESIGNED_URL_TTL_SECONDS,

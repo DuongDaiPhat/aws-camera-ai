@@ -97,6 +97,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/telegram/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tao ma lien ket Telegram mot lan cho tai khoan da dang nhap
+         * @description US-14. Token chi tra ve mot lan, het han sau 10 phut. Gui `/start <token>`
+         *     trong private chat voi bot. Gioi han mot yeu cau moi phut; token cu bi vo hieu.
+         */
+        post: operations["createTelegramLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users": {
         parameters: {
             query?: never;
@@ -687,7 +708,9 @@ export interface paths {
         /**
          * Callback khi nguoi dung bam nut trong Telegram
          * @description US-14. Xac thuc bang header `X-Telegram-Bot-Api-Secret-Token`.
-         *     Body la Update object cua Telegram — khong mo ta lai o day.
+         *     Body la Update object cua Telegram. update_id duoc ghi inbox duy nhat
+         *     truoc khi ACK 200. Callback xac nhan tra 503 cho den khi US-13 cung
+         *     cap confirmation service; Telegram se gui lai update.
          */
         post: operations["telegramWebhook"];
         delete?: never;
@@ -1608,6 +1631,38 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+        };
+    };
+    createTelegramLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ma lien ket da duoc tao */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        linkToken: string;
+                        /** Format: date-time */
+                        expiresAt: string;
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description Yeu cau lien ket qua thuong xuyen */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     listUsers: {
@@ -2779,14 +2834,22 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Da xu ly */
+            /** @description Da ghi va xu ly update hoac update trung lap */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
+            /** @description Confirmation service chua san sang, Telegram can gui lai */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     connectWebhook: {

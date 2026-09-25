@@ -177,6 +177,28 @@ paths:
               schema: { $ref: "#/components/schemas/User" }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
+  /auth/telegram/link:
+    post:
+      tags: [auth]
+      summary: Tao ma lien ket Telegram mot lan cho tai khoan da dang nhap
+      description: |
+        US-14. Token chi tra ve mot lan, het han sau 10 phut. Gui `/start <token>`
+        trong private chat voi bot. Gioi han mot yeu cau moi phut; token cu bi vo hieu.
+      operationId: createTelegramLink
+      responses:
+        "201":
+          description: Ma lien ket da duoc tao
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [linkToken, expiresAt]
+                properties:
+                  linkToken: { type: string }
+                  expiresAt: { type: string, format: date-time }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { description: Yeu cau lien ket qua thuong xuyen }
+
   # ===================================================================
   # USERS
   # ===================================================================
@@ -1086,7 +1108,9 @@ paths:
       summary: Callback khi nguoi dung bam nut trong Telegram
       description: |
         US-14. Xac thuc bang header `X-Telegram-Bot-Api-Secret-Token`.
-        Body la Update object cua Telegram — khong mo ta lai o day.
+        Body la Update object cua Telegram. update_id duoc ghi inbox duy nhat
+        truoc khi ACK 200. Callback xac nhan tra 503 cho den khi US-13 cung
+        cap confirmation service; Telegram se gui lai update.
       operationId: telegramWebhook
       security: []
       requestBody:
@@ -1095,8 +1119,10 @@ paths:
           application/json:
             schema: { type: object, additionalProperties: true }
       responses:
-        "200": { description: Da xu ly }
+        "200": { description: Da ghi va xu ly update hoac update trung lap }
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "503": { description: "Confirmation service chua san sang, Telegram can gui lai" }
 
   /webhooks/connect:
     post:
