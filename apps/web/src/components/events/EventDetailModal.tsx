@@ -9,8 +9,9 @@ import styles from './event-detail-modal.module.css';
 interface EventDetailModalProps {
   event: UIEventItem | null;
   onClose: () => void;
-  onConfirmOk?: (eventId: string) => void;
-  onConfirmHelp?: (eventId: string) => void;
+  onConfirmOk?: (eventId: string, note?: string) => Promise<void> | void;
+  onConfirmHelp?: (eventId: string, note?: string) => Promise<void> | void;
+  onCloseEmergency?: (eventId: string, note?: string) => Promise<void> | void;
   onToggleFalseAlarm?: (eventId: string) => void;
 }
 
@@ -23,10 +24,10 @@ const PERSON_STATUS_LABELS: Record<string, string> = {
 const EVENT_STATUS_LABELS: Record<string, string> = {
   DETECTED: 'Vừa phát hiện',
   LOGGED_ONLY: 'Chỉ ghi nhận',
-  NOTIFIED: 'Đã gửi cảnh báo',
-  ESCALATED: 'Đã leo thang',
+  NOTIFIED: 'Đang chờ xác nhận',
+  ESCALATED: 'Đang leo thang khẩn cấp',
   RESOLVED: 'Đã xác nhận an toàn',
-  CLOSED: 'Đã đóng',
+  CLOSED: 'Đã đóng sự kiện',
   AI_FAILED: 'AI không phân tích được',
 };
 
@@ -216,11 +217,43 @@ export function EventDetailModal({
   onClose,
   onConfirmOk,
   onConfirmHelp,
+  onCloseEmergency,
   onToggleFalseAlarm,
 }: EventDetailModalProps) {
   const { detail, isLoading, error } = useEventDetail(event);
+  const [note, setNote] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   if (!event) return null;
+
+  const currentStatus = event.status;
+
+  const handleAction = async (action: 'OK' | 'HELP' | 'CLOSE') => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setActionError(null);
+
+    try {
+      if (action === 'OK' && onConfirmOk) {
+        await onConfirmOk(event.id, note.trim() || undefined);
+      } else if (action === 'HELP' && onConfirmHelp) {
+        await onConfirmHelp(event.id, note.trim() || undefined);
+      } else if (action === 'CLOSE' && onCloseEmergency) {
+        await onCloseEmergency(event.id, note.trim() || undefined);
+      }
+      onClose();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Có lỗi xảy ra khi xử lý sự kiện.';
+      setActionError(
+        message.includes('409') || message.includes('xử lý bởi người khác')
+          ? 'Sự kiện đã được xử lý bởi người khác hoặc trạng thái đã thay đổi.'
+          : message,
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -258,28 +291,90 @@ export function EventDetailModal({
           <StatusHistorySection detail={detail} />
         </div>
 
+        {actionError && (
+          <div className={styles.actionErrorNotice} role="alert">
+            {actionError}
+          </div>
+        )}
+
         <div className={styles.modalFooter}>
-          <button
-            type="button"
-            className={styles.btnFalseAlarm}
-            onClick={() => onToggleFalseAlarm?.(event.id)}
-          >
-            {event.isFalseAlarm ? 'Bỏ đánh dấu báo động giả' : 'Đánh dấu báo động giả'}
-          </button>
-          <div className={styles.actionButtonGroup}>
-            <button type="button" className={styles.btnOk} onClick={() => onConfirmOk?.(event.id)}>
-              ✅ Tôi ổn (An toàn)
-            </button>
-            <button
-              type="button"
-              className={styles.btnEscalate}
-              onClick={() => onConfirmHelp?.(event.id)}
-            >
-              🆘 Cần giúp đỡ (Leo thang)
-            </button>
+          <div className={styles.footerActionsWrapper}>
+            {(currentStatus === 'NOTIFIED' || currentStatus === 'ESCALATED') && (
+              <input
+                type="text"
+                className={styles.noteInput}
+                placeholder={
+                  currentStatus === 'NOTIFIED'
+                    ? 'Ghi chú xác nhận (không bắt buộc)...'
+                    : 'Ghi chú kết quả xử lý khẩn cấp...'
+                }
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                disabled={isSubmitting}
+                maxLength={500}
+              />
+            )}
+
+            <div className={styles.footerRow}>
+              <button
+                type="button"
+                className={styles.btnFalseAlarm}
+                onClick={() => onToggleFalseAlarm?.(event.id)}
+                disabled={isSubmitting}
+              >
+                {event.isFalseAlarm ? 'Bỏ đánh dấu báo động giả' : 'Đánh dấu báo động giả'}
+              </button>
+
+              <div className={styles.actionButtonGroup}>
+                {currentStatus === 'NOTIFIED' && (
+                  <>
+                    <button
+                      type="button"
+                      className={styles.btnOk}
+                      onClick={() => handleAction('OK')}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Đang gửi…' : '✅ Tôi ổn (An toàn)'}
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.btnEscalate}
+                      onClick={() => handleAction('HELP')}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Đang gửi…' : '🆘 Cần giúp đỡ (Leo thang)'}
+                    </button>
+                  </>
+                )}
+
+                {currentStatus === 'ESCALATED' && (
+                  <button
+                    type="button"
+                    className={styles.btnCloseEmergency}
+                    onClick={() => handleAction('CLOSE')}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Đang đóng…' : '🏁 Đóng sự kiện khẩn cấp'}
+                  </button>
+                )}
+
+                {currentStatus === 'RESOLVED' && (
+                  <span className={styles.statusDoneBadge}>
+                    ✅ Đã xác nhận an toàn
+                  </span>
+                )}
+
+                {currentStatus === 'CLOSED' && (
+                  <span className={styles.statusDoneBadge}>
+                    🏁 Sự kiện khẩn cấp đã được đóng
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
+

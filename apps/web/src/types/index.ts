@@ -1,20 +1,22 @@
 import type { components, operations, paths } from '@cam/contracts';
-import type {
+
+export type { components, operations, paths };
+export type {
   EventType,
   EventStatus,
   PriorityLevel,
   UserRole,
   ConfirmationResponse,
+  ConfirmationPhase,
 } from '@cam/contracts';
-
-export type { components, operations, paths };
-export type { EventType, EventStatus, PriorityLevel, UserRole, ConfirmationResponse };
 
 export type EventSummary = components['schemas']['EventSummary'];
 export type EventDetail = components['schemas']['EventDetail'];
 export type EventMedia = components['schemas']['EventMedia'];
 export type EventStats = components['schemas']['EventStats'];
 export type AiResultItem = components['schemas']['AiResultItem'];
+export type Confirmation = components['schemas']['Confirmation'];
+
 
 export type AiTagColor = 'danger' | 'warning' | 'info' | 'success' | 'neutral';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { fetchEvents, subscribeEventsStream } from '@/lib/events-client';
+import { fetchEvents, subscribeEventsStream, confirmEvent, closeEvent } from '@/lib/events-client';
 import { generateSimulatedLiveEvent } from '@/lib/mock-events';
 import type { UIEventItem, FilterTabKey, FilterTabCounts } from '@/types';
 
@@ -231,26 +231,53 @@ export function useEvents() {
   }, [setEvents, setLiveNoticeText]);
 
   const confirmOk = useCallback(
-    (id: string) => {
-      setEvents((prev) =>
-        updateItem(prev, id, (e) => ({
-          ...e,
-          status: 'RESOLVED',
-          aiTag: 'An toàn',
-          aiTagColor: 'success',
-        })),
-      );
+    async (id: string, note?: string) => {
+      try {
+        await confirmEvent(id, 'IM_OK', note);
+        setEvents((prev) =>
+          updateItem(prev, id, (e) => ({
+            ...e,
+            status: 'RESOLVED',
+            aiTag: 'An toàn',
+            aiTagColor: 'success',
+          })),
+        );
+      } catch (err) {
+        reload();
+        throw err;
+      }
     },
-    [setEvents],
+    [setEvents, reload],
   );
 
   const confirmHelp = useCallback(
-    (id: string) => {
-      setEvents((prev) =>
-        updateItem(prev, id, (e) => ({ ...e, status: 'ESCALATED', priority: 'P0' })),
-      );
+    async (id: string, note?: string) => {
+      try {
+        await confirmEvent(id, 'NEED_HELP', note);
+        setEvents((prev) =>
+          updateItem(prev, id, (e) => ({ ...e, status: 'ESCALATED', priority: 'P0' })),
+        );
+      } catch (err) {
+        reload();
+        throw err;
+      }
     },
-    [setEvents],
+    [setEvents, reload],
+  );
+
+  const closeEmergency = useCallback(
+    async (id: string, note?: string) => {
+      try {
+        await closeEvent(id, note);
+        setEvents((prev) =>
+          updateItem(prev, id, (e) => ({ ...e, status: 'CLOSED' })),
+        );
+      } catch (err) {
+        reload();
+        throw err;
+      }
+    },
+    [setEvents, reload],
   );
 
   const toggleFalseAlarm = useCallback(
@@ -269,6 +296,7 @@ export function useEvents() {
     simulateNewEvent,
     confirmOk,
     confirmHelp,
+    closeEmergency,
     toggleFalseAlarm,
     ...filterState,
     ...paginationState,

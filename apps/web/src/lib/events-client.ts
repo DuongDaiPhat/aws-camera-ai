@@ -1,6 +1,6 @@
 import { apiFetch, getAccessToken, API_BASE_URL } from './api-client';
 import { formatRelativeTime } from './format';
-import type { EventSummary, UIEventItem, EventDetail, EventStats } from '@/types';
+import type { EventSummary, UIEventItem, EventDetail, EventStats, Confirmation } from '@/types';
 
 /** Số sự kiện tải về mỗi lần mở dashboard (tối đa openapi cho phép là 100). */
 export const DEFAULT_EVENTS_PAGE_SIZE = 50;
@@ -105,6 +105,33 @@ export async function fetchEvents(pageSize: number = DEFAULT_EVENTS_PAGE_SIZE): 
  */
 export function fetchEventDetail(eventId: string): Promise<EventDetail> {
   return apiFetch<EventDetail>(`/events/${eventId}`);
+}
+
+/**
+ * Xác nhận ban đầu ("Tôi ổn" / "Cần giúp đỡ") - FR-ESC-03/04 (US-13).
+ */
+export function confirmEvent(
+  eventId: string,
+  response: 'IM_OK' | 'NEED_HELP',
+  note?: string,
+): Promise<Confirmation> {
+  return apiFetch<Confirmation>(`/events/${eventId}/confirm`, {
+    method: 'POST',
+    body: JSON.stringify({ response, note }),
+  });
+}
+
+/**
+ * Đóng sự kiện khẩn cấp sau khi đã tiếp nhận xử lý - FR-ESC-04/09 (US-13 Phase EMERGENCY).
+ */
+export function closeEvent(
+  eventId: string,
+  note?: string,
+): Promise<Confirmation> {
+  return apiFetch<Confirmation>(`/events/${eventId}/close`, {
+    method: 'POST',
+    body: JSON.stringify({ note }),
+  });
 }
 
 /**
