@@ -163,6 +163,9 @@ erDiagram
         uuid correlation_id
         timestamptz detected_at
         timestamptz escalation_deadline_at
+        int version "optimistic locking"
+        jsonb rule_snapshot "snapshot cấu hình khi đánh giá"
+        jsonb triggering_results "danh sách nhãn AI kích hoạt"
     }
 
     event_media {
@@ -192,9 +195,10 @@ erDiagram
         uuid event_id FK
         uuid notification_id FK
         uuid user_id FK
+        confirmation_phase phase "INITIAL | EMERGENCY"
         notification_channel channel
         confirmation_response response
-        boolean is_authoritative "chỉ lần đầu = TRUE"
+        boolean is_authoritative "chỉ lần đầu mỗi phase = TRUE"
         timestamptz responded_at
     }
 
