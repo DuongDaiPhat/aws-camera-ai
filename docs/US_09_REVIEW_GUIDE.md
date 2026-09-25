@@ -32,7 +32,7 @@ FACE_MAX_CONCURRENT=2
 
 ## 3. Các bước khởi chạy (How to Run)
 
-Do US-09 có sinh mã giao tiếp tự động (Contracts) và thêm bảng Database mới (Migration 0005), bạn bắt buộc phải làm theo thứ tự sau:
+Do US-09 có sinh mã giao tiếp tự động (Contracts) và thêm bảng Database mới (Migration 0007), bạn bắt buộc phải làm theo thứ tự sau:
 
 **Bước 1: Khởi động toàn bộ container bằng Docker Compose**
 
