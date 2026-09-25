@@ -1,7 +1,7 @@
 # Thiết kế cơ sở dữ liệu — ERD
 
 > **Task 0.3** · Người phụ trách: **B** (Backend Lead) · Sprint 0
-> DDL thực thi: [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`db/migrations/0002_seed_escalation_rules.sql`](../../db/migrations/0002_seed_escalation_rules.sql), [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql)
+> DDL thực thi: [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`db/migrations/0002_seed_escalation_rules.sql`](../../db/migrations/0002_seed_escalation_rules.sql), [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql), [`db/migrations/0005_escalation_rules_version_and_constraints.sql`](../../db/migrations/0005_escalation_rules_version_and_constraints.sql)
 > Tài liệu này giải thích **vì sao** thiết kế như vậy. File SQL là nguồn sự thật về **cấu trúc**.
 
 ## Mục lục
@@ -113,6 +113,7 @@ erDiagram
         int t_wait_seconds
         boolean skip_logged_only
         jsonb notify_channels
+        int version
     }
 
     events {
@@ -376,6 +377,8 @@ Cấu hình ngưỡng và thời gian chờ cho từng loại sự kiện (US-15
 
 Giá trị mặc định nằm trong migration `0002`, **không phải trong file seed demo** — vì
 FR-ADM-04 yêu cầu mọi môi trường (dev, CI, AWS) đều phải có sẵn khi khởi tạo.
+Migration `0005` bổ sung cột `version INTEGER NOT NULL DEFAULT 1` phục vụ optimistic concurrency control
+khi nhiều ADMIN cùng cấu hình đồng thời, kèm ràng buộc `(t_low IS NULL) = (t_high IS NULL)` và giới hạn `0 <= t_wait_seconds <= 3600`.
 
 `skip_logged_only = TRUE` là cách hiện thực US-19: cháy/khói bỏ qua bậc `LOGGED_ONLY`,
 vào thẳng `NOTIFIED` bất kể confidence.
