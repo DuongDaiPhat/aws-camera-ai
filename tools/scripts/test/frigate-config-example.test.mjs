@@ -41,15 +41,15 @@ describe('config.example.yml của Frigate', () => {
       assert.match(frigateService.image, /^ghcr\.io\/blakeblackshear\/frigate:\d+\.\d+\.\d+$/);
     });
 
-    it('version trong config khớp major.minor của image (config mount read-only)', () => {
+    it('version trong config khớp major.minor của image', () => {
       const [, major, minor] = frigateService.image.match(/:(\d+)\.(\d+)\./);
 
       assert.match(String(config.version), new RegExp(`^${major}\\.${minor}-\\d+$`));
     });
 
-    it('mount config.yml ở chế độ read-only', () => {
+    it('mount config.yml read-write để Orchestrator đồng bộ cấu hình đã kiểm tra', () => {
       assert.ok(
-        frigateService.volumes.includes('./infra/frigate/config.yml:/config/config.yml:ro'),
+        frigateService.volumes.includes('./infra/frigate/config.yml:/config/config.yml:rw'),
       );
     });
 
