@@ -70,6 +70,6 @@ pnpm --filter @cam/web test
 
 ## 4. Kết Quả
 
-- Migration cơ sở dữ liệu `0006_escalation_state_machine.sql` đã áp dụng thành công.
+- Migration cơ sở dữ liệu `0008_escalation_state_machine.sql` đã áp dụng thành công.
 - OpenAPI specification và contracts `@cam/contracts` đồng bộ đầy đủ các schema `ConfirmationPhase`, `CloseEventRequest`, `Confirmation`, và `EventDetail`.
 - Giao diện người dùng và backend xử lý luồng xác nhận 2 giai đoạn mượt mà, chống race condition và bảo toàn lịch sử kiểm toán.

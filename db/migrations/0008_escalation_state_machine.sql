@@ -1,5 +1,5 @@
 -- =====================================================================
--- Migration 0006 — Escalation state machine (US-13)
+-- Migration 0008 — Escalation state machine (US-13)
 --
 -- 1. Tao ENUM confirmation_phase ('INITIAL', 'EMERGENCY')
 -- 2. Bo sung cot 'phase' vao bang confirmations va cap nhat unique index
