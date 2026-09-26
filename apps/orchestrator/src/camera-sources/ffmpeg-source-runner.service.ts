@@ -278,7 +278,15 @@ export class FfmpegSourceRunnerService implements ISourceRunner, OnApplicationSh
       );
     }
 
-    args.push('-c:a', 'aac', '-f', 'rtsp', '-rtsp_transport', 'tcp', outputRtspUrl);
+    args.push(
+      '-c:a',
+      'aac',
+      '-f',
+      'rtsp',
+      '-rtsp_transport',
+      'tcp',
+      outputRtspUrl,
+    );
     return args;
   }
 
