@@ -1,7 +1,7 @@
 # Kế Hoạch & Kết Quả Kiểm Thử US-13: Escalation State Machine Theo Loại Sự Kiện
 
-**Mã User Story:** US-13  
-**Nhánh:** `feat/US-13-escalation-state-machine`  
+**Mã User Story:** US-13<br />
+**Nhánh:** `feat/US-13-escalation-state-machine`<br />
 **Yêu cầu kỹ thuật:** FR-ESC-01, FR-ESC-02, FR-ESC-03, FR-ESC-04, FR-ESC-05, FR-ESC-06, FR-ESC-07, FR-ESC-08, FR-ESC-09, FR-EVT-05, FR-DSH-06
 
 ---
