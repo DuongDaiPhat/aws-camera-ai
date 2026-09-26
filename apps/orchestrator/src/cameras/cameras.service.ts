@@ -266,7 +266,12 @@ export class CamerasService implements CameraConfigPortV1 {
         });
       }
 
-      if (isEnabled && isStateChanged && syncResult?.success && existing.source_type_val !== 'BROWSER_WEBCAM') {
+      if (
+        isEnabled &&
+        isStateChanged &&
+        syncResult?.success &&
+        existing.source_type_val !== 'BROWSER_WEBCAM'
+      ) {
         if (await this.frigateSyncService.waitForCameraFrames(existing.slug)) {
           await this.cameraSourcesService.markCameraOnline(id);
         } else {
