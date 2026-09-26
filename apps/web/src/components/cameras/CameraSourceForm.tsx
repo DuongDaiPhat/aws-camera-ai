@@ -5,6 +5,7 @@ import type { CameraSourceType } from '@/types';
 import { testRtspConnection, updateCameraSource } from '@/lib/cameras-client';
 import { WebcamPublisher } from './WebcamPublisher';
 import { VideoSourceUploader } from './VideoSourceUploader';
+import { stopWebcamSession } from './source/webcam-session-manager';
 import styles from './styles/camera-source-form.module.css';
 
 interface RtspFormProps {
@@ -36,6 +37,7 @@ function RtspSourceForm({ cameraId, initialRtspUrl, isAdmin, onSourceUpdated }: 
         transport,
         videoLoop: true,
       });
+      void stopWebcamSession(cameraId);
       setSuccessMsg('Đã cập nhật nguồn phát RTSP thành công!');
       onSourceUpdated?.();
     } catch (err) {
@@ -212,7 +214,10 @@ export function CameraSourceForm({
           cameraId={cameraId}
           initialFileName={initialVideoFileName}
           isAdmin={isAdmin}
-          onSourceUpdated={() => onSourceUpdated?.()}
+          onSourceUpdated={() => {
+            void stopWebcamSession(cameraId);
+            onSourceUpdated?.();
+          }}
         />
       )}
     </div>

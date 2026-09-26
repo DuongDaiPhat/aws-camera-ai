@@ -4,7 +4,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import type { Camera } from '@/types';
 import type { CameraDebugStream } from '@/lib/cameras-client';
 import { fetchCameraDebugStream } from '@/lib/cameras-client';
+import { CameraLiveStream } from './CameraLiveStream';
 import { CameraStatusBadge } from './CameraStatusBadge';
+import { useWebcamSession } from './source/webcam-session-manager';
 import styles from './styles/camera-grid.module.css';
 
 interface PersonDetectionBox {
@@ -139,7 +141,7 @@ export function CameraGridTile({
     };
 
     void loadStream();
-    const interval = camera.isEnabled ? setInterval(loadStream, 3000) : null;
+    const interval = camera.isEnabled ? setInterval(loadStream, 1000) : null;
     return () => {
       isCancelled = true;
       if (interval) clearInterval(interval);
@@ -160,7 +162,12 @@ export function CameraGridTile({
       }));
   }, [showDetections, debugData]);
 
-  const isLive = camera.isEnabled && camera.runtimeStatus === 'ONLINE';
+  const { isPublishing: isWebcamPublishing } = useWebcamSession(camera.id);
+  const isWebcamActive = camera.sourceType === 'BROWSER_WEBCAM' && isWebcamPublishing;
+  const isLive =
+    camera.isEnabled &&
+    (camera.runtimeStatus === 'ONLINE' || Boolean(debugData?.streamUrl) || isWebcamActive);
+  const effectiveStatus = isLive ? 'ONLINE' : camera.runtimeStatus;
   const resolution =
     camera.detectWidth && camera.detectHeight
       ? `${camera.detectWidth}x${camera.detectHeight}`
@@ -181,7 +188,7 @@ export function CameraGridTile({
           <h4 className={styles.tileName}>{camera.name}</h4>
           <span className={styles.tileSlug}>({camera.slug})</span>
         </div>
-        <CameraStatusBadge isEnabled={camera.isEnabled} runtimeStatus={camera.runtimeStatus} />
+        <CameraStatusBadge isEnabled={camera.isEnabled} runtimeStatus={effectiveStatus} />
       </div>
 
       {/* Khung video màn hình 16:9 */}
@@ -195,12 +202,11 @@ export function CameraGridTile({
         }}
         title={`${camera.name} - Bấm để phóng to hoặc chọn`}
       >
-        {isLive && debugData?.snapshotUrl && !hasError ? (
-          <img
-            src={debugData.snapshotUrl}
-            alt={camera.name}
-            className={styles.videoElement}
-            loading="lazy"
+        {isLive && debugData?.streamUrl && !hasError ? (
+          <CameraLiveStream
+            streamUrl={debugData.streamUrl}
+            title={camera.name}
+            className={styles.videoFrame}
           />
         ) : (
           <div className={styles.noSignalWrapper}>
@@ -219,7 +225,7 @@ export function CameraGridTile({
 
         {showOsd && (
           <GridTileOsd
-            camera={camera}
+            camera={{ ...camera, runtimeStatus: effectiveStatus }}
             isLive={isLive}
             resolution={resolution}
             sourceLabel={sourceLabel}

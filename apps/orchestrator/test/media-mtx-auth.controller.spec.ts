@@ -7,6 +7,7 @@ describe('MediaMtxAuthController', () => {
   let controller: MediaMtxAuthController;
   const mediaMtxService = {
     verifyBrowserSession: jest.fn(),
+    verifyBrowserReadSession: jest.fn(),
     verifyInternalStreamCredentials: jest.fn(),
   } as unknown as MediaMtxService;
   const cameraSourcesRepository = {
@@ -16,7 +17,59 @@ describe('MediaMtxAuthController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(mediaMtxService.verifyInternalStreamCredentials).mockReturnValue(false);
+    jest.mocked(mediaMtxService.verifyBrowserReadSession).mockReturnValue(false);
     controller = new MediaMtxAuthController(mediaMtxService, cameraSourcesRepository);
+  });
+
+  it('allows a camera-bound WebRTC read token for an enabled media path', async () => {
+    jest.mocked(mediaMtxService.verifyBrowserReadSession).mockReturnValue(true);
+    jest.mocked(cameraSourcesRepository.isEnabledMediaPath).mockResolvedValue(true);
+
+    await expect(
+      controller.authorize({
+        action: 'read',
+        protocol: 'webrtc',
+        path: 'cam_front',
+        token: 'viewer-token',
+      }),
+    ).resolves.toBeUndefined();
+    expect(mediaMtxService.verifyBrowserReadSession).toHaveBeenCalledWith(
+      'cam_front',
+      'viewer-token',
+    );
+    expect(cameraSourcesRepository.isEnabledMediaPath).toHaveBeenCalledWith('cam_front', 'read');
+  });
+
+  it('reads a camera-bound WebRTC token from the MediaMTX query payload', async () => {
+    jest.mocked(mediaMtxService.verifyBrowserReadSession).mockReturnValue(true);
+    jest.mocked(cameraSourcesRepository.isEnabledMediaPath).mockResolvedValue(true);
+
+    await expect(
+      controller.authorize({
+        action: 'read',
+        protocol: 'webrtc',
+        path: 'cam_front',
+        query: 'token=viewer-token&autoplay=true',
+      }),
+    ).resolves.toBeUndefined();
+    expect(mediaMtxService.verifyBrowserReadSession).toHaveBeenCalledWith(
+      'cam_front',
+      'viewer-token',
+    );
+  });
+
+  it('rejects a query token that is not bound to the requested camera', async () => {
+    jest.mocked(mediaMtxService.verifyBrowserReadSession).mockReturnValue(false);
+
+    await expect(
+      controller.authorize({
+        action: 'read',
+        protocol: 'webrtc',
+        path: 'cam_other',
+        query: 'token=viewer-token',
+      }),
+    ).rejects.toThrow(UnauthorizedException);
+    expect(cameraSourcesRepository.isEnabledMediaPath).not.toHaveBeenCalled();
   });
 
   it('allows only a valid WebRTC publish token for its bound camera path', async () => {

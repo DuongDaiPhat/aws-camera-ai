@@ -1,8 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { revokeBrowserPublishSession } from '@/lib/cameras-client';
-import { publishWebcam } from './source/webcam-publish';
+import { useEffect, useRef, useState } from 'react';
+import { useWebcamSession } from './source/webcam-session-manager';
 import styles from './styles/camera-source-form.module.css';
 
 interface WebcamPublisherProps {
@@ -49,28 +48,28 @@ function WebcamNotice() {
       <span>⚠️</span>
       <span>
         <strong>Lưu ý:</strong> Luồng phát webcam trực tiếp từ trình duyệt sử dụng giao thức WebRTC
-        (WHIP). Luồng sẽ dừng nếu bạn đóng tab hoặc rời khỏi trang này.
+        (WHIP). Luồng sẽ tiếp tục phát khi bạn chuyển tab hoặc xem trực tiếp, và chỉ dừng khi bạn
+        bấm nút dừng phát hoặc đóng trình duyệt.
       </span>
     </div>
   );
 }
 
-function openWebcam(deviceId: string): Promise<MediaStream> {
-  const video = deviceId ? { deviceId: { exact: deviceId } } : true;
-  return navigator.mediaDevices.getUserMedia({ video });
-}
-
 export function WebcamPublisher({ cameraId, isAdmin, onSourceUpdated }: WebcamPublisherProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const pcRef = useRef<RTCPeerConnection | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
-  const [isPreviewing, setIsPreviewing] = useState<boolean>(false);
-  const [isPublishing, setIsPublishing] = useState<boolean>(false);
-  const [isStarting, setIsStarting] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    stream,
+    deviceId,
+    isPreviewing,
+    isPublishing,
+    isStarting,
+    error,
+    startPreview,
+    startPublish,
+    stop,
+    setDeviceId,
+  } = useWebcamSession(cameraId);
 
   useEffect(() => {
     async function loadDevices() {
@@ -79,70 +78,34 @@ export function WebcamPublisher({ cameraId, isAdmin, onSourceUpdated }: WebcamPu
         const allDevices = await navigator.mediaDevices.enumerateDevices();
         const videoDevices = allDevices.filter((d) => d.kind === 'videoinput');
         setDevices(videoDevices);
-        if (videoDevices.length > 0) setSelectedDeviceId(videoDevices[0].deviceId);
+        if (videoDevices.length > 0 && !deviceId) setDeviceId(videoDevices[0].deviceId);
       } catch {
         // bỏ qua nếu chưa được cấp quyền
       }
     }
     void loadDevices();
-  }, []);
+  }, [deviceId, setDeviceId]);
 
-  const stopAll = useCallback(() => {
-    const hadPublisher = pcRef.current !== null;
-    if (pcRef.current) {
-      pcRef.current.close();
-      pcRef.current = null;
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
     }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
-    }
-    if (videoRef.current) videoRef.current.srcObject = null;
-    setIsPreviewing(false);
-    setIsPublishing(false);
-    if (hadPublisher) {
-      void revokeBrowserPublishSession(cameraId).catch(() => {
-        console.warn('Không thể thu hồi phiên truyền phát webcam');
-      });
-    }
-  }, [cameraId]);
+  }, [stream]);
 
-  useEffect(() => () => stopAll(), [stopAll]);
-
-  const startPreview = async () => {
-    setError(null);
+  const handleStartPreview = async () => {
     try {
-      const stream = await openWebcam(selectedDeviceId);
-      streamRef.current = stream;
-      if (videoRef.current) videoRef.current.srcObject = stream;
-      setIsPreviewing(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể truy cập webcam');
+      await startPreview(deviceId);
+    } catch {
+      // error is recorded in session
     }
   };
 
-  const startPublish = async () => {
+  const handleStartPublish = async () => {
     if (!isAdmin || isStarting) return;
-    setIsStarting(true);
-    setError(null);
     try {
-      if (!streamRef.current) await startPreview();
-      const stream = streamRef.current;
-      if (!stream) throw new Error('Không có luồng video');
-      const pc = await publishWebcam(cameraId, stream);
-      pcRef.current = pc;
-      pc.addEventListener('connectionstatechange', () => {
-        if (pc.connectionState !== 'failed') return;
-        setError('Kết nối webcam tới MediaMTX đã thất bại');
-        stopAll();
-      });
-      setIsPublishing(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Lỗi truyền phát WHIP');
-      stopAll();
-    } finally {
-      setIsStarting(false);
-      onSourceUpdated?.();
+      await startPublish(onSourceUpdated);
+    } catch {
+      // error is recorded in session
     }
   };
 
@@ -154,9 +117,9 @@ export function WebcamPublisher({ cameraId, isAdmin, onSourceUpdated }: WebcamPu
 
       <WebcamDevicePicker
         devices={devices}
-        value={selectedDeviceId}
+        value={deviceId}
         disabled={isPreviewing || isPublishing}
-        onChange={setSelectedDeviceId}
+        onChange={setDeviceId}
       />
 
       <div className={styles.webcamBox}>
@@ -164,12 +127,16 @@ export function WebcamPublisher({ cameraId, isAdmin, onSourceUpdated }: WebcamPu
 
         <div className={styles.actionsRow}>
           {!isPreviewing && !isPublishing ? (
-            <button type="button" className={styles.submitBtn} onClick={() => void startPreview()}>
+            <button
+              type="button"
+              className={styles.submitBtn}
+              onClick={() => void handleStartPreview()}
+            >
               Bật xem trước Webcam
             </button>
           ) : (
-            <button type="button" className={styles.stopBtn} onClick={stopAll}>
-              Tắt xem trước
+            <button type="button" className={styles.stopBtn} onClick={() => void stop()}>
+              {isPublishing ? 'Dừng phát webcam' : 'Tắt xem trước'}
             </button>
           )}
 
@@ -178,7 +145,7 @@ export function WebcamPublisher({ cameraId, isAdmin, onSourceUpdated }: WebcamPu
               type="button"
               className={styles.submitBtn}
               disabled={isStarting}
-              onClick={() => void startPublish()}
+              onClick={() => void handleStartPublish()}
             >
               {isStarting ? 'Đang kết nối...' : 'Bắt đầu truyền phát WHIP'}
             </button>

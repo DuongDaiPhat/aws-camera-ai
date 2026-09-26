@@ -11,6 +11,7 @@ import { EventsService } from '../events/events.service';
 import { EventMediaRepository } from '../media/event-media.repository';
 import { MediaService } from '../media/media.service';
 import { FrigateEventAfterDto, FrigateEventMessageDto } from './dto/frigate-event.dto';
+import { FrigateDetectionTrackerService } from '../frigate/frigate-detection-tracker.service';
 
 const DEFAULT_MQTT_CONNECT_TIMEOUT_MS = 10_000;
 const DEFAULT_MQTT_RECONNECT_PERIOD_MS = 3_000;
@@ -42,6 +43,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     private readonly eventsRepository: EventsRepository,
     private readonly eventMediaRepository: EventMediaRepository,
     private readonly mediaService: MediaService,
+    private readonly detectionTracker: FrigateDetectionTrackerService,
     @Optional() private readonly eventsService?: EventsService,
   ) {}
 
@@ -346,6 +348,8 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     if (!message || message.after.label !== 'person') {
       return;
     }
+
+    this.detectionTracker.track(message.type, message.after);
 
     try {
       const { event, isCreated } = await this.synchronizeEvent(message.type, message.after);

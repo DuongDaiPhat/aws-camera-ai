@@ -11,6 +11,12 @@ export interface BrowserSessionResult {
   expiresAt: string;
 }
 
+export interface BrowserReadSessionResult {
+  streamUrl: string;
+  token: string;
+  expiresAt: string;
+}
+
 interface ActiveSessionEntry {
   token: string;
   slug: string;
@@ -27,6 +33,8 @@ export class MediaMtxService {
   private readonly publishPassword: string;
   private readonly activeSessions = new Map<string, ActiveSessionEntry>();
   private readonly tokenMap = new Map<string, ActiveSessionEntry>();
+  private readonly activeReadSessions = new Map<string, ActiveSessionEntry>();
+  private readonly readTokenMap = new Map<string, ActiveSessionEntry>();
 
   constructor(private readonly configService: ConfigService) {
     this.webrtcBaseUrl = this.configService.get<string>(
@@ -99,6 +107,59 @@ export class MediaMtxService {
     }
 
     return true;
+  }
+
+  createBrowserReadSession(slug: string, cameraId?: string): BrowserReadSessionResult {
+    this.assertValidSlug(slug);
+
+    const effectiveId = cameraId ?? slug;
+    const existing = this.activeReadSessions.get(effectiveId);
+    if (existing?.slug === slug && existing.expiresAt.getTime() > Date.now() + 30_000) {
+      return this.buildBrowserReadSessionResult(existing);
+    }
+    this.revokeBrowserReadSession(effectiveId);
+
+    const token = randomUUID();
+    const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
+    const entry: ActiveSessionEntry = {
+      token,
+      slug,
+      cameraId: effectiveId,
+      expiresAt,
+    };
+
+    this.activeReadSessions.set(effectiveId, entry);
+    this.readTokenMap.set(token, entry);
+
+    return this.buildBrowserReadSessionResult(entry);
+  }
+
+  verifyBrowserReadSession(slug: string, token: string): boolean {
+    const entry = this.readTokenMap.get(token);
+    if (!entry || entry.slug !== slug) return false;
+
+    if (entry.expiresAt.getTime() <= Date.now()) {
+      this.revokeBrowserReadSession(entry.cameraId);
+      return false;
+    }
+
+    return true;
+  }
+
+  private revokeBrowserReadSession(cameraIdOrSlug: string): boolean {
+    const entry = this.activeReadSessions.get(cameraIdOrSlug);
+    if (!entry) return false;
+    this.activeReadSessions.delete(cameraIdOrSlug);
+    this.readTokenMap.delete(entry.token);
+    return true;
+  }
+
+  private buildBrowserReadSessionResult(entry: ActiveSessionEntry): BrowserReadSessionResult {
+    return {
+      streamUrl: `${this.webrtcBaseUrl.replace(/\/$/, '')}/${entry.slug}/?token=${encodeURIComponent(entry.token)}`,
+      token: entry.token,
+      expiresAt: entry.expiresAt.toISOString(),
+    };
   }
 
   hasActiveSession(cameraIdOrSlug: string): boolean {

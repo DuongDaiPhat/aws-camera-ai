@@ -45,6 +45,31 @@ export async function publishWebcam(
   try {
     stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
+    // Ưu tiên codec H.264 để MediaMTX và Frigate xử lý trực tiếp không cần transcode
+    if (typeof pc.getTransceivers === 'function') {
+      const transceivers = pc.getTransceivers();
+      for (const t of transceivers) {
+        if (
+          t.sender?.track?.kind === 'video' &&
+          'setCodecPreferences' in t &&
+          typeof RTCRtpSender.getCapabilities === 'function'
+        ) {
+          const capabilities = RTCRtpSender.getCapabilities('video');
+          if (capabilities) {
+            const h264Codecs = capabilities.codecs.filter(
+              (c) => c.mimeType.toLowerCase() === 'video/h264',
+            );
+            const otherCodecs = capabilities.codecs.filter(
+              (c) => c.mimeType.toLowerCase() !== 'video/h264',
+            );
+            if (h264Codecs.length > 0) {
+              t.setCodecPreferences([...h264Codecs, ...otherCodecs]);
+            }
+          }
+        }
+      }
+    }
+
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
     await waitForIceGathering(pc);

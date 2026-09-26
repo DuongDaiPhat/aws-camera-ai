@@ -77,8 +77,8 @@ export class CameraSourcesRepository {
          JOIN camera_sources s ON s.camera_id = c.id
          WHERE c.slug = $1 AND c.is_enabled = true
            AND (
-             ($2 = 'read' AND s.source_type IN ('VIDEO_FILE', 'BROWSER_WEBCAM'))
-             OR ($2 = 'publish' AND s.source_type IN ('VIDEO_FILE', 'BROWSER_WEBCAM'))
+             ($2 = 'read' AND s.source_type IN ('VIDEO_FILE', 'BROWSER_WEBCAM', 'RTSP'))
+             OR ($2 = 'publish' AND s.source_type IN ('VIDEO_FILE', 'BROWSER_WEBCAM', 'RTSP'))
              OR ($2 = 'publish_browser' AND s.source_type = 'BROWSER_WEBCAM')
            )
        ) AS allowed`,

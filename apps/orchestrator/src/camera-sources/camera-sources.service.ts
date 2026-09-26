@@ -1,6 +1,10 @@
 import { Inject, Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { SOURCE_RUNNER, type ISourceRunner } from './source-runner.interface';
-import { MediaMtxService, type BrowserSessionResult } from './media-mtx.service';
+import {
+  MediaMtxService,
+  type BrowserReadSessionResult,
+  type BrowserSessionResult,
+} from './media-mtx.service';
 import { CameraSourcesRepository } from './camera-sources.repository';
 import type { CameraSourceType } from '../cameras/cameras.types';
 import {
@@ -74,6 +78,10 @@ export class CameraSourcesService implements OnModuleInit {
 
   createBrowserSession(slug: string, cameraId?: string): BrowserSessionResult {
     return this.mediaMtxService.createBrowserSession(slug, cameraId);
+  }
+
+  createBrowserReadSession(slug: string, cameraId?: string): BrowserReadSessionResult {
+    return this.mediaMtxService.createBrowserReadSession(slug, cameraId);
   }
 
   revokeBrowserSession(cameraId: string): boolean {

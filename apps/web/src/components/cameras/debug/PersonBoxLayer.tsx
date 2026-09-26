@@ -42,11 +42,12 @@ export function PersonBoxLayer({
         fill="rgba(56, 189, 248, 0.12)"
         stroke="#38bdf8"
         strokeWidth="2"
+        rx={4}
       />
 
       {/* Header nhãn nhận diện */}
-      <rect x={px} y={py - 22} width={100} height={22} rx={3} fill="#0284c7" />
-      <text x={px + 6} y={py - 7} fill="#ffffff" fontSize="11" fontWeight="bold">
+      <rect x={px} y={Math.max(0, py - 22)} width={100} height={22} rx={3} fill="#0284c7" />
+      <text x={px + 6} y={Math.max(15, py - 7)} fill="#ffffff" fontSize="11" fontWeight="bold">
         👤 {person.label ?? 'person'} {(person.confidence * 100).toFixed(0)}%
       </text>
 

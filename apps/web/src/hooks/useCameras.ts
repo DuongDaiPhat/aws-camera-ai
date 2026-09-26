@@ -34,7 +34,7 @@ async function executeCameraToggle(params: ToggleParams): Promise<boolean> {
   setCameras((prev) =>
     prev.map((c) =>
       c.id === cameraId
-        ? { ...c, isEnabled: target, runtimeStatus: target ? 'ONLINE' : 'DISABLED' }
+        ? { ...c, isEnabled: target, runtimeStatus: target ? 'STARTING' : 'DISABLED' }
         : c,
     ),
   );
@@ -65,23 +65,27 @@ export function useCameras(initialCameraId?: string): UseCamerasReturn {
   const [error, setError] = useState<string | null>(null);
   const [toggleLoadingMap, setToggleLoadingMap] = useState<Record<string, boolean>>({});
 
-  const loadCameras = useCallback(async () => {
-    setIsLoading(true);
+  const refreshCameras = useCallback(async (showLoading: boolean) => {
+    if (showLoading) setIsLoading(true);
     setError(null);
     try {
       const data = await fetchCameras();
       setCameras(data);
-      if (data.length > 0 && !selectedCameraId) setSelectedCameraId(data[0].id);
+      setSelectedCameraId((current) => current ?? data[0]?.id ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể tải danh sách camera');
     } finally {
-      setIsLoading(false);
+      if (showLoading) setIsLoading(false);
     }
-  }, [selectedCameraId]);
+  }, []);
+
+  const loadCameras = useCallback(async () => refreshCameras(true), [refreshCameras]);
 
   useEffect(() => {
     void loadCameras();
-  }, [loadCameras]);
+    const refreshTimer = setInterval(() => void refreshCameras(false), 2000);
+    return () => clearInterval(refreshTimer);
+  }, [loadCameras, refreshCameras]);
 
   const selectedCamera = useMemo(() => {
     return cameras.find((c) => c.id === selectedCameraId) ?? cameras[0] ?? null;

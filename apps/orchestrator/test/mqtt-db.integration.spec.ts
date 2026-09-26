@@ -11,6 +11,7 @@ import { EventsRepository } from '../src/events/events.repository';
 import { MqttConsumerService } from '../src/ingestion/mqtt-consumer.service';
 import { EventMediaRepository } from '../src/media/event-media.repository';
 import { MediaService } from '../src/media/media.service';
+import { FrigateDetectionTrackerService } from '../src/frigate/frigate-detection-tracker.service';
 import {
   IStorageService,
   PresignedUrlResult,
@@ -272,12 +273,14 @@ describe('US-08 - Integration MQTT đến PostgreSQL', () => {
       eventMediaRepository,
       new UnusedStorageService(),
     );
+    const detectionTracker = new FrigateDetectionTrackerService(configService);
 
     consumer = new MqttConsumerService(
       configService,
       eventsRepository,
       eventMediaRepository,
       mediaService,
+      detectionTracker,
     );
     consumer.connect();
   }
