@@ -304,4 +304,3 @@ describe('confirmEvent and closeEvent (US-13)', () => {
     expect(result).toEqual(mockConfirmation);
   });
 });
-

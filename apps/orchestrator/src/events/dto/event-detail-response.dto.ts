@@ -28,4 +28,3 @@ export class EventDetailDto extends EventSummaryDto {
   ruleSnapshot?: Record<string, unknown> | null;
   triggeringResults?: AiResultItem[];
 }
-

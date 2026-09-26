@@ -7,15 +7,7 @@ import { EscalationDeadlineWorkerService } from './escalation-deadline-worker.se
 
 @Module({
   imports: [DatabaseModule, EscalationRulesModule],
-  providers: [
-    EscalationRepository,
-    EscalationEngineService,
-    EscalationDeadlineWorkerService,
-  ],
-  exports: [
-    EscalationRepository,
-    EscalationEngineService,
-    EscalationDeadlineWorkerService,
-  ],
+  providers: [EscalationRepository, EscalationEngineService, EscalationDeadlineWorkerService],
+  exports: [EscalationRepository, EscalationEngineService, EscalationDeadlineWorkerService],
 })
 export class EscalationModule {}

@@ -359,15 +359,11 @@ export function EventDetailModal({
                 )}
 
                 {currentStatus === 'RESOLVED' && (
-                  <span className={styles.statusDoneBadge}>
-                    ✅ Đã xác nhận an toàn
-                  </span>
+                  <span className={styles.statusDoneBadge}>✅ Đã xác nhận an toàn</span>
                 )}
 
                 {currentStatus === 'CLOSED' && (
-                  <span className={styles.statusDoneBadge}>
-                    🏁 Sự kiện khẩn cấp đã được đóng
-                  </span>
+                  <span className={styles.statusDoneBadge}>🏁 Sự kiện khẩn cấp đã được đóng</span>
                 )}
               </div>
             </div>
@@ -377,4 +373,3 @@ export function EventDetailModal({
     </div>
   );
 }
-

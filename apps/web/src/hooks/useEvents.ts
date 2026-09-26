@@ -269,9 +269,7 @@ export function useEvents() {
     async (id: string, note?: string) => {
       try {
         await closeEvent(id, note);
-        setEvents((prev) =>
-          updateItem(prev, id, (e) => ({ ...e, status: 'CLOSED' })),
-        );
+        setEvents((prev) => updateItem(prev, id, (e) => ({ ...e, status: 'CLOSED' })));
       } catch (err) {
         reload();
         throw err;

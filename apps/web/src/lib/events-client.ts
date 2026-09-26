@@ -124,10 +124,7 @@ export function confirmEvent(
 /**
  * Đóng sự kiện khẩn cấp sau khi đã tiếp nhận xử lý - FR-ESC-04/09 (US-13 Phase EMERGENCY).
  */
-export function closeEvent(
-  eventId: string,
-  note?: string,
-): Promise<Confirmation> {
+export function closeEvent(eventId: string, note?: string): Promise<Confirmation> {
   return apiFetch<Confirmation>(`/events/${eventId}/close`, {
     method: 'POST',
     body: JSON.stringify({ note }),

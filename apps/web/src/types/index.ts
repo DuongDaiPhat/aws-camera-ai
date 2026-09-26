@@ -17,7 +17,6 @@ export type EventStats = components['schemas']['EventStats'];
 export type AiResultItem = components['schemas']['AiResultItem'];
 export type Confirmation = components['schemas']['Confirmation'];
 
-
 export type AiTagColor = 'danger' | 'warning' | 'info' | 'success' | 'neutral';
 
 export interface UIEventItem extends EventSummary {

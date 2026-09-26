@@ -47,13 +47,7 @@ export const NOTIFICATION_CHANNELS = [
 ] as const;
 export type NotificationChannel = (typeof NOTIFICATION_CHANNELS)[number];
 
-export const NOTIFICATION_STATUSES = [
-  'PENDING',
-  'SENT',
-  'FAILED',
-  'CONFIRMED',
-  'SKIPPED',
-] as const;
+export const NOTIFICATION_STATUSES = ['PENDING', 'SENT', 'FAILED', 'CONFIRMED', 'SKIPPED'] as const;
 export type NotificationStatus = (typeof NOTIFICATION_STATUSES)[number];
 
 export const CONFIRMATION_RESPONSES = ['IM_OK', 'NEED_HELP', 'ACKNOWLEDGED'] as const;

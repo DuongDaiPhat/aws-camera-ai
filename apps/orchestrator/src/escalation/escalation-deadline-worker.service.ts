@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  type OnModuleInit,
-  type OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, Logger, type OnModuleInit, type OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EscalationRepository } from './escalation.repository';
 
@@ -22,9 +17,7 @@ export class EscalationDeadlineWorkerService implements OnModuleInit, OnModuleDe
     this.pollIntervalMs = Number(
       this.configService.get<number>('ESCALATION_POLL_INTERVAL_MS') ?? 5000,
     );
-    this.batchSize = Number(
-      this.configService.get<number>('ESCALATION_BATCH_SIZE') ?? 10,
-    );
+    this.batchSize = Number(this.configService.get<number>('ESCALATION_BATCH_SIZE') ?? 10);
   }
 
   onModuleInit(): void {
@@ -61,10 +54,7 @@ export class EscalationDeadlineWorkerService implements OnModuleInit, OnModuleDe
 
     try {
       await client.query('BEGIN');
-      const dueEvents = await this.repository.findDueEventsForEscalation(
-        client,
-        this.batchSize,
-      );
+      const dueEvents = await this.repository.findDueEventsForEscalation(client, this.batchSize);
 
       if (dueEvents.length === 0) {
         await client.query('COMMIT');

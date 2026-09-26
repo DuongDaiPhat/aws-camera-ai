@@ -163,7 +163,11 @@ export class EscalationEngineService {
       }
 
       // Kiem tra da co xac nhan authoritative INITIAL chua
-      const existingAuth = await this.repository.findAuthoritativeConfirmation(client, eventId, 'INITIAL');
+      const existingAuth = await this.repository.findAuthoritativeConfirmation(
+        client,
+        eventId,
+        'INITIAL',
+      );
       if (existingAuth) {
         // Ghi nhan lan bam sau voi is_authoritative = false de phuc vu kiem toan (US-14)
         await this.repository.createConfirmation(client, {
@@ -322,7 +326,11 @@ export class EscalationEngineService {
       }
 
       // Kiem tra da co xac nhan authoritative EMERGENCY chua
-      const existingAuth = await this.repository.findAuthoritativeConfirmation(client, eventId, 'EMERGENCY');
+      const existingAuth = await this.repository.findAuthoritativeConfirmation(
+        client,
+        eventId,
+        'EMERGENCY',
+      );
       if (existingAuth) {
         await client.query('ROLLBACK');
         throw new ConflictException({

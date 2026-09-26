@@ -31,6 +31,8 @@ export class ConfirmationResponseDto {
   @ApiProperty({ format: 'date-time' })
   respondedAt!: string;
 
-  @ApiProperty({ enum: ['DETECTED', 'LOGGED_ONLY', 'NOTIFIED', 'ESCALATED', 'RESOLVED', 'CLOSED', 'AI_FAILED'] })
+  @ApiProperty({
+    enum: ['DETECTED', 'LOGGED_ONLY', 'NOTIFIED', 'ESCALATED', 'RESOLVED', 'CLOSED', 'AI_FAILED'],
+  })
   resultingStatus!: EventStatus;
 }

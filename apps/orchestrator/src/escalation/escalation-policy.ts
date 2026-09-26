@@ -1,9 +1,4 @@
-import type {
-  EventType,
-  PriorityLevel,
-  EventStatus,
-  NotificationChannel,
-} from '@cam/contracts';
+import type { EventType, PriorityLevel, EventStatus, NotificationChannel } from '@cam/contracts';
 import { computeEffectiveHighWaitSeconds } from '../escalation-rules/escalation-rule-policy';
 
 export interface AiCandidateResult {

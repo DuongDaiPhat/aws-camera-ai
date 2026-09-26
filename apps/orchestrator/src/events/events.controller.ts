@@ -91,7 +91,8 @@ export class EventsController {
   @Roles('ADMIN', 'CAREGIVER')
   @ApiOperation({
     summary: 'Xác nhận sự kiện ("Tôi ổn" / "Cần giúp đỡ") - FR-ESC-03/04 (US-13)',
-    description: 'Chỉ ADMIN và CAREGIVER mới có quyền xác nhận. Nhận response IM_OK hoặc NEED_HELP.',
+    description:
+      'Chỉ ADMIN và CAREGIVER mới có quyền xác nhận. Nhận response IM_OK hoặc NEED_HELP.',
   })
   @ApiParam({ name: 'eventId', type: 'string', format: 'uuid' })
   @ApiBody({ type: ConfirmEventDto })
@@ -124,7 +125,10 @@ export class EventsController {
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
   @ApiResponse({ status: 403, description: 'Không có quyền thực hiện' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy sự kiện' })
-  @ApiResponse({ status: 409, description: 'Sự kiện không ở trạng thái ESCALATED hoặc đã được đóng trước' })
+  @ApiResponse({
+    status: 409,
+    description: 'Sự kiện không ở trạng thái ESCALATED hoặc đã được đóng trước',
+  })
   async closeEvent(
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Body() dto: CloseEventDto,
@@ -134,4 +138,3 @@ export class EventsController {
     return await this.eventsService.closeEvent(eventId, actorUserId, dto);
   }
 }
-

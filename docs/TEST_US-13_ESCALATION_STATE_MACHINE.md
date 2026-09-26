@@ -2,7 +2,7 @@
 
 **Mã User Story:** US-13  
 **Nhánh:** `feat/US-13-escalation-state-machine`  
-**Yêu cầu kỹ thuật:** FR-ESC-01, FR-ESC-02, FR-ESC-03, FR-ESC-04, FR-ESC-05, FR-ESC-06, FR-ESC-07, FR-ESC-08, FR-ESC-09, FR-EVT-05, FR-DSH-06  
+**Yêu cầu kỹ thuật:** FR-ESC-01, FR-ESC-02, FR-ESC-03, FR-ESC-04, FR-ESC-05, FR-ESC-06, FR-ESC-07, FR-ESC-08, FR-ESC-09, FR-EVT-05, FR-DSH-06
 
 ---
 
@@ -34,16 +34,16 @@
 
 ## 2. Ma Trận Kiểm Thử Tự Động (Automated Test Matrix)
 
-| Khu Vực / Module | File Test | Số Test | Trạng Thái | Mô Tả |
-| :--- | :--- | :--- | :--- | :--- |
-| **Escalation Policy** | `apps/orchestrator/test/escalation-policy.spec.ts` | 10 | PASS | Logic đánh giá ngưỡng T_low, T_high, T_wait_seconds, skip_logged_only, null thresholds, multi-label |
-| **Escalation Engine** | `apps/orchestrator/test/escalation-engine.service.spec.ts` | 11 | PASS | Giao dịch PostgreSQL row locking (`FOR UPDATE`), 2-phase confirmation (`INITIAL`, `EMERGENCY`), outbox intents, idempotency 409 audit logging |
-| **Deadline Worker** | `apps/orchestrator/test/escalation-deadline-worker.service.spec.ts` | 3 | PASS | Quét định kỳ timeout, phục hồi sự kiện trễ deadline sau server restart, concurrency guard |
-| **Events Service** | `apps/orchestrator/test/events.service.spec.ts` | 17 | PASS | Phân trang, chi tiết kèm snapshot/history, `confirmEvent`, `closeEvent`, phát SSE `event.updated` |
-| **Events Controller** | `apps/orchestrator/test/events.controller.spec.ts` | 4 | PASS | REST API endpoints `POST /events/:id/confirm`, `POST /events/:id/close` kèm phân quyền RBAC |
-| **Frontend Client** | `apps/web/src/lib/events-client.spec.ts` | 13 | PASS | Gọi API `confirmEvent`, `closeEvent`, xử lý SSE realtime |
-| **Frontend UI/Components** | `apps/web` test suite tổng hợp | 43 | PASS | Modal chi tiết sự kiện, phân trang, bộ lọc sự kiện |
-| **Tổng Cộng** | **Toàn bộ monorepo** | **183+ tests** | **100% PASS** | Tất cả pass, 0 lỗi TypeScript, 0 lỗi ESLint |
+| Khu Vực / Module           | File Test                                                           | Số Test        | Trạng Thái    | Mô Tả                                                                                                                                         |
+| :------------------------- | :------------------------------------------------------------------ | :------------- | :------------ | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Escalation Policy**      | `apps/orchestrator/test/escalation-policy.spec.ts`                  | 10             | PASS          | Logic đánh giá ngưỡng T_low, T_high, T_wait_seconds, skip_logged_only, null thresholds, multi-label                                           |
+| **Escalation Engine**      | `apps/orchestrator/test/escalation-engine.service.spec.ts`          | 11             | PASS          | Giao dịch PostgreSQL row locking (`FOR UPDATE`), 2-phase confirmation (`INITIAL`, `EMERGENCY`), outbox intents, idempotency 409 audit logging |
+| **Deadline Worker**        | `apps/orchestrator/test/escalation-deadline-worker.service.spec.ts` | 3              | PASS          | Quét định kỳ timeout, phục hồi sự kiện trễ deadline sau server restart, concurrency guard                                                     |
+| **Events Service**         | `apps/orchestrator/test/events.service.spec.ts`                     | 17             | PASS          | Phân trang, chi tiết kèm snapshot/history, `confirmEvent`, `closeEvent`, phát SSE `event.updated`                                             |
+| **Events Controller**      | `apps/orchestrator/test/events.controller.spec.ts`                  | 4              | PASS          | REST API endpoints `POST /events/:id/confirm`, `POST /events/:id/close` kèm phân quyền RBAC                                                   |
+| **Frontend Client**        | `apps/web/src/lib/events-client.spec.ts`                            | 13             | PASS          | Gọi API `confirmEvent`, `closeEvent`, xử lý SSE realtime                                                                                      |
+| **Frontend UI/Components** | `apps/web` test suite tổng hợp                                      | 43             | PASS          | Modal chi tiết sự kiện, phân trang, bộ lọc sự kiện                                                                                            |
+| **Tổng Cộng**              | **Toàn bộ monorepo**                                                | **183+ tests** | **100% PASS** | Tất cả pass, 0 lỗi TypeScript, 0 lỗi ESLint                                                                                                   |
 
 ---
 

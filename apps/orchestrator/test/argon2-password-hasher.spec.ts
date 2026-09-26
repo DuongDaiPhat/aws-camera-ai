@@ -1,7 +1,11 @@
-jest.mock('argon2', () => ({
-  hash: jest.fn(),
-  verify: jest.fn(),
-}), { virtual: true });
+jest.mock(
+  'argon2',
+  () => ({
+    hash: jest.fn(),
+    verify: jest.fn(),
+  }),
+  { virtual: true },
+);
 
 import { Argon2PasswordHasher } from '../src/auth/argon2-password-hasher';
 import * as argon2 from 'argon2';
