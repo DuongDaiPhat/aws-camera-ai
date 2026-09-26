@@ -82,6 +82,7 @@ export function DashboardView() {
     simulateNewEvent,
     confirmOk,
     confirmHelp,
+    closeEmergency,
     toggleFalseAlarm,
     resetFilters,
   } = useEvents();
@@ -178,12 +179,16 @@ export function DashboardView() {
         <EventDetailModal
           event={selectedEventForModal}
           onClose={() => setSelectedEventForModal(null)}
-          onConfirmOk={(id) => {
-            confirmOk(id);
+          onConfirmOk={async (id, note) => {
+            await confirmOk(id, note);
             setSelectedEventForModal(null);
           }}
-          onConfirmHelp={(id) => {
-            confirmHelp(id);
+          onConfirmHelp={async (id, note) => {
+            await confirmHelp(id, note);
+            setSelectedEventForModal(null);
+          }}
+          onCloseEmergency={async (id, note) => {
+            await closeEmergency(id, note);
             setSelectedEventForModal(null);
           }}
           onToggleFalseAlarm={(id) => {

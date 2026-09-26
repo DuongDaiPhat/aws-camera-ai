@@ -47,8 +47,14 @@ export const NOTIFICATION_CHANNELS = [
 ] as const;
 export type NotificationChannel = (typeof NOTIFICATION_CHANNELS)[number];
 
+export const NOTIFICATION_STATUSES = ['PENDING', 'SENT', 'FAILED', 'CONFIRMED', 'SKIPPED'] as const;
+export type NotificationStatus = (typeof NOTIFICATION_STATUSES)[number];
+
 export const CONFIRMATION_RESPONSES = ['IM_OK', 'NEED_HELP', 'ACKNOWLEDGED'] as const;
 export type ConfirmationResponse = (typeof CONFIRMATION_RESPONSES)[number];
+
+export const CONFIRMATION_PHASES = ['INITIAL', 'EMERGENCY'] as const;
+export type ConfirmationPhase = (typeof CONFIRMATION_PHASES)[number];
 
 export const MEDIA_TYPES = ['SNAPSHOT', 'CLIP', 'THUMBNAIL'] as const;
 export type MediaType = (typeof MEDIA_TYPES)[number];

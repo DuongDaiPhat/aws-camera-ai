@@ -24,4 +24,7 @@ export class EventDetailDto extends EventSummaryDto {
   closedAt!: string | null;
   media!: EventMedia[];
   statusHistory!: EventStatusHistoryEntry[];
+  version!: number;
+  ruleSnapshot?: Record<string, unknown> | null;
+  triggeringResults?: AiResultItem[];
 }

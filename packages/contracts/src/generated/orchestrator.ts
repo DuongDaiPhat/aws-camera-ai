@@ -646,6 +646,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/events/{eventId}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dong su kien khan cap sau khi tiep nhan xu ly
+         * @description FR-ESC-04/09. Dong su kien dang o trang thai ESCALATED thanh CLOSED.
+         *     Ghi nhan nguoi dong, thoi diem va ly do dong su kien.
+         */
+        post: operations["closeEvent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/{eventId}/media": {
         parameters: {
             query?: never;
@@ -941,6 +964,8 @@ export interface components {
         NotificationStatus: "PENDING" | "SENT" | "FAILED" | "CONFIRMED" | "SKIPPED";
         /** @enum {string} */
         ConfirmationResponse: "IM_OK" | "NEED_HELP" | "ACKNOWLEDGED";
+        /** @enum {string} */
+        ConfirmationPhase: "INITIAL" | "EMERGENCY";
         /** @enum {string} */
         DeviceStatus: "ONLINE" | "OFFLINE" | "DEGRADED" | "DISABLED";
         ErrorResponse: {
@@ -1430,6 +1455,11 @@ export interface components {
             closedAt?: string | null;
             media?: components["schemas"]["EventMedia"][];
             statusHistory?: components["schemas"]["EventStatusHistoryEntry"][];
+            version?: number;
+            ruleSnapshot?: {
+                [key: string]: unknown;
+            } | null;
+            triggeringResults?: components["schemas"]["AiResultItem"][];
         };
         AiResultItem: {
             /** @enum {string} */
@@ -1536,18 +1566,25 @@ export interface components {
             response: components["schemas"]["ConfirmationResponse"];
             note?: string;
         };
+        /** @description Dong su kien khan cap sau khi tiep nhan va xu ly. */
+        CloseEventRequest: {
+            /** Format: uuid */
+            commandId?: string;
+            note?: string;
+        };
         Confirmation: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
             eventId: string;
+            phase: components["schemas"]["ConfirmationPhase"];
             response: components["schemas"]["ConfirmationResponse"];
             channel: components["schemas"]["NotificationChannel"];
             confirmedByName?: string | null;
             note?: string | null;
             /** Format: date-time */
             respondedAt: string;
-            /** @description IM_OK -> RESOLVED, NEED_HELP -> ESCALATED (FR-ESC-03/04). */
+            /** @description IM_OK -> RESOLVED, NEED_HELP -> ESCALATED, ACKNOWLEDGED -> CLOSED (FR-ESC-03/04). */
             resultingStatus: components["schemas"]["EventStatus"];
         };
         ConfirmationConflict: components["schemas"]["ErrorResponse"] & {
@@ -3153,6 +3190,45 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             /** @description Su kien da duoc xu ly boi nguoi khac */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConfirmationConflict"];
+                };
+            };
+        };
+    };
+    closeEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CloseEventRequest"];
+            };
+        };
+        responses: {
+            /** @description Da dong su kien thanh cong */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Confirmation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            /** @description Su kien khong o trang thai ESCALATED hoac da duoc dong */
             409: {
                 headers: {
                     [name: string]: unknown;
