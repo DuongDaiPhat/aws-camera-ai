@@ -7,6 +7,7 @@ import { fetchCameraDebugStream, fetchCameraZones } from '@/lib/cameras-client';
 import { CameraDebugToolbar } from './CameraDebugToolbar';
 import { ZonePolygonLayer } from './debug/ZonePolygonLayer';
 import { PersonBoxLayer, type DetectedPerson } from './debug/PersonBoxLayer';
+import { CameraLiveStream } from './CameraLiveStream';
 import styles from './styles/camera-preview.module.css';
 
 interface CameraPreviewProps {
@@ -61,7 +62,7 @@ export function CameraPreview({ camera }: CameraPreviewProps) {
       if (!isCancelled) setZones(cameraZones.filter((zone) => zone.isEnabled));
     });
     void loadDebugData();
-    const refreshTimer = camera.isEnabled ? setInterval(() => void loadDebugData(), 3000) : null;
+    const refreshTimer = camera.isEnabled ? setInterval(() => void loadDebugData(), 1000) : null;
     return () => {
       isCancelled = true;
       if (refreshTimer) clearInterval(refreshTimer);
@@ -107,11 +108,11 @@ export function CameraPreview({ camera }: CameraPreviewProps) {
       />
 
       <div className={styles.videoWrapper}>
-        {debugData?.snapshotUrl && camera.isEnabled ? (
-          <img
+        {debugData?.streamUrl && camera.isEnabled ? (
+          <CameraLiveStream
             className={styles.videoElement}
-            src={debugData.snapshotUrl}
-            alt={`Snapshot ${camera.name}`}
+            streamUrl={debugData.streamUrl}
+            title={camera.name}
           />
         ) : (
           <div className={styles.videoPlaceholder}>

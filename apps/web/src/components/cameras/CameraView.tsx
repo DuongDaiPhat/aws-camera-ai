@@ -8,6 +8,7 @@ import { CameraSourceForm } from './CameraSourceForm';
 import { CameraPreview } from './CameraPreview';
 import { CameraSettingsPanel } from './CameraSettingsPanel';
 import { CameraGridView } from './CameraGridView';
+import { stopWebcamSession } from './source/webcam-session-manager';
 import styles from './styles/camera-view.module.css';
 
 interface CameraViewProps {
@@ -126,9 +127,11 @@ function CameraDetailPanel({
         </button>
       </div>
 
-      {activeTab === 'preview' && <CameraPreview camera={camera} />}
+      <div style={{ display: activeTab === 'preview' ? 'block' : 'none' }}>
+        <CameraPreview camera={camera} />
+      </div>
 
-      {activeTab === 'source' && (
+      <div style={{ display: activeTab === 'source' ? 'block' : 'none' }}>
         <CameraSourceForm
           cameraId={camera.id}
           slug={camera.slug}
@@ -140,11 +143,11 @@ function CameraDetailPanel({
           isAdmin={isAdmin}
           onSourceUpdated={onRefreshCameras}
         />
-      )}
+      </div>
 
-      {activeTab === 'frigate' && (
+      <div style={{ display: activeTab === 'frigate' ? 'block' : 'none' }}>
         <CameraSettingsPanel camera={camera} isAdmin={isAdmin} onSynced={onRefreshCameras} />
-      )}
+      </div>
     </div>
   );
 }
@@ -169,6 +172,7 @@ export function CameraView({ user }: CameraViewProps) {
     if (typeof window !== 'undefined') {
       localStorage.setItem('camerai_view_mode', mode);
     }
+    void loadCameras();
   };
 
   const isAdmin = user?.role === 'ADMIN';
@@ -182,6 +186,13 @@ export function CameraView({ user }: CameraViewProps) {
     ).length;
     return { total, active, online, errors };
   }, [cameras]);
+
+  const handleToggleState = async (id: string, isEnabled: boolean) => {
+    if (!isEnabled) {
+      void stopWebcamSession(id);
+    }
+    await toggleCamera(id, isEnabled);
+  };
 
   return (
     <div className={styles.container}>
@@ -297,7 +308,7 @@ export function CameraView({ user }: CameraViewProps) {
             if (id) selectCamera(id);
             handleSetViewMode('list');
           }}
-          onToggleState={(id, isEnabled) => void toggleCamera(id, isEnabled)}
+          onToggleState={(id, isEnabled) => void handleToggleState(id, isEnabled)}
         />
       ) : (
         <div className={styles.contentGrid}>
@@ -307,14 +318,14 @@ export function CameraView({ user }: CameraViewProps) {
             isAdmin={isAdmin}
             toggleLoadingMap={toggleLoadingMap}
             onSelectCamera={selectCamera}
-            onToggleState={(id, isEnabled) => void toggleCamera(id, isEnabled)}
+            onToggleState={(id, isEnabled) => void handleToggleState(id, isEnabled)}
           />
 
           <CameraDetailPanel
             camera={selectedCamera}
             isAdmin={isAdmin}
             isToggling={Boolean(selectedCamera && toggleLoadingMap[selectedCamera.id])}
-            onToggleState={(id, isEnabled) => void toggleCamera(id, isEnabled)}
+            onToggleState={(id, isEnabled) => void handleToggleState(id, isEnabled)}
             onRefreshCameras={() => void loadCameras()}
           />
         </div>
