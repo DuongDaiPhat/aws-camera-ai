@@ -7,17 +7,27 @@ import { STORAGE_SERVICE } from '../src/storage/storage.interface';
 import { CameraSourcesService } from '../src/camera-sources/camera-sources.service';
 import { FrigateSyncService } from '../src/frigate/frigate-sync.service';
 import type { CameraAggregateRecord } from '../src/cameras/cameras.types';
+import { FrigateDetectionTrackerService } from '../src/frigate/frigate-detection-tracker.service';
 
 describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
   let service: CamerasService;
   let repository: jest.Mocked<CamerasRepository>;
   let storageService: { getPresignedUrl: jest.Mock };
-  let mockFrigateSyncService: { syncCamera: jest.Mock; waitForCameraFrames: jest.Mock };
+  let mockFrigateSyncService: {
+    syncCamera: jest.Mock;
+    waitForCameraFrames: jest.Mock;
+    isCameraReceivingFrames: jest.Mock;
+  };
+  let mockDetectionTracker: {
+    getActiveDetections: jest.Mock;
+    getActiveZones: jest.Mock;
+  };
   let mockCameraSourcesService: {
     startCameraSource: jest.Mock;
     stopCameraSource: jest.Mock;
     createBrowserSession: jest.Mock;
     revokeBrowserSession: jest.Mock;
+    createBrowserReadSession: jest.Mock;
     markCameraOnline: jest.Mock;
     testRtspConnection: jest.Mock;
   };
@@ -99,18 +109,29 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
         expiresAt: '2026-03-01T01:00:00.000Z',
       }),
       revokeBrowserSession: jest.fn(),
+      createBrowserReadSession: jest.fn().mockReturnValue({
+        streamUrl: `http://localhost:8889/${mockCamera.slug}/?token=viewer-token`,
+        token: 'viewer-token',
+        expiresAt: '2026-03-01T00:02:00.000Z',
+      }),
       markCameraOnline: jest.fn(),
       testRtspConnection: jest.fn(),
     };
 
     mockFrigateSyncService = {
       waitForCameraFrames: jest.fn().mockResolvedValue(false),
+      isCameraReceivingFrames: jest.fn().mockResolvedValue(false),
       syncCamera: jest.fn().mockImplementation(async (cameraId: string, version?: number) => ({
         success: true,
         cameraId,
         configVersion: version ?? 2,
         syncStatus: 'SYNCED',
       })),
+    };
+
+    mockDetectionTracker = {
+      getActiveDetections: jest.fn().mockReturnValue([]),
+      getActiveZones: jest.fn().mockReturnValue([]),
     };
 
     const mockConfigService = {
@@ -129,6 +150,7 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
         { provide: STORAGE_SERVICE, useValue: storageService },
         { provide: CameraSourcesService, useValue: mockCameraSourcesService },
         { provide: FrigateSyncService, useValue: mockFrigateSyncService },
+        { provide: FrigateDetectionTrackerService, useValue: mockDetectionTracker },
         { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
@@ -370,6 +392,17 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
   });
 
   describe('listCameras & Masking RTSP', () => {
+    it('chuyen camera STARTING sang ONLINE khi Frigate da nhan frame', async () => {
+      repository.findAll.mockResolvedValueOnce([{ ...mockCamera, source_status: 'STARTING' }]);
+      mockFrigateSyncService.isCameraReceivingFrames.mockResolvedValueOnce(true);
+
+      const res = await service.listCameras({}, 'ADMIN');
+
+      expect(mockCameraSourcesService.markCameraOnline).toHaveBeenCalledWith(mockCamera.id);
+      expect(res.data[0].runtimeStatus).toBe('ONLINE');
+      expect(res.data[0].source.isPublishing).toBe(true);
+    });
+
     it('che giau mat khau RTSP cho role ADMIN', async () => {
       repository.findAll.mockResolvedValueOnce([mockCamera]);
 
@@ -495,11 +528,30 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
         url: 'http://minio/snapshot.jpg',
         expiresAt: new Date(),
       });
+      mockDetectionTracker.getActiveDetections.mockReturnValueOnce([
+        {
+          id: 'track-1',
+          label: 'person',
+          confidence: 0.91,
+          box: [128, 72, 384, 432],
+          currentZones: ['vung_1'],
+          updatedAt: Date.now(),
+        },
+      ]);
+      mockDetectionTracker.getActiveZones.mockReturnValueOnce(['vung_1']);
 
       const debug = await service.getCameraDebugStream(mockCamera.id);
       expect(debug.cameraId).toBe(mockCamera.id);
-      expect(debug.streamUrl).toBe(`http://localhost:8889/${mockCamera.slug}`);
-      expect(debug.activeZones).toEqual([]);
+      expect(debug.streamUrl).toBe(`http://localhost:8889/${mockCamera.slug}/?token=viewer-token`);
+      expect(debug.detections).toEqual([
+        {
+          label: 'person',
+          confidence: 0.91,
+          box: [0.1, 0.1, 0.6, 0.3],
+          footPoint: [0.2, 0.6],
+        },
+      ]);
+      expect(debug.activeZones).toEqual(['vung_1']);
     });
 
     it('retryFrigateSync goi frigateSyncService cho ADMIN', async () => {

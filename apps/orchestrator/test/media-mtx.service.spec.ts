@@ -40,6 +40,25 @@ describe('MediaMtxService (Slice CAM)', () => {
     });
   });
 
+  describe('createBrowserReadSession', () => {
+    it('tao URL xem WebRTC kem token ngan han va gioi han dung camera', () => {
+      const session = service.createBrowserReadSession('cam_living_room');
+
+      expect(session.streamUrl).toContain('http://localhost:8889/cam_living_room');
+      expect(session.streamUrl).toContain(`token=${session.token}`);
+      expect(service.verifyBrowserReadSession('cam_living_room', session.token)).toBe(true);
+      expect(service.verifyBrowserReadSession('cam_other', session.token)).toBe(false);
+    });
+
+    it('tai su dung phien doc con han de player khong ket noi lai moi lan poll', () => {
+      const first = service.createBrowserReadSession('cam_living_room', 'camera-id-1');
+      const second = service.createBrowserReadSession('cam_living_room', 'camera-id-1');
+
+      expect(second.token).toBe(first.token);
+      expect(second.streamUrl).toBe(first.streamUrl);
+    });
+  });
+
   describe('Session Token Security & Revocation', () => {
     it('verifyBrowserSession tra ve true voi token hop le', () => {
       const session = service.createBrowserSession('cam_test', 'camera-id-1');

@@ -6,6 +6,7 @@ import { EventsService } from '../src/events/events.service';
 import { MqttConsumerService } from '../src/ingestion/mqtt-consumer.service';
 import { EventMediaRecord, EventMediaRepository } from '../src/media/event-media.repository';
 import { MediaService } from '../src/media/media.service';
+import { FrigateDetectionTrackerService } from '../src/frigate/frigate-detection-tracker.service';
 
 function createEvent(overrides: Partial<EventRecord> = {}): EventRecord {
   return {
@@ -70,6 +71,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
   let mediaService: jest.Mocked<MediaService>;
   let eventMediaRepository: jest.Mocked<EventMediaRepository>;
   let eventsService: jest.Mocked<EventsService>;
+  let detectionTracker: jest.Mocked<FrigateDetectionTrackerService>;
 
   beforeEach(async () => {
     const mockEventsRepository = {
@@ -91,6 +93,9 @@ describe('MqttConsumerService (US-03, US-04)', () => {
       toEventSummary: jest.fn(),
       emitEvent: jest.fn(),
     };
+    const mockDetectionTracker = {
+      track: jest.fn(),
+    };
     const mockConfigService = {
       get: jest.fn((_key: string, defaultValue?: unknown) => defaultValue),
     };
@@ -103,6 +108,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
         { provide: EventMediaRepository, useValue: mockEventMediaRepository },
         { provide: EventsService, useValue: mockEventsService },
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: FrigateDetectionTrackerService, useValue: mockDetectionTracker },
       ],
     }).compile();
 
@@ -111,6 +117,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     mediaService = module.get(MediaService);
     eventMediaRepository = module.get(EventMediaRepository);
     eventsService = module.get(EventsService);
+    detectionTracker = module.get(FrigateDetectionTrackerService);
   });
 
   it('khởi tạo thành công', () => {
@@ -137,6 +144,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
             frame_time: 1_726_387_200.456,
             label: 'person',
             score: 0.84,
+            box: [100, 50, 200, 300],
             current_zones: [],
             has_snapshot: false,
             has_clip: false,
@@ -152,6 +160,14 @@ describe('MqttConsumerService (US-03, US-04)', () => {
         priority: 'P3',
         trackId: 'track-101',
         dedupKey: 'frigate:cam_living_room:track-101',
+      }),
+    );
+    expect(detectionTracker.track).toHaveBeenCalledWith(
+      'new',
+      expect.objectContaining({
+        id: 'track-101',
+        camera: 'cam_living_room',
+        box: [100, 50, 200, 300],
       }),
     );
   });
