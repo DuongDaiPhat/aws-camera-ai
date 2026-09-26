@@ -547,7 +547,7 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
         {
           label: 'person',
           confidence: 0.91,
-          box: [0.1, 0.1, 0.6, 0.3],
+          box: [0.1, 0.125, 0.6, 0.275],
           footPoint: [0.2, 0.6],
         },
       ]);
