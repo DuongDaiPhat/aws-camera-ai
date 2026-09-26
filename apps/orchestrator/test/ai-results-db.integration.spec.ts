@@ -13,6 +13,9 @@ import type {
 } from '../src/ai-results/ai-result.types';
 import { DatabaseService } from '../src/database/database.service';
 import { EventsRepository } from '../src/events/events.repository';
+import { EscalationEngineService } from '../src/escalation/escalation-engine.service';
+import { EscalationRepository } from '../src/escalation/escalation.repository';
+import { EscalationRulesRepository } from '../src/escalation-rules/escalation-rules.repository';
 
 const POSTGRES_PORT = 5432;
 const CONTAINER_STARTUP_TIMEOUT_MS = 120_000;
@@ -261,6 +264,31 @@ describe('US-11 - AI result đến PostgreSQL', () => {
     );
     expect(receiptCount.rows[0]?.count).toBe(2);
     expect(outboxCount.rows[0]?.count).toBe(4);
+    const handoff = await pool.query<{ payload: { candidates: Array<{ eventType: string }> } }>(
+      `SELECT payload
+       FROM outbox_messages
+       WHERE event_id = $1 AND aggregate_version = 2 AND message_type = 'evaluate-escalation'
+       LIMIT 1;`,
+      [ids.eventId],
+    );
+    expect(handoff.rows[0]?.payload.candidates.map((candidate) => candidate.eventType)).toEqual([
+      'UNKNOWN_PERSON',
+      'RESTRICTED_ZONE',
+    ]);
+  });
+
+  it('giữ event.updated đến sau khi đánh giá escalation được ACK', async () => {
+    const face = faceSubmission(ids.eventId);
+    await repository.applyResult(face, hash({ id: face.resultId }), { id: face.resultId });
+
+    const evaluation = await repository.claimOutboxMessage(30);
+    expect(evaluation?.message_type).toBe('evaluate-escalation');
+    if (!evaluation) throw new Error('Không claim được evaluate-escalation.');
+    expect(await repository.claimOutboxMessage(30)).toBeNull();
+
+    await repository.markOutboxProcessed(evaluation.id);
+    const update = await repository.claimOutboxMessage(30);
+    expect(update?.message_type).toBe('event.updated');
   });
 
   it('nhận replay cùng payload một lần và báo conflict khi cùng resultId đổi nội dung', async () => {
@@ -296,6 +324,148 @@ describe('US-11 - AI result đến PostgreSQL', () => {
       [stale.resultId],
     );
     expect(receipt.rows[0]).toEqual({ status: 'IGNORED', ignored_reason: 'STALE_REVISION' });
+  });
+
+  it('bỏ qua AI result đến sau khi event đã CLOSED', async () => {
+    await pool.query("UPDATE events SET status = 'CLOSED' WHERE id = $1;", [ids.eventId]);
+    const face = faceSubmission(ids.eventId);
+
+    const response = await repository.applyResult(face, hash({ id: face.resultId }), {
+      id: face.resultId,
+    });
+
+    expect(response.disposition).toBe('STALE');
+    const result = await pool.query<{
+      status: string;
+      aggregate_version: string;
+      ignored_reason: string;
+    }>(
+      `SELECT e.status, e.aggregate_version, r.ignored_reason
+       FROM events e
+       JOIN event_ai_result_receipts r ON r.event_id = e.id
+       WHERE e.id = $1 AND r.result_id = $2;`,
+      [ids.eventId, face.resultId],
+    );
+    expect(result.rows[0]).toMatchObject({
+      status: 'CLOSED',
+      aggregate_version: '0',
+      ignored_reason: 'EVENT_TERMINAL',
+    });
+  });
+
+  it('commit transition cùng ACK outbox và không tạo notification trùng khi replay', async () => {
+    const face = faceSubmission(ids.eventId);
+    await repository.applyResult(face, hash({ id: face.resultId }), { id: face.resultId });
+    const message = await pool.query<{ id: string }>(
+      `SELECT id FROM outbox_messages
+       WHERE event_id = $1 AND message_type = 'evaluate-escalation'
+       LIMIT 1;`,
+      [ids.eventId],
+    );
+    const messageId = message.rows[0].id;
+    const engine = new EscalationEngineService(
+      new EscalationRepository(pool),
+      new EscalationRulesRepository(pool),
+    );
+    const input = {
+      eventType: 'UNKNOWN_PERSON' as const,
+      detectedAt: new Date(),
+      aiResults: [
+        {
+          eventType: 'UNKNOWN_PERSON' as const,
+          module: 'M1_FACE',
+          label: 'UNKNOWN',
+          confidence: 0.85,
+        },
+      ],
+    };
+
+    await engine.evaluateAndTransition(ids.eventId, input, messageId);
+    await engine.evaluateAndTransition(ids.eventId, input, messageId);
+
+    const result = await pool.query<{
+      status: string;
+      message_status: string;
+      notifications: string;
+      transitions: string;
+    }>(
+      `SELECT e.status,
+              o.status AS message_status,
+              (SELECT COUNT(*)::text FROM notifications WHERE event_id = e.id) AS notifications,
+              (SELECT COUNT(*)::text FROM event_status_history WHERE event_id = e.id) AS transitions
+       FROM events e
+       JOIN outbox_messages o ON o.event_id = e.id
+       WHERE e.id = $1 AND o.id = $2;`,
+      [ids.eventId, messageId],
+    );
+    expect(result.rows[0]).toEqual({
+      status: 'NOTIFIED',
+      message_status: 'PROCESSED',
+      notifications: '1',
+      transitions: '1',
+    });
+  });
+
+  it('P1 dưới ngưỡng không che P2 đủ ngưỡng trong handoff thực', async () => {
+    const face = faceSubmission(ids.eventId);
+    face.results[0].confidence = 0.7;
+    const zone = zoneSubmission(ids);
+    zone.results[0].confidence = 0.4;
+    await repository.applyResult(face, hash({ id: face.resultId }), { id: face.resultId });
+    await repository.applyResult(zone, hash({ id: zone.resultId }), { id: zone.resultId });
+    const handoff = await pool.query<{
+      id: string;
+      payload: {
+        candidates: Array<{
+          eventType: 'UNKNOWN_PERSON' | 'RESTRICTED_ZONE';
+          module: string;
+          label: string;
+          confidence: number;
+        }>;
+      };
+    }>(
+      `SELECT id, payload
+       FROM outbox_messages
+       WHERE event_id = $1 AND aggregate_version = 2 AND message_type = 'evaluate-escalation'
+       LIMIT 1;`,
+      [ids.eventId],
+    );
+    const message = handoff.rows[0];
+    const engine = new EscalationEngineService(
+      new EscalationRepository(pool),
+      new EscalationRulesRepository(pool),
+    );
+    await engine.evaluateAndTransition(
+      ids.eventId,
+      {
+        eventType: 'RESTRICTED_ZONE',
+        detectedAt: new Date(),
+        aiResults: message.payload.candidates,
+      },
+      message.id,
+    );
+
+    const result = await pool.query<{
+      status: string;
+      priority: string;
+      payload: { eventType: string; priority: string };
+      triggering_results: Array<{ eventType: string }>;
+    }>(
+      `SELECT e.status, e.priority, e.triggering_results, n.payload
+       FROM events e
+       JOIN notifications n ON n.event_id = e.id
+       WHERE e.id = $1
+       LIMIT 1;`,
+      [ids.eventId],
+    );
+    expect(result.rows[0]).toMatchObject({
+      status: 'NOTIFIED',
+      priority: 'P1',
+      payload: { eventType: 'UNKNOWN_PERSON', priority: 'P2' },
+    });
+    expect(result.rows[0].triggering_results.map((candidate) => candidate.eventType)).toEqual([
+      'UNKNOWN_PERSON',
+    ]);
   });
 
   it('không cho MQTT update ghi đè projection AI', async () => {

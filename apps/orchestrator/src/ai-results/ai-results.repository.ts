@@ -47,9 +47,21 @@ interface UpdatedEventRow extends QueryResultRow {
   aggregate_version: string;
 }
 
-export interface EventUpdateOutboxRow extends QueryResultRow {
+export interface AiResultOutboxRow extends QueryResultRow {
   id: string;
   event_id: string;
+  aggregate_version: string;
+  message_type: 'event.updated' | 'evaluate-escalation';
+  payload: unknown;
+}
+
+export interface AiEscalationSnapshot extends QueryResultRow {
+  event_type: EventType;
+  status: EventStatus;
+  detected_at: Date;
+  confidence: string | null;
+  ai_label: string | null;
+  aggregate_version: string;
 }
 
 export class AiResultEventNotFoundError extends Error {}
@@ -139,19 +151,31 @@ export class AiResultsRepository {
     });
   }
 
-  async claimEventUpdateMessage(leaseSeconds: number): Promise<EventUpdateOutboxRow | null> {
+  async claimOutboxMessage(leaseSeconds: number): Promise<AiResultOutboxRow | null> {
     return await this.database.transaction(async (client) => {
-      const result = await client.query<EventUpdateOutboxRow>(
+      const result = await client.query<AiResultOutboxRow>(
         `WITH next_message AS (
-           SELECT id
-           FROM outbox_messages
-           WHERE message_type = 'event.updated'
-             AND available_at <= now()
+           SELECT candidate.id
+           FROM outbox_messages candidate
+           WHERE candidate.message_type IN ('event.updated', 'evaluate-escalation')
+             AND candidate.available_at <= now()
              AND (
-               status = 'PENDING' OR
-               (status = 'PROCESSING' AND leased_until < now())
+               candidate.status = 'PENDING' OR
+               (candidate.status = 'PROCESSING' AND candidate.leased_until < now())
              )
-           ORDER BY created_at ASC
+             AND NOT EXISTS (
+               SELECT 1
+               FROM outbox_messages earlier
+               WHERE earlier.event_id = candidate.event_id
+                 AND earlier.message_type = 'evaluate-escalation'
+                 AND earlier.status <> 'PROCESSED'
+                 AND (
+                   earlier.aggregate_version < candidate.aggregate_version OR
+                   (earlier.aggregate_version = candidate.aggregate_version
+                    AND candidate.message_type = 'event.updated')
+                 )
+             )
+           ORDER BY candidate.created_at ASC, candidate.id ASC
            LIMIT 1
            FOR UPDATE SKIP LOCKED
          )
@@ -161,11 +185,23 @@ export class AiResultsRepository {
              leased_until = now() + ($1 * interval '1 second')
          FROM next_message
          WHERE outbox.id = next_message.id
-         RETURNING outbox.id, outbox.event_id;`,
+         RETURNING outbox.id, outbox.event_id, outbox.aggregate_version,
+                   outbox.message_type, outbox.payload;`,
         [leaseSeconds],
       );
       return result.rows[0] ?? null;
     });
+  }
+
+  async findEscalationSnapshot(eventId: string): Promise<AiEscalationSnapshot | null> {
+    const result = await this.database.query<AiEscalationSnapshot>(
+      `SELECT event_type, status, detected_at, confidence, ai_label, aggregate_version
+       FROM events
+       WHERE id = $1
+       LIMIT 1;`,
+      [eventId],
+    );
+    return result.rows[0] ?? null;
   }
 
   async markOutboxProcessed(messageId: string): Promise<void> {
@@ -275,6 +311,9 @@ export class AiResultsRepository {
     event: AiEventRow,
     submission: ValidatedAiResultSubmission,
   ): Promise<string | null> {
+    if (event.status === 'RESOLVED' || event.status === 'CLOSED') {
+      return 'EVENT_TERMINAL';
+    }
     const revisionResult = await client.query<RevisionRow>(
       `SELECT revision
        FROM event_ai_result_receipts
