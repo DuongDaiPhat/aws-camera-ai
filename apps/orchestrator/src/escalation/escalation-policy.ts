@@ -2,6 +2,10 @@ import type { EventType, PriorityLevel, EventStatus, NotificationChannel } from 
 import { computeEffectiveHighWaitSeconds } from '../escalation-rules/escalation-rule-policy';
 
 export interface AiCandidateResult {
+  eventType?: EventType;
+  resultId?: string;
+  observationId?: string;
+  processedAt?: string;
   module: string;
   label: string;
   confidence: number | null;
@@ -34,6 +38,7 @@ export interface EscalationEvaluationInput {
 
 export interface EscalationDecision {
   targetStatus: EventStatus;
+  triggeringEventType: EventType | null;
   priority: PriorityLevel;
   effectiveWaitSeconds: number | null;
   deadlineAt: Date | null;
@@ -89,158 +94,85 @@ export function isValidStatusTransition(fromStatus: EventStatus, toStatus: Event
   }
 }
 
-/**
- * Pure policy danh gia nguong va quyet dinh phan ung (US-13 Section 3)
- */
+interface QualifiedCandidate {
+  candidate: AiCandidateResult;
+  effectiveWait: number;
+  rule: EscalationRuleLookup;
+}
+
+function candidatesForInput(
+  input: EscalationEvaluationInput,
+  currentRule: EscalationRuleLookup | undefined,
+): AiCandidateResult[] {
+  if (input.aiResults?.length) return input.aiResults;
+  if (input.eventType === 'PERSON_DETECTED') return [];
+  if (
+    input.confidence === undefined &&
+    !currentRule?.skipLoggedOnly &&
+    currentRule?.tLow !== null
+  ) {
+    return [];
+  }
+  return [
+    {
+      eventType: input.eventType,
+      module: 'DIRECT',
+      label: input.aiLabel ?? input.eventType,
+      confidence: input.confidence ?? null,
+    },
+  ];
+}
+
+function qualifyCandidate(
+  candidate: AiCandidateResult,
+  eventType: EventType,
+  rulesMap: Map<EventType, EscalationRuleLookup>,
+): QualifiedCandidate | null {
+  const rule = rulesMap.get(candidate.eventType ?? eventType);
+  if (!rule?.isEnabled || rule.eventType === 'PERSON_DETECTED') return null;
+  if (rule.skipLoggedOnly || (rule.tLow === null && rule.tHigh === null)) {
+    return { candidate, effectiveWait: rule.tWaitSeconds, rule };
+  }
+  if (!hasQualifyingScore(candidate.confidence, rule.tLow)) return null;
+  const effectiveWait =
+    rule.tHigh !== null && candidate.confidence >= rule.tHigh
+      ? computeEffectiveHighWaitSeconds(rule.tWaitSeconds)
+      : rule.tWaitSeconds;
+  return { candidate, effectiveWait, rule };
+}
+
+function hasQualifyingScore(confidence: number | null, tLow: number | null): confidence is number {
+  return confidence !== null && confidence !== undefined && tLow !== null && confidence >= tLow;
+}
+
+/** Pure policy danh gia nguong va quyet dinh phan ung (US-13 Section 3). */
 export function evaluateEscalationPolicy(
   input: EscalationEvaluationInput,
   rulesMap: Map<EventType, EscalationRuleLookup>,
 ): EscalationDecision {
   const currentRule = rulesMap.get(input.eventType);
+  // US-11/US-13: moi nhan dung rule cua chinh no, khong dung rule cua nhan dai dien.
+  const triggeringCandidates = candidatesForInput(input, currentRule)
+    .map((candidate) => qualifyCandidate(candidate, input.eventType, rulesMap))
+    .filter((candidate): candidate is QualifiedCandidate => candidate !== null);
 
-  // 1. Truong hop PERSON_DETECTED khong kem nguy co -> luon LOGGED_ONLY
-  if (input.eventType === 'PERSON_DETECTED') {
-    return {
-      targetStatus: 'LOGGED_ONLY',
-      priority: currentRule?.priority ?? 'P3',
-      effectiveWaitSeconds: null,
-      deadlineAt: null,
-      ruleSnapshot: currentRule ? { ...currentRule } : null,
-      triggeringResults: [],
-      reason: 'PERSON_DETECTED không có nhãn nguy cơ, chỉ ghi log',
-    };
-  }
-
-  if (!currentRule || !currentRule.isEnabled) {
-    return {
-      targetStatus: 'LOGGED_ONLY',
-      priority: currentRule?.priority ?? 'P3',
-      effectiveWaitSeconds: null,
-      deadlineAt: null,
-      ruleSnapshot: currentRule ? { ...currentRule } : null,
-      triggeringResults: [],
-      reason: !currentRule ? 'Không tìm thấy rule cấu hình' : 'Rule đã bị vô hiệu hóa',
-    };
-  }
-
-  // 2. Chuan bi tap candidates tu aiResults hoac tu direct event confidence/label
-  const candidates: AiCandidateResult[] =
-    input.aiResults && input.aiResults.length > 0
-      ? input.aiResults
-      : input.confidence !== undefined
-        ? [
-            {
-              module: 'DIRECT',
-              label: input.aiLabel ?? input.eventType,
-              confidence: input.confidence,
-            },
-          ]
-        : [];
-
-  // 3. Rule dac biet: skip_logged_only (vi du: FIRE_SMOKE_DETECTED)
-  if (currentRule.skipLoggedOnly) {
-    const effectiveWait = currentRule.tWaitSeconds;
-    const deadlineAt = new Date(input.detectedAt.getTime() + effectiveWait * 1000);
-    return {
-      targetStatus: 'NOTIFIED',
-      priority: currentRule.priority,
-      effectiveWaitSeconds: effectiveWait,
-      deadlineAt,
-      ruleSnapshot: {
-        eventType: currentRule.eventType,
-        priority: currentRule.priority,
-        tLow: currentRule.tLow,
-        tHigh: currentRule.tHigh,
-        tWaitSeconds: currentRule.tWaitSeconds,
-        effectiveWaitSeconds: effectiveWait,
-        version: currentRule.version,
-      },
-      triggeringResults: candidates,
-      reason: 'Sự kiện khẩn cấp skip_logged_only kích hoạt thông báo ngay',
-    };
-  }
-
-  // 4. Rule dac biet: WELLNESS_TIMEOUT (tLow va tHigh luon null)
-  if (currentRule.tLow === null && currentRule.tHigh === null) {
-    const effectiveWait = currentRule.tWaitSeconds;
-    const deadlineAt = new Date(input.detectedAt.getTime() + effectiveWait * 1000);
-    return {
-      targetStatus: 'NOTIFIED',
-      priority: currentRule.priority,
-      effectiveWaitSeconds: effectiveWait,
-      deadlineAt,
-      ruleSnapshot: {
-        eventType: currentRule.eventType,
-        priority: currentRule.priority,
-        tLow: null,
-        tHigh: null,
-        tWaitSeconds: currentRule.tWaitSeconds,
-        effectiveWaitSeconds: effectiveWait,
-        version: currentRule.version,
-      },
-      triggeringResults: candidates,
-      reason: 'Sự kiện kiểm tra định kỳ không dùng ngưỡng confidence',
-    };
-  }
-
-  // 5. Danh gia tung candidate theo nguong
-  const triggeringCandidates: {
-    candidate: AiCandidateResult;
-    effectiveWait: number;
-    rule: EscalationRuleLookup;
-  }[] = [];
-
-  for (const c of candidates) {
-    if (c.confidence === null || c.confidence === undefined) {
-      continue;
-    }
-
-    const tLow = currentRule.tLow!;
-    const tHigh = currentRule.tHigh!;
-
-    if (c.confidence < tLow) {
-      // Duoi nguong toi thieu -> khong kich hoat
-      continue;
-    }
-
-    let wait = currentRule.tWaitSeconds;
-    if (c.confidence >= tHigh) {
-      wait = computeEffectiveHighWaitSeconds(currentRule.tWaitSeconds);
-    }
-
-    triggeringCandidates.push({
-      candidate: c,
-      effectiveWait: wait,
-      rule: currentRule,
-    });
-  }
-
-  // 6. Neu khong co candidate nao vuot qua tLow -> LOGGED_ONLY
   if (triggeringCandidates.length === 0) {
     return {
       targetStatus: 'LOGGED_ONLY',
-      priority: currentRule.priority,
+      triggeringEventType: null,
+      priority: currentRule?.priority ?? 'P3',
       effectiveWaitSeconds: null,
       deadlineAt: null,
-      ruleSnapshot: {
-        eventType: currentRule.eventType,
-        priority: currentRule.priority,
-        tLow: currentRule.tLow,
-        tHigh: currentRule.tHigh,
-        tWaitSeconds: currentRule.tWaitSeconds,
-        version: currentRule.version,
-      },
+      ruleSnapshot: currentRule ? { ...currentRule } : null,
       triggeringResults: [],
-      reason: 'Confidence dưới ngưỡng tối thiểu (T_low), chỉ ghi log',
+      reason: 'Không có kết quả hợp lệ đạt ngưỡng cảnh báo, chỉ ghi log',
     };
   }
 
-  // 7. Chon candidate co deadline som nhat va priority cao nhat
+  // Uu tien muc nguy co cao nhat; neu bang nhau chon deadline som nhat.
   triggeringCandidates.sort((a, b) => {
-    if (a.effectiveWait !== b.effectiveWait) {
-      return a.effectiveWait - b.effectiveWait; // Deadline som hon xep truoc
-    }
-    return PRIORITY_RANK[a.rule.priority] - PRIORITY_RANK[b.rule.priority];
+    const priorityDifference = PRIORITY_RANK[a.rule.priority] - PRIORITY_RANK[b.rule.priority];
+    return priorityDifference !== 0 ? priorityDifference : a.effectiveWait - b.effectiveWait;
   });
 
   const dominant = triggeringCandidates[0];
@@ -248,6 +180,7 @@ export function evaluateEscalationPolicy(
 
   return {
     targetStatus: 'NOTIFIED',
+    triggeringEventType: dominant.rule.eventType,
     priority: dominant.rule.priority,
     effectiveWaitSeconds: dominant.effectiveWait,
     deadlineAt,

@@ -172,6 +172,44 @@ describe('Escalation Policy (US-13)', () => {
       expect(decision.triggeringResults).toHaveLength(2);
     });
 
+    it('M4 P1 dưới T_low không che M1 P2 đã đạt T_low', () => {
+      const rules = new Map(baseRules);
+      rules.set('RESTRICTED_ZONE', {
+        eventType: 'RESTRICTED_ZONE',
+        priority: 'P1',
+        tLow: 0.6,
+        tHigh: 0.8,
+        tWaitSeconds: 60,
+        skipLoggedOnly: false,
+        notifyChannels: ['TELEGRAM'],
+        escalateChannels: ['CONNECT_CALL'],
+        maxEscalationLevel: 3,
+        isEnabled: true,
+        version: 1,
+      });
+      const decision = evaluateEscalationPolicy(
+        {
+          eventType: 'RESTRICTED_ZONE',
+          detectedAt,
+          aiResults: [
+            {
+              eventType: 'RESTRICTED_ZONE',
+              module: 'M4_ZONE',
+              label: 'RESTRICTED_ZONE',
+              confidence: 0.4,
+            },
+            { eventType: 'UNKNOWN_PERSON', module: 'M1_FACE', label: 'UNKNOWN', confidence: 0.7 },
+          ],
+        },
+        rules as any,
+      );
+
+      expect(decision.targetStatus).toBe('NOTIFIED');
+      expect(decision.triggeringEventType).toBe('UNKNOWN_PERSON');
+      expect(decision.priority).toBe('P2');
+      expect(decision.triggeringResults).toHaveLength(1);
+    });
+
     it('rule bi vo hieu hoa (isEnabled = false) -> LOGGED_ONLY', () => {
       const disabledRules = new Map(baseRules);
       disabledRules.set('FALL_DETECTED', {

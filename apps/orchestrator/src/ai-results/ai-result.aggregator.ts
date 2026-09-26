@@ -84,10 +84,17 @@ function latestFaceResult(results: AiResultProjectionItem[]): AiResultProjection
   );
 }
 
-function shouldLatchRisk(state: AiEventAggregateState, hasRepresentative: boolean): boolean {
+function shouldLatchRisk(
+  state: AiEventAggregateState,
+  representative: (AiRiskCandidate & { priority: PriorityLevel }) | null,
+): boolean {
   const isProtectedStatus =
     LATCHED_STATUSES.has(state.status) || TERMINAL_STATUSES.has(state.status);
-  return isProtectedStatus && state.eventType !== 'PERSON_DETECTED' && !hasRepresentative;
+  return (
+    isProtectedStatus &&
+    state.eventType !== 'PERSON_DETECTED' &&
+    (!representative || PRIORITY_RANK[representative.priority] > PRIORITY_RANK[state.priority])
+  );
 }
 
 function latchedProjection(
@@ -121,7 +128,7 @@ export function aggregateAiResult(
   );
   const candidatesWithPriority = toCandidates(aiResults, priorityByEventType);
   const representative = chooseRepresentative(candidatesWithPriority, state.eventType);
-  if (shouldLatchRisk(state, Boolean(representative))) {
+  if (shouldLatchRisk(state, representative)) {
     return latchedProjection(state, aiResults, candidatesWithPriority);
   }
 

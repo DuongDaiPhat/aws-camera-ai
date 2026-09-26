@@ -1,7 +1,7 @@
 # Plan US-11 — Gắn nhãn AI, confidence và tổng hợp ưu tiên sự kiện
 
 > Phần giao với US-10, US-12, US-13, US-15, shared outbox và migration tuân theo [kế hoạch tích hợp 5 thành viên](PLAN_AGILE_5_MEMBER_EXECUTION.md).
-> Trạng thái: kế hoạch thực thi độc lập, chưa triển khai.
+> Trạng thái: backend nhận và tổng hợp AI result, outbox/SSE và handoff US-13 đã triển khai trên nhánh US-11. Nghiệm thu E2E với producer M1/M4 thật còn chờ tích hợp các US liên quan.
 > Mục tiêu: mỗi kết quả inference được lưu đúng nguồn, event có nhãn đại diện nhất quán và không mất các nguy cơ đồng thời.
 
 ## 1. Phạm vi và phụ thuộc

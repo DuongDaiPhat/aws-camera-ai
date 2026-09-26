@@ -145,4 +145,30 @@ describe('aggregateAiResult (US-11)', () => {
       confidence: 0.7,
     });
   });
+
+  it('không hạ priority đã NOTIFIED khi chỉ còn candidate mức thấp hơn', () => {
+    const projection = aggregateAiResult(
+      state({
+        status: 'NOTIFIED',
+        eventType: 'RESTRICTED_ZONE',
+        priority: 'P1',
+        aiLabel: 'RESTRICTED_ZONE',
+        confidence: 0.7,
+        aiModelVersion: 'zone-v1',
+        aiProcessedAt: '2026-09-23T10:00:00.000Z',
+      }),
+      [result('M1_FACE', 'UNKNOWN', 0.85, 'face-1')],
+      RULES,
+    );
+
+    expect(projection).toMatchObject({
+      eventType: 'RESTRICTED_ZONE',
+      priority: 'P1',
+      aiLabel: 'RESTRICTED_ZONE',
+      confidence: 0.7,
+    });
+    expect(projection.candidates.map((candidate) => candidate.eventType)).toEqual([
+      'UNKNOWN_PERSON',
+    ]);
+  });
 });

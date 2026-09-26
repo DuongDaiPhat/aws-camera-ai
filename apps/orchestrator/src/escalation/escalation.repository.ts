@@ -249,7 +249,17 @@ export class EscalationRepository {
       INSERT INTO notifications (
         event_id, recipient_user_id, emergency_contact_id, channel,
         status, escalation_level, payload
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+      ) VALUES (
+        $1,
+        COALESCE($2::uuid, (
+          SELECT d.owner_user_id
+          FROM events e
+          JOIN cameras c ON c.id = e.camera_id
+          JOIN devices d ON d.id = c.device_id
+          WHERE e.id = $1
+        )),
+        $3, $4, $5, $6, $7
+      )
       RETURNING id;
     `;
     const res = await client.query<{ id: string }>(query, [
