@@ -1,6 +1,6 @@
 import { Injectable, Logger, type OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { spawn, type ChildProcess } from 'child_process';
+import { spawn, spawnSync, type ChildProcess } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import type { ISourceRunner, SourceRunOptions, SourceRunResult } from './source-runner.interface';
@@ -225,16 +225,60 @@ export class FfmpegSourceRunnerService implements ISourceRunner, OnApplicationSh
     await this.cleanup();
   }
 
+  private detectVideoCodec(filePath: string): string | null {
+    try {
+      const res = spawnSync(
+        'ffprobe',
+        [
+          '-v',
+          'error',
+          '-select_streams',
+          'v:0',
+          '-show_entries',
+          'stream=codec_name',
+          '-of',
+          'default=noprint_wrappers=1:nokey=1',
+          filePath,
+        ],
+        { encoding: 'utf-8', timeout: 5000, stdio: ['ignore', 'pipe', 'ignore'] },
+      );
+      if (res.status === 0 && res.stdout) {
+        return res.stdout.trim().toLowerCase() || null;
+      }
+      return null;
+    } catch (err) {
+      this.logger.warn(`Không thể phát hiện video codec của ${filePath} qua ffprobe:`, err);
+      return null;
+    }
+  }
+
   private buildFfmpegArgs(inputPath: string, outputRtspUrl: string, loop: boolean): string[] {
     const args = ['-re'];
     if (loop) {
       args.push('-stream_loop', '-1');
     }
+    args.push('-i', inputPath);
+
+    const codec = this.detectVideoCodec(inputPath);
+    if (codec === 'h264') {
+      args.push('-c:v', 'copy');
+    } else {
+      this.logger.log(
+        `Video codec là "${codec ?? 'unknown'}" (không phải H.264). Đang transcode sang libx264 để hỗ trợ WebRTC trình duyệt...`,
+      );
+      args.push(
+        '-c:v',
+        'libx264',
+        '-preset',
+        'ultrafast',
+        '-tune',
+        'zerolatency',
+        '-pix_fmt',
+        'yuv420p',
+      );
+    }
+
     args.push(
-      '-i',
-      inputPath,
-      '-c:v',
-      'copy',
       '-c:a',
       'aac',
       '-f',
