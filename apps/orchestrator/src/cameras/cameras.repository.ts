@@ -274,30 +274,40 @@ export class CamerasRepository {
       INSERT INTO camera_sources (
         camera_id, source_type, rtsp_url, video_object_key, 
         video_original_name, video_loop, transport, webcam_device_label, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      ) VALUES (
+        $1,
+        COALESCE($2::camera_source_type_enum, 'RTSP'::camera_source_type_enum),
+        $3,
+        $4,
+        $5,
+        COALESCE($6::boolean, true),
+        COALESCE($7::camera_transport_enum, 'TCP'::camera_transport_enum),
+        $8,
+        COALESCE($9::camera_source_status_enum, 'NOT_CONFIGURED'::camera_source_status_enum)
+      )
       ON CONFLICT (camera_id) DO UPDATE SET
-        source_type = COALESCE(EXCLUDED.source_type, camera_sources.source_type),
-        rtsp_url = COALESCE(EXCLUDED.rtsp_url, camera_sources.rtsp_url),
-        video_object_key = COALESCE(EXCLUDED.video_object_key, camera_sources.video_object_key),
-        video_original_name = COALESCE(EXCLUDED.video_original_name, camera_sources.video_original_name),
-        video_loop = COALESCE(EXCLUDED.video_loop, camera_sources.video_loop),
-        transport = COALESCE(EXCLUDED.transport, camera_sources.transport),
-        webcam_device_label = COALESCE(EXCLUDED.webcam_device_label, camera_sources.webcam_device_label),
-        status = COALESCE(EXCLUDED.status, camera_sources.status),
+        source_type = COALESCE($2::camera_source_type_enum, camera_sources.source_type),
+        rtsp_url = CASE WHEN $3::text IS NOT NULL THEN $3::text ELSE camera_sources.rtsp_url END,
+        video_object_key = CASE WHEN $4::text IS NOT NULL THEN $4::text ELSE camera_sources.video_object_key END,
+        video_original_name = CASE WHEN $5::text IS NOT NULL THEN $5::text ELSE camera_sources.video_original_name END,
+        video_loop = COALESCE($6::boolean, camera_sources.video_loop),
+        transport = COALESCE($7::camera_transport_enum, camera_sources.transport),
+        webcam_device_label = CASE WHEN $8::text IS NOT NULL THEN $8::text ELSE camera_sources.webcam_device_label END,
+        status = COALESCE($9::camera_source_status_enum, camera_sources.status),
         updated_at = now()
       RETURNING *
     `;
 
     const values = [
       cameraId,
-      data.source_type ?? 'RTSP',
+      data.source_type ?? null,
       data.rtsp_url ?? null,
       data.video_object_key ?? null,
       data.video_original_name ?? null,
-      data.video_loop ?? true,
-      data.transport ?? 'TCP',
+      data.video_loop ?? null,
+      data.transport ?? null,
       data.webcam_device_label ?? null,
-      data.status ?? 'NOT_CONFIGURED',
+      data.status ?? null,
     ];
 
     const result = await this.pool.query<CameraSourceRecord>(query, values);
