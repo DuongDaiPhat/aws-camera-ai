@@ -451,7 +451,9 @@ export interface paths {
         /**
          * Tao vung giam sat moi
          * @description Toa do da giac phai CHUAN HOA ve khoang 0..1 de doc lap do phan giai.
-         *     Orchestrator tu sinh lai cau hinh Frigate sau khi luu.
+         *     Orchestrator tu sinh lai cau hinh Frigate sau khi luu. Response thanh cong
+         *     chi xac nhan zone da duoc luu vao PostgreSQL; trang thai `frigateSync` cua
+         *     camera cho biet cau hinh da co hieu luc tren Frigate hay chua.
          */
         post: operations["createZone"];
         delete?: never;
@@ -1343,11 +1345,11 @@ export interface components {
             zoneType: components["schemas"]["ZoneType"];
             polygon: components["schemas"]["Polygon"];
             /** @description FR-DET-M4-02 — di luot qua duoi nguong nay khong sinh canh bao. */
-            minDwellSeconds?: number;
+            minDwellSeconds: number;
             /** @example 06:00 */
-            activeFrom?: string | null;
+            activeFrom: string | null;
             /** @example 22:00 */
-            activeTo?: string | null;
+            activeTo: string | null;
             isEnabled: boolean;
         };
         CreateZoneRequest: {
@@ -1357,8 +1359,10 @@ export interface components {
             polygon: components["schemas"]["Polygon"];
             /** @default 2 */
             minDwellSeconds: number;
-            activeFrom?: string;
-            activeTo?: string;
+            /** @description Hai dau cung null la ca ngay; khoang [activeFrom, activeTo) co the qua nua dem. */
+            activeFrom?: string | null;
+            /** @description Khong duoc bang activeFrom. */
+            activeTo?: string | null;
         };
         UpdateZoneRequest: {
             name?: string;
@@ -1417,8 +1421,11 @@ export interface components {
                 name?: string;
             } | null;
             zone?: {
-                /** Format: uuid */
-                id?: string;
+                /**
+                 * Format: uuid
+                 * @description Null neu zone da bi xoa; name van la snapshot lich su.
+                 */
+                id?: string | null;
                 name?: string;
             } | null;
             confidence?: number | null;
@@ -2731,6 +2738,8 @@ export interface operations {
                     "application/json": components["schemas"]["FrigateSyncResult"];
                 };
             };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -2808,6 +2817,10 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
         };
     };
     deleteZone: {
@@ -2828,6 +2841,8 @@ export interface operations {
                 };
                 content?: never;
             };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -2855,7 +2870,11 @@ export interface operations {
                     "application/json": components["schemas"]["Zone"];
                 };
             };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
         };
     };
     listKnownFaces: {

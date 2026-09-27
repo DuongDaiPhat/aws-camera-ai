@@ -17,6 +17,7 @@ import {
 } from './auth.types';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { JwtTokenService } from './jwt-token.service';
+import { RolesGuard } from './roles.guard';
 
 @Module({
   controllers: [AuthController],
@@ -47,6 +48,7 @@ import { JwtTokenService } from './jwt-token.service';
       }),
     },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
   exports: [AuthService, TOKEN_SERVICE],
 })

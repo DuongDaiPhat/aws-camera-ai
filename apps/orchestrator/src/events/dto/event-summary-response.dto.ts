@@ -15,7 +15,7 @@ export class EventCameraDto {
 }
 
 export class EventZoneDto {
-  id?: string;
+  id?: string | null;
   name?: string;
 }
 

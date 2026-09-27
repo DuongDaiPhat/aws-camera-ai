@@ -126,6 +126,46 @@ describe('FrigateConfigService', () => {
     );
   });
 
+  it('sinh zone RESTRICTED voi loitering_time va xoa zone app da bi xoa khoi DB', () => {
+    const initialYaml = YAML.stringify({
+      cameras: {
+        camera_cong_chinh: {
+          zones: {
+            app_zone_cu: { coordinates: '0,0,1,0,1,1' },
+            zone_ngoai_app: { coordinates: '0,0,0.2,0,0.2,0.2' },
+          },
+        },
+      },
+    });
+
+    const updatedYaml = service.generateUpdatedConfig(initialYaml, {
+      camera: mockCamera,
+      settings: { managed_zone_slugs: ['app_zone_cu'] },
+      zones: [
+        {
+          slug: 'restricted_stove',
+          zoneType: 'RESTRICTED',
+          polygon: [
+            [0.4, 0.3],
+            [0.95, 0.3],
+            [0.95, 0.9],
+          ],
+          minDwellSeconds: 2,
+          isEnabled: true,
+        },
+      ],
+    });
+
+    const zones = YAML.parse(updatedYaml).cameras.camera_cong_chinh.zones;
+    expect(zones.app_zone_cu).toBeUndefined();
+    expect(zones.zone_ngoai_app).toBeDefined();
+    expect(zones.restricted_stove).toEqual({
+      coordinates: '0.4,0.3,0.95,0.3,0.95,0.9',
+      objects: ['person'],
+      loitering_time: 2,
+    });
+  });
+
   it('nem loi khi cu phap YAML khong hop le', () => {
     const invalidYaml = 'invalid: [yaml: broken';
 

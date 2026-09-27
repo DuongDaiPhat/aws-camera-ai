@@ -3,9 +3,10 @@ import { EventsModule } from '../events/events.module';
 import { MediaModule } from '../media/media.module';
 import { MqttConsumerService } from './mqtt-consumer.service';
 import { FrigateModule } from '../frigate/frigate.module';
+import { ZonesModule } from '../zones/zones.module';
 
 @Module({
-  imports: [EventsModule, MediaModule, FrigateModule],
+  imports: [EventsModule, MediaModule, FrigateModule, ZonesModule],
   providers: [MqttConsumerService],
   exports: [MqttConsumerService],
 })

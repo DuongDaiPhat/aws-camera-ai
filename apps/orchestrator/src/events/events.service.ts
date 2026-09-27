@@ -283,7 +283,10 @@ export class EventsService {
       camera: record.camera_id
         ? { id: record.camera_id, name: record.camera_name ?? undefined }
         : null,
-      zone: record.zone_id ? { id: record.zone_id, name: record.zone_name ?? undefined } : null,
+      zone:
+        record.zone_id || record.zone_name
+          ? { id: record.zone_id, name: record.zone_name ?? undefined }
+          : null,
       confidence: record.confidence ? Number(record.confidence) : null,
       personStatus: record.person_status ?? undefined,
       matchedPersonName: record.matched_person_name ?? null,

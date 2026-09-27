@@ -10,6 +10,7 @@ import { EventCard, EventDetailModal, EventFilter } from '@/components/events';
 import { CameraView } from '@/components/cameras';
 import { EmptyState, ErrorState, Pagination } from '@/components/ui';
 import { SettingsView } from '@/components/settings';
+import { ZonesView } from '@/components/zones';
 import styles from './dashboard-view.module.css';
 
 function EventsListSection({
@@ -106,12 +107,14 @@ export function DashboardView() {
       />
 
       <div className={styles.mainContent}>
-        <TopHeader
-          userName={user?.fullName || 'Đức Anh'}
-          selectedZone={selectedZone}
-          onSelectZone={setSelectedZone}
-          onSimulateNewEvent={simulateNewEvent}
-        />
+        {(activeNav === 'dashboard' || activeNav === 'events') && (
+          <TopHeader
+            userName={user?.fullName || 'Đức Anh'}
+            selectedZone={selectedZone}
+            onSelectZone={setSelectedZone}
+            onSimulateNewEvent={simulateNewEvent}
+          />
+        )}
 
         <main className={styles.workspace}>
           {activeNav === 'cameras' ? (
@@ -120,6 +123,8 @@ export function DashboardView() {
             <SettingsView user={user} />
           ) : activeNav === 'known-faces' ? (
             <KnownFacesView isAdmin={user?.role === 'ADMIN'} />
+          ) : activeNav === 'zones' ? (
+            <ZonesView user={user} />
           ) : (
             <>
               {liveNoticeText && (

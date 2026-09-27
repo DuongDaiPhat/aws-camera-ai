@@ -13,6 +13,7 @@ import { MediaModule } from './media/media.module';
 import { StorageModule } from './storage/storage.module';
 import { EscalationRulesModule } from './escalation-rules/escalation-rules.module';
 import { EscalationModule } from './escalation/escalation.module';
+import { ZonesModule } from './zones/zones.module';
 
 /**
  * Module goc.
@@ -40,6 +41,7 @@ import { EscalationModule } from './escalation/escalation.module';
     HealthModule,
     EscalationRulesModule,
     EscalationModule,
+    ZonesModule,
   ],
 })
 export class AppModule {}

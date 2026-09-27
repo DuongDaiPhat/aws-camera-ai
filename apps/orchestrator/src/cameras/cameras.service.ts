@@ -783,7 +783,14 @@ export class CamerasService implements CameraConfigPortV1 {
       });
     }
 
+    const targetVersion = camera.config_version ?? 1;
+    if (typeof this.camerasRepository.reopenFrigateSyncJob === 'function') {
+      await this.camerasRepository.reopenFrigateSyncJob(cameraId, targetVersion);
+    }
     const syncResult = await this.frigateSyncService.syncCamera(cameraId);
+    if (syncResult.success && typeof this.camerasRepository.completeFrigateSyncJob === 'function') {
+      await this.camerasRepository.completeFrigateSyncJob(cameraId, targetVersion);
+    }
 
     return {
       cameraId,

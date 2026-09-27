@@ -127,8 +127,8 @@ const EVENT_SUMMARY_PROJECTION = `
     e.detected_at,
     c.id AS camera_id,
     c.name AS camera_name,
-    z.id AS zone_id,
-    z.name AS zone_name,
+    e.zone_id,
+    COALESCE(e.zone_name, z.name) AS zone_name,
     kf.person_name AS matched_person_name,
     em.object_key AS thumbnail_object_key
 `;
@@ -155,6 +155,7 @@ const CREATE_EVENT_QUERY = `
   INSERT INTO events (
     camera_id,
     zone_id,
+    zone_name,
     event_type,
     status,
     priority,
@@ -166,14 +167,15 @@ const CREATE_EVENT_QUERY = `
     correlation_id,
     detected_at
   ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-    COALESCE($11, gen_random_uuid()),
-    $12
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
+    COALESCE($12, gen_random_uuid()),
+    $13
   )
   ON CONFLICT (dedup_key) WHERE dedup_key IS NOT NULL DO NOTHING
   RETURNING id,
             camera_id,
             zone_id,
+            zone_name,
             event_type,
             status,
             priority,
@@ -192,6 +194,8 @@ export interface CameraRecord {
   id: string;
   name: string;
   slug: string;
+  timezone?: string;
+  zone_config_applied?: boolean;
   rtsp_url?: string;
 }
 
@@ -200,11 +204,16 @@ export interface ZoneRecord {
   camera_id: string;
   name: string;
   slug: string;
+  zone_type?: 'RESTRICTED' | 'REST_AREA' | 'NORMAL';
+  min_dwell_seconds?: number;
+  active_from?: string | null;
+  active_to?: string | null;
 }
 
 export interface CreateEventInput {
   cameraId: string | null;
   zoneId: string | null;
+  zoneName?: string | null;
   eventType: EventType;
   status?: EventStatus;
   priority?: PriorityLevel;
@@ -221,6 +230,7 @@ export interface EventRecord {
   id: string;
   camera_id: string | null;
   zone_id: string | null;
+  zone_name?: string | null;
   event_type: EventType;
   status: EventStatus;
   priority: PriorityLevel;
@@ -239,6 +249,7 @@ export interface UpdateEventInput {
   eventId: string;
   cameraId: string | null;
   zoneId: string | null;
+  zoneName?: string | null;
   eventType: EventType;
   priority: PriorityLevel;
   confidence: number;
@@ -255,9 +266,12 @@ export class EventsRepository {
    */
   async findCameraBySlug(slug: string): Promise<CameraRecord | null> {
     const query = `
-      SELECT id, name, slug
-      FROM cameras
-      WHERE slug = $1 AND is_enabled = true
+      SELECT c.id, c.name, c.slug, c.timezone,
+             COALESCE(f.sync_status = 'SYNCED' AND f.applied_version = f.config_version, false)
+               AS zone_config_applied
+      FROM cameras c
+      LEFT JOIN camera_frigate_settings f ON f.camera_id = c.id
+      WHERE c.slug = $1 AND c.is_enabled = true
       LIMIT 1;
     `;
     const res = await this.pool.query<CameraRecord>(query, [slug]);
@@ -267,15 +281,32 @@ export class EventsRepository {
   /**
    * Tra cứu zone theo camera_id và slug của zone.
    */
-  async findZoneByCameraAndSlug(cameraId: string, zoneSlug: string): Promise<ZoneRecord | null> {
+  async findEligibleZones(cameraId: string, zoneSlugs: string[]): Promise<ZoneRecord[]> {
+    if (zoneSlugs.length === 0) return [];
     const query = `
-      SELECT id, camera_id, name, slug
+      SELECT id, camera_id, name, slug, zone_type, min_dwell_seconds,
+             active_from::text, active_to::text
       FROM zones
-      WHERE camera_id = $1 AND slug = $2 AND is_enabled = true
-      LIMIT 1;
+      WHERE camera_id = $1 AND slug = ANY($2) AND is_enabled = true
+        AND zone_type = 'RESTRICTED'
+      ORDER BY id ASC
+      LIMIT 500;
     `;
-    const res = await this.pool.query<ZoneRecord>(query, [cameraId, zoneSlug]);
-    return res.rows[0] ?? null;
+    const res = await this.pool.query<ZoneRecord>(query, [cameraId, zoneSlugs]);
+    return res.rows;
+  }
+
+  /** @deprecated Dung findEligibleZones de danh gia day du tat ca zone hien tai. */
+  async findZoneByCameraAndSlug(cameraId: string, zoneSlug: string): Promise<ZoneRecord | null> {
+    const result = await this.pool.query<ZoneRecord>(
+      `SELECT id, camera_id, name, slug, zone_type, min_dwell_seconds,
+              active_from::text, active_to::text
+       FROM zones
+       WHERE camera_id = $1 AND slug = $2 AND is_enabled = true
+       LIMIT 1`,
+      [cameraId, zoneSlug],
+    );
+    return result.rows[0] ?? null;
   }
 
   /**
@@ -287,6 +318,7 @@ export class EventsRepository {
     const values = [
       input.cameraId,
       input.zoneId,
+      input.zoneName ?? null,
       input.eventType,
       input.status ?? 'DETECTED',
       input.priority ?? 'P3',
@@ -323,6 +355,7 @@ export class EventsRepository {
       SELECT id,
              camera_id,
              zone_id,
+             zone_name,
              event_type,
              status,
              priority,
@@ -351,17 +384,31 @@ export class EventsRepository {
     const query = `
       UPDATE events
       SET camera_id = COALESCE(camera_id, $2),
-          zone_id = COALESCE($3, zone_id),
-          event_type = $4,
-          priority = $5,
+          zone_id = CASE
+            WHEN event_type <> 'RESTRICTED_ZONE' AND $3::uuid IS NOT NULL THEN $3::uuid
+            ELSE zone_id
+          END,
+          zone_name = CASE
+            WHEN event_type <> 'RESTRICTED_ZONE' AND $3::uuid IS NOT NULL THEN $4
+            ELSE zone_name
+          END,
+          event_type = CASE
+            WHEN event_type = 'RESTRICTED_ZONE' THEN event_type
+            ELSE $5::event_type
+          END,
+          priority = CASE
+            WHEN event_type = 'RESTRICTED_ZONE' THEN priority
+            ELSE $6::priority_level
+          END,
           confidence = CASE
-            WHEN confidence IS NULL THEN $6
-            ELSE GREATEST(confidence, $6)
+            WHEN confidence IS NULL THEN $7
+            ELSE GREATEST(confidence, $7)
           END
       WHERE id = $1
       RETURNING id,
                 camera_id,
                 zone_id,
+                zone_name,
                 event_type,
                 status,
                 priority,
@@ -380,6 +427,7 @@ export class EventsRepository {
       input.eventId,
       input.cameraId,
       input.zoneId,
+      input.zoneName ?? null,
       input.eventType,
       input.priority,
       input.confidence,
@@ -573,7 +621,7 @@ export class EventsRepository {
              e.event_type,
              e.priority,
              c.name AS camera_name,
-             z.name AS zone_name,
+             COALESCE(e.zone_name, z.name) AS zone_name,
              e.detected_at
       FROM events e
       LEFT JOIN cameras c ON c.id = e.camera_id

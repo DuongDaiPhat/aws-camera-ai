@@ -76,6 +76,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
   beforeEach(async () => {
     const mockEventsRepository = {
       findCameraBySlug: jest.fn(),
+      findEligibleZones: jest.fn(),
       findZoneByCameraAndSlug: jest.fn(),
       createEvent: jest.fn(),
       findEventByDedupKey: jest.fn(),
@@ -223,6 +224,73 @@ describe('MqttConsumerService (US-03, US-04)', () => {
         priority: 'P1',
         dedupKey: 'frigate:cam_kitchen:track-102',
       }),
+    );
+  });
+
+  it('khong dung entered_zones de ket luan nguoi van o trong vung', async () => {
+    eventsRepository.findCameraBySlug.mockResolvedValueOnce({
+      id: 'cam-uuid-kitchen',
+      name: 'Phong bep',
+      slug: 'cam_kitchen',
+      timezone: 'Asia/Bangkok',
+      zone_config_applied: true,
+    });
+    eventsRepository.createEvent.mockResolvedValueOnce(createEvent());
+
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'new',
+          after: {
+            id: 'track-left-zone',
+            camera: 'cam_kitchen',
+            frame_time: 1_726_387_200,
+            label: 'person',
+            score: 0.9,
+            current_zones: [],
+            entered_zones: ['restricted_stove'],
+          },
+        }),
+      ),
+    );
+
+    expect(eventsRepository.findEligibleZones).not.toHaveBeenCalled();
+    expect(eventsRepository.createEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: 'PERSON_DETECTED', zoneId: null }),
+    );
+  });
+
+  it('khong nang M4 khi version zone chua duoc Frigate ap dung', async () => {
+    eventsRepository.findCameraBySlug.mockResolvedValueOnce({
+      id: 'cam-uuid-kitchen',
+      name: 'Phong bep',
+      slug: 'cam_kitchen',
+      timezone: 'Asia/Bangkok',
+      zone_config_applied: false,
+    });
+    eventsRepository.createEvent.mockResolvedValueOnce(createEvent());
+
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'new',
+          after: {
+            id: 'track-pending-zone',
+            camera: 'cam_kitchen',
+            frame_time: 1_726_387_200,
+            label: 'person',
+            score: 0.9,
+            current_zones: ['restricted_stove'],
+          },
+        }),
+      ),
+    );
+
+    expect(eventsRepository.findEligibleZones).not.toHaveBeenCalled();
+    expect(eventsRepository.createEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: 'PERSON_DETECTED', zoneId: null }),
     );
   });
 

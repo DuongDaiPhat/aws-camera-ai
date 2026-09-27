@@ -137,15 +137,38 @@ export class FrigateSyncService {
         };
       }
 
+      const zones =
+        typeof this.camerasRepository.findZonesByCameraId === 'function'
+          ? await this.camerasRepository.findZonesByCameraId(cameraId)
+          : [];
+
       // 2. Sinh cấu hình mới bảo toàn toàn bộ polygon zones của Thành viên C
       const updatedConfig = this.frigateConfig.generateUpdatedConfig(rawConfig, {
         camera,
         settings: currentSettings,
+        zones,
         mediamtxRtspBaseUrl: this.getMediaMtxRtspBaseUrl(camera.source_type_val),
       });
 
       // 3. Gửi cấu hình đã cập nhật xuống Frigate
       await this.frigateClient.saveConfig(updatedConfig);
+
+      const applied = await this.verifyAppliedZones(
+        camera.slug,
+        zones.filter((zone) => zone.isEnabled).map((zone) => zone.slug),
+        (currentSettings?.managed_zone_slugs ?? []).filter(
+          (slug) => !zones.some((zone) => zone.isEnabled && zone.slug === slug),
+        ),
+      );
+      if (!applied) {
+        throw new Error('Frigate chưa xác nhận cấu hình zone đang chạy.');
+      }
+
+      const settingsAfterApply =
+        await this.camerasRepository.findFrigateSettingsByCameraId(cameraId);
+      if ((settingsAfterApply?.config_version ?? 1) !== targetVersion) {
+        throw new Error('CONFIG_VERSION_CONFLICT');
+      }
 
       // 4. Cập nhật trạng thái thành công trong Database
       const updatedSettings = await this.camerasRepository.updateFrigateSettings(cameraId, {
@@ -153,6 +176,9 @@ export class FrigateSyncService {
         applied_version: targetVersion,
         sync_error_code: null,
         sync_error_message: null,
+        ...(zones.length > 0 || (currentSettings?.managed_zone_slugs?.length ?? 0) > 0
+          ? { managed_zone_slugs: zones.map((zone) => zone.slug) }
+          : {}),
       });
 
       this.logger.log(
@@ -166,7 +192,8 @@ export class FrigateSyncService {
         syncStatus: 'SYNCED',
       };
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Lỗi đồng bộ cấu hình Frigate';
+      const rawMessage = error instanceof Error ? error.message : 'Lỗi đồng bộ cấu hình Frigate';
+      const msg = this.sanitizeError(rawMessage);
       this.logger.error(`Đồng bộ Frigate thất bại cho camera ${camera.slug}:`, msg);
 
       // Đánh dấu FAILED và lưu mã lỗi để người dùng có thể bấm Thử lại
@@ -185,6 +212,31 @@ export class FrigateSyncService {
         errorMessage: msg,
       };
     }
+  }
+
+  private async verifyAppliedZones(
+    cameraSlug: string,
+    expectedSlugs: string[],
+    removedSlugs: string[],
+  ): Promise<boolean> {
+    if (typeof this.frigateConfig.hasAppliedZones !== 'function') return true;
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      try {
+        const currentConfig = await this.frigateClient.getRawConfig();
+        if (
+          this.frigateConfig.hasAppliedZones(currentConfig, cameraSlug, expectedSlugs, removedSlugs)
+        )
+          return true;
+      } catch {
+        // Frigate khoi dong lai trong vai giay sau khi save_option=restart.
+      }
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+    return false;
+  }
+
+  private sanitizeError(message: string): string {
+    return message.replace(/(rtsps?:\/\/)[^:/@\s]+:[^@/\s]+@/gi, '$1***:***@').slice(0, 500);
   }
 
   private getMediaMtxRtspBaseUrl(sourceType: string | null): string {
