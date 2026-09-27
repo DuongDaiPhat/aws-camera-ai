@@ -61,3 +61,7 @@ export type UpdateCameraStateRequest = components['schemas']['UpdateCameraStateR
 export type UpdateCameraSourceRequest = components['schemas']['UpdateCameraSourceRequest'];
 export type RtspConnectionTestRequest = components['schemas']['RtspConnectionTestRequest'];
 export type RtspConnectionTestResult = components['schemas']['RtspConnectionTestResult'];
+export type Zone = components['schemas']['Zone'];
+export type ZoneType = components['schemas']['ZoneType'];
+export type CreateZoneRequest = components['schemas']['CreateZoneRequest'];
+export type UpdateZoneRequest = components['schemas']['UpdateZoneRequest'];
