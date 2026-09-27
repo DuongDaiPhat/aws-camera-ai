@@ -19,7 +19,7 @@ describe('EventsRepository (US-03, US-06)', () => {
 
       const res = await repository.findCameraBySlug('camera_1');
       expect(res).toEqual(mockCam);
-      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('WHERE slug = $1'), [
+      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('WHERE c.slug = $1'), [
         'camera_1',
       ]);
     });

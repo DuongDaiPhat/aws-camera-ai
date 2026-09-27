@@ -132,7 +132,7 @@ describe('EventsService (US-06)', () => {
       const result = await service.listEvents({ page: 1, pageSize: 10 });
       expect(result.data[0].thumbnailUrl).toBeNull();
       expect(result.data[0].camera).toBeNull();
-      expect(result.data[0].zone).toBeNull();
+      expect(result.data[0].zone).toEqual({ id: null, name: 'Khu vực sofa' });
       expect(result.data[0].confidence).toBeNull();
       expect(storageService.getPresignedUrl).not.toHaveBeenCalled();
     });
