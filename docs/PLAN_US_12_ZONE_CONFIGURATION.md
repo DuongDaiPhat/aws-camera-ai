@@ -1,5 +1,14 @@
 **Plan triển khai US-12 — Cấu hình vùng cấm cho từng camera**
 
+> **Trạng thái triển khai (2026-09-27):** Contract, migration 0009, CRUD có quyền ADMIN,
+> worker đồng bộ bền vững, cấu hình Frigate, đánh giá MQTT/M4, snapshot tên vùng, SSE khi
+> nâng sự kiện và giao diện polygon đã được triển khai. Migration và CRUD → Frigate →
+> retry phục hồi đã chạy trên Docker local với Frigate 0.18.0. Unit test, typecheck,
+> OpenAPI lint và validator Frigate đạt. Nghiệm thu chuyển động người thật cho bốn kịch bản
+> dwell vẫn cần nguồn video kiểm soát; xem
+> [biên bản kiểm chứng Frigate](FRIGATE_ZONE_US12_VERIFICATION.md). Không đánh dấu phần này
+> đạt bằng mock/fixture.
+
 > Phần giao với Camera, Frigate config, US-11, UI shell và migration tuân theo [kế hoạch tích hợp 5 thành viên](PLAN_AGILE_5_MEMBER_EXECUTION.md).
 > **1\. Hiện trạng và phạm vi**
 
