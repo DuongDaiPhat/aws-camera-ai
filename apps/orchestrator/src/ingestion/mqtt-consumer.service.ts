@@ -12,6 +12,7 @@ import { EventMediaRepository } from '../media/event-media.repository';
 import { MediaService } from '../media/media.service';
 import { FrigateEventAfterDto, FrigateEventMessageDto } from './dto/frigate-event.dto';
 import { FrigateDetectionTrackerService } from '../frigate/frigate-detection-tracker.service';
+import { ZoneScheduleService } from '../zones/zone-schedule.service';
 
 const DEFAULT_MQTT_CONNECT_TIMEOUT_MS = 10_000;
 const DEFAULT_MQTT_RECONNECT_PERIOD_MS = 3_000;
@@ -21,6 +22,7 @@ type FrigateMessageType = FrigateEventMessageDto['type'];
 interface EventContext {
   cameraId: string | null;
   zoneId: string | null;
+  zoneName: string | null;
   eventType: EventType;
   priority: PriorityLevel;
   dedupKey: string;
@@ -30,6 +32,7 @@ interface EventContext {
 interface SynchronizedEvent {
   event: EventRecord;
   isCreated: boolean;
+  isPromoted: boolean;
 }
 
 @Injectable()
@@ -45,6 +48,8 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     private readonly mediaService: MediaService,
     private readonly detectionTracker: FrigateDetectionTrackerService,
     @Optional() private readonly eventsService?: EventsService,
+    @Optional()
+    private readonly zoneScheduleService: ZoneScheduleService = new ZoneScheduleService(),
   ) {}
 
   onModuleInit(): void {
@@ -149,25 +154,41 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
   }
 
   private getZoneSlugs(after: FrigateEventAfterDto): string[] {
-    const currentZones = after.current_zones ?? [];
-    return currentZones.length > 0 ? currentZones : (after.entered_zones ?? []);
-  }
-
-  private async findZoneId(cameraId: string | null, zoneSlugs: string[]): Promise<string | null> {
-    const firstZoneSlug = zoneSlugs[0];
-    if (!cameraId || !firstZoneSlug) {
-      return null;
-    }
-
-    const zone = await this.eventsRepository.findZoneByCameraAndSlug(cameraId, firstZoneSlug);
-    return zone?.id ?? null;
+    return [...new Set(after.current_zones ?? [])];
   }
 
   private async buildEventContext(after: FrigateEventAfterDto): Promise<EventContext> {
     const zoneSlugs = this.getZoneSlugs(after);
     const camera = await this.eventsRepository.findCameraBySlug(after.camera);
     const cameraId = camera?.id ?? null;
-    const zoneId = await this.findZoneId(cameraId, zoneSlugs);
+    const observedAt = new Date(after.frame_time * 1_000);
+    let eligibleZones = [] as Awaited<ReturnType<EventsRepository['findEligibleZones']>>;
+    if (camera && camera.zone_config_applied !== false && zoneSlugs.length > 0) {
+      if (typeof this.eventsRepository.findEligibleZones === 'function') {
+        const resolved = await this.eventsRepository.findEligibleZones(camera.id, zoneSlugs);
+        eligibleZones = Array.isArray(resolved) ? resolved : [];
+      }
+      if (
+        eligibleZones.length === 0 &&
+        typeof this.eventsRepository.findZoneByCameraAndSlug === 'function'
+      ) {
+        const legacyZone = await this.eventsRepository.findZoneByCameraAndSlug(
+          camera.id,
+          zoneSlugs[0],
+        );
+        if (legacyZone) eligibleZones = [legacyZone];
+      }
+    }
+    const zone = eligibleZones.find((candidate) =>
+      this.zoneScheduleService.isActive(
+        {
+          activeFrom: candidate.active_from?.slice(0, 5) ?? null,
+          activeTo: candidate.active_to?.slice(0, 5) ?? null,
+        },
+        observedAt,
+        camera?.timezone ?? 'UTC',
+      ),
+    );
 
     if (!camera) {
       this.logger.warn(
@@ -175,11 +196,12 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       );
     }
 
-    const isRestrictedZone = zoneSlugs.length > 0;
+    const isRestrictedZone = zone !== undefined;
 
     return {
       cameraId,
-      zoneId,
+      zoneId: zone?.id ?? null,
+      zoneName: zone?.name ?? null,
       eventType: isRestrictedZone ? 'RESTRICTED_ZONE' : 'PERSON_DETECTED',
       priority: isRestrictedZone ? 'P1' : 'P3',
       dedupKey: `frigate:${after.camera}:${after.id}`,
@@ -194,6 +216,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     return await this.eventsRepository.createEvent({
       cameraId: context.cameraId,
       zoneId: context.zoneId,
+      zoneName: context.zoneName,
       eventType: context.eventType,
       status: 'DETECTED',
       priority: context.priority,
@@ -217,6 +240,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       eventId: event.id,
       cameraId: context.cameraId,
       zoneId: context.zoneId,
+      zoneName: context.zoneName,
       eventType: isRestrictedZone ? 'RESTRICTED_ZONE' : 'PERSON_DETECTED',
       priority: isRestrictedZone ? 'P1' : 'P3',
       confidence: after.score,
@@ -238,6 +262,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
         ? null
         : await this.eventsRepository.findEventByDedupKey(context.dedupKey);
     let isCreated = false;
+    let isPromoted = false;
 
     if (!event) {
       event = await this.createEvent(context, after);
@@ -253,7 +278,9 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     }
 
     if (!isCreated) {
+      const previousType = event.event_type;
       event = await this.updateExistingEvent(event, context, after);
+      isPromoted = previousType !== 'RESTRICTED_ZONE' && event.event_type === 'RESTRICTED_ZONE';
     }
 
     this.logger.log(
@@ -271,7 +298,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
         : 'Da cap nhat su kien theo vong doi Frigate track',
     );
 
-    return { event, isCreated };
+    return { event, isCreated, isPromoted };
   }
 
   /**
@@ -352,12 +379,15 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     this.detectionTracker.track(message.type, message.after);
 
     try {
-      const { event, isCreated } = await this.synchronizeEvent(message.type, message.after);
+      const { event, isCreated, isPromoted } = await this.synchronizeEvent(
+        message.type,
+        message.after,
+      );
       const hasNewSnapshot = await this.synchronizeMedia(message.type, event, message.after);
 
       if (isCreated) {
         await this.emitEventToStream(event.id, 'event.created');
-      } else if (hasNewSnapshot) {
+      } else if (isPromoted || hasNewSnapshot) {
         // Anh vua ve toi sau khi the su kien da hien tren dashboard: day ban cap nhat
         // de nguoi dung thay snapshot ma khong phai F5 (FR-DSH-02).
         await this.emitEventToStream(event.id, 'event.updated');

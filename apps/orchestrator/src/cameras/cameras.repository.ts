@@ -69,6 +69,7 @@ export class CamerasRepository {
         f.sync_status,
         f.sync_error_code,
         f.sync_error_message,
+        f.managed_zone_slugs,
         (SELECT COUNT(*)::int FROM zones z WHERE z.camera_id = c.id) AS zone_count
       FROM cameras c
       LEFT JOIN camera_sources s ON s.camera_id = c.id
@@ -114,6 +115,7 @@ export class CamerasRepository {
         f.sync_status,
         f.sync_error_code,
         f.sync_error_message,
+        f.managed_zone_slugs,
         (SELECT COUNT(*)::int FROM zones z WHERE z.camera_id = c.id) AS zone_count
       FROM cameras c
       LEFT JOIN camera_sources s ON s.camera_id = c.id
@@ -158,6 +160,7 @@ export class CamerasRepository {
         f.sync_status,
         f.sync_error_code,
         f.sync_error_message,
+        f.managed_zone_slugs,
         (SELECT COUNT(*)::int FROM zones z WHERE z.camera_id = c.id) AS zone_count
       FROM cameras c
       LEFT JOIN camera_sources s ON s.camera_id = c.id
@@ -337,6 +340,7 @@ export class CamerasRepository {
         sync_error_code = $3,
         sync_error_message = $4,
         applied_version = COALESCE($5, camera_frigate_settings.applied_version),
+        managed_zone_slugs = COALESCE($7::text[], camera_frigate_settings.managed_zone_slugs),
         updated_at = now()
       RETURNING *
     `;
@@ -348,6 +352,7 @@ export class CamerasRepository {
       patch.sync_error_message ?? null,
       patch.applied_version ?? null,
       patch.config_version ?? null,
+      patch.managed_zone_slugs ?? null,
     ];
 
     const result = await this.pool.query<CameraFrigateSettingsRecord>(query, values);
@@ -424,6 +429,26 @@ export class CamerasRepository {
     return result.rows[0].config_version;
   }
 
+  async reopenFrigateSyncJob(cameraId: string, targetVersion: number): Promise<void> {
+    await this.pool.query(
+      `INSERT INTO frigate_config_sync_jobs (camera_id, target_version, status)
+       VALUES ($1, $2, 'PENDING')
+       ON CONFLICT (camera_id) DO UPDATE SET
+         target_version = EXCLUDED.target_version, status = 'PENDING', attempt_count = 0,
+         next_attempt_at = now(), last_error_code = NULL, last_error_message = NULL`,
+      [cameraId, targetVersion],
+    );
+  }
+
+  async completeFrigateSyncJob(cameraId: string, targetVersion: number): Promise<void> {
+    await this.pool.query(
+      `UPDATE frigate_config_sync_jobs
+       SET status = 'SYNCED', last_error_code = NULL, last_error_message = NULL
+       WHERE camera_id = $1 AND target_version = $2`,
+      [cameraId, targetVersion],
+    );
+  }
+
   async findLatestSnapshotKey(cameraId: string): Promise<string | null> {
     const query = `
       SELECT em.object_key 
@@ -445,14 +470,20 @@ export class CamerasRepository {
       slug: string;
       zoneType: string;
       polygon: number[][];
+      minDwellSeconds?: number;
+      activeFrom?: string | null;
+      activeTo?: string | null;
       isEnabled: boolean;
     }>
   > {
     const query = `
-      SELECT id, camera_id AS "cameraId", name, slug, zone_type AS "zoneType", polygon, is_enabled AS "isEnabled"
+      SELECT id, camera_id AS "cameraId", name, slug, zone_type AS "zoneType", polygon,
+             min_dwell_seconds AS "minDwellSeconds", active_from::text AS "activeFrom",
+             active_to::text AS "activeTo", is_enabled AS "isEnabled"
       FROM zones
       WHERE camera_id = $1
-      ORDER BY name ASC
+      ORDER BY id ASC
+      LIMIT 500
     `;
     const result = await this.pool.query(query, [cameraId]);
     return result.rows;

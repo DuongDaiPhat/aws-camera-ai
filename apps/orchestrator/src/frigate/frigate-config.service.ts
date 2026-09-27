@@ -6,7 +6,14 @@ import type { CameraFrigateSettingsRecord } from '../cameras/cameras.types';
 export interface CameraFrigateData {
   camera: CameraAggregateRecord;
   mediamtxRtspBaseUrl?: string;
-  settings?: CameraFrigateSettingsRecord | null;
+  settings?: Partial<CameraFrigateSettingsRecord> | null;
+  zones?: Array<{
+    slug: string;
+    zoneType: string;
+    polygon: number[][];
+    minDwellSeconds?: number;
+    isEnabled: boolean;
+  }>;
 }
 
 @Injectable()
@@ -14,7 +21,7 @@ export class FrigateConfigService {
   private readonly logger = new Logger(FrigateConfigService.name);
 
   generateUpdatedConfig(rawYaml: string, data: CameraFrigateData): string {
-    const { camera, settings, mediamtxRtspBaseUrl = 'rtsp://mediamtx:8554' } = data;
+    const { camera, settings, zones = [], mediamtxRtspBaseUrl = 'rtsp://mediamtx:8554' } = data;
     const slug = camera.slug;
 
     const parsedConfig = this.parseConfig(rawYaml);
@@ -24,7 +31,15 @@ export class FrigateConfigService {
 
     const cameras = parsedConfig.cameras as Record<string, Record<string, unknown>>;
     const existingCamera = cameras[slug] ?? {};
-    const preservedZones = existingCamera.zones ?? {};
+    const existingZones = {
+      ...((existingCamera.zones as Record<string, unknown> | undefined) ?? {}),
+    };
+    for (const managedSlug of settings?.managed_zone_slugs ?? []) {
+      delete existingZones[managedSlug];
+    }
+    for (const zone of zones.filter((candidate) => candidate.isEnabled)) {
+      existingZones[zone.slug] = this.toFrigateZone(zone);
+    }
     const streamUrl = this.resolveStreamUrl(camera, mediamtxRtspBaseUrl);
     const detect = {
       ...((existingCamera.detect as Record<string, unknown> | undefined) ?? {}),
@@ -93,10 +108,43 @@ export class FrigateConfigService {
           retain: { ...alertRetain, days: retentionDays },
         },
       },
-      zones: preservedZones, // Bảo toàn 100% zones của Thành viên C
+      zones: existingZones,
     };
 
     return YAML.stringify(parsedConfig);
+  }
+
+  hasAppliedZones(
+    rawYaml: string,
+    cameraSlug: string,
+    expectedSlugs: string[],
+    removedSlugs: string[] = [],
+  ): boolean {
+    const parsed = this.parseConfig(rawYaml);
+    const cameras = parsed.cameras as Record<string, Record<string, unknown>> | undefined;
+    const zones = cameras?.[cameraSlug]?.zones as Record<string, unknown> | undefined;
+    if (!zones) return expectedSlugs.length === 0;
+    return (
+      expectedSlugs.every((slug) => Object.hasOwn(zones, slug)) &&
+      removedSlugs.every((slug) => !Object.hasOwn(zones, slug))
+    );
+  }
+
+  private toFrigateZone(
+    zone: NonNullable<CameraFrigateData['zones']>[number],
+  ): Record<string, unknown> {
+    const coordinates = zone.polygon
+      .flatMap(([x, y]) => [this.formatCoordinate(x), this.formatCoordinate(y)])
+      .join(',');
+    return {
+      coordinates,
+      objects: ['person'],
+      ...(zone.zoneType === 'RESTRICTED' ? { loitering_time: zone.minDwellSeconds ?? 2 } : {}),
+    };
+  }
+
+  private formatCoordinate(value: number): string {
+    return Number(value.toFixed(6)).toString();
   }
 
   private parseConfig(rawYaml: string): Record<string, unknown> {

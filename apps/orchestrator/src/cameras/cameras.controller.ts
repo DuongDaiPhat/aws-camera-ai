@@ -339,28 +339,11 @@ export class CamerasController {
     return await this.camerasService.retryFrigateSync(cameraId, role);
   }
 
-  @Get(':cameraId/zones')
-  @ApiOperation({
-    summary: 'Danh sách các vùng giám sát (Zones) của camera (US-12)',
-    description: 'Trả về danh sách polygon zones để vẽ overlay trên Debug View.',
-  })
-  @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Danh sách các vùng giám sát' })
-  @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
-  async getCameraZones(@Param('cameraId', ParseUUIDPipe) cameraId: string): Promise<{
-    data: Array<{
-      id: string;
-      cameraId: string;
-      name: string;
-      slug: string;
-      zoneType: string;
-      polygon: number[][];
-      isEnabled: boolean;
-    }>;
+  /** @deprecated Endpoint REST da duoc chuyen sang ZonesController; giu method de tuong thich test/client noi bo. */
+  async getCameraZones(cameraId: string): Promise<{
+    data: Awaited<ReturnType<CamerasService['getCameraZones']>>;
   }> {
-    const data = await this.camerasService.getCameraZones(cameraId);
-    return { data };
+    return { data: await this.camerasService.getCameraZones(cameraId) };
   }
 
   private extractRole(request: AuthenticatedRequest): UserRole {

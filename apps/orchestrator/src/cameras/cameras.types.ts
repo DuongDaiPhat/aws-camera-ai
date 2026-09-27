@@ -79,6 +79,7 @@ export interface CameraFrigateSettingsRecord {
   sync_status: 'PENDING' | 'SYNCED' | 'FAILED';
   sync_error_code: string | null;
   sync_error_message: string | null;
+  managed_zone_slugs?: string[];
   updated_at: Date;
 }
 
@@ -110,5 +111,6 @@ export interface CameraAggregateRecord extends CameraRecord {
   sync_status: 'PENDING' | 'SYNCED' | 'FAILED' | null;
   sync_error_code: string | null;
   sync_error_message: string | null;
+  managed_zone_slugs?: string[] | null;
   zone_count: string | number;
 }
