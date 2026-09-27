@@ -665,6 +665,14 @@ export class EventsRepository {
     ]);
     return res.rows[0] ?? null;
   }
+
+  async getSyncedFaceCollectionVersion(ownerUserId: string): Promise<number> {
+    const res = await this.pool.query<{ synced_version: number }>(
+      'SELECT synced_version FROM face_collection_sync WHERE owner_user_id = $1 LIMIT 1',
+      [ownerUserId],
+    );
+    return res.rows[0]?.synced_version ?? 1;
+  }
 }
 
 export interface FilterConditionsResult {

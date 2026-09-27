@@ -395,12 +395,15 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
           (event.event_type === 'PERSON_DETECTED' || event.event_type === 'RESTRICTED_ZONE')
         ) {
           const camera = await this.eventsRepository.findCameraBySlug(message.after.camera);
+          const ownerScopeId = camera?.owner_user_id ?? '00000000-0000-0000-0000-000000000000';
+          const collectionVersion =
+            await this.eventsRepository.getSyncedFaceCollectionVersion(ownerScopeId);
           await this.faceQueue.add('match_face', {
             eventId: event.id,
             trackId: message.after.id,
             cameraSlug: message.after.camera,
-            ownerScopeId: camera?.owner_user_id ?? '00000000-0000-0000-0000-000000000000',
-            collectionVersion: 1,
+            ownerScopeId,
+            collectionVersion,
           });
         }
       } else if (isPromoted || hasNewSnapshot) {

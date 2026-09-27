@@ -24,7 +24,7 @@ VALUES
     ('RESTRICTED_ZONE',     'P1', 0.600, 0.800,  60, FALSE,
      '["TELEGRAM"]'::jsonb,            '["CONNECT_CALL"]'::jsonb),
 
-    ('UNKNOWN_PERSON',      'P2', 0.600, 0.800, 120, FALSE,
+    ('UNKNOWN_PERSON',      'P2', 0.400, 1.000, 120, FALSE,
      '["TELEGRAM"]'::jsonb,            '["CONNECT_CALL"]'::jsonb),
 
     -- Wellness khong co confidence (thuan logic scheduler) -> t_low/t_high NULL

@@ -7,7 +7,13 @@ import { ZonesModule } from '../zones/zones.module';
 import { BullModule } from '@nestjs/bullmq';
 
 @Module({
-  imports: [EventsModule, MediaModule, FrigateModule, ZonesModule, BullModule.registerQueue({ name: 'face-recognition' })],
+  imports: [
+    EventsModule,
+    MediaModule,
+    FrigateModule,
+    ZonesModule,
+    BullModule.registerQueue({ name: 'face-recognition' }),
+  ],
   providers: [MqttConsumerService],
   exports: [MqttConsumerService],
 })
