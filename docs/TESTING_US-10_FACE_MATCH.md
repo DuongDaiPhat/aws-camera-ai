@@ -22,7 +22,7 @@ Tài liệu này hướng dẫn các bước kiểm thử (test) từ đầu đ�
 4. **Kết quả mong đợi**:
    - Giao diện hiện lên nhãn "Đang chờ đồng bộ".
    - Chờ tối đa khoảng 10 giây (do chu kỳ đồng bộ là mỗi 10s), nhãn này sẽ biến mất và trạng thái tự động chuyển thành "Sẵn sàng nhận diện".
-   - *(Dành cho Dev)* Bạn có thể check log bằng lệnh `docker logs camerai-ai` để thấy API đồng bộ trả về `POST /face/collection/sync HTTP/1.1" 200 OK`.
+   - _(Dành cho Dev)_ Bạn có thể check log bằng lệnh `docker logs camerai-ai` để thấy API đồng bộ trả về `POST /face/collection/sync HTTP/1.1" 200 OK`.
 
 ### Kịch bản 2: Frigate phát hiện người quen (Known Person Detected)
 
@@ -43,7 +43,7 @@ Tài liệu này hướng dẫn các bước kiểm thử (test) từ đầu đ�
 4. **Kết quả mong đợi**:
    - Trường **Nhận diện người**: Hiển thị là "Người lạ".
    - Trường **Người quen khớp**: Hiển thị là "Không".
-   - *(Mở rộng)* Sự kiện "Người lạ" này sẽ kích hoạt quy trình tự động cảnh báo theo rule `UNKNOWN_PERSON` trong cài đặt mức độ ưu tiên của hệ thống (sau một khoảng thời gian chờ nhất định nếu không ai phản hồi).
+   - _(Mở rộng)_ Sự kiện "Người lạ" này sẽ kích hoạt quy trình tự động cảnh báo theo rule `UNKNOWN_PERSON` trong cài đặt mức độ ưu tiên của hệ thống (sau một khoảng thời gian chờ nhất định nếu không ai phản hồi).
 
 ### Kịch bản 4: Kiểm tra ngưỡng từ chối (Threshold Rejection)
 
