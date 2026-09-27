@@ -37,6 +37,7 @@ erDiagram
     devices ||--o{ cameras : "chứa"
     cameras ||--o| camera_sources : "có nguồn phát"
     cameras ||--o| camera_frigate_settings : "cấu hình Frigate"
+    cameras ||--o| frigate_config_sync_jobs : "chờ đồng bộ zone"
     cameras ||--o{ zones : "được chia thành"
     cameras ||--o{ events : "sinh ra"
     zones   ||--o{ events : "xảy ra trong"
@@ -111,6 +112,16 @@ erDiagram
         int config_version
         int applied_version
         frigate_sync_status_enum sync_status
+        text[] managed_zone_slugs
+    }
+
+    frigate_config_sync_jobs {
+        uuid id PK
+        uuid camera_id FK,UK
+        int target_version
+        frigate_sync_status_enum status
+        int attempt_count
+        timestamptz next_attempt_at
     }
 
     zones {
@@ -151,6 +162,7 @@ erDiagram
         uuid id PK
         uuid camera_id FK
         uuid zone_id FK
+        text zone_name "snapshot tên vùng"
         event_type event_type
         event_status status
         priority_level priority
@@ -258,17 +270,18 @@ erDiagram
     }
 ```
 
-### Vì sao có 7 bảng ngoài danh sách 10 bảng ban đầu
+### Vì sao có 8 bảng ngoài danh sách 10 bảng ban đầu
 
-| Bảng                      | Sinh ra từ                  | Nếu không có thì sao                                                                                                 |
-| ------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `event_status_history`    | FR-EVT-05, FR-ESC-09        | Không trả lời được "ai xác nhận, lúc nào, qua kênh nào" — một mục trong tiêu chí demo                                |
-| `emergency_contacts`      | FR-NOT-09, FR-NOT-10        | Không gọi tuần tự 3 liên hệ được; nhồi số điện thoại vào `users` là sai mô hình (liên hệ khẩn không cần tài khoản)   |
-| `wellness_schedules`      | FR-DET-M5-01                | Lịch kiểm tra phải hard-code — vi phạm "mọi tham số cấu hình được"                                                   |
-| `audit_logs`              | FR-LOG-01                   | Không chứng minh được đã ghi nhận hành vi nhạy cảm (xóa dữ liệu sinh trắc học) — phần Đạo đức của báo cáo sẽ hổng    |
-| `auth_refresh_tokens`     | US-05, FR-AUT-02, FR-AUT-04 | Không thể thu hồi JWT khi đăng xuất, không thể xoay vòng Refresh Token (Token Rotation) an toàn chống đánh cắp phiên |
-| `camera_sources`          | CAM                         | Không thể quản lý thống nhất RTSP, webcam trình duyệt và video giả lập hoặc theo dõi vòng đời publisher              |
-| `camera_frigate_settings` | CAM                         | Không thể lưu version, trạng thái đồng bộ và cấu hình detect/snapshot/recording riêng cho từng camera                |
+| Bảng                       | Sinh ra từ                  | Nếu không có thì sao                                                                                                 |
+| -------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `event_status_history`     | FR-EVT-05, FR-ESC-09        | Không trả lời được "ai xác nhận, lúc nào, qua kênh nào" — một mục trong tiêu chí demo                                |
+| `emergency_contacts`       | FR-NOT-09, FR-NOT-10        | Không gọi tuần tự 3 liên hệ được; nhồi số điện thoại vào `users` là sai mô hình (liên hệ khẩn không cần tài khoản)   |
+| `wellness_schedules`       | FR-DET-M5-01                | Lịch kiểm tra phải hard-code — vi phạm "mọi tham số cấu hình được"                                                   |
+| `audit_logs`               | FR-LOG-01                   | Không chứng minh được đã ghi nhận hành vi nhạy cảm (xóa dữ liệu sinh trắc học) — phần Đạo đức của báo cáo sẽ hổng    |
+| `auth_refresh_tokens`      | US-05, FR-AUT-02, FR-AUT-04 | Không thể thu hồi JWT khi đăng xuất, không thể xoay vòng Refresh Token (Token Rotation) an toàn chống đánh cắp phiên |
+| `camera_sources`           | CAM                         | Không thể quản lý thống nhất RTSP, webcam trình duyệt và video giả lập hoặc theo dõi vòng đời publisher              |
+| `camera_frigate_settings`  | CAM                         | Không thể lưu version, trạng thái đồng bộ và cấu hình detect/snapshot/recording riêng cho từng camera                |
+| `frigate_config_sync_jobs` | US-12                       | Công việc đồng bộ zone bị mất khi Orchestrator restart; retry cũ có thể ghi đè version mới                           |
 
 ---
 
@@ -393,8 +406,8 @@ Frigate.
 Vùng giám sát dạng đa giác trên khung hình (FR-DEV-02).
 
 **`polygon` lưu tọa độ chuẩn hóa 0..1, không phải pixel.** Admin vẽ vùng trên ảnh preview
-1280×720; sau này đổi camera sang 1920×1080 thì vùng vẫn đúng chỗ. Orchestrator quy đổi
-sang pixel khi sinh config cho Frigate.
+1280×720; sau này đổi camera sang 1920×1080 thì vùng vẫn đúng chỗ. Orchestrator giữ tọa
+độ chuẩn hóa khi sinh config tương thích Frigate 0.18.
 
 ```json
 {
@@ -417,7 +430,11 @@ Ba loại vùng (FR-DEV-03):
 
 `min_dwell_seconds` (mặc định 2 giây) loại trường hợp đi lướt qua bếp — FR-DET-M4-02.
 `active_from` / `active_to` cho phép tắt giám sát ban đêm; ràng buộc `zones_lich_day_du`
-bắt phải điền cả hai hoặc bỏ trống cả hai.
+bắt phải điền cả hai hoặc bỏ trống cả hai. Hai đầu bằng nhau bị từ chối; lịch qua nửa đêm
+được đánh giá theo múi giờ camera.
+
+`events.zone_name` là snapshot tên vùng lúc sự kiện được nâng thành `RESTRICTED_ZONE`.
+API ưu tiên snapshot này để đổi tên hoặc xóa zone không làm sai lịch sử.
 
 ### 3.5 `known_faces`
 
