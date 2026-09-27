@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { KnownFacesModule } from './known-faces/known-faces.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { CameraSourcesModule } from './camera-sources/camera-sources.module';
 import { CamerasModule } from './cameras/cameras.module';
@@ -14,6 +14,8 @@ import { StorageModule } from './storage/storage.module';
 import { EscalationRulesModule } from './escalation-rules/escalation-rules.module';
 import { EscalationModule } from './escalation/escalation.module';
 import { ZonesModule } from './zones/zones.module';
+import { FaceRecognitionModule } from './face-recognition/face-recognition.module';
+import { BullModule } from '@nestjs/bullmq';
 
 /**
  * Module goc.
@@ -28,6 +30,15 @@ import { ZonesModule } from './zones/zones.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '../../.env'] }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          host: config.get<string>('REDIS_HOST', 'localhost'),
+          port: config.get<number>('REDIS_PORT', 6379),
+        },
+      }),
+    }),
     DatabaseModule,
     AuthModule,
     KnownFacesModule,
@@ -42,6 +53,7 @@ import { ZonesModule } from './zones/zones.module';
     EscalationRulesModule,
     EscalationModule,
     ZonesModule,
+    FaceRecognitionModule,
   ],
 })
 export class AppModule {}

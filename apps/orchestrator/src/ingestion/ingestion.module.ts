@@ -4,9 +4,10 @@ import { MediaModule } from '../media/media.module';
 import { MqttConsumerService } from './mqtt-consumer.service';
 import { FrigateModule } from '../frigate/frigate.module';
 import { ZonesModule } from '../zones/zones.module';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
-  imports: [EventsModule, MediaModule, FrigateModule, ZonesModule],
+  imports: [EventsModule, MediaModule, FrigateModule, ZonesModule, BullModule.registerQueue({ name: 'face-recognition' })],
   providers: [MqttConsumerService],
   exports: [MqttConsumerService],
 })
