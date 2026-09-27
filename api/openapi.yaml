@@ -650,6 +650,8 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/FrigateSyncResult" }
         "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
 
   /cameras/{cameraId}/debug-stream:
     parameters:
@@ -694,7 +696,9 @@ paths:
       summary: Tao vung giam sat moi
       description: |
         Toa do da giac phai CHUAN HOA ve khoang 0..1 de doc lap do phan giai.
-        Orchestrator tu sinh lai cau hinh Frigate sau khi luu.
+        Orchestrator tu sinh lai cau hinh Frigate sau khi luu. Response thanh cong
+        chi xac nhan zone da duoc luu vao PostgreSQL; trang thai `frigateSync` cua
+        camera cho biet cau hinh da co hieu luc tren Frigate hay chua.
       operationId: createZone
       requestBody:
         required: true
@@ -708,6 +712,10 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Zone" }
         "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
 
   /zones/{zoneId}:
     parameters:
@@ -728,12 +736,18 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Zone" }
         "404": { $ref: "#/components/responses/NotFound" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
     delete:
       tags: [zones]
       summary: Xoa vung
       operationId: deleteZone
       responses:
         "204": { description: Da xoa }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   # ===================================================================
@@ -2017,42 +2031,72 @@ components:
 
     Zone:
       type: object
-      required: [id, cameraId, name, slug, zoneType, polygon, isEnabled]
+      required:
+        [
+          id,
+          cameraId,
+          name,
+          slug,
+          zoneType,
+          polygon,
+          minDwellSeconds,
+          activeFrom,
+          activeTo,
+          isEnabled,
+        ]
       properties:
         id: { type: string, format: uuid }
         cameraId: { type: string, format: uuid }
-        name: { type: string }
+        name: { type: string, minLength: 1, maxLength: 60 }
         slug: { type: string }
         zoneType: { $ref: "#/components/schemas/ZoneType" }
         polygon: { $ref: "#/components/schemas/Polygon" }
         minDwellSeconds:
           type: integer
+          minimum: 0
+          maximum: 300
           description: FR-DET-M4-02 — di luot qua duoi nguong nay khong sinh canh bao.
-        activeFrom: { type: ["string", "null"], examples: ["06:00"] }
-        activeTo: { type: ["string", "null"], examples: ["22:00"] }
+        activeFrom:
+          type: ["string", "null"]
+          pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+          examples: ["06:00"]
+        activeTo:
+          type: ["string", "null"]
+          pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+          examples: ["22:00"]
         isEnabled: { type: boolean }
 
     CreateZoneRequest:
       type: object
       required: [name, slug, zoneType, polygon]
       properties:
-        name: { type: string, maxLength: 60 }
+        name: { type: string, minLength: 1, maxLength: 60 }
         slug: { type: string, pattern: "^[a-z][a-z0-9_]{2,63}$" }
         zoneType: { $ref: "#/components/schemas/ZoneType" }
         polygon: { $ref: "#/components/schemas/Polygon" }
         minDwellSeconds: { type: integer, minimum: 0, maximum: 300, default: 2 }
-        activeFrom: { type: string }
-        activeTo: { type: string }
+        activeFrom:
+          type: ["string", "null"]
+          pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+          description: Hai dau cung null la ca ngay; khoang [activeFrom, activeTo) co the qua nua dem.
+        activeTo:
+          type: ["string", "null"]
+          pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+          description: Khong duoc bang activeFrom.
 
     UpdateZoneRequest:
       type: object
       properties:
-        name: { type: string }
+        name: { type: string, minLength: 1, maxLength: 60 }
         zoneType: { $ref: "#/components/schemas/ZoneType" }
         polygon: { $ref: "#/components/schemas/Polygon" }
-        minDwellSeconds: { type: integer }
-        activeFrom: { type: ["string", "null"] }
-        activeTo: { type: ["string", "null"] }
+        minDwellSeconds: { type: integer, minimum: 0, maximum: 300 }
+        activeFrom:
+          type: ["string", "null"]
+          pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+        activeTo:
+          type: ["string", "null"]
+          pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
         isEnabled: { type: boolean }
 
     # ---------------- Known faces ----------------
@@ -2121,7 +2165,10 @@ components:
         zone:
           type: ["object", "null"]
           properties:
-            id: { type: string, format: uuid }
+            id:
+              type: ["string", "null"]
+              format: uuid
+              description: Null neu zone da bi xoa; name van la snapshot lich su.
             name: { type: string }
         confidence: { type: ["number", "null"], minimum: 0, maximum: 1 }
         personStatus: { $ref: "#/components/schemas/PersonStatus" }
