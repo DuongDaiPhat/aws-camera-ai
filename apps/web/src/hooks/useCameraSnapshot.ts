@@ -4,11 +4,23 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CameraPreview } from '@/types';
 import { fetchCameraSnapshot } from '@/lib/cameras-client';
 
+export function getSnapshotTransition(
+  previousCameraId: string | null,
+  cameraId: string | null,
+  isFrozen: boolean,
+): { shouldClear: boolean; shouldReload: boolean } {
+  return {
+    shouldClear: previousCameraId !== cameraId,
+    shouldReload: !isFrozen,
+  };
+}
+
 export function useCameraSnapshot(cameraId: string | null, isFrozen: boolean) {
   const [preview, setPreview] = useState<CameraPreview | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const requestId = useRef(0);
+  const previousCameraId = useRef<string | null>(cameraId);
 
   const reload = useCallback(async () => {
     if (!cameraId || isFrozen) return;
@@ -29,9 +41,14 @@ export function useCameraSnapshot(cameraId: string | null, isFrozen: boolean) {
   }, [cameraId, isFrozen]);
 
   useEffect(() => {
-    setPreview(null);
-    void reload();
-  }, [reload]);
+    const transition = getSnapshotTransition(previousCameraId.current, cameraId, isFrozen);
+    previousCameraId.current = cameraId;
+
+    if (transition.shouldClear) setPreview(null);
+    // Khi bắt đầu vẽ, giữ nguyên snapshot hiện tại để polygon không mất ảnh nền.
+    // Khi kết thúc chỉnh sửa, tải lại để nhận snapshot mới nhất.
+    if (transition.shouldReload) void reload();
+  }, [cameraId, isFrozen, reload]);
 
   useEffect(() => {
     if (!preview?.expiresAt || isFrozen) return;
