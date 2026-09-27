@@ -133,5 +133,7 @@ cameras:
     zones:
       restricted_stove:
         coordinates: 0.40,0.30,0.95,0.30,0.95,0.90,0.40,0.90
+        objects: [person]
+        loitering_time: 2
 
 version: 0.18-0
