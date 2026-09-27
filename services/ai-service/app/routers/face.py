@@ -3,14 +3,16 @@
 import secrets
 from functools import lru_cache
 from threading import BoundedSemaphore
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, UploadFile
 from starlette.concurrency import run_in_threadpool
 
 from app.config import get_settings
-from app.models.face import EmbedResponse, SyncRequest, SyncResponse
+from app.models.face import EmbedResponse, MatchResponse, SyncRequest, SyncResponse
 from app.services.face_collection import FaceCollection
 from app.services.face_embedder import FaceEmbedder
+from app.services.face_matcher import FaceMatcher
 
 
 def authenticate(x_internal_token: str = Header(default="")) -> None:
@@ -26,6 +28,11 @@ collection = FaceCollection()
 @lru_cache
 def get_embedder() -> FaceEmbedder:
     return FaceEmbedder(get_settings())
+
+
+@lru_cache
+def get_matcher() -> FaceMatcher:
+    return FaceMatcher(get_embedder(), collection)
 
 
 @lru_cache
@@ -45,6 +52,28 @@ async def embed_face(
     try:
         data = await image.read(get_settings().face_max_image_bytes + 1)
         return await run_in_threadpool(get_embedder().embed, data, selected_face_index)
+    finally:
+        await image.close()
+        slots.release()
+
+
+@router.post("/match", response_model=MatchResponse)
+async def match_face(
+    image: UploadFile = File(...),  # noqa: B008
+    request_id: UUID = Form(alias="requestId"),  # noqa: B008
+    owner_scope_id: UUID = Form(alias="ownerScopeId"),  # noqa: B008
+    collection_version: int = Form(alias="collectionVersion"),  # noqa: B008
+    threshold: float | None = Form(default=None),  # noqa: B008
+) -> MatchResponse:
+    slots = get_slots()
+    if not slots.acquire(blocking=False):
+        await image.close()
+        raise HTTPException(status_code=503, detail="PROVIDER_UNAVAILABLE")
+    try:
+        data = await image.read(get_settings().face_max_image_bytes + 1)
+        return await run_in_threadpool(
+            get_matcher().match, data, request_id, owner_scope_id, collection_version, threshold
+        )
     finally:
         await image.close()
         slots.release()
