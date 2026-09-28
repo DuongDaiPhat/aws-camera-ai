@@ -41,6 +41,22 @@ services:
     logging: *default-logging
 
   # ------------------------------------------------------------------
+  # 1.1 Redis cho hàng đợi BullMQ (US-10)
+  # ------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: camerai-redis
+    restart: unless-stopped
+    ports:
+      - "${PORT_REDIS:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      <<: *hc
+    logging: *default-logging
+
+  # ------------------------------------------------------------------
   # 2. Mosquitto - MQTT broker giua Frigate va Orchestrator
   # ------------------------------------------------------------------
   mosquitto:
@@ -208,6 +224,7 @@ services:
       MEDIAMTX_PUBLISH_USERNAME: ${MEDIAMTX_PUBLISH_USERNAME:-cam-internal}
       MEDIAMTX_PUBLISH_PASSWORD: ${MEDIAMTX_PUBLISH_PASSWORD:-local-dev-password}
       CAMERA_VIDEO_STORAGE_PATH: /workspace/storage/videos
+      REDIS_HOST: redis
     ports:
       - "${PORT_ORCHESTRATOR:-3001}:3001"
     volumes:
@@ -250,6 +267,7 @@ volumes:
   frigatedb:
   frigatemedia:
   camera-videos:
+  redisdata:
 
 networks:
   default:

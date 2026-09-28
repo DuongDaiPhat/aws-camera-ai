@@ -46,12 +46,12 @@ INSERT INTO zones (camera_id, name, slug, zone_type, polygon) VALUES
 ON CONFLICT (camera_id, slug) DO NOTHING;
 
 -- 5. Thêm Known Faces
-INSERT INTO known_faces (owner_user_id, person_name, relationship, provider, embedding, embedding_dim) VALUES 
-('11111111-1111-4111-8111-111111111111', 'Ong Noi', 'Ong', 'LOCAL', decode('00', 'hex'), 128),
-('11111111-1111-4111-8111-111111111111', 'Ba Ngoai', 'Ba', 'LOCAL', decode('00', 'hex'), 128),
-('11111111-1111-4111-8111-111111111111', 'Con Trai', 'Con', 'LOCAL', decode('00', 'hex'), 128),
-('11111111-1111-4111-8111-111111111111', 'Con Gai', 'Con', 'LOCAL', decode('00', 'hex'), 128),
-('11111111-1111-4111-8111-111111111111', 'Nguoi Giup Viec', 'Giup Viec', 'LOCAL', decode('00', 'hex'), 128)
+INSERT INTO known_faces (owner_user_id, person_name, relationship, provider, embedding, embedding_dim, model_version) VALUES 
+('11111111-1111-4111-8111-111111111111', 'Ong Noi', 'Ong', 'LOCAL', decode(repeat('0000803f', 128), 'hex'), 128, 'yunet-2023mar-sface-2021dec'),
+('11111111-1111-4111-8111-111111111111', 'Ba Ngoai', 'Ba', 'LOCAL', decode(repeat('0000803f', 128), 'hex'), 128, 'yunet-2023mar-sface-2021dec'),
+('11111111-1111-4111-8111-111111111111', 'Con Trai', 'Con', 'LOCAL', decode(repeat('0000803f', 128), 'hex'), 128, 'yunet-2023mar-sface-2021dec'),
+('11111111-1111-4111-8111-111111111111', 'Con Gai', 'Con', 'LOCAL', decode(repeat('0000803f', 128), 'hex'), 128, 'yunet-2023mar-sface-2021dec'),
+('11111111-1111-4111-8111-111111111111', 'Nguoi Giup Viec', 'Giup Viec', 'LOCAL', decode(repeat('0000803f', 128), 'hex'), 128, 'yunet-2023mar-sface-2021dec')
 ON CONFLICT (owner_user_id, person_name) DO NOTHING;
 
 -- 6. Thêm Escalation Rules

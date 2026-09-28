@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import mqtt, { MqttClient } from 'mqtt';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 import { EventType, PriorityLevel } from '@cam/contracts';
 
@@ -50,6 +52,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     @Optional() private readonly eventsService?: EventsService,
     @Optional()
     private readonly zoneScheduleService: ZoneScheduleService = new ZoneScheduleService(),
+    @Optional() @InjectQueue('face-recognition') private readonly faceQueue?: Queue,
   ) {}
 
   onModuleInit(): void {
@@ -387,6 +390,22 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
 
       if (isCreated) {
         await this.emitEventToStream(event.id, 'event.created');
+        if (
+          this.faceQueue &&
+          (event.event_type === 'PERSON_DETECTED' || event.event_type === 'RESTRICTED_ZONE')
+        ) {
+          const camera = await this.eventsRepository.findCameraBySlug(message.after.camera);
+          const ownerScopeId = camera?.owner_user_id ?? '00000000-0000-0000-0000-000000000000';
+          const collectionVersion =
+            await this.eventsRepository.getSyncedFaceCollectionVersion(ownerScopeId);
+          await this.faceQueue.add('match_face', {
+            eventId: event.id,
+            trackId: message.after.id,
+            cameraSlug: message.after.camera,
+            ownerScopeId,
+            collectionVersion,
+          });
+        }
       } else if (isPromoted || hasNewSnapshot) {
         // Anh vua ve toi sau khi the su kien da hien tren dashboard: day ban cap nhat
         // de nguoi dung thay snapshot ma khong phai F5 (FR-DSH-02).
