@@ -1,0 +1,2 @@
+#!/command/with-contenv sh
+exec python3 -u /opt/camerai-frame-metadata/bridge.py
