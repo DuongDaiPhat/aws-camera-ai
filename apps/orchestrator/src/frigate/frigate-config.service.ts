@@ -71,6 +71,7 @@ export class FrigateConfigService {
         inputs: [
           {
             path: streamUrl,
+            input_args: 'preset-rtsp-restream-low-latency',
             roles: ['detect', 'record'],
           },
         ],
