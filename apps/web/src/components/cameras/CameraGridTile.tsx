@@ -1,67 +1,15 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Camera } from '@/types';
 import type { CameraDebugStream } from '@/lib/cameras-client';
 import { fetchCameraDebugStream } from '@/lib/cameras-client';
 import { CameraLiveStream } from './CameraLiveStream';
+import { PersonBoxLayer } from './debug/PersonBoxLayer';
+import { useLivePersonDetections } from './live/use-live-person-detections';
 import { CameraStatusBadge } from './CameraStatusBadge';
 import { useWebcamSession } from './source/webcam-session-manager';
 import styles from './styles/camera-grid.module.css';
-
-interface PersonDetectionBox {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  label: string;
-  confidence: number;
-}
-
-function GridTileDetections({ detections }: { detections: PersonDetectionBox[] }) {
-  if (detections.length === 0) return null;
-  return (
-    <svg className={styles.detectionSvgOverlay} viewBox="0 0 1000 562.5" preserveAspectRatio="none">
-      {detections.map((p, idx) => {
-        const rx = p.x * 1000;
-        const ry = p.y * 562.5;
-        const rw = p.width * 1000;
-        const rh = p.height * 562.5;
-        return (
-          <g key={`det-${idx}`}>
-            <rect
-              x={rx}
-              y={ry}
-              width={rw}
-              height={rh}
-              fill="rgba(37, 99, 235, 0.15)"
-              stroke="#38bdf8"
-              strokeWidth="2.5"
-              strokeDasharray="4 2"
-            />
-            <rect
-              x={rx}
-              y={Math.max(0, ry - 18)}
-              width={Math.min(120, rw)}
-              height={18}
-              fill="#0369a1"
-            />
-            <text
-              x={rx + 4}
-              y={Math.max(12, ry - 5)}
-              fill="#ffffff"
-              fontSize="11"
-              fontFamily="monospace"
-              fontWeight="bold"
-            >
-              {p.label} {(p.confidence * 100).toFixed(0)}%
-            </text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
 
 function GridTileOsd({
   camera,
@@ -123,11 +71,14 @@ export function CameraGridTile({
 
   useEffect(() => {
     let isCancelled = false;
+    let inFlight = false;
     const loadStream = () => {
       if (!camera.isEnabled) {
         setDebugData(null);
         return;
       }
+      if (inFlight) return;
+      inFlight = true;
       fetchCameraDebugStream(camera.id)
         .then((data) => {
           if (!isCancelled) {
@@ -137,30 +88,27 @@ export function CameraGridTile({
         })
         .catch(() => {
           if (!isCancelled) setHasError(true);
+        })
+        .finally(() => {
+          inFlight = false;
         });
     };
 
     void loadStream();
-    const interval = camera.isEnabled ? setInterval(loadStream, 1000) : null;
+    const interval = camera.isEnabled ? setInterval(loadStream, showDetections ? 80 : 1000) : null;
     return () => {
       isCancelled = true;
       if (interval) clearInterval(interval);
     };
-  }, [camera.id, camera.isEnabled]);
+  }, [camera.id, camera.isEnabled, showDetections]);
 
-  const personDetections = useMemo(() => {
-    if (!showDetections || !debugData?.detections) return [];
-    return debugData.detections
-      .filter((d) => d.box && d.box.length === 4)
-      .map((d) => ({
-        x: d.box[1],
-        y: d.box[0],
-        width: d.box[3] - d.box[1],
-        height: d.box[2] - d.box[0],
-        label: d.label,
-        confidence: d.confidence,
-      }));
-  }, [showDetections, debugData]);
+  const personDetections = useLivePersonDetections(
+    debugData,
+    camera.id,
+    camera.isEnabled && showDetections,
+    camera.sourceType,
+  );
+  const overlayHeight = (1000 * (camera.detectHeight || 720)) / (camera.detectWidth || 1280);
 
   const { isPublishing: isWebcamPublishing } = useWebcamSession(camera.id);
   const isWebcamActive = camera.sourceType === 'BROWSER_WEBCAM' && isWebcamPublishing;
@@ -221,7 +169,18 @@ export function CameraGridTile({
           </div>
         )}
 
-        {isLive && <GridTileDetections detections={personDetections} />}
+        {isLive && showDetections && (
+          <svg className={styles.detectionSvgOverlay} viewBox={`0 0 1000 ${overlayHeight}`}>
+            {personDetections.map((person) => (
+              <PersonBoxLayer
+                key={person.id}
+                person={person}
+                height={overlayHeight}
+                showFootpoint={false}
+              />
+            ))}
+          </svg>
+        )}
 
         {showOsd && (
           <GridTileOsd
