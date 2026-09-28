@@ -77,7 +77,7 @@ ffmpeg:
   #   - ffmpeg timeout 10 s (preset-rtsp-restream)
   #   - watchdog Frigate khoi dong lai ffmpeg neu 20 s khong co frame
   #   - retry_interval: so giay cho giua 2 lan thu ket noi lai
-  retry_interval: 10
+  retry_interval: 1
   input_args: preset-rtsp-restream
 
 snapshots:
