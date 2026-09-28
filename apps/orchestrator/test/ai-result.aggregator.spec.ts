@@ -97,6 +97,40 @@ describe('aggregateAiResult (US-11)', () => {
     expect(projection.aiResults.map((item) => item.label)).toEqual(['KNOWN', 'RESTRICTED_ZONE']);
   });
 
+  it('giữ M4 do US-12 đã tạo khi M1 đến trước receipt M4', () => {
+    const projection = aggregateAiResult(
+      state({ eventType: 'RESTRICTED_ZONE', priority: 'P1' }),
+      [result('M1_FACE', 'UNKNOWN', 0.85, 'face-1')],
+      RULES,
+    );
+
+    expect(projection).toMatchObject({
+      eventType: 'RESTRICTED_ZONE',
+      priority: 'P1',
+      aiLabel: null,
+      confidence: null,
+    });
+    expect(projection.aiResults.map((item) => item.label)).toEqual(['UNKNOWN']);
+    expect(projection.candidates.map((candidate) => candidate.eventType)).toEqual([
+      'UNKNOWN_PERSON',
+    ]);
+  });
+
+  it('cho phép nguy cơ P0 vượt M4 do US-12 đã tạo', () => {
+    const projection = aggregateAiResult(
+      state({ eventType: 'RESTRICTED_ZONE', priority: 'P1' }),
+      [result('M3_FIRE', 'FIRE_SMOKE_DETECTED', 0.92, 'fire-1')],
+      RULES,
+    );
+
+    expect(projection).toMatchObject({
+      eventType: 'FIRE_SMOKE_DETECTED',
+      priority: 'P0',
+      aiLabel: 'FIRE_SMOKE_DETECTED',
+      confidence: 0.92,
+    });
+  });
+
   it('giữ confidence null cho UNDETERMINED và không tạo nguy cơ', () => {
     const projection = aggregateAiResult(
       state(),

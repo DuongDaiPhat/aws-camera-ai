@@ -97,6 +97,17 @@ function shouldLatchRisk(
   );
 }
 
+function shouldKeepMqttZone(
+  state: AiEventAggregateState,
+  representative: (AiRiskCandidate & { priority: PriorityLevel }) | null,
+): boolean {
+  return (
+    state.eventType === 'RESTRICTED_ZONE' &&
+    (!representative || PRIORITY_RANK[representative.priority] >= PRIORITY_RANK[state.priority]) &&
+    representative?.eventType !== 'RESTRICTED_ZONE'
+  );
+}
+
 function latchedProjection(
   state: AiEventAggregateState,
   aiResults: AiResultProjectionItem[],
@@ -129,6 +140,11 @@ export function aggregateAiResult(
   const candidatesWithPriority = toCandidates(aiResults, priorityByEventType);
   const representative = chooseRepresentative(candidatesWithPriority, state.eventType);
   if (shouldLatchRisk(state, representative)) {
+    return latchedProjection(state, aiResults, candidatesWithPriority);
+  }
+
+  // US-12 may have already confirmed M4 from Frigate before any AI result is submitted.
+  if (shouldKeepMqttZone(state, representative)) {
     return latchedProjection(state, aiResults, candidatesWithPriority);
   }
 

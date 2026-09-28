@@ -173,24 +173,32 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     );
   });
 
-  it('chỉ ghi zone observation, không tự coi mọi current_zone là vùng cấm', async () => {
+  it('giữ phân loại M4 của US-12 khi current_zone là vùng cấm hợp lệ', async () => {
     eventsRepository.findCameraBySlug.mockResolvedValueOnce({
       id: 'cam-uuid-kitchen',
       name: 'Phong bep',
       slug: 'cam_kitchen',
+      timezone: 'Asia/Bangkok',
+      zone_config_applied: true,
     });
-    eventsRepository.findZoneByCameraAndSlug.mockResolvedValueOnce({
-      id: 'zone-uuid-stove',
-      camera_id: 'cam-uuid-kitchen',
-      name: 'Khu vuc bep',
-      slug: 'restricted_stove',
-    });
+    eventsRepository.findEligibleZones.mockResolvedValueOnce([
+      {
+        id: 'zone-uuid-stove',
+        camera_id: 'cam-uuid-kitchen',
+        name: 'Khu vuc bep',
+        slug: 'restricted_stove',
+        zone_type: 'RESTRICTED',
+        min_dwell_seconds: 2,
+        active_from: null,
+        active_to: null,
+      },
+    ]);
     eventsRepository.createEvent.mockResolvedValueOnce(
       createEvent({
         camera_id: 'cam-uuid-kitchen',
         zone_id: 'zone-uuid-stove',
-        event_type: 'PERSON_DETECTED',
-        priority: 'P3',
+        event_type: 'RESTRICTED_ZONE',
+        priority: 'P1',
         track_id: 'track-102',
         dedup_key: 'frigate:cam_kitchen:track-102',
       }),
@@ -213,15 +221,15 @@ describe('MqttConsumerService (US-03, US-04)', () => {
       ),
     );
 
-    expect(eventsRepository.findZoneByCameraAndSlug).toHaveBeenCalledWith(
-      'cam-uuid-kitchen',
+    expect(eventsRepository.findEligibleZones).toHaveBeenCalledWith('cam-uuid-kitchen', [
       'restricted_stove',
-    );
+    ]);
     expect(eventsRepository.createEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         zoneId: 'zone-uuid-stove',
-        eventType: 'PERSON_DETECTED',
-        priority: 'P3',
+        zoneName: 'Khu vuc bep',
+        eventType: 'RESTRICTED_ZONE',
+        priority: 'P1',
         dedupKey: 'frigate:cam_kitchen:track-102',
       }),
     );
@@ -513,8 +521,8 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     expect(eventsRepository.updateEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         eventId: restrictedEvent.id,
-        eventType: 'PERSON_DETECTED',
-        priority: 'P3',
+        eventType: 'RESTRICTED_ZONE',
+        priority: 'P1',
       }),
     );
     expect(mediaService.downloadAndStoreClip).toHaveBeenCalledWith(

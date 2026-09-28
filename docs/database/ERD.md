@@ -1,7 +1,7 @@
 # Thiết kế cơ sở dữ liệu — ERD
 
 > **Task 0.3** · Người phụ trách: **B** (Backend Lead) · Sprint 0
-> DDL thực thi: [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`db/migrations/0002_seed_escalation_rules.sql`](../../db/migrations/0002_seed_escalation_rules.sql), [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql), [`db/migrations/0004_document_frigate_dedup_key.sql`](../../db/migrations/0004_document_frigate_dedup_key.sql), [`db/migrations/0005_escalation_rules_version_and_constraints.sql`](../../db/migrations/0005_escalation_rules_version_and_constraints.sql), [`db/migrations/0006_camera_sources_and_frigate_settings.sql`](../../db/migrations/0006_camera_sources_and_frigate_settings.sql), [`db/migrations/0007_face_collection_sync.sql`](../../db/migrations/0007_face_collection_sync.sql), [`db/migrations/0008_escalation_state_machine.sql`](../../db/migrations/0008_escalation_state_machine.sql), [`db/migrations/0009_event_ai_result_receipts.sql`](../../db/migrations/0009_event_ai_result_receipts.sql)
+> DDL thực thi: [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`db/migrations/0002_seed_escalation_rules.sql`](../../db/migrations/0002_seed_escalation_rules.sql), [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql), [`db/migrations/0004_document_frigate_dedup_key.sql`](../../db/migrations/0004_document_frigate_dedup_key.sql), [`db/migrations/0005_escalation_rules_version_and_constraints.sql`](../../db/migrations/0005_escalation_rules_version_and_constraints.sql), [`db/migrations/0006_camera_sources_and_frigate_settings.sql`](../../db/migrations/0006_camera_sources_and_frigate_settings.sql), [`db/migrations/0007_face_collection_sync.sql`](../../db/migrations/0007_face_collection_sync.sql), [`db/migrations/0008_escalation_state_machine.sql`](../../db/migrations/0008_escalation_state_machine.sql), [`db/migrations/0009_zone_configuration.sql`](../../db/migrations/0009_zone_configuration.sql), [`db/migrations/0010_event_ai_result_receipts.sql`](../../db/migrations/0010_event_ai_result_receipts.sql)
 > Tài liệu này giải thích **vì sao** thiết kế như vậy. File SQL là nguồn sự thật về **cấu trúc**.
 
 ## Mục lục
@@ -558,7 +558,7 @@ cùng lúc với sự kiện** và không bao giờ truy vấn độc lập. JSO
 
 `detection_confidence` giữ score phát hiện người của Frigate. `confidence` chỉ giữ score của
 đúng nhãn AI đại diện (`ai_label`). Khi chưa có inference, `confidence` là `NULL`; hệ thống không
-lấy score Frigate để giả làm score UNKNOWN/KNOWN. Migration 0005 chuyển score của event cũ chưa
+lấy score Frigate để giả làm score UNKNOWN/KNOWN. Migration 0010 chuyển score của event cũ chưa
 có `ai_label` sang `detection_confidence`.
 
 #### `aggregate_version` — thứ tự projection và handoff

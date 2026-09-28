@@ -1,5 +1,5 @@
 -- =====================================================================
--- Migration 0009 - US-11: durable AI result inbox and aggregate outbox
+-- Migration 0010 - US-11: durable AI result inbox and aggregate outbox
 -- =====================================================================
 
 BEGIN;

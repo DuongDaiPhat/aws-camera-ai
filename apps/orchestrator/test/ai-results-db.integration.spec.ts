@@ -502,4 +502,157 @@ describe('US-11 - AI result đến PostgreSQL', () => {
     expect(Number(result.rows[0]?.confidence)).toBe(0.7);
     expect(Number(result.rows[0]?.detection_confidence)).toBe(0.99);
   });
+
+  it('giữ M4 và tên vùng từ US-12 khi M1 đến rồi MQTT báo rời vùng', async () => {
+    await pool.query(
+      `UPDATE events
+       SET event_type = 'RESTRICTED_ZONE', priority = 'P1', zone_name = 'Bếp'
+       WHERE id = $1;`,
+      [ids.eventId],
+    );
+    const face = faceSubmission(ids.eventId);
+    await repository.applyResult(face, hash({ id: face.resultId }), { id: face.resultId });
+
+    await eventsRepository.updateEvent({
+      eventId: ids.eventId,
+      cameraId: ids.cameraId,
+      zoneId: null,
+      eventType: 'PERSON_DETECTED',
+      priority: 'P3',
+      detectionConfidence: 0.95,
+    });
+
+    const result = await pool.query<{
+      event_type: string;
+      priority: string;
+      zone_name: string;
+      person_status: string;
+      ai_label: string | null;
+      confidence: string | null;
+      ai_results: AiResultProjectionItem[];
+    }>(
+      `SELECT event_type, priority, zone_name, person_status, ai_label, confidence, ai_results
+       FROM events WHERE id = $1;`,
+      [ids.eventId],
+    );
+    expect(result.rows[0]).toMatchObject({
+      event_type: 'RESTRICTED_ZONE',
+      priority: 'P1',
+      zone_name: 'Bếp',
+      person_status: 'UNKNOWN',
+      ai_label: null,
+      confidence: null,
+    });
+    expect(result.rows[0]?.ai_results.map((item) => item.label)).toEqual(['UNKNOWN']);
+  });
+
+  it('nâng M1 P2 lên M4 P1 khi US-12 xác nhận vùng sau AI result', async () => {
+    const face = faceSubmission(ids.eventId);
+    await repository.applyResult(face, hash({ id: face.resultId }), { id: face.resultId });
+
+    await eventsRepository.updateEvent({
+      eventId: ids.eventId,
+      cameraId: ids.cameraId,
+      zoneId: ids.zoneId,
+      zoneName: 'Bếp',
+      eventType: 'RESTRICTED_ZONE',
+      priority: 'P1',
+      detectionConfidence: 0.95,
+    });
+
+    const result = await pool.query<{
+      event_type: string;
+      priority: string;
+      zone_name: string;
+      person_status: string;
+      ai_label: string | null;
+      confidence: string | null;
+      ai_model_version: string | null;
+      ai_processed_at: Date | null;
+      ai_results: AiResultProjectionItem[];
+    }>(
+      `SELECT event_type, priority, zone_name, person_status, ai_label, confidence,
+              ai_model_version, ai_processed_at, ai_results
+       FROM events WHERE id = $1;`,
+      [ids.eventId],
+    );
+    expect(result.rows[0]).toMatchObject({
+      event_type: 'RESTRICTED_ZONE',
+      priority: 'P1',
+      zone_name: 'Bếp',
+      person_status: 'UNKNOWN',
+      ai_label: null,
+      confidence: null,
+      ai_model_version: null,
+      ai_processed_at: null,
+    });
+    expect(result.rows[0]?.ai_results.map((item) => item.label)).toEqual(['UNKNOWN']);
+  });
+
+  it('không chuyển M4 của US-12 sang AI_FAILED khi M1 lỗi', async () => {
+    await pool.query(
+      `UPDATE events
+       SET event_type = 'RESTRICTED_ZONE', priority = 'P1', zone_name = 'Bếp'
+       WHERE id = $1;`,
+      [ids.eventId],
+    );
+    const face = faceSubmission(ids.eventId);
+    face.personStatus = null;
+    face.results = [];
+    face.error = { code: 'MODEL_TIMEOUT', message: 'Face inference timed out' };
+    await repository.applyResult(face, hash({ id: face.resultId }), { id: face.resultId });
+
+    const result = await pool.query<{
+      event_type: string;
+      status: string;
+      priority: string;
+      zone_name: string;
+    }>(`SELECT event_type, status, priority, zone_name FROM events WHERE id = $1;`, [ids.eventId]);
+    expect(result.rows[0]).toMatchObject({
+      event_type: 'RESTRICTED_ZONE',
+      status: 'DETECTED',
+      priority: 'P1',
+      zone_name: 'Bếp',
+    });
+  });
+
+  it('không hạ nguy cơ P0 đã có AI result khi MQTT báo vùng cấm', async () => {
+    await pool.query(
+      `UPDATE events
+       SET event_type = 'FIRE_SMOKE_DETECTED', priority = 'P0',
+           ai_label = 'FIRE_SMOKE_DETECTED', confidence = 0.96,
+           ai_model_version = 'fire-v1', ai_processed_at = now()
+       WHERE id = $1;`,
+      [ids.eventId],
+    );
+
+    await eventsRepository.updateEvent({
+      eventId: ids.eventId,
+      cameraId: ids.cameraId,
+      zoneId: ids.zoneId,
+      zoneName: 'Bếp',
+      eventType: 'RESTRICTED_ZONE',
+      priority: 'P1',
+      detectionConfidence: 0.95,
+    });
+
+    const result = await pool.query<{
+      event_type: string;
+      priority: string;
+      ai_label: string;
+      confidence: string;
+      zone_name: string;
+    }>(
+      `SELECT event_type, priority, ai_label, confidence, zone_name
+       FROM events WHERE id = $1;`,
+      [ids.eventId],
+    );
+    expect(result.rows[0]).toMatchObject({
+      event_type: 'FIRE_SMOKE_DETECTED',
+      priority: 'P0',
+      ai_label: 'FIRE_SMOKE_DETECTED',
+      zone_name: 'Bếp',
+    });
+    expect(Number(result.rows[0]?.confidence)).toBe(0.96);
+  });
 });

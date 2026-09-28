@@ -124,7 +124,7 @@ export class AiResultsRepository {
         submission.results,
         rules,
       );
-      const nextStatus = this.nextStatus(event.status, submission, projection.candidates.length);
+      const nextStatus = this.nextStatus(event.status, submission, projection);
       const updatedVersion = await this.updateEvent(
         client,
         event,
@@ -405,10 +405,15 @@ export class AiResultsRepository {
   private nextStatus(
     currentStatus: EventStatus,
     submission: ValidatedAiResultSubmission,
-    candidateCount: number,
+    projection: ReturnType<typeof aggregateAiResult>,
   ): EventStatus {
     if (currentStatus === 'RESOLVED' || currentStatus === 'CLOSED') return currentStatus;
-    if (submission.error && submission.module === 'M1_FACE' && candidateCount === 0) {
+    if (
+      submission.error &&
+      submission.module === 'M1_FACE' &&
+      projection.candidates.length === 0 &&
+      projection.eventType === 'PERSON_DETECTED'
+    ) {
       return currentStatus === 'DETECTED' ? 'AI_FAILED' : currentStatus;
     }
     if (currentStatus === 'AI_FAILED' && !submission.error) return 'DETECTED';

@@ -9,6 +9,8 @@
 - Sở hữu cổng nhận AI result, validation, chống trùng, tổng hợp labels/priority, lưu event và phát SSE/handoff escalation.
 - Không tự triển khai model M1/M2/M3 hoặc sender Telegram.
 - Input M1 theo [US-10](PLAN_US-10_PERSON_CROP_FACE_MATCH.md); output chuyển cho [US-13](PLAN_US-13_ESCALATION_STATE_MACHINE.md).
+- US-12 đã tạo/nâng `RESTRICTED_ZONE` từ MQTT khi zone thuộc đúng camera, đang bật, cấu hình đã áp dụng và lịch hợp lệ; `zone_id` và `zone_name` là dữ liệu vùng cần giữ nguyên khi US-11 nhận M1. Việc kiểm tra dwell do cấu hình Frigate/US-12 phụ trách.
+- Chưa có producer gửi receipt `M4_ZONE` từ luồng MQTT của US-12 vào cổng US-11. Trước khi tích hợp producer này, không tự tạo nhãn, confidence hoặc candidate M4 giả từ riêng `event_type = RESTRICTED_ZONE`; cần kiểm tra riêng handoff US-13 cho cảnh báo M4 tạo bởi US-12.
 - Có thể triển khai bằng fixtures trước khi model và engine sẵn sàng; nghiệm thu tích hợp phải dùng producer/consumer thật.
 - Nguồn chuẩn: [OpenAPI](../api/openapi.yaml), [AI OpenAPI](../api/openapi-ai-service.yaml), [schema](../db/migrations/0001_init.sql), [rules](../db/migrations/0002_seed_escalation_rules.sql), [coding convention](conventions/CODING_CONVENTION.md), [Git workflow](conventions/GIT_WORKFLOW.md).
 - Đọc lại working tree và AGENTS.md nếu có trước khi thực thi, giữ thay đổi của người khác.
@@ -20,7 +22,7 @@
 - `AiResultItem` bắt buộc confidence là number nên chưa biểu diễn UNDETERMINED không có điểm.
 - `EventDetail` có aiLabel/aiModelVersion/aiResults nhưng chưa phơi bày aiProcessedAt.
 - `EventsRepository.updateEvent()` hiện dùng GREATEST cho confidence MQTT; khi có AI sẽ trộn person detection score với score của nhãn AI nếu không sửa.
-- MQTT consumer có thể ghi đè event_type/priority theo PERSON_DETECTED hoặc zone ở những update sau. Phải chuyển quyền quyết định các trường này sang aggregator.
+- MQTT consumer đã giữ `RESTRICTED_ZONE`/P1 khi track rời vùng. Repository phải cho US-12 nâng P2/P3 lên M4/P1 kể cả khi M1 đến trước, nhưng không được hạ P0 hoặc ghi đè nhãn AI bằng score Frigate. Aggregator US-11 phải giữ phân loại M4 khi M1 đến sau, trừ khi có nguy cơ ưu tiên cao hơn.
 - API read/SSE và UI hiện có cần map đúng field mới, không tạo dashboard khác.
 
 ## 3. Ý nghĩa các trường: chốt trước code
@@ -87,6 +89,8 @@ Tái sử dụng các cột events hiện có. Migration mới đề xuất:
 
 Không xây hai outbox khác nhau nếu US-13 đã cung cấp shared infrastructure. Không sửa migration cũ; update ERD và chính sách retention của receipts cùng event.
 
+US-12 dùng `0009_zone_configuration.sql`; migration US-11 dùng `0010_event_ai_result_receipts.sql` để thứ tự chạy rõ ràng và không trùng số.
+
 Transaction áp dụng:
 
 ```text
@@ -116,6 +120,10 @@ Network call không nằm trong transaction. Hai worker M1/M4 đồng thời ph�
 9. Event đã NOTIFIED/ESCALATED không tự bị hạ hoặc đóng vì kết quả đến muộn. Giữ nguy cơ đã kích hoạt phản ứng trong projection được chốt; cập nhật chi tiết mới mà không triệt tiêu hành động đã phát sinh.
 10. RESOLVED/CLOSED không bị mở lại bởi result cũ. Nguy cơ mới thuộc occurrence mới cần event riêng theo lifecycle đã chốt, không tự sửa dedup trong task này.
 
+Với event đã là `RESTRICTED_ZONE` do US-12 tạo nhưng chưa có receipt M4, M1 KNOWN/UNKNOWN không được hạ `event_type`/priority hoặc xóa tên vùng. Chỉ nhường cho nguy cơ có priority cao hơn. Vẫn lưu M1 trong `ai_results` và `person_status`; `ai_label`/`confidence` M4 để `NULL` tới khi có receipt M4 thật. Danh sách candidate chỉ chứa kết quả đã được nhận và xác thực.
+
+Nếu M1 đến trước rồi MQTT xác nhận M4, giữ M1 trong `ai_results` và `person_status`, chuyển event sang `RESTRICTED_ZONE`/P1 và chụp `zone_name`. Xóa các scalar của nhãn M1 cũ (`ai_label`, `confidence`, `ai_model_version`, `ai_processed_at`) vì chúng không đại diện cho M4; receipt M1 vẫn còn để audit. Event P0 hiện có không bị MQTT hạ xuống P1.
+
 Ví dụ bắt buộc: M1 UNKNOWN confidence=0.85 và M4 RESTRICTED_ZONE confidence=0.70 → giữ cả hai labels; priority P1 do M4; confidence đại diện 0.70, không lấy 0.85 ghép với M4. Nếu M1 KNOWN và M4 hợp lệ, person_status vẫn KNOWN nhưng event vẫn là RESTRICTED_ZONE.
 
 ## 7. Lỗi và lifecycle
@@ -123,7 +131,7 @@ Ví dụ bắt buộc: M1 UNKNOWN confidence=0.85 và M4 RESTRICTED_ZONE confide
 - Lỗi model/timeout: receipt lưu module, code, duration và requestId; không đưa vào tập nhãn thành công.
 - Event chỉ có M1 đang DETECTED mà M1 thất bại → yêu cầu state service chuyển AI_FAILED, có history.
 - Không có face → UNDETERMINED; đây không phải MODEL_NOT_LOADED và không tự tạo AI_FAILED.
-- M1 lỗi trong khi M4 hợp lệ → M4 vẫn được engine đánh giá. Event đã có deadline không bị xóa deadline bởi result lỗi.
+- M1 lỗi trong khi M4 hợp lệ → giữ `RESTRICTED_ZONE` và không chuyển sang `AI_FAILED`; M4 vẫn cần được engine đánh giá qua handoff hợp lệ. Event đã có deadline không bị xóa deadline bởi result lỗi.
 - Retry có version mới thành công khi event AI_FAILED: cho phép reevaluate qua state service; ghi history. Không tạo event mới cho cùng track.
 - SSE chỉ phát sau commit; có outbox/retry để broker hoặc UI disconnect không làm mất trạng thái DB.
 - Log có correlationId/eventId/resultId/module; không log toàn payload nếu có dữ liệu nhạy cảm.
@@ -146,6 +154,11 @@ Tách rule aggregator thành hàm thuần để test đầy đủ; Controller �
 | Một M1 KNOWN                                    | status người, tên, label/score/version/time đúng           |
 | M1 UNKNOWN + M4                                 | Giữ cả hai, priority cao nhất, confidence thuộc đúng label |
 | KNOWN + M4/FIRE                                 | Không mất nguy cơ độc lập                                  |
+| M4 do US-12 tạo trước khi nhận M1               | Giữ RESTRICTED_ZONE/P1/zone_name; không dựng score M4 giả  |
+| M4 do US-12 tạo, sau đó nhận P0                 | Nâng theo P0; vẫn giữ snapshot vùng                        |
+| M1 trước, sau đó US-12 xác nhận M4              | Nâng lên M4/P1, giữ M1 chi tiết, scalar M4 chưa có score   |
+| US-12 đã tạo M4, sau đó M1 lỗi                  | Giữ M4/P1, không chuyển AI_FAILED                          |
+| Event P0 trước, sau đó MQTT báo M4              | Giữ P0 và các scalar AI đại diện                           |
 | P1 dưới T_low + P2 đủ T_low                     | Engine vẫn nhận P2 để thông báo                            |
 | Result trùng hoặc cùng ID khác nội dung         | Một lần áp dụng / 409                                      |
 | M1 và M4 ghi đồng thời                          | Không mất phần tử ai_results                               |
@@ -171,6 +184,8 @@ Integration test dùng PostgreSQL thật cho lock/race/JSONB/unique constraint. 
 - [ ] Cổng nội bộ có auth và validate, 202 chỉ sau durable accept.
 - [ ] ai_label/confidence/model/time nhất quán cùng result.
 - [ ] Giữ đủ nhãn M1/M4 và không làm mất kết quả khi đồng thời.
+- [ ] M1 đến sau M4 của US-12 không hạ RESTRICTED_ZONE/P1 hoặc xóa zone_name; xác nhận đường handoff US-13 khi chưa có receipt M4.
+- [ ] MQTT M4 đến sau M1 nâng đúng P2/P3 lên P1, nhưng không hạ P0 hoặc ghép scalar M1 với nhãn M4.
 - [ ] P0/P1/P2/P3 và mapping event type có policy rõ, UNKNOWN score không nhầm similarity.
 - [ ] Không có mặt/lỗi AI/terminal event được xử lý riêng.
 - [ ] MQTT không ghi đè projection AI, SSE và handoff có dedup/recovery.

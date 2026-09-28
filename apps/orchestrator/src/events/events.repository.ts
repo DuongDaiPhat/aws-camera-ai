@@ -400,12 +400,38 @@ export class EventsRepository {
             ELSE zone_name
           END,
           event_type = CASE
-            WHEN event_type = 'RESTRICTED_ZONE' OR ai_processed_at IS NOT NULL THEN event_type
+            WHEN event_type = 'RESTRICTED_ZONE' THEN event_type
+            WHEN $5::event_type = 'RESTRICTED_ZONE' AND priority IN ('P2', 'P3')
+              THEN 'RESTRICTED_ZONE'::event_type
+            WHEN ai_processed_at IS NOT NULL THEN event_type
             ELSE $5::event_type
           END,
           priority = CASE
-            WHEN event_type = 'RESTRICTED_ZONE' OR ai_processed_at IS NOT NULL THEN priority
+            WHEN event_type = 'RESTRICTED_ZONE' THEN priority
+            WHEN $5::event_type = 'RESTRICTED_ZONE' AND priority IN ('P2', 'P3')
+              THEN 'P1'::priority_level
+            WHEN ai_processed_at IS NOT NULL THEN priority
             ELSE $6::priority_level
+          END,
+          ai_label = CASE
+            WHEN $5::event_type = 'RESTRICTED_ZONE' AND priority IN ('P2', 'P3')
+              THEN NULL
+            ELSE ai_label
+          END,
+          confidence = CASE
+            WHEN $5::event_type = 'RESTRICTED_ZONE' AND priority IN ('P2', 'P3')
+              THEN NULL
+            ELSE confidence
+          END,
+          ai_model_version = CASE
+            WHEN $5::event_type = 'RESTRICTED_ZONE' AND priority IN ('P2', 'P3')
+              THEN NULL
+            ELSE ai_model_version
+          END,
+          ai_processed_at = CASE
+            WHEN $5::event_type = 'RESTRICTED_ZONE' AND priority IN ('P2', 'P3')
+              THEN NULL
+            ELSE ai_processed_at
           END,
           detection_confidence = CASE
             WHEN detection_confidence IS NULL THEN $7
