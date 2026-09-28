@@ -1972,6 +1972,7 @@ components:
       type: object
       required: [label, confidence, box]
       properties:
+        id: { type: string, description: "Stable Frigate track ID" }
         label: { type: string }
         confidence: { type: number }
         box:
@@ -1990,6 +1991,19 @@ components:
         cameraId: { type: string, format: uuid }
         streamUrl: { type: string }
         snapshotUrl: { type: ["string", "null"] }
+        serverTime: { type: number, description: "Server Unix time in milliseconds" }
+        detectionFrames:
+          type: array
+          description: "Recent per-frame tracking samples, ordered by frameTime. Empty when the Frigate metadata bridge is unavailable; MQTT events are not frame samples."
+          items:
+            type: object
+            required: [frameTime, detections]
+            properties:
+              frameTime:
+                { type: number, description: "Frigate frame Unix timestamp in milliseconds" }
+              detections:
+                type: array
+                items: { $ref: "#/components/schemas/CameraDebugDetection" }
         detections:
           type: array
           items: { $ref: "#/components/schemas/CameraDebugDetection" }

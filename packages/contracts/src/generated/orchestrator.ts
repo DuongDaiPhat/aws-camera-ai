@@ -1279,6 +1279,8 @@ export interface components {
             };
         };
         CameraDebugDetection: {
+            /** @description Stable Frigate track ID */
+            id?: string;
             label: string;
             confidence: number;
             /** @description [ymin, xmin, ymax, xmax] normalized 0..1 */
@@ -1291,6 +1293,14 @@ export interface components {
             cameraId: string;
             streamUrl: string;
             snapshotUrl?: string | null;
+            /** @description Server Unix time in milliseconds */
+            serverTime?: number;
+            /** @description Recent per-frame tracking samples, ordered by frameTime. Empty when the Frigate metadata bridge is unavailable; MQTT events are not frame samples. */
+            detectionFrames?: {
+                /** @description Frigate frame Unix timestamp in milliseconds */
+                frameTime: number;
+                detections: components["schemas"]["CameraDebugDetection"][];
+            }[];
             detections: components["schemas"]["CameraDebugDetection"][];
             activeZones: string[];
         };
