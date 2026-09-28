@@ -8,6 +8,7 @@ import { CameraSourcesService } from '../src/camera-sources/camera-sources.servi
 import { FrigateSyncService } from '../src/frigate/frigate-sync.service';
 import type { CameraAggregateRecord } from '../src/cameras/cameras.types';
 import { FrigateDetectionTrackerService } from '../src/frigate/frigate-detection-tracker.service';
+import { FrigateFrameBuffer } from '../src/frigate/frigate-frame-buffer';
 
 describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
   let service: CamerasService;
@@ -19,8 +20,10 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
     isCameraReceivingFrames: jest.Mock;
   };
   let mockDetectionTracker: {
+    frames: FrigateFrameBuffer;
     getActiveDetections: jest.Mock;
     getActiveZones: jest.Mock;
+    clearCamera: jest.Mock;
   };
   let mockCameraSourcesService: {
     startCameraSource: jest.Mock;
@@ -130,8 +133,10 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
     };
 
     mockDetectionTracker = {
+      frames: new FrigateFrameBuffer(),
       getActiveDetections: jest.fn().mockReturnValue([]),
       getActiveZones: jest.fn().mockReturnValue([]),
+      clearCamera: jest.fn(),
     };
 
     const mockConfigService = {
@@ -159,6 +164,27 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
     repository = module.get(CamerasRepository);
   });
 
+  it('returns fresh frame boxes at their measured size without waiting for event snapshots', async () => {
+    repository.findById.mockResolvedValue(mockCamera);
+    const now = Date.now();
+    mockDetectionTracker.frames.accept(
+      {
+        camera: mockCamera.slug,
+        frameTime: now / 1000,
+        objects: [{ id: 'live-person', label: 'person', score: 0.95, box: [128, 144, 512, 576] }],
+      },
+      now,
+    );
+    const result = await service.getCameraDebugStream(mockCamera.id);
+    expect(result.detectionFrames).toEqual([
+      {
+        frameTime: now,
+        detections: [expect.objectContaining({ id: 'live-person', box: [0.2, 0.1, 0.8, 0.4] })],
+      },
+    ]);
+    expect(result.detections).toEqual([]);
+  });
+
   describe('RTSP connection test', () => {
     it('chi cho ADMIN kiem tra va khong luu URL vao database', async () => {
       repository.findById.mockResolvedValueOnce(mockCamera);
@@ -180,6 +206,53 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
         'TCP',
       );
       expect(repository.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Camera source updates', () => {
+    it('khong restart Frigate khi khoi dong lai cung mot nguon browser webcam', async () => {
+      const browserCamera: CameraAggregateRecord = {
+        ...mockCamera,
+        source_type_val: 'BROWSER_WEBCAM',
+        source_rtsp_url: null,
+        source_video_key: null,
+        source_video_loop: true,
+        source_transport: 'TCP',
+        source_status: 'ONLINE',
+      };
+      const currentSource = {
+        id: 's1111111-1111-1111-1111-111111111111',
+        camera_id: mockCamera.id,
+        source_type: 'BROWSER_WEBCAM' as const,
+        rtsp_url: null,
+        video_object_key: null,
+        video_original_name: null,
+        video_loop: true,
+        transport: 'TCP' as const,
+        input_format: null,
+        webcam_device_label: null,
+        status: 'ONLINE' as const,
+        last_error_code: null,
+        last_error_message: null,
+        process_id: null,
+        started_at: new Date('2026-03-01T00:00:00Z'),
+        stopped_at: null,
+        created_at: new Date('2026-03-01T00:00:00Z'),
+        updated_at: new Date('2026-03-01T00:00:00Z'),
+      };
+      repository.findById.mockResolvedValueOnce(browserCamera);
+      repository.findSourceByCameraId.mockResolvedValueOnce(currentSource);
+
+      const result = await service.updateCameraSource(
+        mockCamera.id,
+        { sourceType: 'BROWSER_WEBCAM', videoLoop: true, transport: 'TCP' },
+        'ADMIN',
+      );
+
+      expect(result.status).toBe('ONLINE');
+      expect(repository.upsertSource).not.toHaveBeenCalled();
+      expect(repository.bumpFrigateConfigVersion).not.toHaveBeenCalled();
+      expect(mockFrigateSyncService.syncCamera).not.toHaveBeenCalled();
     });
   });
 

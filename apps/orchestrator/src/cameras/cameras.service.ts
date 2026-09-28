@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import path from 'path';
 import fs from 'fs';
+
 import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
 import { CamerasRepository } from './cameras.repository';
 import type {
@@ -56,6 +57,14 @@ function valueOr<T>(value: T | null | undefined, fallback: T): T {
 export class CamerasService implements CameraConfigPortV1 {
   private readonly logger = new Logger(CamerasService.name);
   private readonly transitioningCameras = new Set<string>();
+  private readonly debugCameraCache = new Map<
+    string,
+    { camera: CameraAggregateRecord; expiresAt: number }
+  >();
+  private readonly debugSnapshotCache = new Map<
+    string,
+    { url: string | null; key: string | null; expiresAt: number }
+  >();
 
   constructor(
     private readonly camerasRepository: CamerasRepository,
@@ -284,6 +293,7 @@ export class CamerasService implements CameraConfigPortV1 {
       }
       if (!isEnabled && isStateChanged) {
         await this.cameraSourcesService.stopCameraSource(id);
+        this.detectionTracker.clearCamera(existing.slug);
       }
 
       this.logger.log(
@@ -431,6 +441,14 @@ export class CamerasService implements CameraConfigPortV1 {
       });
     }
 
+    const currentSource = await this.camerasRepository.findSourceByCameraId(cameraId);
+    if (currentSource && this.isSameSourceConfiguration(currentSource, dto)) {
+      this.logger.debug(
+        `Camera source ${camera.slug} is unchanged; skipping Frigate restart`,
+      );
+      return this.mapToSourceDetail(currentSource, role);
+    }
+
     const updatedSource = await this.camerasRepository.upsertSource(cameraId, {
       source_type: dto.sourceType,
       rtsp_url: dto.rtspUrl,
@@ -450,6 +468,21 @@ export class CamerasService implements CameraConfigPortV1 {
 
     this.logger.log(`Cập nhật nguồn phát cho camera ${camera.slug} sang ${dto.sourceType}`);
     return this.mapToSourceDetail(updatedSource, role);
+  }
+
+  private isSameSourceConfiguration(
+    source: CameraSourceRecord,
+    dto: UpdateCameraSourceDto,
+  ): boolean {
+    return (
+      source.source_type === dto.sourceType &&
+      (dto.rtspUrl === undefined || source.rtsp_url === dto.rtspUrl) &&
+      (dto.videoObjectId === undefined || source.video_object_key === dto.videoObjectId) &&
+      (dto.videoLoop === undefined || source.video_loop === dto.videoLoop) &&
+      source.transport === (dto.transport ?? 'TCP') &&
+      (dto.webcamDeviceLabel === undefined ||
+        source.webcam_device_label === dto.webcamDeviceLabel)
+    );
   }
 
   async testRtspConnection(
@@ -737,33 +770,87 @@ export class CamerasService implements CameraConfigPortV1 {
   }
 
   async getCameraDebugStream(cameraId: string): Promise<CameraDebugStream> {
-    const rawRecord = await this.camerasRepository.findById(cameraId);
-    if (!rawRecord) {
-      throw new NotFoundException({
-        error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${cameraId}` },
-      });
+    const now = Date.now();
+    let camera: CameraAggregateRecord;
+
+    const cachedCamera = this.debugCameraCache.get(cameraId);
+    if (cachedCamera && cachedCamera.expiresAt > now) {
+      camera = cachedCamera.camera;
+    } else {
+      const rawRecord = await this.camerasRepository.findById(cameraId);
+      if (!rawRecord) {
+        throw new NotFoundException({
+          error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${cameraId}` },
+        });
+      }
+      camera = await this.reconcileRuntimeStatus(rawRecord);
+      this.debugCameraCache.set(cameraId, { camera, expiresAt: now + 3000 });
     }
 
-    const camera = await this.reconcileRuntimeStatus(rawRecord);
-
-    const latestSnapshotKey = await this.camerasRepository.findLatestSnapshotKey(cameraId);
+    let snapshotUrl: string | null = null;
+    const cachedSnapshot = this.debugSnapshotCache.get(cameraId);
+    if (cachedSnapshot && cachedSnapshot.expiresAt > now) {
+      snapshotUrl = cachedSnapshot.url;
+    } else {
+      const latestSnapshotKey = await this.camerasRepository.findLatestSnapshotKey(cameraId);
+      if (latestSnapshotKey) {
+        if (cachedSnapshot?.key === latestSnapshotKey && cachedSnapshot.url) {
+          snapshotUrl = cachedSnapshot.url;
+          this.debugSnapshotCache.set(cameraId, {
+            url: snapshotUrl,
+            key: latestSnapshotKey,
+            expiresAt: now + 3000,
+          });
+        } else {
+          const snapshotResult = await this.storageService
+            .getPresignedUrl(latestSnapshotKey)
+            .catch(() => null);
+          snapshotUrl = snapshotResult?.url ?? null;
+          this.debugSnapshotCache.set(cameraId, {
+            url: snapshotUrl,
+            key: latestSnapshotKey,
+            expiresAt: now + 3000,
+          });
+        }
+      } else {
+        this.debugSnapshotCache.set(cameraId, { url: null, key: null, expiresAt: now + 3000 });
+      }
+    }
 
     const readSession = this.cameraSourcesService.createBrowserReadSession(camera.slug, camera.id);
 
-    const snapshotResult = latestSnapshotKey
-      ? await this.storageService.getPresignedUrl(latestSnapshotKey).catch(() => null)
-      : null;
+    const isCameraActive = camera.is_enabled;
 
     return {
       cameraId: camera.id,
       streamUrl: readSession.streamUrl,
-      snapshotUrl: snapshotResult?.url ?? null,
-      detections: this.detectionTracker
-        .getActiveDetections(camera.slug)
-        .map((detection) =>
-          this.mapDebugDetection(detection, camera.detect_width, camera.detect_height),
-        ),
-      activeZones: this.detectionTracker.getActiveZones(camera.slug),
+      snapshotUrl,
+      serverTime: Date.now(),
+      detectionFrames: isCameraActive
+        ? this.detectionTracker.frames
+            .get(camera.slug)
+            .slice(-4)
+            .map((frame) => ({
+              frameTime: frame.frameTime,
+              detections: frame.objects.map((object) => ({
+                ...this.mapDebugDetection(
+                  { ...object, confidence: object.score },
+                  camera.detect_width,
+                  camera.detect_height,
+                  1,
+                ),
+                id: object.id,
+              })),
+            }))
+        : [],
+      detections: isCameraActive
+        ? this.detectionTracker
+            .getActiveDetections(camera.slug)
+            .map((detection) =>
+              this.mapDebugDetection(detection, camera.detect_width, camera.detect_height),
+            )
+        : [],
+      activeZones: isCameraActive ? this.detectionTracker.getActiveZones(camera.slug) : [],
     };
   }
 
@@ -867,6 +954,7 @@ export class CamerasService implements CameraConfigPortV1 {
     detection: { label: string; confidence: number; box: number[] },
     frameWidth: number,
     frameHeight: number,
+    boxFit?: number,
   ): CameraDebugStream['detections'][number] {
     const [rawXmin, rawYmin, rawXmax, rawYmax] = detection.box;
     const coordinatesAreNormalized = detection.box.every((value) => value >= 0 && value <= 1);
@@ -889,7 +977,8 @@ export class CamerasService implements CameraConfigPortV1 {
     // Model detector (MobileNet-SSD) thường quét rộng sang hai bên do bao gồm cả
     // tay vịn ghế, khoảng không dưới nách/cùi chỏ hoặc vật thể nền xung quanh.
     // Thu hẹp bề ngang quanh tâm người (fitFactor 0.75) để viền ôm sát cơ thể.
-    const fitFactor = Number(this.configService.get('CAMERA_PERSON_BOX_FIT_FACTOR', 0.75));
+    const fitFactor =
+      boxFit ?? Number(this.configService.get('CAMERA_PERSON_BOX_FIT_FACTOR', 0.75));
     const effectiveFit =
       Number.isFinite(fitFactor) && fitFactor > 0 && fitFactor <= 1 ? fitFactor : 0.75;
     const fittedHalfW = (rawW * effectiveFit) / 2;
