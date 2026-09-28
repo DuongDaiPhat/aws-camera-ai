@@ -3,6 +3,7 @@
 import React from 'react';
 
 export interface DetectedPerson {
+  id?: string;
   x: number;
   y: number;
   width: number;
@@ -24,21 +25,22 @@ export function PersonBoxLayer({
   width = 1000,
   height = 562.5,
 }: PersonBoxLayerProps) {
-  const px = person.x * width;
-  const py = person.y * height;
-  const pw = person.width * width;
-  const ph = person.height * height;
-  const footX = px + pw / 2;
-  const footY = py + ph;
+  const targetX = person.x * width;
+  const targetY = person.y * height;
+  const targetW = person.width * width;
+  const targetH = person.height * height;
+
+  const footX = targetX + targetW / 2;
+  const footY = targetY + targetH;
 
   return (
     <g className="person-box-layer">
       {/* Khung bao người (Bounding box) */}
       <rect
-        x={px}
-        y={py}
-        width={pw}
-        height={ph}
+        x={targetX}
+        y={targetY}
+        width={targetW}
+        height={targetH}
         fill="rgba(56, 189, 248, 0.12)"
         stroke="#38bdf8"
         strokeWidth="2"
@@ -46,8 +48,21 @@ export function PersonBoxLayer({
       />
 
       {/* Header nhãn nhận diện */}
-      <rect x={px} y={Math.max(0, py - 22)} width={100} height={22} rx={3} fill="#0284c7" />
-      <text x={px + 6} y={Math.max(15, py - 7)} fill="#ffffff" fontSize="11" fontWeight="bold">
+      <rect
+        x={targetX}
+        y={Math.max(0, targetY - 22)}
+        width={100}
+        height={22}
+        rx={3}
+        fill="#0284c7"
+      />
+      <text
+        x={targetX + 6}
+        y={Math.max(15, targetY - 7)}
+        fill="#ffffff"
+        fontSize="11"
+        fontWeight="bold"
+      >
         👤 {person.label ?? 'person'} {(person.confidence * 100).toFixed(0)}%
       </text>
 
