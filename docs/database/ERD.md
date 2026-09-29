@@ -4,6 +4,8 @@
 > DDL thực thi: [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`db/migrations/0002_seed_escalation_rules.sql`](../../db/migrations/0002_seed_escalation_rules.sql), [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql), [`db/migrations/0004_document_frigate_dedup_key.sql`](../../db/migrations/0004_document_frigate_dedup_key.sql), [`db/migrations/0005_escalation_rules_version_and_constraints.sql`](../../db/migrations/0005_escalation_rules_version_and_constraints.sql), [`db/migrations/0006_camera_sources_and_frigate_settings.sql`](../../db/migrations/0006_camera_sources_and_frigate_settings.sql), [`db/migrations/0007_face_collection_sync.sql`](../../db/migrations/0007_face_collection_sync.sql), [`db/migrations/0008_escalation_state_machine.sql`](../../db/migrations/0008_escalation_state_machine.sql), [`db/migrations/0009_zone_configuration.sql`](../../db/migrations/0009_zone_configuration.sql), [`db/migrations/0010_event_ai_result_receipts.sql`](../../db/migrations/0010_event_ai_result_receipts.sql)
 > Bổ sung Telegram và ngưỡng người lạ: [`db/migrations/0007_telegram_delivery.sql`](../../db/migrations/0007_telegram_delivery.sql), [`db/migrations/0010_update_unknown_person_thresholds.sql`](../../db/migrations/0010_update_unknown_person_thresholds.sql).
 > Tài liệu này giải thích **vì sao** thiết kế như vậy. File SQL là nguồn sự thật về **cấu trúc**.
+> Callback/recovery US-14: [`0011_telegram_confirmation_delivery.sql`](../../db/migrations/0011_telegram_confirmation_delivery.sql).
+> Thời gian nhánh cao nhập tay: [`0012_configurable_high_wait.sql`](../../db/migrations/0012_configurable_high_wait.sql).
 
 ## Mục lục
 
@@ -19,7 +21,7 @@
 
 ## 1. Sơ đồ tổng thể
 
-Sơ đồ hiện mô tả **23 bảng**, bao gồm các bảng nghiệp vụ ban đầu và các bảng bổ trợ
+Sơ đồ hiện mô tả **24 bảng**, bao gồm các bảng nghiệp vụ ban đầu và các bảng bổ trợ
 cho xác thực, camera, đồng bộ khuôn mặt/vùng, kết quả AI, outbox và Telegram.
 
 ```mermaid
@@ -56,6 +58,7 @@ erDiagram
     events ||--o{ outbox_messages : "phát thay đổi"
 
     notifications ||--o{ confirmations : "được trả lời qua"
+    notifications ||--o| telegram_message_edits : "sửa tin sau xác nhận"
     emergency_contacts ||--o{ notifications : "nhận"
 
     users {
@@ -159,6 +162,7 @@ erDiagram
         numeric t_low
         numeric t_high
         int t_wait_seconds
+        int high_wait_seconds "nullable; 0 <= value < t_wait_seconds"
         boolean skip_logged_only
         jsonb notify_channels
         int version
@@ -310,6 +314,23 @@ erDiagram
         jsonb update_body
         text status
         timestamptz processed_at
+        integer attempt_count
+        timestamptz available_at
+        uuid lease_token
+        timestamptz lease_until
+        text outcome
+        text last_error
+    }
+
+    telegram_message_edits {
+        uuid notification_id PK,FK
+        text status
+        integer attempt_count
+        timestamptz available_at
+        uuid lease_token
+        timestamptz lease_until
+        text last_error
+        timestamptz processed_at
     }
 
     face_collection_sync {
@@ -323,6 +344,13 @@ erDiagram
 ```
 
 ### Vai trò của một số bảng bổ trợ
+
+US-14 lưu `confirmations.source_update_id` với unique index `(channel, source_update_id)`
+khi giá trị khác NULL: callback replay không tạo thêm confirmation/audit.
+`notifications.telegram_message_kind` và `telegram_message_text` lưu loại/nội dung tin đã gửi.
+Worker reconcile từ confirmation INITIAL có hiệu lực vào `telegram_message_edits`, bao gồm
+cả xác nhận dashboard; mỗi notification chỉ có một job edit. Lỗi edit không đổi event/deadline.
+Tin cũ trước migration chưa có loại nội dung sẽ chỉ được bỏ nút, không đoán loại ảnh/text.
 
 | Bảng                       | Sinh ra từ                  | Nếu không có thì sao                                                                                                 |
 | -------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
@@ -517,6 +545,13 @@ khi nhiều ADMIN cùng cấu hình đồng thời, kèm ràng buộc `(t_low IS
 
 `skip_logged_only = TRUE` là cách hiện thực US-19: cháy/khói bỏ qua bậc `LOGGED_ONLY`,
 vào thẳng `NOTIFIED` bất kể confidence.
+
+Migration `0012` thêm `high_wait_seconds` để ADMIN nhập thời gian nhánh confidence cao,
+không tự tính một nửa T_wait khi lưu. Ràng buộc: số nguyên không âm và nhỏ hơn
+`t_wait_seconds`; NULL khi rule không có nhánh này (FIRE/WELLNESS/PERSON).
+Backfill một lần giữ thời gian cũ, chặn bằng T_wait ở trường hợp T_wait=1 bằng giá trị 0.
+API yêu cầu có giá trị khi chỉnh rule dùng nhánh cao; bỏ qua field giữ giá trị đã lưu.
+Rule snapshot/deadline của sự kiện đang chờ không bị migration hay chỉnh cấu hình đổi lại.
 
 `notify_channels` / `escalate_channels` là JSONB mảng thay vì bảng nối. Đây là quyết định
 có ý thức: quan hệ nhiều-nhiều đúng chuẩn cần thêm 2 bảng, trong khi dữ liệu này chỉ có
