@@ -2737,12 +2737,25 @@ components:
         cameraId: { type: string, format: uuid }
         trackId: { type: string }
         observedAt: { type: string, format: date-time }
-        enteredAt: { type: string, format: date-time }
-        dwellSeconds: { type: number, minimum: 0 }
+        enteredAt: { type: ["string", "null"], format: date-time }
+        dwellSeconds: { type: [number, "null"], minimum: 0 }
+        dwellEvidence:
+          type: string
+          const: FRIGATE_CURRENT_ZONE_LOITERING
+          description: Frigate confirmed current_zones after configured loitering_time. Exact zone entry time and dwell duration are unavailable and must remain null.
         minDwellSeconds: { type: integer, minimum: 0, maximum: 300 }
         scheduleActive: { type: boolean, const: true }
         zoneConfigVersion: { type: integer, minimum: 1 }
         scoreSource: { type: string, const: FRIGATE_PERSON_DETECTION }
+      oneOf:
+        - properties:
+            enteredAt: { type: string, format: date-time }
+            dwellSeconds: { type: number, minimum: 0 }
+        - required: [dwellEvidence]
+          properties:
+            dwellEvidence: { type: string, const: FRIGATE_CURRENT_ZONE_LOITERING }
+            enteredAt: { type: "null" }
+            dwellSeconds: { type: "null" }
 
     ZoneResultSubmission:
       allOf:

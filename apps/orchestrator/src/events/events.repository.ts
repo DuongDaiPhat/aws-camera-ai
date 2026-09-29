@@ -199,6 +199,7 @@ export interface CameraRecord {
   slug: string;
   timezone?: string;
   zone_config_applied?: boolean;
+  zone_config_version?: number;
   rtsp_url?: string;
   owner_user_id?: string;
 }
@@ -273,7 +274,8 @@ export class EventsRepository {
     const query = `
       SELECT c.id, c.name, c.slug, c.timezone, d.owner_user_id,
              COALESCE(f.sync_status = 'SYNCED' AND f.applied_version = f.config_version, false)
-               AS zone_config_applied
+               AS zone_config_applied,
+             f.applied_version AS zone_config_version
       FROM cameras c
       JOIN devices d ON c.device_id = d.id
       LEFT JOIN camera_frigate_settings f ON f.camera_id = c.id
@@ -468,33 +470,6 @@ export class EventsRepository {
     ];
     const result = await this.pool.query<EventRecord>(query, values);
     return result.rows[0] ?? null;
-  }
-
-  /**
-   * Cập nhật kết quả nhận diện khuôn mặt và trạng thái sự kiện từ worker.
-   */
-  async updatePersonStatusAndAiResult(
-    eventId: string,
-    personStatus: PersonStatus | null,
-    matchedKnownFaceId: string | null,
-    aiResult: unknown,
-    status: EventStatus | null,
-  ): Promise<void> {
-    const query = `
-      UPDATE events
-      SET person_status = COALESCE($2, person_status),
-          matched_known_face_id = COALESCE($3, matched_known_face_id),
-          ai_results = COALESCE(ai_results, '[]'::jsonb) || $4::jsonb,
-          status = COALESCE($5, status)
-      WHERE id = $1;
-    `;
-    await this.pool.query(query, [
-      eventId,
-      personStatus,
-      matchedKnownFaceId,
-      JSON.stringify([aiResult]),
-      status,
-    ]);
   }
 
   /**

@@ -13,6 +13,15 @@ from app.services.face_collection import FaceCollection
 from app.services.face_embedder import FaceEmbedder
 
 
+def _normalize_quality_outcome(response: MatchResponse) -> MatchResponse:
+    # FR-DET-M1-04: thiếu mặt rõ ràng không phải lỗi hạ tầng hay người lạ.
+    if response.error and response.error.code in {"NO_FACE_DETECTED", "MULTIPLE_FACES"}:
+        response.person_status = "UNDETERMINED"
+        response.quality_reason = response.error.code
+        response.error = None
+    return response
+
+
 class FaceMatcher:
     def __init__(self, embedder: FaceEmbedder, collection: FaceCollection) -> None:
         self.embedder = embedder
@@ -40,7 +49,8 @@ class FaceMatcher:
         response = MatchResponse(
             request_id=request_id,
             collection_version=collection_version,
-            person_status="UNDETERMINED",
+            person_status=None,
+            threshold_used=threshold,
             model_version=embed_resp.model_version,
             processed_at=now,
             bounding_box=bounding_box,
@@ -48,7 +58,7 @@ class FaceMatcher:
         )
 
         if embed_resp.error:
-            return response
+            return _normalize_quality_outcome(response)
 
         if not embed_resp.embedding_base64 or not embed_resp.embedding_dim:
             response.error = InferenceError(code="NO_EMBEDDING", message="Lỗi trích xuất đặc trưng")
@@ -65,11 +75,9 @@ class FaceMatcher:
 
         if not snapshot.faces:
             response.person_status = "UNKNOWN"
-            response.similarity = 0.0
             response.label_confidence = 1.0
-            response.error = InferenceError(
-                code="EMPTY_COLLECTION", message="Danh sách khuôn mặt trống"
-            )
+            response.confidence_policy_version = "empty-collection-v1"
+            response.quality_reason = "EMPTY_COLLECTION"
             return response
 
         q = decode(embed_resp.embedding_base64, embed_resp.embedding_dim)

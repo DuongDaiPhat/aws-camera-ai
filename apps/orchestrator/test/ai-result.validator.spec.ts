@@ -146,4 +146,40 @@ describe('AiResultValidator (US-11)', () => {
     });
     expect(() => validator.validate(EVENT_ID, dto)).toThrow(BadRequestException);
   });
+
+  it.each([
+    { zoneConfigVersion: 0 },
+    { observedAt: 'invalid-date' },
+    { dwellSeconds: 2 },
+    { enteredAt: new Date().toISOString() },
+    { minDwellSeconds: -1 },
+    { minDwellSeconds: 301 },
+    { scheduleActive: false },
+    { scoreSource: 'FACE_SIMILARITY' },
+  ])('từ chối bằng chứng loitering M4 không hợp lệ: %j', (override) => {
+    const dto = faceSubmission({
+      module: 'M4_ZONE',
+      personStatus: undefined,
+      results: [
+        {
+          module: 'M4_ZONE',
+          label: 'RESTRICTED_ZONE',
+          confidence: 0.9,
+          boundingBox: null,
+          metadata: {
+            scheduleActive: true,
+            scoreSource: 'FRIGATE_PERSON_DETECTION',
+            dwellEvidence: 'FRIGATE_CURRENT_ZONE_LOITERING',
+            enteredAt: null,
+            dwellSeconds: null,
+            minDwellSeconds: 2,
+            zoneConfigVersion: 7,
+            observedAt: new Date().toISOString(),
+            ...override,
+          },
+        },
+      ],
+    });
+    expect(() => validator.validate(EVENT_ID, dto)).toThrow(BadRequestException);
+  });
 });

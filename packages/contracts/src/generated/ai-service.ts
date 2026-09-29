@@ -176,6 +176,7 @@ export interface components {
             matchedPersonName?: string | null;
             /** @description Do tuong dong cosine voi ban ghi khop nhat. */
             similarity: number | null;
+            /** @description Nguong matching thuc te cua request, hoac FACE_MATCH_THRESHOLD khi khong truyen threshold. */
             thresholdUsed?: number;
             boundingBox?: components["schemas"]["BoundingBox"] | null;
             modelVersion: string;

@@ -1826,15 +1826,29 @@ export interface components {
             /** Format: date-time */
             observedAt: string;
             /** Format: date-time */
-            enteredAt: string;
-            dwellSeconds: number;
+            enteredAt: string | null;
+            dwellSeconds: number | null;
+            /**
+             * @description Frigate confirmed current_zones after configured loitering_time. Exact zone entry time and dwell duration are unavailable and must remain null.
+             * @constant
+             */
+            dwellEvidence?: "FRIGATE_CURRENT_ZONE_LOITERING";
             minDwellSeconds: number;
             /** @constant */
             scheduleActive: true;
             zoneConfigVersion: number;
             /** @constant */
             scoreSource: "FRIGATE_PERSON_DETECTION";
-        };
+        } & ({
+            /** Format: date-time */
+            enteredAt?: string;
+            dwellSeconds?: number;
+        } | {
+            /** @constant */
+            dwellEvidence: "FRIGATE_CURRENT_ZONE_LOITERING";
+            enteredAt?: null;
+            dwellSeconds?: null;
+        });
         /** @description Only submit enabled RESTRICTED zones with proven dwell and active schedule. Score comes from the matching Frigate person observation, never fabricated as 1. Missing score is diagnostic, not a risk result. Deduplicate event/zone/track; modelVersion identifies detector and metadata identifies config. */
         ZoneResultSubmission: components["schemas"]["ResultIdentity"] & {
             /** @constant */

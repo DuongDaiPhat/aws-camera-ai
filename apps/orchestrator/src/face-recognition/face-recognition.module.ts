@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { FaceRecognitionWorker } from './face-recognition.worker';
 import { MediaModule } from '../media/media.module';
-import { EventsModule } from '../events/events.module';
+import { AiResultsModule } from '../ai-results/ai-results.module';
 
 @Module({
   imports: [
@@ -10,7 +10,7 @@ import { EventsModule } from '../events/events.module';
       name: 'face-recognition',
     }),
     MediaModule,
-    EventsModule,
+    AiResultsModule,
   ],
   providers: [FaceRecognitionWorker],
   exports: [BullModule],

@@ -9,6 +9,8 @@ import { Pool } from 'pg';
 import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
 import { EventsRepository } from '../src/events/events.repository';
 import { MqttConsumerService } from '../src/ingestion/mqtt-consumer.service';
+import { ZoneResultProducerService } from '../src/ingestion/zone-result-producer.service';
+import { AiResultsService } from '../src/ai-results/ai-results.service';
 import { EventMediaRepository } from '../src/media/event-media.repository';
 import { MediaService } from '../src/media/media.service';
 import { FrigateDetectionTrackerService } from '../src/frigate/frigate-detection-tracker.service';
@@ -282,6 +284,7 @@ describe('US-08 - Integration MQTT đến PostgreSQL', () => {
       eventMediaRepository,
       mediaService,
       detectionTracker,
+      new ZoneResultProducerService({ submit: jest.fn() } as unknown as AiResultsService),
     );
     consumer.connect();
   }

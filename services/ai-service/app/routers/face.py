@@ -63,7 +63,7 @@ async def match_face(
     request_id: UUID = Form(alias="requestId"),  # noqa: B008
     owner_scope_id: UUID = Form(alias="ownerScopeId"),  # noqa: B008
     collection_version: int = Form(alias="collectionVersion"),  # noqa: B008
-    threshold: float | None = Form(default=None),  # noqa: B008
+    threshold: float | None = Form(default=None, ge=0, le=1),  # noqa: B008
 ) -> MatchResponse:
     slots = get_slots()
     if not slots.acquire(blocking=False):

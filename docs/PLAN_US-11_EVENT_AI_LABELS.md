@@ -1,7 +1,7 @@
 # Plan US-11 — Gắn nhãn AI, confidence và tổng hợp ưu tiên sự kiện
 
 > Phần giao với US-10, US-12, US-13, US-15, shared outbox và migration tuân theo [kế hoạch tích hợp 5 thành viên](PLAN_AGILE_5_MEMBER_EXECUTION.md).
-> Trạng thái: backend nhận và tổng hợp AI result, outbox/SSE và handoff US-13 đã triển khai trên nhánh US-11. Nghiệm thu E2E với producer M1/M4 thật còn chờ tích hợp các US liên quan.
+> Trạng thái: backend nhận và tổng hợp AI result, outbox/SSE và handoff US-13 đã triển khai trên nhánh US-11. Worker M1 của US-10 và producer M4 từ MQTT của US-12 đã gọi chung `AiResultsService`. Còn nghiệm thu E2E với camera/video thật, AI service, UI và escalation.
 > Mục tiêu: mỗi kết quả inference được lưu đúng nguồn, event có nhãn đại diện nhất quán và không mất các nguy cơ đồng thời.
 
 ## 1. Phạm vi và phụ thuộc
@@ -10,12 +10,15 @@
 - Không tự triển khai model M1/M2/M3 hoặc sender Telegram.
 - Input M1 theo [US-10](PLAN_US-10_PERSON_CROP_FACE_MATCH.md); output chuyển cho [US-13](PLAN_US-13_ESCALATION_STATE_MACHINE.md).
 - US-12 đã tạo/nâng `RESTRICTED_ZONE` từ MQTT khi zone thuộc đúng camera, đang bật, cấu hình đã áp dụng và lịch hợp lệ; `zone_id` và `zone_name` là dữ liệu vùng cần giữ nguyên khi US-11 nhận M1. Việc kiểm tra dwell do cấu hình Frigate/US-12 phụ trách.
-- Chưa có producer gửi receipt `M4_ZONE` từ luồng MQTT của US-12 vào cổng US-11. Trước khi tích hợp producer này, không tự tạo nhãn, confidence hoặc candidate M4 giả từ riêng `event_type = RESTRICTED_ZONE`; cần kiểm tra riêng handoff US-13 cho cảnh báo M4 tạo bởi US-12.
+- `ZoneResultProducerService` gửi receipt `M4_ZONE` cho từng vùng RESTRICTED hợp lệ trong `current_zones`, qua cùng `AiResultsService` mà cổng nội bộ sử dụng. Không suy ra M4 từ riêng `event_type = RESTRICTED_ZONE` hoặc từ lịch sử `entered_zones`.
+- Producer M4 chỉ sử dụng cấu hình đã đồng bộ. Confidence lấy từ `after.score` của observation người; version đại diện là version rule loitering và cấu hình. Metadata ghi `dwellEvidence = FRIGATE_CURRENT_ZONE_LOITERING`, `enteredAt = null`, `dwellSeconds = null` vì Frigate xác nhận ngưỡng nhưng không cung cấp thời điểm vào vùng và tổng dwell chính xác. Không dùng thời gian tồn tại track làm dwell vùng, không đếm thêm sau loitering.
 - Có thể triển khai bằng fixtures trước khi model và engine sẵn sàng; nghiệm thu tích hợp phải dùng producer/consumer thật.
 - Nguồn chuẩn: [OpenAPI](../api/openapi.yaml), [AI OpenAPI](../api/openapi-ai-service.yaml), [schema](../db/migrations/0001_init.sql), [rules](../db/migrations/0002_seed_escalation_rules.sql), [coding convention](conventions/CODING_CONVENTION.md), [Git workflow](conventions/GIT_WORKFLOW.md).
 - Đọc lại working tree và AGENTS.md nếu có trước khi thực thi, giữ thay đổi của người khác.
 
-## 2. Hiện trạng và lỗi tích hợp cần xử lý
+## 2. Hiện trạng trước triển khai và lỗi tích hợp cần xử lý
+
+Các mục dưới đây là vấn đề đầu vào của plan, không phải kết luận trạng thái hiện tại. Trạng thái tích hợp mới nhất được ghi ở đầu tài liệu và phần phạm vi.
 
 - `events` đã có ai_label, confidence, ai_model_version, ai_processed_at, person_status, matched_known_face_id, ai_results JSONB và priority.
 - OpenAPI đã khai báo `POST /internal/events/{eventId}/ai-result` trả 202, bảo vệ bằng X-Internal-Token; chưa có controller thực thi.
@@ -75,6 +78,7 @@ error?                 code, message đã làm sạch
 - Bổ sung lỗi 400/401/404/409. Kết quả lặp cùng ID/nội dung được tiếp nhận idempotently; cùng ID nhưng nội dung khác là 409.
 - Endpoint chỉ trả 202 sau khi result đã được ghi bền vững; lưu inbox xong rồi xử lý async. Không ACK trước khi commit.
 - Worker nội bộ US-10 gọi cùng result-application service để tránh hai đường cập nhật khác nhau.
+- Producer M4 trong ingestion cũng gọi cùng service. Contract hỗ trợ dwell đo được hoặc bằng chứng loitering Frigate; trường `enteredAt`/`dwellSeconds` bắt buộc là `null` ở dạng loitering. Repository kiểm tra lại camera/track, loại vùng, trạng thái bật, lịch theo múi giờ, ngưỡng dwell và version cấu hình trước khi áp dụng bằng chứng này; receipt không còn khớp được lưu `IGNORED` kèm lý do.
 - Regenerate contracts; enum mới nếu có phải đồng bộ SQL, packages/contracts/src/enums.ts và OpenAPI.
 
 ## 5. Database và chống mất kết quả
@@ -106,6 +110,8 @@ claim receipt
 ```
 
 Network call không nằm trong transaction. Hai worker M1/M4 đồng thời phải serialize trên cùng event để không mất JSONB update. Stale revision được lưu trạng thái ignored có lý do, không thay projection hiện tại.
+
+Receipt M4 có `observationId` theo zone trong event, `revision` theo số mili giây từ lúc bắt đầu track đến observation (cộng 1), và `resultId` xác định từ event/zone/revision/config version. Replay cùng observation dùng lại ID và payload; frame mới thay thế projection cùng zone bằng revision mới. Các zone đồng thời có identity riêng nên không ghi đè nhau.
 
 ## 6. Thuật toán tổng hợp
 
@@ -149,27 +155,33 @@ Tách rule aggregator thành hàm thuần để test đầy đủ; Controller �
 
 ## 9. Ma trận kiểm thử
 
-| Ca                                              | Kết quả                                                    |
-| ----------------------------------------------- | ---------------------------------------------------------- |
-| Một M1 KNOWN                                    | status người, tên, label/score/version/time đúng           |
-| M1 UNKNOWN + M4                                 | Giữ cả hai, priority cao nhất, confidence thuộc đúng label |
-| KNOWN + M4/FIRE                                 | Không mất nguy cơ độc lập                                  |
-| M4 do US-12 tạo trước khi nhận M1               | Giữ RESTRICTED_ZONE/P1/zone_name; không dựng score M4 giả  |
-| M4 do US-12 tạo, sau đó nhận P0                 | Nâng theo P0; vẫn giữ snapshot vùng                        |
-| M1 trước, sau đó US-12 xác nhận M4              | Nâng lên M4/P1, giữ M1 chi tiết, scalar M4 chưa có score   |
-| US-12 đã tạo M4, sau đó M1 lỗi                  | Giữ M4/P1, không chuyển AI_FAILED                          |
-| Event P0 trước, sau đó MQTT báo M4              | Giữ P0 và các scalar AI đại diện                           |
-| P1 dưới T_low + P2 đủ T_low                     | Engine vẫn nhận P2 để thông báo                            |
-| Result trùng hoặc cùng ID khác nội dung         | Một lần áp dụng / 409                                      |
-| M1 và M4 ghi đồng thời                          | Không mất phần tử ai_results                               |
-| Confidence -0.1, 1.1, NaN; timestamp/module sai | Reject trước DB                                            |
-| No face và timeout                              | Hai outcome/lifecycle phân biệt                            |
-| MQTT update sau khi có AI                       | Không ghi đè nhãn và confidence AI                         |
-| Kết quả stale hoặc collection bị xóa            | Không ghi tên/ID sai hoặc downgrade                        |
-| Callback đến sau RESOLVED/CLOSED                | Không mở lại, lưu lý do ignored                            |
-| Crash sau commit trước SSE/handoff              | Outbox phát lại, consumer dedup                            |
+| Ca                                                 | Kết quả                                                            |
+| -------------------------------------------------- | ------------------------------------------------------------------ |
+| Một M1 KNOWN                                       | status người, tên, label/score/version/time đúng                   |
+| M1 UNKNOWN + M4                                    | Giữ cả hai, priority cao nhất, confidence thuộc đúng label         |
+| KNOWN + M4/FIRE                                    | Không mất nguy cơ độc lập                                          |
+| M4 do US-12 tạo trước khi nhận M1                  | Giữ RESTRICTED_ZONE/P1/zone_name; không dựng score M4 giả          |
+| M4 do US-12 tạo, sau đó nhận P0                    | Nâng theo P0; vẫn giữ snapshot vùng                                |
+| M1 trước, sau đó US-12 xác nhận M4                 | Nâng lên M4/P1, giữ M1 chi tiết, scalar M4 chưa có score           |
+| US-12 đã tạo M4, sau đó M1 lỗi                     | Giữ M4/P1, không chuyển AI_FAILED                                  |
+| MQTT current_zones hợp lệ                          | Receipt M4 có score thật và bằng chứng loitering, không dựng dwell |
+| Replay cùng observation M4                         | Một receipt, không tăng aggregate version hoặc outbox lần nữa      |
+| Cấu hình/dwell/lịch/vùng đổi trước áp dụng receipt | Receipt IGNORED, không đưa nguy cơ chưa xác minh vào projection    |
+| Event P0 trước, sau đó MQTT báo M4                 | Giữ P0 và các scalar AI đại diện                                   |
+| P1 dưới T_low + P2 đủ T_low                        | Engine vẫn nhận P2 để thông báo                                    |
+| Result trùng hoặc cùng ID khác nội dung            | Một lần áp dụng / 409                                              |
+| M1 và M4 ghi đồng thời                             | Không mất phần tử ai_results                                       |
+| Confidence -0.1, 1.1, NaN; timestamp/module sai    | Reject trước DB                                                    |
+| No face và timeout                                 | Hai outcome/lifecycle phân biệt                                    |
+| MQTT update sau khi có AI                          | Không ghi đè nhãn và confidence AI                                 |
+| Kết quả stale hoặc collection bị xóa               | Không ghi tên/ID sai hoặc downgrade                                |
+| Callback đến sau RESOLVED/CLOSED                   | Không mở lại, lưu lý do ignored                                    |
+| Crash sau commit trước SSE/handoff                 | Outbox phát lại, consumer dedup                                    |
 
 Integration test dùng PostgreSQL thật cho lock/race/JSONB/unique constraint. E2E submit M1 + M4 → đọc EventDetail → SSE cập nhật UI → engine nhận đủ candidates. Test thứ tự M1/M4 đảo ngược phải cho projection tương đương.
+
+Các bước thực thi, dữ liệu chuẩn bị và truy vấn đối chiếu nằm trong
+[hướng dẫn kiểm thử E2E US-11](test/HUONG_DAN_KIEM_THU_E2E_US-11.md).
 
 ## 10. Git và kiểm tra trước bàn giao
 

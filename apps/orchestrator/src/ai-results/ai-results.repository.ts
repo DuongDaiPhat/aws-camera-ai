@@ -368,12 +368,21 @@ export class AiResultsRepository {
     event: AiEventRow,
     submission: ValidatedAiResultSubmission,
   ): Promise<string | null> {
-    const metadata = submission.results[0]?.metadata;
-    const zoneId = metadata?.zoneId;
-    const cameraId = metadata?.cameraId;
-    const trackId = metadata?.trackId;
-    if (typeof zoneId !== 'string' || cameraId !== event.camera_id || trackId !== event.track_id) {
+    const resultItem = submission.results[0];
+    if (!resultItem || event.camera_id === null) return 'ZONE_SCOPE_MISMATCH';
+    const metadata = resultItem.metadata;
+    const zoneId = metadata.zoneId;
+    const cameraId = event.camera_id;
+    const trackId = metadata.trackId;
+    if (
+      typeof zoneId !== 'string' ||
+      metadata.cameraId !== cameraId ||
+      trackId !== event.track_id
+    ) {
       return 'ZONE_SCOPE_MISMATCH';
+    }
+    if (metadata.dwellEvidence === 'FRIGATE_CURRENT_ZONE_LOITERING') {
+      return await this.validateFrigateZoneEvidence(client, zoneId, cameraId, metadata);
     }
     const result = await client.query<BooleanRow>(
       `SELECT EXISTS (
@@ -387,6 +396,37 @@ export class AiResultsRepository {
       [zoneId, cameraId],
     );
     return result.rows[0]?.exists ? null : 'ZONE_NOT_AVAILABLE';
+  }
+
+  private async validateFrigateZoneEvidence(
+    client: PoolClient,
+    zoneId: string,
+    cameraId: string | null,
+    metadata: Record<string, unknown>,
+  ): Promise<string | null> {
+    const result = await client.query<BooleanRow>(
+      `SELECT EXISTS (
+         SELECT 1 FROM zones z
+         JOIN cameras c ON c.id = z.camera_id
+         JOIN camera_frigate_settings f ON f.camera_id = c.id
+         WHERE z.id = $1 AND c.id = $2
+           AND z.zone_type = 'RESTRICTED' AND z.is_enabled AND c.is_enabled
+           AND f.sync_status = 'SYNCED'
+           AND f.applied_version = f.config_version AND f.applied_version = $3
+           AND z.min_dwell_seconds = $4
+           AND (
+             (z.active_from IS NULL AND z.active_to IS NULL)
+             OR (z.active_from < z.active_to
+                 AND ($5::timestamptz AT TIME ZONE c.timezone)::time >= z.active_from
+                 AND ($5::timestamptz AT TIME ZONE c.timezone)::time < z.active_to)
+             OR (z.active_from > z.active_to
+                 AND (($5::timestamptz AT TIME ZONE c.timezone)::time >= z.active_from
+                      OR ($5::timestamptz AT TIME ZONE c.timezone)::time < z.active_to))
+           )
+       ) AS exists;`,
+      [zoneId, cameraId, metadata.zoneConfigVersion, metadata.minDwellSeconds, metadata.observedAt],
+    );
+    return result.rows[0]?.exists ? null : 'ZONE_EVIDENCE_STALE';
   }
 
   private async listRulePriorities(client: PoolClient): Promise<EscalationRulePriority[]> {

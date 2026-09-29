@@ -24,6 +24,7 @@ const OTHER_MODULE_LABELS: Readonly<Record<string, readonly string[]>> = {
   M5_WELLNESS: ['WELLNESS_TIMEOUT'],
 };
 const SCORE_EPSILON = 0.000_001;
+const MAX_ZONE_DWELL_SECONDS = 300;
 
 function requiredPositiveInteger(config: ConfigService, key: string): number {
   const value = Number(config.getOrThrow<string>(key));
@@ -60,6 +61,28 @@ function metadataNumber(metadata: Record<string, unknown>, key: string): number 
 function metadataString(metadata: Record<string, unknown>, key: string): string | null {
   const value = metadata[key];
   return typeof value === 'string' ? value : null;
+}
+
+function hasValidZoneDwell(metadata: Record<string, unknown>): boolean {
+  const minDwellSeconds = metadataNumber(metadata, 'minDwellSeconds');
+  if (
+    minDwellSeconds === null ||
+    !Number.isInteger(minDwellSeconds) ||
+    minDwellSeconds < 0 ||
+    minDwellSeconds > MAX_ZONE_DWELL_SECONDS
+  )
+    return false;
+  if (metadata.dwellEvidence === 'FRIGATE_CURRENT_ZONE_LOITERING') {
+    return (
+      metadata.dwellSeconds === null &&
+      metadata.enteredAt === null &&
+      Number.isInteger(metadata.zoneConfigVersion) &&
+      Number(metadata.zoneConfigVersion) >= 1 &&
+      Number.isFinite(Date.parse(String(metadata.observedAt)))
+    );
+  }
+  const dwellSeconds = metadataNumber(metadata, 'dwellSeconds');
+  return dwellSeconds !== null && dwellSeconds >= minDwellSeconds;
 }
 
 @Injectable()
@@ -126,7 +149,10 @@ export class AiResultValidator {
     if (result.module !== dto.module) {
       this.reject('MODULE_MISMATCH', 'module của result item không khớp callback.');
     }
-    if (result.confidence !== null && (result.confidence < 0 || result.confidence > 1)) {
+    if (
+      result.confidence !== null &&
+      (!Number.isFinite(result.confidence) || result.confidence < 0 || result.confidence > 1)
+    ) {
       this.reject('INVALID_CONFIDENCE', 'confidence phải nằm trong khoảng 0..1.');
     }
     this.validateBoundingBox(result.boundingBox);
@@ -230,20 +256,16 @@ export class AiResultValidator {
   }
 
   private validateZonePayload(dto: SubmitAiResultDto): void {
-    if (dto.error || dto.results.length !== 1) {
+    if (dto.error || dto.results.length !== 1 || dto.personStatus || dto.matchedKnownFaceId) {
       this.reject('INVALID_ZONE_RESULT', 'M4 phải có đúng một kết quả thành công.');
     }
     const result = dto.results[0];
-    const dwellSeconds = metadataNumber(result.metadata, 'dwellSeconds');
-    const minDwellSeconds = metadataNumber(result.metadata, 'minDwellSeconds');
     if (
       result.label !== 'RESTRICTED_ZONE' ||
       result.confidence === null ||
       result.metadata.scheduleActive !== true ||
       result.metadata.scoreSource !== 'FRIGATE_PERSON_DETECTION' ||
-      dwellSeconds === null ||
-      minDwellSeconds === null ||
-      dwellSeconds < minDwellSeconds
+      !hasValidZoneDwell(result.metadata)
     ) {
       this.reject(
         'INVALID_ZONE_RESULT',

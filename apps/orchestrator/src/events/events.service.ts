@@ -29,7 +29,6 @@ import type { EventStatsResponseDto } from './dto/event-stats-response.dto';
 import type { ConfirmEventDto, CloseEventDto } from './dto/confirm-event.dto';
 import type { ConfirmationResponseDto } from './dto/confirmation-response.dto';
 import { DEFAULT_STATS_WINDOW_HOURS } from './dto/get-event-stats-query.dto';
-import type { AiComponents, PersonStatus, EventStatus } from '@cam/contracts';
 
 const PRESIGNED_URL_TTL_SECONDS = 900; // 15 phút (FR-EVT-07)
 const STATUS_HISTORY_LIMIT = 50;
@@ -349,60 +348,5 @@ export class EventsService {
     }
 
     return this.eventSubject.asObservable();
-  }
-
-  /**
-   * Xử lý kết quả từ FaceRecognitionWorker.
-   * Ghi PersonStatus, AI results, update EventStatus nếu cần (US-10).
-   */
-  async processFaceMatchResult(
-    eventId: string,
-    result: AiComponents['schemas']['MatchResponse'],
-  ): Promise<void> {
-    let personStatus: PersonStatus | null = null;
-    let newEventStatus: EventStatus | null = null;
-
-    if (result.personStatus === 'KNOWN') {
-      personStatus = 'KNOWN';
-    } else if (result.personStatus === 'UNKNOWN') {
-      personStatus = 'UNKNOWN';
-      newEventStatus = 'NOTIFIED'; // escalate immediately
-    } else if (result.personStatus === 'UNDETERMINED') {
-      personStatus = 'UNDETERMINED';
-    } else if (result.error) {
-      newEventStatus = 'AI_FAILED';
-    }
-
-    const aiResultItem = {
-      module: 'M1_FACE',
-      requestId: result.requestId,
-      collectionVersion: result.collectionVersion,
-      matchedKnownFaceId:
-        ('matchedKnownFaceId' in result
-          ? (result as { matchedKnownFaceId?: string }).matchedKnownFaceId
-          : null) || null,
-      results: [
-        {
-          label: 'person',
-          confidence: result.similarity,
-          labelConfidence: result.labelConfidence,
-        },
-      ],
-      error: result.error,
-    };
-
-    await this.eventsRepository.updatePersonStatusAndAiResult(
-      eventId,
-      personStatus,
-      aiResultItem.matchedKnownFaceId,
-      aiResultItem,
-      newEventStatus,
-    );
-
-    const summaryRecord = await this.eventsRepository.findEventSummaryById(eventId);
-    if (summaryRecord) {
-      const summary = await this.toEventSummary(summaryRecord);
-      this.emitEvent(summary, 'event.updated');
-    }
   }
 }
