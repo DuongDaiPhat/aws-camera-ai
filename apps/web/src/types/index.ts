@@ -1,20 +1,21 @@
 import type { components, operations, paths } from '@cam/contracts';
-import type {
+
+export type { components, operations, paths };
+export type {
   EventType,
   EventStatus,
   PriorityLevel,
   UserRole,
   ConfirmationResponse,
+  ConfirmationPhase,
 } from '@cam/contracts';
-
-export type { components, operations, paths };
-export type { EventType, EventStatus, PriorityLevel, UserRole, ConfirmationResponse };
 
 export type EventSummary = components['schemas']['EventSummary'];
 export type EventDetail = components['schemas']['EventDetail'];
 export type EventMedia = components['schemas']['EventMedia'];
 export type EventStats = components['schemas']['EventStats'];
 export type AiResultItem = components['schemas']['AiResultItem'];
+export type Confirmation = components['schemas']['Confirmation'];
 
 export type AiTagColor = 'danger' | 'warning' | 'info' | 'success' | 'neutral';
 
@@ -48,3 +49,19 @@ export interface MetricCardData {
 export type CurrentUser = components['schemas']['User'];
 export type LoginRequest = components['schemas']['LoginRequest'];
 export type AuthTokens = components['schemas']['AuthTokens'];
+
+export type Camera = components['schemas']['Camera'];
+export type CameraSourceType = components['schemas']['CameraSourceType'];
+export type CameraRuntimeStatus = components['schemas']['CameraRuntimeStatus'];
+export type CameraSourceDetail = components['schemas']['CameraSourceDetail'];
+export type CameraPreview = components['schemas']['CameraPreview'];
+export type CameraFrigateSettings = components['schemas']['CameraFrigateSettings'];
+export type UpdateCameraRequest = components['schemas']['UpdateCameraRequest'];
+export type UpdateCameraStateRequest = components['schemas']['UpdateCameraStateRequest'];
+export type UpdateCameraSourceRequest = components['schemas']['UpdateCameraSourceRequest'];
+export type RtspConnectionTestRequest = components['schemas']['RtspConnectionTestRequest'];
+export type RtspConnectionTestResult = components['schemas']['RtspConnectionTestResult'];
+export type Zone = components['schemas']['Zone'];
+export type ZoneType = components['schemas']['ZoneType'];
+export type CreateZoneRequest = components['schemas']['CreateZoneRequest'];
+export type UpdateZoneRequest = components['schemas']['UpdateZoneRequest'];

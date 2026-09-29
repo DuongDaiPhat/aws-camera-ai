@@ -10,6 +10,7 @@ import { Subject, Observable } from 'rxjs';
 import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
 import { TOKEN_SERVICE, type TokenService } from '../auth/auth.types';
 import { MediaService } from '../media/media.service';
+import { EscalationEngineService } from '../escalation/escalation-engine.service';
 import {
   EventsRepository,
   type EventDetailRecord,
@@ -25,6 +26,8 @@ import type {
   EventStatusHistoryEntry,
 } from './dto/event-detail-response.dto';
 import type { EventStatsResponseDto } from './dto/event-stats-response.dto';
+import type { ConfirmEventDto, CloseEventDto } from './dto/confirm-event.dto';
+import type { ConfirmationResponseDto } from './dto/confirmation-response.dto';
 import { DEFAULT_STATS_WINDOW_HOURS } from './dto/get-event-stats-query.dto';
 
 const PRESIGNED_URL_TTL_SECONDS = 900; // 15 phút (FR-EVT-07)
@@ -40,18 +43,36 @@ function toAiResultItems(rawResults: unknown): AiResultItem[] {
     return [];
   }
 
-  return rawResults.filter((item): item is AiResultItem => {
-    if (typeof item !== 'object' || item === null) return false;
-    const candidate = item as Partial<AiResultItem>;
-    return (
-      typeof candidate.label === 'string' &&
-      (candidate.confidence === null ||
-        (typeof candidate.confidence === 'number' &&
-          Number.isFinite(candidate.confidence) &&
-          candidate.confidence >= 0 &&
-          candidate.confidence <= 1))
-    );
-  });
+  return rawResults.filter(isAiResultItem);
+}
+
+function isAiResultItem(item: unknown): item is AiResultItem {
+  if (typeof item !== 'object' || item === null) return false;
+  const candidate = item as Partial<AiResultItem>;
+  return hasAiResultIdentity(candidate) && hasValidAiResultValue(candidate);
+}
+
+function hasAiResultIdentity(candidate: Partial<AiResultItem>): boolean {
+  return (
+    typeof candidate.resultId === 'string' &&
+    typeof candidate.observationId === 'string' &&
+    typeof candidate.revision === 'number' &&
+    typeof candidate.module === 'string' &&
+    typeof candidate.modelVersion === 'string' &&
+    typeof candidate.processedAt === 'string'
+  );
+}
+
+function hasValidAiResultValue(candidate: Partial<AiResultItem>): boolean {
+  const hasValidLabel = candidate.label === null || typeof candidate.label === 'string';
+  const hasValidStatus = candidate.status === 'SUCCESS' || candidate.status === 'ERROR';
+  const hasValidConfidence =
+    candidate.confidence === null ||
+    (typeof candidate.confidence === 'number' &&
+      Number.isFinite(candidate.confidence) &&
+      candidate.confidence >= 0 &&
+      candidate.confidence <= 1);
+  return hasValidLabel && hasValidStatus && hasValidConfidence;
 }
 
 function toIsoStringOrNull(value: Date | null): string | null {
@@ -66,6 +87,7 @@ export class EventsService {
   constructor(
     private readonly eventsRepository: EventsRepository,
     private readonly mediaService: MediaService,
+    private readonly escalationEngineService: EscalationEngineService,
     @Inject(STORAGE_SERVICE) private readonly storageService: IStorageService,
     @Inject(TOKEN_SERVICE) private readonly tokenService: TokenService,
   ) {}
@@ -124,6 +146,53 @@ export class EventsService {
     return this.toEventDetail(record, summary, media, statusHistory);
   }
 
+  /**
+   * Xác nhận sự kiện ban đầu ("Tôi ổn" / "Cần giúp đỡ") - FR-ESC-03/04/09 (US-13).
+   */
+  async confirmEvent(
+    eventId: string,
+    actorUserId: string,
+    dto: ConfirmEventDto,
+  ): Promise<ConfirmationResponseDto> {
+    const result = await this.escalationEngineService.confirmInitial(eventId, actorUserId, {
+      response: dto.response,
+      note: dto.note,
+      commandId: dto.commandId,
+      channel: 'DASHBOARD',
+    });
+
+    const summary = await this.eventsRepository.findEventSummaryById(eventId);
+    if (summary) {
+      const summaryDto = await this.toEventSummary(summary);
+      this.emitEvent(summaryDto, 'event.updated');
+    }
+
+    return result;
+  }
+
+  /**
+   * Đóng sự kiện khẩn cấp sau khi đã tiếp nhận và can thiệp - FR-ESC-04/09 (US-13 Phase EMERGENCY).
+   */
+  async closeEvent(
+    eventId: string,
+    actorUserId: string,
+    dto: CloseEventDto,
+  ): Promise<ConfirmationResponseDto> {
+    const result = await this.escalationEngineService.closeEmergency(eventId, actorUserId, {
+      note: dto.note,
+      commandId: dto.commandId,
+      channel: 'DASHBOARD',
+    });
+
+    const summary = await this.eventsRepository.findEventSummaryById(eventId);
+    if (summary) {
+      const summaryDto = await this.toEventSummary(summary);
+      this.emitEvent(summaryDto, 'event.updated');
+    }
+
+    return result;
+  }
+
   private toEventDetail(
     record: EventDetailRecord,
     summary: EventSummaryDto,
@@ -136,7 +205,9 @@ export class EventsService {
       trackId: record.track_id,
       aiLabel: record.ai_label,
       aiModelVersion: record.ai_model_version,
+      aiProcessedAt: toIsoStringOrNull(record.ai_processed_at),
       aiResults: toAiResultItems(record.ai_results),
+      aggregateVersion: Number(record.aggregate_version),
       retain: record.retain,
       correlationId: record.correlation_id,
       escalationDeadlineAt: toIsoStringOrNull(record.escalation_deadline_at),
@@ -146,6 +217,9 @@ export class EventsService {
       closedAt: toIsoStringOrNull(record.closed_at),
       media,
       statusHistory: statusHistory.map((entry) => this.toStatusHistoryEntry(entry)),
+      version: record.version ?? 1,
+      ruleSnapshot: record.rule_snapshot as Record<string, unknown> | null,
+      triggeringResults: toAiResultItems(record.triggering_results),
     };
   }
 
@@ -229,8 +303,11 @@ export class EventsService {
       camera: record.camera_id
         ? { id: record.camera_id, name: record.camera_name ?? undefined }
         : null,
-      zone: record.zone_id ? { id: record.zone_id, name: record.zone_name ?? undefined } : null,
-      confidence: record.confidence ? Number(record.confidence) : null,
+      zone:
+        record.zone_id || record.zone_name
+          ? { id: record.zone_id, name: record.zone_name ?? undefined }
+          : null,
+      confidence: record.confidence !== null ? Number(record.confidence) : null,
       personStatus: record.person_status ?? undefined,
       matchedPersonName: record.matched_person_name ?? null,
       thumbnailUrl,

@@ -39,6 +39,7 @@ export class ApiError extends Error {
     readonly code: string,
     message: string,
     readonly traceId?: string,
+    readonly details?: unknown,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -49,10 +50,21 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   return request<T>(path, init, true);
 }
 
+/**
+ * Upload multipart có báo tiến độ và dùng cùng cơ chế access/refresh token với apiFetch.
+ */
+export async function apiUpload<T>(
+  path: string,
+  body: FormData,
+  onProgress?: (progressPercent: number) => void,
+): Promise<T> {
+  return uploadRequest<T>(path, body, onProgress, true);
+}
+
 async function request<T>(path: string, init: RequestInit, canRefresh: boolean): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
-    headers: buildHeaders(init.headers),
+    headers: buildHeaders(init.headers, init.body instanceof FormData),
     credentials: 'include',
   });
 
@@ -70,18 +82,96 @@ async function request<T>(path: string, init: RequestInit, canRefresh: boolean):
 
   if (!response.ok) {
     const body = (await response.json().catch(() => ({}))) as {
-      error?: { code?: string; message?: string; traceId?: string };
+      error?: { code?: string; message?: string; traceId?: string; details?: unknown };
     };
     throw new ApiError(
       response.status,
       body.error?.code ?? 'UNKNOWN',
       body.error?.message ?? response.statusText,
       body.error?.traceId,
+      body.error?.details,
     );
   }
 
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
+}
+
+async function uploadRequest<T>(
+  path: string,
+  body: FormData,
+  onProgress: ((progressPercent: number) => void) | undefined,
+  canRefresh: boolean,
+): Promise<T> {
+  try {
+    return await sendUpload<T>(path, body, onProgress);
+  } catch (error) {
+    if (!(error instanceof ApiError) || error.status !== 401 || !canRefresh) throw error;
+
+    try {
+      const refreshedToken = await refreshAccessToken();
+      setAccessToken(refreshedToken);
+      return await uploadRequest<T>(path, body, onProgress, false);
+    } catch (refreshError) {
+      setAccessToken(null);
+      redirectToLogin();
+      throw refreshError;
+    }
+  }
+}
+
+function sendUpload<T>(
+  path: string,
+  body: FormData,
+  onProgress?: (progressPercent: number) => void,
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_BASE_URL}${path}`);
+    xhr.withCredentials = true;
+
+    const token = getAccessToken();
+    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+    xhr.upload.onprogress = (event) => {
+      if (!event.lengthComputable || !onProgress) return;
+      onProgress(Math.round((event.loaded / event.total) * 100));
+    };
+
+    xhr.onerror = () => reject(new ApiError(0, 'NETWORK_ERROR', 'Không thể kết nối tới máy chủ.'));
+    xhr.onload = () => {
+      const responseBody = parseResponseBody(xhr.responseText);
+      if (xhr.status < 200 || xhr.status >= 300) {
+        reject(
+          new ApiError(
+            xhr.status,
+            responseBody.error?.code ?? 'UNKNOWN',
+            responseBody.error?.message ?? xhr.statusText,
+            responseBody.error?.traceId,
+          ),
+        );
+        return;
+      }
+      resolve(responseBody as T);
+    };
+
+    xhr.send(body);
+  });
+}
+
+function parseResponseBody(responseText: string): {
+  error?: { code?: string; message?: string; traceId?: string };
+  [key: string]: unknown;
+} {
+  if (!responseText) return {};
+  try {
+    return JSON.parse(responseText) as {
+      error?: { code?: string; message?: string; traceId?: string };
+      [key: string]: unknown;
+    };
+  } catch {
+    return {};
+  }
 }
 
 function canRefreshRequest(path: string): boolean {
@@ -95,12 +185,16 @@ function redirectToLogin(): void {
   window.location.assign('/login');
 }
 
-function buildHeaders(headers?: HeadersInit): HeadersInit {
+function buildHeaders(headers?: HeadersInit, multipart = false): HeadersInit {
   const token = getAccessToken();
+  const result = new Headers(headers);
+  if (multipart) result.delete('Content-Type');
+  else if (!result.has('Content-Type')) result.set('Content-Type', 'application/json');
+  const authorization = result.get('Authorization') ?? (token ? `Bearer ${token}` : null);
+  result.delete('Authorization');
   return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(headers ?? {}),
+    ...Object.fromEntries(result.entries()),
+    ...(authorization ? { Authorization: authorization } : {}),
   };
 }
 

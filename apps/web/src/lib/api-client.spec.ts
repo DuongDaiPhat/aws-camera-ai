@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, apiFetch, setAccessToken } from './api-client';
+import { ApiError, apiFetch, apiUpload, setAccessToken } from './api-client';
 
 afterEach(() => {
   setAccessToken(null);
@@ -94,5 +94,49 @@ describe('apiFetch', () => {
       }),
     ).rejects.toMatchObject({ code: 'INVALID_CREDENTIALS' });
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('apiUpload', () => {
+  it('gui multipart bang XMLHttpRequest va bao cao tien do upload', async () => {
+    const progressValues: number[] = [];
+
+    class MockXMLHttpRequest {
+      status = 200;
+      responseText = JSON.stringify({ cameraId: 'camera-1', sourceType: 'VIDEO_FILE' });
+      statusText = 'OK';
+      withCredentials = false;
+      upload = { onprogress: null as ((event: ProgressEvent) => void) | null };
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      headers: Record<string, string> = {};
+
+      open(_method: string, _url: string): void {}
+
+      setRequestHeader(name: string, value: string): void {
+        this.headers[name] = value;
+      }
+
+      send(_body: FormData): void {
+        this.upload.onprogress?.({
+          lengthComputable: true,
+          loaded: 50,
+          total: 100,
+        } as ProgressEvent);
+        this.onload?.();
+      }
+    }
+
+    vi.stubGlobal('XMLHttpRequest', MockXMLHttpRequest);
+    setAccessToken('access-token');
+
+    const result = await apiUpload<{ cameraId: string; sourceType: string }>(
+      '/cameras/camera-1/source/video',
+      new FormData(),
+      (progress) => progressValues.push(progress),
+    );
+
+    expect(result.sourceType).toBe('VIDEO_FILE');
+    expect(progressValues).toEqual([50]);
   });
 });

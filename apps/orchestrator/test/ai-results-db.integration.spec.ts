@@ -1,0 +1,952 @@
+import { createHash, randomUUID } from 'node:crypto';
+import { readdir, readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { Pool } from 'pg';
+import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
+import {
+  AiResultIdempotencyConflictError,
+  AiResultsRepository,
+} from '../src/ai-results/ai-results.repository';
+import type {
+  AiResultProjectionItem,
+  ValidatedAiResultSubmission,
+} from '../src/ai-results/ai-result.types';
+import { DatabaseService } from '../src/database/database.service';
+import { EventsRepository } from '../src/events/events.repository';
+import { EscalationEngineService } from '../src/escalation/escalation-engine.service';
+import { EscalationRepository } from '../src/escalation/escalation.repository';
+import { EscalationRulesRepository } from '../src/escalation-rules/escalation-rules.repository';
+import { ConfigService } from '@nestjs/config';
+import { AiResultsService } from '../src/ai-results/ai-results.service';
+import { AiResultValidator } from '../src/ai-results/ai-result.validator';
+import { AiResultOutboxService } from '../src/ai-results/ai-result-outbox.service';
+import { ZoneResultProducerService } from '../src/ingestion/zone-result-producer.service';
+import { MqttConsumerService } from '../src/ingestion/mqtt-consumer.service';
+import { EventMediaRepository } from '../src/media/event-media.repository';
+import { MediaService } from '../src/media/media.service';
+import { FrigateDetectionTrackerService } from '../src/frigate/frigate-detection-tracker.service';
+import { FaceRecognitionWorker } from '../src/face-recognition/face-recognition.worker';
+import type { MatchFaceJob } from '../src/face-recognition/face-recognition.worker';
+import type { Job } from 'bullmq';
+import type { FrigateMediaAdapter } from '../src/media/frigate-media.adapter';
+import type { SubmitAiResultDto } from '../src/ai-results/dto/submit-ai-result.dto';
+
+const POSTGRES_PORT = 5432;
+const CONTAINER_STARTUP_TIMEOUT_MS = 120_000;
+
+interface FixtureIds {
+  eventId: string;
+  cameraId: string;
+  zoneId: string;
+}
+
+interface AggregateRow {
+  event_type: string;
+  status: string;
+  priority: string;
+  confidence: string | null;
+  detection_confidence: string;
+  ai_label: string | null;
+  ai_results: AiResultProjectionItem[];
+  aggregate_version: string;
+}
+
+async function runMigrations(pool: Pool): Promise<void> {
+  const migrationsDirectory = resolve(__dirname, '../../../db/migrations');
+  const migrationFiles = (await readdir(migrationsDirectory))
+    .filter((fileName) => fileName.endsWith('.sql'))
+    .sort();
+  for (const migrationFile of migrationFiles) {
+    await pool.query(await readFile(resolve(migrationsDirectory, migrationFile), 'utf8'));
+  }
+}
+
+async function seedFixture(pool: Pool): Promise<FixtureIds> {
+  const ownerId = randomUUID();
+  const deviceId = randomUUID();
+  const cameraId = randomUUID();
+  const zoneId = randomUUID();
+  const eventId = randomUUID();
+  await pool.query(
+    `INSERT INTO users (id, email, password_hash, full_name, role)
+     VALUES ($1, $2, $3, $4, 'ADMIN');`,
+    [ownerId, 'us11@example.test', 'test-password-hash', 'US-11 Owner'],
+  );
+  await pool.query(
+    `INSERT INTO devices (id, owner_user_id, name, status)
+     VALUES ($1, $2, $3, 'ONLINE');`,
+    [deviceId, ownerId, 'US-11 Gateway'],
+  );
+  await pool.query(
+    `INSERT INTO cameras (id, device_id, name, slug, rtsp_url)
+     VALUES ($1, $2, $3, $4, $5);`,
+    [cameraId, deviceId, 'Phòng khách', 'cam_us11', 'rtsp://mediamtx:8554/cam_us11'],
+  );
+  await pool.query(
+    `INSERT INTO zones (
+       id, camera_id, name, slug, zone_type, polygon, min_dwell_seconds
+     ) VALUES ($1, $2, $3, $4, 'RESTRICTED', $5, 2);`,
+    [
+      zoneId,
+      cameraId,
+      'Bếp',
+      'restricted_kitchen',
+      JSON.stringify([
+        [0.1, 0.1],
+        [0.9, 0.1],
+        [0.9, 0.9],
+      ]),
+    ],
+  );
+  await pool.query(
+    `INSERT INTO camera_frigate_settings (camera_id, config_version, applied_version, sync_status)
+     VALUES ($1, 7, 7, 'SYNCED');`,
+    [cameraId],
+  );
+  await pool.query(
+    `INSERT INTO events (
+       id, camera_id, zone_id, event_type, status, priority, source,
+       track_id, dedup_key, confidence, detection_confidence, detected_at
+     ) VALUES ($1, $2, $3, 'PERSON_DETECTED', 'DETECTED', 'P3', 'FRIGATE',
+               $4, $5, NULL, 0.900, now());`,
+    [eventId, cameraId, zoneId, 'track-us11', 'frigate:cam_us11:track-us11'],
+  );
+  return { eventId, cameraId, zoneId };
+}
+
+function hash(payload: Record<string, unknown>): string {
+  return createHash('sha256').update(JSON.stringify(payload)).digest('hex');
+}
+
+function item(
+  submission: Pick<
+    ValidatedAiResultSubmission,
+    'resultId' | 'observationId' | 'revision' | 'module' | 'modelVersion' | 'processedAt'
+  >,
+  label: string,
+  confidence: number,
+  metadata: Record<string, unknown>,
+): AiResultProjectionItem {
+  return {
+    ...submission,
+    label,
+    confidence,
+    status: 'SUCCESS',
+    error: null,
+    boundingBox: null,
+    metadata,
+  };
+}
+
+function faceSubmission(eventId: string, revision = 1): ValidatedAiResultSubmission {
+  const identity = {
+    resultId: randomUUID(),
+    observationId: 'face-observation',
+    revision,
+    module: 'M1_FACE' as const,
+    modelVersion: 'face-v1',
+    processedAt: `2026-09-23T10:00:0${revision}.000Z`,
+  };
+  return {
+    schemaVersion: 1,
+    ...identity,
+    requestId: randomUUID(),
+    eventId,
+    personStatus: 'UNKNOWN',
+    matchedKnownFaceId: null,
+    results: [item(identity, 'UNKNOWN', 0.85, { similarity: 0.15 })],
+    error: null,
+  };
+}
+
+function zoneSubmission(ids: FixtureIds): ValidatedAiResultSubmission {
+  const identity = {
+    resultId: randomUUID(),
+    observationId: 'zone-observation',
+    revision: 1,
+    module: 'M4_ZONE' as const,
+    modelVersion: 'frigate-zone-v1',
+    processedAt: '2026-09-23T10:00:02.000Z',
+  };
+  return {
+    schemaVersion: 1,
+    ...identity,
+    requestId: null,
+    eventId: ids.eventId,
+    personStatus: null,
+    matchedKnownFaceId: null,
+    results: [
+      item(identity, 'RESTRICTED_ZONE', 0.7, {
+        zoneId: ids.zoneId,
+        cameraId: ids.cameraId,
+        trackId: 'track-us11',
+      }),
+    ],
+    error: null,
+  };
+}
+
+describe('US-11 - AI result đến PostgreSQL', () => {
+  let container: StartedTestContainer;
+  let pool: Pool;
+  let repository: AiResultsRepository;
+  let eventsRepository: EventsRepository;
+  let ids: FixtureIds;
+  let aiResultsService: AiResultsService;
+  let zoneProducer: ZoneResultProducerService;
+
+  jest.setTimeout(CONTAINER_STARTUP_TIMEOUT_MS);
+
+  beforeAll(async () => {
+    container = await new GenericContainer('postgres:16-alpine')
+      .withEnvironment({
+        POSTGRES_DB: 'camerai_test',
+        POSTGRES_USER: 'camerai_test',
+        POSTGRES_PASSWORD: 'camerai_test_password',
+      })
+      .withExposedPorts(POSTGRES_PORT)
+      .withWaitStrategy(Wait.forLogMessage(/database system is ready to accept connections/, 2))
+      .withStartupTimeout(CONTAINER_STARTUP_TIMEOUT_MS)
+      .start();
+    pool = new Pool({
+      host: container.getHost(),
+      port: container.getMappedPort(POSTGRES_PORT),
+      database: 'camerai_test',
+      user: 'camerai_test',
+      password: 'camerai_test_password',
+      max: 5,
+    });
+    await runMigrations(pool);
+    repository = new AiResultsRepository(new DatabaseService(pool));
+    eventsRepository = new EventsRepository(pool);
+    aiResultsService = new AiResultsService(
+      new AiResultValidator(
+        new ConfigService({
+          AI_RESULT_MAX_ITEMS: '20',
+          AI_RESULT_MAX_METADATA_BYTES: '16384',
+          AI_RESULT_MAX_METADATA_DEPTH: '5',
+          AI_RESULT_MAX_FUTURE_SECONDS: '300',
+        }),
+      ),
+      repository,
+      {
+        dispatchAvailable: jest.fn().mockResolvedValue(undefined),
+      } as unknown as AiResultOutboxService,
+    );
+    zoneProducer = new ZoneResultProducerService(aiResultsService);
+  });
+
+  beforeEach(async () => {
+    await pool.query(
+      'DELETE FROM events; DELETE FROM zones; DELETE FROM cameras; DELETE FROM devices; DELETE FROM users;',
+    );
+    ids = await seedFixture(pool);
+  });
+
+  afterAll(async () => {
+    await pool?.end();
+    await container?.stop();
+  });
+
+  it.each(['NO_FACE_DETECTED', 'MULTIPLE_FACES'])(
+    'worker → receipt → DB → engine: %s là UNDETERMINED, không AI_FAILED hay notification',
+    async (code) => {
+      const response = {
+        requestId: randomUUID(),
+        collectionVersion: 7,
+        personStatus: 'UNDETERMINED',
+        similarity: null,
+        labelConfidence: null,
+        thresholdUsed: 0.6,
+        confidencePolicyVersion: 'v1',
+        qualityReason: null,
+        modelVersion: 'face-v1',
+        processedAt: new Date().toISOString(),
+        error: { code, message: 'Không thấy mặt rõ ràng' },
+      };
+      const fetchSpy = jest.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: true,
+        json: async () => response,
+      } as Response);
+      try {
+        const worker = new FaceRecognitionWorker(
+          {
+            getCroppedSnapshot: jest.fn().mockResolvedValue(Buffer.from('jpg')),
+          } as unknown as FrigateMediaAdapter,
+          new ConfigService(),
+          aiResultsService,
+        );
+        await worker.process({
+          data: {
+            eventId: ids.eventId,
+            trackId: 'track-us11',
+            cameraSlug: 'cam_us11',
+            ownerScopeId: randomUUID(),
+            collectionVersion: 7,
+          },
+        } as Job<MatchFaceJob, void, string>);
+      } finally {
+        fetchSpy.mockRestore();
+      }
+      const handoff = await pool.query<{ id: string; payload: { candidates: [] } }>(
+        `SELECT id, payload FROM outbox_messages
+         WHERE event_id = $1 AND message_type = 'evaluate-escalation' LIMIT 1`,
+        [ids.eventId],
+      );
+      expect(handoff.rows[0].payload.candidates).toEqual([]);
+      const engine = new EscalationEngineService(
+        new EscalationRepository(pool),
+        new EscalationRulesRepository(pool),
+      );
+      await engine.evaluateAndTransition(
+        ids.eventId,
+        { eventType: 'PERSON_DETECTED', detectedAt: new Date(), aiResults: [] },
+        handoff.rows[0].id,
+      );
+      const result = await pool.query<{
+        status: string;
+        person_status: string;
+        ai_label: string;
+        confidence: string | null;
+        ai_results: AiResultProjectionItem[];
+        notifications: number;
+      }>(
+        `SELECT status, person_status, ai_label, confidence, ai_results,
+                (SELECT COUNT(*)::int FROM notifications WHERE event_id = e.id) AS notifications
+         FROM events e WHERE id = $1`,
+        [ids.eventId],
+      );
+      expect(result.rows[0]).toMatchObject({
+        status: 'LOGGED_ONLY',
+        person_status: 'UNDETERMINED',
+        ai_label: 'UNDETERMINED',
+        confidence: null,
+        notifications: 0,
+      });
+      expect(result.rows[0].ai_results[0]).toMatchObject({
+        status: 'SUCCESS',
+        label: 'UNDETERMINED',
+        confidence: null,
+        error: null,
+        metadata: { qualityReason: code, thresholdUsed: 0.6 },
+      });
+    },
+  );
+
+  it.each(['M1_FIRST', 'M4_FIRST'])(
+    'UNDETERMINED không che nhãn hoặc score M4 hợp lệ (%s)',
+    async (order) => {
+      const zone = zoneSubmission(ids);
+      const face: SubmitAiResultDto = {
+        schemaVersion: 1,
+        resultId: randomUUID(),
+        requestId: randomUUID(),
+        eventId: ids.eventId,
+        observationId: 'face-observation',
+        revision: 1,
+        module: 'M1_FACE',
+        modelVersion: 'face-v1',
+        processedAt: new Date().toISOString(),
+        personStatus: 'UNDETERMINED',
+        matchedKnownFaceId: null,
+        collectionVersion: 7,
+        results: [
+          {
+            module: 'M1_FACE',
+            label: 'UNDETERMINED',
+            confidence: null,
+            boundingBox: null,
+            metadata: {
+              similarity: null,
+              thresholdUsed: 0.6,
+              confidencePolicyVersion: 'v1',
+              qualityReason: 'NO_FACE_DETECTED',
+            },
+          },
+        ],
+        error: null,
+      };
+      if (order === 'M1_FIRST') await aiResultsService.submit(ids.eventId, face);
+      await repository.applyResult(zone, hash({ resultId: zone.resultId }), {
+        resultId: zone.resultId,
+      });
+      if (order === 'M4_FIRST') await aiResultsService.submit(ids.eventId, face);
+
+      const result = await pool.query<AggregateRow & { person_status: string }>(
+        'SELECT event_type, status, priority, confidence, person_status, ai_label, ai_results FROM events WHERE id = $1',
+        [ids.eventId],
+      );
+      expect(result.rows[0]).toMatchObject({
+        event_type: 'RESTRICTED_ZONE',
+        status: 'DETECTED',
+        priority: 'P1',
+        person_status: 'UNDETERMINED',
+        ai_label: 'RESTRICTED_ZONE',
+      });
+      expect(Number(result.rows[0].confidence)).toBe(0.7);
+      expect(result.rows[0].ai_results.map((entry) => entry.label)).toEqual([
+        'UNDETERMINED',
+        'RESTRICTED_ZONE',
+      ]);
+    },
+  );
+
+  it.each(['M1_FIRST', 'M4_FIRST'])(
+    'MQTT → receipt M4 → DB/outbox giữ cả M1 và M4, replay không trùng (%s)',
+    async (order) => {
+      const consumer = new MqttConsumerService(
+        new ConfigService(),
+        eventsRepository,
+        {} as EventMediaRepository,
+        {} as MediaService,
+        { track: jest.fn() } as unknown as FrigateDetectionTrackerService,
+        zoneProducer,
+      );
+      const face = faceSubmission(ids.eventId);
+      const event = await eventsRepository.findEventByDedupKey('frigate:cam_us11:track-us11');
+      if (!event) throw new Error('Thiếu event fixture');
+      const message = Buffer.from(
+        JSON.stringify({
+          type: 'update',
+          after: {
+            id: 'track-us11',
+            camera: 'cam_us11',
+            label: 'person',
+            score: 0.7,
+            frame_time: event.detected_at.getTime() / 1_000 + 2.1,
+            current_zones: ['restricted_kitchen'],
+          },
+        }),
+      );
+      if (order === 'M1_FIRST') {
+        await repository.applyResult(face, hash({ resultId: face.resultId }), {
+          resultId: face.resultId,
+        });
+      }
+      await consumer.handleMessage('frigate/events', message);
+      if (order === 'M4_FIRST') {
+        await repository.applyResult(face, hash({ resultId: face.resultId }), {
+          resultId: face.resultId,
+        });
+      }
+      await consumer.handleMessage('frigate/events', message);
+      const rows = await pool.query<AggregateRow>(
+        'SELECT event_type, priority, ai_label, confidence, ai_results, aggregate_version FROM events WHERE id = $1',
+        [ids.eventId],
+      );
+      expect(rows.rows[0]).toMatchObject({
+        event_type: 'RESTRICTED_ZONE',
+        priority: 'P1',
+        ai_label: 'RESTRICTED_ZONE',
+      });
+      expect(Number(rows.rows[0].confidence)).toBe(0.7);
+      expect(Number(rows.rows[0].aggregate_version)).toBe(2);
+      expect(rows.rows[0].ai_results.map((entry) => entry.module)).toEqual(['M1_FACE', 'M4_ZONE']);
+      const receipts = await pool.query<{ count: number }>(
+        'SELECT COUNT(*)::int AS count FROM event_ai_result_receipts WHERE event_id = $1',
+        [ids.eventId],
+      );
+      expect(receipts.rows[0].count).toBe(2);
+      const handoff = await pool.query<{ payload: { candidates: Array<{ module: string }> } }>(
+        `SELECT payload FROM outbox_messages
+         WHERE event_id = $1 AND aggregate_version = 2 AND message_type = 'evaluate-escalation' LIMIT 1`,
+        [ids.eventId],
+      );
+      expect(handoff.rows[0].payload.candidates.map((entry) => entry.module)).toEqual([
+        'M1_FACE',
+        'M4_ZONE',
+      ]);
+    },
+  );
+
+  it.each(['CONFIG_CHANGED', 'DWELL_CHANGED', 'SCHEDULE_INACTIVE', 'DISABLED', 'WRONG_CAMERA'])(
+    'bỏ qua receipt loitering khi bằng chứng vùng đã thay đổi: %s',
+    async (scenario) => {
+      const event = await eventsRepository.findEventByDedupKey('frigate:cam_us11:track-us11');
+      const camera = await eventsRepository.findCameraBySlug('cam_us11');
+      const zones = await eventsRepository.findEligibleZones(ids.cameraId, ['restricted_kitchen']);
+      if (!event || !camera) throw new Error('Thiếu fixture');
+      event.detected_at = new Date('2026-09-23T09:59:57Z');
+      if (scenario === 'CONFIG_CHANGED') {
+        await pool.query(
+          "UPDATE camera_frigate_settings SET config_version = 8, sync_status = 'PENDING' WHERE camera_id = $1",
+          [ids.cameraId],
+        );
+      } else if (scenario === 'DWELL_CHANGED') {
+        await pool.query('UPDATE zones SET min_dwell_seconds = 3 WHERE id = $1', [ids.zoneId]);
+      } else if (scenario === 'SCHEDULE_INACTIVE') {
+        await pool.query(
+          "UPDATE zones SET active_from = '01:00', active_to = '01:01' WHERE id = $1",
+          [ids.zoneId],
+        );
+      } else if (scenario === 'DISABLED') {
+        await pool.query('UPDATE zones SET is_enabled = false WHERE id = $1', [ids.zoneId]);
+      } else {
+        camera.id = randomUUID();
+      }
+      await zoneProducer.submit(
+        event,
+        {
+          id: 'track-us11',
+          camera: 'cam_us11',
+          label: 'person',
+          score: 0.9,
+          frame_time: new Date('2026-09-23T10:00:00Z').getTime() / 1_000,
+        },
+        { camera, zones },
+      );
+      const receipt = await pool.query<{ status: string; ignored_reason: string }>(
+        'SELECT status, ignored_reason FROM event_ai_result_receipts WHERE event_id = $1 LIMIT 1',
+        [ids.eventId],
+      );
+      expect(receipt.rows[0]?.status).toBe('IGNORED');
+      expect(
+        (await eventsRepository.findEventByDedupKey('frigate:cam_us11:track-us11'))?.ai_results,
+      ).toEqual([]);
+    },
+  );
+
+  it('serialize M1 và M4 đồng thời, giữ đủ nhãn và score đúng nguồn', async () => {
+    const face = faceSubmission(ids.eventId);
+    const zone = zoneSubmission(ids);
+
+    await Promise.all([
+      repository.applyResult(face, hash({ resultId: face.resultId }), {
+        resultId: face.resultId,
+      }),
+      repository.applyResult(zone, hash({ resultId: zone.resultId }), {
+        resultId: zone.resultId,
+      }),
+    ]);
+
+    const result = await pool.query<AggregateRow>(
+      `SELECT event_type,
+              status,
+              priority,
+              confidence,
+              detection_confidence,
+              ai_label,
+              ai_results,
+              aggregate_version
+       FROM events
+       WHERE id = $1;`,
+      [ids.eventId],
+    );
+    const event = result.rows[0];
+    expect(event).toMatchObject({
+      event_type: 'RESTRICTED_ZONE',
+      status: 'DETECTED',
+      priority: 'P1',
+      ai_label: 'RESTRICTED_ZONE',
+    });
+    expect(Number(event?.confidence)).toBe(0.7);
+    expect(Number(event?.detection_confidence)).toBe(0.9);
+    expect(event?.ai_results.map((entry) => entry.label)).toEqual(['UNKNOWN', 'RESTRICTED_ZONE']);
+    expect(Number(event?.aggregate_version)).toBe(2);
+
+    const receiptCount = await pool.query<{ count: number }>(
+      `SELECT COUNT(*)::int AS count
+       FROM event_ai_result_receipts
+       WHERE event_id = $1 AND status = 'PROCESSED';`,
+      [ids.eventId],
+    );
+    const outboxCount = await pool.query<{ count: number }>(
+      `SELECT COUNT(*)::int AS count
+       FROM outbox_messages
+       WHERE event_id = $1;`,
+      [ids.eventId],
+    );
+    expect(receiptCount.rows[0]?.count).toBe(2);
+    expect(outboxCount.rows[0]?.count).toBe(4);
+    const handoff = await pool.query<{ payload: { candidates: Array<{ eventType: string }> } }>(
+      `SELECT payload
+       FROM outbox_messages
+       WHERE event_id = $1 AND aggregate_version = 2 AND message_type = 'evaluate-escalation'
+       LIMIT 1;`,
+      [ids.eventId],
+    );
+    expect(handoff.rows[0]?.payload.candidates.map((candidate) => candidate.eventType)).toEqual([
+      'UNKNOWN_PERSON',
+      'RESTRICTED_ZONE',
+    ]);
+  });
+
+  it('giữ event.updated đến sau khi đánh giá escalation được ACK', async () => {
+    const face = faceSubmission(ids.eventId);
+    await repository.applyResult(face, hash({ id: face.resultId }), { id: face.resultId });
+
+    const evaluation = await repository.claimOutboxMessage(30);
+    expect(evaluation?.message_type).toBe('evaluate-escalation');
+    if (!evaluation) throw new Error('Không claim được evaluate-escalation.');
+    expect(await repository.claimOutboxMessage(30)).toBeNull();
+
+    await repository.markOutboxProcessed(evaluation.id);
+    const update = await repository.claimOutboxMessage(30);
+    expect(update?.message_type).toBe('event.updated');
+  });
+
+  it('nhận replay cùng payload một lần và báo conflict khi cùng resultId đổi nội dung', async () => {
+    const face = faceSubmission(ids.eventId);
+    const payload = { resultId: face.resultId, revision: face.revision };
+    const payloadHash = hash(payload);
+
+    const accepted = await repository.applyResult(face, payloadHash, payload);
+    const duplicate = await repository.applyResult(face, payloadHash, payload);
+    expect(accepted.disposition).toBe('ACCEPTED');
+    expect(duplicate).toMatchObject({ disposition: 'DUPLICATE', aggregateVersion: 1 });
+    await expect(
+      repository.applyResult(face, hash({ ...payload, changed: true }), {
+        ...payload,
+        changed: true,
+      }),
+    ).rejects.toBeInstanceOf(AiResultIdempotencyConflictError);
+  });
+
+  it('lưu revision cũ là STALE và không thay projection hiện tại', async () => {
+    const newest = faceSubmission(ids.eventId, 2);
+    await repository.applyResult(newest, hash({ id: newest.resultId }), { id: newest.resultId });
+    const stale = faceSubmission(ids.eventId, 1);
+    const response = await repository.applyResult(stale, hash({ id: stale.resultId }), {
+      id: stale.resultId,
+    });
+
+    expect(response).toMatchObject({ disposition: 'STALE', aggregateVersion: 1 });
+    const receipt = await pool.query<{ status: string; ignored_reason: string }>(
+      `SELECT status, ignored_reason
+       FROM event_ai_result_receipts
+       WHERE result_id = $1;`,
+      [stale.resultId],
+    );
+    expect(receipt.rows[0]).toEqual({ status: 'IGNORED', ignored_reason: 'STALE_REVISION' });
+  });
+
+  it('bỏ qua AI result đến sau khi event đã CLOSED', async () => {
+    await pool.query("UPDATE events SET status = 'CLOSED' WHERE id = $1;", [ids.eventId]);
+    const face = faceSubmission(ids.eventId);
+
+    const response = await repository.applyResult(face, hash({ id: face.resultId }), {
+      id: face.resultId,
+    });
+
+    expect(response.disposition).toBe('STALE');
+    const result = await pool.query<{
+      status: string;
+      aggregate_version: string;
+      ignored_reason: string;
+    }>(
+      `SELECT e.status, e.aggregate_version, r.ignored_reason
+       FROM events e
+       JOIN event_ai_result_receipts r ON r.event_id = e.id
+       WHERE e.id = $1 AND r.result_id = $2;`,
+      [ids.eventId, face.resultId],
+    );
+    expect(result.rows[0]).toMatchObject({
+      status: 'CLOSED',
+      aggregate_version: '0',
+      ignored_reason: 'EVENT_TERMINAL',
+    });
+  });
+
+  it('commit transition cùng ACK outbox và không tạo notification trùng khi replay', async () => {
+    const face = faceSubmission(ids.eventId);
+    await repository.applyResult(face, hash({ id: face.resultId }), { id: face.resultId });
+    const message = await pool.query<{ id: string }>(
+      `SELECT id FROM outbox_messages
+       WHERE event_id = $1 AND message_type = 'evaluate-escalation'
+       LIMIT 1;`,
+      [ids.eventId],
+    );
+    const messageId = message.rows[0].id;
+    const engine = new EscalationEngineService(
+      new EscalationRepository(pool),
+      new EscalationRulesRepository(pool),
+    );
+    const input = {
+      eventType: 'UNKNOWN_PERSON' as const,
+      detectedAt: new Date(),
+      aiResults: [
+        {
+          eventType: 'UNKNOWN_PERSON' as const,
+          module: 'M1_FACE',
+          label: 'UNKNOWN',
+          confidence: 0.85,
+        },
+      ],
+    };
+
+    await engine.evaluateAndTransition(ids.eventId, input, messageId);
+    await engine.evaluateAndTransition(ids.eventId, input, messageId);
+
+    const result = await pool.query<{
+      status: string;
+      message_status: string;
+      notifications: string;
+      transitions: string;
+    }>(
+      `SELECT e.status,
+              o.status AS message_status,
+              (SELECT COUNT(*)::text FROM notifications WHERE event_id = e.id) AS notifications,
+              (SELECT COUNT(*)::text FROM event_status_history WHERE event_id = e.id) AS transitions
+       FROM events e
+       JOIN outbox_messages o ON o.event_id = e.id
+       WHERE e.id = $1 AND o.id = $2;`,
+      [ids.eventId, messageId],
+    );
+    expect(result.rows[0]).toEqual({
+      status: 'NOTIFIED',
+      message_status: 'PROCESSED',
+      notifications: '1',
+      transitions: '1',
+    });
+  });
+
+  it('P1 dưới ngưỡng không che P2 đủ ngưỡng trong handoff thực', async () => {
+    const face = faceSubmission(ids.eventId);
+    face.results[0].confidence = 0.7;
+    const zone = zoneSubmission(ids);
+    zone.results[0].confidence = 0.4;
+    await repository.applyResult(face, hash({ id: face.resultId }), { id: face.resultId });
+    await repository.applyResult(zone, hash({ id: zone.resultId }), { id: zone.resultId });
+    const handoff = await pool.query<{
+      id: string;
+      payload: {
+        candidates: Array<{
+          eventType: 'UNKNOWN_PERSON' | 'RESTRICTED_ZONE';
+          module: string;
+          label: string;
+          confidence: number;
+        }>;
+      };
+    }>(
+      `SELECT id, payload
+       FROM outbox_messages
+       WHERE event_id = $1 AND aggregate_version = 2 AND message_type = 'evaluate-escalation'
+       LIMIT 1;`,
+      [ids.eventId],
+    );
+    const message = handoff.rows[0];
+    const engine = new EscalationEngineService(
+      new EscalationRepository(pool),
+      new EscalationRulesRepository(pool),
+    );
+    await engine.evaluateAndTransition(
+      ids.eventId,
+      {
+        eventType: 'RESTRICTED_ZONE',
+        detectedAt: new Date(),
+        aiResults: message.payload.candidates,
+      },
+      message.id,
+    );
+
+    const result = await pool.query<{
+      status: string;
+      priority: string;
+      payload: { eventType: string; priority: string };
+      triggering_results: Array<{ eventType: string }>;
+    }>(
+      `SELECT e.status, e.priority, e.triggering_results, n.payload
+       FROM events e
+       JOIN notifications n ON n.event_id = e.id
+       WHERE e.id = $1
+       LIMIT 1;`,
+      [ids.eventId],
+    );
+    expect(result.rows[0]).toMatchObject({
+      status: 'NOTIFIED',
+      priority: 'P1',
+      payload: { eventType: 'UNKNOWN_PERSON', priority: 'P2' },
+    });
+    expect(result.rows[0].triggering_results.map((candidate) => candidate.eventType)).toEqual([
+      'UNKNOWN_PERSON',
+    ]);
+  });
+
+  it('không cho MQTT update ghi đè projection AI', async () => {
+    const zone = zoneSubmission(ids);
+    await repository.applyResult(zone, hash({ id: zone.resultId }), { id: zone.resultId });
+
+    await eventsRepository.updateEvent({
+      eventId: ids.eventId,
+      cameraId: ids.cameraId,
+      zoneId: ids.zoneId,
+      eventType: 'PERSON_DETECTED',
+      priority: 'P3',
+      detectionConfidence: 0.99,
+    });
+
+    const result = await pool.query<AggregateRow>(
+      `SELECT event_type,
+              status,
+              priority,
+              confidence,
+              detection_confidence,
+              ai_label,
+              ai_results,
+              aggregate_version
+       FROM events
+       WHERE id = $1;`,
+      [ids.eventId],
+    );
+    expect(result.rows[0]).toMatchObject({
+      event_type: 'RESTRICTED_ZONE',
+      priority: 'P1',
+      ai_label: 'RESTRICTED_ZONE',
+    });
+    expect(Number(result.rows[0]?.confidence)).toBe(0.7);
+    expect(Number(result.rows[0]?.detection_confidence)).toBe(0.99);
+  });
+
+  it('giữ M4 và tên vùng từ US-12 khi M1 đến rồi MQTT báo rời vùng', async () => {
+    await pool.query(
+      `UPDATE events
+       SET event_type = 'RESTRICTED_ZONE', priority = 'P1', zone_name = 'Bếp'
+       WHERE id = $1;`,
+      [ids.eventId],
+    );
+    const face = faceSubmission(ids.eventId);
+    await repository.applyResult(face, hash({ id: face.resultId }), { id: face.resultId });
+
+    await eventsRepository.updateEvent({
+      eventId: ids.eventId,
+      cameraId: ids.cameraId,
+      zoneId: null,
+      eventType: 'PERSON_DETECTED',
+      priority: 'P3',
+      detectionConfidence: 0.95,
+    });
+
+    const result = await pool.query<{
+      event_type: string;
+      priority: string;
+      zone_name: string;
+      person_status: string;
+      ai_label: string | null;
+      confidence: string | null;
+      ai_results: AiResultProjectionItem[];
+    }>(
+      `SELECT event_type, priority, zone_name, person_status, ai_label, confidence, ai_results
+       FROM events WHERE id = $1;`,
+      [ids.eventId],
+    );
+    expect(result.rows[0]).toMatchObject({
+      event_type: 'RESTRICTED_ZONE',
+      priority: 'P1',
+      zone_name: 'Bếp',
+      person_status: 'UNKNOWN',
+      ai_label: null,
+      confidence: null,
+    });
+    expect(result.rows[0]?.ai_results.map((item) => item.label)).toEqual(['UNKNOWN']);
+  });
+
+  it('nâng M1 P2 lên M4 P1 khi US-12 xác nhận vùng sau AI result', async () => {
+    const face = faceSubmission(ids.eventId);
+    await repository.applyResult(face, hash({ id: face.resultId }), { id: face.resultId });
+
+    await eventsRepository.updateEvent({
+      eventId: ids.eventId,
+      cameraId: ids.cameraId,
+      zoneId: ids.zoneId,
+      zoneName: 'Bếp',
+      eventType: 'RESTRICTED_ZONE',
+      priority: 'P1',
+      detectionConfidence: 0.95,
+    });
+
+    const result = await pool.query<{
+      event_type: string;
+      priority: string;
+      zone_name: string;
+      person_status: string;
+      ai_label: string | null;
+      confidence: string | null;
+      ai_model_version: string | null;
+      ai_processed_at: Date | null;
+      ai_results: AiResultProjectionItem[];
+    }>(
+      `SELECT event_type, priority, zone_name, person_status, ai_label, confidence,
+              ai_model_version, ai_processed_at, ai_results
+       FROM events WHERE id = $1;`,
+      [ids.eventId],
+    );
+    expect(result.rows[0]).toMatchObject({
+      event_type: 'RESTRICTED_ZONE',
+      priority: 'P1',
+      zone_name: 'Bếp',
+      person_status: 'UNKNOWN',
+      ai_label: null,
+      confidence: null,
+      ai_model_version: null,
+      ai_processed_at: null,
+    });
+    expect(result.rows[0]?.ai_results.map((item) => item.label)).toEqual(['UNKNOWN']);
+  });
+
+  it('không chuyển M4 của US-12 sang AI_FAILED khi M1 lỗi', async () => {
+    await pool.query(
+      `UPDATE events
+       SET event_type = 'RESTRICTED_ZONE', priority = 'P1', zone_name = 'Bếp'
+       WHERE id = $1;`,
+      [ids.eventId],
+    );
+    const face = faceSubmission(ids.eventId);
+    face.personStatus = null;
+    face.results = [];
+    face.error = { code: 'MODEL_TIMEOUT', message: 'Face inference timed out' };
+    await repository.applyResult(face, hash({ id: face.resultId }), { id: face.resultId });
+
+    const result = await pool.query<{
+      event_type: string;
+      status: string;
+      priority: string;
+      zone_name: string;
+    }>(`SELECT event_type, status, priority, zone_name FROM events WHERE id = $1;`, [ids.eventId]);
+    expect(result.rows[0]).toMatchObject({
+      event_type: 'RESTRICTED_ZONE',
+      status: 'DETECTED',
+      priority: 'P1',
+      zone_name: 'Bếp',
+    });
+  });
+
+  it('không hạ nguy cơ P0 đã có AI result khi MQTT báo vùng cấm', async () => {
+    await pool.query(
+      `UPDATE events
+       SET event_type = 'FIRE_SMOKE_DETECTED', priority = 'P0',
+           ai_label = 'FIRE_SMOKE_DETECTED', confidence = 0.96,
+           ai_model_version = 'fire-v1', ai_processed_at = now()
+       WHERE id = $1;`,
+      [ids.eventId],
+    );
+
+    await eventsRepository.updateEvent({
+      eventId: ids.eventId,
+      cameraId: ids.cameraId,
+      zoneId: ids.zoneId,
+      zoneName: 'Bếp',
+      eventType: 'RESTRICTED_ZONE',
+      priority: 'P1',
+      detectionConfidence: 0.95,
+    });
+
+    const result = await pool.query<{
+      event_type: string;
+      priority: string;
+      ai_label: string;
+      confidence: string;
+      zone_name: string;
+    }>(
+      `SELECT event_type, priority, ai_label, confidence, zone_name
+       FROM events WHERE id = $1;`,
+      [ids.eventId],
+    );
+    expect(result.rows[0]).toMatchObject({
+      event_type: 'FIRE_SMOKE_DETECTED',
+      priority: 'P0',
+      ai_label: 'FIRE_SMOKE_DETECTED',
+      zone_name: 'Bếp',
+    });
+    expect(Number(result.rows[0]?.confidence)).toBe(0.96);
+  });
+});

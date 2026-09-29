@@ -6,6 +6,8 @@ import {
   fetchEventStats,
   subscribeEventsStream,
   toUIEventItem,
+  confirmEvent,
+  closeEvent,
 } from './events-client';
 import type { EventStats, EventSummary } from '@/types';
 
@@ -240,5 +242,65 @@ describe('subscribeEventsStream', () => {
       expect.objectContaining({ thumbnailUrl: 'https://minio.local/snapshot.jpg' }),
     );
     expect(onCreated).not.toHaveBeenCalled();
+  });
+});
+
+describe('confirmEvent and closeEvent (US-13)', () => {
+  it('confirmEvent gửi POST /events/:id/confirm với response và note', async () => {
+    const mockConfirmation = {
+      id: 'conf-1',
+      eventId: 'evt-1',
+      phase: 'INITIAL',
+      response: 'IM_OK',
+      channel: 'DASHBOARD',
+      confirmedByName: 'Admin',
+      note: 'Ổn định',
+      respondedAt: new Date().toISOString(),
+      resultingStatus: 'RESOLVED',
+    };
+
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(jsonResponse(mockConfirmation));
+
+    const result = await confirmEvent('evt-1', 'IM_OK', 'Ổn định');
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/events/evt-1/confirm'),
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ response: 'IM_OK', note: 'Ổn định' }),
+      }),
+    );
+    expect(result).toEqual(mockConfirmation);
+  });
+
+  it('closeEvent gửi POST /events/:id/close với note', async () => {
+    const mockConfirmation = {
+      id: 'conf-2',
+      eventId: 'evt-1',
+      phase: 'EMERGENCY',
+      response: 'ACKNOWLEDGED',
+      channel: 'DASHBOARD',
+      confirmedByName: 'Admin',
+      note: 'Đã đưa đi cấp cứu',
+      respondedAt: new Date().toISOString(),
+      resultingStatus: 'CLOSED',
+    };
+
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(jsonResponse(mockConfirmation));
+
+    const result = await closeEvent('evt-1', 'Đã đưa đi cấp cứu');
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/events/evt-1/close'),
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ note: 'Đã đưa đi cấp cứu' }),
+      }),
+    );
+    expect(result).toEqual(mockConfirmation);
   });
 });

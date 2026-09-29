@@ -3,7 +3,7 @@
 
 # ---------- base ----------
 FROM node:22-alpine AS base
-RUN corepack enable && apk add --no-cache wget
+RUN corepack enable && apk add --no-cache wget ffmpeg
 WORKDIR /workspace
 
 # ---------- deps ----------

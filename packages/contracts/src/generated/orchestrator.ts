@@ -264,6 +264,199 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cameras/{cameraId}/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** Bat hoac tat camera (desired state) */
+        put: operations["updateCameraState"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/runtime-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        /** Lay trang thai runtime thuc te cua camera */
+        get: operations["getCameraRuntimeStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/source": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        /** Chi tiet nguon phat cua camera */
+        get: operations["getCameraSource"];
+        /** Cap nhat cau hinh nguon phat camera */
+        put: operations["updateCameraSource"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/source/video": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload file video nguon phat cho camera */
+        post: operations["uploadCameraVideo"];
+        /** Xoa file video nguon phat cua camera */
+        delete: operations["deleteCameraVideo"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/source/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Kiem tra ket noi toi nguon RTSP ma khong luu cau hinh */
+        post: operations["testCameraRtspConnection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/source/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Bat dau phat nguon camera (video publisher / webcam) */
+        post: operations["startCameraSource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/source/stop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dung phat nguon camera */
+        post: operations["stopCameraSource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/source/browser-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cap phien publish WebRTC/WHIP cho webcam trinh duyet */
+        post: operations["createBrowserPublishSession"];
+        /** Thu hoi phien publish WebRTC/WHIP cho webcam trinh duyet */
+        delete: operations["revokeBrowserPublishSession"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/frigate-sync/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Thu lai dong bo cau hinh xuong Frigate */
+        post: operations["retryFrigateSync"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cameras/{cameraId}/debug-stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        /** Lay thong tin luong debug va du lieu detection thuc te */
+        get: operations["getCameraDebugStream"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cameras/{cameraId}/zones": {
         parameters: {
             query?: never;
@@ -279,7 +472,9 @@ export interface paths {
         /**
          * Tao vung giam sat moi
          * @description Toa do da giac phai CHUAN HOA ve khoang 0..1 de doc lap do phan giai.
-         *     Orchestrator tu sinh lai cau hinh Frigate sau khi luu.
+         *     Orchestrator tu sinh lai cau hinh Frigate sau khi luu. Response thanh cong
+         *     chi xac nhan zone da duoc luu vao PostgreSQL; trang thai `frigateSync` cua
+         *     camera cho biet cau hinh da co hieu luc tren Frigate hay chua.
          */
         post: operations["createZone"];
         delete?: never;
@@ -315,7 +510,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Danh sach nguoi quen */
+        /**
+         * Danh sach nguoi quen
+         * @description Danh sach thuoc user trong access token; khong suy dien quyen ho gia dinh.
+         */
         get: operations["listKnownFaces"];
         put?: never;
         /**
@@ -323,7 +521,9 @@ export interface paths {
          * @description FR-DEV-06: anh khong phat hien duoc khuon mat -> `422` voi
          *     `code = NO_FACE_DETECTED`.
          *     Anh co nhieu hon 1 khuon mat -> `422` voi `code = MULTIPLE_FACES`
-         *     kem `details.faces[]` de nguoi dung chon.
+         *     kem `details.images[]` de nguoi dung chon cho tung anh.
+         *     Chi ADMIN duoc tao. Owner lay tu access token, khong nhan tu client.
+         *     faceSelections la JSON array trong mot multipart text field.
          *     FR-DEV-08: he thong chi luu embedding, KHONG luu anh goc.
          */
         post: operations["createKnownFace"];
@@ -463,6 +663,29 @@ export interface paths {
          *     de kiem toan (US-14).
          */
         post: operations["confirmEvent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events/{eventId}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dong su kien khan cap sau khi tiep nhan xu ly
+         * @description FR-ESC-04/09. Dong su kien dang o trang thai ESCALATED thanh CLOSED.
+         *     Ghi nhan nguoi dong, thoi diem va ly do dong su kien.
+         */
+        post: operations["closeEvent"];
         delete?: never;
         options?: never;
         head?: never;
@@ -767,14 +990,12 @@ export interface components {
         /** @enum {string} */
         ConfirmationResponse: "IM_OK" | "NEED_HELP" | "ACKNOWLEDGED";
         /** @enum {string} */
+        ConfirmationPhase: "INITIAL" | "EMERGENCY";
+        /** @enum {string} */
         DeviceStatus: "ONLINE" | "OFFLINE" | "DEGRADED" | "DISABLED";
         ErrorResponse: {
             error: {
-                /**
-                 * @description Ma loi on dinh de FE xu ly, vi du TOKEN_EXPIRED.
-                 * @example NO_FACE_DETECTED
-                 */
-                code: string;
+                code: components["schemas"]["CameraErrorCode"];
                 /** @description Thong diep tieng Viet hien thi duoc cho nguoi dung. */
                 message: string;
                 details?: {
@@ -784,6 +1005,11 @@ export interface components {
                 traceId: string;
             };
         };
+        /**
+         * @description Stable errors returned by camera source, runtime and Frigate operations.
+         * @enum {string}
+         */
+        CameraErrorCode: "ACCOUNT_LOCKED" | "CAMERA_NOT_FOUND" | "CAMERA_SOURCE_NOT_FOUND" | "SOURCE_NOT_CONFIGURED" | "SOURCE_UNAVAILABLE" | "WEBCAM_PERMISSION_DENIED" | "WEBCAM_PUBLISH_FAILED" | "VIDEO_INVALID_FORMAT" | "VIDEO_TOO_LARGE" | "VIDEO_NOT_FOUND" | "FFMPEG_START_FAILED" | "FRIGATE_SYNC_FAILED" | "FRIGATE_UNAVAILABLE" | "MEDIAMTX_UNAVAILABLE" | "CAMERA_ALREADY_TRANSITIONING" | "CONFIG_VERSION_CONFLICT" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "INVALID_REFRESH_TOKEN" | "INVALID_SLUG" | "INVALID_TOKEN" | "EVENT_NOT_FOUND" | "UNAUTHORIZED";
         PaginatedResponse: {
             data: unknown[];
             meta: {
@@ -886,18 +1112,59 @@ export interface components {
             detectionEnabled?: boolean;
             retentionDays?: number;
             sourceType?: components["schemas"]["CameraSourceType"];
-            runtimeStatus?: components["schemas"]["CameraRuntimeStatus"];
+            runtimeStatus: components["schemas"]["CameraRuntimeStatus"];
+            source: components["schemas"]["CameraSourceInfo"];
+            frigateSync: components["schemas"]["CameraFrigateSyncInfo"];
+            frigateSettings: components["schemas"]["CameraFrigateSettings"];
+            debugCapabilities: components["schemas"]["CameraDebugCapabilities"];
             configVersion?: number;
             /** @enum {string} */
-            syncStatus?: "PENDING" | "APPLIED" | "FAILED";
+            syncStatus?: "PENDING" | "SYNCED" | "FAILED";
             zoneCount?: number;
             /** Format: date-time */
             createdAt: string;
         };
+        CameraSourceInfo: {
+            type: components["schemas"]["CameraSourceType"];
+            displayName?: string | null;
+            isPublishing: boolean;
+            lastError?: string | null;
+            requiresBrowserPublisher: boolean;
+        };
+        CameraFrigateSyncInfo: {
+            /** @enum {string} */
+            status: "PENDING" | "SYNCED" | "FAILED";
+            configVersion: number;
+            appliedVersion?: number | null;
+            errorCode?: string | null;
+            errorMessage?: string | null;
+        };
+        CameraFrigateSettings: {
+            detectWidth: number;
+            detectHeight: number;
+            detectFps: number;
+            minInitializedFrames: number;
+            maxDisappearedFrames: number;
+            /** Format: float */
+            personMinScore: number;
+            /** Format: float */
+            personThreshold: number;
+            personMinArea: number;
+            snapshotsEnabled: boolean;
+            snapshotBoundingBox: boolean;
+            recordingEnabled: boolean;
+            detectionRetentionDays: number;
+        };
+        CameraDebugCapabilities: {
+            personBoundary: boolean;
+            zoneBoundary: boolean;
+        };
         /** @enum {string} */
         CameraSourceType: "RTSP" | "BROWSER_WEBCAM" | "VIDEO_FILE";
         /** @enum {string} */
-        CameraRuntimeStatus: "NOT_CONFIGURED" | "STARTING" | "ONLINE" | "OFFLINE" | "FAILED" | "STOPPED";
+        CameraRuntimeStatus: "ONLINE" | "OFFLINE" | "STARTING" | "FAILED" | "DISABLED";
+        /** @enum {string} */
+        CameraSourceRuntimeStatus: "NOT_CONFIGURED" | "STARTING" | "ONLINE" | "OFFLINE" | "FAILED" | "STOPPED";
         CameraPreview: components["schemas"]["MediaUrl"] & {
             /** Format: uuid */
             cameraId: string;
@@ -946,9 +1213,128 @@ export interface components {
             name?: string;
             rtspUrl?: string;
             fps?: number;
+            detectWidth?: number;
+            detectHeight?: number;
             isEnabled?: boolean;
             detectionEnabled?: boolean;
             retentionDays?: number;
+            minInitializedFrames?: number;
+            maxDisappearedFrames?: number;
+            /** Format: float */
+            personMinScore?: number;
+            /** Format: float */
+            personThreshold?: number;
+            personMinArea?: number;
+            snapshotsEnabled?: boolean;
+            snapshotBoundingBox?: boolean;
+            recordingEnabled?: boolean;
+            detectionRetentionDays?: number;
+        };
+        RtspConnectionTestRequest: {
+            rtspUrl: string;
+            /** @enum {string} */
+            transport: "TCP" | "UDP";
+        };
+        RtspConnectionTestResult: {
+            success: boolean;
+            message: string;
+            latencyMs: number | null;
+        };
+        UpdateCameraStateRequest: {
+            isEnabled: boolean;
+        };
+        CameraSourceDetail: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            cameraId: string;
+            sourceType: components["schemas"]["CameraSourceType"];
+            /** @description Chi tra ve gia tri da che credential cho role ADMIN. */
+            rtspUrl?: string | null;
+            videoOriginalName?: string | null;
+            /** @default true */
+            videoLoop: boolean;
+            /**
+             * @default TCP
+             * @enum {string}
+             */
+            transport: "TCP" | "UDP";
+            inputFormat?: string | null;
+            webcamDeviceLabel?: string | null;
+            status: components["schemas"]["CameraSourceRuntimeStatus"];
+            lastErrorCode?: string | null;
+            lastErrorMessage?: string | null;
+            /** Format: date-time */
+            startedAt?: string | null;
+            /** Format: date-time */
+            stoppedAt?: string | null;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        UpdateCameraSourceRequest: {
+            sourceType: components["schemas"]["CameraSourceType"];
+            rtspUrl?: string;
+            /** Format: uuid */
+            videoObjectId?: string;
+            /** @default true */
+            videoLoop: boolean;
+            /**
+             * @default TCP
+             * @enum {string}
+             */
+            transport: "TCP" | "UDP";
+            inputFormat?: string;
+            webcamDeviceLabel?: string;
+        };
+        CameraRuntimeStatusResponse: {
+            /** Format: uuid */
+            cameraId: string;
+            runtimeStatus: components["schemas"]["CameraRuntimeStatus"];
+            isPublishing: boolean;
+            /** @enum {string} */
+            frigateSyncStatus: "PENDING" | "SYNCED" | "FAILED";
+            /** Format: date-time */
+            lastCheckedAt: string;
+            details?: {
+                sourceType?: components["schemas"]["CameraSourceType"];
+                errorCode?: string | null;
+                errorMessage?: string | null;
+            };
+        };
+        CameraDebugDetection: {
+            label: string;
+            confidence: number;
+            /** @description [ymin, xmin, ymax, xmax] normalized 0..1 */
+            box: number[];
+            /** @description [x, y] normalized 0..1 */
+            footPoint?: number[];
+        };
+        CameraDebugStream: {
+            /** Format: uuid */
+            cameraId: string;
+            streamUrl: string;
+            snapshotUrl?: string | null;
+            detections: components["schemas"]["CameraDebugDetection"][];
+            activeZones: string[];
+        };
+        BrowserPublishSession: {
+            /** @description URL WebRTC WHIP publish endpoint */
+            publishUrl: string;
+            /** @description Camera slug hoac stream key */
+            streamKey: string;
+            /** @description Token bao mat phien publish ngan han */
+            token: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
+        FrigateSyncResult: {
+            /** Format: uuid */
+            cameraId: string;
+            configVersion: number;
+            /** @enum {string} */
+            syncStatus: "PENDING" | "SYNCED" | "FAILED";
+            errorCode?: string | null;
+            errorMessage?: string | null;
         };
         /**
          * @description Da giac voi toa do CHUAN HOA 0..1 theo [x, y].
@@ -982,11 +1368,11 @@ export interface components {
             zoneType: components["schemas"]["ZoneType"];
             polygon: components["schemas"]["Polygon"];
             /** @description FR-DET-M4-02 — di luot qua duoi nguong nay khong sinh canh bao. */
-            minDwellSeconds?: number;
+            minDwellSeconds: number;
             /** @example 06:00 */
-            activeFrom?: string | null;
+            activeFrom: string | null;
             /** @example 22:00 */
-            activeTo?: string | null;
+            activeTo: string | null;
             isEnabled: boolean;
         };
         CreateZoneRequest: {
@@ -996,8 +1382,10 @@ export interface components {
             polygon: components["schemas"]["Polygon"];
             /** @default 2 */
             minDwellSeconds: number;
-            activeFrom?: string;
-            activeTo?: string;
+            /** @description Hai dau cung null la ca ngay; khoang [activeFrom, activeTo) co the qua nua dem. */
+            activeFrom?: string | null;
+            /** @description Khong duoc bang activeFrom. */
+            activeTo?: string | null;
         };
         UpdateZoneRequest: {
             name?: string;
@@ -1013,6 +1401,8 @@ export interface components {
          *     va embedding khong bao gio duoc tra ra ngoai qua API.
          */
         KnownFace: {
+            /** @enum {string} */
+            recognitionStatus?: "READY" | "SYNC_PENDING";
             /** Format: uuid */
             id: string;
             personName: string;
@@ -1027,6 +1417,21 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        FaceSelectionDetails: {
+            images: {
+                imageIndex: number;
+                code?: string;
+                faces: {
+                    faceIndex: number;
+                    boundingBox: {
+                        x: number;
+                        y: number;
+                        width: number;
+                        height: number;
+                    };
+                }[];
+            }[];
+        };
         EventSummary: {
             /** Format: uuid */
             id: string;
@@ -1039,8 +1444,11 @@ export interface components {
                 name?: string;
             } | null;
             zone?: {
-                /** Format: uuid */
-                id?: string;
+                /**
+                 * Format: uuid
+                 * @description Null neu zone da bi xoa; name van la snapshot lich su.
+                 */
+                id?: string | null;
                 name?: string;
             } | null;
             confidence?: number | null;
@@ -1062,6 +1470,7 @@ export interface components {
             aiModelVersion?: string | null;
             /** @description FR-EVT-04 — giu du chi tiet tung nhan AI. */
             aiResults?: components["schemas"]["AiResultItem"][];
+            aggregateVersion?: number;
             retain?: boolean;
             /** Format: uuid */
             correlationId?: string;
@@ -1077,13 +1486,27 @@ export interface components {
             closedAt?: string | null;
             media?: components["schemas"]["EventMedia"][];
             statusHistory?: components["schemas"]["EventStatusHistoryEntry"][];
+            version?: number;
+            ruleSnapshot?: {
+                [key: string]: unknown;
+            } | null;
+            triggeringResults?: components["schemas"]["AiResultItem"][];
         };
         AiResultItem: {
+            /** Format: uuid */
+            resultId: string;
+            observationId: string;
+            revision: number;
             /** @enum {string} */
             module: "M1_FACE" | "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M4_ZONE" | "M5_WELLNESS";
-            label: string;
+            label: string | null;
             confidence: number | null;
-            modelVersion?: string;
+            modelVersion: string;
+            /** Format: date-time */
+            processedAt: string;
+            /** @enum {string} */
+            status: "SUCCESS" | "ERROR";
+            error?: components["schemas"]["ResultError"] | null;
             /** @description Toa do chuan hoa 0..1. */
             boundingBox?: {
                 x?: number;
@@ -1183,18 +1606,25 @@ export interface components {
             response: components["schemas"]["ConfirmationResponse"];
             note?: string;
         };
+        /** @description Dong su kien khan cap sau khi tiep nhan va xu ly. */
+        CloseEventRequest: {
+            /** Format: uuid */
+            commandId?: string;
+            note?: string;
+        };
         Confirmation: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
             eventId: string;
+            phase: components["schemas"]["ConfirmationPhase"];
             response: components["schemas"]["ConfirmationResponse"];
             channel: components["schemas"]["NotificationChannel"];
             confirmedByName?: string | null;
             note?: string | null;
             /** Format: date-time */
             respondedAt: string;
-            /** @description IM_OK -> RESOLVED, NEED_HELP -> ESCALATED (FR-ESC-03/04). */
+            /** @description IM_OK -> RESOLVED, NEED_HELP -> ESCALATED, ACKNOWLEDGED -> CLOSED (FR-ESC-03/04). */
             resultingStatus: components["schemas"]["EventStatus"];
         };
         ConfirmationConflict: components["schemas"]["ErrorResponse"] & {
@@ -1240,10 +1670,14 @@ export interface components {
             skipLoggedOnly?: boolean;
             notifyChannels?: components["schemas"]["NotificationChannel"][];
             escalateChannels?: components["schemas"]["NotificationChannel"][];
+            /** @description Tên hiển thị tiếng Việt của loại sự kiện. */
+            displayName?: string;
             maxEscalationLevel?: number;
             isEnabled: boolean;
             /** Format: date-time */
             updatedAt?: string;
+            /** @description Tên người dùng cập nhật gần nhất. */
+            updatedByName?: string | null;
         };
         /** @description tLow <= tHigh; WELLNESS_TIMEOUT requires both null. Other alert types require both numbers. Updates only future evaluations. */
         UpdateEscalationThresholdsRequest: {
@@ -1317,21 +1751,29 @@ export interface components {
             priorityOrder: number;
         };
         AiResultRequest: components["schemas"]["FaceResultSubmission"] | components["schemas"]["ZoneResultSubmission"] | components["schemas"]["OtherAiResultSubmission"];
-        OtherAiResultSubmission: {
+        AiResultAccepted: {
+            /** Format: uuid */
+            resultId: string;
+            /** @enum {string} */
+            disposition: "ACCEPTED" | "DUPLICATE" | "STALE";
+            aggregateVersion: number;
+        };
+        /** @description Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline. */
+        OtherAiResultSubmission: components["schemas"]["ResultIdentity"] & {
+            /** @enum {string} */
+            module?: "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M5_WELLNESS";
+            results: components["schemas"]["OtherAiResultItem"][];
+            error: components["schemas"]["ResultError"] | null;
+        };
+        OtherAiResultItem: {
             /** @enum {string} */
             module: "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M5_WELLNESS";
-            modelVersion: string;
-            results: components["schemas"]["AiResultItem"][];
-            personStatus?: components["schemas"]["PersonStatus"];
-            /** Format: uuid */
-            matchedKnownFaceId?: string | null;
-            /** Format: date-time */
-            processedAt: string;
-            /** @description Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline. */
-            error?: {
-                code?: string;
-                message?: string;
-            } | null;
+            label: string;
+            confidence: number | null;
+            boundingBox: components["schemas"]["NormalizedBox"] | null;
+            metadata: {
+                [key: string]: unknown;
+            };
         };
         /** @description eventId must match path. Same resultId and payload is replay-safe; changed payload is IDEMPOTENCY_CONFLICT. Persist before 202. Older revisions cannot replace newer results. */
         ResultIdentity: {
@@ -1407,15 +1849,29 @@ export interface components {
             /** Format: date-time */
             observedAt: string;
             /** Format: date-time */
-            enteredAt: string;
-            dwellSeconds: number;
+            enteredAt: string | null;
+            dwellSeconds: number | null;
+            /**
+             * @description Frigate confirmed current_zones after configured loitering_time. Exact zone entry time and dwell duration are unavailable and must remain null.
+             * @constant
+             */
+            dwellEvidence?: "FRIGATE_CURRENT_ZONE_LOITERING";
             minDwellSeconds: number;
             /** @constant */
             scheduleActive: true;
             zoneConfigVersion: number;
             /** @constant */
             scoreSource: "FRIGATE_PERSON_DETECTION";
-        };
+        } & ({
+            /** Format: date-time */
+            enteredAt?: string;
+            dwellSeconds?: number;
+        } | {
+            /** @constant */
+            dwellEvidence: "FRIGATE_CURRENT_ZONE_LOITERING";
+            enteredAt?: null;
+            dwellSeconds?: null;
+        });
         /** @description Only submit enabled RESTRICTED zones with proven dwell and active schedule. Score comes from the matching Frigate person observation, never fabricated as 1. Missing score is diagnostic, not a risk result. Deduplicate event/zone/track; modelVersion identifies detector and metadata identifies config. */
         ZoneResultSubmission: components["schemas"]["ResultIdentity"] & {
             /** @constant */
@@ -2066,6 +2522,337 @@ export interface operations {
             };
         };
     };
+    updateCameraState: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCameraStateRequest"];
+            };
+        };
+        responses: {
+            /** @description Trang thai camera sau khi cap nhat */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Camera"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getCameraRuntimeStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Trang thai runtime thuc te */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraRuntimeStatusResponse"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getCameraSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thong tin chi tiet nguon phat */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraSourceDetail"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updateCameraSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCameraSourceRequest"];
+            };
+        };
+        responses: {
+            /** @description Nguon phat sau khi cap nhat */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraSourceDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    uploadCameraVideo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description File video (MP4 hoac MKV, toi da theo CAMERA_VIDEO_MAX_BYTES)
+                     */
+                    file: string;
+                    /** @default true */
+                    loop?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description Nguon phat video sau khi upload */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraSourceDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteCameraVideo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Da xoa file video thanh cong */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    testCameraRtspConnection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RtspConnectionTestRequest"];
+            };
+        };
+        responses: {
+            /** @description Ket qua kiem tra RTSP */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RtspConnectionTestResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    startCameraSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Nguon phat da khoi dong */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraSourceDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    stopCameraSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Nguon phat da dung */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraSourceDetail"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    createBrowserPublishSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thong tin publish WebRTC */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BrowserPublishSession"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    revokeBrowserPublishSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Da thu hoi phien publish thanh cong */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    retryFrigateSync: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ket qua thu lai dong bo */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrigateSyncResult"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getCameraDebugStream: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cameraId: components["parameters"]["CameraId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thong tin luong debug va du lieu detection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraDebugStream"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
     listZones: {
         parameters: {
             query?: never;
@@ -2117,6 +2904,10 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
         };
     };
     deleteZone: {
@@ -2137,6 +2928,8 @@ export interface operations {
                 };
                 content?: never;
             };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -2164,7 +2957,11 @@ export interface operations {
                     "application/json": components["schemas"]["Zone"];
                 };
             };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
         };
     };
     listKnownFaces: {
@@ -2220,9 +3017,63 @@ export interface operations {
                     "application/json": components["schemas"]["KnownFace"];
                 };
             };
-            409: components["responses"]["Conflict"];
-            /** @description Anh khong dung yeu cau (FR-DEV-06) */
+            /** @description INVALID_IMAGE */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description KNOWN_FACE_NAME_EXISTS or KNOWN_FACE_LIMIT */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description IMAGE_TOO_LARGE */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NO_FACE_DETECTED, MULTIPLE_FACES, FACE_SELECTION_INVALID, FACE_IMAGES_INCONSISTENT. details follows FaceSelectionDetails when images require correction. */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description RATE_LIMITED */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FACE_PROVIDER_UNAVAILABLE */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2243,14 +3094,41 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Da xoa vinh vien */
+            /** @description Da xoa DB va ghi audit; collection dang cho dong bo. Khong coi la da xoa hoan tat. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        recognitionStatus: "SYNC_PENDING";
+                    };
+                };
+            };
+            /** @description Da xoa DB va dong bo collection */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
+            401: components["responses"]["Unauthorized"];
+            /** @description Chi ADMIN duoc xoa */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             404: components["responses"]["NotFound"];
+            /** @description FACE_PROVIDER_UNAVAILABLE */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     listEvents: {
@@ -2418,6 +3296,45 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             /** @description Su kien da duoc xu ly boi nguoi khac */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConfirmationConflict"];
+                };
+            };
+        };
+    };
+    closeEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CloseEventRequest"];
+            };
+        };
+        responses: {
+            /** @description Da dong su kien thanh cong */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Confirmation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            /** @description Su kien khong o trang thai ESCALATED hoac da duoc dong */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -2811,7 +3728,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiResultAccepted"];
+                };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];

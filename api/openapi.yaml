@@ -471,6 +471,225 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorResponse" }
 
+  /cameras/{cameraId}/state:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    put:
+      tags: [cameras]
+      summary: Bat hoac tat camera (desired state)
+      operationId: updateCameraState
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateCameraStateRequest" }
+      responses:
+        "200":
+          description: Trang thai camera sau khi cap nhat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Camera" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/runtime-status:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    get:
+      tags: [cameras]
+      summary: Lay trang thai runtime thuc te cua camera
+      operationId: getCameraRuntimeStatus
+      responses:
+        "200":
+          description: Trang thai runtime thuc te
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraRuntimeStatusResponse" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    get:
+      tags: [cameras]
+      summary: Chi tiet nguon phat cua camera
+      operationId: getCameraSource
+      responses:
+        "200":
+          description: Thong tin chi tiet nguon phat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [cameras]
+      summary: Cap nhat cau hinh nguon phat camera
+      operationId: updateCameraSource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateCameraSourceRequest" }
+      responses:
+        "200":
+          description: Nguon phat sau khi cap nhat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source/video:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Upload file video nguon phat cho camera
+      operationId: uploadCameraVideo
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: File video (MP4 hoac MKV, toi da theo CAMERA_VIDEO_MAX_BYTES)
+                loop:
+                  type: boolean
+                  default: true
+      responses:
+        "200":
+          description: Nguon phat video sau khi upload
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [cameras]
+      summary: Xoa file video nguon phat cua camera
+      operationId: deleteCameraVideo
+      responses:
+        "204":
+          description: Da xoa file video thanh cong
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source/test:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Kiem tra ket noi toi nguon RTSP ma khong luu cau hinh
+      operationId: testCameraRtspConnection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RtspConnectionTestRequest" }
+      responses:
+        "200":
+          description: Ket qua kiem tra RTSP
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RtspConnectionTestResult" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source/start:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Bat dau phat nguon camera (video publisher / webcam)
+      operationId: startCameraSource
+      responses:
+        "200":
+          description: Nguon phat da khoi dong
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source/stop:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Dung phat nguon camera
+      operationId: stopCameraSource
+      responses:
+        "200":
+          description: Nguon phat da dung
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/source/browser-session:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Cap phien publish WebRTC/WHIP cho webcam trinh duyet
+      operationId: createBrowserPublishSession
+      responses:
+        "200":
+          description: Thong tin publish WebRTC
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BrowserPublishSession" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [cameras]
+      summary: Thu hoi phien publish WebRTC/WHIP cho webcam trinh duyet
+      operationId: revokeBrowserPublishSession
+      responses:
+        "204":
+          description: Da thu hoi phien publish thanh cong
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cameras/{cameraId}/frigate-sync/retry:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    post:
+      tags: [cameras]
+      summary: Thu lai dong bo cau hinh xuong Frigate
+      operationId: retryFrigateSync
+      responses:
+        "200":
+          description: Ket qua thu lai dong bo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FrigateSyncResult" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /cameras/{cameraId}/debug-stream:
+    parameters:
+      - $ref: "#/components/parameters/CameraId"
+    get:
+      tags: [cameras]
+      summary: Lay thong tin luong debug va du lieu detection thuc te
+      operationId: getCameraDebugStream
+      responses:
+        "200":
+          description: Thong tin luong debug va du lieu detection
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CameraDebugStream" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
   # ===================================================================
   # ZONES — US-12
   # ===================================================================
@@ -499,7 +718,9 @@ paths:
       summary: Tao vung giam sat moi
       description: |
         Toa do da giac phai CHUAN HOA ve khoang 0..1 de doc lap do phan giai.
-        Orchestrator tu sinh lai cau hinh Frigate sau khi luu.
+        Orchestrator tu sinh lai cau hinh Frigate sau khi luu. Response thanh cong
+        chi xac nhan zone da duoc luu vao PostgreSQL; trang thai `frigateSync` cua
+        camera cho biet cau hinh da co hieu luc tren Frigate hay chua.
       operationId: createZone
       requestBody:
         required: true
@@ -513,6 +734,10 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Zone" }
         "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
 
   /zones/{zoneId}:
     parameters:
@@ -533,12 +758,18 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Zone" }
         "404": { $ref: "#/components/responses/NotFound" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
     delete:
       tags: [zones]
       summary: Xoa vung
       operationId: deleteZone
       responses:
         "204": { description: Da xoa }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   # ===================================================================
@@ -549,6 +780,7 @@ paths:
       tags: [known-faces]
       summary: Danh sach nguoi quen
       operationId: listKnownFaces
+      description: Danh sach thuoc user trong access token; khong suy dien quyen ho gia dinh.
       responses:
         "200":
           description: Danh sach nguoi quen
@@ -568,7 +800,9 @@ paths:
         FR-DEV-06: anh khong phat hien duoc khuon mat -> `422` voi
         `code = NO_FACE_DETECTED`.
         Anh co nhieu hon 1 khuon mat -> `422` voi `code = MULTIPLE_FACES`
-        kem `details.faces[]` de nguoi dung chon.
+        kem `details.images[]` de nguoi dung chon cho tung anh.
+        Chi ADMIN duoc tao. Owner lay tu access token, khong nhan tu client.
+        faceSelections la JSON array trong mot multipart text field.
         FR-DEV-08: he thong chi luu embedding, KHONG luu anh goc.
       operationId: createKnownFace
       requestBody:
@@ -579,7 +813,7 @@ paths:
               type: object
               required: [personName, images]
               properties:
-                personName: { type: string, maxLength: 120 }
+                personName: { type: string, minLength: 1, maxLength: 120 }
                 relationship: { type: string, maxLength: 60 }
                 linkedUserId: { type: string, format: uuid }
                 faceSelections:
@@ -598,9 +832,45 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/KnownFace" }
-        "409": { $ref: "#/components/responses/Conflict" }
+        "400":
+          {
+            description: INVALID_IMAGE,
+            content:
+              { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          {
+            description: FORBIDDEN,
+            content:
+              { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+          }
+        "409":
+          {
+            description: KNOWN_FACE_NAME_EXISTS or KNOWN_FACE_LIMIT,
+            content:
+              { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+          }
+        "413":
+          {
+            description: IMAGE_TOO_LARGE,
+            content:
+              { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+          }
+        "429":
+          {
+            description: RATE_LIMITED,
+            content:
+              { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+          }
+        "503":
+          {
+            description: FACE_PROVIDER_UNAVAILABLE,
+            content:
+              { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+          }
         "422":
-          description: Anh khong dung yeu cau (FR-DEV-06)
+          description: NO_FACE_DETECTED, MULTIPLE_FACES, FACE_SELECTION_INVALID, FACE_IMAGES_INCONSISTENT. details follows FaceSelectionDetails when images require correction.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorResponse" }
@@ -619,7 +889,19 @@ paths:
         Collection neu dang dung. Khong soft-delete. Ghi audit log.
       operationId: deleteKnownFace
       responses:
-        "204": { description: Da xoa vinh vien }
+        "204": { description: Da xoa DB va dong bo collection }
+        "202":
+          description: Da xoa DB va ghi audit; collection dang cho dong bo. Khong coi la da xoa hoan tat.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [recognitionStatus]
+                properties:
+                  recognitionStatus: { type: string, enum: [SYNC_PENDING] }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: Chi ADMIN duoc xoa }
+        "503": { description: FACE_PROVIDER_UNAVAILABLE }
         "404": { $ref: "#/components/responses/NotFound" }
 
   # ===================================================================
@@ -792,6 +1074,37 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "409":
           description: Su kien da duoc xu ly boi nguoi khac
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConfirmationConflict" }
+
+  /events/{eventId}/close:
+    parameters:
+      - $ref: "#/components/parameters/EventId"
+    post:
+      tags: [events]
+      summary: Dong su kien khan cap sau khi tiep nhan xu ly
+      description: |
+        FR-ESC-04/09. Dong su kien dang o trang thai ESCALATED thanh CLOSED.
+        Ghi nhan nguoi dong, thoi diem va ly do dong su kien.
+      operationId: closeEvent
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CloseEventRequest" }
+      responses:
+        "200":
+          description: Da dong su kien thanh cong
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Confirmation" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Su kien khong o trang thai ESCALATED hoac da duoc dong
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ConfirmationConflict" }
@@ -1097,6 +1410,9 @@ paths:
       responses:
         "202":
           description: Da tiep nhan, dang chuyen cho escalation engine
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AiResultAccepted" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "409": { $ref: "#/components/responses/Conflict" }
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -1268,6 +1584,9 @@ components:
     ConfirmationResponse:
       type: string
       enum: [IM_OK, NEED_HELP, ACKNOWLEDGED]
+    ConfirmationPhase:
+      type: string
+      enum: [INITIAL, EMERGENCY]
     DeviceStatus:
       type: string
       enum: [ONLINE, OFFLINE, DEGRADED, DISABLED]
@@ -1282,9 +1601,7 @@ components:
           required: [code, message, traceId]
           properties:
             code:
-              type: string
-              description: Ma loi on dinh de FE xu ly, vi du TOKEN_EXPIRED.
-              examples: [NO_FACE_DETECTED]
+              $ref: "#/components/schemas/CameraErrorCode"
             message:
               type: string
               description: Thong diep tieng Viet hien thi duoc cho nguoi dung.
@@ -1294,6 +1611,34 @@ components:
             traceId:
               type: string
               description: FR-LOG-02 — dung de tra log xuyen service.
+
+    CameraErrorCode:
+      type: string
+      enum:
+        - ACCOUNT_LOCKED
+        - CAMERA_NOT_FOUND
+        - CAMERA_SOURCE_NOT_FOUND
+        - SOURCE_NOT_CONFIGURED
+        - SOURCE_UNAVAILABLE
+        - WEBCAM_PERMISSION_DENIED
+        - WEBCAM_PUBLISH_FAILED
+        - VIDEO_INVALID_FORMAT
+        - VIDEO_TOO_LARGE
+        - VIDEO_NOT_FOUND
+        - FFMPEG_START_FAILED
+        - FRIGATE_SYNC_FAILED
+        - FRIGATE_UNAVAILABLE
+        - MEDIAMTX_UNAVAILABLE
+        - CAMERA_ALREADY_TRANSITIONING
+        - CONFIG_VERSION_CONFLICT
+        - FORBIDDEN
+        - INVALID_CREDENTIALS
+        - INVALID_REFRESH_TOKEN
+        - INVALID_SLUG
+        - INVALID_TOKEN
+        - EVENT_NOT_FOUND
+        - UNAUTHORIZED
+      description: Stable errors returned by camera source, runtime and Frigate operations.
 
     PaginatedResponse:
       type: object
@@ -1402,7 +1747,20 @@ components:
     # ---------------- Cameras ----------------
     Camera:
       type: object
-      required: [id, deviceId, name, slug, isEnabled, createdAt]
+      required:
+        [
+          id,
+          deviceId,
+          name,
+          slug,
+          isEnabled,
+          runtimeStatus,
+          source,
+          frigateSync,
+          frigateSettings,
+          debugCapabilities,
+          createdAt,
+        ]
       properties:
         id: { type: string, format: uuid }
         deviceId: { type: string, format: uuid }
@@ -1423,15 +1781,80 @@ components:
         retentionDays: { type: integer }
         sourceType: { $ref: "#/components/schemas/CameraSourceType" }
         runtimeStatus: { $ref: "#/components/schemas/CameraRuntimeStatus" }
+        source: { $ref: "#/components/schemas/CameraSourceInfo" }
+        frigateSync: { $ref: "#/components/schemas/CameraFrigateSyncInfo" }
+        frigateSettings: { $ref: "#/components/schemas/CameraFrigateSettings" }
+        debugCapabilities: { $ref: "#/components/schemas/CameraDebugCapabilities" }
         configVersion: { type: integer, minimum: 1 }
-        syncStatus: { type: string, enum: [PENDING, APPLIED, FAILED] }
+        syncStatus: { type: string, enum: [PENDING, SYNCED, FAILED] }
         zoneCount: { type: integer }
         createdAt: { type: string, format: date-time }
+
+    CameraSourceInfo:
+      type: object
+      required: [type, isPublishing, requiresBrowserPublisher]
+      properties:
+        type: { $ref: "#/components/schemas/CameraSourceType" }
+        displayName: { type: ["string", "null"] }
+        isPublishing: { type: boolean }
+        lastError: { type: ["string", "null"] }
+        requiresBrowserPublisher: { type: boolean }
+
+    CameraFrigateSyncInfo:
+      type: object
+      required: [status, configVersion]
+      properties:
+        status: { type: string, enum: [PENDING, SYNCED, FAILED] }
+        configVersion: { type: integer, minimum: 1 }
+        appliedVersion: { type: ["integer", "null"] }
+        errorCode: { type: ["string", "null"] }
+        errorMessage: { type: ["string", "null"] }
+
+    CameraFrigateSettings:
+      type: object
+      required:
+        [
+          detectWidth,
+          detectHeight,
+          detectFps,
+          minInitializedFrames,
+          maxDisappearedFrames,
+          personMinScore,
+          personThreshold,
+          personMinArea,
+          snapshotsEnabled,
+          snapshotBoundingBox,
+          recordingEnabled,
+          detectionRetentionDays,
+        ]
+      properties:
+        detectWidth: { type: integer, minimum: 160, maximum: 7680 }
+        detectHeight: { type: integer, minimum: 120, maximum: 4320 }
+        detectFps: { type: integer, minimum: 1, maximum: 30 }
+        minInitializedFrames: { type: integer, minimum: 1, maximum: 300 }
+        maxDisappearedFrames: { type: integer, minimum: 1, maximum: 300 }
+        personMinScore: { type: number, format: float, minimum: 0, maximum: 1 }
+        personThreshold: { type: number, format: float, minimum: 0, maximum: 1 }
+        personMinArea: { type: integer, minimum: 0, maximum: 10000000 }
+        snapshotsEnabled: { type: boolean }
+        snapshotBoundingBox: { type: boolean }
+        recordingEnabled: { type: boolean }
+        detectionRetentionDays: { type: integer, minimum: 0, maximum: 90 }
+
+    CameraDebugCapabilities:
+      type: object
+      required: [personBoundary, zoneBoundary]
+      properties:
+        personBoundary: { type: boolean }
+        zoneBoundary: { type: boolean }
 
     CameraSourceType:
       type: string
       enum: [RTSP, BROWSER_WEBCAM, VIDEO_FILE]
     CameraRuntimeStatus:
+      type: string
+      enum: [ONLINE, OFFLINE, STARTING, FAILED, DISABLED]
+    CameraSourceRuntimeStatus:
       type: string
       enum: [NOT_CONFIGURED, STARTING, ONLINE, OFFLINE, FAILED, STOPPED]
     CameraPreview:
@@ -1488,9 +1911,139 @@ components:
         name: { type: string }
         rtspUrl: { type: string }
         fps: { type: integer, minimum: 1, maximum: 30 }
+        detectWidth: { type: integer, minimum: 160, maximum: 7680 }
+        detectHeight: { type: integer, minimum: 120, maximum: 4320 }
         isEnabled: { type: boolean }
         detectionEnabled: { type: boolean }
         retentionDays: { type: integer, minimum: 1, maximum: 90 }
+        minInitializedFrames: { type: integer, minimum: 1, maximum: 300 }
+        maxDisappearedFrames: { type: integer, minimum: 1, maximum: 300 }
+        personMinScore: { type: number, format: float, minimum: 0, maximum: 1 }
+        personThreshold: { type: number, format: float, minimum: 0, maximum: 1 }
+        personMinArea: { type: integer, minimum: 0, maximum: 10000000 }
+        snapshotsEnabled: { type: boolean }
+        snapshotBoundingBox: { type: boolean }
+        recordingEnabled: { type: boolean }
+        detectionRetentionDays: { type: integer, minimum: 0, maximum: 90 }
+
+    RtspConnectionTestRequest:
+      type: object
+      required: [rtspUrl, transport]
+      properties:
+        rtspUrl: { type: string, pattern: "^rtsps?://", writeOnly: true }
+        transport: { type: string, enum: [TCP, UDP] }
+
+    RtspConnectionTestResult:
+      type: object
+      required: [success, message, latencyMs]
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        latencyMs: { type: ["integer", "null"], minimum: 0 }
+
+    UpdateCameraStateRequest:
+      type: object
+      required: [isEnabled]
+      properties:
+        isEnabled: { type: boolean }
+
+    CameraSourceDetail:
+      type: object
+      required: [id, cameraId, sourceType, status, transport, videoLoop]
+      properties:
+        id: { type: string, format: uuid }
+        cameraId: { type: string, format: uuid }
+        sourceType: { $ref: "#/components/schemas/CameraSourceType" }
+        rtspUrl:
+          type: ["string", "null"]
+          description: Chi tra ve gia tri da che credential cho role ADMIN.
+        videoOriginalName: { type: ["string", "null"] }
+        videoLoop: { type: boolean, default: true }
+        transport: { type: string, enum: [TCP, UDP], default: TCP }
+        inputFormat: { type: ["string", "null"] }
+        webcamDeviceLabel: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/CameraSourceRuntimeStatus" }
+        lastErrorCode: { type: ["string", "null"] }
+        lastErrorMessage: { type: ["string", "null"] }
+        startedAt: { type: ["string", "null"], format: date-time }
+        stoppedAt: { type: ["string", "null"], format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    UpdateCameraSourceRequest:
+      type: object
+      required: [sourceType]
+      properties:
+        sourceType: { $ref: "#/components/schemas/CameraSourceType" }
+        rtspUrl: { type: string, writeOnly: true }
+        videoObjectId: { type: string, format: uuid }
+        videoLoop: { type: boolean, default: true }
+        transport: { type: string, enum: [TCP, UDP], default: TCP }
+        inputFormat: { type: string }
+        webcamDeviceLabel: { type: string }
+
+    CameraRuntimeStatusResponse:
+      type: object
+      required: [cameraId, runtimeStatus, isPublishing, frigateSyncStatus, lastCheckedAt]
+      properties:
+        cameraId: { type: string, format: uuid }
+        runtimeStatus: { $ref: "#/components/schemas/CameraRuntimeStatus" }
+        isPublishing: { type: boolean }
+        frigateSyncStatus: { type: string, enum: [PENDING, SYNCED, FAILED] }
+        lastCheckedAt: { type: string, format: date-time }
+        details:
+          type: object
+          properties:
+            sourceType: { $ref: "#/components/schemas/CameraSourceType" }
+            errorCode: { type: ["string", "null"] }
+            errorMessage: { type: ["string", "null"] }
+
+    CameraDebugDetection:
+      type: object
+      required: [label, confidence, box]
+      properties:
+        label: { type: string }
+        confidence: { type: number }
+        box:
+          type: array
+          items: { type: number }
+          description: "[ymin, xmin, ymax, xmax] normalized 0..1"
+        footPoint:
+          type: array
+          items: { type: number }
+          description: "[x, y] normalized 0..1"
+
+    CameraDebugStream:
+      type: object
+      required: [cameraId, streamUrl, detections, activeZones]
+      properties:
+        cameraId: { type: string, format: uuid }
+        streamUrl: { type: string }
+        snapshotUrl: { type: ["string", "null"] }
+        detections:
+          type: array
+          items: { $ref: "#/components/schemas/CameraDebugDetection" }
+        activeZones:
+          type: array
+          items: { type: string }
+
+    BrowserPublishSession:
+      type: object
+      required: [publishUrl, streamKey, token, expiresAt]
+      properties:
+        publishUrl: { type: string, description: "URL WebRTC WHIP publish endpoint" }
+        streamKey: { type: string, description: "Camera slug hoac stream key" }
+        token: { type: string, description: "Token bao mat phien publish ngan han" }
+        expiresAt: { type: string, format: date-time }
+
+    FrigateSyncResult:
+      type: object
+      required: [cameraId, configVersion, syncStatus]
+      properties:
+        cameraId: { type: string, format: uuid }
+        configVersion: { type: integer, minimum: 1 }
+        syncStatus: { type: string, enum: [PENDING, SYNCED, FAILED] }
+        errorCode: { type: ["string", "null"] }
+        errorMessage: { type: ["string", "null"] }
 
     # ---------------- Zones ----------------
     Polygon:
@@ -1507,42 +2060,72 @@ components:
 
     Zone:
       type: object
-      required: [id, cameraId, name, slug, zoneType, polygon, isEnabled]
+      required:
+        [
+          id,
+          cameraId,
+          name,
+          slug,
+          zoneType,
+          polygon,
+          minDwellSeconds,
+          activeFrom,
+          activeTo,
+          isEnabled,
+        ]
       properties:
         id: { type: string, format: uuid }
         cameraId: { type: string, format: uuid }
-        name: { type: string }
+        name: { type: string, minLength: 1, maxLength: 60 }
         slug: { type: string }
         zoneType: { $ref: "#/components/schemas/ZoneType" }
         polygon: { $ref: "#/components/schemas/Polygon" }
         minDwellSeconds:
           type: integer
+          minimum: 0
+          maximum: 300
           description: FR-DET-M4-02 — di luot qua duoi nguong nay khong sinh canh bao.
-        activeFrom: { type: ["string", "null"], examples: ["06:00"] }
-        activeTo: { type: ["string", "null"], examples: ["22:00"] }
+        activeFrom:
+          type: ["string", "null"]
+          pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+          examples: ["06:00"]
+        activeTo:
+          type: ["string", "null"]
+          pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+          examples: ["22:00"]
         isEnabled: { type: boolean }
 
     CreateZoneRequest:
       type: object
       required: [name, slug, zoneType, polygon]
       properties:
-        name: { type: string, maxLength: 60 }
+        name: { type: string, minLength: 1, maxLength: 60 }
         slug: { type: string, pattern: "^[a-z][a-z0-9_]{2,63}$" }
         zoneType: { $ref: "#/components/schemas/ZoneType" }
         polygon: { $ref: "#/components/schemas/Polygon" }
         minDwellSeconds: { type: integer, minimum: 0, maximum: 300, default: 2 }
-        activeFrom: { type: string }
-        activeTo: { type: string }
+        activeFrom:
+          type: ["string", "null"]
+          pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+          description: Hai dau cung null la ca ngay; khoang [activeFrom, activeTo) co the qua nua dem.
+        activeTo:
+          type: ["string", "null"]
+          pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+          description: Khong duoc bang activeFrom.
 
     UpdateZoneRequest:
       type: object
       properties:
-        name: { type: string }
+        name: { type: string, minLength: 1, maxLength: 60 }
         zoneType: { $ref: "#/components/schemas/ZoneType" }
         polygon: { $ref: "#/components/schemas/Polygon" }
-        minDwellSeconds: { type: integer }
-        activeFrom: { type: ["string", "null"] }
-        activeTo: { type: ["string", "null"] }
+        minDwellSeconds: { type: integer, minimum: 0, maximum: 300 }
+        activeFrom:
+          type: ["string", "null"]
+          pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+        activeTo:
+          type: ["string", "null"]
+          pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
         isEnabled: { type: boolean }
 
     # ---------------- Known faces ----------------
@@ -1550,6 +2133,9 @@ components:
       type: object
       required: [id, personName, provider, isActive, createdAt]
       properties:
+        recognitionStatus:
+          type: string
+          enum: [READY, SYNC_PENDING]
         id: { type: string, format: uuid }
         personName: { type: string }
         relationship: { type: ["string", "null"] }
@@ -1562,6 +2148,34 @@ components:
       description: |
         Khong co truong anh: FR-DEV-08 cam luu anh goc, chi luu embedding
         va embedding khong bao gio duoc tra ra ngoai qua API.
+
+    FaceSelectionDetails:
+      type: object
+      required: [images]
+      properties:
+        images:
+          type: array
+          items:
+            type: object
+            required: [imageIndex, faces]
+            properties:
+              imageIndex: { type: integer, minimum: 0, maximum: 4 }
+              code: { type: string }
+              faces:
+                type: array
+                items:
+                  type: object
+                  required: [faceIndex, boundingBox]
+                  properties:
+                    faceIndex: { type: integer, minimum: 0 }
+                    boundingBox:
+                      type: object
+                      required: [x, y, width, height]
+                      properties:
+                        x: { type: number, minimum: 0, maximum: 1 }
+                        y: { type: number, minimum: 0, maximum: 1 }
+                        width: { type: number, minimum: 0, maximum: 1 }
+                        height: { type: number, minimum: 0, maximum: 1 }
 
     # ---------------- Events ----------------
     EventSummary:
@@ -1580,7 +2194,10 @@ components:
         zone:
           type: ["object", "null"]
           properties:
-            id: { type: string, format: uuid }
+            id:
+              type: ["string", "null"]
+              format: uuid
+              description: Null neu zone da bi xoa; name van la snapshot lich su.
             name: { type: string }
         confidence: { type: ["number", "null"], minimum: 0, maximum: 1 }
         personStatus: { $ref: "#/components/schemas/PersonStatus" }
@@ -1605,6 +2222,7 @@ components:
               type: array
               description: FR-EVT-04 — giu du chi tiet tung nhan AI.
               items: { $ref: "#/components/schemas/AiResultItem" }
+            aggregateVersion: { type: integer, minimum: 0 }
             retain: { type: boolean }
             correlationId: { type: string, format: uuid }
             escalationDeadlineAt: { type: ["string", "null"], format: date-time }
@@ -1618,17 +2236,42 @@ components:
             statusHistory:
               type: array
               items: { $ref: "#/components/schemas/EventStatusHistoryEntry" }
+            version: { type: integer, minimum: 1 }
+            ruleSnapshot: { type: ["object", "null"], additionalProperties: true }
+            triggeringResults:
+              type: array
+              items: { $ref: "#/components/schemas/AiResultItem" }
 
     AiResultItem:
       type: object
-      required: [module, label, confidence]
+      required:
+        [
+          resultId,
+          observationId,
+          revision,
+          module,
+          label,
+          confidence,
+          modelVersion,
+          processedAt,
+          status,
+        ]
       properties:
+        resultId: { type: string, format: uuid }
+        observationId: { type: string }
+        revision: { type: integer, minimum: 1 }
         module:
           type: string
           enum: [M1_FACE, M2A_FALL, M2B_POSTURE, M3_FIRE, M4_ZONE, M5_WELLNESS]
-        label: { type: string }
+        label: { type: ["string", "null"] }
         confidence: { type: ["number", "null"], minimum: 0, maximum: 1 }
         modelVersion: { type: string }
+        processedAt: { type: string, format: date-time }
+        status: { type: string, enum: [SUCCESS, ERROR] }
+        error:
+          oneOf:
+            - $ref: "#/components/schemas/ResultError"
+            - type: "null"
         boundingBox:
           type: ["object", "null"]
           description: Toa do chuan hoa 0..1.
@@ -1748,12 +2391,22 @@ components:
         response: { $ref: "#/components/schemas/ConfirmationResponse" }
         note: { type: string, maxLength: 500 }
 
+    CloseEventRequest:
+      type: object
+      description: Dong su kien khan cap sau khi tiep nhan va xu ly.
+      properties:
+        commandId:
+          type: string
+          format: uuid
+        note: { type: string, maxLength: 500 }
+
     Confirmation:
       type: object
-      required: [id, eventId, response, channel, respondedAt, resultingStatus]
+      required: [id, eventId, phase, response, channel, respondedAt, resultingStatus]
       properties:
         id: { type: string, format: uuid }
         eventId: { type: string, format: uuid }
+        phase: { $ref: "#/components/schemas/ConfirmationPhase" }
         response: { $ref: "#/components/schemas/ConfirmationResponse" }
         channel: { $ref: "#/components/schemas/NotificationChannel" }
         confirmedByName: { type: ["string", "null"] }
@@ -1761,7 +2414,7 @@ components:
         respondedAt: { type: string, format: date-time }
         resultingStatus:
           $ref: "#/components/schemas/EventStatus"
-          description: IM_OK -> RESOLVED, NEED_HELP -> ESCALATED (FR-ESC-03/04).
+          description: IM_OK -> RESOLVED, NEED_HELP -> ESCALATED, ACKNOWLEDGED -> CLOSED (FR-ESC-03/04).
 
     ConfirmationConflict:
       allOf:
@@ -1835,9 +2488,15 @@ components:
         escalateChannels:
           type: array
           items: { $ref: "#/components/schemas/NotificationChannel" }
+        displayName:
+          type: string
+          description: Tên hiển thị tiếng Việt của loại sự kiện.
         maxEscalationLevel: { type: integer, minimum: 1, maximum: 3 }
         isEnabled: { type: boolean }
         updatedAt: { type: string, format: date-time }
+        updatedByName:
+          type: ["string", "null"]
+          description: Tên người dùng cập nhật gần nhất.
 
     UpdateEscalationThresholdsRequest:
       type: object
@@ -1940,27 +2599,50 @@ components:
         - $ref: "#/components/schemas/ZoneResultSubmission"
         - $ref: "#/components/schemas/OtherAiResultSubmission"
 
-    OtherAiResultSubmission:
+    AiResultAccepted:
       type: object
-      required: [module, results, modelVersion, processedAt]
+      required: [resultId, disposition, aggregateVersion]
+      properties:
+        resultId: { type: string, format: uuid }
+        disposition: { type: string, enum: [ACCEPTED, DUPLICATE, STALE] }
+        aggregateVersion: { type: integer, minimum: 0 }
+
+    OtherAiResultSubmission:
+      allOf:
+        - $ref: "#/components/schemas/ResultIdentity"
+        - type: object
+          required: [results, error]
+          properties:
+            module:
+              type: string
+              enum: [M2A_FALL, M2B_POSTURE, M3_FIRE, M5_WELLNESS]
+            results:
+              type: array
+              maxItems: 20
+              items: { $ref: "#/components/schemas/OtherAiResultItem" }
+            error:
+              oneOf:
+                - $ref: "#/components/schemas/ResultError"
+                - type: "null"
+      description: Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline.
+
+    OtherAiResultItem:
+      type: object
+      required: [module, label, confidence, boundingBox, metadata]
       properties:
         module:
           type: string
           enum: [M2A_FALL, M2B_POSTURE, M3_FIRE, M5_WELLNESS]
-        modelVersion: { type: string }
-        results:
-          type: array
-          items: { $ref: "#/components/schemas/AiResultItem" }
-        personStatus: { $ref: "#/components/schemas/PersonStatus" }
-        matchedKnownFaceId: { type: ["string", "null"], format: uuid }
-        processedAt: { type: string, format: date-time }
-        error:
-          type: ["object", "null"]
-          description: |
-            Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline.
-          properties:
-            code: { type: string }
-            message: { type: string }
+        label: { type: string }
+        confidence: { type: ["number", "null"], minimum: 0, maximum: 1 }
+        boundingBox:
+          oneOf:
+            - $ref: "#/components/schemas/NormalizedBox"
+            - type: "null"
+        metadata:
+          type: object
+          additionalProperties: true
+
     ResultIdentity:
       type: object
       required:
@@ -2081,12 +2763,25 @@ components:
         cameraId: { type: string, format: uuid }
         trackId: { type: string }
         observedAt: { type: string, format: date-time }
-        enteredAt: { type: string, format: date-time }
-        dwellSeconds: { type: number, minimum: 0 }
+        enteredAt: { type: ["string", "null"], format: date-time }
+        dwellSeconds: { type: [number, "null"], minimum: 0 }
+        dwellEvidence:
+          type: string
+          const: FRIGATE_CURRENT_ZONE_LOITERING
+          description: Frigate confirmed current_zones after configured loitering_time. Exact zone entry time and dwell duration are unavailable and must remain null.
         minDwellSeconds: { type: integer, minimum: 0, maximum: 300 }
         scheduleActive: { type: boolean, const: true }
         zoneConfigVersion: { type: integer, minimum: 1 }
         scoreSource: { type: string, const: FRIGATE_PERSON_DETECTION }
+      oneOf:
+        - properties:
+            enteredAt: { type: string, format: date-time }
+            dwellSeconds: { type: number, minimum: 0 }
+        - required: [dwellEvidence]
+          properties:
+            dwellEvidence: { type: string, const: FRIGATE_CURRENT_ZONE_LOITERING }
+            enteredAt: { type: "null" }
+            dwellSeconds: { type: "null" }
 
     ZoneResultSubmission:
       allOf:

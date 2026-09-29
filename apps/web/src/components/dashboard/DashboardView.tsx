@@ -1,12 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import { KnownFacesView } from '@/components/known-faces/KnownFacesView';
 import type { UIEventItem } from '@/types';
 import { useAuth, useEvents, useEventStats } from '@/hooks';
 import { Sidebar, TopHeader } from '@/components/layout';
 import { MetricCards } from '@/components/dashboard/MetricCards';
 import { EventCard, EventDetailModal, EventFilter } from '@/components/events';
+import { CameraView } from '@/components/cameras';
 import { EmptyState, ErrorState, Pagination } from '@/components/ui';
+import { SettingsView } from '@/components/settings';
+import { ZonesView } from '@/components/zones';
 import styles from './dashboard-view.module.css';
 
 function EventsListSection({
@@ -79,6 +83,7 @@ export function DashboardView() {
     simulateNewEvent,
     confirmOk,
     confirmHelp,
+    closeEmergency,
     toggleFalseAlarm,
     resetFilters,
   } = useEvents();
@@ -102,61 +107,76 @@ export function DashboardView() {
       />
 
       <div className={styles.mainContent}>
-        <TopHeader
-          userName={user?.fullName || 'Đức Anh'}
-          selectedZone={selectedZone}
-          onSelectZone={setSelectedZone}
-          onSimulateNewEvent={simulateNewEvent}
-        />
+        {(activeNav === 'dashboard' || activeNav === 'events') && (
+          <TopHeader
+            userName={user?.fullName || 'Đức Anh'}
+            selectedZone={selectedZone}
+            onSelectZone={setSelectedZone}
+            onSimulateNewEvent={simulateNewEvent}
+          />
+        )}
 
         <main className={styles.workspace}>
-          {liveNoticeText && (
-            <div className={styles.newEventNotice} role="status">
-              <span>{liveNoticeText}</span>
-              <small>Vừa chèn lên đầu danh sách</small>
-            </div>
+          {activeNav === 'cameras' ? (
+            <CameraView user={user} />
+          ) : activeNav === 'settings' ? (
+            <SettingsView user={user} />
+          ) : activeNav === 'known-faces' ? (
+            <KnownFacesView isAdmin={user?.role === 'ADMIN'} />
+          ) : activeNav === 'zones' ? (
+            <ZonesView user={user} />
+          ) : (
+            <>
+              {liveNoticeText && (
+                <div className={styles.newEventNotice} role="status">
+                  <span>{liveNoticeText}</span>
+                  <small>Vừa chèn lên đầu danh sách</small>
+                </div>
+              )}
+
+              <MetricCards stats={stats} isLoading={isStatsLoading} error={statsError} />
+
+              <section className={styles.eventsSection} aria-labelledby="events-title">
+                <div className={styles.sectionHeader}>
+                  <div className={styles.sectionTitles}>
+                    <h2 id="events-title" className={styles.sectionTitle}>
+                      Sự kiện gần đây
+                    </h2>
+                    <p className={styles.sectionSubtitle}>
+                      Những hoạt động mới nhất được camera và cảm biến ghi nhận trong thời gian
+                      thực.
+                    </p>
+                  </div>
+
+                  <EventFilter
+                    activeTab={activeFilterTab}
+                    onSelectTab={setActiveFilterTab}
+                    counts={counts}
+                  />
+                </div>
+
+                <EventsListSection
+                  isLoading={isLoading}
+                  error={error}
+                  events={paginatedEvents}
+                  onViewDetail={setSelectedEventForModal}
+                  onResetFilter={resetFilters}
+                  onRetry={reload}
+                />
+
+                {!isLoading && !error && filteredEvents.length > 0 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalFilteredItems}
+                    pageSize={pageSize}
+                    onPageChange={setCurrentPage}
+                    onPageSizeChange={setPageSize}
+                  />
+                )}
+              </section>
+            </>
           )}
-
-          <MetricCards stats={stats} isLoading={isStatsLoading} error={statsError} />
-
-          <section className={styles.eventsSection} aria-labelledby="events-title">
-            <div className={styles.sectionHeader}>
-              <div className={styles.sectionTitles}>
-                <h2 id="events-title" className={styles.sectionTitle}>
-                  Sự kiện gần đây
-                </h2>
-                <p className={styles.sectionSubtitle}>
-                  Những hoạt động mới nhất được camera và cảm biến ghi nhận trong thời gian thực.
-                </p>
-              </div>
-
-              <EventFilter
-                activeTab={activeFilterTab}
-                onSelectTab={setActiveFilterTab}
-                counts={counts}
-              />
-            </div>
-
-            <EventsListSection
-              isLoading={isLoading}
-              error={error}
-              events={paginatedEvents}
-              onViewDetail={setSelectedEventForModal}
-              onResetFilter={resetFilters}
-              onRetry={reload}
-            />
-
-            {!isLoading && !error && filteredEvents.length > 0 && (
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={totalFilteredItems}
-                pageSize={pageSize}
-                onPageChange={setCurrentPage}
-                onPageSizeChange={setPageSize}
-              />
-            )}
-          </section>
         </main>
       </div>
 
@@ -164,12 +184,16 @@ export function DashboardView() {
         <EventDetailModal
           event={selectedEventForModal}
           onClose={() => setSelectedEventForModal(null)}
-          onConfirmOk={(id) => {
-            confirmOk(id);
+          onConfirmOk={async (id, note) => {
+            await confirmOk(id, note);
             setSelectedEventForModal(null);
           }}
-          onConfirmHelp={(id) => {
-            confirmHelp(id);
+          onConfirmHelp={async (id, note) => {
+            await confirmHelp(id, note);
+            setSelectedEventForModal(null);
+          }}
+          onCloseEmergency={async (id, note) => {
+            await closeEmergency(id, note);
             setSelectedEventForModal(null);
           }}
           onToggleFalseAlarm={(id) => {

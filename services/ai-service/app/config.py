@@ -31,6 +31,14 @@ class Settings(BaseSettings):
     # Module 1 — nhan dien nguoi la
     face_provider: Literal["local", "rekognition"] = "local"
     face_match_threshold: float = 0.60
+    ai_internal_token: str = ""
+    face_detector_path: str = "models/face_detection_yunet_2023mar.onnx"
+    face_embedder_path: str = "models/face_recognition_sface_2021dec.onnx"
+    face_model_version: str = "yunet-2023mar-sface-2021dec"
+    face_max_image_bytes: int = 5 * 1024 * 1024
+    face_max_pixels: int = 12_000_000
+    face_detection_threshold: float = 0.9
+    face_max_concurrent: int = 2
     aws_region: str = "ap-southeast-1"
     rekognition_collection_id: str = "camerai-known-faces"
 

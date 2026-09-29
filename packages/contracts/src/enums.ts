@@ -47,8 +47,14 @@ export const NOTIFICATION_CHANNELS = [
 ] as const;
 export type NotificationChannel = (typeof NOTIFICATION_CHANNELS)[number];
 
+export const NOTIFICATION_STATUSES = ['PENDING', 'SENT', 'FAILED', 'CONFIRMED', 'SKIPPED'] as const;
+export type NotificationStatus = (typeof NOTIFICATION_STATUSES)[number];
+
 export const CONFIRMATION_RESPONSES = ['IM_OK', 'NEED_HELP', 'ACKNOWLEDGED'] as const;
 export type ConfirmationResponse = (typeof CONFIRMATION_RESPONSES)[number];
+
+export const CONFIRMATION_PHASES = ['INITIAL', 'EMERGENCY'] as const;
+export type ConfirmationPhase = (typeof CONFIRMATION_PHASES)[number];
 
 export const MEDIA_TYPES = ['SNAPSHOT', 'CLIP', 'THUMBNAIL'] as const;
 export type MediaType = (typeof MEDIA_TYPES)[number];
@@ -65,3 +71,28 @@ export const DEFAULT_ESCALATION_RULES: Record<
   WELLNESS_TIMEOUT: { priority: 'P2', tLow: null, tHigh: null, tWaitSeconds: 300 },
   PERSON_DETECTED: { priority: 'P3', tLow: null, tHigh: null, tWaitSeconds: 0 },
 };
+
+export const CAMERA_SOURCE_TYPES = ['RTSP', 'BROWSER_WEBCAM', 'VIDEO_FILE'] as const;
+export type CameraSourceType = (typeof CAMERA_SOURCE_TYPES)[number];
+
+export const CAMERA_RUNTIME_STATUSES = [
+  'ONLINE',
+  'OFFLINE',
+  'STARTING',
+  'FAILED',
+  'DISABLED',
+] as const;
+export type CameraRuntimeStatus = (typeof CAMERA_RUNTIME_STATUSES)[number];
+
+export const CAMERA_SOURCE_RUNTIME_STATUSES = [
+  'NOT_CONFIGURED',
+  'STARTING',
+  'ONLINE',
+  'OFFLINE',
+  'FAILED',
+  'STOPPED',
+] as const;
+export type CameraSourceRuntimeStatus = (typeof CAMERA_SOURCE_RUNTIME_STATUSES)[number];
+
+export const FRIGATE_SYNC_STATUSES = ['PENDING', 'SYNCED', 'FAILED'] as const;
+export type FrigateSyncStatus = (typeof FRIGATE_SYNC_STATUSES)[number];

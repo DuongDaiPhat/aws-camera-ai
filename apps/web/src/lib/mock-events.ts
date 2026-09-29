@@ -151,15 +151,32 @@ function getEventAiResults(summary: UIEventItem) {
   const isFire = summary.eventType === 'FIRE_SMOKE_DETECTED';
   return [
     {
+      resultId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+      observationId: `mock-${summary.id}-face`,
+      revision: 1,
       module: isFire ? ('M3_FIRE' as const) : ('M1_FACE' as const),
       label: summary.eventType,
       confidence: summary.confidence ?? 0.85,
       modelVersion: 'v1.0.0',
+      processedAt: summary.detectedAt,
+      status: 'SUCCESS' as const,
+      error: null,
+      boundingBox: null,
+      metadata: {},
     },
     {
+      resultId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+      observationId: `mock-${summary.id}-zone`,
+      revision: 1,
       module: 'M4_ZONE' as const,
       label: summary.zone?.name ?? 'Khu vực chính',
       confidence: 1.0,
+      modelVersion: 'frigate-zone-v1',
+      processedAt: summary.detectedAt,
+      status: 'SUCCESS' as const,
+      error: null,
+      boundingBox: null,
+      metadata: {},
     },
   ];
 }
@@ -193,6 +210,8 @@ export function getMockEventDetail(summary: UIEventItem): EventDetail {
     trackId: `track_${summary.id.slice(0, 8)}`,
     aiLabel: summary.eventType,
     aiModelVersion: 'yolo-v8s-camai-2026.1',
+    aiProcessedAt: summary.detectedAt,
+    aggregateVersion: 1,
     retain: false,
     correlationId: `corr_${summary.id}`,
     notifiedAt: isNotified ? summary.detectedAt : null,

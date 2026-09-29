@@ -19,7 +19,7 @@ describe('EventsRepository (US-03, US-06)', () => {
 
       const res = await repository.findCameraBySlug('camera_1');
       expect(res).toEqual(mockCam);
-      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('WHERE slug = $1'), [
+      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('WHERE c.slug = $1'), [
         'camera_1',
       ]);
     });
@@ -55,7 +55,7 @@ describe('EventsRepository (US-03, US-06)', () => {
       source: 'FRIGATE',
       trackId: 'track-1',
       dedupKey: 'dedup-1',
-      confidence: 0.9,
+      detectionConfidence: 0.9,
       detectedAt: new Date(),
     };
 

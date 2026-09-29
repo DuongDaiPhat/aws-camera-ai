@@ -11,6 +11,7 @@ import { ListEventsQueryDto } from '../src/events/dto/list-events-query.dto';
 import { MediaService } from '../src/media/media.service';
 import { STORAGE_SERVICE, IStorageService } from '../src/storage/storage.interface';
 import { TOKEN_SERVICE, TokenService } from '../src/auth/auth.types';
+import { EscalationEngineService } from '../src/escalation/escalation-engine.service';
 
 describe('EventsService (US-06)', () => {
   let service: EventsService;
@@ -18,6 +19,7 @@ describe('EventsService (US-06)', () => {
   let storageService: jest.Mocked<IStorageService>;
   let tokenService: jest.Mocked<TokenService>;
   let mediaService: jest.Mocked<MediaService>;
+  let escalationEngineService: jest.Mocked<EscalationEngineService>;
 
   const mockRecord: EventListItemRecord = {
     id: '11111111-1111-1111-1111-111111111111',
@@ -61,6 +63,12 @@ describe('EventsService (US-06)', () => {
       verifyRefreshToken: jest.fn(),
     };
 
+    const mockEscalationEngineService = {
+      confirmInitial: jest.fn(),
+      closeEmergency: jest.fn(),
+      evaluateAndTransition: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EventsService,
@@ -68,6 +76,7 @@ describe('EventsService (US-06)', () => {
         { provide: MediaService, useValue: mockMediaService },
         { provide: STORAGE_SERVICE, useValue: mockStorageService },
         { provide: TOKEN_SERVICE, useValue: mockTokenService },
+        { provide: EscalationEngineService, useValue: mockEscalationEngineService },
       ],
     }).compile();
 
@@ -76,6 +85,7 @@ describe('EventsService (US-06)', () => {
     storageService = module.get(STORAGE_SERVICE);
     tokenService = module.get(TOKEN_SERVICE);
     mediaService = module.get(MediaService);
+    escalationEngineService = module.get(EscalationEngineService);
   });
 
   describe('listEvents', () => {
@@ -123,7 +133,7 @@ describe('EventsService (US-06)', () => {
       const result = await service.listEvents({ page: 1, pageSize: 10 });
       expect(result.data[0].thumbnailUrl).toBeNull();
       expect(result.data[0].camera).toBeNull();
-      expect(result.data[0].zone).toBeNull();
+      expect(result.data[0].zone).toEqual({ id: null, name: 'Khu vực sofa' });
       expect(result.data[0].confidence).toBeNull();
       expect(storageService.getPresignedUrl).not.toHaveBeenCalled();
     });
@@ -183,8 +193,21 @@ describe('EventsService (US-06)', () => {
       track_id: 'track-101',
       ai_label: 'person',
       ai_model_version: 'yolo-v8s',
+      ai_processed_at: new Date('2026-09-19T10:00:02Z'),
+      aggregate_version: 1,
       ai_results: [
-        { module: 'M1_FACE', label: 'UNKNOWN', confidence: 0.82 },
+        {
+          resultId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+          observationId: 'frame-1',
+          revision: 1,
+          module: 'M1_FACE',
+          label: 'UNKNOWN',
+          confidence: 0.82,
+          modelVersion: 'face-v1',
+          processedAt: '2026-09-19T10:00:02.000Z',
+          status: 'SUCCESS',
+          error: null,
+        },
         'khong phai object',
         { label: 'thieu confidence' },
       ],
@@ -195,6 +218,9 @@ describe('EventsService (US-06)', () => {
       escalated_at: null,
       resolved_at: null,
       closed_at: null,
+      version: 1,
+      rule_snapshot: null,
+      triggering_results: [],
     };
 
     it('tra ve chi tiet su kien kem media, ket qua AI va lich su trang thai', async () => {
@@ -257,9 +283,39 @@ describe('EventsService (US-06)', () => {
       eventsRepository.findEventDetailById.mockResolvedValueOnce({
         ...mockDetailRecord,
         ai_results: [
-          { module: 'M1_FACE', label: 'UNDETERMINED', confidence: null },
-          { module: 'M1_FACE', label: 'UNKNOWN', confidence: Number.NaN },
-          { module: 'M1_FACE', label: 'UNKNOWN', confidence: 1.1 },
+          {
+            resultId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+            observationId: 'frame-1',
+            revision: 1,
+            module: 'M1_FACE',
+            label: 'UNDETERMINED',
+            confidence: null,
+            modelVersion: 'face-v1',
+            processedAt: '2026-09-19T10:00:02.000Z',
+            status: 'SUCCESS',
+          },
+          {
+            resultId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+            observationId: 'frame-2',
+            revision: 1,
+            module: 'M1_FACE',
+            label: 'UNKNOWN',
+            confidence: Number.NaN,
+            modelVersion: 'face-v1',
+            processedAt: '2026-09-19T10:00:02.000Z',
+            status: 'SUCCESS',
+          },
+          {
+            resultId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3',
+            observationId: 'frame-3',
+            revision: 1,
+            module: 'M1_FACE',
+            label: 'UNKNOWN',
+            confidence: 1.1,
+            modelVersion: 'face-v1',
+            processedAt: '2026-09-19T10:00:02.000Z',
+            status: 'SUCCESS',
+          },
         ],
       });
       eventsRepository.listStatusHistoryByEventId.mockResolvedValueOnce([]);
@@ -269,7 +325,11 @@ describe('EventsService (US-06)', () => {
       });
       const detail = await service.getEvent(mockDetailRecord.id);
       expect(detail.aiResults).toEqual([
-        { module: 'M1_FACE', label: 'UNDETERMINED', confidence: null },
+        expect.objectContaining({
+          module: 'M1_FACE',
+          label: 'UNDETERMINED',
+          confidence: null,
+        }),
       ]);
     });
 
@@ -338,6 +398,72 @@ describe('EventsService (US-06)', () => {
       expect(stats.latestPendingEvent).toBeNull();
       expect(beforeCall - since.getTime()).toBeGreaterThanOrEqual(60 * 60 * 1000);
       expect(beforeCall - since.getTime()).toBeLessThan(61 * 60 * 1000);
+    });
+  });
+
+  describe('confirmEvent and closeEvent', () => {
+    it('gọi escalationEngineService.confirmInitial và emit SSE event.updated', async () => {
+      const mockResult = {
+        id: 'conf-1',
+        eventId: 'evt-1',
+        phase: 'INITIAL' as const,
+        response: 'IM_OK' as const,
+        channel: 'DASHBOARD' as const,
+        confirmedByName: 'Admin',
+        note: 'Ổn',
+        respondedAt: new Date().toISOString(),
+        resultingStatus: 'RESOLVED' as const,
+      };
+      escalationEngineService.confirmInitial.mockResolvedValueOnce(mockResult);
+      eventsRepository.findEventSummaryById.mockResolvedValueOnce(mockRecord);
+      storageService.getPresignedUrl.mockResolvedValueOnce({
+        url: 'https://minio.local/thumb.jpg',
+        expiresAt: new Date(),
+      });
+
+      const res = await service.confirmEvent('evt-1', 'user-1', {
+        response: 'IM_OK',
+        note: 'Ổn',
+      });
+
+      expect(res).toEqual(mockResult);
+      expect(escalationEngineService.confirmInitial).toHaveBeenCalledWith('evt-1', 'user-1', {
+        response: 'IM_OK',
+        note: 'Ổn',
+        commandId: undefined,
+        channel: 'DASHBOARD',
+      });
+    });
+
+    it('gọi escalationEngineService.closeEmergency và emit SSE event.updated', async () => {
+      const mockResult = {
+        id: 'conf-2',
+        eventId: 'evt-1',
+        phase: 'EMERGENCY' as const,
+        response: 'ACKNOWLEDGED' as const,
+        channel: 'DASHBOARD' as const,
+        confirmedByName: 'Caregiver',
+        note: 'Đã giải quyết',
+        respondedAt: new Date().toISOString(),
+        resultingStatus: 'CLOSED' as const,
+      };
+      escalationEngineService.closeEmergency.mockResolvedValueOnce(mockResult);
+      eventsRepository.findEventSummaryById.mockResolvedValueOnce(mockRecord);
+      storageService.getPresignedUrl.mockResolvedValueOnce({
+        url: 'https://minio.local/thumb.jpg',
+        expiresAt: new Date(),
+      });
+
+      const res = await service.closeEvent('evt-1', 'user-1', {
+        note: 'Đã giải quyết',
+      });
+
+      expect(res).toEqual(mockResult);
+      expect(escalationEngineService.closeEmergency).toHaveBeenCalledWith('evt-1', 'user-1', {
+        note: 'Đã giải quyết',
+        commandId: undefined,
+        channel: 'DASHBOARD',
+      });
     });
   });
 

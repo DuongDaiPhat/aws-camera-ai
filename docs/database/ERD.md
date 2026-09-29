@@ -1,7 +1,8 @@
 # Thiết kế cơ sở dữ liệu — ERD
 
 > **Task 0.3** · Người phụ trách: **B** (Backend Lead) · Sprint 0
-> DDL thực thi: [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`db/migrations/0002_seed_escalation_rules.sql`](../../db/migrations/0002_seed_escalation_rules.sql), [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql), [`db/migrations/0007_telegram_delivery.sql`](../../db/migrations/0007_telegram_delivery.sql)
+> DDL thực thi: [`db/migrations/0001_init.sql`](../../db/migrations/0001_init.sql), [`db/migrations/0002_seed_escalation_rules.sql`](../../db/migrations/0002_seed_escalation_rules.sql), [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql), [`db/migrations/0004_document_frigate_dedup_key.sql`](../../db/migrations/0004_document_frigate_dedup_key.sql), [`db/migrations/0005_escalation_rules_version_and_constraints.sql`](../../db/migrations/0005_escalation_rules_version_and_constraints.sql), [`db/migrations/0006_camera_sources_and_frigate_settings.sql`](../../db/migrations/0006_camera_sources_and_frigate_settings.sql), [`db/migrations/0007_face_collection_sync.sql`](../../db/migrations/0007_face_collection_sync.sql), [`db/migrations/0008_escalation_state_machine.sql`](../../db/migrations/0008_escalation_state_machine.sql), [`db/migrations/0009_zone_configuration.sql`](../../db/migrations/0009_zone_configuration.sql), [`db/migrations/0010_event_ai_result_receipts.sql`](../../db/migrations/0010_event_ai_result_receipts.sql)
+> Bổ sung Telegram và ngưỡng người lạ: [`db/migrations/0007_telegram_delivery.sql`](../../db/migrations/0007_telegram_delivery.sql), [`db/migrations/0010_update_unknown_person_thresholds.sql`](../../db/migrations/0010_update_unknown_person_thresholds.sql).
 > Tài liệu này giải thích **vì sao** thiết kế như vậy. File SQL là nguồn sự thật về **cấu trúc**.
 
 ## Mục lục
@@ -18,8 +19,8 @@
 
 ## 1. Sơ đồ tổng thể
 
-17 bảng hiện được mô tả: **10 bảng chính** theo task 0.3, **5 bảng bổ trợ** từ Sprint 0–1
-và **2 bảng Telegram** của US-14.
+Sơ đồ hiện mô tả **23 bảng**, bao gồm các bảng nghiệp vụ ban đầu và các bảng bổ trợ
+cho xác thực, camera, đồng bộ khuôn mặt/vùng, kết quả AI, outbox và Telegram.
 
 ```mermaid
 erDiagram
@@ -32,9 +33,13 @@ erDiagram
     users ||--o{ audit_logs : "thực hiện"
     users ||--o{ auth_refresh_tokens : "sở hữu"
     users ||--o{ telegram_link_requests : "tạo mã liên kết"
+    users ||--o{ face_collection_sync : "sở hữu"
     auth_refresh_tokens ||--o| auth_refresh_tokens : "thay thế bởi"
 
     devices ||--o{ cameras : "chứa"
+    cameras ||--o| camera_sources : "có nguồn phát"
+    cameras ||--o| camera_frigate_settings : "cấu hình Frigate"
+    cameras ||--o| frigate_config_sync_jobs : "chờ đồng bộ zone"
     cameras ||--o{ zones : "được chia thành"
     cameras ||--o{ events : "sinh ra"
     zones   ||--o{ events : "xảy ra trong"
@@ -47,6 +52,8 @@ erDiagram
     events ||--o{ notifications : "kích hoạt"
     events ||--o{ confirmations : "được xác nhận bởi"
     events ||--o{ event_status_history : "ghi lại"
+    events ||--o{ event_ai_result_receipts : "nhận kết quả AI"
+    events ||--o{ outbox_messages : "phát thay đổi"
 
     notifications ||--o{ confirmations : "được trả lời qua"
     emergency_contacts ||--o{ notifications : "nhận"
@@ -85,6 +92,44 @@ erDiagram
         smallint retention_days
     }
 
+    camera_sources {
+        uuid id PK
+        uuid camera_id FK,UK
+        camera_source_type_enum source_type
+        text rtsp_url "chỉ trả dạng đã che"
+        text video_object_key
+        text video_original_name
+        boolean video_loop
+        camera_transport_enum transport
+        camera_source_status_enum status
+        text last_error_code
+        text process_id
+    }
+
+    camera_frigate_settings {
+        uuid camera_id PK,FK
+        int detect_width
+        int detect_height
+        smallint detect_fps
+        numeric person_min_score
+        numeric person_threshold
+        boolean snapshots_enabled
+        boolean recording_enabled
+        int config_version
+        int applied_version
+        frigate_sync_status_enum sync_status
+        text[] managed_zone_slugs
+    }
+
+    frigate_config_sync_jobs {
+        uuid id PK
+        uuid camera_id FK,UK
+        int target_version
+        frigate_sync_status_enum status
+        int attempt_count
+        timestamptz next_attempt_at
+    }
+
     zones {
         uuid id PK
         uuid camera_id FK
@@ -116,24 +161,31 @@ erDiagram
         int t_wait_seconds
         boolean skip_logged_only
         jsonb notify_channels
+        int version
     }
 
     events {
         uuid id PK
         uuid camera_id FK
         uuid zone_id FK
+        text zone_name "snapshot tên vùng"
         event_type event_type
         event_status status
         priority_level priority
         text track_id
         text dedup_key UK
+        numeric detection_confidence "score Frigate"
         numeric confidence
         jsonb ai_results
+        bigint aggregate_version
         person_status person_status
         boolean is_false_alarm
         uuid correlation_id
         timestamptz detected_at
         timestamptz escalation_deadline_at
+        int version "optimistic locking"
+        jsonb rule_snapshot "snapshot cấu hình khi đánh giá"
+        jsonb triggering_results "danh sách nhãn AI kích hoạt"
     }
 
     event_media {
@@ -144,6 +196,30 @@ erDiagram
         text bucket
         text object_key
         timestamptz expires_at
+    }
+
+    event_ai_result_receipts {
+        uuid result_id PK
+        uuid event_id FK
+        text module
+        text observation_id
+        int revision
+        char payload_hash
+        jsonb payload
+        text status
+        timestamptz received_at
+        timestamptz processed_at
+    }
+
+    outbox_messages {
+        uuid id PK
+        uuid event_id FK
+        bigint aggregate_version
+        text message_type
+        jsonb payload
+        text status
+        int attempt_count
+        timestamptz available_at
     }
 
     notifications {
@@ -168,9 +244,10 @@ erDiagram
         uuid event_id FK
         uuid notification_id FK
         uuid user_id FK
+        confirmation_phase phase "INITIAL | EMERGENCY"
         notification_channel channel
         confirmation_response response
-        boolean is_authoritative "chỉ lần đầu = TRUE"
+        boolean is_authoritative "chỉ lần đầu mỗi phase = TRUE"
         timestamptz responded_at
     }
 
@@ -234,17 +311,29 @@ erDiagram
         text status
         timestamptz processed_at
     }
+
+    face_collection_sync {
+        uuid owner_user_id PK,FK
+        text model_version PK
+        smallint embedding_dim
+        integer version
+        integer synced_version
+        timestamptz last_synced_at
+    }
 ```
 
-### Vì sao có 5 bảng ngoài danh sách 10 bảng ban đầu
+### Vai trò của một số bảng bổ trợ
 
-| Bảng                   | Sinh ra từ                  | Nếu không có thì sao                                                                                                 |
-| ---------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `event_status_history` | FR-EVT-05, FR-ESC-09        | Không trả lời được "ai xác nhận, lúc nào, qua kênh nào" — một mục trong tiêu chí demo                                |
-| `emergency_contacts`   | FR-NOT-09, FR-NOT-10        | Không gọi tuần tự 3 liên hệ được; nhồi số điện thoại vào `users` là sai mô hình (liên hệ khẩn không cần tài khoản)   |
-| `wellness_schedules`   | FR-DET-M5-01                | Lịch kiểm tra phải hard-code — vi phạm "mọi tham số cấu hình được"                                                   |
-| `audit_logs`           | FR-LOG-01                   | Không chứng minh được đã ghi nhận hành vi nhạy cảm (xóa dữ liệu sinh trắc học) — phần Đạo đức của báo cáo sẽ hổng    |
-| `auth_refresh_tokens`  | US-05, FR-AUT-02, FR-AUT-04 | Không thể thu hồi JWT khi đăng xuất, không thể xoay vòng Refresh Token (Token Rotation) an toàn chống đánh cắp phiên |
+| Bảng                       | Sinh ra từ                  | Nếu không có thì sao                                                                                                 |
+| -------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `event_status_history`     | FR-EVT-05, FR-ESC-09        | Không trả lời được "ai xác nhận, lúc nào, qua kênh nào" — một mục trong tiêu chí demo                                |
+| `emergency_contacts`       | FR-NOT-09, FR-NOT-10        | Không gọi tuần tự 3 liên hệ được; nhồi số điện thoại vào `users` là sai mô hình (liên hệ khẩn không cần tài khoản)   |
+| `wellness_schedules`       | FR-DET-M5-01                | Lịch kiểm tra phải hard-code — vi phạm "mọi tham số cấu hình được"                                                   |
+| `audit_logs`               | FR-LOG-01                   | Không chứng minh được đã ghi nhận hành vi nhạy cảm (xóa dữ liệu sinh trắc học) — phần Đạo đức của báo cáo sẽ hổng    |
+| `auth_refresh_tokens`      | US-05, FR-AUT-02, FR-AUT-04 | Không thể thu hồi JWT khi đăng xuất, không thể xoay vòng Refresh Token (Token Rotation) an toàn chống đánh cắp phiên |
+| `camera_sources`           | CAM                         | Không thể quản lý thống nhất RTSP, webcam trình duyệt và video giả lập hoặc theo dõi vòng đời publisher              |
+| `camera_frigate_settings`  | CAM                         | Không thể lưu version, trạng thái đồng bộ và cấu hình detect/snapshot/recording riêng cho từng camera                |
+| `frigate_config_sync_jobs` | US-12                       | Công việc đồng bộ zone bị mất khi Orchestrator restart; retry cũ có thể ghi đè version mới                           |
 
 ---
 
@@ -344,13 +433,33 @@ phải chuyển quyền sở hữu trước.
 | `fps`            | Giới hạn 1–30. Máy yếu thì hạ xuống 5 (rủi ro R4)                                                                                                 |
 | `retention_days` | Cơ sở tính `event_media.expires_at` (FR-DAT-01)                                                                                                   |
 
+#### 3.3.1 `camera_sources`
+
+Mỗi camera có tối đa một nguồn đang cấu hình. `source_type` phân biệt camera RTSP thật,
+webcam publish từ trình duyệt và video upload dùng để giả lập camera. URL RTSP có thể
+chứa credential nên API chỉ trả bản đã che; log và response lỗi không được chứa URL gốc.
+
+`video_object_key` chỉ lưu tên file do backend sinh trong thư mục được quản lý. File video
+không nằm trong Git và được giữ trong Docker volume `camera-videos`. `status` phản ánh
+publisher/nguồn đang chạy, độc lập với trạng thái cấu hình mong muốn `cameras.is_enabled`.
+
+#### 3.3.2 `camera_frigate_settings`
+
+Bảng này lưu cấu hình detect, person, snapshot và recording của từng camera. Database là
+nguồn cấu hình của ứng dụng; Orchestrator sinh phần cấu hình camera rồi đồng bộ xuống
+Frigate.
+
+`config_version` tăng mỗi khi cấu hình thay đổi. `applied_version` chỉ tăng sau khi Frigate
+áp dụng thành công. Khi đồng bộ lỗi, cấu hình mới vẫn được giữ trong database,
+`sync_status = FAILED` và giao diện cho phép người dùng thử lại.
+
 ### 3.4 `zones`
 
 Vùng giám sát dạng đa giác trên khung hình (FR-DEV-02).
 
 **`polygon` lưu tọa độ chuẩn hóa 0..1, không phải pixel.** Admin vẽ vùng trên ảnh preview
-1280×720; sau này đổi camera sang 1920×1080 thì vùng vẫn đúng chỗ. Orchestrator quy đổi
-sang pixel khi sinh config cho Frigate.
+1280×720; sau này đổi camera sang 1920×1080 thì vùng vẫn đúng chỗ. Orchestrator giữ tọa
+độ chuẩn hóa khi sinh config tương thích Frigate 0.18.
 
 ```json
 {
@@ -373,7 +482,11 @@ Ba loại vùng (FR-DEV-03):
 
 `min_dwell_seconds` (mặc định 2 giây) loại trường hợp đi lướt qua bếp — FR-DET-M4-02.
 `active_from` / `active_to` cho phép tắt giám sát ban đêm; ràng buộc `zones_lich_day_du`
-bắt phải điền cả hai hoặc bỏ trống cả hai.
+bắt phải điền cả hai hoặc bỏ trống cả hai. Hai đầu bằng nhau bị từ chối; lịch qua nửa đêm
+được đánh giá theo múi giờ camera.
+
+`events.zone_name` là snapshot tên vùng lúc sự kiện được nâng thành `RESTRICTED_ZONE`.
+API ưu tiên snapshot này để đổi tên hoặc xóa zone không làm sai lịch sử.
 
 ### 3.5 `known_faces`
 
@@ -399,6 +512,8 @@ Cấu hình ngưỡng và thời gian chờ cho từng loại sự kiện (US-15
 
 Giá trị mặc định nằm trong migration `0002`, **không phải trong file seed demo** — vì
 FR-ADM-04 yêu cầu mọi môi trường (dev, CI, AWS) đều phải có sẵn khi khởi tạo.
+Migration `0005` bổ sung cột `version INTEGER NOT NULL DEFAULT 1` phục vụ optimistic concurrency control
+khi nhiều ADMIN cùng cấu hình đồng thời, kèm ràng buộc `(t_low IS NULL) = (t_high IS NULL)` và giới hạn `0 <= t_wait_seconds <= 3600`.
 
 `skip_logged_only = TRUE` là cách hiện thực US-19: cháy/khói bỏ qua bậc `LOGGED_ONLY`,
 vào thẳng `NOTIFIED` bất kể confidence.
@@ -463,7 +578,36 @@ Tách thành bảng `event_ai_results` sẽ chuẩn hơn về lý thuyết, như
 cùng lúc với sự kiện** và không bao giờ truy vấn độc lập. JSONB + index GIN là đủ, mà tiết kiệm
 được một JOIN trên đường nóng nhất của hệ thống.
 
-### 3.8 `event_media`
+#### `detection_confidence` và `confidence` — hai score khác nghĩa
+
+`detection_confidence` giữ score phát hiện người của Frigate. `confidence` chỉ giữ score của
+đúng nhãn AI đại diện (`ai_label`). Khi chưa có inference, `confidence` là `NULL`; hệ thống không
+lấy score Frigate để giả làm score UNKNOWN/KNOWN. Migration 0010 chuyển score của event cũ chưa
+có `ai_label` sang `detection_confidence`.
+
+#### `aggregate_version` — thứ tự projection và handoff
+
+Mỗi AI result thực sự được áp dụng làm tăng `aggregate_version`. SSE và escalation handoff dùng
+`(event_id, aggregate_version, message_type)` làm khóa chống phát lặp; replay/stale result không
+làm tăng version.
+
+### 3.8 `event_ai_result_receipts`
+
+Durable inbox của US-11. `result_id` là khóa idempotency; `payload_hash` phân biệt replay cùng nội
+dung với việc tái sử dụng ID cho nội dung khác. Mỗi receipt giữ module, observation, revision và
+payload đã validate. Revision cũ vẫn được lưu với `status = IGNORED` cùng lý do để audit, nhưng
+không thay projection hiện tại. Bảng bị xóa theo event (`ON DELETE CASCADE`), nên retention đi cùng
+chính sách retention của event và không giữ dữ liệu nhạy cảm lâu hơn sự kiện.
+
+### 3.9 `outbox_messages`
+
+Transactional outbox dùng chung cho `event.updated` và `evaluate-escalation`. Bản ghi outbox được
+commit cùng receipt và projection; network/SSE chỉ chạy sau commit. Unique key
+`(event_id, aggregate_version, message_type)` chặn tạo hai handoff cho cùng một version. Lease và
+`attempt_count` cho phép worker khác nhận lại sau crash; US-13 tái sử dụng bảng này thay vì tạo
+outbox thứ hai.
+
+### 3.10 `event_media`
 
 Metadata của ảnh/clip. File thật ở MinIO/S3.
 
@@ -478,7 +622,7 @@ Tiền tố theo ngày giúp lifecycle rule của S3 hoạt động hiệu quả
 
 `expires_at` là `NULL` khi `events.retain = TRUE` (FR-DAT-02).
 
-### 3.9 `emergency_contacts`
+### 3.11 `emergency_contacts`
 
 Tối đa 3 liên hệ, gọi tuần tự theo `priority_order` (FR-NOT-09). Ràng buộc
 `emergency_contacts_thu_tu_duy_nhat` chặn hai liên hệ cùng thứ tự 1 — nếu không, thứ tự gọi
@@ -487,7 +631,7 @@ phụ thuộc vào may rủi của planner.
 `is_verified` phản ánh giới hạn thật: SNS sandbox và Connect chỉ gửi tới số đã verify.
 FR-NOT-06 yêu cầu ghi log rõ lý do thất bại, không im lặng bỏ qua.
 
-### 3.10 `notifications`
+### 3.12 `notifications`
 
 Mỗi lần gửi là một bản ghi, kể cả gửi lại (FR-NOT-04).
 
@@ -501,7 +645,7 @@ Mỗi lần gửi là một bản ghi, kể cả gửi lại (FR-NOT-04).
 Ràng buộc `notifications_co_nguoi_nhan`: phải có ít nhất một trong `recipient_user_id`
 hoặc `emergency_contact_id`.
 
-### 3.11 `confirmations`
+### 3.13 `confirmations`
 
 Ai bấm nút gì, lúc nào, qua kênh nào.
 
@@ -517,7 +661,7 @@ CREATE UNIQUE INDEX uq_confirmations_lan_dau_tien ON confirmations (event_id)
 Partial unique index: mỗi sự kiện chỉ có **một** xác nhận `is_authoritative = TRUE`. Các lần
 sau ghi với `FALSE`. Ai bấm trước thắng — do database quyết định, không do thứ tự chạy của code.
 
-### 3.12 `event_status_history`
+### 3.14 `event_status_history`
 
 Nhật ký chuyển trạng thái (FR-EVT-05). Ghi một dòng cho **mọi** lần đổi `events.status`,
 kể cả do hệ thống tự làm.
@@ -531,7 +675,7 @@ ESCALATED → CLOSED    reason='CONTACT_ACKNOWLEDGED'    actor=EMERGENCY_CONTACT
 Đây là nguồn dữ liệu cho phần "lịch sử chuyển trạng thái" ở trang chi tiết sự kiện (US-21)
 và cũng là bằng chứng khi hội đồng hỏi "làm sao biết hệ thống đã leo thang đúng".
 
-### 3.13 `wellness_schedules`
+### 3.15 `wellness_schedules`
 
 Lịch kiểm tra hiện diện (US-20). `days_of_week` dùng `SMALLINT[]` với quy ước ISO:
 **1 = Thứ Hai … 7 = Chủ Nhật**.
@@ -539,14 +683,14 @@ Lịch kiểm tra hiện diện (US-20). `days_of_week` dùng `SMALLINT[]` với
 `camera_ids UUID[]` rỗng nghĩa là xét mọi camera của hộ. Dùng mảng thay vì bảng nối vì
 danh sách rất ngắn và luôn đọc trọn gói.
 
-### 3.14 `audit_logs`
+### 3.16 `audit_logs`
 
 Hành động nhạy cảm (FR-LOG-01): đăng nhập, xóa dữ liệu khuôn mặt, đổi cấu hình ngưỡng.
 
 `actor_user_id` dùng `ON DELETE SET NULL` — xóa người dùng **không** được xóa mất dấu vết
 hành động của họ.
 
-### 3.15 `auth_refresh_tokens`
+### 3.17 `auth_refresh_tokens`
 
 Quản lý phiên đăng nhập và vòng đời Refresh Token (US-05, FR-AUT-02, FR-AUT-04).
 DDL thực thi: [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migrations/0003_auth_refresh_tokens.sql).
@@ -572,6 +716,21 @@ DDL thực thi: [`db/migrations/0003_auth_refresh_tokens.sql`](../../db/migratio
       WHERE revoked_at IS NULL;
   ```
   Chỉ chứa các token còn hoạt động (`revoked_at IS NULL`), tối ưu tuyệt đối tốc độ xác thực và gia hạn phiên đăng nhập.
+
+### 3.16 `face_collection_sync`
+
+Bảng quản lý trạng thái đồng bộ (synchronization) đặc trưng khuôn mặt (embedding) từ CSDL Postgres sang bộ nhớ (in-memory collection) của AI Service. Được sinh ra ở US-09.
+
+| Cột              | Ghi chú                                                                   |
+| ---------------- | ------------------------------------------------------------------------- |
+| `owner_user_id`  | Người dùng sở hữu bộ sưu tập mặt (`ON DELETE CASCADE` khi xóa tài khoản)  |
+| `model_version`  | Phiên bản model AI (mỗi model có một collection riêng rẽ)                 |
+| `embedding_dim`  | Số chiều của vector (ví dụ 128) để khởi tạo index trong AI Service        |
+| `version`        | Tăng lên 1 mỗi khi có thêm khuôn mặt mới được người dùng đăng ký          |
+| `synced_version` | Trạng thái AI Service báo về đã đồng bộ đến version nào (để tải thay đổi) |
+| `last_synced_at` | Thời điểm AI Service đồng bộ thành công gần nhất                          |
+
+**Thiết kế bền vững:** Việc quản lý `version` và `synced_version` trực tiếp trong Database giúp chống mất mát dữ liệu (Data Loss) nếu AI Service bị sập ngang, tránh việc phải dùng hàng đợi (Message Queue) phức tạp mà dễ lỗi cho việc đồng bộ khuôn mặt.
 
 ---
 

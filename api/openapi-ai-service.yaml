@@ -307,8 +307,11 @@ components:
 
     EmbedResponse:
       type: object
-      required: [modelVersion]
+      required:
+        [modelVersion, embeddingBase64, embeddingDim, faces, error, provider, selectedFaceIndex]
       properties:
+        provider: { type: string, enum: [local, rekognition] }
+        selectedFaceIndex: { type: [integer, "null"], minimum: 0 }
         embeddingBase64:
           type: ["string", "null"]
           description: float32 array da pack, base64. Null khi co loi.
@@ -352,7 +355,11 @@ components:
           minimum: 0
           maximum: 1
           description: Do tuong dong cosine voi ban ghi khop nhat.
-        thresholdUsed: { type: number }
+        thresholdUsed:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Nguong matching thuc te cua request, hoac FACE_MATCH_THRESHOLD khi khong truyen threshold.
         boundingBox:
           oneOf:
             - $ref: "#/components/schemas/BoundingBox"

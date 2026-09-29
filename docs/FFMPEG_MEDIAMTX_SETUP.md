@@ -164,7 +164,7 @@ ffmpeg -re -stream_loop -1 -i .\datasets\fall_01.mp4 `
 Nếu codec của file không tương thích với client, mã hóa lại thành H.264:
 
 ```powershell
-ffmpeg -re -stream_loop -1 -i .\datasets\fall_01.mp4 `
+ffmpeg -re -stream_loop -1 -i .\datasets\samples\caviar_Browse1.mp4 `
   -c:v libx264 -preset ultrafast -tune zerolatency -an `
   -f rtsp -rtsp_transport tcp `
   rtsp://localhost:8554/cam_test

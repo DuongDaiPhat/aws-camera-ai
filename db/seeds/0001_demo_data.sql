@@ -46,17 +46,17 @@ INSERT INTO zones (camera_id, name, slug, zone_type, polygon) VALUES
 ON CONFLICT (camera_id, slug) DO NOTHING;
 
 -- 5. Thêm Known Faces
-INSERT INTO known_faces (owner_user_id, person_name, relationship, provider, embedding, embedding_dim) VALUES 
-('11111111-1111-4111-8111-111111111111', 'Ong Noi', 'Ong', 'LOCAL', decode('00', 'hex'), 128),
-('11111111-1111-4111-8111-111111111111', 'Ba Ngoai', 'Ba', 'LOCAL', decode('00', 'hex'), 128),
-('11111111-1111-4111-8111-111111111111', 'Con Trai', 'Con', 'LOCAL', decode('00', 'hex'), 128),
-('11111111-1111-4111-8111-111111111111', 'Con Gai', 'Con', 'LOCAL', decode('00', 'hex'), 128),
-('11111111-1111-4111-8111-111111111111', 'Nguoi Giup Viec', 'Giup Viec', 'LOCAL', decode('00', 'hex'), 128)
+INSERT INTO known_faces (owner_user_id, person_name, relationship, provider, embedding, embedding_dim, model_version) VALUES 
+('11111111-1111-4111-8111-111111111111', 'Ong Noi', 'Ong', 'LOCAL', decode(repeat('0000803f', 128), 'hex'), 128, 'yunet-2023mar-sface-2021dec'),
+('11111111-1111-4111-8111-111111111111', 'Ba Ngoai', 'Ba', 'LOCAL', decode(repeat('0000803f', 128), 'hex'), 128, 'yunet-2023mar-sface-2021dec'),
+('11111111-1111-4111-8111-111111111111', 'Con Trai', 'Con', 'LOCAL', decode(repeat('0000803f', 128), 'hex'), 128, 'yunet-2023mar-sface-2021dec'),
+('11111111-1111-4111-8111-111111111111', 'Con Gai', 'Con', 'LOCAL', decode(repeat('0000803f', 128), 'hex'), 128, 'yunet-2023mar-sface-2021dec'),
+('11111111-1111-4111-8111-111111111111', 'Nguoi Giup Viec', 'Giup Viec', 'LOCAL', decode(repeat('0000803f', 128), 'hex'), 128, 'yunet-2023mar-sface-2021dec')
 ON CONFLICT (owner_user_id, person_name) DO NOTHING;
 
 -- 6. Thêm Escalation Rules
 INSERT INTO escalation_rules (event_type, priority, t_low, t_high, t_wait_seconds, skip_logged_only) VALUES
-('FIRE_SMOKE_DETECTED', 'P0', NULL, 0.5, 30, TRUE),
+('FIRE_SMOKE_DETECTED', 'P0', 0.5, 0.7, 30, TRUE),
 ('FALL_DETECTED', 'P1', 0.4, 0.8, 60, FALSE),
 ('UNKNOWN_PERSON', 'P2', 0.6, 0.85, 120, FALSE),
 ('RESTRICTED_ZONE', 'P2', NULL, NULL, 60, FALSE),

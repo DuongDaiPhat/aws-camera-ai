@@ -169,7 +169,7 @@ File: [`infra/frigate/config.example.yml`](../infra/frigate/config.example.yml)
 | Cấu hình                           | Giá trị                 | Vì sao                                                                                                  |
 | ---------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------- |
 | Image                              | `frigate:0.18.0` (ghim) | `version` trong config phải khớp image; tag `stable` tự nhảy phiên bản làm Frigate không khởi động được |
-| `version`                          | `0.18-0`                | Config mount read-only — lệch version thì Frigate cố migrate (ghi đè file) và lỗi                       |
+| `version`                          | `0.18-0`                | Phải khớp image đã ghim; config mount read-write để Orchestrator đồng bộ thay đổi đã validation         |
 | `detectors`                        | OpenVINO trên CPU       | Model có sẵn trong image, chạy mọi CPU x86, ~20 ms/lần suy luận. CPU thuần để sẵn trong comment         |
 | `detect.fps`                       | `5`                     | Đủ cho người đi bộ, giảm tải máy yếu (ghi chú kỹ thuật US-01, rủi ro R4)                                |
 | `detect.min_initialized`           | `5`                     | **AC US-01 "quá 1 giây"**: 5 frame liên tiếp × 5 fps = 1 giây mới tạo track                             |

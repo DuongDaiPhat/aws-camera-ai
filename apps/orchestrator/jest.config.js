@@ -4,7 +4,10 @@ module.exports = {
   rootDir: '.',
   // Integration test dùng Docker được chạy riêng bằng `pnpm test:integration`.
   testRegex: '^(?!.*\\.integration\\.spec\\.ts$).*\\.spec\\.ts$',
-  transform: { '^.+\.ts$': 'ts-jest' },
+  transform: { '^.+\\.ts$': 'ts-jest' },
+  moduleNameMapper: {
+    '^@nestjs/bullmq$': '<rootDir>/test/mocks/nestjs-bullmq.ts',
+  },
   collectCoverageFrom: ['src/**/*.ts', '!src/main.ts', '!src/**/*.module.ts'],
   coverageDirectory: './coverage',
   testEnvironment: 'node',
