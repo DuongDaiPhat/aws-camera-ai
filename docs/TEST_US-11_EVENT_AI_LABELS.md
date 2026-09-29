@@ -31,14 +31,14 @@
 
 ## 2. Ma Tran Kiem Thu Tu Dong
 
-| Khu vuc / Module | Lenh / File test | Ket qua |
-| :-- | :-- | :-- |
-| AI service face matching | `node tools/scripts/py.mjs pytest` | 31 pass; coverage 94.34% |
-| Worker + validator + aggregator + zone producer | `face-recognition.worker.spec.ts`, `ai-result.validator.spec.ts`, `ai-result.aggregator.spec.ts`, `zone-result-producer.service.spec.ts` | 38 pass |
-| PostgreSQL integration | `apps/orchestrator/test/ai-results-db.integration.spec.ts` | 23 pass |
-| Orchestrator typecheck | `pnpm --filter @cam/orchestrator typecheck` | Pass |
-| Contracts | `pnpm --filter @cam/contracts build` | Pass |
-| API lint | `pnpm api:lint` | Pass; con 3 warning co san ngoai US-11 |
+| Khu vuc / Module                                | Lenh / File test                                                                                                                         | Ket qua                                |
+| :---------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------- |
+| AI service face matching                        | `node tools/scripts/py.mjs pytest`                                                                                                       | 31 pass; coverage 94.34%               |
+| Worker + validator + aggregator + zone producer | `face-recognition.worker.spec.ts`, `ai-result.validator.spec.ts`, `ai-result.aggregator.spec.ts`, `zone-result-producer.service.spec.ts` | 38 pass                                |
+| PostgreSQL integration                          | `apps/orchestrator/test/ai-results-db.integration.spec.ts`                                                                               | 23 pass                                |
+| Orchestrator typecheck                          | `pnpm --filter @cam/orchestrator typecheck`                                                                                              | Pass                                   |
+| Contracts                                       | `pnpm --filter @cam/contracts build`                                                                                                     | Pass                                   |
+| API lint                                        | `pnpm api:lint`                                                                                                                          | Pass; con 3 warning co san ngoai US-11 |
 
 Lenh chay nhanh:
 
@@ -103,15 +103,15 @@ Ket qua mong doi:
 
 Bang chung da kiem:
 
-| Truong | Gia tri |
-| :-- | :-- |
-| `track_id` | `1790668598.324929-2wyw54` |
-| `event_id` | `054b4fa5-e076-478c-9c6d-3f2f694911b6` |
-| `person_status` / `ai_label` | `KNOWN` / `KNOWN` |
-| `matched_known_face` | `Nhan` |
-| `confidence` | `0.735382080078125` |
-| `status` / `priority` | `LOGGED_ONLY` / `P3` |
-| Notification | `0` |
+| Truong                       | Gia tri                                |
+| :--------------------------- | :------------------------------------- |
+| `track_id`                   | `1790668598.324929-2wyw54`             |
+| `event_id`                   | `054b4fa5-e076-478c-9c6d-3f2f694911b6` |
+| `person_status` / `ai_label` | `KNOWN` / `KNOWN`                      |
+| `matched_known_face`         | `Nhan`                                 |
+| `confidence`                 | `0.735382080078125`                    |
+| `status` / `priority`        | `LOGGED_ONLY` / `P3`                   |
+| Notification                 | `0`                                    |
 
 ### Kich ban 2: M1 nhan dien nguoi la `UNKNOWN`
 
@@ -128,15 +128,15 @@ Ket qua mong doi:
 
 Bang chung da kiem:
 
-| Truong | Gia tri |
-| :-- | :-- |
-| `track_id` | `1790665902.323126-xtawab` |
-| `event_id` | `df9c89ea-a7fd-4e42-ae1a-1d4a9bc6f20a` |
-| `person_status` / `ai_label` | `UNKNOWN` / `UNKNOWN` |
-| `similarity` | `0.36421969532966614` |
-| `confidence` | `0.6357803046703339` |
-| `status` / `priority` | `ESCALATED` / `P2` |
-| Outbox | `event.updated` va `evaluate-escalation` da `PROCESSED` |
+| Truong                       | Gia tri                                                 |
+| :--------------------------- | :------------------------------------------------------ |
+| `track_id`                   | `1790665902.323126-xtawab`                              |
+| `event_id`                   | `df9c89ea-a7fd-4e42-ae1a-1d4a9bc6f20a`                  |
+| `person_status` / `ai_label` | `UNKNOWN` / `UNKNOWN`                                   |
+| `similarity`                 | `0.36421969532966614`                                   |
+| `confidence`                 | `0.6357803046703339`                                    |
+| `status` / `priority`        | `ESCALATED` / `P2`                                      |
+| Outbox                       | `event.updated` va `evaluate-escalation` da `PROCESSED` |
 
 ### Kich ban 3: M1 khong du chat luong `UNDETERMINED`
 
@@ -152,15 +152,15 @@ Ket qua mong doi:
 
 Bang chung da kiem:
 
-| Truong | Gia tri |
-| :-- | :-- |
-| `track_id` | `1790666098.987664-ou4ue5` |
-| `event_id` | `666713c5-0404-48b8-aa84-479ff94faf16` |
-| `person_status` / `ai_label` | `UNDETERMINED` / `UNDETERMINED` |
-| `qualityReason` | `NO_FACE_DETECTED` |
-| `confidence` | `NULL` |
-| `status` / `priority` | `LOGGED_ONLY` / `P3` |
-| Notification | `0` |
+| Truong                       | Gia tri                                |
+| :--------------------------- | :------------------------------------- |
+| `track_id`                   | `1790666098.987664-ou4ue5`             |
+| `event_id`                   | `666713c5-0404-48b8-aa84-479ff94faf16` |
+| `person_status` / `ai_label` | `UNDETERMINED` / `UNDETERMINED`        |
+| `qualityReason`              | `NO_FACE_DETECTED`                     |
+| `confidence`                 | `NULL`                                 |
+| `status` / `priority`        | `LOGGED_ONLY` / `P3`                   |
+| Notification                 | `0`                                    |
 
 ### Kich ban 4: M1 + M4 cung event
 
@@ -178,15 +178,15 @@ Ket qua mong doi:
 
 Bang chung da kiem:
 
-| Truong | Gia tri |
-| :-- | :-- |
-| `track_id` | `1790668023.49604-41vzms` |
-| `event_id` | `f4c30904-44a5-4ab5-94fe-5456dd90db55` |
-| M1 | `UNDETERMINED`, `NO_FACE_DETECTED`, confidence `NULL` |
-| M4 | `RESTRICTED_ZONE`, confidence `0.7957610487937927` |
-| Projection dai dien | `RESTRICTED_ZONE` / `P1` |
-| `aggregate_version` | `8` |
-| Outbox | `evaluate-escalation` va `event.updated` da `PROCESSED` |
+| Truong              | Gia tri                                                 |
+| :------------------ | :------------------------------------------------------ |
+| `track_id`          | `1790668023.49604-41vzms`                               |
+| `event_id`          | `f4c30904-44a5-4ab5-94fe-5456dd90db55`                  |
+| M1                  | `UNDETERMINED`, `NO_FACE_DETECTED`, confidence `NULL`   |
+| M4                  | `RESTRICTED_ZONE`, confidence `0.7957610487937927`      |
+| Projection dai dien | `RESTRICTED_ZONE` / `P1`                                |
+| `aggregate_version` | `8`                                                     |
+| Outbox              | `evaluate-escalation` va `event.updated` da `PROCESSED` |
 
 ---
 
