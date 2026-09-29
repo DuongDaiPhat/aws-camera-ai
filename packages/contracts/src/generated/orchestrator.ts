@@ -932,8 +932,10 @@ export interface paths {
          * Callback khi nguoi dung bam nut trong Telegram
          * @description US-14. Xac thuc bang header `X-Telegram-Bot-Api-Secret-Token`.
          *     Body la Update object cua Telegram. update_id duoc ghi inbox duy nhat
-         *     truoc khi ACK 200. Callback xac nhan tra 503 cho den khi US-13 cung
-         *     cap confirmation service; Telegram se gui lai update.
+         *     truoc khi ACK 200; worker xu ly bat dong bo qua confirmation service US-13.
+         *     Kiem tra actor da lien ket, quyen camera, notification, chat/message va TTL.
+         *     Replay khong tao them confirmation. Callback da xu ly/sai quyen duoc ACK,
+         *     ket qua tra qua answerCallbackQuery; edit tin nhan duoc retry rieng.
          */
         post: operations["telegramWebhook"];
         delete?: never;
@@ -1657,7 +1659,10 @@ export interface components {
         };
         EscalationRule: {
             version?: number;
+            /** @description Thời gian hiệu lực nhánh tin cậy cao; dùng highWaitSeconds đã lưu, không tự chia đôi. */
             readonly effectiveHighWaitSeconds?: number;
+            /** @description Thời gian nhập tay cho confidence >= T_high, phải nhỏ hơn tWaitSeconds. Null với rule không dùng nhánh này. */
+            highWaitSeconds?: number | null;
             eventType: components["schemas"]["EventType"];
             priority: components["schemas"]["PriorityLevel"];
             /** @description Duoi nguong nay -> LOGGED_ONLY, khong lam phien ai. */
@@ -1679,11 +1684,13 @@ export interface components {
             /** @description Tên người dùng cập nhật gần nhất. */
             updatedByName?: string | null;
         };
-        /** @description tLow <= tHigh; WELLNESS_TIMEOUT requires both null. Other alert types require both numbers. Updates only future evaluations. */
+        /** @description tLow <= tHigh; WELLNESS_TIMEOUT requires both null. Other alert types require both numbers. highWaitSeconds is a non-negative integer less than tWaitSeconds when applicable. Updates only future evaluations; existing deadlines are not reset. */
         UpdateEscalationThresholdsRequest: {
             tLow: number | null;
             tHigh: number | null;
             tWaitSeconds: number;
+            /** @description Nhập tay, phải nhỏ hơn tWaitSeconds; bỏ trường này để giữ giá trị đang lưu. Null với FIRE/WELLNESS không dùng nhánh chia theo confidence. */
+            highWaitSeconds?: number | null;
             expectedVersion: number;
         };
         UpdateEscalationRuleRequest: {
@@ -3741,7 +3748,9 @@ export interface operations {
     telegramWebhook: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                "X-Telegram-Bot-Api-Secret-Token": string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -3753,7 +3762,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Da ghi va xu ly update hoac update trung lap */
+            /** @description Da luu ben vung update hoac nhan update trung lap */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3762,8 +3771,15 @@ export interface operations {
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
-            /** @description Confirmation service chua san sang, Telegram can gui lai */
-            503: {
+            /** @description Update ID/callback ID da ton tai voi noi dung khac */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Khong luu duoc inbox, Telegram can gui lai */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -1,16 +1,8 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  Logger,
-  ServiceUnavailableException,
-} from '@nestjs/common';
-import { TELEGRAM_CHANNEL, type TelegramChannel } from '../notification-channel.interface';
-import { TelegramLinkService } from './telegram-link.service';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { hashTelegramLinkToken } from './telegram-link.service';
 import { TelegramWebhookRepository } from './telegram-webhook.repository';
 
-type TelegramUpdate =
+export type TelegramUpdate =
   | {
       kind: 'CALLBACK';
       updateId: number;
@@ -88,13 +80,7 @@ export function parseTelegramUpdate(value: unknown): TelegramUpdate {
 
 @Injectable()
 export class TelegramWebhookService {
-  private readonly logger = new Logger(TelegramWebhookService.name);
-
-  constructor(
-    private readonly inbox: TelegramWebhookRepository,
-    private readonly links: TelegramLinkService,
-    @Inject(TELEGRAM_CHANNEL) private readonly telegram: TelegramChannel,
-  ) {}
+  constructor(private readonly inbox: TelegramWebhookRepository) {}
 
   async receive(body: unknown): Promise<{ ok: true }> {
     const update = parseTelegramUpdate(body);
@@ -109,27 +95,7 @@ export class TelegramWebhookService {
         : update;
     await this.inbox.store(update.updateId, minimalBody);
 
-    if (update.kind === 'CALLBACK') {
-      // Keep the update in the durable inbox until US-13 provides the canonical confirm port.
-      throw new ServiceUnavailableException('Confirmation service chưa sẵn sàng.');
-    }
-    if (update.kind === 'LINK' && !(await this.inbox.isProcessed(update.updateId))) {
-      const linked = await this.links.consume(update.token, update.actorId, update.chatId);
-      await this.inbox.markProcessed(update.updateId);
-      try {
-        await this.telegram.sendMessage(
-          update.chatId,
-          linked
-            ? 'Đã liên kết Telegram với tài khoản CameraAI.'
-            : 'Mã liên kết không hợp lệ hoặc đã hết hạn.',
-          { inline_keyboard: [] },
-        );
-      } catch {
-        this.logger.warn(`Không thể trả lời liên kết Telegram updateId=${update.updateId}`);
-      }
-    } else {
-      await this.inbox.markProcessed(update.updateId);
-    }
+    // ACK sau khi lưu bền vững; worker xử lý cả callback/link sau restart.
     return { ok: true };
   }
 }

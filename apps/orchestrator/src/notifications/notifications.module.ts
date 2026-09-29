@@ -1,4 +1,10 @@
 import { Module } from '@nestjs/common';
+import { EscalationModule } from '../escalation/escalation.module';
+import { EventsModule } from '../events/events.module';
+import { TelegramCallbackService } from './telegram/telegram-callback.service';
+import { TelegramWorkConfig } from './telegram/telegram-work.config';
+import { TelegramWorkRepository } from './telegram/telegram-work.repository';
+import { TelegramWorkWorker } from './telegram/telegram-work-worker.service';
 import { NotificationRetryWorker } from './notification-retry-worker.service';
 import { TELEGRAM_CHANNEL } from './notification-channel.interface';
 import { NotificationsRepository } from './notifications.repository';
@@ -12,8 +18,13 @@ import { TelegramWebhookRepository } from './telegram/telegram-webhook.repositor
 import { TelegramWebhookService } from './telegram/telegram-webhook.service';
 
 @Module({
+  imports: [EscalationModule, EventsModule],
   controllers: [TelegramLinkController, TelegramWebhookController],
   providers: [
+    TelegramCallbackService,
+    TelegramWorkConfig,
+    TelegramWorkRepository,
+    TelegramWorkWorker,
     NotificationsRepository,
     NotificationRetryWorker,
     TelegramAdapter,

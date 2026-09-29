@@ -42,6 +42,20 @@ export class UpdateEscalationThresholdsDto {
   tWaitSeconds!: number;
 
   @ApiProperty({
+    required: false,
+    nullable: true,
+    minimum: 0,
+    maximum: 3599,
+    description: 'Thời gian nhánh tin cậy cao nhập tay, phải nhỏ hơn tWaitSeconds.',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @Max(3599)
+  highWaitSeconds?: number | null;
+
+  @ApiProperty({
     example: 1,
     description: 'Phiên bản cấu hình hiện tại trong DB (chống ghi đè đồng thời).',
     minimum: 1,

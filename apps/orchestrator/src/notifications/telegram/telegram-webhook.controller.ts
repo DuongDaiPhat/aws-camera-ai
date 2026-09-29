@@ -14,7 +14,7 @@ export class TelegramWebhookController {
   @Post()
   @HttpCode(200)
   @ApiOperation({ summary: 'Nhận Telegram update đã ký bằng webhook secret' })
-  @ApiResponse({ status: 200, description: 'Update đã được ghi và xử lý' })
+  @ApiResponse({ status: 200, description: 'Update đã được lưu bền vững để xử lý' })
   receive(@Body() body: unknown): Promise<{ ok: true }> {
     return this.webhook.receive(body);
   }

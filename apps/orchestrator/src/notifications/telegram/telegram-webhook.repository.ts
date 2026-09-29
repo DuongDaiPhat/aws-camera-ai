@@ -10,7 +10,7 @@ export class TelegramWebhookRepository {
       `
       INSERT INTO telegram_webhook_inbox (update_id, update_body)
       VALUES ($1, $2::jsonb)
-      ON CONFLICT (update_id) DO NOTHING
+      ON CONFLICT DO NOTHING
       RETURNING update_id
     `,
       [updateId, JSON.stringify(minimalBody)],
@@ -18,8 +18,10 @@ export class TelegramWebhookRepository {
     if (result.rowCount === 1) return true;
     const existing = await this.database.query<{ same_payload: boolean }>(
       `
-      SELECT update_body = $2::jsonb AS same_payload
-      FROM telegram_webhook_inbox WHERE update_id = $1 LIMIT 1
+      SELECT (update_body - 'updateId') = ($2::jsonb - 'updateId') AS same_payload
+      FROM telegram_webhook_inbox
+      WHERE update_id = $1 OR update_body ->> 'callbackId' = $2::jsonb ->> 'callbackId'
+      LIMIT 1
     `,
       [updateId, JSON.stringify(minimalBody)],
     );

@@ -1,22 +1,30 @@
 import {
   computeEffectiveHighWaitSeconds,
   validateThresholdUpdate,
+  validateHighWaitSeconds,
 } from '../src/escalation-rules/escalation-rule-policy';
 
 describe('EscalationRulePolicy (US-15, US-13)', () => {
   describe('computeEffectiveHighWaitSeconds', () => {
     it.each([
-      [1, 1],
-      [2, 1],
-      [3, 2],
-      [30, 15],
-      [60, 30],
-      [120, 60],
-      [300, 150],
-      [3600, 1800],
-    ])('với tWaitSeconds = %d giây, trả về %d giây', (tWait, expected) => {
-      expect(computeEffectiveHighWaitSeconds(tWait)).toBe(expected);
+      [1, 0, 0],
+      [60, 17, 17],
+      [300, 17, 17],
+      [60, null, 60],
+      [120, undefined, 120],
+    ])('base=%d, high=%s dùng đúng %d giây', (tWait, highWait, expected) => {
+      expect(computeEffectiveHighWaitSeconds(tWait, highWait)).toBe(expected);
     });
+  });
+
+  it.each([-1, 60, 61, 1.5, NaN, Infinity])(
+    'từ chối highWaitSeconds không hợp lệ %s',
+    (seconds) => {
+      expect(validateHighWaitSeconds(seconds, 60)?.errorCode).toBe('INVALID_HIGH_WAIT_SECONDS');
+    },
+  );
+  it.each([0, 17, 59])('chấp nhận highWaitSeconds < T_wait: %s', (seconds) => {
+    expect(validateHighWaitSeconds(seconds, 60)).toBeNull();
   });
 
   describe('validateThresholdUpdate', () => {

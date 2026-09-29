@@ -45,7 +45,7 @@ describe('Telegram webhook', () => {
     telegram.sendMessage.mockResolvedValue({ chatId: '12345', messageId: '42' });
   });
 
-  it('liên kết tài khoản sau khi ghi inbox và không lưu token thô', async () => {
+  it('ACK sau khi lưu yêu cầu liên kết, không lưu token thô hay gọi mạng trong request', async () => {
     await expect(service.receive(LINK_UPDATE)).resolves.toEqual({ ok: true });
 
     expect(inbox.store).toHaveBeenCalledWith(
@@ -56,8 +56,9 @@ describe('Telegram webhook', () => {
       }),
     );
     expect(JSON.stringify(inbox.store.mock.calls[0][1])).not.toContain('x'.repeat(43));
-    expect(links.consume).toHaveBeenCalledWith('x'.repeat(43), '12345', '12345');
-    expect(inbox.markProcessed).toHaveBeenCalledWith(1001);
+    expect(links.consume).not.toHaveBeenCalled();
+    expect(telegram.sendMessage).not.toHaveBeenCalled();
+    expect(inbox.markProcessed).not.toHaveBeenCalled();
   });
 
   it('bỏ qua group chat mà không cấp quyền liên kết', () => {
@@ -69,7 +70,7 @@ describe('Telegram webhook', () => {
     ).toEqual({ kind: 'IGNORED', updateId: 1001 });
   });
 
-  it('giữ callback trong inbox và báo chưa sẵn sàng khi thiếu US-13', async () => {
+  it('ACK callback đã lưu bền vững để worker gọi US-13', async () => {
     const callback = {
       update_id: 1002,
       callback_query: {
@@ -79,7 +80,7 @@ describe('Telegram webhook', () => {
         data: 'cf:6cc3d21fefe44bb4b32dce067494d70a:ok',
       },
     };
-    await expect(service.receive(callback)).rejects.toMatchObject({ status: 503 });
+    await expect(service.receive(callback)).resolves.toEqual({ ok: true });
     expect(inbox.store).toHaveBeenCalledWith(
       1002,
       expect.objectContaining({
@@ -88,6 +89,11 @@ describe('Telegram webhook', () => {
       }),
     );
     expect(inbox.markProcessed).not.toHaveBeenCalled();
+  });
+
+  it('không ACK thành công khi database không lưu được inbox', async () => {
+    inbox.store.mockRejectedValueOnce(new Error('DB unavailable'));
+    await expect(service.receive(LINK_UPDATE)).rejects.toThrow('DB unavailable');
   });
 });
 

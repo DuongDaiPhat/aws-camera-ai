@@ -4,6 +4,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import type {
   EventType,
@@ -33,6 +34,23 @@ export interface ConfirmationResultDto {
   note: string | null;
   respondedAt: string;
   resultingStatus: EventStatus;
+}
+
+interface InitialConfirmationParams {
+  response: ConfirmationResponse;
+  note?: string;
+  channel?: NotificationChannel;
+  commandId?: string;
+  notificationId?: string;
+  sourceMessageId?: string;
+  sourceUpdateId?: string;
+  telegramSource?: {
+    notificationId: string;
+    telegramUserId: string;
+    chatId: string;
+    messageId: string;
+    ttlSeconds: number;
+  };
 }
 
 @Injectable()
@@ -115,6 +133,7 @@ export class EscalationEngineService {
           tLow: rule.t_low !== null ? Number(rule.t_low) : null,
           tHigh: rule.t_high !== null ? Number(rule.t_high) : null,
           tWaitSeconds: rule.t_wait_seconds,
+          highWaitSeconds: rule.high_wait_seconds,
           skipLoggedOnly: rule.skip_logged_only,
           notifyChannels: rule.notify_channels,
           escalateChannels: rule.escalate_channels,
@@ -198,6 +217,61 @@ export class EscalationEngineService {
     return updated;
   }
 
+  private async findInitialTelegramReplay(
+    client: PoolClient,
+    eventId: string,
+    actorUserId: string,
+    params: InitialConfirmationParams,
+  ): Promise<ConfirmationResultDto | null> {
+    if (params.channel !== 'TELEGRAM') return null;
+    if (
+      !params.telegramSource ||
+      !params.sourceUpdateId ||
+      params.telegramSource.notificationId !== params.notificationId ||
+      params.telegramSource.messageId !== params.sourceMessageId ||
+      !(await this.repository.authorizeTelegramConfirmation(
+        client,
+        eventId,
+        actorUserId,
+        params.telegramSource,
+      ))
+    ) {
+      throw new ForbiddenException('Bạn không có quyền xác nhận tin Telegram này.');
+    }
+    const replay = await this.repository.findTelegramReplay(client, params.sourceUpdateId);
+    if (!replay) return null;
+    if (
+      replay.event_id !== eventId ||
+      replay.user_id !== actorUserId ||
+      replay.notification_id !== params.notificationId ||
+      replay.source_message_id !== params.sourceMessageId ||
+      replay.response !== params.response ||
+      replay.phase !== 'INITIAL'
+    ) {
+      throw new ConflictException({
+        code: 'SOURCE_UPDATE_CONFLICT',
+        message: 'Nguồn xác nhận đã được sử dụng.',
+      });
+    }
+    if (!replay.is_authoritative) {
+      throw new ConflictException({
+        code: 'ALREADY_CONFIRMED',
+        message: 'Sự kiện đã được xử lý.',
+      });
+    }
+    return {
+      id: replay.id,
+      eventId,
+      phase: 'INITIAL',
+      response: replay.response,
+      channel: replay.channel,
+      confirmedByName: replay.confirmed_by_name ?? null,
+      note: replay.note,
+      respondedAt: replay.responded_at.toISOString(),
+      resultingStatus: replay.response === 'IM_OK' ? 'RESOLVED' : 'ESCALATED',
+    };
+  }
+
   private async markAiOutboxProcessed(client: PoolClient, messageId: string): Promise<void> {
     await client.query(
       `UPDATE outbox_messages
@@ -213,12 +287,7 @@ export class EscalationEngineService {
   async confirmInitial(
     eventId: string,
     actorUserId: string,
-    params: {
-      response: ConfirmationResponse;
-      note?: string;
-      channel?: NotificationChannel;
-      commandId?: string;
-    },
+    params: InitialConfirmationParams,
   ): Promise<ConfirmationResultDto> {
     if (params.response !== 'IM_OK' && params.response !== 'NEED_HELP') {
       throw new BadRequestException('Giai đoạn ban đầu chỉ chấp nhận IM_OK hoặc NEED_HELP');
@@ -230,6 +299,12 @@ export class EscalationEngineService {
       const event = await this.repository.findEventForUpdate(client, eventId);
       if (!event) {
         throw new NotFoundException(`Không tìm thấy sự kiện ${eventId}`);
+      }
+
+      const replay = await this.findInitialTelegramReplay(client, eventId, actorUserId, params);
+      if (replay) {
+        await client.query('COMMIT');
+        return replay;
       }
 
       // Kiem tra da co xac nhan authoritative INITIAL chua
@@ -248,7 +323,9 @@ export class EscalationEngineService {
           phase: 'INITIAL',
           isAuthoritative: false,
           note: params.note ?? null,
-          sourceMessageId: params.commandId ?? null,
+          notificationId: params.notificationId,
+          sourceMessageId: params.sourceMessageId ?? params.commandId ?? null,
+          sourceUpdateId: params.sourceUpdateId,
         });
 
         await client.query('COMMIT'); // Commit audit record
@@ -297,7 +374,9 @@ export class EscalationEngineService {
         phase: 'INITIAL',
         isAuthoritative: true,
         note: params.note ?? null,
-        sourceMessageId: params.commandId ?? null,
+        notificationId: params.notificationId,
+        sourceMessageId: params.sourceMessageId ?? params.commandId ?? null,
+        sourceUpdateId: params.sourceUpdateId,
       });
 
       await this.repository.updateEventStatus(client, eventId, event.version, {

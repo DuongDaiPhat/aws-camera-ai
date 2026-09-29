@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { TelegramApiError } from './telegram-api.error';
+export { TelegramApiError } from './telegram-api.error';
 import type {
   TelegramButtons,
   TelegramChannel,
@@ -10,26 +12,13 @@ interface TelegramResponse<Result> {
   ok: boolean;
   result?: Result;
   error_code?: number;
+  description?: string;
   parameters?: { retry_after?: number };
 }
 
 interface TelegramMessageResponse {
   message_id: number;
   chat: { id: number | string };
-}
-
-export class TelegramApiError extends Error {
-  constructor(
-    message: string,
-    readonly status: number | null,
-    readonly retryAfterSeconds: number | null = null,
-  ) {
-    super(message);
-  }
-
-  get permanent(): boolean {
-    return this.status !== null && this.status >= 400 && this.status < 500 && this.status !== 429;
-  }
 }
 
 @Injectable()
@@ -60,6 +49,7 @@ export class TelegramAdapter implements TelegramChannel {
     form.set('reply_markup', JSON.stringify(buttons));
     form.set('photo', new Blob([new Uint8Array(photo)], { type: 'image/jpeg' }), 'snapshot.jpg');
     const message = await this.call<TelegramMessageResponse>('sendPhoto', form);
+    if (!message) throw new TelegramApiError('Thiếu kết quả gửi ảnh Telegram.', null);
     return { chatId: String(message.chat.id), messageId: String(message.message_id) };
   }
 
@@ -73,6 +63,7 @@ export class TelegramAdapter implements TelegramChannel {
       text,
       reply_markup: buttons,
     });
+    if (!message) throw new TelegramApiError('Thiếu kết quả gửi tin Telegram.', null);
     return { chatId: String(message.chat.id), messageId: String(message.message_id) };
   }
 
@@ -106,7 +97,7 @@ export class TelegramAdapter implements TelegramChannel {
     });
   }
 
-  private async call<Result>(method: string, body: object | FormData): Promise<Result> {
+  private async call<Result>(method: string, body: object | FormData): Promise<Result | undefined> {
     if (!this.token) throw new TelegramApiError('Telegram chưa được cấu hình.', 401);
     const isForm = body instanceof FormData;
     let response: Response;
@@ -122,10 +113,13 @@ export class TelegramAdapter implements TelegramChannel {
       throw new TelegramApiError('Không nhận được phản hồi từ Telegram.', null);
     }
 
-    return this.parseResponse<Result>(response);
+    return this.parseResponse<Result>(response, method);
   }
 
-  private async parseResponse<Result>(response: Response): Promise<Result> {
+  private async parseResponse<Result>(
+    response: Response,
+    method: string,
+  ): Promise<Result | undefined> {
     let data: TelegramResponse<Result>;
     try {
       data = (await response.json()) as TelegramResponse<Result>;
@@ -133,6 +127,13 @@ export class TelegramAdapter implements TelegramChannel {
       throw new TelegramApiError('Phản hồi Telegram không hợp lệ.', response.status);
     }
     if (!response.ok || !data.ok || data.result === undefined) {
+      // Telegram có thể đã sửa tin trước khi kết nối bị ngắt. Replay edit là thành công.
+      if (
+        method.startsWith('editMessage') &&
+        data.error_code === 400 &&
+        data.description?.includes('message is not modified')
+      )
+        return undefined;
       throw new TelegramApiError(
         `Telegram trả mã ${data.error_code ?? response.status}.`,
         data.error_code ?? response.status,

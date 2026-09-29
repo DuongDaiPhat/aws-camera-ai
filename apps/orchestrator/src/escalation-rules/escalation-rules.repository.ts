@@ -1,7 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_POOL } from '../database/database.module';
 import type { EventType, PriorityLevel, NotificationChannel } from '@cam/contracts';
+import { validateHighWaitSeconds } from './escalation-rule-policy';
 
 export interface EscalationRuleRecord {
   id: string;
@@ -10,6 +11,7 @@ export interface EscalationRuleRecord {
   t_low: string | null;
   t_high: string | null;
   t_wait_seconds: number;
+  high_wait_seconds: number | null;
   skip_logged_only: boolean;
   notify_channels: NotificationChannel[];
   escalate_channels: NotificationChannel[];
@@ -25,6 +27,7 @@ export interface UpdateThresholdsParams {
   tLow: number | null;
   tHigh: number | null;
   tWaitSeconds: number;
+  highWaitSeconds?: number | null;
   expectedVersion: number;
   actorUserId: string;
   clientIp?: string | null;
@@ -62,6 +65,7 @@ export class EscalationRulesRepository {
         er.t_low,
         er.t_high,
         er.t_wait_seconds,
+        er.high_wait_seconds,
         er.skip_logged_only,
         er.notify_channels,
         er.escalate_channels,
@@ -95,6 +99,7 @@ export class EscalationRulesRepository {
         er.t_low,
         er.t_high,
         er.t_wait_seconds,
+        er.high_wait_seconds,
         er.skip_logged_only,
         er.notify_channels,
         er.escalate_channels,
@@ -118,7 +123,7 @@ export class EscalationRulesRepository {
 
       // Khóa dòng để tránh race conditions (FR-ADM-03, optimistic locking)
       const selectQuery = `
-        SELECT id, event_type, version, t_low, t_high, t_wait_seconds
+        SELECT id, event_type, version, t_low, t_high, t_wait_seconds, high_wait_seconds, skip_logged_only
         FROM escalation_rules
         WHERE event_type::text = $1
         FOR UPDATE;
@@ -130,6 +135,8 @@ export class EscalationRulesRepository {
         t_low: string | null;
         t_high: string | null;
         t_wait_seconds: number;
+        high_wait_seconds: number | null;
+        skip_logged_only: boolean;
       }>(selectQuery, [params.eventType]);
 
       if (currentRes.rows.length === 0) {
@@ -141,6 +148,26 @@ export class EscalationRulesRepository {
         throw new RuleVersionConflictError(current.version);
       }
 
+      const usesHighWait =
+        !current.skip_logged_only && params.tLow !== null && params.tHigh !== null;
+      const highWaitSeconds = usesHighWait
+        ? params.highWaitSeconds === undefined
+          ? current.high_wait_seconds
+          : params.highWaitSeconds
+        : null;
+      const highWaitError = validateHighWaitSeconds(highWaitSeconds, params.tWaitSeconds);
+      if (usesHighWait && (highWaitSeconds === null || highWaitSeconds === undefined)) {
+        throw new BadRequestException('Vui lòng nhập thời gian nhánh khẩn cấp.');
+      }
+      if (highWaitError) throw new BadRequestException(highWaitError.message);
+      if (
+        !usesHighWait &&
+        params.highWaitSeconds !== undefined &&
+        params.highWaitSeconds !== null
+      ) {
+        throw new BadRequestException('Rule này không sử dụng thời gian nhánh khẩn cấp riêng.');
+      }
+
       const updateQuery = `
         UPDATE escalation_rules
         SET
@@ -148,7 +175,8 @@ export class EscalationRulesRepository {
           t_high = $2,
           t_wait_seconds = $3,
           updated_by_user_id = $4,
-          version = version + 1
+          version = version + 1,
+          high_wait_seconds = $7
         WHERE event_type::text = $5 AND version = $6
         RETURNING
           id,
@@ -157,6 +185,7 @@ export class EscalationRulesRepository {
           t_low,
           t_high,
           t_wait_seconds,
+          high_wait_seconds,
           skip_logged_only,
           notify_channels,
           escalate_channels,
@@ -172,6 +201,7 @@ export class EscalationRulesRepository {
         params.actorUserId,
         params.eventType,
         params.expectedVersion,
+        highWaitSeconds,
       ]);
 
       if (updateRes.rows.length === 0) {
@@ -200,11 +230,13 @@ export class EscalationRulesRepository {
           tLow: current.t_low !== null ? Number(current.t_low) : null,
           tHigh: current.t_high !== null ? Number(current.t_high) : null,
           tWaitSeconds: current.t_wait_seconds,
+          highWaitSeconds: current.high_wait_seconds,
         },
         after: {
           tLow: params.tLow,
           tHigh: params.tHigh,
           tWaitSeconds: params.tWaitSeconds,
+          highWaitSeconds,
         },
         correlationId: params.correlationId ?? null,
       };

@@ -7,6 +7,7 @@ export interface TelegramNotificationJob {
   eventId: string;
   leaseToken: string;
   attemptCount: number;
+  maxAttempts?: number;
   escalationLevel: number;
   status: string;
   correlationId: string;
@@ -28,6 +29,7 @@ interface ClaimedRow {
   event_id: string;
   lease_token: string;
   attempt_count: number;
+  max_attempts: number;
   escalation_level: number;
   status: string;
   correlation_id: string;
@@ -49,7 +51,7 @@ const CLAIM_TELEGRAM_SQL = `
     SELECT n.id FROM notifications n
     WHERE n.channel = 'TELEGRAM'
       AND n.status IN ('PENDING', 'FAILED')
-      AND n.attempt_count < 4
+      AND n.attempt_count < CASE WHEN n.attempt_count = 0 THEN $3 ELSE n.max_attempts END
       AND (n.status = 'PENDING' OR (n.next_retry_at IS NOT NULL AND n.next_retry_at <= now()))
       AND (n.lease_until IS NULL OR n.lease_until <= now())
     ORDER BY n.created_at, n.id
@@ -57,14 +59,15 @@ const CLAIM_TELEGRAM_SQL = `
     LIMIT $1
   ), claimed AS (
     UPDATE notifications n
-    SET attempt_count = n.attempt_count + 1, max_attempts = 4,
+    SET attempt_count = n.attempt_count + 1,
+        max_attempts = CASE WHEN n.attempt_count = 0 THEN $3 ELSE n.max_attempts END,
         lease_token = gen_random_uuid(),
         lease_until = now() + ($2 * interval '1 second')
     FROM ready WHERE n.id = ready.id
     RETURNING n.id, n.event_id, n.recipient_user_id,
-              n.lease_token, n.attempt_count, n.escalation_level
+              n.lease_token, n.attempt_count, n.max_attempts, n.escalation_level
   )
-  SELECT n.id, n.event_id, n.lease_token, n.attempt_count, n.escalation_level,
+  SELECT n.id, n.event_id, n.lease_token, n.attempt_count, n.max_attempts, n.escalation_level,
          e.status, e.correlation_id, u.telegram_chat_id, u.telegram_user_id,
          u.telegram_linked_at, u.is_active, e.event_type,
          c.name AS camera_name, z.name AS zone_name, e.detected_at,
@@ -88,6 +91,7 @@ function toTelegramJob(row: ClaimedRow): TelegramNotificationJob {
     eventId: row.event_id,
     leaseToken: row.lease_token,
     attemptCount: row.attempt_count,
+    maxAttempts: row.max_attempts,
     escalationLevel: row.escalation_level,
     status: row.status,
     correlationId: row.correlation_id,
@@ -112,6 +116,7 @@ export class NotificationsRepository {
   async claimTelegramBatch(
     limit: number,
     leaseSeconds: number,
+    maxAttempts = 4,
   ): Promise<TelegramNotificationJob[]> {
     return this.database.transaction(async (client) => {
       await client.query(`
@@ -119,9 +124,13 @@ export class NotificationsRepository {
         SET status = 'FAILED', failed_at = now(), next_retry_at = NULL,
             error_code = 'LEASE_EXHAUSTED', lease_token = NULL, lease_until = NULL
         WHERE channel = 'TELEGRAM' AND status IN ('PENDING', 'FAILED')
-          AND attempt_count >= 4 AND lease_until IS NOT NULL AND lease_until <= now()
+          AND attempt_count >= max_attempts AND lease_until IS NOT NULL AND lease_until <= now()
       `);
-      const claimed = await client.query<ClaimedRow>(CLAIM_TELEGRAM_SQL, [limit, leaseSeconds]);
+      const claimed = await client.query<ClaimedRow>(CLAIM_TELEGRAM_SQL, [
+        limit,
+        leaseSeconds,
+        maxAttempts,
+      ]);
       return claimed.rows.map(toTelegramJob);
     });
   }
@@ -148,17 +157,24 @@ export class NotificationsRepository {
     return status === 'NOTIFIED' || (status === 'ESCALATED' && escalationLevel > 0);
   }
 
-  async markSent(job: TelegramNotificationJob, chatId: string, messageId: string): Promise<void> {
+  async markSent(
+    job: TelegramNotificationJob,
+    chatId: string,
+    messageId: string,
+    kind: 'PHOTO' | 'TEXT' | null = null,
+    text: string | null = null,
+  ): Promise<void> {
     const result = await this.database.query<{ id: string }>(
       `
       UPDATE notifications
       SET status = 'SENT', provider_chat_id = $3, provider_message_id = $4,
+          telegram_message_kind = $5, telegram_message_text = $6,
           sent_at = now(), failed_at = NULL, next_retry_at = NULL,
           error_code = NULL, error_message = NULL, lease_token = NULL, lease_until = NULL
       WHERE id = $1 AND lease_token = $2 AND status IN ('PENDING', 'FAILED')
       RETURNING id
     `,
-      [job.id, job.leaseToken, chatId, messageId],
+      [job.id, job.leaseToken, chatId, messageId, kind, text],
     );
     if (result.rowCount !== 1) throw new Error('Telegram notification lease đã hết hiệu lực.');
   }

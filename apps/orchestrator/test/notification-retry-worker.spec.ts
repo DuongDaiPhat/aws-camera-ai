@@ -83,7 +83,13 @@ describe('NotificationRetryWorker', () => {
       expect.stringContaining('Người không quen'),
       expect.objectContaining({ inline_keyboard: expect.any(Array) }),
     );
-    expect(repository.markSent).toHaveBeenCalledWith(JOB, '12345', '42');
+    expect(repository.markSent).toHaveBeenCalledWith(
+      JOB,
+      '12345',
+      '42',
+      'PHOTO',
+      expect.stringContaining('Cảnh báo:'),
+    );
     expect(telegram.sendMessage).not.toHaveBeenCalled();
   });
 
@@ -149,7 +155,13 @@ describe('NotificationRetryWorker', () => {
       expect.stringContaining('Chưa lấy được ảnh'),
       expect.objectContaining({ inline_keyboard: expect.any(Array) }),
     );
-    expect(repository.markSent).toHaveBeenCalledWith(expect.any(Object), '12345', '43');
+    expect(repository.markSent).toHaveBeenCalledWith(
+      expect.any(Object),
+      '12345',
+      '43',
+      'TEXT',
+      expect.stringContaining('Chưa lấy được ảnh'),
+    );
   });
 
   it('dừng retry khi bot bị Telegram chặn vĩnh viễn', async () => {

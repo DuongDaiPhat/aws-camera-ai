@@ -32,6 +32,7 @@ describe('escalation-rules-client', () => {
       tLow: 0.6,
       tHigh: 0.8,
       tWaitSeconds: 45,
+      highWaitSeconds: 17,
       expectedVersion: 1,
     };
 

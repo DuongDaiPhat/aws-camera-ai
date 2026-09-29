@@ -44,6 +44,8 @@ export interface ConfirmationRecord {
   note: string | null;
   responded_at: Date;
   confirmed_by_name?: string | null;
+  notification_id?: string | null;
+  source_message_id?: string | null;
 }
 
 export class EventNotFoundError extends Error {
@@ -182,13 +184,14 @@ export class EscalationRepository {
       isAuthoritative: boolean;
       note?: string | null;
       sourceMessageId?: string | null;
+      sourceUpdateId?: string | null;
     },
   ): Promise<ConfirmationRecord> {
     const query = `
       INSERT INTO confirmations (
         event_id, notification_id, user_id, emergency_contact_id,
-        channel, response, phase, is_authoritative, note, source_message_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        channel, response, phase, is_authoritative, note, source_message_id, source_update_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING id, event_id, user_id, emergency_contact_id, channel, response, phase, is_authoritative, note, responded_at;
     `;
     const res = await client.query<ConfirmationRecord>(query, [
@@ -202,6 +205,7 @@ export class EscalationRepository {
       data.isAuthoritative,
       data.note ?? null,
       data.sourceMessageId ?? null,
+      data.sourceUpdateId ?? null,
     ]);
 
     const created = res.rows[0];
@@ -231,6 +235,59 @@ export class EscalationRepository {
     `;
     const res = await client.query<ConfirmationRecord>(query, [eventId, phase]);
     return res.rows[0] ?? null;
+  }
+
+  async findTelegramReplay(
+    client: PoolClient,
+    updateId: string,
+  ): Promise<ConfirmationRecord | null> {
+    const result = await client.query<ConfirmationRecord>(
+      `SELECT c.id, c.event_id, c.user_id, c.emergency_contact_id, c.channel,
+              c.response, c.phase, c.is_authoritative, c.note, c.responded_at,
+              c.notification_id, c.source_message_id, u.full_name AS confirmed_by_name
+       FROM confirmations c LEFT JOIN users u ON u.id = c.user_id
+       WHERE c.channel = 'TELEGRAM' AND c.source_update_id = $1 LIMIT 1`,
+      [updateId],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  async authorizeTelegramConfirmation(
+    client: PoolClient,
+    eventId: string,
+    actorUserId: string,
+    source: {
+      notificationId: string;
+      telegramUserId: string;
+      chatId: string;
+      messageId: string;
+      ttlSeconds: number;
+    },
+  ): Promise<boolean> {
+    const result = await client.query<{ id: string }>(
+      `SELECT n.id FROM notifications n
+       JOIN events e ON e.id = n.event_id
+       JOIN cameras c ON c.id = e.camera_id JOIN devices d ON d.id = c.device_id
+       JOIN users u ON u.id = n.recipient_user_id
+       WHERE n.id = $1 AND n.event_id = $2 AND n.channel = 'TELEGRAM'
+         AND n.escalation_level = 0 AND n.status IN ('SENT', 'CONFIRMED')
+         AND u.id = $3 AND u.is_active = TRUE AND u.role IN ('ADMIN', 'CAREGIVER')
+         AND (u.id = d.owner_user_id OR u.role = 'ADMIN')
+         AND u.telegram_user_id = $4 AND u.telegram_linked_at IS NOT NULL
+         AND u.telegram_chat_id = $5 AND n.provider_chat_id = $5 AND n.provider_message_id = $6
+         AND n.sent_at > now() - ($7 * interval '1 second')
+       FOR SHARE OF u, n`,
+      [
+        source.notificationId,
+        eventId,
+        actorUserId,
+        source.telegramUserId,
+        source.chatId,
+        source.messageId,
+        source.ttlSeconds,
+      ],
+    );
+    return result.rowCount === 1;
   }
 
   async createNotificationIntent(

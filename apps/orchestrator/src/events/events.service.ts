@@ -170,6 +170,11 @@ export class EventsService {
     return result;
   }
 
+  async publishCommittedUpdate(eventId: string): Promise<void> {
+    const summary = await this.eventsRepository.findEventSummaryById(eventId);
+    if (summary) this.emitEvent(await this.toEventSummary(summary), 'event.updated');
+  }
+
   /**
    * Đóng sự kiện khẩn cấp sau khi đã tiếp nhận và can thiệp - FR-ESC-04/09 (US-13 Phase EMERGENCY).
    */

@@ -19,6 +19,7 @@ export interface EscalationRuleLookup {
   tLow: number | null;
   tHigh: number | null;
   tWaitSeconds: number;
+  highWaitSeconds?: number | null;
   skipLoggedOnly: boolean;
   notifyChannels: NotificationChannel[];
   escalateChannels: NotificationChannel[];
@@ -136,7 +137,7 @@ function qualifyCandidate(
   if (!hasQualifyingScore(candidate.confidence, rule.tLow)) return null;
   const effectiveWait =
     rule.tHigh !== null && candidate.confidence >= rule.tHigh
-      ? computeEffectiveHighWaitSeconds(rule.tWaitSeconds)
+      ? computeEffectiveHighWaitSeconds(rule.tWaitSeconds, rule.highWaitSeconds)
       : rule.tWaitSeconds;
   return { candidate, effectiveWait, rule };
 }
@@ -190,6 +191,7 @@ export function evaluateEscalationPolicy(
       tLow: dominant.rule.tLow,
       tHigh: dominant.rule.tHigh,
       tWaitSeconds: dominant.rule.tWaitSeconds,
+      highWaitSeconds: dominant.rule.highWaitSeconds ?? null,
       effectiveWaitSeconds: dominant.effectiveWait,
       version: dominant.rule.version,
     },

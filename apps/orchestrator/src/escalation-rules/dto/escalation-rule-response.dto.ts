@@ -8,6 +8,9 @@ export class EscalationRuleDto {
   @ApiProperty({ example: 15, description: 'Thời gian chờ ưu tiên cho nhánh confidence >= T_high' })
   effectiveHighWaitSeconds!: number;
 
+  @ApiProperty({ nullable: true, description: 'Thời gian nhánh tin cậy cao đã lưu, nhập tay.' })
+  highWaitSeconds!: number | null;
+
   @ApiProperty({
     example: 'FIRE_SMOKE_DETECTED',
     enum: [

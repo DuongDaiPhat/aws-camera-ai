@@ -3,6 +3,12 @@
 import React from 'react';
 import type { EscalationRule } from '@/lib/escalation-rules-client';
 import type { RuleDraft } from '@/hooks/useEscalationRules';
+import {
+  isValidWaitSeconds,
+  isValidHighWaitSeconds,
+  usesShortenedWait,
+} from '@/lib/escalation-wait-settings';
+import { EscalationWaitControl } from './EscalationWaitControl';
 import styles from './settings-view.module.css';
 
 interface EscalationRuleCardProps {
@@ -34,24 +40,25 @@ export function EscalationRuleCard({
 }: EscalationRuleCardProps) {
   const isWellness = rule.eventType === 'WELLNESS_TIMEOUT';
 
-  // Computed policy preview cho nhánh confidence cao (US-13, US-15)
-  const computedHighWait = Math.max(1, Math.ceil((draft.tWaitSeconds || 1) / 2));
-
   // Kiểm tra tính hợp lệ cơ bản tại form
   const isThresholdInvalid =
     !isWellness &&
     (draft.tLow === null ||
       draft.tHigh === null ||
+      !Number.isFinite(draft.tLow) ||
+      !Number.isFinite(draft.tHigh) ||
       draft.tLow < 0 ||
       draft.tLow > 1 ||
       draft.tHigh < 0 ||
       draft.tHigh > 1 ||
       draft.tLow > draft.tHigh);
 
-  const isWaitInvalid =
-    typeof draft.tWaitSeconds !== 'number' || draft.tWaitSeconds < 1 || draft.tWaitSeconds > 3600;
+  const isWaitInvalid = !isValidWaitSeconds(draft.tWaitSeconds);
 
-  const canSave = isAdmin && isDirty && !isThresholdInvalid && !isWaitInvalid && !isSaving;
+  const isHighWaitInvalid =
+    usesShortenedWait(rule) && !isValidHighWaitSeconds(draft.highWaitSeconds, draft.tWaitSeconds);
+  const canSave =
+    isAdmin && isDirty && !isThresholdInvalid && !isWaitInvalid && !isHighWaitInvalid && !isSaving;
 
   const priorityClass =
     rule.priority === 'P0'
@@ -102,6 +109,14 @@ export function EscalationRuleCard({
 
       {/* Body */}
       <div className={styles.cardBody}>
+        <EscalationWaitControl
+          rule={{ ...rule, highWaitSeconds: draft.highWaitSeconds }}
+          seconds={draft.tWaitSeconds}
+          hasUnsavedChanges={isDirty}
+          disabled={!isAdmin || isSaving}
+          onChange={(seconds) => onUpdateDraft(rule.eventType, 'tWaitSeconds', seconds)}
+          onHighWaitChange={(seconds) => onUpdateDraft(rule.eventType, 'highWaitSeconds', seconds)}
+        />
         {isWellness ? (
           <div className={styles.notApplicableBox}>
             Sự kiện an sinh được kích hoạt theo lịch kiểm tra định kỳ (không sử dụng ngưỡng
@@ -172,51 +187,6 @@ export function EscalationRuleCard({
             </div>
           </div>
         )}
-
-        <div className={styles.inputsGrid}>
-          <div className={styles.fieldGroup}>
-            <label htmlFor={`tWait-${rule.eventType}`} className={styles.fieldLabel}>
-              <span>Thời gian chờ phản hồi (T_wait)</span>
-              {draft.tWaitSeconds >= 60 && (
-                <span style={{ color: '#64748b', fontWeight: 500, fontSize: 12 }}>
-                  (~{(draft.tWaitSeconds / 60).toFixed(1).replace('.0', '')} phút)
-                </span>
-              )}
-            </label>
-            <span className={styles.fieldHint}>
-              Đơn vị: <strong>giây</strong> (1–3600 giây). Hết thời gian này nếu chưa có ai phản hồi
-              sẽ tự động gọi điện khẩn cấp.
-            </span>
-            <div className={styles.inputWrapper}>
-              <input
-                id={`tWait-${rule.eventType}`}
-                type="number"
-                step="1"
-                min="1"
-                max="3600"
-                disabled={!isAdmin || isSaving}
-                className={styles.inputNumber}
-                value={draft.tWaitSeconds}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value, 10);
-                  onUpdateDraft(rule.eventType, 'tWaitSeconds', Number.isNaN(val) ? 0 : val);
-                }}
-              />
-              <span className={styles.inputSuffix}>giây</span>
-            </div>
-          </div>
-
-          <div className={styles.fieldGroup}>
-            <span className={styles.fieldLabel}>Chờ ưu tiên tự động (computed)</span>
-            <span className={styles.fieldHint}>
-              Áp dụng khi confidence &gt;= T_high (tự tính: ceil(T_wait/2))
-            </span>
-            <div className={styles.computedWaitBox}>
-              <span>Nhánh khẩn cấp:</span>
-              <span className={styles.computedWaitValue}>{computedHighWait} giây</span>
-            </div>
-          </div>
-        </div>
 
         {/* Validation warning inline */}
         {isThresholdInvalid && (

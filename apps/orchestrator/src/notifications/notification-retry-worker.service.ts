@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
 import { TELEGRAM_CHANNEL, type TelegramChannel } from './notification-channel.interface';
 import { NotificationsRepository, type TelegramNotificationJob } from './notifications.repository';
-import { TelegramApiError } from './telegram/telegram.adapter';
+import { TelegramApiError } from './telegram/telegram-api.error';
 import { buildTelegramAlert, buildTelegramButtons } from './telegram/telegram-message-builder';
 
 const RETRY_DELAYS_SECONDS = [2, 4, 8];
@@ -19,8 +19,9 @@ export function nextTelegramRetry(
   attemptCount: number,
   finishedAt: Date,
   retryAfterSeconds: number | null = null,
+  delays: readonly number[] = RETRY_DELAYS_SECONDS,
 ): Date | null {
-  const backoff = RETRY_DELAYS_SECONDS[attemptCount - 1];
+  const backoff = delays[attemptCount - 1];
   if (backoff === undefined) return null;
   return new Date(finishedAt.getTime() + Math.max(backoff, retryAfterSeconds ?? 0) * 1000);
 }
@@ -34,6 +35,7 @@ export class NotificationRetryWorker implements OnModuleInit, OnModuleDestroy {
   private readonly batchSize: number;
   private readonly mediaWaitMs: number;
   private readonly storageProvider: string;
+  private readonly retryDelays: number[];
   private interval: ReturnType<typeof setInterval> | null = null;
   private running = false;
 
@@ -49,8 +51,14 @@ export class NotificationRetryWorker implements OnModuleInit, OnModuleDestroy {
     this.batchSize = this.positiveInteger(config, 'TELEGRAM_BATCH_SIZE', 20);
     this.mediaWaitMs = this.positiveInteger(config, 'TELEGRAM_MEDIA_WAIT_MS', 1000);
     this.storageProvider = config.get<string>('STORAGE_PROVIDER', 'MINIO').toUpperCase();
+    this.retryDelays = (config.get<string>('TELEGRAM_RETRY_DELAYS_SECONDS') ?? '2,4,8')
+      .split(',')
+      .map(Number);
+    if (this.retryDelays.some((delay) => !Number.isSafeInteger(delay) || delay <= 0)) {
+      throw new Error('TELEGRAM_RETRY_DELAYS_SECONDS phải là danh sách số giây dương.');
+    }
     const timeoutMs = this.positiveInteger(config, 'TELEGRAM_TIMEOUT_MS', 5000);
-    if (this.leaseSeconds * 1000 <= timeoutMs + this.mediaWaitMs + 5000) {
+    if (this.leaseSeconds * 1000 <= timeoutMs + this.mediaWaitMs * 3 + this.pollMs) {
       throw new Error('TELEGRAM_LEASE_SECONDS phải dài hơn thời gian gửi và chờ ảnh.');
     }
   }
@@ -72,9 +80,13 @@ export class NotificationRetryWorker implements OnModuleInit, OnModuleDestroy {
     if (!this.enabled || this.running) return;
     this.running = true;
     try {
-      // Claim immediately before each HTTP call so a queued job cannot lose its lease in memory.
+      // Claim ngay trước HTTP để job không mất lease trong lúc còn chờ ở bộ nhớ.
       for (let index = 0; index < this.batchSize; index += 1) {
-        const [job] = await this.repository.claimTelegramBatch(1, this.leaseSeconds);
+        const [job] = await this.repository.claimTelegramBatch(
+          1,
+          this.leaseSeconds,
+          this.retryDelays.length + 1,
+        );
         if (!job) break;
         await this.deliver(job);
       }
@@ -107,15 +119,17 @@ export class NotificationRetryWorker implements OnModuleInit, OnModuleDestroy {
         return;
       }
       const buttons = buildTelegramButtons(job.id);
+      const text = buildTelegramAlert(event, !photo);
       const message = photo
-        ? await this.telegram.sendPhoto(
-            job.chatId,
-            photo,
-            buildTelegramAlert(event, false),
-            buttons,
-          )
-        : await this.telegram.sendMessage(job.chatId, buildTelegramAlert(event, true), buttons);
-      await this.repository.markSent(job, message.chatId, message.messageId);
+        ? await this.telegram.sendPhoto(job.chatId, photo, text, buttons)
+        : await this.telegram.sendMessage(job.chatId, text, buttons);
+      await this.repository.markSent(
+        job,
+        message.chatId,
+        message.messageId,
+        photo ? 'PHOTO' : 'TEXT',
+        text,
+      );
     } catch (error: unknown) {
       await this.handleDeliveryFailure(job, error);
     }
@@ -133,9 +147,16 @@ export class NotificationRetryWorker implements OnModuleInit, OnModuleDestroy {
 
   private async handleDeliveryFailure(job: TelegramNotificationJob, error: unknown): Promise<void> {
     const telegramError = error instanceof TelegramApiError ? error : null;
-    const retryAt = telegramError?.permanent
-      ? null
-      : nextTelegramRetry(job.attemptCount, new Date(), telegramError?.retryAfterSeconds);
+    const retryAt =
+      telegramError?.permanent ||
+      job.attemptCount >= (job.maxAttempts ?? this.retryDelays.length + 1)
+        ? null
+        : nextTelegramRetry(
+            job.attemptCount,
+            new Date(),
+            telegramError?.retryAfterSeconds,
+            this.retryDelays,
+          );
     const code = telegramError
       ? telegramError.status === null
         ? 'DELIVERY_UNCERTAIN'
@@ -155,7 +176,7 @@ export class NotificationRetryWorker implements OnModuleInit, OnModuleDestroy {
           : await this.repository.findSnapshot(job.eventId);
       if (snapshot?.provider === this.storageProvider) {
         try {
-          const photo = await this.storage.download(snapshot.key);
+          const photo = await this.downloadWithinBudget(snapshot.key);
           if (photo.length <= MAX_TELEGRAM_PHOTO_BYTES) return photo;
         } catch {
           // The object may not be available immediately after its metadata is committed.
@@ -173,5 +194,22 @@ export class NotificationRetryWorker implements OnModuleInit, OnModuleDestroy {
     const value = Number(config.get<string>(key) ?? fallback);
     if (!Number.isInteger(value) || value <= 0) throw new Error(`${key} phải là số nguyên dương.`);
     return value;
+  }
+
+  private async downloadWithinBudget(key: string): Promise<Buffer> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        this.storage.download(key),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(
+            () => reject(new Error('Hết thời gian lấy snapshot.')),
+            this.mediaWaitMs,
+          );
+        }),
+      ]);
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
   }
 }

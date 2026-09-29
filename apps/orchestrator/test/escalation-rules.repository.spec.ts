@@ -70,6 +70,7 @@ describe('EscalationRulesRepository Unit', () => {
       tLow: 0.65,
       tHigh: 0.85,
       tWaitSeconds: 60,
+      highWaitSeconds: 23,
       expectedVersion: 1,
       actorUserId: 'admin-123',
       clientIp: '127.0.0.1',
@@ -89,6 +90,8 @@ describe('EscalationRulesRepository Unit', () => {
             t_low: '0.60',
             t_high: '0.80',
             t_wait_seconds: 45,
+            high_wait_seconds: 17,
+            skip_logged_only: false,
           },
         ],
       });
@@ -100,6 +103,7 @@ describe('EscalationRulesRepository Unit', () => {
         t_low: '0.65',
         t_high: '0.85',
         t_wait_seconds: 60,
+        high_wait_seconds: 23,
         updated_by_user_id: 'admin-123',
       };
       mockClient.query.mockResolvedValueOnce({ rows: [updatedRecord] });

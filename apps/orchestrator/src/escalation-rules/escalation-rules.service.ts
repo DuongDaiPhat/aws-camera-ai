@@ -58,6 +58,7 @@ export class EscalationRulesService {
       tLow: dto.tLow,
       tHigh: dto.tHigh,
       tWaitSeconds: dto.tWaitSeconds,
+      highWaitSeconds: dto.highWaitSeconds,
     });
 
     if (!validation.isValid) {
@@ -83,6 +84,7 @@ export class EscalationRulesService {
         tLow: dto.tLow,
         tHigh: dto.tHigh,
         tWaitSeconds: dto.tWaitSeconds,
+        highWaitSeconds: dto.highWaitSeconds,
         expectedVersion: dto.expectedVersion,
         actorUserId: actor.userId,
         clientIp: actor.ipAddress,
@@ -115,7 +117,11 @@ export class EscalationRulesService {
   private mapRecordToDto(record: EscalationRuleRecord): EscalationRuleDto {
     return {
       version: record.version,
-      effectiveHighWaitSeconds: computeEffectiveHighWaitSeconds(record.t_wait_seconds),
+      effectiveHighWaitSeconds: computeEffectiveHighWaitSeconds(
+        record.t_wait_seconds,
+        record.high_wait_seconds,
+      ),
+      highWaitSeconds: record.high_wait_seconds ?? null,
       eventType: record.event_type as EventType,
       displayName: EVENT_TYPE_DISPLAY_NAMES[record.event_type as EventType] ?? record.event_type,
       priority: record.priority,

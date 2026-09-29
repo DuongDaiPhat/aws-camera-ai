@@ -18,6 +18,7 @@ describe('EscalationRulesService (US-15)', () => {
     t_low: '0.550',
     t_high: '0.750',
     t_wait_seconds: 60,
+    high_wait_seconds: 30,
     skip_logged_only: false,
     notify_channels: ['TELEGRAM'],
     escalate_channels: ['CONNECT_CALL'],
@@ -52,7 +53,8 @@ describe('EscalationRulesService (US-15)', () => {
         tLow: 0.55,
         tHigh: 0.75,
         tWaitSeconds: 60,
-        effectiveHighWaitSeconds: 30, // max(1, ceil(60/2))
+        highWaitSeconds: 30,
+        effectiveHighWaitSeconds: 30,
         version: 1,
         updatedByName: 'Quản trị CameraAI',
       });
@@ -89,6 +91,7 @@ describe('EscalationRulesService (US-15)', () => {
         t_low: '0.600',
         t_high: '0.800',
         t_wait_seconds: 45,
+        high_wait_seconds: 17,
         version: 2,
         updated_at: new Date('2026-09-25T08:05:00Z'),
       };
@@ -101,6 +104,7 @@ describe('EscalationRulesService (US-15)', () => {
           tLow: 0.6,
           tHigh: 0.8,
           tWaitSeconds: 45,
+          highWaitSeconds: 17,
           expectedVersion: 1,
         },
         actor,
@@ -110,12 +114,13 @@ describe('EscalationRulesService (US-15)', () => {
       expect(result.tLow).toBe(0.6);
       expect(result.tHigh).toBe(0.8);
       expect(result.tWaitSeconds).toBe(45);
-      expect(result.effectiveHighWaitSeconds).toBe(23); // ceil(45/2) = 23
+      expect(result.effectiveHighWaitSeconds).toBe(17);
       expect(repository.updateThresholdsAtomic).toHaveBeenCalledWith({
         eventType: 'FALL_DETECTED',
         tLow: 0.6,
         tHigh: 0.8,
         tWaitSeconds: 45,
+        highWaitSeconds: 17,
         expectedVersion: 1,
         actorUserId: actor.userId,
         clientIp: actor.ipAddress,

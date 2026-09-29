@@ -35,10 +35,32 @@ export const PRIORITY_ORDER: Record<PriorityLevel, number> = {
 
 /**
  * Thời gian chờ rút ngắn cho nhánh confidence cao (>= T_high).
- * Công thức policy thống nhất với US-13: max(1, ceil(T_wait / 2)).
+ * Giá trị nhập tay được dùng nguyên vẹn; rule không có nhánh riêng dùng T_wait.
  */
-export function computeEffectiveHighWaitSeconds(tWaitSeconds: number): number {
-  return Math.max(1, Math.ceil(tWaitSeconds / 2));
+export function computeEffectiveHighWaitSeconds(
+  tWaitSeconds: number,
+  highWaitSeconds?: number | null,
+): number {
+  return highWaitSeconds ?? tWaitSeconds;
+}
+
+export function validateHighWaitSeconds(
+  highWaitSeconds: number | null | undefined,
+  tWaitSeconds: number,
+): ValidationResult | null {
+  if (highWaitSeconds === undefined || highWaitSeconds === null) return null;
+  if (
+    !Number.isInteger(highWaitSeconds) ||
+    highWaitSeconds < 0 ||
+    highWaitSeconds >= tWaitSeconds
+  ) {
+    return {
+      isValid: false,
+      errorCode: 'INVALID_HIGH_WAIT_SECONDS',
+      message: 'Thời gian nhánh khẩn cấp phải là số nguyên không âm và nhỏ hơn T_wait.',
+    };
+  }
+  return null;
 }
 
 export interface ThresholdValidationInput {
@@ -46,6 +68,7 @@ export interface ThresholdValidationInput {
   tLow: number | null;
   tHigh: number | null;
   tWaitSeconds: number;
+  highWaitSeconds?: number | null;
 }
 
 export type ValidationErrorType =
@@ -53,7 +76,8 @@ export type ValidationErrorType =
   | 'THRESHOLD_NOT_APPLICABLE'
   | 'THRESHOLD_REQUIRED'
   | 'INVALID_THRESHOLD'
-  | 'INVALID_WAIT_SECONDS';
+  | 'INVALID_WAIT_SECONDS'
+  | 'INVALID_HIGH_WAIT_SECONDS';
 
 export interface ValidationResult {
   isValid: boolean;
@@ -154,6 +178,9 @@ export function validateThresholdUpdate(input: ThresholdValidationInput): Valida
 
   const waitErr = validateWaitSeconds(tWaitSeconds);
   if (waitErr) return waitErr;
+
+  const highWaitErr = validateHighWaitSeconds(input.highWaitSeconds, tWaitSeconds);
+  if (highWaitErr) return highWaitErr;
 
   if (eventType === 'WELLNESS_TIMEOUT') {
     const wellnessErr = validateWellnessThresholds(tLow, tHigh);

@@ -12,6 +12,16 @@ export interface RuleDraft {
   tLow: number | null;
   tHigh: number | null;
   tWaitSeconds: number;
+  highWaitSeconds: number | null;
+}
+
+export function toRuleDraft(rule: EscalationRule): RuleDraft {
+  return {
+    tLow: rule.tLow ?? null,
+    tHigh: rule.tHigh ?? null,
+    tWaitSeconds: rule.tWaitSeconds,
+    highWaitSeconds: rule.highWaitSeconds ?? null,
+  };
 }
 
 export function useEscalationRules() {
@@ -35,11 +45,7 @@ export function useEscalationRules() {
 
       const initialDrafts: Record<string, RuleDraft> = {};
       for (const rule of filtered) {
-        initialDrafts[rule.eventType] = {
-          tLow: rule.tLow ?? null,
-          tHigh: rule.tHigh ?? null,
-          tWaitSeconds: rule.tWaitSeconds,
-        };
+        initialDrafts[rule.eventType] = toRuleDraft(rule);
       }
       setDrafts(initialDrafts);
     } catch (err: unknown) {
@@ -62,7 +68,12 @@ export function useEscalationRules() {
       setDrafts((prev) => ({
         ...prev,
         [eventType]: {
-          ...(prev[eventType] ?? { tLow: null, tHigh: null, tWaitSeconds: 30 }),
+          ...(prev[eventType] ?? {
+            tLow: null,
+            tHigh: null,
+            tWaitSeconds: NaN,
+            highWaitSeconds: null,
+          }),
           [field]: value,
         },
       }));
@@ -81,11 +92,7 @@ export function useEscalationRules() {
 
       setDrafts((prev) => ({
         ...prev,
-        [eventType]: {
-          tLow: canonical.tLow ?? null,
-          tHigh: canonical.tHigh ?? null,
-          tWaitSeconds: canonical.tWaitSeconds,
-        },
+        [eventType]: toRuleDraft(canonical),
       }));
       setErrorMap((prev) => ({ ...prev, [eventType]: null }));
       setSuccessMap((prev) => ({ ...prev, [eventType]: null }));
@@ -102,7 +109,8 @@ export function useEscalationRules() {
       return (
         canonical.tLow !== draft.tLow ||
         canonical.tHigh !== draft.tHigh ||
-        canonical.tWaitSeconds !== draft.tWaitSeconds
+        canonical.tWaitSeconds !== draft.tWaitSeconds ||
+        (canonical.highWaitSeconds ?? null) !== draft.highWaitSeconds
       );
     },
     [rules, drafts],
@@ -123,6 +131,7 @@ export function useEscalationRules() {
           tLow: draft.tLow,
           tHigh: draft.tHigh,
           tWaitSeconds: draft.tWaitSeconds,
+          highWaitSeconds: draft.highWaitSeconds,
           expectedVersion: canonical.version ?? 1,
         });
 
@@ -130,11 +139,7 @@ export function useEscalationRules() {
 
         setDrafts((prev) => ({
           ...prev,
-          [eventType]: {
-            tLow: updated.tLow ?? null,
-            tHigh: updated.tHigh ?? null,
-            tWaitSeconds: updated.tWaitSeconds,
-          },
+          [eventType]: toRuleDraft(updated),
         }));
 
         setSuccessMap((prev) => ({
