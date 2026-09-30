@@ -171,7 +171,15 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
       {
         camera: mockCamera.slug,
         frameTime: now / 1000,
-        objects: [{ id: 'live-person', label: 'person', score: 0.95, box: [128, 144, 512, 576] }],
+        objects: [
+          {
+            id: 'live-person',
+            label: 'person',
+            score: 0.95,
+            box: [128, 144, 512, 576],
+            observedAt: now / 1000,
+          },
+        ],
       },
       now,
     );
@@ -179,7 +187,13 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
     expect(result.detectionFrames).toEqual([
       {
         frameTime: now,
-        detections: [expect.objectContaining({ id: 'live-person', box: [0.2, 0.1, 0.8, 0.4] })],
+        detections: [
+          expect.objectContaining({
+            id: 'live-person',
+            box: [0.2, 0.1, 0.8, 0.4],
+            observedAt: now,
+          }),
+        ],
       },
     ]);
     expect(result.detections).toEqual([]);

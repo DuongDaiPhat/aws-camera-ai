@@ -443,9 +443,7 @@ export class CamerasService implements CameraConfigPortV1 {
 
     const currentSource = await this.camerasRepository.findSourceByCameraId(cameraId);
     if (currentSource && this.isSameSourceConfiguration(currentSource, dto)) {
-      this.logger.debug(
-        `Camera source ${camera.slug} is unchanged; skipping Frigate restart`,
-      );
+      this.logger.debug(`Camera source ${camera.slug} is unchanged; skipping Frigate restart`);
       return this.mapToSourceDetail(currentSource, role);
     }
 
@@ -480,8 +478,7 @@ export class CamerasService implements CameraConfigPortV1 {
       (dto.videoObjectId === undefined || source.video_object_key === dto.videoObjectId) &&
       (dto.videoLoop === undefined || source.video_loop === dto.videoLoop) &&
       source.transport === (dto.transport ?? 'TCP') &&
-      (dto.webcamDeviceLabel === undefined ||
-        source.webcam_device_label === dto.webcamDeviceLabel)
+      (dto.webcamDeviceLabel === undefined || source.webcam_device_label === dto.webcamDeviceLabel)
     );
   }
 
@@ -821,27 +818,36 @@ export class CamerasService implements CameraConfigPortV1 {
 
     const isCameraActive = camera.is_enabled;
 
+    const serverTime = Date.now();
     return {
       cameraId: camera.id,
       streamUrl: readSession.streamUrl,
       snapshotUrl,
-      serverTime: Date.now(),
+      serverTime,
       detectionFrames: isCameraActive
         ? this.detectionTracker.frames
             .get(camera.slug)
             .slice(-4)
-            .map((frame) => ({
-              frameTime: frame.frameTime,
-              detections: frame.objects.map((object) => ({
-                ...this.mapDebugDetection(
-                  { ...object, confidence: object.score },
-                  camera.detect_width,
-                  camera.detect_height,
-                  1,
-                ),
-                id: object.id,
-              })),
-            }))
+            .map((frame) => {
+              for (const object of frame.objects) {
+                this.logger.log(
+                  `[PERSON_DEBUG][API] camera=${camera.slug} serverTime=${serverTime} latestFrameTime=${frame.frameTime} objects=${frame.objects.length} objectId=${object.id} observedAt=${object.observedAt}`,
+                );
+              }
+              return {
+                frameTime: frame.frameTime,
+                detections: frame.objects.map((object) => ({
+                  ...this.mapDebugDetection(
+                    { ...object, confidence: object.score },
+                    camera.detect_width,
+                    camera.detect_height,
+                    1,
+                  ),
+                  id: object.id,
+                  observedAt: object.observedAt,
+                })),
+              };
+            })
         : [],
       detections: isCameraActive
         ? this.detectionTracker

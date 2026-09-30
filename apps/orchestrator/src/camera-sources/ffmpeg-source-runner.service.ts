@@ -225,7 +225,11 @@ export class FfmpegSourceRunnerService implements ISourceRunner, OnApplicationSh
     await this.cleanup();
   }
 
-  private detectVideoCodec(filePath: string): string | null {
+  private detectVideoInfo(filePath: string): {
+    codec: string | null;
+    width: number;
+    height: number;
+  } {
     try {
       const res = spawnSync(
         'ffprobe',
@@ -235,20 +239,28 @@ export class FfmpegSourceRunnerService implements ISourceRunner, OnApplicationSh
           '-select_streams',
           'v:0',
           '-show_entries',
-          'stream=codec_name',
+          'stream=codec_name,width,height',
           '-of',
-          'default=noprint_wrappers=1:nokey=1',
+          'json',
           filePath,
         ],
         { encoding: 'utf-8', timeout: 5000, stdio: ['ignore', 'pipe', 'ignore'] },
       );
       if (res.status === 0 && res.stdout) {
-        return res.stdout.trim().toLowerCase() || null;
+        const data = JSON.parse(res.stdout) as {
+          streams?: Array<{ codec_name?: string; width?: number; height?: number }>;
+        };
+        const stream = data.streams?.[0];
+        return {
+          codec: stream?.codec_name?.toLowerCase() || null,
+          width: Number(stream?.width) || 0,
+          height: Number(stream?.height) || 0,
+        };
       }
-      return null;
+      return { codec: null, width: 0, height: 0 };
     } catch (err) {
-      this.logger.warn(`Không thể phát hiện video codec của ${filePath} qua ffprobe:`, err);
-      return null;
+      this.logger.warn(`Không thể phát hiện thông tin video của ${filePath} qua ffprobe:`, err);
+      return { codec: null, width: 0, height: 0 };
     }
   }
 
@@ -259,14 +271,16 @@ export class FfmpegSourceRunnerService implements ISourceRunner, OnApplicationSh
     }
     args.push('-i', inputPath);
 
-    const codec = this.detectVideoCodec(inputPath);
-    if (codec === 'h264') {
+    const info = this.detectVideoInfo(inputPath);
+    if (info.codec === 'h264' && info.width === 1280 && info.height === 720) {
       args.push('-c:v', 'copy');
     } else {
       this.logger.log(
-        `Video codec là "${codec ?? 'unknown'}" (không phải H.264). Đang transcode sang libx264 để hỗ trợ WebRTC trình duyệt...`,
+        `Video source (${info.codec ?? 'unknown'}, ${info.width}x${info.height}). Chuẩn hóa sang 1280x720 libx264 để khớp tỷ lệ khung hình với Frigate và WebRTC...`,
       );
       args.push(
+        '-vf',
+        'scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1',
         '-c:v',
         'libx264',
         '-preset',
