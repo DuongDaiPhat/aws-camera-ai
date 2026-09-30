@@ -16,6 +16,7 @@ applied immediately. Boxes do not extrapolate between observations: this avoids
 the old predicted-position jump followed by a snap back on each new sample.
 
 A missing person is held for at most 250 ms to bridge a short missed detection.
+Stale person objects whose detection `frame_time` is older than `FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS` (default: 0.25s) are filtered out at the bridge level to prevent ghost boxes when a person moves away.
 A transport interruption expires the whole overlay after 750 ms. Disabling the
 overlay or switching cameras clears display state immediately. These short holds
 avoid blinking without keeping stale boxes around for seconds.

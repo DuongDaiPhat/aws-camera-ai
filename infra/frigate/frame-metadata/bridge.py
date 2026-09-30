@@ -6,16 +6,57 @@ import signal
 import time
 
 
-def frame_payload(payload):
+MAX_OBJECT_AGE_SECONDS = float(os.getenv("FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS", "0.25"))
+
+
+def is_valid_person(obj, frame_time, max_age=MAX_OBJECT_AGE_SECONDS):
+    if obj.get("label") != "person":
+        return False
+    if obj.get("false_positive", True):
+        return False
+    if obj.get("end_time") is not None:
+        return False
+    if obj.get("box") is None:
+        return False
+    obj_frame_time = obj.get("frame_time")
+    if obj_frame_time is None or not isinstance(obj_frame_time, (int, float)):
+        return False
+    age = frame_time - obj_frame_time
+    if age < 0 or age > max_age:
+        return False
+    return True
+
+
+def frame_payload(payload, max_age=MAX_OBJECT_AGE_SECONDS):
     camera, _name, frame_time, objects, _motion, _regions = payload
-    people = [
-        {"id": obj["id"], "label": "person", "score": obj["score"], "box": obj["box"]}
-        for obj in objects
-        if obj.get("label") == "person"
-        and not obj.get("false_positive", True)
-        and obj.get("end_time") is None
-        and obj.get("box") is not None
-    ]
+    people = []
+    for obj in objects:
+        if is_valid_person(obj, frame_time, max_age):
+            obs_time = obj["frame_time"]
+            people.append(
+                {
+                    "id": obj["id"],
+                    "label": "person",
+                    "score": obj["score"],
+                    "box": obj["box"],
+                    "observedAt": obs_time,
+                }
+            )
+            print(
+                f"[PERSON_DEBUG][BRIDGE] camera={camera} objectId={obj['id']} "
+                f"frameTime={frame_time:.3f} observedAt={obs_time:.3f} "
+                f"ageMs={(frame_time - obs_time) * 1000:.1f} box={obj['box']} action=PUBLISH",
+                flush=True,
+            )
+        elif obj.get("label") == "person":
+            obj_time = obj.get("frame_time")
+            age_ms = (frame_time - obj_time) * 1000 if isinstance(obj_time, (int, float)) else -1
+            print(
+                f"[PERSON_DEBUG][BRIDGE] camera={camera} objectId={obj.get('id')} "
+                f"frameTime={frame_time:.3f} observedAt={obj_time} "
+                f"ageMs={age_ms:.1f} box={obj.get('box')} action=DROP",
+                flush=True,
+            )
     return {"camera": camera, "frameTime": frame_time, "objects": people}
 
 
