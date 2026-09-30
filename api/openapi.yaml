@@ -2020,6 +2020,9 @@ components:
           type: array
           items: { type: number }
           description: "[x, y] normalized 0..1"
+        observedAt:
+          type: number
+          description: "Frigate detector observation timestamp in milliseconds"
 
     CameraDebugStream:
       type: object

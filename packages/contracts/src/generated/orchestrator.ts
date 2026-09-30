@@ -1312,6 +1312,8 @@ export interface components {
             box: number[];
             /** @description [x, y] normalized 0..1 */
             footPoint?: number[];
+            /** @description Frigate detector observation timestamp in milliseconds */
+            observedAt?: number;
         };
         CameraDebugStream: {
             /** Format: uuid */
