@@ -6,13 +6,13 @@ import type { CameraSourceType } from '@/types';
 import type { DetectedPerson } from '../debug/PersonBoxLayer';
 import { LivePersonTracker } from './live-person-tracker';
 
-const VIDEO_FILE_BOX_FIT = { width: 0.78, height: 0.94 } as const;
 const LIVE_BOX_FIT = { width: 1, height: 1 } as const;
 
-export function personBoxFitForSource(
-  sourceType: CameraSourceType | undefined,
-): { width: number; height: number } {
-  return sourceType === 'VIDEO_FILE' ? VIDEO_FILE_BOX_FIT : LIVE_BOX_FIT;
+export function personBoxFitForSource(_sourceType: CameraSourceType | undefined): {
+  width: number;
+  height: number;
+} {
+  return LIVE_BOX_FIT;
 }
 
 export function useLivePersonDetections(
@@ -26,10 +26,13 @@ export function useLivePersonDetections(
     detections: [],
   });
   const [tracker] = useState(() => new LivePersonTracker());
-  const clockRef = useRef<{ serverTime: number; receivedAt: number } | null>(null);
+  const clockRef = useRef<{ frameTime: number; receivedAt: number } | null>(null);
+  const renderLogRef = useRef<{ count: number; ids: string } | null>(null);
+
   useEffect(() => {
     tracker.clear();
     clockRef.current = null;
+    renderLogRef.current = null;
     setPeople({ cameraId, detections: [] });
     if (!enabled) return;
     const boxFit = personBoxFitForSource(sourceType);
@@ -38,8 +41,34 @@ export function useLivePersonDetections(
     const draw = () => {
       const clock = clockRef.current;
       if (clock) {
-        lastTime = Math.max(lastTime, clock.serverTime + performance.now() - clock.receivedAt);
+        const streamNow = clock.frameTime + performance.now() - clock.receivedAt;
+        if (streamNow < lastTime - 2000) {
+          lastTime = streamNow;
+        } else {
+          lastTime = Math.max(lastTime, streamNow);
+        }
         const detections = tracker.get(lastTime, boxFit);
+
+        const currentIds = detections
+          .map((d) => d.id ?? '')
+          .sort()
+          .join(',');
+        const prev = renderLogRef.current;
+        if (!prev || prev.count !== detections.length || prev.ids !== currentIds) {
+          if (detections.length === 0 && prev && prev.count > 0) {
+            console.warn(`[PERSON_DEBUG][RENDER] camera=${cameraId} action=HIDE count=0`);
+          } else if (detections.length === 1) {
+            console.warn(
+              `[PERSON_DEBUG][RENDER] camera=${cameraId} action=SHOW count=1 objectId=${detections[0].id}`,
+            );
+          } else if (detections.length > 1) {
+            console.warn(
+              `[PERSON_DEBUG][RENDER] camera=${cameraId} action=MULTIPLE_BOXES count=${detections.length} ids=${currentIds}`,
+            );
+          }
+          renderLogRef.current = { count: detections.length, ids: currentIds };
+        }
+
         setPeople((previous) => {
           const unchanged =
             previous.cameraId === cameraId &&
@@ -66,12 +95,34 @@ export function useLivePersonDetections(
   }, [cameraId, enabled, sourceType, tracker]);
 
   useEffect(() => {
-    if (!enabled || data?.cameraId !== cameraId || !data.detectionFrames || !data.serverTime)
-      return;
+    if (!enabled || data?.cameraId !== cameraId || !data.detectionFrames) return;
+
+    for (const frame of data.detectionFrames) {
+      for (const detection of frame.detections) {
+        console.warn(
+          `[PERSON_DEBUG][FRONTEND_RECEIVE] camera=${cameraId} frameTime=${frame.frameTime} observedAt=${detection.observedAt} receivedAt=${data.serverTime} objectId=${detection.id}`,
+        );
+      }
+    }
+
     // Keep the tracker and render loop across HTTP responses. A duplicate poll
     // must not reset boxes, filtering history, or their expiry timestamps.
     tracker.update(data.detectionFrames);
-    clockRef.current = { serverTime: data.serverTime, receivedAt: performance.now() };
+
+    const latestFrame =
+      data.detectionFrames.length > 0
+        ? data.detectionFrames[data.detectionFrames.length - 1]
+        : null;
+
+    if (latestFrame) {
+      if (
+        !clockRef.current ||
+        latestFrame.frameTime > clockRef.current.frameTime ||
+        latestFrame.frameTime < clockRef.current.frameTime - 2000
+      ) {
+        clockRef.current = { frameTime: latestFrame.frameTime, receivedAt: performance.now() };
+      }
+    }
   }, [data, cameraId, enabled, tracker]);
   return enabled && people.cameraId === cameraId && data?.cameraId === cameraId
     ? people.detections
