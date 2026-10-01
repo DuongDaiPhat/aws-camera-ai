@@ -17,6 +17,7 @@ interface Track {
   confidence: number;
   lastSeen: number;
   lastRendered: number;
+  snapPending: boolean;
 }
 
 export interface PersonBoxFit {
@@ -99,6 +100,11 @@ function updateTrackTarget(
   }
 
   const raw = geometry(detection.box);
+  const movement = Math.hypot(raw.cx - track.target.cx, raw.cy - track.target.cy);
+  const personScale = Math.max(0.01, Math.min(raw.width, raw.height));
+  // Apply clear measured movement on the next draw. Keep this pending across
+  // a batch ending in a stationary sample; never extrapolate past the detector.
+  track.snapPending ||= movement > personScale * 0.15;
   track.target.cx = raw.cx;
   track.target.cy = raw.cy;
   track.target.width = raw.width;
@@ -112,10 +118,17 @@ function updateTrackTarget(
 
 /**
  * Single-layer render smoothing with scale-aware deadband and adaptive time-constant.
- * When a person moves fast, tau is short (18ms) so box responds immediately.
+ * Clear measured movement updates on the next draw without added smoothing delay.
+ * Smaller movement uses a short adaptive tau (18ms/35ms).
  * When stationary, detector jitter is absorbed by scale-aware deadband and slow tau (110ms).
  */
 function animateTrack(track: Track, now: number): void {
+  if (track.snapPending) {
+    track.display = { ...track.target };
+    track.snapPending = false;
+    track.lastRendered = now;
+    return;
+  }
   const dt = Math.max(0, Math.min(now - track.lastRendered, 100));
   if (dt === 0) return;
 
@@ -272,6 +285,7 @@ export class LivePersonTracker {
           confidence: detection.confidence,
           lastSeen: obsAt,
           lastRendered: frameTime,
+          snapPending: false,
         };
         this.tracks.set(id, created);
         matchedTracks.add(created);

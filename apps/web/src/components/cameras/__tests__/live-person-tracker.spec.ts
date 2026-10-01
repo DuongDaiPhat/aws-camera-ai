@@ -89,6 +89,47 @@ describe('LivePersonTracker', () => {
     expect(afterDuplicates[0].x).toBeLessThan(0.31);
   });
 
+  it('renders fast movement at the measured position on the next animation frame', () => {
+    const tracker = new LivePersonTracker();
+    tracker.update([frame(1000)]);
+    tracker.get(1066);
+    tracker.update([frame(1067, [detection(0.5, 0.24)])]);
+
+    const moved = tracker.get(1082)[0];
+    expect(moved.x).toBeCloseTo(0.5, 6);
+    expect(moved.width).toBeCloseTo(0.24, 6);
+
+    // A rapid direction change must not keep following the previous target.
+    tracker.update([frame(1134, [detection(0.22, 0.18)])]);
+    const reversed = tracker.get(1149)[0];
+    expect(reversed.x).toBeCloseTo(0.22, 6);
+    expect(reversed.width).toBeCloseTo(0.18, 6);
+    // Never predict beyond the detector's last measured position.
+    expect(tracker.get(1250)[0].x).toBeCloseTo(0.22, 6);
+  });
+
+  it('keeps the newest position when fast motion and a stop arrive in one batch', () => {
+    const tracker = new LivePersonTracker();
+    tracker.update([frame(1000)]);
+    tracker.get(1066);
+    tracker.update([frame(1067, [detection(0.5)]), frame(1134, [detection(0.5)])]);
+
+    expect(tracker.get(1149)[0].x).toBeCloseTo(0.5, 6);
+  });
+
+  it('updates vertical movement for a small person without waiting between 5 FPS samples', () => {
+    const tracker = new LivePersonTracker();
+    const person = { ...detection(0.3, 0.05), box: [0.1, 0.3, 0.2, 0.35] };
+    tracker.update([frame(1000, [person])]);
+    tracker.get(1199);
+    tracker.update([frame(1200, [{ ...person, box: [0.16, 0.3, 0.26, 0.35] }])]);
+
+    const moved = tracker.get(1216)[0];
+    expect(moved.y).toBeCloseTo(0.16, 6);
+    expect(moved.height).toBeCloseTo(0.1, 6);
+    expect(tracker.get(1350)[0].y).toBeCloseTo(0.16, 6);
+  });
+
   it('does not leave a duplicate ghost when the detector changes ID at the same location', () => {
     const tracker = new LivePersonTracker();
     tracker.update([frame(1000)]);

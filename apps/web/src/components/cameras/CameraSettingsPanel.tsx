@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Camera, UpdateCameraRequest } from '@/types';
 import { retryFrigateSync, updateCamera } from '@/lib/cameras-client';
 import formStyles from './styles/camera-source-form.module.css';
@@ -280,17 +280,38 @@ export function CameraSettingsPanel({ camera, isAdmin, onSynced }: CameraSetting
   const [isRetrying, setIsRetrying] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const draft = useRef({
+    cameraId: camera.id,
+    version: camera.frigateSync.configVersion,
+    dirty: false,
+  });
 
   useEffect(() => {
-    setForm(settingsFromCamera(camera));
-    setErrorMsg(null);
-    setSuccessMsg(null);
-  }, [camera]);
+    if (draft.current.cameraId !== camera.id) {
+      draft.current = {
+        cameraId: camera.id,
+        version: camera.frigateSync.configVersion,
+        dirty: false,
+      };
+      setForm(settingsFromCamera(camera));
+      setErrorMsg(null);
+      setSuccessMsg(null);
+    } else if (
+      !draft.current.dirty &&
+      !isSaving &&
+      camera.frigateSync.configVersion > draft.current.version
+    ) {
+      // Status polling must not overwrite edits or a newer PATCH response.
+      draft.current.version = camera.frigateSync.configVersion;
+      setForm(settingsFromCamera(camera));
+    }
+  }, [camera, isSaving]);
 
   const updateField = <K extends keyof UpdateCameraRequest>(
     field: K,
     value: UpdateCameraRequest[K],
   ) => {
+    draft.current.dirty = true;
     setForm((current) => ({ ...current, [field]: value }));
   };
 
@@ -300,10 +321,22 @@ export function CameraSettingsPanel({ camera, isAdmin, onSynced }: CameraSetting
     setErrorMsg(null);
     setSuccessMsg(null);
     try {
-      await updateCamera(camera.id, form);
-      setSuccessMsg('Đã lưu và đồng bộ cấu hình Frigate.');
+      const updated = await updateCamera(camera.id, form);
+      if (draft.current.cameraId !== camera.id) return;
+      draft.current = {
+        cameraId: updated.id,
+        version: updated.frigateSync.configVersion,
+        dirty: false,
+      };
+      setForm(settingsFromCamera(updated));
+      setSuccessMsg(
+        updated.frigateSync.status === 'SYNCED'
+          ? 'Đã lưu và đồng bộ cấu hình Frigate.'
+          : 'Đã lưu cấu hình. Frigate chưa đồng bộ xong; hãy kiểm tra trạng thái hoặc thử đồng bộ lại.',
+      );
       onSynced?.();
     } catch (error) {
+      if (draft.current.cameraId !== camera.id) return;
       setErrorMsg(error instanceof Error ? error.message : 'Không thể lưu cấu hình Frigate.');
     } finally {
       setIsSaving(false);
@@ -349,9 +382,21 @@ export function CameraSettingsPanel({ camera, isAdmin, onSynced }: CameraSetting
       {successMsg && <div className={formStyles.successAlert}>{successMsg}</div>}
       {errorMsg && <div className={formStyles.errorAlert}>{errorMsg}</div>}
 
-      <BasicSettings form={form} disabled={!isAdmin} updateField={updateField} />
-      <PersonSettings form={form} disabled={!isAdmin} updateField={updateField} />
-      <SnapshotSettings form={form} disabled={!isAdmin} updateField={updateField} />
+      <BasicSettings
+        form={form}
+        disabled={!isAdmin || isSaving || isRetrying}
+        updateField={updateField}
+      />
+      <PersonSettings
+        form={form}
+        disabled={!isAdmin || isSaving || isRetrying}
+        updateField={updateField}
+      />
+      <SnapshotSettings
+        form={form}
+        disabled={!isAdmin || isSaving || isRetrying}
+        updateField={updateField}
+      />
 
       {camera.frigateSync.errorMessage && (
         <div className={formStyles.errorAlert}>{camera.frigateSync.errorMessage}</div>
@@ -371,7 +416,12 @@ export function CameraSettingsPanel({ camera, isAdmin, onSynced }: CameraSetting
             type="button"
             className={viewStyles.refreshBtn}
             disabled={isSaving || isRetrying}
-            onClick={() => setForm(DEFAULT_SETTINGS)}
+            onClick={() => {
+              draft.current.dirty = true;
+              setForm(DEFAULT_SETTINGS);
+              setErrorMsg(null);
+              setSuccessMsg(null);
+            }}
           >
             Khôi phục mặc định
           </button>
