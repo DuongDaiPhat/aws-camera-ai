@@ -1,6 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+export interface FrigateRuntimeState {
+  rawConfig: string;
+  startedAt: number;
+}
+
 @Injectable()
 export class FrigateClientService {
   private readonly logger = new Logger(FrigateClientService.name);
@@ -44,6 +49,22 @@ export class FrigateClientService {
       cameras?: Record<string, { camera_fps?: number }>;
     };
     return (payload.cameras?.[slug]?.camera_fps ?? 0) > 0;
+  }
+
+  async getRuntimeState(): Promise<FrigateRuntimeState> {
+    const [config, stats] = await Promise.all(
+      ['/api/config', '/api/stats'].map(async (path) => {
+        const response = await fetch(`${this.frigateUrl}${path}`, {
+          signal: AbortSignal.timeout(3000),
+        });
+        if (!response.ok) throw new Error(`Frigate trả về mã lỗi: ${response.status}`);
+        return response.json();
+      }),
+    );
+    const { service } = stats as { service: { uptime: number; last_updated: number } };
+    const startedAt = service.last_updated - service.uptime;
+    if (!Number.isFinite(startedAt)) throw new Error('Frigate chưa cung cấp trạng thái khởi động.');
+    return { rawConfig: JSON.stringify(config), startedAt };
   }
 
   async saveConfig(rawYaml: string): Promise<boolean> {

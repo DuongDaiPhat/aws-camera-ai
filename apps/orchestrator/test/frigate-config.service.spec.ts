@@ -175,4 +175,22 @@ describe('FrigateConfigService', () => {
       }),
     ).toThrow('YAML cấu hình Frigate không hợp lệ');
   });
+
+  it('checks running detection settings even when the zone names already match', () => {
+    const expected = service.generateUpdatedConfig('cameras: {}', { camera: mockCamera });
+    const running = YAML.parse(expected);
+    running.cameras[mockCamera.slug].detect.fps = 8;
+    expect(
+      (service as any).hasAppliedSettings(JSON.stringify(running), expected, mockCamera.slug),
+    ).toBe(false);
+    running.cameras[mockCamera.slug].detect.fps = 5;
+    running.cameras[mockCamera.slug].objects.filters.person.min_score = 0.3;
+    expect(
+      (service as any).hasAppliedSettings(JSON.stringify(running), expected, mockCamera.slug),
+    ).toBe(false);
+    running.cameras[mockCamera.slug].objects.filters.person.min_score = '0.500';
+    expect(
+      (service as any).hasAppliedSettings(JSON.stringify(running), expected, mockCamera.slug),
+    ).toBe(true);
+  });
 });

@@ -47,7 +47,9 @@ describe('FfmpegSourceRunnerService (Slice CAM)', () => {
     (fs.realpathSync as unknown as jest.Mock).mockImplementation((filePath: string) => filePath);
     (child_process.spawnSync as unknown as jest.Mock).mockReturnValue({
       status: 0,
-      stdout: 'h264\n',
+      stdout: JSON.stringify({
+        streams: [{ codec_name: 'h264', width: 1280, height: 720 }],
+      }),
     });
 
     const module: TestingModule = await Test.createTestingModule({
@@ -114,11 +116,13 @@ describe('FfmpegSourceRunnerService (Slice CAM)', () => {
   });
 
   describe('Khoi chay FFmpeg thanh cong', () => {
-    it('goi child_process.spawn voi copy video khi video la h264', async () => {
+    it('goi child_process.spawn voi copy video khi video la h264 dung chuan 1280x720', async () => {
       (fs.existsSync as jest.Mock).mockReturnValue(true);
       (child_process.spawnSync as unknown as jest.Mock).mockReturnValue({
         status: 0,
-        stdout: 'h264\n',
+        stdout: JSON.stringify({
+          streams: [{ codec_name: 'h264', width: 1280, height: 720 }],
+        }),
       });
 
       const mockChild = new EventEmitter() as any;
@@ -131,7 +135,7 @@ describe('FfmpegSourceRunnerService (Slice CAM)', () => {
       const result = await service.start({
         cameraId: mockCameraId,
         slug: mockSlug,
-        videoPath: 'sample.mp4',
+        videoPath: 'sample_1280x720.mp4',
         loop: true,
       });
 
@@ -146,7 +150,7 @@ describe('FfmpegSourceRunnerService (Slice CAM)', () => {
           '-stream_loop',
           '-1',
           '-i',
-          expect.stringContaining('sample.mp4'),
+          expect.stringContaining('sample_1280x720.mp4'),
           '-c:v',
           'copy',
           '-c:a',
@@ -159,11 +163,91 @@ describe('FfmpegSourceRunnerService (Slice CAM)', () => {
       );
     });
 
+    it('transcode va chuan hoa 1280x720 neu h264 co do phan giai khac (vi du 1920x1080)', async () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      (child_process.spawnSync as unknown as jest.Mock).mockReturnValue({
+        status: 0,
+        stdout: JSON.stringify({
+          streams: [{ codec_name: 'h264', width: 1920, height: 1080 }],
+        }),
+      });
+
+      const mockChild = new EventEmitter() as any;
+      mockChild.pid = 9995;
+      mockChild.kill = jest.fn();
+      mockChild.stderr = new EventEmitter();
+
+      mockSpawn(mockChild);
+
+      const result = await service.start({
+        cameraId: mockCameraId,
+        slug: mockSlug,
+        videoPath: 'sample_1080p.mp4',
+        loop: true,
+      });
+
+      expect(result.success).toBe(true);
+      expect(child_process.spawn).toHaveBeenCalledWith(
+        'ffmpeg',
+        expect.arrayContaining([
+          '-vf',
+          'scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1',
+          '-c:v',
+          'libx264',
+          '-preset',
+          'ultrafast',
+          '-tune',
+          'zerolatency',
+          '-pix_fmt',
+          'yuv420p',
+        ]),
+        expect.any(Object),
+      );
+    });
+
+    it('transcode va pad hop le cho video doc 1080x1920 (9:16 portrait)', async () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      (child_process.spawnSync as unknown as jest.Mock).mockReturnValue({
+        status: 0,
+        stdout: JSON.stringify({
+          streams: [{ codec_name: 'h264', width: 1080, height: 1920 }],
+        }),
+      });
+
+      const mockChild = new EventEmitter() as any;
+      mockChild.pid = 9994;
+      mockChild.kill = jest.fn();
+      mockChild.stderr = new EventEmitter();
+
+      mockSpawn(mockChild);
+
+      const result = await service.start({
+        cameraId: mockCameraId,
+        slug: mockSlug,
+        videoPath: 'sample_portrait.mp4',
+        loop: true,
+      });
+
+      expect(result.success).toBe(true);
+      expect(child_process.spawn).toHaveBeenCalledWith(
+        'ffmpeg',
+        expect.arrayContaining([
+          '-vf',
+          'scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1',
+          '-c:v',
+          'libx264',
+        ]),
+        expect.any(Object),
+      );
+    });
+
     it('transcode sang libx264 neu video khong phai h264 (vi du HEVC/H.265)', async () => {
       (fs.existsSync as jest.Mock).mockReturnValue(true);
       (child_process.spawnSync as unknown as jest.Mock).mockReturnValue({
         status: 0,
-        stdout: 'hevc\n',
+        stdout: JSON.stringify({
+          streams: [{ codec_name: 'hevc', width: 1280, height: 720 }],
+        }),
       });
 
       const mockChild = new EventEmitter() as any;
@@ -191,6 +275,8 @@ describe('FfmpegSourceRunnerService (Slice CAM)', () => {
           '-1',
           '-i',
           expect.stringContaining('sample_hevc.mp4'),
+          '-vf',
+          'scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1',
           '-c:v',
           'libx264',
           '-preset',
@@ -209,7 +295,7 @@ describe('FfmpegSourceRunnerService (Slice CAM)', () => {
       );
     });
 
-    it('fallback sang libx264 neu ffprobe loi hoac khong phat hien duoc codec', async () => {
+    it('fallback sang libx264 va scale/pad neu ffprobe loi hoac khong phat hien duoc codec', async () => {
       (fs.existsSync as jest.Mock).mockReturnValue(true);
       (child_process.spawnSync as unknown as jest.Mock).mockReturnValue({
         status: 1,
@@ -234,6 +320,8 @@ describe('FfmpegSourceRunnerService (Slice CAM)', () => {
       expect(child_process.spawn).toHaveBeenCalledWith(
         'ffmpeg',
         expect.arrayContaining([
+          '-vf',
+          'scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1',
           '-c:v',
           'libx264',
           '-preset',

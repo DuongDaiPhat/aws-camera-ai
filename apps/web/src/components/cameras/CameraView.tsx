@@ -146,7 +146,12 @@ function CameraDetailPanel({
       </div>
 
       <div style={{ display: activeTab === 'frigate' ? 'block' : 'none' }}>
-        <CameraSettingsPanel camera={camera} isAdmin={isAdmin} onSynced={onRefreshCameras} />
+        <CameraSettingsPanel
+          key={camera.id}
+          camera={camera}
+          isAdmin={isAdmin}
+          onSynced={onRefreshCameras}
+        />
       </div>
     </div>
   );

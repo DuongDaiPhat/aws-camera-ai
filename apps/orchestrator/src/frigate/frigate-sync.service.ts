@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CamerasRepository } from '../cameras/cameras.repository';
-import { FrigateClientService } from './frigate-client.service';
+import { FrigateClientService, type FrigateRuntimeState } from './frigate-client.service';
 import { FrigateConfigService } from './frigate-config.service';
 
 export interface FrigateSyncResult {
@@ -122,6 +122,8 @@ export class FrigateSyncService {
     }
 
     try {
+      // A previous save may still be restarting the shared Frigate instance.
+      const beforeRestart = await this.waitForRuntime();
       // 1. Lấy cấu hình thô hiện tại từ Frigate
       const rawConfig = await this.frigateClient.getRawConfig();
 
@@ -153,16 +155,15 @@ export class FrigateSyncService {
       // 3. Gửi cấu hình đã cập nhật xuống Frigate
       await this.frigateClient.saveConfig(updatedConfig);
 
-      const applied = await this.verifyAppliedZones(
+      await this.verifyAppliedConfig(
+        beforeRestart.startedAt,
+        updatedConfig,
         camera.slug,
         zones.filter((zone) => zone.isEnabled).map((zone) => zone.slug),
         (currentSettings?.managed_zone_slugs ?? []).filter(
           (slug) => !zones.some((zone) => zone.isEnabled && zone.slug === slug),
         ),
       );
-      if (!applied) {
-        throw new Error('Frigate chưa xác nhận cấu hình zone đang chạy.');
-      }
 
       const settingsAfterApply =
         await this.camerasRepository.findFrigateSettingsByCameraId(cameraId);
@@ -214,25 +215,42 @@ export class FrigateSyncService {
     }
   }
 
-  private async verifyAppliedZones(
+  private async verifyAppliedConfig(
+    previousStartedAt: number,
+    expectedConfig: string,
     cameraSlug: string,
     expectedSlugs: string[],
     removedSlugs: string[],
-  ): Promise<boolean> {
-    if (typeof this.frigateConfig.hasAppliedZones !== 'function') return true;
-    for (let attempt = 0; attempt < 10; attempt += 1) {
+  ): Promise<void> {
+    await this.waitForRuntime(
+      (state) =>
+        Math.abs(state.startedAt - previousStartedAt) > 2 &&
+        this.frigateConfig.hasAppliedSettings(state.rawConfig, expectedConfig, cameraSlug) &&
+        (typeof this.frigateConfig.hasAppliedZones !== 'function' ||
+          this.frigateConfig.hasAppliedZones(
+            state.rawConfig,
+            cameraSlug,
+            expectedSlugs,
+            removedSlugs,
+          )),
+    );
+  }
+
+  private async waitForRuntime(
+    matches: (state: FrigateRuntimeState) => boolean = () => true,
+  ): Promise<FrigateRuntimeState> {
+    const timeoutMs = Number(this.configService.get('FRIGATE_SYNC_TIMEOUT_MS', 45000));
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
       try {
-        const currentConfig = await this.frigateClient.getRawConfig();
-        if (
-          this.frigateConfig.hasAppliedZones(currentConfig, cameraSlug, expectedSlugs, removedSlugs)
-        )
-          return true;
+        const state = await this.frigateClient.getRuntimeState();
+        if (matches(state)) return state;
       } catch {
-        // Frigate khoi dong lai trong vai giay sau khi save_option=restart.
+        // Connection failures and HTTP 500/502 are expected during restart.
       }
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
-    return false;
+    throw new Error('Frigate chưa sẵn sàng hoặc chưa áp dụng cấu hình trong thời gian chờ.');
   }
 
   private sanitizeError(message: string): string {

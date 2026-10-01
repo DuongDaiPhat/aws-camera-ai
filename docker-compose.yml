@@ -150,10 +150,14 @@ services:
     shm_size: "256mb"
     environment:
       TZ: ${TZ}
+      MQTT_TOPIC_CAMERA_FRAMES: ${MQTT_TOPIC_CAMERA_FRAMES:-frigate/camerai/frames}
     ports:
       - "${PORT_FRIGATE:-5000}:5000"
     volumes:
       - ./infra/frigate/config.yml:/config/config.yml:rw
+      - ./infra/frigate/frame-metadata/bridge.py:/opt/camerai-frame-metadata/bridge.py:ro
+      - ./infra/frigate/frame-metadata/service:/etc/s6-overlay/s6-rc.d/camerai-frames:ro
+      - ./infra/frigate/frame-metadata/enabled:/etc/s6-overlay/s6-rc.d/user/contents.d/camerai-frames:ro
       - frigatedb:/db
       - frigatemedia:/media/frigate
     logging: *default-logging
@@ -257,6 +261,7 @@ services:
       - "${PORT_WEB:-3000}:3000"
     volumes:
       - ./apps/web/src:/workspace/apps/web/src
+      - ./packages/contracts/src:/workspace/packages/contracts/src
       - ./packages/contracts/dist:/workspace/packages/contracts/dist
     logging: *default-logging
 

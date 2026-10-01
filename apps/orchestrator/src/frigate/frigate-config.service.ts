@@ -71,6 +71,7 @@ export class FrigateConfigService {
         inputs: [
           {
             path: streamUrl,
+            input_args: 'preset-rtsp-restream-low-latency',
             roles: ['detect', 'record'],
           },
         ],
@@ -128,6 +129,42 @@ export class FrigateConfigService {
       expectedSlugs.every((slug) => Object.hasOwn(zones, slug)) &&
       removedSlugs.every((slug) => !Object.hasOwn(zones, slug))
     );
+  }
+
+  hasAppliedSettings(runningConfig: string, expectedConfig: string, cameraSlug: string): boolean {
+    const running = this.parseConfig(runningConfig);
+    const expected = this.parseConfig(expectedConfig);
+    const valueAt = (config: Record<string, unknown>, path: string): unknown =>
+      ['cameras', cameraSlug, ...path.split('.')].reduce<unknown>(
+        (value, key) =>
+          value && typeof value === 'object' ? (value as Record<string, unknown>)[key] : undefined,
+        config,
+      );
+    return [
+      'enabled',
+      'detect.enabled',
+      'detect.width',
+      'detect.height',
+      'detect.fps',
+      'detect.min_initialized',
+      'detect.max_disappeared',
+      'objects.filters.person.min_score',
+      'objects.filters.person.threshold',
+      'objects.filters.person.min_area',
+      'snapshots.enabled',
+      'snapshots.bounding_box',
+      'record.enabled',
+      'record.detections.retain.days',
+      'record.alerts.retain.days',
+    ].every((path) => {
+      const target = valueAt(expected, path);
+      const actual = valueAt(running, path);
+      if (target === undefined) return true;
+      if (typeof actual === 'number' || typeof target === 'number') {
+        return actual !== undefined && Math.abs(Number(actual) - Number(target)) < 0.000001;
+      }
+      return actual === target;
+    });
   }
 
   private toFrigateZone(

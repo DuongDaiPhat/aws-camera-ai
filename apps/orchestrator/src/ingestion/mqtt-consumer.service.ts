@@ -81,6 +81,10 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     const username = this.configService.get<string>('MQTT_USERNAME');
     const password = this.configService.get<string>('MQTT_PASSWORD');
     const topic = this.configService.get<string>('MQTT_TOPIC_FRIGATE', 'frigate/events');
+    const framesTopic = this.configService.get<string>(
+      'MQTT_TOPIC_CAMERA_FRAMES',
+      'frigate/camerai/frames',
+    );
     const reconnectPeriodMs = Number(
       this.configService.get<string | number>(
         'MQTT_RECONNECT_PERIOD_MS',
@@ -106,7 +110,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
 
     this.client.on('connect', () => {
       this.logger.log(`Da ket noi MQTT Broker thanh cong. Dang subscribe topic: ${topic}`);
-      this.client?.subscribe(topic, (error) => {
+      this.client?.subscribe([topic, framesTopic], (error) => {
         if (error) {
           this.logger.error(`Subscribe topic ${topic} that bai:`, error);
           return;
@@ -120,6 +124,16 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     });
 
     this.client.on('message', (receivedTopic, buffer) => {
+      // Frame telemetry must not wait for snapshot downloads or database writes.
+      if (receivedTopic === framesTopic) {
+        if (buffer.length > 128 * 1024) return;
+        try {
+          this.detectionTracker.frames.accept(JSON.parse(buffer.toString('utf8')) as unknown);
+        } catch {
+          this.logger.warn('Invalid camera frame metadata');
+        }
+        return;
+      }
       this.processingQueue = this.processingQueue
         .then(() => this.handleMessage(receivedTopic, buffer))
         .catch((error: unknown) => {

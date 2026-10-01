@@ -39,4 +39,21 @@ describe('FrigateClientService', () => {
       }),
     );
   });
+
+  it('reads the running configuration and the process startup time, not the saved file', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(
+      async (url) =>
+        ({
+          ok: true,
+          json: async () =>
+            String(url).endsWith('/api/stats')
+              ? { service: { uptime: 20, last_updated: 120 } }
+              : { cameras: { test: { detect: { fps: 8 } } } },
+        }) as Response,
+    );
+    const state = await (service as any).getRuntimeState();
+    expect(state.startedAt).toBe(100);
+    expect(JSON.parse(state.rawConfig).cameras.test.detect.fps).toBe(8);
+    expect(fetchMock).toHaveBeenCalledWith('http://frigate:5000/api/config', expect.any(Object));
+  });
 });

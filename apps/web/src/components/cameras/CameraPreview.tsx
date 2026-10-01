@@ -6,8 +6,9 @@ import type { CameraDebugStream, CameraZone } from '@/lib/cameras-client';
 import { fetchCameraDebugStream, fetchCameraZones } from '@/lib/cameras-client';
 import { CameraDebugToolbar } from './CameraDebugToolbar';
 import { ZonePolygonLayer } from './debug/ZonePolygonLayer';
-import { PersonBoxLayer, type DetectedPerson } from './debug/PersonBoxLayer';
+import { PersonBoxLayer } from './debug/PersonBoxLayer';
 import { CameraLiveStream } from './CameraLiveStream';
+import { useLivePersonDetections } from './live/use-live-person-detections';
 import styles from './styles/camera-preview.module.css';
 
 interface CameraPreviewProps {
@@ -46,7 +47,14 @@ export function CameraPreview({ camera }: CameraPreviewProps) {
   // Tải danh sách zones thực tế từ DB/API, nếu rỗng thì dùng sample zones
   useEffect(() => {
     let isCancelled = false;
-    const loadDebugData = () =>
+    let inFlight = false;
+    const loadDebugData = () => {
+      if (!camera.isEnabled) {
+        setDebugData(null);
+        return;
+      }
+      if (inFlight) return;
+      inFlight = true;
       fetchCameraDebugStream(camera.id)
         .then((stream) => {
           if (!isCancelled) {
@@ -56,13 +64,17 @@ export function CameraPreview({ camera }: CameraPreviewProps) {
         })
         .catch(() => {
           if (!isCancelled) setLoadError(true);
+        })
+        .finally(() => {
+          inFlight = false;
         });
+    };
 
     void fetchCameraZones(camera.id).then((cameraZones) => {
       if (!isCancelled) setZones(cameraZones.filter((zone) => zone.isEnabled));
     });
     void loadDebugData();
-    const refreshTimer = camera.isEnabled ? setInterval(() => void loadDebugData(), 1000) : null;
+    const refreshTimer = camera.isEnabled ? setInterval(loadDebugData, 80) : null;
     return () => {
       isCancelled = true;
       if (refreshTimer) clearInterval(refreshTimer);
@@ -73,23 +85,15 @@ export function CameraPreview({ camera }: CameraPreviewProps) {
     return new Set(debugData?.activeZones ?? []);
   }, [debugData]);
 
-  const detectedPeople = useMemo<DetectedPerson[]>(
-    () =>
-      (debugData?.detections ?? [])
-        .filter((item) => item.label === 'person' && item.box.length === 4)
-        .map((item) => {
-          const [yMin, xMin, yMax, xMax] = item.box;
-          return {
-            x: xMin,
-            y: yMin,
-            width: xMax - xMin,
-            height: yMax - yMin,
-            confidence: item.confidence,
-            label: item.label,
-          };
-        }),
-    [debugData],
+  const detectedPeople = useLivePersonDetections(
+    debugData,
+    camera.id,
+    camera.isEnabled && debugEnabled && showPerson,
+    camera.sourceType,
   );
+
+  const personCount = detectedPeople.length;
+  const overlayHeight = (1000 * (camera.detectHeight || 720)) / (camera.detectWidth || 1280);
 
   const resolution =
     camera.detectWidth && camera.detectHeight
@@ -137,15 +141,22 @@ export function CameraPreview({ camera }: CameraPreviewProps) {
           <span className={styles.hudBadge}>SOURCE: {camera.sourceType}</span>
         </div>
 
-        {debugEnabled && (
-          <svg className={styles.svgOverlay} viewBox="0 0 1000 562.5">
-            {showZone && <ZonePolygonLayer zones={zones} activeZoneSlugs={activeZoneSlugs} />}
+        {debugEnabled && camera.isEnabled && (
+          <svg className={styles.svgOverlay} viewBox={`0 0 1000 ${overlayHeight}`}>
+            {showZone && (
+              <ZonePolygonLayer
+                zones={zones}
+                activeZoneSlugs={activeZoneSlugs}
+                height={overlayHeight}
+              />
+            )}
             {showPerson &&
               detectedPeople.map((person, index) => (
                 <PersonBoxLayer
-                  key={`${person.label}-${index}`}
+                  key={person.id || `${person.label}-${index}`}
                   person={person}
                   showFootpoint={showZone}
+                  height={overlayHeight}
                 />
               ))}
           </svg>
@@ -154,8 +165,8 @@ export function CameraPreview({ camera }: CameraPreviewProps) {
 
       <div className={styles.infoFootnote}>
         <span>
-          {detectedPeople.length > 0
-            ? `${detectedPeople.length} person detection(s) from Frigate`
+          {personCount > 0
+            ? `${personCount} person detection(s) from Frigate`
             : 'No current person detections'}
         </span>
         <span className={styles.footpointLegend}>

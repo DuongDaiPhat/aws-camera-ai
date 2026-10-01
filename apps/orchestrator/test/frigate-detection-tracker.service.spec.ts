@@ -68,4 +68,43 @@ describe('FrigateDetectionTrackerService', () => {
 
     expect(service.getActiveDetections('cam_test')).toEqual([]);
   });
+
+  it('retains stationary detections beyond short intervals and only expires after full TTL', () => {
+    jest.useFakeTimers();
+    try {
+      service.track('new', {
+        id: 'track-stationary',
+        camera: 'cam_test',
+        label: 'person',
+        score: 0.88,
+        frame_time: 100,
+        box: [50, 50, 200, 200],
+        current_zones: [],
+      });
+
+      // Advance by 4s (person is stationary, within TTL)
+      jest.advanceTimersByTime(4_000);
+      expect(service.getActiveDetections('cam_test')).toHaveLength(1);
+
+      // Advance beyond 8s TTL fallback
+      jest.advanceTimersByTime(5_000);
+      expect(service.getActiveDetections('cam_test')).toEqual([]);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('clears camera detections immediately when clearCamera is called', () => {
+    service.track('new', {
+      id: 'track-test',
+      camera: 'cam_test',
+      label: 'person',
+      score: 0.9,
+      frame_time: 100,
+      box: [10, 10, 100, 100],
+    });
+    expect(service.getActiveDetections('cam_test')).toHaveLength(1);
+    service.clearCamera('cam_test');
+    expect(service.getActiveDetections('cam_test')).toEqual([]);
+  });
 });
