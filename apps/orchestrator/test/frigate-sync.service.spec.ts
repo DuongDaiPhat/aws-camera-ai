@@ -53,6 +53,10 @@ describe('FrigateSyncService', () => {
     };
 
     const mockClient = {
+      getRuntimeState: jest
+        .fn()
+        .mockResolvedValueOnce({ rawConfig: 'cameras: {}', startedAt: 100 })
+        .mockResolvedValue({ rawConfig: 'cameras: {}', startedAt: 200 }),
       getRawConfig: jest.fn(),
       saveConfig: jest.fn(),
       restart: jest.fn(),
@@ -61,6 +65,7 @@ describe('FrigateSyncService', () => {
 
     const mockConfig = {
       generateUpdatedConfig: jest.fn(),
+      hasAppliedSettings: jest.fn().mockReturnValue(true),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -248,6 +253,59 @@ describe('FrigateSyncService', () => {
 
     expect(res.success).toBe(false);
     expect(res.errorCode).toBe('CAMERA_NOT_FOUND');
+  });
+
+  it('holds the sync lock until Frigate restarts and the running settings match', async () => {
+    jest.useFakeTimers();
+    try {
+      camerasRepository.findById.mockResolvedValue(mockCamera);
+      camerasRepository.findFrigateSettingsByCameraId.mockResolvedValue(null);
+      camerasRepository.updateFrigateSettings.mockResolvedValue({ config_version: 1 } as any);
+      frigateClient.getRawConfig.mockResolvedValue('cameras: {}');
+      frigateConfig.generateUpdatedConfig.mockReturnValue('cameras: {}');
+      frigateClient.saveConfig.mockResolvedValue(true);
+      const runtime = (frigateClient as any).getRuntimeState as jest.Mock;
+      runtime.mockReset().mockResolvedValue({ rawConfig: 'cameras: {}', startedAt: 100 });
+      const pending = service.syncCamera(mockCamera.id);
+      await jest.advanceTimersByTimeAsync(1500);
+      expect(camerasRepository.updateFrigateSettings).not.toHaveBeenCalled();
+      expect((await service.syncCamera(mockCamera.id)).errorCode).toBe(
+        'CAMERA_ALREADY_TRANSITIONING',
+      );
+      runtime.mockResolvedValue({ rawConfig: 'cameras: {}', startedAt: 200 });
+      (frigateConfig as any).hasAppliedSettings.mockReturnValue(false);
+      await jest.advanceTimersByTimeAsync(500);
+      expect(camerasRepository.updateFrigateSettings).not.toHaveBeenCalled();
+      runtime.mockRejectedValueOnce(new Error('Frigate trả về mã lỗi: 500'));
+      (frigateConfig as any).hasAppliedSettings.mockReturnValue(true);
+      await jest.advanceTimersByTimeAsync(1000);
+      expect((await pending).success).toBe(true);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('waits through a restart outage before preparing the next configuration', async () => {
+    jest.useFakeTimers();
+    try {
+      camerasRepository.findById.mockResolvedValue(mockCamera);
+      camerasRepository.findFrigateSettingsByCameraId.mockResolvedValue(null);
+      camerasRepository.updateFrigateSettings.mockResolvedValue({ config_version: 1 } as any);
+      frigateClient.getRawConfig.mockResolvedValue('cameras: {}');
+      frigateConfig.generateUpdatedConfig.mockReturnValue('cameras: {}');
+      frigateClient.saveConfig.mockResolvedValue(true);
+      (frigateClient as any).getRuntimeState
+        .mockReset()
+        .mockRejectedValueOnce(new Error('Frigate trả về mã lỗi: 500'))
+        .mockResolvedValueOnce({ rawConfig: 'cameras: {}', startedAt: 100 })
+        .mockResolvedValue({ rawConfig: 'cameras: {}', startedAt: 200 });
+      const pending = service.syncCamera(mockCamera.id);
+      await jest.advanceTimersByTimeAsync(1000);
+      expect((await pending).success).toBe(true);
+      expect(frigateClient.saveConfig).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('xu ly loi Frigate API offline va danh dau FAILED vao DB', async () => {
