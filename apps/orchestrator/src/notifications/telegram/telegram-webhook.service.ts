@@ -1,0 +1,101 @@
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { hashTelegramLinkToken } from './telegram-link.service';
+import { TelegramWebhookRepository } from './telegram-webhook.repository';
+
+export type TelegramUpdate =
+  | {
+      kind: 'CALLBACK';
+      updateId: number;
+      callbackId: string;
+      actorId: string;
+      chatId: string | null;
+      messageId: string | null;
+      data: string | null;
+    }
+  | { kind: 'LINK'; updateId: number; token: string; actorId: string; chatId: string }
+  | { kind: 'IGNORED'; updateId: number };
+
+function record(value: unknown): Record<string, unknown> | null {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function telegramId(value: unknown): string | null {
+  return typeof value === 'number' && Number.isSafeInteger(value) ? String(value) : null;
+}
+
+function privateChatActor(
+  message: Record<string, unknown>,
+  chat: Record<string, unknown> | null,
+): string | null {
+  const actorId = telegramId(record(message.from)?.id);
+  const chatId = telegramId(chat?.id);
+  return actorId && chatId && chat?.type === 'private' && actorId === chatId ? actorId : null;
+}
+
+function parseCallback(updateId: number, callback: Record<string, unknown>): TelegramUpdate {
+  const actorId = telegramId(record(callback.from)?.id);
+  const message = record(callback.message);
+  if (typeof callback.id !== 'string' || !actorId) {
+    throw new BadRequestException('Telegram callback không hợp lệ.');
+  }
+  return {
+    kind: 'CALLBACK',
+    updateId,
+    callbackId: callback.id,
+    actorId,
+    chatId: telegramId(record(message?.chat)?.id),
+    messageId: telegramId(message?.message_id),
+    data: typeof callback.data === 'string' ? callback.data : null,
+  };
+}
+
+function parseMessage(updateId: number, value: unknown): TelegramUpdate {
+  const message = record(value);
+  const text = message?.text;
+  if (typeof text !== 'string' || !text.startsWith('/start ')) {
+    return { kind: 'IGNORED', updateId };
+  }
+  const chat = record(message?.chat);
+  const chatId = telegramId(chat?.id);
+  const actorId = message ? privateChatActor(message, chat) : null;
+  if (!actorId || !chatId) {
+    return { kind: 'IGNORED', updateId };
+  }
+  return { kind: 'LINK', updateId, actorId, chatId, token: text.slice(7).trim() };
+}
+
+export function parseTelegramUpdate(value: unknown): TelegramUpdate {
+  const update = record(value);
+  if (!update) throw new BadRequestException('Telegram update không hợp lệ.');
+  const updateId = update.update_id;
+  if (typeof updateId !== 'number' || !Number.isSafeInteger(updateId) || updateId < 0) {
+    throw new BadRequestException('Telegram update_id không hợp lệ.');
+  }
+
+  const callback = record(update.callback_query);
+  return callback ? parseCallback(updateId, callback) : parseMessage(updateId, update.message);
+}
+
+@Injectable()
+export class TelegramWebhookService {
+  constructor(private readonly inbox: TelegramWebhookRepository) {}
+
+  async receive(body: unknown): Promise<{ ok: true }> {
+    const update = parseTelegramUpdate(body);
+    const minimalBody =
+      update.kind === 'LINK'
+        ? {
+            kind: 'LINK',
+            actorId: update.actorId,
+            chatId: update.chatId,
+            tokenHash: hashTelegramLinkToken(update.token),
+          }
+        : update;
+    await this.inbox.store(update.updateId, minimalBody);
+
+    // ACK sau khi lưu bền vững; worker xử lý cả callback/link sau restart.
+    return { ok: true };
+  }
+}

@@ -55,7 +55,7 @@ describe('EventsRepository (US-03, US-06)', () => {
       source: 'FRIGATE',
       trackId: 'track-1',
       dedupKey: 'dedup-1',
-      confidence: 0.9,
+      detectionConfidence: 0.9,
       detectedAt: new Date(),
     };
 

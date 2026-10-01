@@ -177,6 +177,28 @@ paths:
               schema: { $ref: "#/components/schemas/User" }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
+  /auth/telegram/link:
+    post:
+      tags: [auth]
+      summary: Tao ma lien ket Telegram mot lan cho tai khoan da dang nhap
+      description: |
+        US-14. Token chi tra ve mot lan, het han sau 10 phut. Gui `/start <token>`
+        trong private chat voi bot. Gioi han mot yeu cau moi phut; token cu bi vo hieu.
+      operationId: createTelegramLink
+      responses:
+        "201":
+          description: Ma lien ket da duoc tao
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [linkToken, expiresAt]
+                properties:
+                  linkToken: { type: string }
+                  expiresAt: { type: string, format: date-time }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { description: Yeu cau lien ket qua thuong xuyen }
+
   # ===================================================================
   # USERS
   # ===================================================================
@@ -1388,6 +1410,9 @@ paths:
       responses:
         "202":
           description: Da tiep nhan, dang chuyen cho escalation engine
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AiResultAccepted" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "409": { $ref: "#/components/responses/Conflict" }
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -1399,17 +1424,29 @@ paths:
       summary: Callback khi nguoi dung bam nut trong Telegram
       description: |
         US-14. Xac thuc bang header `X-Telegram-Bot-Api-Secret-Token`.
-        Body la Update object cua Telegram — khong mo ta lai o day.
+        Body la Update object cua Telegram. update_id duoc ghi inbox duy nhat
+        truoc khi ACK 200; worker xu ly bat dong bo qua confirmation service US-13.
+        Kiem tra actor da lien ket, quyen camera, notification, chat/message va TTL.
+        Replay khong tao them confirmation. Callback da xu ly/sai quyen duoc ACK,
+        ket qua tra qua answerCallbackQuery; edit tin nhan duoc retry rieng.
       operationId: telegramWebhook
       security: []
+      parameters:
+        - in: header
+          name: X-Telegram-Bot-Api-Secret-Token
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 256 }
       requestBody:
         required: true
         content:
           application/json:
             schema: { type: object, additionalProperties: true }
       responses:
-        "200": { description: Da xu ly }
+        "200": { description: Da luu ben vung update hoac nhan update trung lap }
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "409": { description: "Update ID/callback ID da ton tai voi noi dung khac" }
+        "500": { description: "Khong luu duoc inbox, Telegram can gui lai" }
 
   /webhooks/connect:
     post:
@@ -2193,6 +2230,7 @@ components:
               type: array
               description: FR-EVT-04 — giu du chi tiet tung nhan AI.
               items: { $ref: "#/components/schemas/AiResultItem" }
+            aggregateVersion: { type: integer, minimum: 0 }
             retain: { type: boolean }
             correlationId: { type: string, format: uuid }
             escalationDeadlineAt: { type: ["string", "null"], format: date-time }
@@ -2214,14 +2252,34 @@ components:
 
     AiResultItem:
       type: object
-      required: [module, label, confidence]
+      required:
+        [
+          resultId,
+          observationId,
+          revision,
+          module,
+          label,
+          confidence,
+          modelVersion,
+          processedAt,
+          status,
+        ]
       properties:
+        resultId: { type: string, format: uuid }
+        observationId: { type: string }
+        revision: { type: integer, minimum: 1 }
         module:
           type: string
           enum: [M1_FACE, M2A_FALL, M2B_POSTURE, M3_FIRE, M4_ZONE, M5_WELLNESS]
-        label: { type: string }
+        label: { type: ["string", "null"] }
         confidence: { type: ["number", "null"], minimum: 0, maximum: 1 }
         modelVersion: { type: string }
+        processedAt: { type: string, format: date-time }
+        status: { type: string, enum: [SUCCESS, ERROR] }
+        error:
+          oneOf:
+            - $ref: "#/components/schemas/ResultError"
+            - type: "null"
         boundingBox:
           type: ["object", "null"]
           description: Toa do chuan hoa 0..1.
@@ -2412,7 +2470,16 @@ components:
       required: [eventType, priority, tWaitSeconds, isEnabled]
       properties:
         version: { type: integer, minimum: 1 }
-        effectiveHighWaitSeconds: { type: integer, minimum: 1, readOnly: true }
+        effectiveHighWaitSeconds:
+          type: integer
+          minimum: 0
+          readOnly: true
+          description: Thời gian hiệu lực nhánh tin cậy cao; dùng highWaitSeconds đã lưu, không tự chia đôi.
+        highWaitSeconds:
+          type: ["integer", "null"]
+          minimum: 0
+          maximum: 3599
+          description: Thời gian nhập tay cho confidence >= T_high, phải nhỏ hơn tWaitSeconds. Null với rule không dùng nhánh này.
         eventType: { $ref: "#/components/schemas/EventType" }
         priority: { $ref: "#/components/schemas/PriorityLevel" }
         tLow:
@@ -2456,8 +2523,13 @@ components:
         tLow: { type: ["number", "null"], minimum: 0, maximum: 1 }
         tHigh: { type: ["number", "null"], minimum: 0, maximum: 1 }
         tWaitSeconds: { type: integer, minimum: 1, maximum: 3600 }
+        highWaitSeconds:
+          type: ["integer", "null"]
+          minimum: 0
+          maximum: 3599
+          description: Nhập tay, phải nhỏ hơn tWaitSeconds; bỏ trường này để giữ giá trị đang lưu. Null với FIRE/WELLNESS không dùng nhánh chia theo confidence.
         expectedVersion: { type: integer, minimum: 1 }
-      description: tLow <= tHigh; WELLNESS_TIMEOUT requires both null. Other alert types require both numbers. Updates only future evaluations.
+      description: tLow <= tHigh; WELLNESS_TIMEOUT requires both null. Other alert types require both numbers. highWaitSeconds is a non-negative integer less than tWaitSeconds when applicable. Updates only future evaluations; existing deadlines are not reset.
 
     UpdateEscalationRuleRequest:
       type: object
@@ -2549,27 +2621,50 @@ components:
         - $ref: "#/components/schemas/ZoneResultSubmission"
         - $ref: "#/components/schemas/OtherAiResultSubmission"
 
-    OtherAiResultSubmission:
+    AiResultAccepted:
       type: object
-      required: [module, results, modelVersion, processedAt]
+      required: [resultId, disposition, aggregateVersion]
+      properties:
+        resultId: { type: string, format: uuid }
+        disposition: { type: string, enum: [ACCEPTED, DUPLICATE, STALE] }
+        aggregateVersion: { type: integer, minimum: 0 }
+
+    OtherAiResultSubmission:
+      allOf:
+        - $ref: "#/components/schemas/ResultIdentity"
+        - type: object
+          required: [results, error]
+          properties:
+            module:
+              type: string
+              enum: [M2A_FALL, M2B_POSTURE, M3_FIRE, M5_WELLNESS]
+            results:
+              type: array
+              maxItems: 20
+              items: { $ref: "#/components/schemas/OtherAiResultItem" }
+            error:
+              oneOf:
+                - $ref: "#/components/schemas/ResultError"
+                - type: "null"
+      description: Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline.
+
+    OtherAiResultItem:
+      type: object
+      required: [module, label, confidence, boundingBox, metadata]
       properties:
         module:
           type: string
           enum: [M2A_FALL, M2B_POSTURE, M3_FIRE, M5_WELLNESS]
-        modelVersion: { type: string }
-        results:
-          type: array
-          items: { $ref: "#/components/schemas/AiResultItem" }
-        personStatus: { $ref: "#/components/schemas/PersonStatus" }
-        matchedKnownFaceId: { type: ["string", "null"], format: uuid }
-        processedAt: { type: string, format: date-time }
-        error:
-          type: ["object", "null"]
-          description: |
-            Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline.
-          properties:
-            code: { type: string }
-            message: { type: string }
+        label: { type: string }
+        confidence: { type: ["number", "null"], minimum: 0, maximum: 1 }
+        boundingBox:
+          oneOf:
+            - $ref: "#/components/schemas/NormalizedBox"
+            - type: "null"
+        metadata:
+          type: object
+          additionalProperties: true
+
     ResultIdentity:
       type: object
       required:
@@ -2690,12 +2785,25 @@ components:
         cameraId: { type: string, format: uuid }
         trackId: { type: string }
         observedAt: { type: string, format: date-time }
-        enteredAt: { type: string, format: date-time }
-        dwellSeconds: { type: number, minimum: 0 }
+        enteredAt: { type: ["string", "null"], format: date-time }
+        dwellSeconds: { type: [number, "null"], minimum: 0 }
+        dwellEvidence:
+          type: string
+          const: FRIGATE_CURRENT_ZONE_LOITERING
+          description: Frigate confirmed current_zones after configured loitering_time. Exact zone entry time and dwell duration are unavailable and must remain null.
         minDwellSeconds: { type: integer, minimum: 0, maximum: 300 }
         scheduleActive: { type: boolean, const: true }
         zoneConfigVersion: { type: integer, minimum: 1 }
         scoreSource: { type: string, const: FRIGATE_PERSON_DETECTION }
+      oneOf:
+        - properties:
+            enteredAt: { type: string, format: date-time }
+            dwellSeconds: { type: number, minimum: 0 }
+        - required: [dwellEvidence]
+          properties:
+            dwellEvidence: { type: string, const: FRIGATE_CURRENT_ZONE_LOITERING }
+            enteredAt: { type: "null" }
+            dwellSeconds: { type: "null" }
 
     ZoneResultSubmission:
       allOf:

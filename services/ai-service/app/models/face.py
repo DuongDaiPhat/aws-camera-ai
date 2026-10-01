@@ -60,6 +60,7 @@ class MatchResponse(FaceModel):
     collection_version: int = Field(alias="collectionVersion")
     person_status: Literal["KNOWN", "UNKNOWN", "UNDETERMINED"] | None = Field(alias="personStatus")
     similarity: float | None = None
+    threshold_used: float = Field(ge=0, le=1, alias="thresholdUsed")
     label_confidence: float | None = Field(default=None, alias="labelConfidence")
     confidence_policy_version: str = Field(default="v1", alias="confidencePolicyVersion")
     quality_reason: str | None = Field(default=None, alias="qualityReason")

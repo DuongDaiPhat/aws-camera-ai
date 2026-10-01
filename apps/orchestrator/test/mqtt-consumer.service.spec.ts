@@ -7,6 +7,8 @@ import { MqttConsumerService } from '../src/ingestion/mqtt-consumer.service';
 import { EventMediaRecord, EventMediaRepository } from '../src/media/event-media.repository';
 import { MediaService } from '../src/media/media.service';
 import { FrigateDetectionTrackerService } from '../src/frigate/frigate-detection-tracker.service';
+import { ZoneResultProducerService } from '../src/ingestion/zone-result-producer.service';
+import { AiResultsService } from '../src/ai-results/ai-results.service';
 
 function createEvent(overrides: Partial<EventRecord> = {}): EventRecord {
   return {
@@ -72,6 +74,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
   let eventMediaRepository: jest.Mocked<EventMediaRepository>;
   let eventsService: jest.Mocked<EventsService>;
   let detectionTracker: jest.Mocked<FrigateDetectionTrackerService>;
+  let aiResultsService: jest.Mocked<AiResultsService>;
 
   beforeEach(async () => {
     const mockEventsRepository = {
@@ -104,6 +107,8 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MqttConsumerService,
+        ZoneResultProducerService,
+        { provide: AiResultsService, useValue: { submit: jest.fn() } },
         { provide: EventsRepository, useValue: mockEventsRepository },
         { provide: MediaService, useValue: mockMediaService },
         { provide: EventMediaRepository, useValue: mockEventMediaRepository },
@@ -119,6 +124,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     eventMediaRepository = module.get(EventMediaRepository);
     eventsService = module.get(EventsService);
     detectionTracker = module.get(FrigateDetectionTrackerService);
+    aiResultsService = module.get(AiResultsService);
   });
 
   it('khởi tạo thành công', () => {
@@ -173,18 +179,27 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     );
   });
 
-  it('tạo RESTRICTED_ZONE P1 và tra zone từ current_zones', async () => {
+  it('giữ phân loại M4 của US-12 khi current_zone là vùng cấm hợp lệ', async () => {
     eventsRepository.findCameraBySlug.mockResolvedValueOnce({
       id: 'cam-uuid-kitchen',
       name: 'Phong bep',
       slug: 'cam_kitchen',
+      timezone: 'Asia/Bangkok',
+      zone_config_applied: true,
+      zone_config_version: 7,
     });
-    eventsRepository.findZoneByCameraAndSlug.mockResolvedValueOnce({
-      id: 'zone-uuid-stove',
-      camera_id: 'cam-uuid-kitchen',
-      name: 'Khu vuc bep',
-      slug: 'restricted_stove',
-    });
+    eventsRepository.findEligibleZones.mockResolvedValueOnce([
+      {
+        id: 'zone-uuid-stove',
+        camera_id: 'cam-uuid-kitchen',
+        name: 'Khu vuc bep',
+        slug: 'restricted_stove',
+        zone_type: 'RESTRICTED',
+        min_dwell_seconds: 2,
+        active_from: null,
+        active_to: null,
+      },
+    ]);
     eventsRepository.createEvent.mockResolvedValueOnce(
       createEvent({
         camera_id: 'cam-uuid-kitchen',
@@ -193,6 +208,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
         priority: 'P1',
         track_id: 'track-102',
         dedup_key: 'frigate:cam_kitchen:track-102',
+        detected_at: new Date(1_726_387_200_000),
       }),
     );
 
@@ -213,16 +229,34 @@ describe('MqttConsumerService (US-03, US-04)', () => {
       ),
     );
 
-    expect(eventsRepository.findZoneByCameraAndSlug).toHaveBeenCalledWith(
-      'cam-uuid-kitchen',
+    expect(eventsRepository.findEligibleZones).toHaveBeenCalledWith('cam-uuid-kitchen', [
       'restricted_stove',
-    );
+    ]);
     expect(eventsRepository.createEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         zoneId: 'zone-uuid-stove',
+        zoneName: 'Khu vuc bep',
         eventType: 'RESTRICTED_ZONE',
         priority: 'P1',
         dedupKey: 'frigate:cam_kitchen:track-102',
+      }),
+    );
+    expect(aiResultsService.submit).toHaveBeenCalledWith(
+      'event-uuid-1',
+      expect.objectContaining({
+        module: 'M4_ZONE',
+        results: [
+          expect.objectContaining({
+            label: 'RESTRICTED_ZONE',
+            confidence: 0.9,
+            metadata: expect.objectContaining({
+              zoneId: 'zone-uuid-stove',
+              dwellSeconds: null,
+              dwellEvidence: 'FRIGATE_CURRENT_ZONE_LOITERING',
+              zoneConfigVersion: 7,
+            }),
+          }),
+        ],
       }),
     );
   });
@@ -256,6 +290,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     );
 
     expect(eventsRepository.findEligibleZones).not.toHaveBeenCalled();
+    expect(aiResultsService.submit).not.toHaveBeenCalled();
     expect(eventsRepository.createEvent).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: 'PERSON_DETECTED', zoneId: null }),
     );
@@ -289,6 +324,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     );
 
     expect(eventsRepository.findEligibleZones).not.toHaveBeenCalled();
+    expect(aiResultsService.submit).not.toHaveBeenCalled();
     expect(eventsRepository.createEvent).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: 'PERSON_DETECTED', zoneId: null }),
     );
@@ -318,6 +354,61 @@ describe('MqttConsumerService (US-03, US-04)', () => {
 
     expect(eventsRepository.createEvent).not.toHaveBeenCalled();
   });
+
+  it.each(['REST_AREA', 'NORMAL', 'INACTIVE', 'WRONG_CAMERA'])(
+    'không gửi receipt M4 cho vùng %s',
+    async (scenario) => {
+      eventsRepository.findCameraBySlug.mockResolvedValue({
+        id: 'cam-uuid-1',
+        name: 'Bếp',
+        slug: 'cam_kitchen',
+        timezone: 'UTC',
+        zone_config_applied: true,
+        zone_config_version: 7,
+      });
+      eventsRepository.findEligibleZones.mockResolvedValue([
+        {
+          id: 'zone-uuid-stove',
+          camera_id: scenario === 'WRONG_CAMERA' ? 'other-camera' : 'cam-uuid-1',
+          name: 'Bếp',
+          slug: 'restricted_stove',
+          zone_type:
+            scenario === 'REST_AREA'
+              ? 'REST_AREA'
+              : scenario === 'NORMAL'
+                ? 'NORMAL'
+                : 'RESTRICTED',
+          min_dwell_seconds: 2,
+          active_from: scenario === 'INACTIVE' ? '00:00' : null,
+          active_to: scenario === 'INACTIVE' ? '00:01' : null,
+        },
+      ]);
+      eventsRepository.createEvent.mockResolvedValue(createEvent());
+      await service.handleMessage(
+        'frigate/events',
+        Buffer.from(
+          JSON.stringify({
+            type: 'new',
+            after: {
+              id: 'track-101',
+              camera: 'cam_kitchen',
+              frame_time: 1_726_387_200,
+              label: 'person',
+              score: 0.9,
+              current_zones: ['restricted_stove'],
+            },
+          }),
+        ),
+      );
+      expect(aiResultsService.submit).not.toHaveBeenCalled();
+      expect(eventsRepository.createEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: 'PERSON_DETECTED',
+          zoneId: null,
+        }),
+      );
+    },
+  );
 
   it('bỏ qua label không phải person', async () => {
     await service.handleMessage(
@@ -389,7 +480,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
       'frigate:cam_living_room:track-boundary',
     );
     expect(eventsRepository.updateEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ eventId: createdEvent.id, confidence: 0.9 }),
+      expect.objectContaining({ eventId: createdEvent.id, detectionConfidence: 0.9 }),
     );
   });
 

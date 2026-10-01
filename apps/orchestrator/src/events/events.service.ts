@@ -29,7 +29,6 @@ import type { EventStatsResponseDto } from './dto/event-stats-response.dto';
 import type { ConfirmEventDto, CloseEventDto } from './dto/confirm-event.dto';
 import type { ConfirmationResponseDto } from './dto/confirmation-response.dto';
 import { DEFAULT_STATS_WINDOW_HOURS } from './dto/get-event-stats-query.dto';
-import type { AiComponents, PersonStatus, EventStatus } from '@cam/contracts';
 
 const PRESIGNED_URL_TTL_SECONDS = 900; // 15 phút (FR-EVT-07)
 const STATUS_HISTORY_LIMIT = 50;
@@ -44,18 +43,36 @@ function toAiResultItems(rawResults: unknown): AiResultItem[] {
     return [];
   }
 
-  return rawResults.filter((item): item is AiResultItem => {
-    if (typeof item !== 'object' || item === null) return false;
-    const candidate = item as Partial<AiResultItem>;
-    return (
-      typeof candidate.label === 'string' &&
-      (candidate.confidence === null ||
-        (typeof candidate.confidence === 'number' &&
-          Number.isFinite(candidate.confidence) &&
-          candidate.confidence >= 0 &&
-          candidate.confidence <= 1))
-    );
-  });
+  return rawResults.filter(isAiResultItem);
+}
+
+function isAiResultItem(item: unknown): item is AiResultItem {
+  if (typeof item !== 'object' || item === null) return false;
+  const candidate = item as Partial<AiResultItem>;
+  return hasAiResultIdentity(candidate) && hasValidAiResultValue(candidate);
+}
+
+function hasAiResultIdentity(candidate: Partial<AiResultItem>): boolean {
+  return (
+    typeof candidate.resultId === 'string' &&
+    typeof candidate.observationId === 'string' &&
+    typeof candidate.revision === 'number' &&
+    typeof candidate.module === 'string' &&
+    typeof candidate.modelVersion === 'string' &&
+    typeof candidate.processedAt === 'string'
+  );
+}
+
+function hasValidAiResultValue(candidate: Partial<AiResultItem>): boolean {
+  const hasValidLabel = candidate.label === null || typeof candidate.label === 'string';
+  const hasValidStatus = candidate.status === 'SUCCESS' || candidate.status === 'ERROR';
+  const hasValidConfidence =
+    candidate.confidence === null ||
+    (typeof candidate.confidence === 'number' &&
+      Number.isFinite(candidate.confidence) &&
+      candidate.confidence >= 0 &&
+      candidate.confidence <= 1);
+  return hasValidLabel && hasValidStatus && hasValidConfidence;
 }
 
 function toIsoStringOrNull(value: Date | null): string | null {
@@ -153,6 +170,11 @@ export class EventsService {
     return result;
   }
 
+  async publishCommittedUpdate(eventId: string): Promise<void> {
+    const summary = await this.eventsRepository.findEventSummaryById(eventId);
+    if (summary) this.emitEvent(await this.toEventSummary(summary), 'event.updated');
+  }
+
   /**
    * Đóng sự kiện khẩn cấp sau khi đã tiếp nhận và can thiệp - FR-ESC-04/09 (US-13 Phase EMERGENCY).
    */
@@ -188,7 +210,9 @@ export class EventsService {
       trackId: record.track_id,
       aiLabel: record.ai_label,
       aiModelVersion: record.ai_model_version,
+      aiProcessedAt: toIsoStringOrNull(record.ai_processed_at),
       aiResults: toAiResultItems(record.ai_results),
+      aggregateVersion: Number(record.aggregate_version),
       retain: record.retain,
       correlationId: record.correlation_id,
       escalationDeadlineAt: toIsoStringOrNull(record.escalation_deadline_at),
@@ -288,7 +312,7 @@ export class EventsService {
         record.zone_id || record.zone_name
           ? { id: record.zone_id, name: record.zone_name ?? undefined }
           : null,
-      confidence: record.confidence ? Number(record.confidence) : null,
+      confidence: record.confidence !== null ? Number(record.confidence) : null,
       personStatus: record.person_status ?? undefined,
       matchedPersonName: record.matched_person_name ?? null,
       thumbnailUrl,
@@ -329,60 +353,5 @@ export class EventsService {
     }
 
     return this.eventSubject.asObservable();
-  }
-
-  /**
-   * Xử lý kết quả từ FaceRecognitionWorker.
-   * Ghi PersonStatus, AI results, update EventStatus nếu cần (US-10).
-   */
-  async processFaceMatchResult(
-    eventId: string,
-    result: AiComponents['schemas']['MatchResponse'],
-  ): Promise<void> {
-    let personStatus: PersonStatus | null = null;
-    let newEventStatus: EventStatus | null = null;
-
-    if (result.personStatus === 'KNOWN') {
-      personStatus = 'KNOWN';
-    } else if (result.personStatus === 'UNKNOWN') {
-      personStatus = 'UNKNOWN';
-      newEventStatus = 'NOTIFIED'; // escalate immediately
-    } else if (result.personStatus === 'UNDETERMINED') {
-      personStatus = 'UNDETERMINED';
-    } else if (result.error) {
-      newEventStatus = 'AI_FAILED';
-    }
-
-    const aiResultItem = {
-      module: 'M1_FACE',
-      requestId: result.requestId,
-      collectionVersion: result.collectionVersion,
-      matchedKnownFaceId:
-        ('matchedKnownFaceId' in result
-          ? (result as { matchedKnownFaceId?: string }).matchedKnownFaceId
-          : null) || null,
-      results: [
-        {
-          label: 'person',
-          confidence: result.similarity,
-          labelConfidence: result.labelConfidence,
-        },
-      ],
-      error: result.error,
-    };
-
-    await this.eventsRepository.updatePersonStatusAndAiResult(
-      eventId,
-      personStatus,
-      aiResultItem.matchedKnownFaceId,
-      aiResultItem,
-      newEventStatus,
-    );
-
-    const summaryRecord = await this.eventsRepository.findEventSummaryById(eventId);
-    if (summaryRecord) {
-      const summary = await this.toEventSummary(summaryRecord);
-      this.emitEvent(summary, 'event.updated');
-    }
   }
 }

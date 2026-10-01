@@ -3,6 +3,8 @@ dist
 .next
 coverage
 pnpm-lock.yaml
+.pytest_cache
+.venv
 
 # Migration SQL — thut dong can chinh bang tay cho de doc
 db/migrations

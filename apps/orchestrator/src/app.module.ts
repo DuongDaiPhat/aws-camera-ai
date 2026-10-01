@@ -4,12 +4,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { CameraSourcesModule } from './camera-sources/camera-sources.module';
 import { CamerasModule } from './cameras/cameras.module';
+import { AiResultsModule } from './ai-results/ai-results.module';
 import { DatabaseModule } from './database/database.module';
 import { EventsModule } from './events/events.module';
 import { FrigateModule } from './frigate/frigate.module';
 import { HealthModule } from './health/health.module';
 import { IngestionModule } from './ingestion/ingestion.module';
 import { MediaModule } from './media/media.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { StorageModule } from './storage/storage.module';
 import { EscalationRulesModule } from './escalation-rules/escalation-rules.module';
 import { EscalationModule } from './escalation/escalation.module';
@@ -42,12 +44,14 @@ import { BullModule } from '@nestjs/bullmq';
     DatabaseModule,
     AuthModule,
     KnownFacesModule,
+    AiResultsModule,
     StorageModule,
     CameraSourcesModule,
     FrigateModule,
     CamerasModule,
     EventsModule,
     MediaModule,
+    NotificationsModule,
     IngestionModule,
     HealthModule,
     EscalationRulesModule,

@@ -105,74 +105,96 @@ function EventThumbnail({ event }: { event: UIEventItem }) {
 }
 
 function PriorityBadge({ event }: { event: UIEventItem }) {
-  if (event.status === 'RESOLVED') {
-    return (
-      <span className={`${styles.priorityBadge} ${styles.priorityBadgeSuccess}`}>
-        ✅ Đã xác nhận an toàn
-      </span>
-    );
-  }
+  const isFinished = event.status === 'RESOLVED' || event.status === 'CLOSED';
+  const badgeClass = `${styles.priorityBadge} ${isFinished ? styles.priorityBadgeMuted : ''}`;
+
   if (event.priority === 'P0') {
     return (
-      <span className={`${styles.priorityBadge} ${styles.priorityBadgeP0}`}>🔥 P0 Khẩn cấp</span>
+      <span className={`${badgeClass} ${!isFinished ? styles.priorityBadgeP0 : ''}`}>
+        🔥 P0 Khẩn cấp
+      </span>
     );
   }
   if (event.priority === 'P1') {
     return (
-      <span className={`${styles.priorityBadge} ${styles.priorityBadgeP1}`}>⚠️ P1 Quan trọng</span>
+      <span className={`${badgeClass} ${!isFinished ? styles.priorityBadgeP1 : ''}`}>
+        ⚠️ P1 Quan trọng
+      </span>
     );
   }
   if (event.priority === 'P2') {
     return (
-      <span className={`${styles.priorityBadge} ${styles.priorityBadgeP2}`}>P2 Cần chú ý</span>
+      <span className={`${badgeClass} ${!isFinished ? styles.priorityBadgeP2 : ''}`}>
+        P2 Cần chú ý
+      </span>
     );
   }
-  return (
-    <span className={`${styles.priorityBadge} ${styles.priorityBadgeNeutral}`}>Thông tin</span>
-  );
+  return <span className={`${badgeClass} ${styles.priorityBadgeNeutral}`}>Thông tin</span>;
 }
 
 function EventStatusBadges({ event }: { event: UIEventItem }) {
-  if (event.status === 'RESOLVED') return null;
+  const statusLabels: Record<UIEventItem['status'], string> = {
+    DETECTED: 'Mới phát hiện',
+    LOGGED_ONLY: 'Chỉ ghi nhận',
+    NOTIFIED: 'Đang chờ xác nhận',
+    ESCALATED: 'Đang leo thang khẩn cấp',
+    RESOLVED: 'Đã xác nhận an toàn',
+    CLOSED: 'Đã đóng sự kiện khẩn cấp',
+    AI_FAILED: 'AI không phân tích được',
+  };
+  const statusClasses: Partial<Record<UIEventItem['status'], string>> = {
+    NOTIFIED: styles.statusBadgeNotified,
+    ESCALATED: styles.statusBadgeEscalated,
+    RESOLVED: styles.statusBadgeResolved,
+    CLOSED: styles.statusBadgeClosed,
+    AI_FAILED: styles.statusBadgeFailed,
+  };
 
   return (
     <>
-      {event.priority === 'P1' && event.eventType === 'FALL_DETECTED' && (
-        <span className={`${styles.statusBadge} ${styles.statusBadgeAlert}`}>Cần xử lý ngay</span>
-      )}
-      {event.status === 'DETECTED' && <span className={styles.statusBadge}>Mới phát hiện</span>}
-      {event.status === 'NOTIFIED' && <span className={styles.statusBadge}>Đã gửi cảnh báo</span>}
-      {event.status === 'LOGGED_ONLY' && <span className={styles.statusBadge}>Đã ghi nhận</span>}
+      <span className={`${styles.statusBadge} ${statusClasses[event.status] ?? ''}`}>
+        {statusLabels[event.status]}
+      </span>
+      {event.priority === 'P1' &&
+        event.eventType === 'FALL_DETECTED' &&
+        (event.status === 'DETECTED' || event.status === 'NOTIFIED') && (
+          <span className={`${styles.statusBadge} ${styles.statusBadgeAlert}`}>Cần xử lý ngay</span>
+        )}
       {event.isFalseAlarm && <span className={styles.statusBadge}>Đã đánh dấu báo động giả</span>}
     </>
   );
 }
 
 export function EventCard({ event, onViewDetail }: EventCardProps) {
-  const isResolved = event.status === 'RESOLVED';
+  const isFinished = event.status === 'RESOLVED' || event.status === 'CLOSED';
+  const isEscalated = event.status === 'ESCALATED';
   const isP0 = event.priority === 'P0';
   const isP1 = event.priority === 'P1';
   const isP2 = event.priority === 'P2';
 
-  const accentClass = isResolved
-    ? styles.accentSuccess
-    : isP0
-      ? styles.accentP0
-      : isP1
-        ? styles.accentP1
-        : isP2
-          ? styles.accentP2
-          : styles.accentNeutral;
+  const accentClass = isEscalated
+    ? styles.accentEscalated
+    : event.status === 'RESOLVED'
+      ? styles.accentSuccess
+      : event.status === 'CLOSED'
+        ? styles.accentClosed
+        : isP0
+          ? styles.accentP0
+          : isP1
+            ? styles.accentP1
+            : isP2
+              ? styles.accentP2
+              : styles.accentNeutral;
 
-  const actionButtonClass = isResolved
+  const actionButtonClass = isFinished
     ? styles.actionButtonOutline
-    : isP0
+    : isEscalated || isP0
       ? styles.actionButtonP0
       : isP1 || isP2
         ? styles.actionButtonPrimary
         : styles.actionButtonOutline;
 
-  const actionLabel = isResolved ? 'Xem lại' : 'Xem chi tiết';
+  const actionLabel = isFinished ? 'Xem lại' : isEscalated ? 'Xử lý khẩn cấp' : 'Xem chi tiết';
   const title = EVENT_TITLES[event.eventType] ?? 'Sự kiện camera';
   const confidencePercent =
     typeof event.confidence === 'number' ? `${Math.round(event.confidence * 100)}%` : null;
@@ -187,12 +209,15 @@ export function EventCard({ event, onViewDetail }: EventCardProps) {
             <PriorityBadge event={event} />
             <EventStatusBadges event={event} />
 
-            <span className={styles.timeText} title={formatExactTime(event.detectedAt)}>
+            <span
+              className={styles.timeText}
+              title={`Thời điểm phát hiện: ${formatExactTime(event.detectedAt)}`}
+            >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
-              <span>{event.relativeTimeText}</span>
+              <span>Phát hiện: {event.relativeTimeText}</span>
             </span>
           </div>
 

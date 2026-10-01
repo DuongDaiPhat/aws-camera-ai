@@ -15,6 +15,7 @@ describe('Escalation Policy (US-13)', () => {
         tLow: 0.5,
         tHigh: 0.7,
         tWaitSeconds: 30,
+        highWaitSeconds: null,
         skipLoggedOnly: true,
         notifyChannels: ['TELEGRAM'],
         escalateChannels: ['CONNECT_CALL'],
@@ -31,6 +32,7 @@ describe('Escalation Policy (US-13)', () => {
         tLow: 0.55,
         tHigh: 0.75,
         tWaitSeconds: 60,
+        highWaitSeconds: 30,
         skipLoggedOnly: false,
         notifyChannels: ['TELEGRAM'],
         escalateChannels: ['CONNECT_CALL'],
@@ -47,6 +49,7 @@ describe('Escalation Policy (US-13)', () => {
         tLow: 0.6,
         tHigh: 0.8,
         tWaitSeconds: 120,
+        highWaitSeconds: 60,
         skipLoggedOnly: false,
         notifyChannels: ['TELEGRAM'],
         escalateChannels: ['CONNECT_CALL'],
@@ -63,6 +66,7 @@ describe('Escalation Policy (US-13)', () => {
         tLow: null,
         tHigh: null,
         tWaitSeconds: 300,
+        highWaitSeconds: null,
         skipLoggedOnly: false,
         notifyChannels: ['TELEGRAM'],
         escalateChannels: ['CONNECT_CALL'],
@@ -116,7 +120,7 @@ describe('Escalation Policy (US-13)', () => {
       expect(decision.deadlineAt).toEqual(new Date('2026-09-25T10:01:00Z')); // 10:00:00 + 60s
     });
 
-    it('confidence >= T_high -> NOTIFIED voi wait = max(1, ceil(T_wait/2)) = 30s', () => {
+    it('confidence >= T_high -> NOTIFIED dùng thời gian nhánh khẩn cấp đã lưu', () => {
       const input: EscalationEvaluationInput = {
         eventType: 'FALL_DETECTED',
         detectedAt,
@@ -170,6 +174,45 @@ describe('Escalation Policy (US-13)', () => {
       expect(decision.targetStatus).toBe('NOTIFIED');
       expect(decision.effectiveWaitSeconds).toBe(30);
       expect(decision.triggeringResults).toHaveLength(2);
+    });
+
+    it('M4 P1 dưới T_low không che M1 P2 đã đạt T_low', () => {
+      const rules = new Map(baseRules);
+      rules.set('RESTRICTED_ZONE', {
+        eventType: 'RESTRICTED_ZONE',
+        priority: 'P1',
+        tLow: 0.6,
+        tHigh: 0.8,
+        tWaitSeconds: 60,
+        highWaitSeconds: 30,
+        skipLoggedOnly: false,
+        notifyChannels: ['TELEGRAM'],
+        escalateChannels: ['CONNECT_CALL'],
+        maxEscalationLevel: 3,
+        isEnabled: true,
+        version: 1,
+      });
+      const decision = evaluateEscalationPolicy(
+        {
+          eventType: 'RESTRICTED_ZONE',
+          detectedAt,
+          aiResults: [
+            {
+              eventType: 'RESTRICTED_ZONE',
+              module: 'M4_ZONE',
+              label: 'RESTRICTED_ZONE',
+              confidence: 0.4,
+            },
+            { eventType: 'UNKNOWN_PERSON', module: 'M1_FACE', label: 'UNKNOWN', confidence: 0.7 },
+          ],
+        },
+        rules as any,
+      );
+
+      expect(decision.targetStatus).toBe('NOTIFIED');
+      expect(decision.triggeringEventType).toBe('UNKNOWN_PERSON');
+      expect(decision.priority).toBe('P2');
+      expect(decision.triggeringResults).toHaveLength(1);
     });
 
     it('rule bi vo hieu hoa (isEnabled = false) -> LOGGED_ONLY', () => {

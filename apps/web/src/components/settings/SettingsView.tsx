@@ -37,8 +37,8 @@ export function SettingsView({ user }: SettingsViewProps) {
           <span>Cấu hình cảnh báo &amp; Quy tắc leo thang</span>
         </h2>
         <p className={styles.pageSubtitle}>
-          Cấu hình ngưỡng tin cậy phát hiện AI (T_low, T_high) và thời gian chờ xử lý trước khi kích
-          hoạt cuộc gọi khẩn cấp theo từng loại sự kiện an ninh.
+          Điều chỉnh thời gian chờ xác nhận và ngưỡng tin cậy AI cho từng loại sự kiện. Hết thời
+          gian chờ sẽ leo thang trong hệ thống; tích hợp gọi điện khẩn cấp được triển khai riêng.
         </p>
       </div>
 

@@ -97,6 +97,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/telegram/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tao ma lien ket Telegram mot lan cho tai khoan da dang nhap
+         * @description US-14. Token chi tra ve mot lan, het han sau 10 phut. Gui `/start <token>`
+         *     trong private chat voi bot. Gioi han mot yeu cau moi phut; token cu bi vo hieu.
+         */
+        post: operations["createTelegramLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users": {
         parameters: {
             query?: never;
@@ -910,7 +931,11 @@ export interface paths {
         /**
          * Callback khi nguoi dung bam nut trong Telegram
          * @description US-14. Xac thuc bang header `X-Telegram-Bot-Api-Secret-Token`.
-         *     Body la Update object cua Telegram — khong mo ta lai o day.
+         *     Body la Update object cua Telegram. update_id duoc ghi inbox duy nhat
+         *     truoc khi ACK 200; worker xu ly bat dong bo qua confirmation service US-13.
+         *     Kiem tra actor da lien ket, quyen camera, notification, chat/message va TTL.
+         *     Replay khong tao them confirmation. Callback da xu ly/sai quyen duoc ACK,
+         *     ket qua tra qua answerCallbackQuery; edit tin nhan duoc retry rieng.
          */
         post: operations["telegramWebhook"];
         delete?: never;
@@ -1447,6 +1472,7 @@ export interface components {
             aiModelVersion?: string | null;
             /** @description FR-EVT-04 — giu du chi tiet tung nhan AI. */
             aiResults?: components["schemas"]["AiResultItem"][];
+            aggregateVersion?: number;
             retain?: boolean;
             /** Format: uuid */
             correlationId?: string;
@@ -1469,11 +1495,20 @@ export interface components {
             triggeringResults?: components["schemas"]["AiResultItem"][];
         };
         AiResultItem: {
+            /** Format: uuid */
+            resultId: string;
+            observationId: string;
+            revision: number;
             /** @enum {string} */
             module: "M1_FACE" | "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M4_ZONE" | "M5_WELLNESS";
-            label: string;
+            label: string | null;
             confidence: number | null;
-            modelVersion?: string;
+            modelVersion: string;
+            /** Format: date-time */
+            processedAt: string;
+            /** @enum {string} */
+            status: "SUCCESS" | "ERROR";
+            error?: components["schemas"]["ResultError"] | null;
             /** @description Toa do chuan hoa 0..1. */
             boundingBox?: {
                 x?: number;
@@ -1624,7 +1659,10 @@ export interface components {
         };
         EscalationRule: {
             version?: number;
+            /** @description Thời gian hiệu lực nhánh tin cậy cao; dùng highWaitSeconds đã lưu, không tự chia đôi. */
             readonly effectiveHighWaitSeconds?: number;
+            /** @description Thời gian nhập tay cho confidence >= T_high, phải nhỏ hơn tWaitSeconds. Null với rule không dùng nhánh này. */
+            highWaitSeconds?: number | null;
             eventType: components["schemas"]["EventType"];
             priority: components["schemas"]["PriorityLevel"];
             /** @description Duoi nguong nay -> LOGGED_ONLY, khong lam phien ai. */
@@ -1646,11 +1684,13 @@ export interface components {
             /** @description Tên người dùng cập nhật gần nhất. */
             updatedByName?: string | null;
         };
-        /** @description tLow <= tHigh; WELLNESS_TIMEOUT requires both null. Other alert types require both numbers. Updates only future evaluations. */
+        /** @description tLow <= tHigh; WELLNESS_TIMEOUT requires both null. Other alert types require both numbers. highWaitSeconds is a non-negative integer less than tWaitSeconds when applicable. Updates only future evaluations; existing deadlines are not reset. */
         UpdateEscalationThresholdsRequest: {
             tLow: number | null;
             tHigh: number | null;
             tWaitSeconds: number;
+            /** @description Nhập tay, phải nhỏ hơn tWaitSeconds; bỏ trường này để giữ giá trị đang lưu. Null với FIRE/WELLNESS không dùng nhánh chia theo confidence. */
+            highWaitSeconds?: number | null;
             expectedVersion: number;
         };
         UpdateEscalationRuleRequest: {
@@ -1718,21 +1758,29 @@ export interface components {
             priorityOrder: number;
         };
         AiResultRequest: components["schemas"]["FaceResultSubmission"] | components["schemas"]["ZoneResultSubmission"] | components["schemas"]["OtherAiResultSubmission"];
-        OtherAiResultSubmission: {
+        AiResultAccepted: {
+            /** Format: uuid */
+            resultId: string;
+            /** @enum {string} */
+            disposition: "ACCEPTED" | "DUPLICATE" | "STALE";
+            aggregateVersion: number;
+        };
+        /** @description Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline. */
+        OtherAiResultSubmission: components["schemas"]["ResultIdentity"] & {
+            /** @enum {string} */
+            module?: "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M5_WELLNESS";
+            results: components["schemas"]["OtherAiResultItem"][];
+            error: components["schemas"]["ResultError"] | null;
+        };
+        OtherAiResultItem: {
             /** @enum {string} */
             module: "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M5_WELLNESS";
-            modelVersion: string;
-            results: components["schemas"]["AiResultItem"][];
-            personStatus?: components["schemas"]["PersonStatus"];
-            /** Format: uuid */
-            matchedKnownFaceId?: string | null;
-            /** Format: date-time */
-            processedAt: string;
-            /** @description Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline. */
-            error?: {
-                code?: string;
-                message?: string;
-            } | null;
+            label: string;
+            confidence: number | null;
+            boundingBox: components["schemas"]["NormalizedBox"] | null;
+            metadata: {
+                [key: string]: unknown;
+            };
         };
         /** @description eventId must match path. Same resultId and payload is replay-safe; changed payload is IDEMPOTENCY_CONFLICT. Persist before 202. Older revisions cannot replace newer results. */
         ResultIdentity: {
@@ -1808,15 +1856,29 @@ export interface components {
             /** Format: date-time */
             observedAt: string;
             /** Format: date-time */
-            enteredAt: string;
-            dwellSeconds: number;
+            enteredAt: string | null;
+            dwellSeconds: number | null;
+            /**
+             * @description Frigate confirmed current_zones after configured loitering_time. Exact zone entry time and dwell duration are unavailable and must remain null.
+             * @constant
+             */
+            dwellEvidence?: "FRIGATE_CURRENT_ZONE_LOITERING";
             minDwellSeconds: number;
             /** @constant */
             scheduleActive: true;
             zoneConfigVersion: number;
             /** @constant */
             scoreSource: "FRIGATE_PERSON_DETECTION";
-        };
+        } & ({
+            /** Format: date-time */
+            enteredAt?: string;
+            dwellSeconds?: number;
+        } | {
+            /** @constant */
+            dwellEvidence: "FRIGATE_CURRENT_ZONE_LOITERING";
+            enteredAt?: null;
+            dwellSeconds?: null;
+        });
         /** @description Only submit enabled RESTRICTED zones with proven dwell and active schedule. Score comes from the matching Frigate person observation, never fabricated as 1. Missing score is diagnostic, not a risk result. Deduplicate event/zone/track; modelVersion identifies detector and metadata identifies config. */
         ZoneResultSubmission: components["schemas"]["ResultIdentity"] & {
             /** @constant */
@@ -2032,6 +2094,38 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+        };
+    };
+    createTelegramLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ma lien ket da duoc tao */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        linkToken: string;
+                        /** Format: date-time */
+                        expiresAt: string;
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description Yeu cau lien ket qua thuong xuyen */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     listUsers: {
@@ -3641,7 +3735,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiResultAccepted"];
+                };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -3652,7 +3748,9 @@ export interface operations {
     telegramWebhook: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                "X-Telegram-Bot-Api-Secret-Token": string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -3664,14 +3762,29 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Da xu ly */
+            /** @description Da luu ben vung update hoac nhan update trung lap */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
+            /** @description Update ID/callback ID da ton tai voi noi dung khac */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Khong luu duoc inbox, Telegram can gui lai */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     connectWebhook: {

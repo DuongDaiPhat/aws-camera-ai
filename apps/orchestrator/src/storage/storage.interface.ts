@@ -14,5 +14,6 @@ export interface PresignedUrlResult {
 
 export interface IStorageService {
   upload(key: string, body: Buffer, contentType: string): Promise<UploadResult>;
+  download(key: string): Promise<Buffer>;
   getPresignedUrl(key: string, expiresInSeconds?: number): Promise<PresignedUrlResult>;
 }

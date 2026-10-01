@@ -34,7 +34,9 @@ export interface EventDetailRecord extends EventListItemRecord {
   track_id: string | null;
   ai_label: string | null;
   ai_model_version: string | null;
+  ai_processed_at: Date | null;
   ai_results: unknown[];
+  aggregate_version: number;
   retain: boolean;
   correlation_id: string;
   escalation_deadline_at: Date | null;
@@ -163,13 +165,13 @@ const CREATE_EVENT_QUERY = `
     track_id,
     dedup_key,
     confidence,
+    detection_confidence,
     ai_results,
     correlation_id,
     detected_at
   ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
-    COALESCE($12, gen_random_uuid()),
-    $13
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, NULL, $10, $11,
+    COALESCE($12, gen_random_uuid()), $13
   )
   ON CONFLICT (dedup_key) WHERE dedup_key IS NOT NULL DO NOTHING
   RETURNING id,
@@ -183,6 +185,7 @@ const CREATE_EVENT_QUERY = `
             track_id,
             dedup_key,
             confidence,
+            detection_confidence,
             ai_results,
             correlation_id,
             detected_at,
@@ -196,6 +199,7 @@ export interface CameraRecord {
   slug: string;
   timezone?: string;
   zone_config_applied?: boolean;
+  zone_config_version?: number;
   rtsp_url?: string;
   owner_user_id?: string;
 }
@@ -221,7 +225,7 @@ export interface CreateEventInput {
   source?: string;
   trackId: string;
   dedupKey: string;
-  confidence: number;
+  detectionConfidence: number;
   aiResults?: unknown[];
   correlationId?: string;
   detectedAt: Date;
@@ -239,6 +243,7 @@ export interface EventRecord {
   track_id: string | null;
   dedup_key: string | null;
   confidence: number | null;
+  detection_confidence?: number | null;
   ai_results: unknown[];
   correlation_id: string;
   detected_at: Date;
@@ -253,7 +258,7 @@ export interface UpdateEventInput {
   zoneName?: string | null;
   eventType: EventType;
   priority: PriorityLevel;
-  confidence: number;
+  detectionConfidence: number;
 }
 
 @Injectable()
@@ -269,7 +274,8 @@ export class EventsRepository {
     const query = `
       SELECT c.id, c.name, c.slug, c.timezone, d.owner_user_id,
              COALESCE(f.sync_status = 'SYNCED' AND f.applied_version = f.config_version, false)
-               AS zone_config_applied
+               AS zone_config_applied,
+             f.applied_version AS zone_config_version
       FROM cameras c
       JOIN devices d ON c.device_id = d.id
       LEFT JOIN camera_frigate_settings f ON f.camera_id = c.id
@@ -327,7 +333,7 @@ export class EventsRepository {
       input.source ?? 'FRIGATE',
       input.trackId,
       input.dedupKey,
-      input.confidence,
+      input.detectionConfidence,
       JSON.stringify(input.aiResults ?? []),
       input.correlationId ?? null,
       input.detectedAt,
@@ -365,6 +371,7 @@ export class EventsRepository {
              track_id,
              dedup_key,
              confidence,
+             detection_confidence,
              ai_results,
              correlation_id,
              detected_at,
@@ -396,15 +403,41 @@ export class EventsRepository {
           END,
           event_type = CASE
             WHEN event_type = 'RESTRICTED_ZONE' THEN event_type
+            WHEN $5::event_type = 'RESTRICTED_ZONE' AND priority IN ('P2', 'P3')
+              THEN 'RESTRICTED_ZONE'::event_type
+            WHEN ai_processed_at IS NOT NULL THEN event_type
             ELSE $5::event_type
           END,
           priority = CASE
             WHEN event_type = 'RESTRICTED_ZONE' THEN priority
+            WHEN $5::event_type = 'RESTRICTED_ZONE' AND priority IN ('P2', 'P3')
+              THEN 'P1'::priority_level
+            WHEN ai_processed_at IS NOT NULL THEN priority
             ELSE $6::priority_level
           END,
+          ai_label = CASE
+            WHEN $5::event_type = 'RESTRICTED_ZONE' AND priority IN ('P2', 'P3')
+              THEN NULL
+            ELSE ai_label
+          END,
           confidence = CASE
-            WHEN confidence IS NULL THEN $7
-            ELSE GREATEST(confidence, $7)
+            WHEN $5::event_type = 'RESTRICTED_ZONE' AND priority IN ('P2', 'P3')
+              THEN NULL
+            ELSE confidence
+          END,
+          ai_model_version = CASE
+            WHEN $5::event_type = 'RESTRICTED_ZONE' AND priority IN ('P2', 'P3')
+              THEN NULL
+            ELSE ai_model_version
+          END,
+          ai_processed_at = CASE
+            WHEN $5::event_type = 'RESTRICTED_ZONE' AND priority IN ('P2', 'P3')
+              THEN NULL
+            ELSE ai_processed_at
+          END,
+          detection_confidence = CASE
+            WHEN detection_confidence IS NULL THEN $7
+            ELSE GREATEST(detection_confidence, $7)
           END
       WHERE id = $1
       RETURNING id,
@@ -418,6 +451,7 @@ export class EventsRepository {
                 track_id,
                 dedup_key,
                 confidence,
+                detection_confidence,
                 ai_results,
                 correlation_id,
                 detected_at,
@@ -432,37 +466,10 @@ export class EventsRepository {
       input.zoneName ?? null,
       input.eventType,
       input.priority,
-      input.confidence,
+      input.detectionConfidence,
     ];
     const result = await this.pool.query<EventRecord>(query, values);
     return result.rows[0] ?? null;
-  }
-
-  /**
-   * Cập nhật kết quả nhận diện khuôn mặt và trạng thái sự kiện từ worker.
-   */
-  async updatePersonStatusAndAiResult(
-    eventId: string,
-    personStatus: PersonStatus | null,
-    matchedKnownFaceId: string | null,
-    aiResult: unknown,
-    status: EventStatus | null,
-  ): Promise<void> {
-    const query = `
-      UPDATE events
-      SET person_status = COALESCE($2, person_status),
-          matched_known_face_id = COALESCE($3, matched_known_face_id),
-          ai_results = COALESCE(ai_results, '[]'::jsonb) || $4::jsonb,
-          status = COALESCE($5, status)
-      WHERE id = $1;
-    `;
-    await this.pool.query(query, [
-      eventId,
-      personStatus,
-      matchedKnownFaceId,
-      JSON.stringify([aiResult]),
-      status,
-    ]);
   }
 
   /**
@@ -514,7 +521,9 @@ export class EventsRepository {
              e.track_id,
              e.ai_label,
              e.ai_model_version,
+             e.ai_processed_at,
              e.ai_results,
+             e.aggregate_version,
              e.retain,
              e.correlation_id,
              e.escalation_deadline_at,

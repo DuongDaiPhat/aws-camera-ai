@@ -1,7 +1,7 @@
 # Plan US-14 — Cảnh báo Telegram kèm ảnh và hai nút xác nhận
 
 > Phần giao với US-13, shared notifications/outbox, media và identity tuân theo [kế hoạch tích hợp 5 thành viên](PLAN_AGILE_5_MEMBER_EXECUTION.md).
-> Trạng thái: kế hoạch thực thi, chưa triển khai hay gửi tin nhắn thật.
+> Trạng thái: đã triển khai sender/retry, liên kết Telegram, durable webhook inbox và callback qua confirmation service US-13; sửa tin sau commit. Automated tests đã qua; E2E bot/chat thật chưa nghiệm thu. Bằng chứng tại [TEST_US-14_TELEGRAM_ALERTS.md](TEST_US-14_TELEGRAM_ALERTS.md).
 > Mục tiêu: gửi cảnh báo rõ ràng, nhận xác nhận đúng người, retry bền vững và không trì hoãn escalation.
 
 ## 1. Phạm vi và phụ thuộc
@@ -16,11 +16,12 @@
 ## 2. Hiện trạng
 
 - Đã có notifications, confirmations, event_status_history và audit_logs.
-- notifications có attempt_count/max_attempts/next_retry_at/provider_message_id, nhưng mặc định max_attempts=3 và constraint attempt_count<=max_attempts.
+- notifications có attempt_count/max_attempts/next_retry_at/provider_chat_id/provider_message_id và lease; sender Telegram đặt ngân sách 4 attempts theo cấu hình, không đổi default của các kênh khác.
 - confirmations có unique partial index cho một is_authoritative=true trên mỗi event; các lần bấm sau có thể lưu is_authoritative=false.
-- OpenAPI có `/webhooks/telegram` và `/events/{eventId}/confirm`; backend chưa triển khai.
+- Đã có backend và OpenAPI cho `/auth/telegram/link`, `/webhooks/telegram` và `/events/{eventId}/confirm`. Callback dùng cùng transaction `confirmInitial()` với dashboard.
 - Env đã có TELEGRAM_BOT_TOKEN và TELEGRAM_WEBHOOK_SECRET.
-- Chưa có Telegram sender, worker, retry scheduler hoặc mapping người bấm được xác minh.
+- Đã có sender, retry scheduler, liên kết actor đã xác minh và worker inbox/edit. Migrations `0007_telegram_delivery.sql` và `0011_telegram_confirmation_delivery.sql` bổ sung dữ liệu Telegram.
+- Môi trường local đã áp dụng hai migration và nạp lại orchestrator ngày 29/09/2026. Bot token/webhook secret chưa cấu hình; chưa có bằng chứng gửi ảnh và bấm nút Telegram thật.
 
 ## 3. Hợp đồng với engine
 
@@ -150,7 +151,6 @@ DB dedup bảo đảm một notification intent, không bảo đảm exactly-onc
 apps/orchestrator/src/notifications/
   notifications.module.ts
   notifications.repository.ts
-  notification-dispatcher.service.ts
   notification-retry-worker.service.ts
   notification-channel.interface.ts
   telegram/
@@ -159,9 +159,18 @@ apps/orchestrator/src/notifications/
     telegram-webhook.controller.ts
     telegram-webhook.guard.ts
     telegram-callback.service.ts
-    dto/
+    telegram-webhook.service.ts
+    telegram-webhook.repository.ts
+    telegram-link.controller.ts
+    telegram-link.service.ts
+    telegram-link.repository.ts
+    telegram-work-worker.service.ts
+    telegram-work.repository.ts
+    telegram-work.config.ts
+    telegram-api.error.ts
 ```
 
+- Cấu trúc trên phản ánh code hiện tại: `NotificationRetryWorker` claim notification và dispatch qua channel interface, không cần thêm dispatcher riêng. Webhook nhận payload API bên ngoài dạng `unknown`, validate/narrow bằng `parseTelegramUpdate()` trước khi lưu inbox; chưa dùng DTO/class-validator riêng cho payload Telegram.
 - Adapter HTTP qua interface, mock được; log dùng Logger/correlationId.
 - Tái sử dụng storage interface để lấy snapshot, event service để đọc thông tin canonical.
 - UI không cần trang mới: event detail thể hiện SENT/FAILED/CONFIRMED, số attempt và người xác nhận nếu đã có component tương ứng.
@@ -195,6 +204,8 @@ Unit dùng fake clock/HTTP adapter; integration dùng PostgreSQL để chứng m
 3. Nhánh ví dụ `feat/US-14-telegram-alerts`; commit tiếng Việt theo scope: `feat(orchestrator): gửi cảnh báo Telegram kèm xác nhận`.
 4. Chạy `pnpm api:lint`, `pnpm contracts:generate`, `pnpm --filter @cam/orchestrator test`, `pnpm check:all` và Docker smoke test.
 5. PR theo template, không log secret/chat cá nhân trong evidence; A/B review khi sửa API, ít nhất một người khác approve, không tự merge và squash theo workflow.
+
+Checklist dưới đây là nghiệm thu toàn story. Unit/integration đã chứng minh logic nhưng không thay thế bằng chứng bot/chat thật; trạng thái từng ca được ghi trong test guide.
 
 - [ ] Happy path gửi ảnh và đủ nội dung/hai nút.
 - [ ] Actor được xác minh, callback có secret và authorization theo event.

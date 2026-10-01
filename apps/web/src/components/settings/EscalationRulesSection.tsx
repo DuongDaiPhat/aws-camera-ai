@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useEscalationRules } from '@/hooks/useEscalationRules';
+import { useEscalationRules, toRuleDraft } from '@/hooks/useEscalationRules';
 import { EscalationRuleCard } from './EscalationRuleCard';
 import styles from './settings-view.module.css';
 
@@ -86,11 +86,18 @@ export function EscalationRulesSection({ isAdmin }: EscalationRulesSectionProps)
           </li>
           <li>
             <strong>Độ tin cậy cao (&ge; T_high):</strong> Kích hoạt thông báo với thời gian chờ rút
-            ngắn ưu tiên <code>ceil(T_wait / 2)</code>.
+            nhập tay ở ô “Nhánh khẩn cấp”, nhỏ hơn T_wait. Rule bỏ qua ngưỡng và sự kiện an sinh
+            dùng T_wait trực tiếp.
           </li>
           <li>
-            <strong>Hiệu lực tức thì:</strong> Thay đổi cấu hình được áp dụng cho mọi sự kiện phát
-            sinh mới trong vòng tối đa 60 giây mà không cần khởi động lại dịch vụ.
+            <strong>Điều chỉnh để test:</strong> Chọn nhanh hoặc nhập T_wait trong từng thẻ rồi bấm
+            “Lưu thay đổi”. Thay đổi áp dụng cho lần đánh giá mới sau khi lưu thành công, không gia
+            hạn deadline của sự kiện đang chờ.
+          </li>
+          <li>
+            <strong>Mốc tính giờ:</strong> Từ lúc camera phát hiện, không phải lúc Telegram nhận
+            tin. Hết hạn mà chưa xác nhận sẽ leo thang khẩn cấp; chưa đồng nghĩa gọi điện thật hoặc
+            gửi thêm tin Telegram.
           </li>
         </ul>
       </div>
@@ -108,11 +115,7 @@ export function EscalationRulesSection({ isAdmin }: EscalationRulesSectionProps)
       {/* Rules list */}
       <div className={styles.rulesList}>
         {rules.map((rule) => {
-          const draft = drafts[rule.eventType] ?? {
-            tLow: rule.tLow ?? null,
-            tHigh: rule.tHigh ?? null,
-            tWaitSeconds: rule.tWaitSeconds,
-          };
+          const draft = drafts[rule.eventType] ?? toRuleDraft(rule);
 
           return (
             <EscalationRuleCard

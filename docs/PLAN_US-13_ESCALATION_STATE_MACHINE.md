@@ -26,7 +26,7 @@
 ### Quyết định thiết kế của plan
 
 1. User story yêu cầu recovery theo detected_at. Tài liệu DATA_FLOW hiện dùng now()+T_wait. Thực hiện `deadline = detected_at + effectiveWaitSeconds` ngay lần thông báo đầu, lưu DB và dùng lại sau restart. Cập nhật tài liệu cũ trong PR để thống nhất; không chỉ đổi công thức lúc recovery.
-2. OpenAPI ghi `confidence >= T_high` vẫn NOTIFIED nhưng hẹn giờ ngắn, trong khi US-15 chỉ cho quản trị viên cấu hình một `T_wait`. Để không mở rộng contract ngoài user story, thời gian chờ cho nhánh confidence cao được suy ra bằng `max(1, ceil(T_wait / 2))` giây. Công thức này phải nằm trong policy dùng chung và hiển thị dạng chỉ đọc trên trang Cấu hình. FIRE/WELLNESS ngoại lệ dùng T_wait riêng theo rule.
+2. `confidence >= T_high` vẫn NOTIFIED nhưng dùng `highWaitSeconds` do ADMIN nhập tay, số nguyên không âm và nhỏ hơn `tWaitSeconds`. Theo yêu cầu cập nhật ngày 29/09/2026, bỏ việc tự chia đôi. Migration `0012` khởi tạo một lần từ giá trị cũ để giữ hành vi trước nâng cấp; các lần chỉnh cấu hình sau lưu độc lập. FIRE/WELLNESS ngoại lệ dùng T_wait riêng theo rule.
 3. “Xác nhận đầu tiên” áp dụng quyết định IM_OK/NEED_HELP giai đoạn NOTIFIED. Sau NEED_HELP vẫn phải cho một xác nhận khẩn cấp riêng để đóng ESCALATED; không để unique index hiện tại chặn CLOSED mãi mãi.
 4. P1/P3 trong persona không phải event priority. UNKNOWN_PERSON mặc định P2 theo seed; không đổi priority thành P1 chỉ vì người nhận là persona P1.
 
@@ -41,12 +41,12 @@
 | Lỗi AI đơn thuần trước khi phản ứng          | AI_FAILED, không coi là confidence=0                   |
 | Nguy cơ hợp lệ, confidence < T_low           | LOGGED_ONLY                                            |
 | T_low <= confidence < T_high                 | NOTIFIED, wait=T_wait                                  |
-| confidence >= T_high                         | NOTIFIED, wait=max(1, ceil(T_wait/2))                  |
+| confidence >= T_high                         | NOTIFIED, wait=highWaitSeconds đã lưu                  |
 | Rule skip_logged_only=true                   | NOTIFIED theo T_wait của rule; không skip quality gate |
 | T_low/T_high null cho WELLNESS               | Đánh giá rule scheduler hợp lệ, không ép null thành 0  |
 | Nguy cơ cần confidence nhưng nhận null/sai   | Ghi lỗi, không tự phát cảnh báo hoặc so sánh null      |
 
-- T_low<=T_high; 0<=T_wait<=3600, validate ở API/service/DB phù hợp. Nhánh confidence cao dùng công thức suy ra, không thêm trường cấu hình thứ tư.
+- T_low<=T_high; form ADMIN cho 1<=T_wait<=3600. Rule có nhánh cao cần 0<=highWaitSeconds<T_wait; validate ở UI/API/DB. `0` nghĩa là deadline ngay lúc phát hiện, worker xử lý ở lần kiểm tra kế tiếp. Rule nội bộ PERSON_DETECTED vẫn có T_wait=0.
 - FIRE_SMOKE_DETECTED dùng P0, skip_logged_only=true, T_wait=30 theo rule hiện có; “bất kể confidence” không biến lỗi model thành phát hiện cháy.
 - PERSON_DETECTED có channels rỗng, T_wait=0 không được tự escalate.
 - Rules hiện có: FALL P1/60s, RESTRICTED_ZONE P1/60s, UNKNOWN_PERSON P2/120s, WELLNESS P2/300s, FIRE P0/30s.
@@ -156,7 +156,7 @@ Giữ API `POST /events/{eventId}/confirm` với IM_OK/NEED_HELP:
 
 - Implement `/events/{eventId}/confirm` theo contract hiện có; thêm 401/403/400 nếu thiếu.
 - Implement endpoint close mới và mô tả emergency phase; response Confirmation thêm phase nếu dùng chung schema.
-- Giữ rule schemas/read/update với đúng `tLow`, `tHigh`, `tWaitSeconds`; API response có thể trả `effectiveHighWaitSeconds` dạng computed/read-only để UI giải thích hành vi, không lưu thêm cột.
+- Rule schemas/read/update gồm `tLow`, `tHigh`, `tWaitSeconds`, `highWaitSeconds`. Migration `0012` thêm `high_wait_seconds`; response `effectiveHighWaitSeconds` chỉ đọc trả thời gian đã lưu (hoặc T_wait khi không có nhánh riêng). PATCH bỏ qua field mới sẽ giữ giá trị hiện tại, nhưng vẫn kiểm tra nhỏ hơn T_wait mới.
 - Event detail expose history, deadlines, handler, rule/triggering result summary cần thiết; không public nội dung token/provider secret.
 - Các internal callback dùng internal token, webhook dùng guard riêng; không để @Public mà thiếu auth thay thế.
 - Chạy api:lint/contracts:generate trước triển khai consumer; không viết tay API types trong web.
@@ -205,7 +205,7 @@ apps/orchestrator/src/escalation/
 | -------------------------------------------------------- | -------------------------------------------------------- |
 | confidence < T_low                                       | LOGGED_ONLY, không notification                          |
 | confidence = T_low hoặc giữa hai ngưỡng                  | NOTIFIED, deadline detected_at+T_wait                    |
-| confidence = T_high hoặc cao hơn                         | NOTIFIED với `max(1, ceil(T_wait/2))`                    |
+| confidence = T_high hoặc cao hơn                         | NOTIFIED với `highWaitSeconds` đã lưu                    |
 | FIRE hợp lệ score thấp                                   | NOTIFIED P0, deadline 30s theo rule                      |
 | PERSON_DETECTED hoặc UNDETERMINED đơn thuần              | Không alarm                                              |
 | UNKNOWN cùng M4, confidence khác nhau                    | Mỗi candidate dùng đúng rule; không bỏ nguy cơ đủ ngưỡng |

@@ -22,6 +22,7 @@ describe('MediaService (US-04)', () => {
     const mockStorageService = {
       upload: jest.fn(),
       getPresignedUrl: jest.fn(),
+      download: jest.fn(),
     };
 
     const mockConfigService = {

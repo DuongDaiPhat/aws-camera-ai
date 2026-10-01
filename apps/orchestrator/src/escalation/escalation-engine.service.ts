@@ -4,6 +4,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import type {
   EventType,
@@ -11,12 +12,15 @@ import type {
   NotificationChannel,
   ConfirmationResponse,
 } from '@cam/contracts';
+import type { PoolClient } from 'pg';
 import { EscalationRepository, type EventRecord } from './escalation.repository';
 import { EscalationRulesRepository } from '../escalation-rules/escalation-rules.repository';
 import {
   evaluateEscalationPolicy,
   isValidStatusTransition,
+  PRIORITY_RANK,
   type EscalationEvaluationInput,
+  type EscalationDecision,
   type EscalationRuleLookup,
 } from './escalation-policy';
 
@@ -30,6 +34,23 @@ export interface ConfirmationResultDto {
   note: string | null;
   respondedAt: string;
   resultingStatus: EventStatus;
+}
+
+interface InitialConfirmationParams {
+  response: ConfirmationResponse;
+  note?: string;
+  channel?: NotificationChannel;
+  commandId?: string;
+  notificationId?: string;
+  sourceMessageId?: string;
+  sourceUpdateId?: string;
+  telegramSource?: {
+    notificationId: string;
+    telegramUserId: string;
+    chatId: string;
+    messageId: string;
+    ttlSeconds: number;
+  };
 }
 
 @Injectable()
@@ -47,27 +68,9 @@ export class EscalationEngineService {
   async evaluateAndTransition(
     eventId: string,
     input: EscalationEvaluationInput,
+    outboxMessageId?: string,
   ): Promise<EventRecord> {
-    const rules = await this.rulesRepository.findAll();
-    const rulesMap = new Map<EventType, EscalationRuleLookup>(
-      rules.map((r) => [
-        r.event_type,
-        {
-          eventType: r.event_type,
-          priority: r.priority,
-          tLow: r.t_low !== null ? Number(r.t_low) : null,
-          tHigh: r.t_high !== null ? Number(r.t_high) : null,
-          tWaitSeconds: r.t_wait_seconds,
-          skipLoggedOnly: r.skip_logged_only,
-          notifyChannels: r.notify_channels,
-          escalateChannels: r.escalate_channels,
-          maxEscalationLevel: r.max_escalation_level,
-          isEnabled: r.is_enabled,
-          version: r.version,
-        },
-      ]),
-    );
-
+    const rulesMap = await this.loadRulesMap();
     const decision = evaluateEscalationPolicy(input, rulesMap);
     const client = await this.repository.getPoolClient();
 
@@ -78,54 +81,32 @@ export class EscalationEngineService {
         throw new NotFoundException(`Không tìm thấy sự kiện ${eventId}`);
       }
 
+      if (
+        outboxMessageId &&
+        (await this.isOutboxAlreadyHandled(client, eventId, outboxMessageId))
+      ) {
+        await client.query('COMMIT');
+        return event;
+      }
+
+      if (this.isStableDecision(event, decision)) {
+        if (outboxMessageId) await this.markAiOutboxProcessed(client, outboxMessageId);
+        await client.query(outboxMessageId ? 'COMMIT' : 'ROLLBACK');
+        return event;
+      }
+
       if (!isValidStatusTransition(event.status, decision.targetStatus)) {
         this.logger.warn(
           `Bỏ qua transition không hợp lệ từ ${event.status} sang ${decision.targetStatus} cho sự kiện ${eventId}`,
         );
-        await client.query('ROLLBACK');
+        if (outboxMessageId) await this.markAiOutboxProcessed(client, outboxMessageId);
+        await client.query(outboxMessageId ? 'COMMIT' : 'ROLLBACK');
         return event;
       }
 
-      const now = new Date();
-      const updated = await this.repository.updateEventStatus(client, eventId, event.version, {
-        status: decision.targetStatus,
-        priority: decision.priority,
-        notifiedAt: decision.targetStatus === 'NOTIFIED' ? now : undefined,
-        escalationDeadlineAt: decision.deadlineAt,
-        ruleSnapshot: decision.ruleSnapshot,
-        triggeringResults: decision.triggeringResults,
-      });
+      const updated = await this.applyDecision(client, event, input, decision, rulesMap);
 
-      await this.repository.createStatusHistory(client, {
-        eventId,
-        fromStatus: event.status,
-        toStatus: decision.targetStatus,
-        reason: decision.reason,
-        actorType: 'SYSTEM',
-        metadata: {
-          decision,
-          detectedAt: input.detectedAt,
-        },
-      });
-
-      // Neu chuyen sang NOTIFIED: tao notification intents cho cac kenh caregiver
-      if (decision.targetStatus === 'NOTIFIED') {
-        const rule = rulesMap.get(input.eventType);
-        const channels = rule?.notifyChannels ?? ['TELEGRAM'];
-        for (const channel of channels) {
-          await this.repository.createNotificationIntent(client, {
-            eventId,
-            channel,
-            status: 'PENDING',
-            escalationLevel: 0,
-            payload: {
-              eventType: input.eventType,
-              priority: decision.priority,
-              deadlineAt: decision.deadlineAt,
-            },
-          });
-        }
-      }
+      if (outboxMessageId) await this.markAiOutboxProcessed(client, outboxMessageId);
 
       await client.query('COMMIT');
       return updated;
@@ -137,18 +118,176 @@ export class EscalationEngineService {
     }
   }
 
+  private isStableDecision(event: EventRecord, decision: EscalationDecision): boolean {
+    return event.status === decision.targetStatus && event.status !== 'DETECTED';
+  }
+
+  private async loadRulesMap(): Promise<Map<EventType, EscalationRuleLookup>> {
+    const rules = await this.rulesRepository.findAll();
+    return new Map(
+      rules.map((rule) => [
+        rule.event_type,
+        {
+          eventType: rule.event_type,
+          priority: rule.priority,
+          tLow: rule.t_low !== null ? Number(rule.t_low) : null,
+          tHigh: rule.t_high !== null ? Number(rule.t_high) : null,
+          tWaitSeconds: rule.t_wait_seconds,
+          highWaitSeconds: rule.high_wait_seconds,
+          skipLoggedOnly: rule.skip_logged_only,
+          notifyChannels: rule.notify_channels,
+          escalateChannels: rule.escalate_channels,
+          maxEscalationLevel: rule.max_escalation_level,
+          isEnabled: rule.is_enabled,
+          version: rule.version,
+        },
+      ]),
+    );
+  }
+
+  private async isOutboxAlreadyHandled(
+    client: PoolClient,
+    eventId: string,
+    messageId: string,
+  ): Promise<boolean> {
+    const delivery = await client.query<{ status: string; aggregate_version: string }>(
+      `SELECT status, aggregate_version
+       FROM outbox_messages
+       WHERE id = $1 AND event_id = $2 AND message_type = 'evaluate-escalation'
+       FOR UPDATE;`,
+      [messageId, eventId],
+    );
+    if (!delivery.rows[0]) {
+      throw new NotFoundException(`Không tìm thấy AI outbox message ${messageId}`);
+    }
+    if (delivery.rows[0].status === 'PROCESSED') return true;
+    const version = await client.query<{ aggregate_version: string }>(
+      'SELECT aggregate_version FROM events WHERE id = $1;',
+      [eventId],
+    );
+    if (Number(version.rows[0]?.aggregate_version) <= Number(delivery.rows[0].aggregate_version)) {
+      return false;
+    }
+    await this.markAiOutboxProcessed(client, messageId);
+    return true;
+  }
+
+  private async applyDecision(
+    client: PoolClient,
+    event: EventRecord,
+    input: EscalationEvaluationInput,
+    decision: EscalationDecision,
+    rulesMap: Map<EventType, EscalationRuleLookup>,
+  ): Promise<EventRecord> {
+    const updated = await this.repository.updateEventStatus(client, event.id, event.version, {
+      status: decision.targetStatus,
+      priority:
+        PRIORITY_RANK[event.priority] < PRIORITY_RANK[decision.priority]
+          ? event.priority
+          : decision.priority,
+      notifiedAt: decision.targetStatus === 'NOTIFIED' ? new Date() : undefined,
+      escalationDeadlineAt: decision.deadlineAt,
+      ruleSnapshot: decision.ruleSnapshot,
+      triggeringResults: decision.triggeringResults,
+    });
+    await this.repository.createStatusHistory(client, {
+      eventId: event.id,
+      fromStatus: event.status,
+      toStatus: decision.targetStatus,
+      reason: decision.reason,
+      actorType: 'SYSTEM',
+      metadata: { decision, detectedAt: input.detectedAt },
+    });
+    if (decision.targetStatus === 'NOTIFIED') {
+      const rule = rulesMap.get(decision.triggeringEventType ?? input.eventType);
+      for (const channel of rule?.notifyChannels ?? ['TELEGRAM']) {
+        await this.repository.createNotificationIntent(client, {
+          eventId: event.id,
+          channel,
+          status: 'PENDING',
+          escalationLevel: 0,
+          payload: {
+            eventType: decision.triggeringEventType ?? input.eventType,
+            priority: decision.priority,
+            deadlineAt: decision.deadlineAt,
+          },
+        });
+      }
+    }
+    return updated;
+  }
+
+  private async findInitialTelegramReplay(
+    client: PoolClient,
+    eventId: string,
+    actorUserId: string,
+    params: InitialConfirmationParams,
+  ): Promise<ConfirmationResultDto | null> {
+    if (params.channel !== 'TELEGRAM') return null;
+    if (
+      !params.telegramSource ||
+      !params.sourceUpdateId ||
+      params.telegramSource.notificationId !== params.notificationId ||
+      params.telegramSource.messageId !== params.sourceMessageId ||
+      !(await this.repository.authorizeTelegramConfirmation(
+        client,
+        eventId,
+        actorUserId,
+        params.telegramSource,
+      ))
+    ) {
+      throw new ForbiddenException('Bạn không có quyền xác nhận tin Telegram này.');
+    }
+    const replay = await this.repository.findTelegramReplay(client, params.sourceUpdateId);
+    if (!replay) return null;
+    if (
+      replay.event_id !== eventId ||
+      replay.user_id !== actorUserId ||
+      replay.notification_id !== params.notificationId ||
+      replay.source_message_id !== params.sourceMessageId ||
+      replay.response !== params.response ||
+      replay.phase !== 'INITIAL'
+    ) {
+      throw new ConflictException({
+        code: 'SOURCE_UPDATE_CONFLICT',
+        message: 'Nguồn xác nhận đã được sử dụng.',
+      });
+    }
+    if (!replay.is_authoritative) {
+      throw new ConflictException({
+        code: 'ALREADY_CONFIRMED',
+        message: 'Sự kiện đã được xử lý.',
+      });
+    }
+    return {
+      id: replay.id,
+      eventId,
+      phase: 'INITIAL',
+      response: replay.response,
+      channel: replay.channel,
+      confirmedByName: replay.confirmed_by_name ?? null,
+      note: replay.note,
+      respondedAt: replay.responded_at.toISOString(),
+      resultingStatus: replay.response === 'IM_OK' ? 'RESOLVED' : 'ESCALATED',
+    };
+  }
+
+  private async markAiOutboxProcessed(client: PoolClient, messageId: string): Promise<void> {
+    await client.query(
+      `UPDATE outbox_messages
+       SET status = 'PROCESSED', processed_at = now(), leased_until = NULL, last_error = NULL
+       WHERE id = $1;`,
+      [messageId],
+    );
+  }
+
   /**
    * Xac nhan su kien giai doan INITIAL ("Toi on" / "Can giup do") - FR-ESC-03/04/09
    */
   async confirmInitial(
     eventId: string,
     actorUserId: string,
-    params: {
-      response: ConfirmationResponse;
-      note?: string;
-      channel?: NotificationChannel;
-      commandId?: string;
-    },
+    params: InitialConfirmationParams,
   ): Promise<ConfirmationResultDto> {
     if (params.response !== 'IM_OK' && params.response !== 'NEED_HELP') {
       throw new BadRequestException('Giai đoạn ban đầu chỉ chấp nhận IM_OK hoặc NEED_HELP');
@@ -160,6 +299,12 @@ export class EscalationEngineService {
       const event = await this.repository.findEventForUpdate(client, eventId);
       if (!event) {
         throw new NotFoundException(`Không tìm thấy sự kiện ${eventId}`);
+      }
+
+      const replay = await this.findInitialTelegramReplay(client, eventId, actorUserId, params);
+      if (replay) {
+        await client.query('COMMIT');
+        return replay;
       }
 
       // Kiem tra da co xac nhan authoritative INITIAL chua
@@ -178,7 +323,9 @@ export class EscalationEngineService {
           phase: 'INITIAL',
           isAuthoritative: false,
           note: params.note ?? null,
-          sourceMessageId: params.commandId ?? null,
+          notificationId: params.notificationId,
+          sourceMessageId: params.sourceMessageId ?? params.commandId ?? null,
+          sourceUpdateId: params.sourceUpdateId,
         });
 
         await client.query('COMMIT'); // Commit audit record
@@ -227,7 +374,9 @@ export class EscalationEngineService {
         phase: 'INITIAL',
         isAuthoritative: true,
         note: params.note ?? null,
-        sourceMessageId: params.commandId ?? null,
+        notificationId: params.notificationId,
+        sourceMessageId: params.sourceMessageId ?? params.commandId ?? null,
+        sourceUpdateId: params.sourceUpdateId,
       });
 
       await this.repository.updateEventStatus(client, eventId, event.version, {

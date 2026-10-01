@@ -12,7 +12,8 @@ describe('EscalationRulesController & RolesGuard (US-15)', () => {
 
   const mockRuleDto: EscalationRuleDto = {
     version: 1,
-    effectiveHighWaitSeconds: 15,
+    effectiveHighWaitSeconds: 30,
+    highWaitSeconds: null,
     eventType: 'FIRE_SMOKE_DETECTED',
     displayName: 'Phát hiện cháy / khói',
     priority: 'P0',
