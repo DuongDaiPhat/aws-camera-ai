@@ -1,428 +1,412 @@
-# Quy trình Git và mẫu PR
+# Git Workflow & Pull Request Guidelines
 
-> **Task 0.9** · Người phụ trách: **B** (Scrum Master) · Sprint 0
-> Mẫu PR thực thi: [`.github/pull_request_template.md`](../../.github/pull_request_template.md)
+> **Task 0.9** · Owner: **B** (Scrum Master) · Sprint 0  
+> Executable PR template: [`.github/pull_request_template.md`](../../.github/pull_request_template.md)
 
-## Mục lục
+## Table of Contents
 
-- [1. Mô hình nhánh](#1-mô-hình-nhánh)
-- [2. Đặt tên nhánh](#2-đặt-tên-nhánh)
-- [3. Commit message](#3-commit-message)
-- [4. Vòng đời một task](#4-vòng-đời-một-task)
-- [5. Pull Request](#5-pull-request)
-- [6. Review code](#6-review-code)
-- [7. Bảo vệ nhánh main](#7-bảo-vệ-nhánh-main)
-- [8. Xử lý xung đột](#8-xử-lý-xung-đột)
-- [9. Tình huống thường gặp](#9-tình-huống-thường-gặp)
-- [10. Windows và CRLF](#10-windows-và-crlf)
+- [1. Branching Model](#1-branching-model)
+- [2. Branch Naming](#2-branch-naming)
+- [3. Commit Messages](#3-commit-messages)
+- [4. Task Lifecycle](#4-task-lifecycle)
+- [5. Pull Requests](#5-pull-requests)
+- [6. Code Review](#6-code-review)
+- [7. Protecting the Main Branch](#7-protecting-the-main-branch)
+- [8. Merge Conflicts](#8-merge-conflicts)
+- [9. Common Scenarios](#9-common-scenarios)
+- [10. Windows & CRLF](#10-windows--crlf)
 
 ---
 
-## 1. Mô hình nhánh
+## 1. Branching Model
 
-Dùng **trunk-based development** rút gọn: một nhánh `main` luôn xanh, mọi việc khác là
-nhánh ngắn ngày.
+We use a simplified **trunk-based development** model: a single `main` branch that is always green, accompanied by short-lived feature branches.
 
 ```
-main ────●────●────●────●────●────●────────►  luôn deploy được, CI luôn xanh
+main ────●────●────●────●────●────●────────►  Always deployable, CI always green
           \        /      \      /
-           ●──●──●         ●──●──●            nhánh tính năng, sống < 3 ngày
+           ●──●──●         ●──●──●            Feature branches, lifespan < 3 days
 ```
 
-### Vì sao không dùng Git Flow
+### Why Not Git Flow?
 
-Git Flow có `develop`, `release/*`, `hotfix/*` — hợp lý cho sản phẩm có nhiều phiên bản
-chạy song song. Với 5 người trong 30 ngày, nó chỉ tạo thêm bước merge và cơ hội xung đột.
+Git Flow introduces `develop`, `release/*`, and `hotfix/*` branches — suitable for products running multiple concurrent production releases. For a 5-member team over 30 days, it only adds redundant merge ceremonies and increases the surface area for merge conflicts.
 
-### Quy tắc bất di bất dịch
+### Immutable Rules
 
-1. **Không bao giờ push thẳng vào `main`.** Mọi thay đổi đi qua PR.
-2. **Nhánh sống tối đa 3 ngày.** Lâu hơn thì gần như chắc chắn task quá to — tách nhỏ ra.
-   Đây là cách chống rủi ro R8 (tích hợp muộn, vỡ ở tuần cuối).
-3. **`main` phải luôn `docker compose up` chạy được.** Merge vào làm hỏng `main` là sự cố
-   nghiêm trọng nhất — sửa ngay lập tức, gác mọi việc khác.
-4. **Không merge PR của chính mình.** Không có ngoại lệ, kể cả sửa một dấu phẩy.
+1. **Never push directly to `main`.** All changes must pass through a Pull Request (PR).
+2. **Branch lifespan must not exceed 3 days.** Longer lifespans indicate that the user story is too large and must be decomposed. This is our primary defense against Risk R8 (late integration failure in the final sprint).
+3. **`main` must always be launchable via `docker compose up`.** Breaking `main` is an incident of highest severity — fix it immediately, pausing all other non-urgent tasks.
+4. **Never merge your own PR.** No exceptions, not even for fixing a punctuation typo.
 
 ---
 
-## 2. Đặt tên nhánh
+## 2. Branch Naming
+
+Format:
 
 ```
-<loại>/<mã-story>-<mô-tả-ngắn-không-dấu>
+<type>/<story-id>-<short-description>
 ```
 
-| Loại       | Dùng cho                        | Ví dụ                                 |
-| ---------- | ------------------------------- | ------------------------------------- |
-| `feat`     | Tính năng mới                   | `feat/US-13-escalation-state-machine` |
-| `fix`      | Sửa lỗi                         | `fix/US-14-telegram-retry-backoff`    |
-| `docs`     | Tài liệu                        | `docs/sprint0-erd`                    |
-| `chore`    | Việc vặt, cấu hình              | `chore/update-eslint-config`          |
-| `refactor` | Sửa cấu trúc, không đổi hành vi | `refactor/tach-storage-adapter`       |
-| `test`     | Chỉ thêm test                   | `test/US-13-state-machine-cases`      |
-| `ci`       | Pipeline                        | `ci/them-job-migration`               |
+| Type       | Intended For                                 | Example                               |
+| :--------- | :------------------------------------------- | :------------------------------------ |
+| `feat`     | New user feature or capability               | `feat/US-13-escalation-state-machine` |
+| `fix`      | Bug fix                                      | `fix/US-14-telegram-retry-backoff`    |
+| `docs`     | Documentation updates                        | `docs/sprint0-erd`                    |
+| `chore`    | Maintenance, dependencies, config            | `chore/update-eslint-config`          |
+| `refactor` | Code restructuring without behavioral change | `refactor/split-storage-adapter`      |
+| `test`     | Adding or updating tests only                | `test/US-13-state-machine-cases`      |
+| `ci`       | CI/CD pipeline modifications                 | `ci/add-migration-validation-job`     |
 
-**Quy tắc:** chữ thường, dùng `-`, không dấu tiếng Việt, tối đa ~50 ký tự.
-Mã story giúp nhìn `git branch -a` là biết ai đang làm gì.
+**Rules:** lowercase, words separated by hyphens (`-`), maximum ~50 characters.  
+Including the user story ID enables anyone running `git branch -a` to immediately understand what is in flight.
 
 ---
 
-## 3. Commit message
+## 3. Commit Messages
 
-Theo [Conventional Commits](https://www.conventionalcommits.org/). `commitlint` kiểm tra
-tự động ở hook `commit-msg` và trong CI.
+Commit messages adhere to [Conventional Commits](https://www.conventionalcommits.org/). Verification is automated via the `commit-msg` Husky hook using `commitlint` and validated in CI.
 
 ```
-<loại>(<phạm vi>): <mô tả ngắn bằng tiếng Việt>
+<type>(<scope>): <short summary in English>
 
-[thân — tùy chọn, giải thích TẠI SAO]
+[optional body — explains WHY the change was made]
 
-[footer — tùy chọn, refs #issue]
+[optional footer — refs #issue, breaking changes]
 ```
 
-### Loại và phạm vi hợp lệ
+### Valid Types & Scopes
 
-| Loại       | Ý nghĩa                         |
-| ---------- | ------------------------------- |
-| `feat`     | Tính năng mới                   |
-| `fix`      | Sửa lỗi                         |
-| `docs`     | Chỉ tài liệu                    |
-| `style`    | Định dạng, không đổi logic      |
-| `refactor` | Sửa cấu trúc, không đổi hành vi |
-| `perf`     | Cải thiện hiệu năng             |
-| `test`     | Thêm/sửa test                   |
-| `build`    | Build system, dependency        |
-| `ci`       | Pipeline CI                     |
-| `chore`    | Việc vặt khác                   |
-| `revert`   | Hoàn tác commit trước           |
+| Type       | Meaning                                                       |
+| :--------- | :------------------------------------------------------------ |
+| `feat`     | A new feature                                                 |
+| `fix`      | A bug fix                                                     |
+| `docs`     | Documentation only changes                                    |
+| `style`    | Formatting changes that do not affect the meaning of the code |
+| `refactor` | A code change that neither fixes a bug nor adds a feature     |
+| `perf`     | A code change that improves performance                       |
+| `test`     | Adding missing tests or correcting existing tests             |
+| `build`    | Changes that affect the build system or external dependencies |
+| `ci`       | Changes to CI configuration files and scripts                 |
+| `chore`    | Other changes that don't modify src or test files             |
+| `revert`   | Reverts a previous commit                                     |
 
-**Phạm vi** (`scope`) bắt buộc, chọn một trong:
+**Scope** (`scope`) is mandatory. Choose from:
 `orchestrator` · `web` · `ai` · `contracts` · `db` · `infra` · `api` · `ci` · `docs` · `deps` · `repo`
 
-### Ví dụ đúng
+### Valid Examples
 
 ```
-feat(orchestrator): thêm khôi phục hẹn giờ escalation sau restart
+feat(orchestrator): add escalation timer recovery after service restart
 
-TimerService trước đây dùng setTimeout nên restart là mất hết cảnh báo
-đang chờ. Nay ghi escalation_deadline_at xuống DB và quét mỗi 10 giây.
+Previously, TimerService relied on in-memory setTimeout, which caused pending
+alerts to be lost upon container restart. Now persisted to PostgreSQL with
+escalation_deadline_at, polled every 10 seconds.
 
 Refs #42, FR-ESC-07
 ```
 
 ```
-fix(ai): không báo té ngã khi người nằm trong vùng REST_AREA
-feat(web): thêm bộ lọc theo loại sự kiện ở trang lịch sử
-docs(db): cập nhật ERD sau khi thêm bảng event_status_history
-chore(deps): nâng NestJS lên 10.4.4
+fix(ai): prevent fall alerts when person is inside REST_AREA zone
+feat(web): add event type filter on incident history page
+docs(db): update ERD with event_status_history schema
+chore(deps): bump NestJS to 10.4.4
 ```
 
-### Ví dụ sai
+### Prohibited Examples
 
-| Sai                       | Vì sao                                        |
-| ------------------------- | --------------------------------------------- |
-| `update code`             | Không có loại, không có phạm vi, không nói gì |
-| `fix bug`                 | Bug nào?                                      |
-| `feat: thêm API`          | Thiếu phạm vi                                 |
-| `FEAT(web): ...`          | Loại phải viết thường                         |
-| `feat(web): Thêm bộ lọc.` | Không kết thúc bằng dấu chấm                  |
+| Invalid                  | Reason                                        |
+| :----------------------- | :-------------------------------------------- |
+| `update code`            | No type, no scope, completely non-descriptive |
+| `fix bug`                | Which bug? Where?                             |
+| `feat: add api`          | Missing required scope                        |
+| `FEAT(web): ...`         | Type must be strictly lowercase               |
+| `feat(web): Add filter.` | Starts with uppercase and ends with a period  |
 
-### Kích cỡ commit
+### Commit Granularity
 
-Một commit = một thay đổi có nghĩa. Không gộp "sửa lỗi + đổi tên biến + thêm test" vào một commit.
+One commit = one coherent, logical change. Do not bundle "bug fix + variable rename + tests" into a single monolithic commit.
 
 ```bash
-# Commit từng phần, không phải git add -A
+# Stage and commit logically distinct chunks:
 git add apps/orchestrator/src/escalation/
-git commit -m "feat(orchestrator): thêm bảng chuyển trạng thái hợp lệ"
+git commit -m "feat(orchestrator): add valid state transition table"
 
 git add apps/orchestrator/test/
-git commit -m "test(orchestrator): phủ 7 nhánh của state machine"
+git commit -m "test(orchestrator): cover 7 branches of escalation state machine"
 ```
 
 ---
 
-## 4. Vòng đời một task
+## 4. Task Lifecycle
 
 ```mermaid
 graph LR
-    A["Backlog"] --> B["Ready<br/>đạt DoR"]
-    B --> C["In Progress<br/>tối đa 2/người"]
-    C --> D["In Review<br/>đã mở PR"]
-    D --> E["Testing<br/>người khác chạy thử"]
-    E --> F["Done<br/>đạt DoD"]
-    D -.->|"yêu cầu sửa"| C
-    E -.->|"phát hiện lỗi"| C
+    A["Backlog"] --> B["Ready<br/>(meets DoR)"]
+    B --> C["In Progress<br/>(max 2 per dev)"]
+    C --> D["In Review<br/>(PR opened)"]
+    D --> E["Testing<br/>(peer verification)"]
+    E --> F["Done<br/>(meets DoD)"]
+    D -.->|"changes requested"| C
+    E -.->|"defects found"| C
 ```
 
-### Các bước cụ thể
+### Step-by-Step Execution
 
 ```bash
-# 1. Đồng bộ main
+# 1. Synchronize local main
 git checkout main
 git pull origin main
 
-# 2. Tạo nhánh
+# 2. Create feature branch
 git checkout -b feat/US-13-escalation-state-machine
 
-# 3. Làm việc, commit nhỏ và thường xuyên
-git add <file cụ thể>
-git commit -m "feat(orchestrator): thêm bảng chuyển trạng thái hợp lệ"
+# 3. Work and commit in small, logical increments
+git add <specific-files>
+git commit -m "feat(orchestrator): add valid state transition table"
 
-# 4. Đồng bộ với main HÀNG NGÀY (rebase, không merge)
+# 4. Synchronize with main DAILY (rebase, do NOT merge main into branch)
 git fetch origin
 git rebase origin/main
 
-# 5. Kiểm tra trước khi mở PR
-pnpm check:all      # Prettier, ESLint, TS, test, OpenAPI, ruff, pytest
-docker compose up -d && docker compose ps    # mọi container phải healthy
+# 5. Execute pre-PR verification locally
+pnpm check:all                               # Prettier, ESLint, TS, tests, OpenAPI, Ruff, Pytest
+docker compose up -d && docker compose ps    # Verify all containers remain healthy
 
-# 6. Đẩy lên
+# 6. Push branch to remote
 git push -u origin feat/US-13-escalation-state-machine
 
-# 7. Mở PR trên GitHub, điền mẫu PR, gắn reviewer
+# 7. Open PR on GitHub, complete all template checklist items, assign reviewers
 
-# 8. Chờ CI xanh + 1 approve, rồi Squash and merge
+# 8. Wait for green CI + ≥ 1 approval, then perform Squash and Merge
 
-# 9. Dọn dẹp
+# 9. Cleanup local workspace
 git checkout main && git pull origin main
 git branch -d feat/US-13-escalation-state-machine
 ```
 
-> **Rebase hằng ngày là bắt buộc**, không phải khuyến nghị. Nhánh 3 ngày không rebase
-> sẽ biến việc merge thành một buổi tối vật lộn với xung đột.
+> **Daily rebase is mandatory**, not an optional suggestion. A branch un-rebased for 3 days turns merging into an evening-long struggle with conflicts.
 
 ---
 
-## 5. Pull Request
+## 5. Pull Requests
 
-### Mở PR thế nào
+### Opening a PR
 
-Mẫu PR ([`.github/pull_request_template.md`](../../.github/pull_request_template.md)) tự
-điền khi bấm "New pull request". **Điền hết**, không xóa mục nào.
+The PR template ([`.github/pull_request_template.md`](../../.github/pull_request_template.md)) automatically populates when you click "New pull request". Fill out all sections completely; do not delete checklist items.
 
-### Kích cỡ PR
+### PR Sizing
 
-| Số dòng thay đổi | Đánh giá                                               |
-| ---------------- | ------------------------------------------------------ |
-| < 200            | 👍 Lý tưởng — review kỹ trong 15 phút                  |
-| 200–500          | 🙂 Chấp nhận được                                      |
-| 500–1000         | ⚠️ Nên tách, nếu không review sẽ hời hợt               |
-| > 1000           | ❌ Tách ra, trừ khi là code sinh tự động hoặc tài liệu |
+| Changed Lines | Evaluation                                                 |
+| :------------ | :--------------------------------------------------------- |
+| < 200         | 👍 Ideal — Thorough review within 15 minutes               |
+| 200–500       | 🙂 Acceptable                                              |
+| 500–1000      | ⚠️ Consider splitting; risks superficial review            |
+| > 1000        | ❌ Must split, unless pure generated code or documentation |
 
-PR quá to thì người review sẽ lướt qua và bấm approve — mất luôn giá trị của việc review.
+When a PR is too large, reviewers inevitably skim and click approve, which destroys the value of code review.
 
-### PR nháp (Draft)
+### Draft PRs
 
-Mở Draft PR sớm khi muốn xin ý kiến về hướng làm, hoặc muốn CI chạy thử. Draft PR không
-làm phiền reviewer, nhưng cho cả nhóm thấy bạn đang làm gì.
+Open a Draft PR early when seeking feedback on architecture, or to trigger CI runs during development. Draft PRs do not notify reviewers for formal review, but provide visibility to the entire team.
 
-### Trước khi bấm "Ready for review"
+### Pre-Review Checklist ("Ready for Review")
 
-- [ ] Đã tự đọc lại toàn bộ diff của mình một lượt
-- [ ] CI xanh
-- [ ] Không còn code debug, `console.log`, file rác
-- [ ] Đã rebase lên `main` mới nhất
+- [ ] Reviewed your own full diff once before requesting review
+- [ ] CI pipeline is green
+- [ ] No leftover debug code, temporary `console.log` statements, or scratch files
+- [ ] Rebased onto latest `origin/main`
 
 ---
 
-## 6. Review code
+## 6. Code Review
 
-### Ai review ai
+### Reviewer Assignment
 
-[`CODEOWNERS`](../../.github/CODEOWNERS) tự động gán reviewer theo vùng code, tương ứng
-phân công backup trong kế hoạch: A↔B (web), D↔E (AI), C↔B (hạ tầng).
+[`CODEOWNERS`](../../.github/CODEOWNERS) automatically assigns reviewers based on file paths, matching the cross-functional backup pairs established in the project plan: A↔B (web), D↔E (AI), C↔B (infra).
 
-**Bắt buộc ≥ 1 approve.** Thay đổi trong `api/` cần **cả A và B** duyệt vì đó là hợp đồng
-giữa frontend và backend.
+**Requirement: ≥ 1 approval.** Changes under `api/` require approvals from **both A and B** because it defines the contract binding frontend and backend.
 
-### Thời hạn
+### Service Level Agreements (SLA)
 
-| Việc                         | Hạn                                                   |
-| ---------------------------- | ----------------------------------------------------- |
-| Phản hồi PR lần đầu          | **Trong 24 giờ**                                      |
-| Tác giả xử lý góp ý          | Trong 24 giờ                                          |
-| Lead time từ mở PR đến merge | Mục tiêu < 24 giờ (chỉ số theo dõi ở mục 12 kế hoạch) |
+| Activity                     | Target Deadline                                |
+| :--------------------------- | :--------------------------------------------- |
+| First review response        | **Within 24 hours**                            |
+| Author resolves comments     | Within 24 hours                                |
+| Lead time (PR open to merge) | Target < 24 hours (tracked in project metrics) |
 
-PR nằm quá 24 giờ không ai động đến thì nhắc trong standup.
+If a PR is untouched for > 24 hours, escalate it during daily standup.
 
-### Người review tìm gì
+### What Reviewers Look For (By Priority)
 
-Theo thứ tự ưu tiên:
+1. **Correctness** — Does it satisfy the acceptance criteria of the story?
+2. **Edge Cases & Vulnerabilities** — Boundaries, race conditions, null checks, timeouts.
+3. **Test Quality** — Is new business logic covered? Are assertions validating genuine behavior?
+4. **Security** — Leaked secrets, SQL injection, missing authorization checks.
+5. **Readability & Maintainability** — Can a third engineer understand and maintain this easily?
+6. **Architecture Compliance** — Does a controller bypass a service? Does a service import concrete storage classes directly?
 
-1. **Đúng không** — có làm đúng acceptance criteria của story không?
-2. **Có lỗ hổng không** — trường hợp biên, lỗi, race condition, null
-3. **Có test không** — logic mới có được phủ không? Test có kiểm tra đúng thứ cần kiểm tra không?
-4. **An toàn không** — secret, SQL injection, thiếu kiểm tra quyền
-5. **Đọc được không** — người thứ ba đọc có hiểu không?
-6. **Có đúng kiến trúc không** — controller có gọi thẳng repository không? Service có import adapter cụ thể không?
+**Do not review:** Code formatting, trailing commas, import sorting — automated tools handle these completely.
 
-**Không review:** định dạng, dấu cách, thứ tự import — máy đã lo rồi.
-
-### Viết nhận xét thế nào
+### Constructive Feedback Examples
 
 ```
-❌ "Code này sai."
-✅ "Chỗ này nếu `zones` rỗng thì `zones[0]` sẽ là undefined và ném lỗi ở dòng dưới.
-    Thêm kiểm tra hoặc dùng optional chaining được không?"
+❌ "This code is wrong."
+✅ "If `zones` is empty, `zones[0]` will evaluate to undefined and throw on the next line.
+    Can we add a guard check or use optional chaining here?"
 
-❌ "Xấu quá."
-✅ "Hàm này đang làm 3 việc: parse, validate, và ghi DB. Tách ra sẽ dễ test hơn —
-    nhưng nếu gấp thì để Sprint sau cũng được, mình không chặn PR vì việc này."
+❌ "Looks bad."
+✅ "This function handles 3 concerns: parsing, validation, and database persistence.
+    Splitting them would make unit testing significantly easier."
 
-❌ "Tại sao không dùng X?"
-✅ "Mình thấy chỗ khác dùng `RetryService`, ở đây tự viết lại retry có lý do riêng không?"
+❌ "Why not use X?"
+✅ "I noticed other services use `RetryService`. Is there a specific rationale for implementing a custom retry loop here?"
 ```
 
-### Ba mức nhận xét — ghi rõ mức
+### Three Comment Severity Levels
 
-| Nhãn        | Ý nghĩa                           |
-| ----------- | --------------------------------- |
-| **[chặn]**  | Phải sửa trước khi merge          |
-| **[nên]**   | Nên sửa nhưng không chặn          |
-| **[góp ý]** | Chỉ là ý kiến, tác giả quyết định |
+Prefix review comments with explicit severity tags:
 
-Ghi nhãn giúp tác giả biết cái gì phải làm ngay, cái gì để sau — tránh tình trạng PR bị
-treo vì một góp ý về tên biến.
+| Tag            | Meaning                                                |
+| :------------- | :----------------------------------------------------- |
+| **[blocking]** | Must be addressed before merging                       |
+| **[should]**   | Recommended improvement, but not blocking              |
+| **[nit]**      | Minor suggestion or cosmetic note; author's discretion |
 
-### Người được review nên làm gì
+Explicit tagging prevents PRs from being blocked over minor naming preferences.
 
-- Trả lời **mọi** nhận xét, kể cả chỉ "Đã sửa" hoặc "Mình giữ nguyên vì...".
-- Không tự ý resolve nhận xét của người khác — để người nêu tự resolve.
-- Bất đồng thì tranh luận bằng lý lẽ kỹ thuật. Không thống nhất được sau 2 lượt thì hỏi B
-  (Scrum Master) hoặc đưa ra standup — **không để PR treo quá 24 giờ vì tranh luận**.
+### Author Etiquette
+
+- Respond to **every** comment (even a brief "Resolved" or "Opted to keep as is because...").
+- Do not unilaterally resolve reviewer comment threads — let the reviewer verify and resolve their own comments.
+- Resolve technical disagreements with rational arguments. If unresolved after 2 exchanges, consult B (Scrum Master) or discuss in standup — **never leave a PR hanging for > 24 hours over debates**.
 
 ---
 
-## 7. Bảo vệ nhánh main
+## 7. Protecting the Main Branch
 
-Cấu hình **một lần** ở Sprint 0. Trên GitHub: _Settings → Branches → Add rule_, pattern `main`:
+Configured in repository settings: _Settings → Branches → Branch protection rules_, branch pattern `main`:
 
 - ✅ Require a pull request before merging
 - ✅ Require approvals: **1**
 - ✅ Dismiss stale pull request approvals when new commits are pushed
 - ✅ Require review from Code Owners
 - ✅ Require status checks to pass before merging
-  - Chọn **`CI xanh`** (job tổng hợp trong [`ci.yml`](../../.github/workflows/ci.yml))
+  - Select the composite **`CI xanh`** job (from [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml))
   - ✅ Require branches to be up to date before merging
 - ✅ Require conversation resolution before merging
-- ❌ Allow force pushes — **tắt**
-- ❌ Allow deletions — **tắt**
+- ❌ Allow force pushes — **Disabled**
+- ❌ Allow deletions — **Disabled**
 
-> **Chọn job `CI xanh`, không chọn từng job lẻ.** Sau này thêm job mới vào CI, không phải
-> vào cài đặt GitHub sửa lại.
+### Merge Method: Squash and Merge
 
-### Cách merge: Squash and merge
+**Only enable "Squash and merge"**, disabling "Create a merge commit" and "Rebase and merge".
 
-Chỉ bật **Squash and merge**, tắt hai lựa chọn còn lại.
+Rationale: A feature branch may accumulate 15 intermediate commits ("wip", "fix typo", "re-test"). Squashing collapses them into one clean, atomic commit on `main`. The `main` history remains linear, readable, git-bisectable, and every commit corresponds directly to a user story.
 
-Lý do: nhánh tính năng có 15 commit kiểu "wip", "fix typo", "sửa lại". Squash biến chúng
-thành một commit sạch trên `main`. Lịch sử `main` đọc được, `git bisect` dùng được,
-mỗi commit tương ứng một story.
-
-Sửa tiêu đề commit khi squash cho đúng Conventional Commits:
+Format the squash commit title to match Conventional Commits:
 
 ```
-feat(orchestrator): thêm khôi phục hẹn giờ escalation (#42)
+feat(orchestrator): add escalation timer recovery after service restart (#42)
 ```
 
 ---
 
-## 8. Xử lý xung đột
+## 8. Merge Conflicts
 
-### Phòng hơn chữa
+### Prevention Over Cure
 
-| Việc                                                | Tác dụng                               |
-| --------------------------------------------------- | -------------------------------------- |
-| Rebase lên `main` hằng ngày                         | Xung đột nhỏ, sửa 2 phút thay vì 2 giờ |
-| Nhánh sống < 3 ngày                                 | Ít cơ hội đụng độ                      |
-| Mỗi người sở hữu một vùng code rõ ràng              | Xem CODEOWNERS                         |
-| Đổi `api/openapi.yaml` thì merge riêng một PR trước | Không kéo theo xung đột ở FE lẫn BE    |
+| Practice                                         | Benefit                                                         |
+| :----------------------------------------------- | :-------------------------------------------------------------- |
+| Daily rebase onto `main`                         | Conflicts remain tiny, resolved in 2 minutes instead of 2 hours |
+| Short branch lifespan (< 3 days)                 | Minimal divergence from trunk                                   |
+| Clear code ownership                             | See `CODEOWNERS`                                                |
+| Merge `api/openapi.yaml` in an isolated PR first | Avoids cascading conflicts across both frontend and backend     |
 
-### Khi đã có xung đột
+### Resolving Active Conflicts
 
 ```bash
 git fetch origin
 git rebase origin/main
 
-# Sửa từng file xung đột
+# Check conflicted files
 git status
-# ... mở file, xóa <<<<<<< ======= >>>>>>>, giữ đúng phần cần giữ
+# Open files, resolve conflict markers (<<<<<<<, =======, >>>>>>>)
 
-git add <file đã sửa>
+git add <resolved-files>
 git rebase --continue
 
-# Chạy lại test — rebase xong mà chưa test là lỗi hay gặp
+# Re-run all tests — a common defect is failing to verify post-rebase
 pnpm test
 
+# Push rebased branch
 git push --force-with-lease
 ```
 
-> `--force-with-lease`, **không phải** `--force`. Nó từ chối đẩy nếu người khác vừa push
-> lên nhánh đó — cứu bạn khỏi xóa mất công của đồng đội.
+> **Always use `--force-with-lease`**, never raw `--force`. It verifies that no teammate pushed additional commits to the remote branch while you were rebasing.
 
-### Xung đột ở file đặc biệt
+### Resolving Critical Files
 
-| File               | Cách xử lý                                                                                                        |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `pnpm-lock.yaml`   | Đừng sửa tay. `git checkout --theirs pnpm-lock.yaml && pnpm install`                                              |
-| `db/migrations/*`  | **Không bao giờ** sửa file cũ. Xung đột nghĩa là hai người cùng đánh số — đổi số file của mình thành số tiếp theo |
-| `api/openapi.yaml` | Gọi người kia, cùng giải quyết. Đây là hợp đồng chung, sửa một mình rất dễ sai                                    |
+| File               | Resolution Protocol                                                                                                                         |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm-lock.yaml`   | Never resolve manually. Run `git checkout --theirs pnpm-lock.yaml && pnpm install`                                                          |
+| `db/migrations/*`  | **Never edit existing migrations.** If two engineers used the same sequence number, renumber your migration to the next sequential integer. |
+| `api/openapi.yaml` | Coordinate directly with the other contributor. This is a shared system contract; unilateral edits risk breaking client-server parity.      |
 
 ---
 
-## 9. Tình huống thường gặp
+## 9. Common Scenarios
 
-### Lỡ commit vào main
+### Accidentally Committed Directly to `main`
 
 ```bash
-git branch feat/US-XX-mo-ta        # cứu công việc sang nhánh mới
-git reset --hard origin/main       # trả main về đúng trạng thái
-git checkout feat/US-XX-mo-ta
+git branch feat/US-XX-description       # Save work into a new branch
+git reset --hard origin/main            # Reset local main to match remote
+git checkout feat/US-XX-description
 ```
 
-### Lỡ commit file `.env`
+### Accidentally Committed `.env`
 
 ```bash
 git rm --cached .env
-git commit -m "chore(repo): go .env khoi git"
+git commit -m "chore(repo): untrack .env file from git"
 ```
 
-**Nếu đã push lên GitHub:** coi như secret trong đó đã lộ. Đổi ngay mọi giá trị trong file
-đó (JWT secret, token Telegram, key AWS) rồi báo C. Xóa khỏi lịch sử git là việc phức tạp
-và không đảm bảo — đổi secret mới là cách chắc chắn.
+**If already pushed to GitHub:** Consider all contained secrets compromised. Immediately rotate all secrets (JWT secrets, Telegram bot tokens, AWS IAM access keys) and inform engineer C. Purging git history is error-prone; rotating secrets provides guaranteed security.
 
-### Sửa commit message vừa viết
+### Amending the Most Recent Commit Message
 
 ```bash
-git commit --amend -m "feat(orchestrator): mo ta dung"
+git commit --amend -m "feat(orchestrator): correct descriptive message"
 ```
 
-Chỉ làm khi **chưa push**. Đã push rồi thì để nguyên — squash lúc merge sẽ dọn.
+Only perform this if the commit has **not yet been pushed**. If already pushed, leave it as is — squashing during merge will sanitize it.
 
-### Bỏ thay đổi chưa commit
+### Discarding Uncommitted Changes
 
 ```bash
-git checkout -- <file>      # một file
-git restore .               # tất cả — CẨN THẬN, không lấy lại được
+git checkout -- <file>      # Revert a single file
+git restore .               # Revert all unstaged changes (CAUTION: non-recoverable)
 ```
 
-### Cứu công việc đang dở để chuyển nhánh gấp
+### Temporarily Shelving Work to Switch Branches
 
 ```bash
-git stash push -m "dang lam escalation timer"
+git stash push -m "WIP: escalation timer logic"
 git checkout main
-# ... xử lý việc gấp
+# ... handle urgent task
 git checkout feat/US-13-...
 git stash pop
 ```
 
-### Lấy một commit từ nhánh khác
+### Cherry-Picking a Specific Commit
 
 ```bash
 git cherry-pick <sha>
 ```
 
-### Xem ai sửa dòng này và vì sao
+### Inspecting Change Origins and History
 
 ```bash
 git log -p --follow apps/orchestrator/src/escalation/escalation.service.ts
@@ -431,42 +415,42 @@ git blame apps/orchestrator/src/escalation/escalation.service.ts
 
 ---
 
-## 10. Windows và CRLF
+## 10. Windows & CRLF
 
-Nhóm dùng Windows, CI chạy Linux. Không thống nhất thì `git diff` sẽ hiện toàn bộ file
-thay đổi dù chỉ sửa một dòng.
+Because developers use Windows while CI and production execute on Linux, inconsistent line endings cause `git diff` to report entire files as modified due to CR/LF mismatches.
 
-### Cài một lần trên mỗi máy
+### Mandatory Global Git Configuration
+
+Run once on each developer workstation:
 
 ```bash
 git config --global core.autocrlf input
 git config --global core.eol lf
 ```
 
-Repo đã có [`.editorconfig`](../../.editorconfig) đặt `end_of_line = lf`. VS Code cần thêm:
+The repository includes an [`.editorconfig`](../../.editorconfig) enforcing `end_of_line = lf`. Ensure VS Code settings contain:
 
 ```json
 { "files.eol": "\n" }
 ```
 
-### Cấu hình git khác nên đặt
+### Recommended Global Git Defaults
 
 ```bash
-git config --global user.name "Tên thật của bạn"
-git config --global user.email "email-github@example.com"
-git config --global pull.rebase true          # pull = rebase, không tạo merge commit rác
+git config --global user.name "Your Full Name"
+git config --global user.email "your-github-registered-email@example.com"
+git config --global pull.rebase true          # git pull rebases by default; prevents noisy merge commits
 git config --global init.defaultBranch main
-git config --global fetch.prune true          # tự dọn nhánh remote đã xóa
+git config --global fetch.prune true          # Automatically prune deleted remote branch references
 ```
 
-> `user.email` phải trùng email đăng ký GitHub, nếu không commit sẽ không gắn được vào
-> tài khoản của bạn — và đến lúc nộp báo cáo, đóng góp của bạn không hiện trong biểu đồ Contributors.
+> Ensure `user.email` matches your primary GitHub account email. Otherwise, commits will not link to your GitHub profile and contributions will not appear on project reports.
 
 ---
 
-## Xem tiếp
+## Further Reading
 
-- [Quy ước viết code](CODING_CONVENTION.md)
-- [Mẫu PR](../../.github/pull_request_template.md)
-- [CI pipeline](../../.github/workflows/ci.yml)
-- [Hướng dẫn cài đặt môi trường](../DEV_ONBOARDING.md)
+- [Coding Conventions](CODING_CONVENTION.md)
+- [PR Template](../../.github/pull_request_template.md)
+- [CI Pipeline Specification](../../.github/workflows/ci.yml)
+- [Developer Onboarding Guide](../DEV_ONBOARDING.md)
