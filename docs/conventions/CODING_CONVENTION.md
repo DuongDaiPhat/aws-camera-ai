@@ -1,152 +1,147 @@
-# Quy ước viết code
+# Coding Conventions
 
-> **Task 0.9** · Người phụ trách: **B** (Scrum Master) · Sprint 0
-> Quy ước nào máy kiểm tra được thì đã cấu hình trong ESLint / Prettier / Ruff.
-> Tài liệu này giải thích những thứ máy **không** kiểm tra được.
+> **Task 0.9** · Owner: **B** (Scrum Master) · Sprint 0  
+> Conventions verifiable by automated tools are configured in ESLint / Prettier / Ruff.  
+> This document explains the architectural principles, standards, and rules that tools **cannot** automatically verify.
 
-## Mục lục
+## Table of Contents
 
-- [1. Nguyên tắc chung](#1-nguyên-tắc-chung)
-- [2. Đặt tên](#2-đặt-tên)
+- [1. General Principles](#1-general-principles)
+- [2. Naming Conventions](#2-naming-conventions)
 - [3. TypeScript / NestJS](#3-typescript--nestjs)
 - [4. TypeScript / Next.js](#4-typescript--nextjs)
 - [5. Python / FastAPI](#5-python--fastapi)
 - [6. SQL](#6-sql)
-- [7. Xử lý lỗi và log](#7-xử-lý-lỗi-và-log)
-- [8. Cấu hình và secret](#8-cấu-hình-và-secret)
-- [9. Viết test](#9-viết-test)
-- [10. Viết comment](#10-viết-comment)
-- [11. Công cụ tự động](#11-công-cụ-tự-động)
+- [7. Error Handling & Logging](#7-error-handling--logging)
+- [8. Configuration & Secrets](#8-configuration--secrets)
+- [9. Testing Guidelines](#9-testing-guidelines)
+- [10. Commenting Guidelines](#10-commenting-guidelines)
+- [11. Automated Tooling](#11-automated-tooling)
 
 ---
 
-## 1. Nguyên tắc chung
+## 1. General Principles
 
-### NT-1 · Người đọc quan trọng hơn người viết
+### GP-1 · Readers Are More Important Than Writers
 
-Code được đọc nhiều hơn viết rất nhiều. Trong nhóm 5 người review chéo, mỗi dòng code sẽ
-được ít nhất 2 người đọc. Viết sao cho người thứ hai hiểu ngay, kể cả khi phải dài hơn vài dòng.
+Code is read far more often than it is written. In a 5-member team with cross-reviews, every line of code will be read by at least two people. Write code so that the reader understands it immediately, even if it requires a few extra lines.
 
-### NT-2 · Rõ ràng hơn ngắn gọn
+### GP-2 · Clarity Over Brevity
 
 ```typescript
-// ❌ Ngắn nhưng phải dừng lại nghĩ
+// ❌ Short but forces the reader to pause and decipher
 const e = evts.filter((x) => x.s === 'N' && x.d < now);
 
-// ✅ Dài hơn nhưng đọc một lần là hiểu
-const suKienQuaHan = events.filter(
+// ✅ Longer but immediately understandable in one pass
+const overdueEvents = events.filter(
   (event) => event.status === 'NOTIFIED' && event.escalationDeadlineAt < now,
 );
 ```
 
-### NT-3 · Không có số ma thuật
+### GP-3 · No Magic Numbers
 
-Mọi ngưỡng, timeout, giới hạn đều phải có tên và đọc được từ cấu hình.
+All thresholds, timeouts, and limits must be explicitly named and read from configuration.
 
 ```typescript
-// ❌ 15 là gì? Ai đổi được nó?
+// ❌ What is 15? Who can change it?
 if (immobileSeconds > 15) { ... }
 
-// ✅
+// ✅ Self-explanatory and configurable
 if (immobileSeconds > this.config.fallImmobilitySeconds) { ... }
 ```
 
-Đây không phải chuyện thẩm mỹ: Sprint 4 sẽ phải chỉnh ngưỡng để giảm FAR (US-29).
-Hard-code nghĩa là lúc đó phải sửa code, build lại, deploy lại — giữa tuần cuối.
+This is not just aesthetics: Sprint 4 requires threshold tuning to minimize the False Alarm Rate (FAR) (US-29). Hardcoding values means modifying code, rebuilding, and redeploying in the final crunch week.
 
-### NT-4 · Thất bại phải ồn ào, đừng im lặng
+### GP-4 · Fail Loudly, Never Fail Silently
 
 ```typescript
-// ❌ Lỗi biến mất, không ai biết gì
+// ❌ Error vanishes, nobody knows what happened
 try {
   await this.telegram.send(msg);
 } catch (e) {}
 
-// ✅ Ghi nhận được, và escalation vẫn tiếp tục (FR-NOT-05)
+// ✅ Recorded for auditing, while escalation continues uninterrupted (FR-NOT-05)
 try {
   await this.telegram.send(msg);
 } catch (error) {
   this.logger.error(
     { correlationId, eventId, channel: 'TELEGRAM', err: error },
-    'Gửi Telegram thất bại',
+    'Failed to send Telegram notification',
   );
   await this.notificationRepo.markFailed(notificationId, error);
-  // KHÔNG throw lại — đếm giờ escalation phải tiếp tục
+  // Do NOT rethrow — escalation countdown must continue
 }
 ```
 
-### NT-5 · Một hàm làm một việc
+### GP-5 · Single Responsibility per Function
 
-Quá 60 dòng thì ESLint cảnh báo. Quá 100 dòng thì gần như chắc chắn hàm đó đang làm 3 việc.
+Functions exceeding 60 lines trigger an ESLint warning. Functions exceeding 100 lines almost certainly violate the Single Responsibility Principle.
 
 ---
 
-## 2. Đặt tên
+## 2. Naming Conventions
 
-### Ngôn ngữ
+### Language Guidelines
 
-| Đối tượng                     | Ngôn ngữ                 | Ví dụ                                       |
-| ----------------------------- | ------------------------ | ------------------------------------------- |
-| Tên biến, hàm, class          | **Tiếng Anh**            | `escalationDeadline`, `findPendingEvents()` |
-| Comment giải thích            | **Tiếng Việt**           | `// Chỉ lần xác nhận đầu tiên có hiệu lực`  |
-| Thông điệp lỗi cho người dùng | **Tiếng Việt**           | `"Không phát hiện được khuôn mặt"`          |
-| Log nội bộ                    | **Tiếng Việt hoặc Anh**  | Miễn nhất quán trong một service            |
-| Commit message                | **Tiếng Việt**           | `feat(orchestrator): thêm khôi phục timer`  |
-| Tên bảng, cột SQL             | **Tiếng Anh**            | `events`, `detected_at`                     |
-| Tên ràng buộc SQL             | **Tiếng Việt không dấu** | `known_faces_so_anh_hop_le`                 |
+| Target                          | Language                      | Example                                             |
+| :------------------------------ | :---------------------------- | :-------------------------------------------------- |
+| Variable, function, class names | **English**                   | `escalationDeadline`, `findPendingEvents()`         |
+| Code comments & documentation   | **English**                   | `// Only the first confirmation is authoritative`   |
+| User-facing UI messages         | **Vietnamese** (or localized) | `"Không phát hiện được khuôn mặt"`                  |
+| Internal logs & error messages  | **English**                   | `"Failed to send Telegram notification"`            |
+| Commit messages                 | **English**                   | `feat(orchestrator): add timer recovery on restart` |
+| SQL table & column names        | **English**                   | `events`, `detected_at`                             |
+| SQL constraints & indexes       | **English**                   | `uq_confirmations_authoritative_per_phase`          |
 
-Lý do đặt tên ràng buộc SQL bằng tiếng Việt: khi vi phạm, Postgres in thẳng tên ràng buộc
-ra màn hình. `escalation_rules_t_low_khong_lon_hon_t_high` là thông điệp lỗi luôn.
+### Casing Rules
 
-### Quy tắc viết hoa
+| Type                        | Convention                   | Example                            |
+| :-------------------------- | :--------------------------- | :--------------------------------- |
+| Variable, function (TS)     | `camelCase`                  | `detectedAt`, `buildDedupKey()`    |
+| Class, interface, type      | `PascalCase`                 | `EscalationEngine`, `EventSummary` |
+| Outbound Port Interface     | `PascalCase` with `I` prefix | `IStorageService`, `IFaceService`  |
+| Constant                    | `SCREAMING_SNAKE_CASE`       | `DEFAULT_PAGE_SIZE`                |
+| Variable, function (Python) | `snake_case`                 | `match_face()`, `torso_angle_deg`  |
+| Class (Python)              | `PascalCase`                 | `FallTracker`                      |
+| TS filename                 | `kebab-case.<type>.ts`       | `escalation.service.ts`            |
+| Python filename             | `snake_case.py`              | `fall_tracker.py`                  |
+| React component filename    | `PascalCase.tsx`             | `EventCard.tsx`                    |
+| SQL table                   | `snake_case` plural          | `events`, `known_faces`            |
+| SQL column                  | `snake_case` singular        | `event_type`, `is_false_alarm`     |
 
-| Loại                   | Quy tắc                     | Ví dụ                              |
-| ---------------------- | --------------------------- | ---------------------------------- |
-| Biến, hàm (TS)         | `camelCase`                 | `detectedAt`, `buildDedupKey()`    |
-| Class, interface, type | `PascalCase`                | `EscalationEngine`, `EventSummary` |
-| Interface cổng ra      | `PascalCase` có tiền tố `I` | `IStorageService`, `IFaceService`  |
-| Hằng số                | `SCREAMING_SNAKE_CASE`      | `DEFAULT_PAGE_SIZE`                |
-| Biến, hàm (Python)     | `snake_case`                | `match_face()`, `torso_angle_deg`  |
-| Class (Python)         | `PascalCase`                | `FallTracker`                      |
-| File TS                | `kebab-case.<loại>.ts`      | `escalation.service.ts`            |
-| File Python            | `snake_case.py`             | `fall_tracker.py`                  |
-| File React             | `PascalCase.tsx`            | `EventCard.tsx`                    |
-| Bảng SQL               | `snake_case` số nhiều       | `events`, `known_faces`            |
-| Cột SQL                | `snake_case` số ít          | `event_type`, `is_false_alarm`     |
+### Semantic Naming Rules
 
-### Quy ước theo ngữ nghĩa
+| Prefix / Suffix              | Purpose                                  | Example                              |
+| :--------------------------- | :--------------------------------------- | :----------------------------------- |
+| `is`, `has`, `should`, `can` | Boolean                                  | `isFalseAlarm`, `hasSnapshot`        |
+| `*At`                        | Timestamp                                | `detectedAt`, `escalationDeadlineAt` |
+| `*Seconds`, `*Ms`            | Time duration — **always include units** | `tWaitSeconds`, `timeoutMs`          |
+| `*Count`                     | Quantity / Counter                       | `attemptCount`, `sourceImageCount`   |
+| `get*`                       | Retrieve data, throws if absent          | `getEvent(id)`                       |
+| `find*`                      | Retrieve data, returns `null` if absent  | `findEventByTrackId(id)`             |
+| `list*`                      | Return array / collection                | `listZonesByCamera(id)`              |
 
-| Tiền tố / hậu tố             | Dùng cho                                  | Ví dụ                                |
-| ---------------------------- | ----------------------------------------- | ------------------------------------ |
-| `is`, `has`, `should`, `can` | Boolean                                   | `isFalseAlarm`, `hasSnapshot`        |
-| `*At`                        | Mốc thời gian                             | `detectedAt`, `escalationDeadlineAt` |
-| `*Seconds`, `*Ms`            | Khoảng thời gian — **luôn ghi rõ đơn vị** | `tWaitSeconds`, `timeoutMs`          |
-| `*Count`                     | Số lượng                                  | `attemptCount`, `sourceImageCount`   |
-| `get*`                       | Lấy dữ liệu, ném lỗi nếu không có         | `getEvent(id)`                       |
-| `find*`                      | Lấy dữ liệu, trả `null` nếu không có      | `findEventByTrackId(id)`             |
-| `list*`                      | Trả về mảng                               | `listZonesByCamera(id)`              |
-
-> **Đơn vị thời gian luôn nằm trong tên.** `timeout = 5` là 5 giây hay 5 mili giây?
-> `timeoutMs = 5000` thì không ai hỏi.
+> **Always include the time unit in the variable name.** Does `timeout = 5` mean 5 seconds or 5 milliseconds?  
+> `timeoutMs = 5000` is completely unambiguous.
 
 ---
 
 ## 3. TypeScript / NestJS
 
-### Cấu trúc thư mục theo tính năng
+### Feature-Based Directory Structure
 
 ```
 apps/orchestrator/src/
 ├── main.ts
 ├── app.module.ts
-├── common/                      # dùng chung toàn app
+├── common/                      # Shared across the entire app
 │   ├── decorators/
-│   ├── filters/                 # bộ lọc exception toàn cục
+│   ├── filters/                 # Global exception filters
 │   ├── guards/                  # RolesGuard, JwtAuthGuard
-│   ├── interceptors/            # logging, correlation-id
+│   ├── interceptors/            # Logging, correlation-id
 │   └── interfaces/              # IStorageService, IFaceService...
 ├── config/
-├── events/                      # mỗi tính năng một thư mục
+├── events/                      # Feature module directory
 │   ├── events.module.ts
 │   ├── events.controller.ts
 │   ├── events.service.ts
@@ -158,11 +153,11 @@ apps/orchestrator/src/
 ├── escalation/
 ├── notifications/
 ├── ingestion/                   # MQTT consumer
-├── storage/                     # adapter MinIO / S3
+├── storage/                     # MinIO / S3 adapter
 └── health/
 ```
 
-### Quy tắc phụ thuộc
+### Dependency Rules
 
 ```
 Controller  →  Service  →  Repository  →  Database
@@ -170,13 +165,13 @@ Controller  →  Service  →  Repository  →  Database
               Interface  ←  Adapter
 ```
 
-- Controller **chỉ** làm: nhận request, gọi service, trả response. Không có `if` nghiệp vụ.
-- Service chứa toàn bộ logic nghiệp vụ. Không import `Request`/`Response` của Express.
-- Repository chỉ truy cập DB và chuyển đổi `snake_case` ↔ `camelCase`.
-- Service **không được** import class adapter cụ thể.
+- **Controller**: Only receives requests, calls services, and returns responses. Zero business `if` statements.
+- **Service**: Encapsulates all domain and business logic. Never import Express `Request`/`Response`.
+- **Repository**: Only interacts with the database and converts between `snake_case` and `camelCase`.
+- **Service must NOT import concrete adapter classes**:
 
 ```typescript
-// ❌ Khóa cứng vào S3, không test được nếu thiếu credential AWS
+// ❌ Hardcoded to AWS S3; fails tests when AWS credentials are absent
 import { S3Client } from '@aws-sdk/client-s3';
 
 @Injectable()
@@ -184,16 +179,16 @@ export class EventService {
   private s3 = new S3Client({ region: 'ap-southeast-1' });
 }
 
-// ✅ Đổi provider bằng biến môi trường, mock được khi test
+// ✅ Switch providers via environment variables; easily mockable in tests
 @Injectable()
 export class EventService {
   constructor(@Inject(STORAGE_SERVICE) private readonly storage: IStorageService) {}
 }
 ```
 
-### DTO và validation
+### DTOs and Validation
 
-Mọi dữ liệu vào đều qua DTO có `class-validator`. Không bao giờ dùng `any`.
+All inbound payloads must pass through a DTO validated with `class-validator`. Never use `any`.
 
 ```typescript
 export class ConfirmEventDto {
@@ -209,29 +204,28 @@ export class ConfirmEventDto {
 }
 ```
 
-`ValidationPipe` đã bật `whitelist` và `forbidNonWhitelisted` trong `main.ts`: trường lạ
-không lọt vào được, và người gửi nhận lỗi rõ ràng thay vì bị âm thầm bỏ qua.
+`ValidationPipe` has `whitelist: true` and `forbidNonWhitelisted: true` enabled in `main.ts`: extraneous properties are rejected with an explicit error rather than silently ignored.
 
-### Cấm dùng
+### Prohibited Practices
 
-| Cấm                                  | Dùng thay thế                                         |
-| ------------------------------------ | ----------------------------------------------------- |
-| `any`                                | Kiểu cụ thể, hoặc `unknown` rồi thu hẹp               |
-| `console.log`                        | `Logger` của Nest                                     |
-| `@ts-ignore`                         | `@ts-expect-error` kèm comment giải thích             |
-| `!` (non-null assertion) trong logic | Kiểm tra tường minh (`!` trong khai báo DTO thì được) |
-| `process.env.X` rải rác              | `ConfigService`                                       |
-| `as` để ép kiểu cho qua chuyện       | Sửa kiểu cho đúng                                     |
+| Prohibited                           | Required Alternative                                            |
+| :----------------------------------- | :-------------------------------------------------------------- |
+| `any`                                | Concrete type, or `unknown` narrowed down                       |
+| `console.log`                        | NestJS `Logger`                                                 |
+| `@ts-ignore`                         | `@ts-expect-error` with an explanatory comment                  |
+| `!` (non-null assertion) in logic    | Explicit null checking (`!` is only allowed in DTO definitions) |
+| Scattered `process.env.X`            | `ConfigService`                                                 |
+| `as` type assertion to bypass errors | Fix the underlying type properly                                |
 
-### Bất đồng bộ
+### Asynchronous Operations
 
 ```typescript
-// ❌ Tuần tự không cần thiết — 3 lần chờ liên tiếp
+// ❌ Unnecessary sequential calls — 3 consecutive roundtrips
 const camera = await this.cameraRepo.find(id);
 const zones = await this.zoneRepo.findByCamera(id);
 const rules = await this.ruleRepo.findAll();
 
-// ✅ Song song khi không phụ thuộc nhau
+// ✅ Parallel execution when operations are independent
 const [camera, zones, rules] = await Promise.all([
   this.cameraRepo.find(id),
   this.zoneRepo.findByCamera(id),
@@ -239,25 +233,25 @@ const [camera, zones, rules] = await Promise.all([
 ]);
 ```
 
-Luôn `await` hoặc xử lý promise tường minh. Promise bị bỏ rơi làm lỗi biến mất không dấu vết.
+Always `await` or explicitly handle promises. Dangling promises cause unhandled rejections and vanish without trace.
 
 ---
 
 ## 4. TypeScript / Next.js
 
-### Cấu trúc
+### Structure
 
 ```
 apps/web/src/
-├── app/                      # App Router
+├── app/                      # Next.js App Router
 │   ├── layout.tsx
-│   ├── page.tsx              # danh sách sự kiện (US-06)
-│   ├── events/[id]/page.tsx  # chi tiết (US-21)
-│   ├── known-faces/page.tsx  # người quen (US-09)
-│   └── settings/page.tsx     # ngưỡng cảnh báo (US-15)
+│   ├── page.tsx              # Event list (US-06)
+│   ├── events/[id]/page.tsx  # Event detail (US-21)
+│   ├── known-faces/page.tsx  # Known faces management (US-09)
+│   └── settings/page.tsx     # Escalation rule settings (US-15)
 ├── components/
-│   ├── ui/                   # nút, thẻ, badge — không biết gì về nghiệp vụ
-│   └── events/               # EventCard, EventFilter — biết nghiệp vụ
+│   ├── ui/                   # Buttons, cards, badges — purely visual
+│   └── events/               # EventCard, EventFilter — domain-aware
 ├── hooks/
 ├── lib/
 │   ├── api-client.ts
@@ -265,36 +259,32 @@ apps/web/src/
 └── types/
 ```
 
-### Quy tắc
+### Rules
 
-- **Server Component mặc định.** Chỉ thêm `'use client'` khi thực sự cần state, effect,
-  hoặc event handler.
-- **Không viết tay kiểu dữ liệu API.** Import từ `@cam/contracts`.
-- **Không gọi `fetch` trực tiếp trong component.** Dùng `apiFetch` trong `lib/api-client.ts`
-  — nơi duy nhất xử lý token, refresh và bọc lỗi.
-- **Mọi trạng thái đều phải hiển thị được:** loading, empty, error. US-06 nói rõ
-  "trạng thái rỗng thân thiện, không phải bảng trắng".
+- **Server Components by default.** Only add `'use client'` when state, effects, or event handlers are required.
+- **Do not handwrite API types.** Always import generated types from `@cam/contracts`.
+- **Do not invoke `fetch` directly in components.** Use `apiFetch` in `lib/api-client.ts` — the single source of truth for auth tokens, token refresh, and error wrapping.
+- **All component states must be rendered:** loading, empty, and error states. US-06 requires "a friendly empty state, never a blank white page".
 
 ```tsx
 if (isLoading) return <EventListSkeleton />;
 if (error) return <ErrorState error={error} onRetry={refetch} />;
-if (events.length === 0) return <EmptyState message="Chưa có sự kiện nào." />;
+if (events.length === 0) return <EmptyState message="No events recorded yet." />;
 return <EventList events={events} />;
 ```
 
-### Giao diện
+### UI & UX
 
-- Tiếng Việt toàn bộ, có dấu đầy đủ.
-- Thời gian hiển thị tương đối ("3 phút trước") — tuyệt đối khi hover.
-- Responsive từ 360px (NFR-10). Test bằng DevTools ở chế độ iPhone SE.
-- Màu theo mức ưu tiên phải nhất quán: P0 đỏ, P1 cam, P2 vàng, P3 xám.
-- Không dùng màu **một mình** để truyền đạt thông tin — luôn kèm chữ hoặc biểu tượng.
+- Relative timestamps by default ("3 minutes ago") — show absolute timestamp on hover.
+- Responsive starting at 360px width (NFR-10). Test with DevTools in iPhone SE mode.
+- Consistent color coding by event priority: P0 Red, P1 Orange, P2 Yellow, P3 Gray.
+- **Never rely on color alone** to convey information — always pair with text or an icon.
 
 ---
 
 ## 5. Python / FastAPI
 
-### Cấu trúc
+### Structure
 
 ```
 services/ai-service/app/
@@ -302,65 +292,63 @@ services/ai-service/app/
 ├── config.py                 # Settings (pydantic-settings)
 ├── routers/
 │   ├── health.py
-│   ├── face.py               # M1 — D phụ trách
-│   ├── pose.py               # M2a — E phụ trách
-│   └── fire.py               # M3 — D phụ trách
-├── models/                   # schema Pydantic
-├── services/                 # logic suy luận
+│   ├── face.py               # M1 — Face recognition (D)
+│   ├── pose.py               # M2a — Pose & Fall detection (E)
+│   └── fire.py               # M3 — Fire & Smoke detection (D)
+├── models/                   # Pydantic schemas
+├── services/                 # Inference engines
 │   ├── face_matcher.py
 │   ├── fall_tracker.py
 │   └── fire_detector.py
 └── utils/
 ```
 
-> **Chia file theo module là có chủ ý:** D và E sửa file khác nhau nên hầu như không
-> gặp xung đột merge.
+> **Separation by module is deliberate:** Engineers D and E work on distinct files, virtually eliminating Git merge conflicts.
 
-### Quy tắc
+### Rules
 
-- **Type hint bắt buộc** ở mọi hàm public. `mypy` bật `disallow_untyped_defs`.
-- **Pydantic cho mọi request/response.** Không trả `dict` trần.
-- **Không đọc `os.environ` rải rác.** Dùng `get_settings()`.
-- **Lỗi suy luận trả `200` kèm `error != null`**, không trả `500` — để orchestrator vẫn ghi
-  được sự kiện với `status = AI_FAILED` (US-10).
+- **Type hints are mandatory** on all public functions. `mypy` has `disallow_untyped_defs` enabled.
+- **Pydantic models for all requests/responses.** Never return raw dictionaries.
+- **No scattered `os.environ`.** Use `get_settings()`.
+- **Inference failures return HTTP `200` with `error != null`**, never `500` — enabling Orchestrator to persist events with `status = AI_FAILED` (US-10).
 
 ```python
 @router.post("/face/match", response_model=MatchResponse)
 async def match_face(image: UploadFile, event_id: UUID) -> MatchResponse:
-    """So khớp khuôn mặt với danh sách người quen (US-10)."""
+    """Match detected face against known face collection (US-10)."""
     settings = get_settings()
 
     try:
         embedding = extract_embedding(await image.read())
     except NoFaceDetectedError:
-        # FR-DET-M1-04: không trích xuất được thì KHÔNG báo động
+        # FR-DET-M1-04: If no face can be extracted, DO NOT trigger an alarm
         return MatchResponse(
             person_status="UNDETERMINED",
             model_version=MODEL_VERSION,
             processed_at=datetime.now(timezone.utc),
-            error=InferenceError(code="NO_FACE_DETECTED", message="Không thấy khuôn mặt"),
+            error=InferenceError(code="NO_FACE_DETECTED", message="No face detected in crop"),
         )
     ...
 ```
 
-### Cấm dùng
+### Prohibited Practices
 
-| Cấm                                      | Dùng thay thế                   |
-| ---------------------------------------- | ------------------------------- |
-| `print()`                                | `logging`                       |
-| `except:` trần                           | `except <LoạiLỗiCụThể>:`        |
-| Mutable default argument (`def f(x=[])`) | `def f(x: list \| None = None)` |
-| Import `*`                               | Import tường minh               |
-| Đường dẫn model hard-code                | Biến môi trường                 |
+| Prohibited                               | Required Alternative                               |
+| :--------------------------------------- | :------------------------------------------------- |
+| `print()`                                | Standard `logging`                                 |
+| Bare `except:`                           | Catch specific exceptions: `except SpecificError:` |
+| Mutable default argument (`def f(x=[])`) | `def f(x: list \| None = None)`                    |
+| Wildcard import (`from x import *`)      | Explicit imports                                   |
+| Hardcoded model file paths               | Read from environment variables / settings         |
 
 ---
 
 ## 6. SQL
 
-### Định dạng
+### Formatting
 
 ```sql
--- Từ khóa VIẾT HOA, tên bảng/cột viết thường
+-- UPPERCASE SQL keywords, lowercase table/column identifiers
 SELECT e.id,
        e.event_type,
        c.name AS camera_name
@@ -372,33 +360,33 @@ ORDER BY e.detected_at DESC
 LIMIT 20;
 ```
 
-### Quy tắc
+### Rules
 
-- **Luôn dùng tham số hóa.** Không bao giờ nối chuỗi vào SQL.
+- **Always use parameterized queries.** Never concatenate strings into SQL queries.
 
   ```typescript
-  // ❌ SQL injection
+  // ❌ Vulnerable to SQL injection
   `SELECT * FROM events WHERE camera_id = '${cameraId}'`;
 
-  // ✅
+  // ✅ Secure parameterized query
   ('SELECT * FROM events WHERE camera_id = $1', [cameraId]);
   ```
 
-- **`SELECT` liệt kê cột**, không `SELECT *` trong code production (query khám phá thì được).
-- **Mọi `SELECT` trả danh sách phải có `LIMIT`.**
-- Migration mới, không sửa migration cũ — xem [ERD.md § 7](../database/ERD.md#7-quy-trình-thay-đổi-schema).
+- **Explicit column projection in `SELECT`**: Never use `SELECT *` in production code.
+- **Every paginated query must include a `LIMIT` clause.**
+- **Append new migrations; never edit historical migrations** (see [ERD.md § 7](../database/ERD.md#7-quy-trình-thay-đổi-schema)).
 
 ---
 
-## 7. Xử lý lỗi và log
+## 7. Error Handling & Logging
 
-### Log có cấu trúc, luôn kèm `correlationId`
+### Structured Logging with `correlationId`
 
 ```typescript
-// ❌ Không tra được, không biết sự kiện nào
-this.logger.log('Gửi thất bại');
+// ❌ Not traceable; cannot identify which event triggered the log
+this.logger.log('Failed to send');
 
-// ✅
+// ✅ Fully structured and searchable across log aggregators
 this.logger.error(
   {
     correlationId: event.correlationId,
@@ -407,114 +395,110 @@ this.logger.error(
     attempt: 3,
     err: error,
   },
-  'Gửi Telegram thất bại sau 3 lần thử',
+  'Failed to send Telegram notification after 3 attempts',
 );
 ```
 
-Không có `correlationId` thì khi hệ thống chạy, câu hỏi "tại sao cảnh báo lúc 14:20 không tới"
-sẽ không có cách nào trả lời (FR-LOG-02).
+Without `correlationId`, diagnosing "why an alert at 14:20 was not delivered" in production is impossible (FR-LOG-02).
 
-### Mức log
+### Log Levels
 
-| Mức          | Dùng khi                     | Ví dụ                                 |
-| ------------ | ---------------------------- | ------------------------------------- |
-| `error`      | Cần người xem ngay           | Không kết nối được DB                 |
-| `warn`       | Bất thường nhưng đã tự xử lý | Rekognition lỗi, đã fallback về local |
-| `log`/`info` | Mốc nghiệp vụ quan trọng     | Sự kiện chuyển sang ESCALATED         |
-| `debug`      | Chi tiết khi gỡ lỗi          | Payload MQTT thô                      |
+| Level          | When to Use                        | Example                                     |
+| :------------- | :--------------------------------- | :------------------------------------------ |
+| `error`        | Requires immediate human attention | Database connection failure                 |
+| `warn`         | Abnormal state handled by fallback | Rekognition error, fell back to local model |
+| `log` / `info` | Key business milestones            | Event transitioned to `ESCALATED`           |
+| `debug`        | Detailed troubleshooting info      | Raw MQTT message payload                    |
 
-Không log ở mức `info` trong vòng lặp chạy mỗi frame — 5 fps × 3 camera = 15 dòng/giây,
-log sẽ ngập và che mất thứ quan trọng.
+Never log at `info` level inside per-frame processing loops — 5 fps × 3 cameras = 15 log lines/sec, which floods logs and conceals critical events.
 
-### Tuyệt đối không log
+### Strictly Prohibited in Logs
 
-- Mật khẩu, token, API key (NFR-09)
-- `rtsp_url` đầy đủ (có credential camera)
-- Face embedding
-- Ảnh dạng base64
+- Passwords, JWT secrets, auth tokens, API keys (NFR-09)
+- Full `rtsp_url` strings containing camera credentials
+- Raw face embedding vectors
+- Base64-encoded image payloads
 
-### Exception filter toàn cục
+### Global Exception Filter
 
-Mọi lỗi lọt ra ngoài đều bị bắt bởi một filter duy nhất, biến thành định dạng `ErrorResponse`
-chuẩn kèm `traceId`. Controller không tự bắt lỗi rồi tự tạo response lỗi riêng.
+All unhandled exceptions are intercepted by a single global filter that maps them to a canonical `ErrorResponse` schema with a `traceId`. Controllers must not catch unexpected errors to format custom responses.
 
 ---
 
-## 8. Cấu hình và secret
+## 8. Configuration & Secrets
 
-### Quy tắc
+### Rules
 
-1. **Mọi cấu hình đọc từ biến môi trường.** Không có `config.json` chứa giá trị theo môi trường.
-2. **`.env` không bao giờ được commit.** Chỉ commit `.env.example` với giá trị giả.
-3. **Mỗi biến mới phải được thêm vào `.env.example`** trong cùng PR.
-4. **Không có giá trị mặc định cho secret.** Thiếu `JWT_SECRET` thì app phải **từ chối khởi động**,
-   không được lặng lẽ dùng `"secret"`.
+1. **All configurations are read from environment variables.** No hardcoded configuration files.
+2. **Never commit `.env`.** Only commit `.env.example` with sanitized placeholder values.
+3. **Every new environment variable must be documented in `.env.example`** within the same PR.
+4. **No fallback default values for secrets.** Missing `JWT_SECRET` must cause the app to **fail fast and refuse to start**, rather than silently using `"secret"`.
 
 ```typescript
-// ✅ Sai cấu hình thì biết ngay lúc khởi động, không phải lúc demo
+// ✅ Misconfiguration is caught immediately upon startup, not during the demo
 const jwtSecret = this.config.getOrThrow<string>('JWT_SECRET');
 ```
 
-### Trước khi commit
+### Pre-Commit Leak Check
 
 ```bash
 git diff --staged | grep -iE '(password|secret|token|api[_-]?key).*=.*[a-z0-9]{12,}'
 ```
 
-Nếu có kết quả — dừng lại và kiểm tra. NFR-09 yêu cầu **0 lần** secret lọt vào repo.
+If matches appear, abort immediately. NFR-09 requires **0 leaked secrets** in the repository history.
 
 ---
 
-## 9. Viết test
+## 9. Testing Guidelines
 
-### Kim tự tháp
+### Testing Pyramid
 
 ```
-        /\        E2E (Playwright) — 3 kịch bản, chỉ Sprint 3-4
+        /\        E2E (Playwright) — 3 golden scenarios (Sprint 3-4)
        /  \
-      /----\      Integration — MQTT → DB → Storage, mỗi sprint
+      /----\      Integration — MQTT → DB → Storage (Every Sprint)
      /      \
-    /--------\    Unit — logic nghiệp vụ, MỖI PR
+    /--------\    Unit — Domain & Business logic (EVERY PR)
 ```
 
-### Bắt buộc phải có unit test
+### Mandatory Unit Test Coverage
 
-- Escalation state machine (US-13) — **quan trọng nhất trong toàn hệ thống**
-- Tính `dedup_key`
-- Logic so sánh ngưỡng
-- Logic xác nhận té ngã
-- Quy đổi tọa độ polygon chuẩn hóa ↔ pixel
-- Hàm tính thời gian retry
+- Escalation state machine (US-13) — **the most critical engine in the system**
+- `dedup_key` calculation algorithms
+- Threshold comparison and boundary policies
+- Fall immobility verification logic
+- Normalized coordinate polygon ↔ pixel translation
+- Exponential backoff and retry calculation functions
 
-### Không cần test
+### Tests Not Required
 
-- Getter/setter thuần
-- Controller chỉ gọi thẳng service
-- Code sinh tự động
+- Trivial getters / setters
+- Passthrough controllers that merely forward calls to services
+- Automatically generated contract code
 
-### Tên test viết bằng tiếng Việt, mô tả hành vi
+### Test Naming: Clear Behavioral Specification
 
 ```typescript
 describe('EscalationEngine', () => {
-  it('chuyển sang LOGGED_ONLY khi confidence dưới T_low', () => {});
-  it('bỏ qua LOGGED_ONLY với sự kiện cháy bất kể confidence', () => {});
-  it('chỉ chấp nhận lần xác nhận đầu tiên, lần sau trả ALREADY_CONFIRMED', () => {});
-  it('khôi phục hẹn giờ từ DB sau khi restart', () => {});
+  it('transitions to LOGGED_ONLY when confidence is below T_low', () => {});
+  it('bypasses LOGGED_ONLY for FIRE_SMOKE events regardless of confidence', () => {});
+  it('only accepts the first authoritative confirmation, subsequent return ALREADY_CONFIRMED', () => {});
+  it('recovers pending deadlines from database upon restart', () => {});
 });
 ```
 
-### Mẫu AAA
+### AAA Pattern (Arrange - Act - Assert)
 
 ```typescript
-it('chuyển sang ESCALATED khi hết T_wait mà không có phản hồi', async () => {
+it('transitions to ESCALATED when T_wait expires without response', async () => {
   // Arrange
-  const event = taoSuKienMau({
+  const event = createMockEvent({
     status: 'NOTIFIED',
     escalationDeadlineAt: subSeconds(new Date(), 1),
   });
 
   // Act
-  await engine.kiemTraQuaHan();
+  await engine.checkOverdueDeadlines();
 
   // Assert
   expect(await repo.find(event.id)).toMatchObject({ status: 'ESCALATED' });
@@ -522,132 +506,105 @@ it('chuyển sang ESCALATED khi hết T_wait mà không có phản hồi', async
 });
 ```
 
-### Coverage
+### Code Coverage
 
-Mục tiêu **≥ 60%** cho business logic (NFR-07). Đây là ngưỡng CI sẽ chặn nếu tụt xuống dưới.
-
-Nhưng con số không phải mục đích: 100% coverage với toàn test vô nghĩa còn tệ hơn 50%
-với test đúng chỗ. Ưu tiên phủ **state machine** và **logic ngưỡng** trước.
+Target is **≥ 60%** for core business logic (NFR-07). CI will fail if coverage drops below this baseline.  
+Prioritize testing the **state machine transitions** and **threshold evaluations**.
 
 ---
 
-## 10. Viết comment
+## 10. Commenting Guidelines
 
-### Comment giải thích **tại sao**, không phải **cái gì**
+### Explain the "Why", Not the "What"
 
 ```typescript
-// ❌ Lặp lại đúng những gì code đã nói
-// Tăng attemptCount lên 1
+// ❌ Redundant: merely restates what the code already says
+// Increment attemptCount by 1
 notification.attemptCount += 1;
 
-// ✅ Giải thích quyết định thiết kế
-// Ghi deadline xuống DB thay vì dùng setTimeout: service restart lúc 2 giờ sáng
-// sẽ làm mất toàn bộ cảnh báo đang chờ (FR-ESC-07, NFR-05).
+// ✅ Explains the architectural design decision
+// Persist deadline directly in PostgreSQL instead of relying on in-memory setTimeout:
+// a service restart at 2 AM would otherwise drop all pending alerts (FR-ESC-07, NFR-05).
 event.escalationDeadlineAt = addSeconds(new Date(), rule.tWaitSeconds);
 ```
 
-### Comment tham chiếu yêu cầu
+### Reference Requirements
 
-Khi code hiện thực một yêu cầu cụ thể, ghi mã vào — người sau đọc sẽ biết tra ở đâu:
+When implementing specific functional requirements, include the requirement code:
 
 ```typescript
-// FR-DET-M1-04: UNDETERMINED (quay lưng, quá tối) KHÔNG sinh cảnh báo,
-// nếu không hệ thống sẽ spam mỗi lần người nhà quay lưng vào camera.
+// FR-DET-M1-04: UNDETERMINED (subject turned away or underexposed) does NOT trigger an alarm;
+// otherwise, family members turning their backs to the camera would spam notifications.
 if (result.personStatus === 'UNDETERMINED') {
   return { status: 'LOGGED_ONLY' };
 }
 ```
 
-### TODO phải có chủ và có hạn
+### TODOs Must Have an Owner and Milestone
 
 ```typescript
-// ❌ Sẽ nằm đó đến ngày bảo vệ
-// TODO: xử lý sau
+// ❌ Abandoned indefinitely
+// TODO: fix later
 
-// ✅
-// TODO(B, Sprint 3): thay quét tuần tự bằng index pgvector khi known_faces > 100.
-// Hiện tại ~20 bản ghi nên O(n) là đủ nhanh.
+// ✅ Actionable with clear scope and rationale
+// TODO(B, Sprint 3): Replace sequential scan with pgvector index when known_faces exceeds 100.
+// Currently ~20 records, so O(n) scan is sub-millisecond.
 ```
 
 ---
 
-## 11. Công cụ tự động
+## 11. Automated Tooling
 
-### Cài một lần
+### Initial Setup
 
 ```bash
-pnpm install          # cài dependency JS + husky hook
-pnpm setup:ai         # tạo venv + cài dependency Python
+pnpm install          # Install JS dependencies + Husky hooks
+pnpm setup:ai         # Create virtualenv + install Python dependencies
 ```
 
-### Chạy trước khi mở PR
+### Pre-PR Quality Check
 
 ```bash
-pnpm check:all        # chạy hết: Prettier, ESLint, TS, test, OpenAPI, ruff, pytest
+pnpm check:all        # Runs everything: Prettier, ESLint, TS, tests, OpenAPI, Ruff, Pytest
 ```
 
-Hoặc từng phần:
+Or run targeted checks:
 
 ```bash
-pnpm format           # Prettier tự sửa
+pnpm format           # Auto-format with Prettier
 pnpm lint             # ESLint
 pnpm typecheck        # TypeScript
 pnpm test             # Jest + Vitest
-pnpm api:lint         # OpenAPI
+pnpm api:lint         # OpenAPI spec linting
 
-pnpm lint:ai:fix      # ruff check --fix
-pnpm format:ai        # ruff format
-pnpm test:ai          # pytest
+pnpm lint:ai:fix      # Ruff check --fix
+pnpm format:ai        # Ruff format
+pnpm test:ai          # Pytest
 ```
 
-> `ruff` và `pytest` chỉ nằm trong venv, không có trên PATH. Các script `pnpm *:ai`
-> tự tìm Python trong venv nên chạy được ở mọi shell mà không cần activate —
-> xem [DEV_ONBOARDING.md](../DEV_ONBOARDING.md#kiểm-tra-tất-cả-chạy-được).
+### Git Hooks
 
-### Git hook tự động
+| Hook         | Action                                                  |
+| :----------- | :------------------------------------------------------ |
+| `pre-commit` | Runs `lint-staged`: format + lint staged files          |
+| `commit-msg` | Runs `commitlint`: enforces Conventional Commits format |
 
-| Hook         | Làm gì                                          |
-| ------------ | ----------------------------------------------- |
-| `pre-commit` | `lint-staged`: format + lint file đang commit   |
-| `commit-msg` | `commitlint`: kiểm tra định dạng commit message |
+Never bypass hooks with `--no-verify`. Hooks exist to prevent CI failures from trivial formatting mistakes.
 
-Hook hỏng hoặc chậm thì báo với C để sửa. **Không dùng `--no-verify` để đi vòng** —
-hook tồn tại để CI không đỏ vì những lỗi nhặt được trong 2 giây.
+### Tooling Configuration Map
 
-### Cấu hình ở đâu
-
-| Công cụ              | File                                                                             |
-| -------------------- | -------------------------------------------------------------------------------- |
+| Tool                 | Configuration File                                                               |
+| :------------------- | :------------------------------------------------------------------------------- |
 | ESLint               | [`packages/eslint-config/node.mjs`](../../packages/eslint-config/node.mjs)       |
 | Prettier             | [`.prettierrc.json`](../../.prettierrc.json)                                     |
 | Ruff + mypy + pytest | [`services/ai-service/pyproject.toml`](../../services/ai-service/pyproject.toml) |
 | commitlint           | [`commitlint.config.cjs`](../../commitlint.config.cjs)                           |
 | EditorConfig         | [`.editorconfig`](../../.editorconfig)                                           |
 
-### Gợi ý cho VS Code
-
-Cài: **ESLint**, **Prettier**, **Ruff**, **EditorConfig**, **Docker**, **Mermaid Preview**.
-
-```json
-{
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
-  "[python]": {
-    "editor.defaultFormatter": "charliermarsh.ruff",
-    "editor.codeActionsOnSave": { "source.fixAll.ruff": "explicit" }
-  },
-  "files.eol": "\n"
-}
-```
-
-> **Windows:** đặt `files.eol` là `\n`. Xem thêm phần xử lý CRLF trong
-> [GIT_WORKFLOW.md](GIT_WORKFLOW.md).
-
 ---
 
-## Xem tiếp
+## Further Reading
 
-- [Quy trình Git và mẫu PR](GIT_WORKFLOW.md)
-- [Kiến trúc C4](../architecture/C4_ARCHITECTURE.md)
-- [Hợp đồng API](../api/API_GUIDE.md)
+- [Git Workflow and PR Guidelines](GIT_WORKFLOW.md)
+- [C4 Architecture](../architecture/C4_ARCHITECTURE.md)
+- [API Contract Guide](../api/API_GUIDE.md)

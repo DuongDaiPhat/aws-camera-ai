@@ -33,17 +33,18 @@ Hướng dẫn đầy đủ (yêu cầu phần cứng, gỡ rối, giả lập c
 
 Toàn bộ mục lục: **[docs/README.md](docs/README.md)**
 
-|                                                                          |                                              |
-| ------------------------------------------------------------------------ | -------------------------------------------- |
-| 🏗️ [Kiến trúc C4](docs/architecture/C4_ARCHITECTURE.md)                  | Hệ thống gồm những gì, vì sao chia như vậy   |
-| 🔄 [Luồng dữ liệu](docs/architecture/DATA_FLOW.md)                       | Dữ liệu chảy thế nào, kèm payload thật       |
-| 🗄️ [ERD](docs/database/ERD.md)                                           | 14 bảng, giải thích từng quyết định thiết kế |
-| 🔌 [Hợp đồng API](docs/api/API_GUIDE.md)                                 | Contract-first, mã lỗi, ví dụ gọi            |
-| 🛠️ [Cài đặt môi trường](docs/DEV_ONBOARDING.md)                          | Từ máy trắng đến chạy được                   |
-| ✍️ [Quy ước code](docs/conventions/CODING_CONVENTION.md)                 | Đặt tên, log, test, comment                  |
-| 🌿 [Quy trình Git](docs/conventions/GIT_WORKFLOW.md)                     | Nhánh, commit, PR, review                    |
-| 📋 [Kế hoạch Agile](docs/KE_HOACH_AGILE_CameraAI_AWS.md)                 | 5 sprint, MoSCoW, rủi ro                     |
-| 📝 [Backlog & User Story](docs/Roadmap_Backlog_UserStory_FR_CameraAI.md) | 38 story, yêu cầu chức năng                  |
+|                                                                          |                                                       |
+| ------------------------------------------------------------------------ | ----------------------------------------------------- |
+| 🏗️ [Kiến trúc C4](docs/architecture/C4_ARCHITECTURE.md)                  | Hệ thống gồm những gì, vì sao chia như vậy            |
+| 🔄 [Luồng dữ liệu](docs/architecture/DATA_FLOW.md)                       | Dữ liệu chảy thế nào, kèm payload thật                |
+| 🗄️ [ERD](docs/database/ERD.md)                                           | 14 bảng, giải thích từng quyết định thiết kế          |
+| 🔌 [Hợp đồng API](docs/api/API_GUIDE.md)                                 | Contract-first, mã lỗi, ví dụ gọi                     |
+| 🛠️ [Cài đặt môi trường](docs/DEV_ONBOARDING.md)                          | Từ máy trắng đến chạy được                            |
+| ⚡ [Cheatsheet lệnh CLI](CLI_COMMANDS.md)                                | Bảng tổng hợp toàn bộ lệnh Docker, DB, Seed, Test, AI |
+| ✍️ [Quy ước code](docs/conventions/CODING_CONVENTION.md)                 | Đặt tên, log, test, comment                           |
+| 🌿 [Quy trình Git](docs/conventions/GIT_WORKFLOW.md)                     | Nhánh, commit, PR, review                             |
+| 📋 [Kế hoạch Agile](docs/KE_HOACH_AGILE_CameraAI_AWS.md)                 | 5 sprint, MoSCoW, rủi ro                              |
+| 📝 [Backlog & User Story](docs/Roadmap_Backlog_UserStory_FR_CameraAI.md) | 38 story, yêu cầu chức năng                           |
 
 ---
 
