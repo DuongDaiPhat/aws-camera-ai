@@ -22,7 +22,10 @@ def main() -> None:
     assert np.__version__ == "1.26.4"
     assert onnx.__version__ == "1.17.0" and ort.__version__ == "1.20.1"
     torch.set_num_threads(2)
-    with tempfile.TemporaryDirectory(prefix="camerai-training-smoke-") as directory, chdir(directory):
+    with (
+        tempfile.TemporaryDirectory(prefix="camerai-training-smoke-") as directory,
+        chdir(directory),
+    ):
         config = yaml_model_load("yolo11n.yaml")
         config["nc"] = 2
         path = Path(directory) / "yolo11n-gate.yaml"

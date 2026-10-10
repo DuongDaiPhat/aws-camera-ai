@@ -33,7 +33,9 @@ try {
   const url = (name) => `postgresql://camerai:gate-only-test@127.0.0.1:${port}/${name}`;
   for (let i = 0; ; i++) {
     try {
-      docker('exec', container, 'pg_isready', '-U', 'camerai');
+      // The entrypoint's temporary init server only listens on a Unix socket.
+      // Require TCP readiness so initialization cannot race the first client.
+      docker('exec', container, 'pg_isready', '-h', '127.0.0.1', '-U', 'camerai', '-d', 'postgres');
       break;
     } catch (error) {
       if (i >= 30) throw error;
