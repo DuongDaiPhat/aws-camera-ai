@@ -4,7 +4,7 @@
 
 ## Cập nhật gate ngày 10/10/2026
 
-Baseline runtime đã được hiện thực thành lock có hashes, cùng setup, Docker và CI. Các mục 3/5/6 bên dưới là snapshot khi chuẩn bị plan; tham chiếu mục này và [SHARED_GATE_HANDOFF.md](SHARED_GATE_HANDOFF.md) khi bắt đầu implementation.
+Baseline runtime đã **MERGED_FROZEN** qua [PR #25](https://github.com/DuongDaiPhat/aws-camera-ai/pull/25), commit `04080bf3c305e14fd00f5388f437d00b28d0e2b6`, sau khi 9 jobs của [CI run #89](https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/38017191512) đạt. Lock có hashes, setup, Docker và CI đã ở main. Các mục 3/5/6 bên dưới là snapshot khi chuẩn bị plan; tham chiếu mục này và [SHARED_GATE_HANDOFF.md](SHARED_GATE_HANDOFF.md) khi bắt đầu implementation.
 
 | Phần                    | Nguồn chốt hiện hành                                                                                                                                                           |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

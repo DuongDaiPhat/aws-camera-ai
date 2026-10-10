@@ -2,7 +2,9 @@
 
 Ngày kiểm chứng: **10/10/2026**. Phạm vi: contract, dependency, model compatibility và DDL nền tảng; chưa implement bốn user stories hoặc triển khai AWS.
 
-Contract đã merge qua PR #24. Dependency hiện được kiểm chứng local trên nhánh `codex/sprint-3-dependency-gate`; chưa push/mở PR/merge vì thao tác tạo PR bị automatic approval review từ chối publication ra GitHub. Cần xác nhận repository đích trước bước publication; không đánh dấu dependency `MERGED_FROZEN` khi còn ở local. Hash nguồn/locks được ghi tại [SHARED_GATE_FINGERPRINT.json](SHARED_GATE_FINGERPRINT.json).
+Contract đã merge qua [PR #24](https://github.com/DuongDaiPhat/aws-camera-ai/pull/24). Dependency đã **MERGED_FROZEN** qua [PR #25](https://github.com/DuongDaiPhat/aws-camera-ai/pull/25), squash commit `04080bf3c305e14fd00f5388f437d00b28d0e2b6`, sau khi toàn bộ 9 jobs của [CI run #89](https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/38017191512) đạt. Đây là mốc chung để bắt đầu ba nhánh US16–17, US18 và US20. Hash nguồn/locks được ghi tại [SHARED_GATE_FINGERPRINT.json](SHARED_GATE_FINGERPRINT.json).
+
+CI kiểm chứng Python 3.11.13 trên cả Linux và Windows; Windows dùng standalone Python qua uv 0.8.22 vì bộ cài `setup-python` không cung cấp bản này trên runner Windows. DB gate đợi TCP readiness để tránh temporary init server. Training/export chạy môi trường CPU riêng.
 
 ## Baseline contract
 
@@ -67,7 +69,7 @@ Smoke ảnh trống chỉ kiểm chứng API/ABI/model compatibility. Không suy
 
 ## Bắt đầu ba nhánh song song
 
-Lấy commit đã merge dependency PR trước khi code. US16–17 làm cùng nhánh E2E vì dùng chung candidate/confirmation; US18 và US20 làm nhánh riêng. Cùng dùng baseline này, không tự add dependency hoặc sửa schemas shared.
+Lấy commit `04080bf3c305e14fd00f5388f437d00b28d0e2b6` hoặc main mới hơn chứa commit này trước khi code. US16–17 làm cùng nhánh E2E vì dùng chung candidate/confirmation; US18 và US20 làm nhánh riêng. Cùng dùng baseline này, không tự add dependency hoặc sửa schemas shared.
 
 US16–17 tiếp tục frame/track history và FALL runtime. US18 tiếp tục dataset/training/holdout rồi mới bật model runtime. US20 tiếp tục adapter identity/motion/direction, CRUD và durable scheduler; thiếu departure evidence không được claim skip-away AC. Các file entrypoint, frame bridge, generic notification/escalation và event UI vẫn cần owner tích hợp tuần tự.
 
