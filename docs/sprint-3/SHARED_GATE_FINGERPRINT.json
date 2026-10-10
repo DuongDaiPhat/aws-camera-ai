@@ -3,7 +3,10 @@
   "stories": ["US-16", "US-17", "US-18", "US-20"],
   "contractMergeCommit": "97765fc710aefd0d76c0572f7e74c86fa10efdca",
   "contractPullRequest": "https://github.com/DuongDaiPhat/aws-camera-ai/pull/24",
-  "dependencyStatus": "LOCAL_VERIFIED_PENDING_PUBLICATION",
+  "dependencyStatus": "MERGED_FROZEN",
+  "dependencyPullRequest": "https://github.com/DuongDaiPhat/aws-camera-ai/pull/25",
+  "dependencyMergeCommit": "04080bf3c305e14fd00f5388f437d00b28d0e2b6",
+  "dependencyCiRun": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/38017191512",
   "python": "3.11.13",
   "lockTool": "pip-tools 7.4.1",
   "hashes": {
