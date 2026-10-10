@@ -4,695 +4,725 @@
  */
 
 export interface paths {
-    "/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Kiem tra service song va provider dang bat */
-        get: operations["aiHealth"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/face/embed": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Trich xuat embedding tu anh de dang ky nguoi quen
-         * @description US-09. Tra `error.code = NO_FACE_DETECTED` khi khong thay khuon mat,
-         *     `MULTIPLE_FACES` kem danh sach bounding box khi co nhieu hon mot.
-         */
-        post: operations["embedFace"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Kiem tra service song va provider dang bat */
+    get: operations['aiHealth'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/face/embed': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/face/match": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * So khop anh crop voi danh sach nguoi quen
-         * @description US-10. `personStatus`:
-         *       - `KNOWN`        khi similarity >= FACE_MATCH_THRESHOLD
-         *       - `UNKNOWN`      khi similarity < nguong
-         *       - `UNDETERMINED` khi khong trich xuat duoc khuon mat (quay lung,
-         *         qua toi, qua nho). FR-DET-M1-04: truong hop nay KHONG sinh canh bao.
-         */
-        post: operations["matchFace"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Trich xuat embedding tu anh de dang ky nguoi quen
+     * @description US-09. Tra `error.code = NO_FACE_DETECTED` khi khong thay khuon mat,
+     *     `MULTIPLE_FACES` kem danh sach bounding box khi co nhieu hon mot.
+     */
+    post: operations['embedFace'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/face/match': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/face/collection/sync": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Nap lai danh sach embedding nguoi quen vao bo nho service
-         * @description Atomic full snapshot replacement per owner/model after create/delete. Reject older version with 409; same version with identical contents is replay-safe. Empty faces means loaded empty collection, not unavailable collection.
-         */
-        post: operations["syncFaceCollection"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * So khop anh crop voi danh sach nguoi quen
+     * @description US-10. `personStatus`:
+     *       - `KNOWN`        khi similarity >= FACE_MATCH_THRESHOLD
+     *       - `UNKNOWN`      khi similarity < nguong
+     *       - `UNDETERMINED` khi khong trich xuat duoc khuon mat (quay lung,
+     *         qua toi, qua nho). FR-DET-M1-04: truong hop nay KHONG sinh canh bao.
+     */
+    post: operations['matchFace'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/face/collection/sync': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/pose/fall": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Danh gia mot frame trong chuoi theo doi te nga
-         * @description US-16/US-17; FR-DET-M2-01..05. Evaluate the exact full-camera
-         *     JPEG/PNG frame identified by frameTimestamp, without rotation or
-         *     letterboxing. An event snapshot or latest image with an unrelated
-         *     timestamp is not valid temporal evidence. New M2a producers always
-         *     send frameId, sourceSessionId, personBoundingBox and zoneConfigVersion.
-         *
-         *     Track state is isolated by (cameraSlug, sourceSessionId, trackId).
-         *     MONITORING becomes CANDIDATE only with 10 preceding valid pose frames,
-         *     torso angle strictly below 30 degrees and a sudden center drop.
-         *     The baseline is frozen at candidate creation. CONFIRMED requires a
-         *     currently valid abnormal pose and continuous observed immobility
-         *     strictly longer than FALL_IMMOBILITY_SECONDS (default 15 seconds).
-         *     Exactly 15 seconds is not sufficient; motion or an invalid frame gap
-         *     resets the immobility interval. Standing up cancels the candidate.
-         *
-         *     Missing/low-quality/ambiguous pose is poseAvailable=false, error=null.
-         *     Keep candidate identity for at most 5 seconds, reset immobileSeconds
-         *     immediately, then cancel even if no more frames arrive. Resuming pose
-         *     starts a new interval; missing time never contributes to confirmation.
-         *     Duplicate/out-of-order/stale frames do not advance history or timers.
-         *     Restart or source-session/coordinate changes clear unconfirmed state.
-         *     Use one stateful process/replica until shared tracking is implemented.
-         *
-         *     Orchestrator supplies inRestArea from enabled REST_AREA polygons of
-         *     this camera using the current person's bounding-box center; polygon
-         *     boundaries count as inside. Entering a rest area cancels tracking;
-         *     inRestArea=true must never return CONFIRMED. Orchestrator rechecks
-         *     camera/zone configuration before persistence. Only CONFIRMED with
-         *     valid identity/evidence, poseAvailable=true, error=null and outside
-         *     a rest area proposes a separate FALL_DETECTED/P1 incident. This
-         *     service neither persists incidents nor sends notifications.
-         *
-         *     CONFIRMED is latched for one episode until an observed standing pose
-         *     re-arms monitoring. Replayed confirmation retains the original
-         *     episodeId/confirmedAt; it is not a newly inferred fall. Technical
-         *     inference/decode failures return 200 with error != null, never a fall.
-         *     All thresholds and image limits are configurable, not hard-coded.
-         */
-        post: operations["evaluateFall"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Nap lai danh sach embedding nguoi quen vao bo nho service
+     * @description Atomic full snapshot replacement per owner/model after create/delete. Reject older version with 409; same version with identical contents is replay-safe. Empty faces means loaded empty collection, not unavailable collection.
+     */
+    post: operations['syncFaceCollection'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/pose/fall': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/fire/detect": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Phat hien lua/khoi va xac nhan chuoi frame toan camera
-         * @description US-18. Stateful per (cameraSlug, sourceSessionId); image is the full camera frame at frameTimestamp, even without a person. New producers send frameId/sourceSessionId. Each unique, ordered, fresh frame counts once, regardless of bounding-box count.
-         *
-         *     A qualifying frame has at least one fire/smoke detection with confidence >= thresholdUsed (default T_fire=0.50). Confirm at >= requiredFrames (default 3) consecutive qualifying frames whose first-to-last interval is <= windowSeconds (default 5), with no adjacent gap > maxFrameGapSeconds (default 1). Mixed fire/smoke labels qualify. Confirmation happens on the third frame; there is no mandatory five-second wait.
-         *
-         *     Negative/below-threshold frames and technical errors reset unconfirmed evidence; a gap/out-of-window starts a new eligible suffix. Duplicate, out-of-order and stale frames do not advance the counter or create new confirmation. Silence never confirms. Confirmed episode evidence is frozen for replay. The orchestrator persists one active episode per camera across source sessions and restarts, clearing only after 10 seconds of valid continuous negative observations; resolving an event does not clear it.
-         *
-         *     Episode UUIDv5 uses URL namespace 6ba7b811-9dad-11d1-80b4-00c04fd430c8 and compact UTF-8 JSON [cameraSlug,sourceSessionId,firstQualifiedAt], timestamp canonical UTC milliseconds. incidentConfidence is the minimum of each qualifying frame's maximum qualifying score (fire-temporal-min-v1), not the latest frame maximum. This service does not persist events or send notifications.
-         */
-        post: operations["detectFire"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Danh gia mot frame trong chuoi theo doi te nga
+     * @description US-16/US-17; FR-DET-M2-01..05. Evaluate the exact full-camera
+     *     JPEG/PNG frame identified by frameTimestamp, without rotation or
+     *     letterboxing. An event snapshot or latest image with an unrelated
+     *     timestamp is not valid temporal evidence. New M2a producers always
+     *     send frameId, sourceSessionId, personBoundingBox and zoneConfigVersion.
+     *
+     *     Track state is isolated by (cameraSlug, sourceSessionId, trackId).
+     *     MONITORING becomes CANDIDATE only with 10 preceding valid pose frames,
+     *     torso angle strictly below 30 degrees and a sudden center drop.
+     *     The baseline is frozen at candidate creation. CONFIRMED requires a
+     *     currently valid abnormal pose and continuous observed immobility
+     *     strictly longer than FALL_IMMOBILITY_SECONDS (default 15 seconds).
+     *     Exactly 15 seconds is not sufficient; motion or an invalid frame gap
+     *     resets the immobility interval. Standing up cancels the candidate.
+     *
+     *     Missing/low-quality/ambiguous pose is poseAvailable=false, error=null.
+     *     Keep candidate identity for at most 5 seconds, reset immobileSeconds
+     *     immediately, then cancel even if no more frames arrive. Resuming pose
+     *     starts a new interval; missing time never contributes to confirmation.
+     *     Duplicate/out-of-order/stale frames do not advance history or timers.
+     *     Restart or source-session/coordinate changes clear unconfirmed state.
+     *     Use one stateful process/replica until shared tracking is implemented.
+     *
+     *     Orchestrator supplies inRestArea from enabled REST_AREA polygons of
+     *     this camera using the current person's bounding-box center; polygon
+     *     boundaries count as inside. Entering a rest area cancels tracking;
+     *     inRestArea=true must never return CONFIRMED. Orchestrator rechecks
+     *     camera/zone configuration before persistence. Only CONFIRMED with
+     *     valid identity/evidence, poseAvailable=true, error=null and outside
+     *     a rest area proposes a separate FALL_DETECTED/P1 incident. This
+     *     service neither persists incidents nor sends notifications.
+     *
+     *     CONFIRMED is latched for one episode until an observed standing pose
+     *     re-arms monitoring. Replayed confirmation retains the original
+     *     episodeId/confirmedAt; it is not a newly inferred fall. Technical
+     *     inference/decode failures return 200 with error != null, never a fall.
+     *     All thresholds and image limits are configurable, not hard-coded.
+     */
+    post: operations['evaluateFall'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/fire/detect': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    get?: never;
+    put?: never;
+    /**
+     * Phat hien lua/khoi va xac nhan chuoi frame toan camera
+     * @description US-18. Stateful per (cameraSlug, sourceSessionId); image is the full camera frame at frameTimestamp, even without a person. New producers send frameId/sourceSessionId. Each unique, ordered, fresh frame counts once, regardless of bounding-box count.
+     *
+     *     A qualifying frame has at least one fire/smoke detection with confidence >= thresholdUsed (default T_fire=0.50). Confirm at >= requiredFrames (default 3) consecutive qualifying frames whose first-to-last interval is <= windowSeconds (default 5), with no adjacent gap > maxFrameGapSeconds (default 1). Mixed fire/smoke labels qualify. Confirmation happens on the third frame; there is no mandatory five-second wait.
+     *
+     *     Negative/below-threshold frames and technical errors reset unconfirmed evidence; a gap/out-of-window starts a new eligible suffix. Duplicate, out-of-order and stale frames do not advance the counter or create new confirmation. Silence never confirms. Confirmed episode evidence is frozen for replay. The orchestrator persists one active episode per camera across source sessions and restarts, clearing only after 10 seconds of valid continuous negative observations; resolving an event does not clear it.
+     *
+     *     Episode UUIDv5 uses URL namespace 6ba7b811-9dad-11d1-80b4-00c04fd430c8 and compact UTF-8 JSON [cameraSlug,sourceSessionId,firstQualifiedAt], timestamp canonical UTC milliseconds. incidentConfidence is the minimum of each qualifying frame's maximum qualifying score (fire-temporal-min-v1), not the latest frame maximum. This service does not persist events or send notifications.
+     */
+    post: operations['detectFire'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        /** @description Toa do chuan hoa 0..1. */
-        BoundingBox: {
-            x: number;
-            y: number;
-            width: number;
-            height: number;
-        };
-        InferenceError: {
-            /** @enum {string} */
-            code: "NO_FACE_DETECTED" | "MULTIPLE_FACES" | "IMAGE_DECODE_FAILED" | "MODEL_NOT_LOADED" | "PROVIDER_UNAVAILABLE" | "TIMEOUT" | "COLLECTION_NOT_READY" | "COLLECTION_VERSION_CONFLICT" | "INVALID_FACE_SELECTION";
-            message: string;
-        } | null;
-        EmbedResponse: {
-            /** @enum {string} */
-            provider: "local" | "rekognition";
-            selectedFaceIndex: number | null;
-            /** @description float32 array da pack, base64. Null khi co loi. */
-            embeddingBase64: string | null;
-            embeddingDim: number | null;
-            /** @description Co nhieu phan tu khi anh chua nhieu khuon mat (US-09). */
-            faces: components["schemas"]["BoundingBox"][];
-            modelVersion: string;
-            error: components["schemas"]["InferenceError"];
-        };
-        /** @description Technical error has null personStatus and score. No-face/poor quality is UNDETERMINED with error=null. Loaded empty collection is UNKNOWN with similarity=null and labelConfidence=1 under empty-collection-v1; collection unavailable is a technical error. */
-        MatchResponse: {
-            /** Format: uuid */
-            requestId: string;
-            collectionVersion: number;
-            labelConfidence: number | null;
-            confidencePolicyVersion: string;
-            qualityReason: string | null;
-            /** @enum {string|null} */
-            personStatus: "KNOWN" | "UNKNOWN" | "UNDETERMINED" | null;
-            /** Format: uuid */
-            matchedKnownFaceId?: string | null;
-            matchedPersonName?: string | null;
-            /** @description Do tuong dong cosine voi ban ghi khop nhat. */
-            similarity: number | null;
-            /** @description Nguong matching thuc te cua request, hoac FACE_MATCH_THRESHOLD khi khong truyen threshold. */
-            thresholdUsed?: number;
-            boundingBox?: components["schemas"]["BoundingBox"] | null;
-            modelVersion: string;
-            /** @enum {string} */
-            provider?: "local" | "rekognition";
-            /** @description FR-DET-M1-06 — true khi Rekognition loi va da tu chuyen ve model local. */
-            fellBackToLocal?: boolean;
-            /** Format: date-time */
-            processedAt: string;
-            error: components["schemas"]["InferenceError"];
-        };
-        /**
-         * @description US-16/US-17. Existing required fields remain unchanged; new fields are
-         *     optional for compatibility, but the new producer/implementation must
-         *     provide complete identity/evidence before proposing an incident.
-         *     No-pose observations are not technical errors and cannot confirm a fall.
-         *     Geometry is measured on the full image, after undoing ROI transforms.
-         */
-        FallResponse: {
-            trackId: string;
-            cameraSlug?: string;
-            sourceSessionId?: string;
-            frameId?: string | null;
-            /**
-             * Format: date-time
-             * @description UTC capture timestamp, equal to request frameTimestamp.
-             */
-            observedAt?: string;
-            /** @enum {string} */
-            state: "MONITORING" | "CANDIDATE" | "CONFIRMED" | "CANCELLED";
-            poseAvailable?: boolean;
-            /** @description Observation/state reason, e.g. NORMAL_POSTURE, HISTORY_INSUFFICIENT, FALL_CANDIDATE, IMMOBILE_CONFIRMED, NO_POSE, LOW_VISIBILITY, AMBIGUOUS_POSE, REST_AREA, RECOVERED, MISSING_TIMEOUT, OUT_OF_ORDER, FRAME_GAP, STALE_FRAME, TRACK_RESET, CANDIDATE_TIMEOUT or TECHNICAL_ERROR. Missing pose does not introduce a new public state. */
-            reason?: string;
-            /** @description True for a cached response to an already processed frame; does not advance observation clocks. */
-            isReplay?: boolean;
-            /**
-             * Format: uuid
-             * @description Stable UUIDv5, null before a candidate. Namespace UUID is 6ba7b811-9dad-11d1-80b4-00c04fd430c8 (URL); name is the compact UTF-8 JSON array [cameraSlug, sourceSessionId, trackId, candidateStartedAt], with timestamp canonicalized to UTC YYYY-MM-DDTHH:mm:ss.SSSZ. Retry retains identity; a new fall after observed recovery uses a new candidate timestamp.
-             */
-            episodeId?: string | null;
-            /** Format: date-time */
-            candidateStartedAt?: string | null;
-            /**
-             * Format: date-time
-             * @description Capture time of the valid frame first confirming this episode. Null before confirmation; retained on replay. This becomes the separate FALL incident detectedAt, not the source track's start time.
-             */
-            confirmedAt?: string | null;
-            /** @description fall-rule-evidence-v1 returns 1 only for CONFIRMED with complete rule evidence, otherwise null. Evidence completeness score, not a calibrated probability, Frigate person score or landmark visibility. */
-            confidence?: number | null;
-            /** @example fall-rule-evidence-v1 */
-            confidencePolicyVersion?: string;
-            /** @description Degrees to horizontal from shoulder/hip midpoints in full-image pixels. atan2(abs(dy),abs(dx)); strictly below configured 30 degrees is horizontal. Null without valid geometry. */
-            torsoAngleDeg?: number | null;
-            /** @description Person bounding-box height/width in full-image pixels; diagnostic in v1, not an extra confirmation gate. */
-            aspectRatio?: number | null;
-            /** @description 1 minus torso-center y normalized by full-image height. Torso center is the mean of shoulder and hip midpoints; 2D proxy, not height in meters. */
-            centerHeight?: number | null;
-            /** @description Current torso-center y minus median y of the 10 preceding valid poses, divided by their median bbox height in pixels. Positive means downward motion. Default candidate gate >=0.20; baseline frozen during candidate tracking. */
-            centerDropRatio?: number | null;
-            /** @description Median displacement of quality-matched full-image landmark pairs divided by frozen baseline bbox height and frame delta seconds, in body-heights/second. Default immobile gate <0.05; require at least 6 pairs including shoulders/hips. Missing/invalid frame gaps return null and reset continuity. */
-            motionScore?: number | null;
-            /** @description Continuously observed abnormal and immobile interval; resets on movement, missing pose or invalid gap. Confirmation requires strictly greater than thresholdSeconds, never wall-clock time through a blind interval. */
-            immobileSeconds?: number;
-            /** @default 15 */
-            thresholdSeconds: number;
-            /** @description Seconds since the last valid pose, including transport silence. Candidate identity is cancelled at the configured 5-second grace limit; no confirmation is triggered by the cleanup timer. */
-            missingPoseSeconds?: number;
-            /** @description Number of MediaPipe's 33 landmarks passing the configured quality gate; mandatory shoulder/hip geometry is validated independently. */
-            keypointsDetected?: number;
-            /** @description Person box normalized to the full image, never crop coordinates. Null when no box can be established. */
-            boundingBox?: components["schemas"]["BoundingBox"] | null;
-            modelVersion: string;
-            /** Format: date-time */
-            processedAt: string;
-            error?: components["schemas"]["FallInferenceError"];
-        };
-        /** @description M2a-specific technical error returned with HTTP 200; missing/occluded/low-visibility pose instead uses poseAvailable=false, reason and error=null. Does not change face/fire InferenceError. */
-        FallInferenceError: {
-            /** @enum {string} */
-            code: "IMAGE_DECODE_FAILED" | "MODEL_NOT_LOADED" | "PROVIDER_UNAVAILABLE" | "TIMEOUT" | "POSE_INFERENCE_FAILED";
-            message: string;
-        } | null;
-        FireResponse: {
-            /** @description True only with a valid qualifying sequence; replay retains the frozen confirmation evidence. */
-            confirmed: boolean;
-            consecutiveFrames?: number;
-            /** @default 3 */
-            requiredFrames: number;
-            detections: components["schemas"]["FireDetection"][];
-            /** @description Current-frame maximum; null without detections or on technical error. */
-            maxConfidence?: number | null;
-            modelVersion: string;
-            /** Format: date-time */
-            processedAt: string;
-            cameraSlug?: string;
-            sourceSessionId?: string;
-            frameId?: string;
-            /** Format: date-time */
-            observedAt?: string;
-            isReplay?: boolean;
-            /** Format: uuid */
-            episodeId?: string | null;
-            /** Format: date-time */
-            firstQualifiedAt?: string | null;
-            /** Format: date-time */
-            confirmedAt?: string | null;
-            /** @default 5 */
-            windowSeconds: number;
-            /** @default 1 */
-            maxFrameGapSeconds: number;
-            thresholdUsed?: number;
-            qualifyingFrameIds?: string[];
-            qualifyingFrameTimestamps?: string[];
-            incidentConfidence?: number | null;
-            /** @enum {string} */
-            confidencePolicyVersion?: "fire-temporal-min-v1";
-            /** @enum {string} */
-            reason?: "NEGATIVE" | "INSUFFICIENT_FRAMES" | "CONFIRMED" | "REPLAY" | "BELOW_THRESHOLD" | "FRAME_GAP" | "WINDOW_EXPIRED" | "STALE_FRAME" | "OUT_OF_ORDER" | "INFERENCE_ERROR" | "ACTIVE_EPISODE";
-            error?: components["schemas"]["FireInferenceError"];
-        };
-        FireDetection: {
-            /** @enum {string} */
-            label: "fire" | "smoke";
-            confidence: number;
-            boundingBox: components["schemas"]["BoundingBox"];
-        };
-        FireInferenceError: {
-            /** @enum {string} */
-            code: "IMAGE_DECODE_FAILED" | "MODEL_NOT_LOADED" | "PROVIDER_UNAVAILABLE" | "TIMEOUT" | "FIRE_INFERENCE_FAILED";
-            message: string;
-        } | null;
+  schemas: {
+    /** @description Toa do chuan hoa 0..1. */
+    BoundingBox: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    InferenceError: {
+      /** @enum {string} */
+      code:
+        | 'NO_FACE_DETECTED'
+        | 'MULTIPLE_FACES'
+        | 'IMAGE_DECODE_FAILED'
+        | 'MODEL_NOT_LOADED'
+        | 'PROVIDER_UNAVAILABLE'
+        | 'TIMEOUT'
+        | 'COLLECTION_NOT_READY'
+        | 'COLLECTION_VERSION_CONFLICT'
+        | 'INVALID_FACE_SELECTION';
+      message: string;
+    } | null;
+    EmbedResponse: {
+      /** @enum {string} */
+      provider: 'local' | 'rekognition';
+      selectedFaceIndex: number | null;
+      /** @description float32 array da pack, base64. Null khi co loi. */
+      embeddingBase64: string | null;
+      embeddingDim: number | null;
+      /** @description Co nhieu phan tu khi anh chua nhieu khuon mat (US-09). */
+      faces: components['schemas']['BoundingBox'][];
+      modelVersion: string;
+      error: components['schemas']['InferenceError'];
+    };
+    /** @description Technical error has null personStatus and score. No-face/poor quality is UNDETERMINED with error=null. Loaded empty collection is UNKNOWN with similarity=null and labelConfidence=1 under empty-collection-v1; collection unavailable is a technical error. */
+    MatchResponse: {
+      /** Format: uuid */
+      requestId: string;
+      collectionVersion: number;
+      labelConfidence: number | null;
+      confidencePolicyVersion: string;
+      qualityReason: string | null;
+      /** @enum {string|null} */
+      personStatus: 'KNOWN' | 'UNKNOWN' | 'UNDETERMINED' | null;
+      /** Format: uuid */
+      matchedKnownFaceId?: string | null;
+      matchedPersonName?: string | null;
+      /** @description Do tuong dong cosine voi ban ghi khop nhat. */
+      similarity: number | null;
+      /** @description Nguong matching thuc te cua request, hoac FACE_MATCH_THRESHOLD khi khong truyen threshold. */
+      thresholdUsed?: number;
+      boundingBox?: components['schemas']['BoundingBox'] | null;
+      modelVersion: string;
+      /** @enum {string} */
+      provider?: 'local' | 'rekognition';
+      /** @description FR-DET-M1-06 — true khi Rekognition loi va da tu chuyen ve model local. */
+      fellBackToLocal?: boolean;
+      /** Format: date-time */
+      processedAt: string;
+      error: components['schemas']['InferenceError'];
+    };
+    /**
+     * @description US-16/US-17. Existing required fields remain unchanged; new fields are
+     *     optional for compatibility, but the new producer/implementation must
+     *     provide complete identity/evidence before proposing an incident.
+     *     No-pose observations are not technical errors and cannot confirm a fall.
+     *     Geometry is measured on the full image, after undoing ROI transforms.
+     */
+    FallResponse: {
+      trackId: string;
+      cameraSlug?: string;
+      sourceSessionId?: string;
+      frameId?: string | null;
+      /**
+       * Format: date-time
+       * @description UTC capture timestamp, equal to request frameTimestamp.
+       */
+      observedAt?: string;
+      /** @enum {string} */
+      state: 'MONITORING' | 'CANDIDATE' | 'CONFIRMED' | 'CANCELLED';
+      poseAvailable?: boolean;
+      /** @description Observation/state reason, e.g. NORMAL_POSTURE, HISTORY_INSUFFICIENT, FALL_CANDIDATE, IMMOBILE_CONFIRMED, NO_POSE, LOW_VISIBILITY, AMBIGUOUS_POSE, REST_AREA, RECOVERED, MISSING_TIMEOUT, OUT_OF_ORDER, FRAME_GAP, STALE_FRAME, TRACK_RESET, CANDIDATE_TIMEOUT or TECHNICAL_ERROR. Missing pose does not introduce a new public state. */
+      reason?: string;
+      /** @description True for a cached response to an already processed frame; does not advance observation clocks. */
+      isReplay?: boolean;
+      /**
+       * Format: uuid
+       * @description Stable UUIDv5, null before a candidate. Namespace UUID is 6ba7b811-9dad-11d1-80b4-00c04fd430c8 (URL); name is the compact UTF-8 JSON array [cameraSlug, sourceSessionId, trackId, candidateStartedAt], with timestamp canonicalized to UTC YYYY-MM-DDTHH:mm:ss.SSSZ. Retry retains identity; a new fall after observed recovery uses a new candidate timestamp.
+       */
+      episodeId?: string | null;
+      /** Format: date-time */
+      candidateStartedAt?: string | null;
+      /**
+       * Format: date-time
+       * @description Capture time of the valid frame first confirming this episode. Null before confirmation; retained on replay. This becomes the separate FALL incident detectedAt, not the source track's start time.
+       */
+      confirmedAt?: string | null;
+      /** @description fall-rule-evidence-v1 returns 1 only for CONFIRMED with complete rule evidence, otherwise null. Evidence completeness score, not a calibrated probability, Frigate person score or landmark visibility. */
+      confidence?: number | null;
+      /** @example fall-rule-evidence-v1 */
+      confidencePolicyVersion?: string;
+      /** @description Degrees to horizontal from shoulder/hip midpoints in full-image pixels. atan2(abs(dy),abs(dx)); strictly below configured 30 degrees is horizontal. Null without valid geometry. */
+      torsoAngleDeg?: number | null;
+      /** @description Person bounding-box height/width in full-image pixels; diagnostic in v1, not an extra confirmation gate. */
+      aspectRatio?: number | null;
+      /** @description 1 minus torso-center y normalized by full-image height. Torso center is the mean of shoulder and hip midpoints; 2D proxy, not height in meters. */
+      centerHeight?: number | null;
+      /** @description Current torso-center y minus median y of the 10 preceding valid poses, divided by their median bbox height in pixels. Positive means downward motion. Default candidate gate >=0.20; baseline frozen during candidate tracking. */
+      centerDropRatio?: number | null;
+      /** @description Median displacement of quality-matched full-image landmark pairs divided by frozen baseline bbox height and frame delta seconds, in body-heights/second. Default immobile gate <0.05; require at least 6 pairs including shoulders/hips. Missing/invalid frame gaps return null and reset continuity. */
+      motionScore?: number | null;
+      /** @description Continuously observed abnormal and immobile interval; resets on movement, missing pose or invalid gap. Confirmation requires strictly greater than thresholdSeconds, never wall-clock time through a blind interval. */
+      immobileSeconds?: number;
+      /** @default 15 */
+      thresholdSeconds: number;
+      /** @description Seconds since the last valid pose, including transport silence. Candidate identity is cancelled at the configured 5-second grace limit; no confirmation is triggered by the cleanup timer. */
+      missingPoseSeconds?: number;
+      /** @description Number of MediaPipe's 33 landmarks passing the configured quality gate; mandatory shoulder/hip geometry is validated independently. */
+      keypointsDetected?: number;
+      /** @description Person box normalized to the full image, never crop coordinates. Null when no box can be established. */
+      boundingBox?: components['schemas']['BoundingBox'] | null;
+      modelVersion: string;
+      /** Format: date-time */
+      processedAt: string;
+      error?: components['schemas']['FallInferenceError'];
+    };
+    /** @description M2a-specific technical error returned with HTTP 200; missing/occluded/low-visibility pose instead uses poseAvailable=false, reason and error=null. Does not change face/fire InferenceError. */
+    FallInferenceError: {
+      /** @enum {string} */
+      code:
+        | 'IMAGE_DECODE_FAILED'
+        | 'MODEL_NOT_LOADED'
+        | 'PROVIDER_UNAVAILABLE'
+        | 'TIMEOUT'
+        | 'POSE_INFERENCE_FAILED';
+      message: string;
+    } | null;
+    FireResponse: {
+      /** @description True only with a valid qualifying sequence; replay retains the frozen confirmation evidence. */
+      confirmed: boolean;
+      consecutiveFrames?: number;
+      /** @default 3 */
+      requiredFrames: number;
+      detections: components['schemas']['FireDetection'][];
+      /** @description Current-frame maximum; null without detections or on technical error. */
+      maxConfidence?: number | null;
+      modelVersion: string;
+      /** Format: date-time */
+      processedAt: string;
+      cameraSlug?: string;
+      sourceSessionId?: string;
+      frameId?: string;
+      /** Format: date-time */
+      observedAt?: string;
+      isReplay?: boolean;
+      /** Format: uuid */
+      episodeId?: string | null;
+      /** Format: date-time */
+      firstQualifiedAt?: string | null;
+      /** Format: date-time */
+      confirmedAt?: string | null;
+      /** @default 5 */
+      windowSeconds: number;
+      /** @default 1 */
+      maxFrameGapSeconds: number;
+      thresholdUsed?: number;
+      qualifyingFrameIds?: string[];
+      qualifyingFrameTimestamps?: string[];
+      incidentConfidence?: number | null;
+      /** @enum {string} */
+      confidencePolicyVersion?: 'fire-temporal-min-v1';
+      /** @enum {string} */
+      reason?:
+        | 'NEGATIVE'
+        | 'INSUFFICIENT_FRAMES'
+        | 'CONFIRMED'
+        | 'REPLAY'
+        | 'BELOW_THRESHOLD'
+        | 'FRAME_GAP'
+        | 'WINDOW_EXPIRED'
+        | 'STALE_FRAME'
+        | 'OUT_OF_ORDER'
+        | 'INFERENCE_ERROR'
+        | 'ACTIVE_EPISODE';
+      error?: components['schemas']['FireInferenceError'];
+    };
+    FireDetection: {
+      /** @enum {string} */
+      label: 'fire' | 'smoke';
+      confidence: number;
+      boundingBox: components['schemas']['BoundingBox'];
+    };
+    FireInferenceError: {
+      /** @enum {string} */
+      code:
+        | 'IMAGE_DECODE_FAILED'
+        | 'MODEL_NOT_LOADED'
+        | 'PROVIDER_UNAVAILABLE'
+        | 'TIMEOUT'
+        | 'FIRE_INFERENCE_FAILED';
+      message: string;
+    } | null;
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    aiHealth: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Trang thai service */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @enum {string} */
-                        status: "ok" | "degraded";
-                        service: string;
-                        version: string;
-                        /**
-                         * @description Quan sat feature flag US-24 tu ben ngoai.
-                         * @enum {string}
-                         */
-                        faceProvider: "local" | "rekognition";
-                        uptimeSeconds?: number;
-                    };
-                };
-            };
-            /** @description Service dang khoi dong, model chua nap xong */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  aiHealth: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    embedFace: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Trang thai service */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /** Format: binary */
-                    image: string;
-                    /** @description Index in deterministic detected-face order; reject invalid selection. */
-                    selectedFaceIndex?: number;
-                };
-            };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            status: 'ok' | 'degraded';
+            service: string;
+            version: string;
+            /**
+             * @description Quan sat feature flag US-24 tu ben ngoai.
+             * @enum {string}
+             */
+            faceProvider: 'local' | 'rekognition';
+            uptimeSeconds?: number;
+          };
         };
-        responses: {
-            /** @description Ket qua trich xuat */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmbedResponse"];
-                };
-            };
-            /** @description Thieu hoac sai X-Internal-Token */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Thieu truong bat buoc trong form-data */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+      };
+      /** @description Service dang khoi dong, model chua nap xong */
+      503: {
+        headers: {
+          [name: string]: unknown;
         };
+        content?: never;
+      };
     };
-    matchFace: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /** Format: binary */
-                    image: string;
-                    /** Format: uuid */
-                    eventId: string;
-                    /** Format: uuid */
-                    requestId: string;
-                    /**
-                     * Format: uuid
-                     * @description Derived by orchestrator from camera owner; never browser supplied.
-                     */
-                    ownerScopeId: string;
-                    collectionVersion: number;
-                    /**
-                     * @description Ghi de nguong mac dinh; de trong thi dung cau hinh service.
-                     * @default 0.6
-                     */
-                    threshold?: number;
-                };
-            };
-        };
-        responses: {
-            /** @description Ket qua so khop */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MatchResponse"];
-                };
-            };
-            /** @description Thieu hoac sai X-Internal-Token */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Thieu truong bat buoc trong form-data */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  embedFace: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    syncFaceCollection: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          image: string;
+          /** @description Index in deterministic detected-face order; reject invalid selection. */
+          selectedFaceIndex?: number;
         };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** Format: uuid */
-                    ownerScopeId: string;
-                    version: number;
-                    modelVersion: string;
-                    embeddingDim: number;
-                    faces: {
-                        /** Format: uuid */
-                        knownFaceId: string;
-                        personName: string;
-                        embeddingBase64?: string | null;
-                        rekognitionFaceId?: string | null;
-                    }[];
-                };
-            };
-        };
-        responses: {
-            /** @description Da dong bo */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** Format: uuid */
-                        ownerScopeId?: string;
-                        version?: number;
-                        loaded?: number;
-                        /** @enum {string} */
-                        provider?: "local" | "rekognition";
-                    };
-                };
-            };
-            /** @description Thieu hoac sai X-Internal-Token */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description COLLECTION_VERSION_CONFLICT */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Danh sach faces sai dinh dang */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+      };
     };
-    evaluateFall: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      /** @description Ket qua trich xuat */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /**
-                     * Format: binary
-                     * @description Full-camera JPEG/PNG corresponding exactly to frameTimestamp. Default limits are 1048576 bytes and 2073600 decoded pixels; oversize input returns 413.
-                     */
-                    image: string;
-                    trackId: string;
-                    cameraSlug: string;
-                    /**
-                     * Format: date-time
-                     * @description UTC capture timestamp of this image, not request time. Must increase for new observations; default freshness limit 1 second and future tolerance 0.5 second.
-                     */
-                    frameTimestamp: string;
-                    /** @description Unique image identity within sourceSessionId. Optional for legacy callers; new producer always sends it. Duplicate identity cannot extend history, immobility or missing-pose grace. */
-                    frameId?: string;
-                    /**
-                     * @description Source generation, changed on source restart. Part of track identity; new producer always sends it.
-                     * @default legacy
-                     */
-                    sourceSessionId?: string;
-                    /**
-                     * @description JSON-encoded normalized BoundingBox on the full image, with positive width/height, finite numbers, x+width<=1 and y+height<=1. Crop with padding, then transform landmarks back to full-image coordinates. Without this field accept only one unambiguously identified person; ambiguity is missing pose.
-                     * @example {"x":0.15,"y":0.55,"width":0.5,"height":0.4}
-                     */
-                    personBoundingBox?: string;
-                    /** @description Camera zone-config snapshot version used to compute inRestArea. Optional for legacy callers; new producer always sends it. */
-                    zoneConfigVersion?: number;
-                    /**
-                     * @description FR-DET-M2-05. Derived by orchestrator, never by the browser. True suppresses confirmation and cancels any candidate; lookup/config errors must not be interpreted as false.
-                     * @default false
-                     */
-                    inRestArea?: boolean;
-                };
-            };
+        content: {
+          'application/json': components['schemas']['EmbedResponse'];
         };
-        responses: {
-            /** @description Trang thai theo doi hien tai */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FallResponse"];
-                };
-            };
-            /** @description Thieu hoac sai X-Internal-Token */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Encoded image or decoded pixel count exceeds the configured limit. */
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing/invalid form fields, timestamp or normalized personBoundingBox. Decode/inference failures are returned as 200 with error != null. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+      };
+      /** @description Thieu hoac sai X-Internal-Token */
+      401: {
+        headers: {
+          [name: string]: unknown;
         };
+        content?: never;
+      };
+      /** @description Thieu truong bat buoc trong form-data */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    detectFire: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /**
-                     * Format: binary
-                     * @description JPEG/PNG full frame captured at frameTimestamp; no person crop or repeated event snapshot.
-                     */
-                    image: string;
-                    cameraSlug: string;
-                    /**
-                     * Format: date-time
-                     * @description UTC capture time with timezone, not processing time; validated for freshness and ordering.
-                     */
-                    frameTimestamp: string;
-                    /** @description Unique within sourceSessionId. New producers always send it; legacy identity derives from capture timestamp. */
-                    frameId?: string;
-                    /**
-                     * @description Source generation; new producers always send it and change it on source restart.
-                     * @default legacy
-                     */
-                    sourceSessionId?: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Detection/evidence; technical inference failures have error != null and confirmed=false. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FireResponse"];
-                };
-            };
-            /** @description Thieu hoac sai X-Internal-Token */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Encoded bytes or decoded pixels exceed configured limits. */
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing/invalid fields or capture timestamp. Decode/inference failures return 200 with error != null. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  matchFace: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          image: string;
+          /** Format: uuid */
+          eventId: string;
+          /** Format: uuid */
+          requestId: string;
+          /**
+           * Format: uuid
+           * @description Derived by orchestrator from camera owner; never browser supplied.
+           */
+          ownerScopeId: string;
+          collectionVersion: number;
+          /**
+           * @description Ghi de nguong mac dinh; de trong thi dung cau hinh service.
+           * @default 0.6
+           */
+          threshold?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ket qua so khop */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MatchResponse'];
+        };
+      };
+      /** @description Thieu hoac sai X-Internal-Token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Thieu truong bat buoc trong form-data */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  syncFaceCollection: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: uuid */
+          ownerScopeId: string;
+          version: number;
+          modelVersion: string;
+          embeddingDim: number;
+          faces: {
+            /** Format: uuid */
+            knownFaceId: string;
+            personName: string;
+            embeddingBase64?: string | null;
+            rekognitionFaceId?: string | null;
+          }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Da dong bo */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** Format: uuid */
+            ownerScopeId?: string;
+            version?: number;
+            loaded?: number;
+            /** @enum {string} */
+            provider?: 'local' | 'rekognition';
+          };
+        };
+      };
+      /** @description Thieu hoac sai X-Internal-Token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description COLLECTION_VERSION_CONFLICT */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Danh sach faces sai dinh dang */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  evaluateFall: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /**
+           * Format: binary
+           * @description Full-camera JPEG/PNG corresponding exactly to frameTimestamp. Default limits are 1048576 bytes and 2073600 decoded pixels; oversize input returns 413.
+           */
+          image: string;
+          trackId: string;
+          cameraSlug: string;
+          /**
+           * Format: date-time
+           * @description UTC capture timestamp of this image, not request time. Must increase for new observations; default freshness limit 1 second and future tolerance 0.5 second.
+           */
+          frameTimestamp: string;
+          /** @description Unique image identity within sourceSessionId. Optional for legacy callers; new producer always sends it. Duplicate identity cannot extend history, immobility or missing-pose grace. */
+          frameId?: string;
+          /**
+           * @description Source generation, changed on source restart. Part of track identity; new producer always sends it.
+           * @default legacy
+           */
+          sourceSessionId?: string;
+          /**
+           * @description JSON-encoded normalized BoundingBox on the full image, with positive width/height, finite numbers, x+width<=1 and y+height<=1. Crop with padding, then transform landmarks back to full-image coordinates. Without this field accept only one unambiguously identified person; ambiguity is missing pose.
+           * @example {"x":0.15,"y":0.55,"width":0.5,"height":0.4}
+           */
+          personBoundingBox?: string;
+          /** @description Camera zone-config snapshot version used to compute inRestArea. Optional for legacy callers; new producer always sends it. */
+          zoneConfigVersion?: number;
+          /**
+           * @description FR-DET-M2-05. Derived by orchestrator, never by the browser. True suppresses confirmation and cancels any candidate; lookup/config errors must not be interpreted as false.
+           * @default false
+           */
+          inRestArea?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Trang thai theo doi hien tai */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FallResponse'];
+        };
+      };
+      /** @description Thieu hoac sai X-Internal-Token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Encoded image or decoded pixel count exceeds the configured limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing/invalid form fields, timestamp or normalized personBoundingBox. Decode/inference failures are returned as 200 with error != null. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  detectFire: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /**
+           * Format: binary
+           * @description JPEG/PNG full frame captured at frameTimestamp; no person crop or repeated event snapshot.
+           */
+          image: string;
+          cameraSlug: string;
+          /**
+           * Format: date-time
+           * @description UTC capture time with timezone, not processing time; validated for freshness and ordering.
+           */
+          frameTimestamp: string;
+          /** @description Unique within sourceSessionId. New producers always send it; legacy identity derives from capture timestamp. */
+          frameId?: string;
+          /**
+           * @description Source generation; new producers always send it and change it on source restart.
+           * @default legacy
+           */
+          sourceSessionId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Detection/evidence; technical inference failures have error != null and confirmed=false. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FireResponse'];
+        };
+      };
+      /** @description Thieu hoac sai X-Internal-Token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Encoded bytes or decoded pixels exceed configured limits. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing/invalid fields or capture timestamp. Decode/inference failures return 200 with error != null. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
 }
