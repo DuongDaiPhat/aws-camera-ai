@@ -6,16 +6,16 @@ Ngày đối chiếu code và tài liệu AWS: **09/10/2026**. Region ví dụ: 
 
 Bạn nên học theo thứ tự IAM → Lambda → S3/SQS → event-driven reliability → triển khai bằng SAM → monitoring/budget. Với CameraAI, hãy làm được một sự kiện từ camera đến cảnh báo trước khi chuyển toàn bộ backend.
 
-| Thứ tự | Kiến thức | Bài thực hành gắn với project | Điều kiện hoàn thành |
-| --- | --- | --- | --- |
-| 1 | AWS account, Region, IAM role/policy, MFA, CLI profile, temporary credentials | Tạo môi trường dev, budget và role chỉ đọc/ghi một prefix S3 | Không dùng root hoặc commit access key |
-| 2 | Lambda handler, event/context, SDK, timeout, memory, cold start, execution role | Handler nhận `eventId`, validate và ghi structured log | Payload sai được xử lý có chủ đích; có test |
-| 3 | S3 object/key, presigned URL, lifecycle; SQS visibility, DLQ | Upload crop, đưa pointer S3 vào queue, Lambda đọc ảnh | Không đưa video/base64 vào message |
-| 4 | At-least-once, idempotency, ordering, retry/backoff, inbox/outbox, transaction | Gửi cùng một event nhiều lần, giả lập lỗi sau DB commit | Một kết quả nghiệp vụ, không mất công việc |
-| 5 | EventBridge event bus/rule, Step Functions Standard, Scheduler | Route `ai.result.ready`; chờ deadline rồi đọc lại trạng thái | Event đã RESOLVED không bị escalated |
-| 6 | API Gateway, Cognito JWT, webhook security | Callback xác nhận của dashboard/Telegram | Kiểm tra cả identity lẫn quyền sở hữu event |
-| 7 | SAM/CloudFormation, change set, stack outputs, rollback, CI/CD OIDC | Tạo stack dev tái lập được | Deploy từ source, không phụ thuộc thao tác Console chưa ghi lại |
-| 8 | CloudWatch metrics/alarms, Cost Explorer, Budgets | Theo dõi queue age, lỗi và chi phí demo | Có runbook xử lý lỗi và dừng phát sinh chi phí |
+| Thứ tự | Kiến thức                                                                       | Bài thực hành gắn với project                                | Điều kiện hoàn thành                                            |
+| ------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------- |
+| 1      | AWS account, Region, IAM role/policy, MFA, CLI profile, temporary credentials   | Tạo môi trường dev, budget và role chỉ đọc/ghi một prefix S3 | Không dùng root hoặc commit access key                          |
+| 2      | Lambda handler, event/context, SDK, timeout, memory, cold start, execution role | Handler nhận `eventId`, validate và ghi structured log       | Payload sai được xử lý có chủ đích; có test                     |
+| 3      | S3 object/key, presigned URL, lifecycle; SQS visibility, DLQ                    | Upload crop, đưa pointer S3 vào queue, Lambda đọc ảnh        | Không đưa video/base64 vào message                              |
+| 4      | At-least-once, idempotency, ordering, retry/backoff, inbox/outbox, transaction  | Gửi cùng một event nhiều lần, giả lập lỗi sau DB commit      | Một kết quả nghiệp vụ, không mất công việc                      |
+| 5      | EventBridge event bus/rule, Step Functions Standard, Scheduler                  | Route `ai.result.ready`; chờ deadline rồi đọc lại trạng thái | Event đã RESOLVED không bị escalated                            |
+| 6      | API Gateway, Cognito JWT, webhook security                                      | Callback xác nhận của dashboard/Telegram                     | Kiểm tra cả identity lẫn quyền sở hữu event                     |
+| 7      | SAM/CloudFormation, change set, stack outputs, rollback, CI/CD OIDC             | Tạo stack dev tái lập được                                   | Deploy từ source, không phụ thuộc thao tác Console chưa ghi lại |
+| 8      | CloudWatch metrics/alarms, Cost Explorer, Budgets                               | Theo dõi queue age, lỗi và chi phí demo                      | Có runbook xử lý lỗi và dừng phát sinh chi phí                  |
 
 Gợi ý 10 buổi học: buổi 1–2 IAM/budget; 3 Lambda; 4 S3; 5 SQS/DLQ; 6 idempotency/outbox; 7 SAM; 8 workflow; 9 API/auth; 10 kiểm thử E2E và tổng kết chi phí. Đây là lịch gợi ý, không phải cam kết thời gian.
 
@@ -23,17 +23,17 @@ Gợi ý 10 buổi học: buổi 1–2 IAM/budget; 3 Lambda; 4 S3; 5 SQS/DLQ; 6 
 
 Không suy ra một provider đã hoạt động chỉ vì có biến môi trường hoặc được nhắc trong README.
 
-| Thành phần | Bằng chứng | Trạng thái và việc còn thiếu |
-| --- | --- | --- |
-| Edge/video | `infra/frigate`, `infra/mediamtx`, `infra/mosquitto`, `docker-compose.yml` | Frigate, MediaMTX, FFmpeg, Mosquitto chạy dạng tiến trình/container |
-| Backend | `apps/orchestrator/src` | NestJS, MQTT subscriber, PostgreSQL, BullMQ/Redis, worker và REST API đã có code |
-| S3 | `storage/s3-storage.service.ts`, `storage/storage.module.ts` | Có upload/download/presign và switch `STORAGE_PROVIDER`; chưa chứng minh bucket/IAM đã tạo |
-| Nhận diện khuôn mặt | `services/ai-service/app/services/face_matcher.py`, `face_embedder.py` | Luồng local dùng YuNet/SFace; cấu hình `rekognition` không chứng minh adapter AWS hoàn chỉnh |
-| Auth | `auth/auth.module.ts` | JWT local đang được wire; `AUTH_PROVIDER=cognito` chưa đủ để thay toàn bộ auth |
-| Notification | `notifications/notifications.module.ts`, thư mục `notifications/telegram` | Telegram có implementation; enum/channel SNS/Connect không chứng minh đã gọi AWS |
-| Inbox/outbox | `db/migrations/0010_event_ai_result_receipts.sql`, `ai-results/ai-result-outbox.service.ts` | Có nền tảng durable receipt/outbox để tái sử dụng |
-| Lambda và hạ tầng event-driven | Chưa thấy SAM/CDK/Terraform cho luồng này trong cây file đã kiểm tra | Cần thêm handler, adapter, event contract và infrastructure-as-code |
-| Fall/fire/wellness | `docs/sprint-3`, migrations 0013–0015 và config AI | Có thiết kế/schema; phải kiểm tra implementation và acceptance trước khi coi là hoàn tất |
+| Thành phần                     | Bằng chứng                                                                                  | Trạng thái và việc còn thiếu                                                                 |
+| ------------------------------ | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Edge/video                     | `infra/frigate`, `infra/mediamtx`, `infra/mosquitto`, `docker-compose.yml`                  | Frigate, MediaMTX, FFmpeg, Mosquitto chạy dạng tiến trình/container                          |
+| Backend                        | `apps/orchestrator/src`                                                                     | NestJS, MQTT subscriber, PostgreSQL, BullMQ/Redis, worker và REST API đã có code             |
+| S3                             | `storage/s3-storage.service.ts`, `storage/storage.module.ts`                                | Có upload/download/presign và switch `STORAGE_PROVIDER`; chưa chứng minh bucket/IAM đã tạo   |
+| Nhận diện khuôn mặt            | `services/ai-service/app/services/face_matcher.py`, `face_embedder.py`                      | Luồng local dùng YuNet/SFace; cấu hình `rekognition` không chứng minh adapter AWS hoàn chỉnh |
+| Auth                           | `auth/auth.module.ts`                                                                       | JWT local đang được wire; `AUTH_PROVIDER=cognito` chưa đủ để thay toàn bộ auth               |
+| Notification                   | `notifications/notifications.module.ts`, thư mục `notifications/telegram`                   | Telegram có implementation; enum/channel SNS/Connect không chứng minh đã gọi AWS             |
+| Inbox/outbox                   | `db/migrations/0010_event_ai_result_receipts.sql`, `ai-results/ai-result-outbox.service.ts` | Có nền tảng durable receipt/outbox để tái sử dụng                                            |
+| Lambda và hạ tầng event-driven | Chưa thấy SAM/CDK/Terraform cho luồng này trong cây file đã kiểm tra                        | Cần thêm handler, adapter, event contract và infrastructure-as-code                          |
+| Fall/fire/wellness             | `docs/sprint-3`, migrations 0013–0015 và config AI                                          | Có thiết kế/schema; phải kiểm tra implementation và acceptance trước khi coi là hoàn tất     |
 
 Tài liệu nền: [C4](architecture/C4_ARCHITECTURE.md), [data flow](architecture/DATA_FLOW.md), [API](api/API_GUIDE.md), [environment](../.env.example). Hướng dẫn này bổ sung một phương án migration; chưa thay kiến trúc đang chạy.
 
@@ -306,23 +306,23 @@ CI/CD: lint/build/tests → SAM validate → deploy dev → smoke test → revie
 
 ## 7. Ma trận kiểm thử và tiêu chí nghiệm thu
 
-| Tầng/tình huống | Cách thực hiện | Kết quả cần thấy |
-| --- | --- | --- |
-| Unit/contract | Fixture Frigate → mapper → domain envelope → AI result DTO | Schema/enum đúng; thiếu field được từ chối |
-| Idempotency | Gửi cùng message 10 lần, restart worker giữa chừng | Một incident; receipt/outbox có unique semantics |
-| Ordering | Revision 2 đến trước revision 1 | Revision cũ không ghi đè kết quả mới |
-| DB/publish crash | Dừng process sau commit, trước hoặc sau publish | Relay phục hồi; consumer chịu duplicate |
-| Partial batch | Một record lỗi trong batch nhiều record | Record thành công không bị chạy lại do lỗi kia |
-| Poison message | Cố định lỗi schema/provider | DLQ có reason/correlation, không vòng retry vô hạn |
-| Media race | Event đến khi key không tồn tại hoặc upload lỗi | Retry có giới hạn; không ghi kết quả face giả |
-| Face quality | known/unknown/no-face/multi-face/low-light | UNKNOWN khác UNDETERMINED; đo FAR/FRR |
-| Deadline race | Xác nhận ngay trước/sát/sau deadline | State machine theo policy; không gọi sau RESOLVED đã commit |
-| Camera/network | Mất MQTT/cloud rồi kết nối lại | Spool replay, dedup; heartbeat báo outage |
-| Security | User sai owner, token sai, certificate revoke | AccessDenied/401/403 đúng; không rò media |
-| Provider retry | Telegram 429, SNS/Connect throttle, timeout | Backoff/cooldown; không tạo storm |
-| Load | 1 camera rồi burst nhiều camera có mức trần | Queue age/connections nằm trong mục tiêu đã chọn |
-| Budget | Bật cap số face call/callout rồi vượt cap | Công việc tốn tiền bị chặn theo policy, alarm được nhận |
-| Recovery | Redrive DLQ và rollback alias | Không mất event; kết quả cũ vẫn đọc được |
+| Tầng/tình huống  | Cách thực hiện                                             | Kết quả cần thấy                                            |
+| ---------------- | ---------------------------------------------------------- | ----------------------------------------------------------- |
+| Unit/contract    | Fixture Frigate → mapper → domain envelope → AI result DTO | Schema/enum đúng; thiếu field được từ chối                  |
+| Idempotency      | Gửi cùng message 10 lần, restart worker giữa chừng         | Một incident; receipt/outbox có unique semantics            |
+| Ordering         | Revision 2 đến trước revision 1                            | Revision cũ không ghi đè kết quả mới                        |
+| DB/publish crash | Dừng process sau commit, trước hoặc sau publish            | Relay phục hồi; consumer chịu duplicate                     |
+| Partial batch    | Một record lỗi trong batch nhiều record                    | Record thành công không bị chạy lại do lỗi kia              |
+| Poison message   | Cố định lỗi schema/provider                                | DLQ có reason/correlation, không vòng retry vô hạn          |
+| Media race       | Event đến khi key không tồn tại hoặc upload lỗi            | Retry có giới hạn; không ghi kết quả face giả               |
+| Face quality     | known/unknown/no-face/multi-face/low-light                 | UNKNOWN khác UNDETERMINED; đo FAR/FRR                       |
+| Deadline race    | Xác nhận ngay trước/sát/sau deadline                       | State machine theo policy; không gọi sau RESOLVED đã commit |
+| Camera/network   | Mất MQTT/cloud rồi kết nối lại                             | Spool replay, dedup; heartbeat báo outage                   |
+| Security         | User sai owner, token sai, certificate revoke              | AccessDenied/401/403 đúng; không rò media                   |
+| Provider retry   | Telegram 429, SNS/Connect throttle, timeout                | Backoff/cooldown; không tạo storm                           |
+| Load             | 1 camera rồi burst nhiều camera có mức trần                | Queue age/connections nằm trong mục tiêu đã chọn            |
+| Budget           | Bật cap số face call/callout rồi vượt cap                  | Công việc tốn tiền bị chặn theo policy, alarm được nhận     |
+| Recovery         | Redrive DLQ và rollback alias                              | Không mất event; kết quả cũ vẫn đọc được                    |
 
 Các test sẵn có đáng tái sử dụng: `mqtt-consumer.service.spec.ts`, `mqtt-db.integration.spec.ts`, `face-recognition.worker.spec.ts`, `ai-results-db.integration.spec.ts`, `ai-result-outbox.service.spec.ts`, `escalation-deadline-worker.service.spec.ts`, `telegram.adapter.spec.ts`, `telegram-db.integration.spec.ts` trong `apps/orchestrator/test`.
 
@@ -334,15 +334,15 @@ Acceptance đề xuất: luồng một camera thật chạy end-to-end; duplicat
 
 Ví dụ giả định demo: 2 camera, tổng 1.000 event/ngày, tháng 30 ngày; 1 crop 200 KB/event, 10% event có clip 5 MB; giữ media 7 ngày; 2 invocation/event, 512 MB, 300 ms/invocation; 20 face đăng ký. **Đây là số giả định để nhập calculator, chưa phải giá tiền hoặc workload đo được.**
 
-| Hạng mục | Khối lượng ước tính |
-| --- | --- |
-| Events | 30.000/tháng, chưa gồm heartbeat/update/retry |
-| Lambda | 60.000 invocation; 9.000 GB-seconds |
-| Face search | Tối đa 30.000 nếu mỗi event search một lần; giảm theo track/dedup |
-| Media upload | Crop ~6 GB/tháng + clip ~15 GB/tháng |
-| Media lưu ổn định 7 ngày | ~4,9 GB trung bình khi phân bố đều, chưa versions/retained media |
-| Queue/bus requests | Tính từng hop, batch, polling, retry và fan-out, không chỉ đếm events |
-| Notification | Tính theo escalation ratio, số kênh, số người nhận, attempts và phút gọi |
+| Hạng mục                 | Khối lượng ước tính                                                      |
+| ------------------------ | ------------------------------------------------------------------------ |
+| Events                   | 30.000/tháng, chưa gồm heartbeat/update/retry                            |
+| Lambda                   | 60.000 invocation; 9.000 GB-seconds                                      |
+| Face search              | Tối đa 30.000 nếu mỗi event search một lần; giảm theo track/dedup        |
+| Media upload             | Crop ~6 GB/tháng + clip ~15 GB/tháng                                     |
+| Media lưu ổn định 7 ngày | ~4,9 GB trung bình khi phân bố đều, chưa versions/retained media         |
+| Queue/bus requests       | Tính từng hop, batch, polling, retry và fan-out, không chỉ đếm events    |
+| Notification             | Tính theo escalation ratio, số kênh, số người nhận, attempts và phút gọi |
 
 Tổng dự toán = Lambda + S3 + SQS + IoT + EventBridge/workflow + Rekognition + API/auth + notifications + logs/secrets + hosting/DB/network. Dữ liệu tải lên và tải xem nhiều lần có biểu phí khác nhau; nhập egress vào calculator.
 
@@ -369,15 +369,15 @@ Budgets không dừng dịch vụ ngay khi chạm ngưỡng. Budget Actions có 
 
 ## 9. Vận hành, rollback và dọn môi trường
 
-| Sự cố | Kiểm tra | Hành động |
-| --- | --- | --- |
-| Không có event | Heartbeat, bridge certificate, IoT rule, camera health | Phục hồi bridge, replay spool |
-| Queue tăng | Throttles, timeout, DB pool, downstream quota | Sửa bottleneck; tăng concurrency chỉ khi DB/provider chịu được |
-| DLQ có record | Error reason và correlationId | Sửa code/config, redrive dev có giới hạn |
-| Alert trùng | Ledger/outbox, message ID, crash window | Sửa idempotency; không chỉ tăng visibility |
-| Event không escalated | Deadline DB, execution ID, relay backlog | Reconcile missing workflow; xác minh rule snapshot |
-| Không gọi được Telegram | VPC egress, secret, 429 | Phục hồi network/token, backoff |
-| Login lỗi sau Cognito migration | issuer/audience/sub mapping, refresh flow | Rollback auth rollout có kiểm soát |
+| Sự cố                           | Kiểm tra                                               | Hành động                                                      |
+| ------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------- |
+| Không có event                  | Heartbeat, bridge certificate, IoT rule, camera health | Phục hồi bridge, replay spool                                  |
+| Queue tăng                      | Throttles, timeout, DB pool, downstream quota          | Sửa bottleneck; tăng concurrency chỉ khi DB/provider chịu được |
+| DLQ có record                   | Error reason và correlationId                          | Sửa code/config, redrive dev có giới hạn                       |
+| Alert trùng                     | Ledger/outbox, message ID, crash window                | Sửa idempotency; không chỉ tăng visibility                     |
+| Event không escalated           | Deadline DB, execution ID, relay backlog               | Reconcile missing workflow; xác minh rule snapshot             |
+| Không gọi được Telegram         | VPC egress, secret, 429                                | Phục hồi network/token, backoff                                |
+| Login lỗi sau Cognito migration | issuer/audience/sub mapping, refresh flow              | Rollback auth rollout có kiểm soát                             |
 
 Trước xóa stack dev: dừng producer, export dữ liệu/log cần bàn giao, kiểm tra queue/outbox chưa xử lý, xác định resource được Retain. Khi implementation SAM đã có, dùng `sam delete` cho đúng stack/profile/region sau kiểm tra. Bucket không rỗng/versioned và resource Retain có thể tồn tại sau xóa stack; không tự xóa dữ liệu cần giữ để làm lệnh thành công.
 
