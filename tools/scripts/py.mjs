@@ -16,24 +16,55 @@
  */
 
 import { spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const SERVICE_DIR = join(ROOT, 'services', 'ai-service');
 const IS_WINDOWS = process.platform === 'win32';
+const PYTHON_VERSION = readFileSync(join(SERVICE_DIR, '.python-version'), 'utf8').trim();
+const VENV_DIR = process.env.CAMERAI_VENV
+  ? resolve(ROOT, process.env.CAMERAI_VENV)
+  : join(SERVICE_DIR, '.venv');
+const DEV_LOCK = IS_WINDOWS ? 'requirements-dev-windows.lock' : 'requirements-dev.lock';
 
 const VENV_PYTHON = IS_WINDOWS
-  ? join(SERVICE_DIR, '.venv', 'Scripts', 'python.exe')
-  : join(SERVICE_DIR, '.venv', 'bin', 'python');
+  ? join(VENV_DIR, 'Scripts', 'python.exe')
+  : join(VENV_DIR, 'bin', 'python');
+
+function dungPhienBan(lenh, args = []) {
+  const result = spawnSync(
+    lenh,
+    [...args, '-c', 'import platform; print(platform.python_version())'],
+    {
+      encoding: 'utf8',
+      shell: false,
+    },
+  );
+  return result.status === 0 && result.stdout.trim() === PYTHON_VERSION;
+}
+
+function kiemTraVenv() {
+  if (!dungPhienBan(VENV_PYTHON)) {
+    console.error(
+      `  Venv phai dung Python ${PYTHON_VERSION}. Khong tu xoa venv cu. ` +
+        'Dung CAMERAI_PYTHON va CAMERAI_VENV de tao moi truong rieng (xem dependency baseline).',
+    );
+    process.exit(1);
+  }
+}
 
 /** Python cua he thong — chi dung de TAO venv. */
 function timPythonHeThong() {
-  for (const ungVien of IS_WINDOWS ? ['py', 'python', 'python3'] : ['python3', 'python']) {
-    const args = ungVien === 'py' ? ['-3', '--version'] : ['--version'];
-    const r = spawnSync(ungVien, args, { stdio: 'ignore', shell: IS_WINDOWS });  // can shell de do PATH
-    if (r.status === 0) return { lenh: ungVien, themArgs: ungVien === 'py' ? ['-3'] : [] };
+  if (process.env.CAMERAI_PYTHON) {
+    return dungPhienBan(process.env.CAMERAI_PYTHON)
+      ? { lenh: process.env.CAMERAI_PYTHON, themArgs: [] }
+      : null;
+  }
+  for (const ungVien of IS_WINDOWS ? ['py', 'python'] : ['python3.11', 'python3', 'python']) {
+    const args = ungVien === 'py' ? ['-3.11'] : [];
+    if (dungPhienBan(ungVien, args)) return { lenh: ungVien, themArgs: args };
   }
   return null;
 }
@@ -53,22 +84,31 @@ function setup() {
   if (!py) {
     console.error(
       '\n  Khong tim thay Python tren may.\n' +
-        '  Cai Python 3.11+ roi chay lai:  winget install Python.Python.3.11\n',
+        `  Can Python ${PYTHON_VERSION}; chi dinh executable bang CAMERAI_PYTHON.\n`,
     );
     process.exit(1);
   }
 
   if (!existsSync(VENV_PYTHON)) {
-    console.log('  Dang tao virtualenv tai services/ai-service/.venv ...');
-    const r = chay(py.lenh, [...py.themArgs, '-m', 'venv', '.venv'], { timPATH: true });
+    console.log(`  Dang tao virtualenv tai ${VENV_DIR} ...`);
+    const r = chay(py.lenh, [...py.themArgs, '-m', 'venv', VENV_DIR]);
     if (r.status !== 0) process.exit(r.status ?? 1);
   }
 
-  console.log('  Dang cai dependency (pip install -e ".[dev]") ...');
-  const r = chay(VENV_PYTHON, ['-m', 'pip', 'install', '--quiet', '--upgrade', 'pip']);
+  kiemTraVenv();
+  console.log(`  Dang cai dependency tu ${DEV_LOCK} (hash-locked) ...`);
+  const r = chay(VENV_PYTHON, ['-m', 'pip', 'install', '--require-hashes', '-r', DEV_LOCK]);
   if (r.status !== 0) process.exit(r.status ?? 1);
 
-  const r2 = chay(VENV_PYTHON, ['-m', 'pip', 'install', '-e', '.[dev]']);
+  const r2 = chay(VENV_PYTHON, [
+    '-m',
+    'pip',
+    'install',
+    '--no-deps',
+    '--no-build-isolation',
+    '-e',
+    '.[dev,m2a,m3]',
+  ]);
   if (r2.status !== 0) process.exit(r2.status ?? 1);
 
   console.log('\n  Xong. Gio chay duoc: pnpm check:ai\n');
@@ -93,12 +133,13 @@ if (!existsSync(VENV_PYTHON)) {
     '\n  Chua co virtualenv cho AI service.\n\n' +
       '  Chay mot lenh duy nhat de tao va cai dependency:\n\n' +
       '      pnpm setup:ai\n\n' +
-      '  (Tuong duong: cd services/ai-service && python -m venv .venv && pip install -e ".[dev]")\n',
+      '  Xem docs/sprint-3/DEPENDENCY_BASELINE.md de chon Python va lock dung OS.\n',
   );
   process.exit(1);
 }
 
 // `ruff` va `pytest` deu chay duoc duoi dang module: python -m ruff / python -m pytest
+kiemTraVenv();
 const ketQua = chay(VENV_PYTHON, ['-m', ...argv]);
 
 if (ketQua.error) {

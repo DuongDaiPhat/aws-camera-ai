@@ -1,6 +1,29 @@
 # Dependency baseline — Sprint 3 M2a/M3/M5
 
-> Một người tích hợp dependency chung, một graph/version cho mỗi môi trường. Mỗi story được triển khai E2E bởi một người với một AI Agent. Tài liệu này chốt lựa chọn và gate; không tuyên bố Python graph/model đã clean-install hoặc train thành công.
+> Một người tích hợp dependency chung, một graph/version cho mỗi môi trường. Mỗi story được triển khai E2E bởi một người với một AI Agent. Trạng thái và bằng chứng hiện hành ở mục cập nhật gate; các mục cũ giữ snapshot thiết kế. Chất lượng model FIRE và nghiệm thu feature vẫn thuộc implementation từng story.
+
+## Cập nhật gate ngày 10/10/2026
+
+Baseline runtime đã được hiện thực thành lock có hashes, cùng setup, Docker và CI. Các mục 3/5/6 bên dưới là snapshot khi chuẩn bị plan; tham chiếu mục này và [SHARED_GATE_HANDOFF.md](SHARED_GATE_HANDOFF.md) khi bắt đầu implementation.
+
+| Phần                    | Nguồn chốt hiện hành                                                                                                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Contract/DDL            | PR #24, merge SHA `97765fc710aefd0d76c0572f7e74c86fa10efdca`                                                                                                                   |
+| Python                  | CPython **3.11.13**, `services/ai-service/.python-version`; không dùng 3.14 hoặc tự nâng patch                                                                                 |
+| Linux runtime/dev       | `services/ai-service/requirements-runtime.lock`, `requirements-dev.lock`                                                                                                       |
+| Windows x64 runtime/dev | `services/ai-service/requirements-runtime-windows.lock`, `requirements-dev-windows.lock`                                                                                       |
+| Công cụ tạo lock        | `requirements-lock-tools.in` và `requirements-lock-tools.lock`; pip 24.3.1, pip-tools 7.4.1, setuptools 75.6.0, wheel 0.45.1                                                   |
+| Shared AI               | NumPy 1.26.4, OpenCV contrib 4.10.0.84, MediaPipe 0.10.32, ONNX Runtime 1.20.1                                                                                                 |
+| Web AI đã resolve       | FastAPI 0.143.0, Pydantic 2.14.0, pydantic-settings 2.15.0, Uvicorn 0.54.0, Pillow 12.3.0; graph bắc cầu lấy từ lock                                                           |
+| Training US-18          | `training/requirements.in` và `training/requirements-cpu-linux.lock`; Linux x86_64, Python 3.11.13, PyTorch 2.5.1+cpu, torchvision 0.20.1+cpu, Ultralytics 8.3.59, ONNX 1.17.0 |
+| Model artifacts M1/M2a  | `model-manifest.json`: immutable source/version, size và SHA-256 đo từ file tải thực; không commit weights                                                                     |
+| JS/M5                   | Giữ nguyên pnpm 9.12.0 và `pnpm-lock.yaml`; US20 không thêm thư viện                                                                                                           |
+
+Runtime không cài Ultralytics/PyTorch/dlib hoặc nhiều distribution `cv2`. Training dùng `opencv-python` trong môi trường riêng; không cài training lock vào API. CPU wheels được chỉ định bằng URL đúng CPython/Linux, tránh tải graph CUDA hoặc wheel cho platform khác.
+
+Python base image đã pin: `python:3.11.13-slim-bookworm@sha256:86adf8dbadc3d6e82ee5dd2c74bec2e1c2467cdad47886280501df722372d2e1`. Linux runtime build và Windows clean install đã qua `pip check`, import, model load/inference trên ảnh trống và 31 tests M1 (coverage 94,34%). Smoke không chứng minh chất lượng phát hiện té ngã/cháy. Model FIRE vẫn `PENDING_TRAINING`; dataset/holdout/training/ONNX parity của model đã train thuộc US18.
+
+CI chạy Python trên Windows/Linux, kiểm tra hashes, model checksums và chỉ một OpenCV flavor. Quy trình sinh lại: tạo venv công cụ riêng đúng Python, cài `requirements-lock-tools.lock` với `--require-hashes`, chạy `python scripts/lock_dependencies.py` trên từng OS; training dùng `--training` trên Linux. Không hand-edit lock hoặc regenerate bằng interpreter khác.
 
 ## 1. Nguồn sự thật và baseline đã có
 

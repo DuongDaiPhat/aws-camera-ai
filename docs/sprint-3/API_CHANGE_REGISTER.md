@@ -2,6 +2,14 @@
 
 > Source of truth: [`api/openapi.yaml`](../../api/openapi.yaml), [`api/openapi-ai-service.yaml`](../../api/openapi-ai-service.yaml). Repo dùng **openapi.yaml**, không tạo thêm openapi.yml. Mỗi story có một owner E2E/một AI Agent; phần shared có một người tích hợp tuần tự.
 
+## Trạng thái chốt ngày 10/10/2026
+
+Contract và DDL của **US-16, US-17, US-18, US-20 đã merge** qua [PR #24](https://github.com/DuongDaiPhat/aws-camera-ai/pull/24), merge commit `97765fc710aefd0d76c0572f7e74c86fa10efdca`. Hai spec và migrations 0013–0015 tại commit này là baseline dùng chung; không cần tạo lại PR contract giống hệt.
+
+Đã kiểm chứng lại: OpenAPI lint hợp lệ (5 warnings đã ghi ở snapshot), regeneration từ cả hai spec, build/types của workspace, PostgreSQL 16 fresh install, upgrade từ schema đến 0012 có seed, re-run migration runner và invariants M2a/M3/M5. Không apply DB thật. Generated files được chuẩn hóa bằng formatter sau generate; không sửa types bằng tay. CI kiểm tra generated output không lệch source.
+
+Các ghi chú `LOCAL_PREPARED`/`merge SHA pending` bên dưới là **snapshot lịch sử ngày 09/10**, đã được thay thế bởi trạng thái merge ở mục này. Hướng dẫn hiện hành: [shared gate handoff](SHARED_GATE_HANDOFF.md). Merge không xác nhận runtime detector/scheduler đã được implement hoặc story E2E đã đạt.
+
 ## 1. Reservation operation/schema
 
 | Story                   | File/phần được reserve                                                                | Operation/schema                                                                                                                    | Trạng thái                                        |

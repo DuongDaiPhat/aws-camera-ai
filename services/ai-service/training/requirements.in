@@ -1,0 +1,9 @@
+# US-18 training/export only. Linux x86_64, Python 3.11, CPU wheels.
+# Never install this graph in the shared API runtime.
+ultralytics==8.3.59
+torch @ https://download.pytorch.org/whl/cpu/torch-2.5.1%2Bcpu-cp311-cp311-linux_x86_64.whl
+torchvision @ https://download.pytorch.org/whl/cpu/torchvision-0.20.1%2Bcpu-cp311-cp311-linux_x86_64.whl
+numpy==1.26.4
+opencv-python==4.10.0.84
+onnx==1.17.0
+onnxruntime==1.20.1
