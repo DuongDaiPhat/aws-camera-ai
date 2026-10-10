@@ -6,6 +6,7 @@
 > Tài liệu này giải thích **vì sao** thiết kế như vậy. File SQL là nguồn sự thật về **cấu trúc**.
 > Callback/recovery US-14: [`0011_telegram_confirmation_delivery.sql`](../../db/migrations/0011_telegram_confirmation_delivery.sql).
 > Thời gian nhánh cao nhập tay: [`0012_configurable_high_wait.sql`](../../db/migrations/0012_configurable_high_wait.sql).
+> Sprint 3 contract/DDL: [0013 M2a](../../db/migrations/0013_fall_incidents.sql), [0014 M3](../../db/migrations/0014_fire_incidents.sql), [0015 M5](../../db/migrations/0015_wellness_check_runtime.sql). Chưa tự apply DB; runtime thực hiện theo các plan.
 
 ## Mục lục
 
@@ -21,7 +22,7 @@
 
 ## 1. Sơ đồ tổng thể
 
-Sơ đồ hiện mô tả **24 bảng**, bao gồm các bảng nghiệp vụ ban đầu và các bảng bổ trợ
+Sơ đồ hiện mô tả **29 bảng**, bao gồm các bảng nghiệp vụ ban đầu và các bảng bổ trợ
 cho xác thực, camera, đồng bộ khuôn mặt/vùng, kết quả AI, outbox và Telegram.
 
 ```mermaid
@@ -30,6 +31,21 @@ erDiagram
     users ||--o{ known_faces : "đăng ký"
     users ||--o{ emergency_contacts : "khai báo"
     users ||--o{ wellness_schedules : "được kiểm tra"
+    users |o--o{ wellness_schedules : "owner hộ"
+    cameras ||--o{ fall_incidents : "confirmed falls"
+    cameras ||--o{ fire_incidents : "fire episodes"
+    events ||--o| fall_incidents : "pending fall result"
+    events ||--o| fire_incidents : "pending fire result"
+    users ||--o{ resident_wellness_observations : "resident và owner"
+    known_faces |o--o{ resident_wellness_observations : "identity evidence"
+    cameras |o--o{ resident_wellness_observations : "motion và direction"
+    events |o--o{ resident_wellness_observations : "identity event"
+    resident_wellness_observations ||--o{ resident_wellness_presence : "latest evidence"
+    resident_wellness_observations |o--o{ wellness_check_runs : "presence snapshot"
+    users ||--o{ resident_wellness_presence : "resident và owner"
+    wellness_schedules ||--o{ wellness_check_runs : "daily occurrences"
+    users ||--o{ wellness_check_runs : "resident và owner"
+    events |o--o| wellness_check_runs : "timeout alert"
     users ||--o{ confirmations : "xác nhận"
     users ||--o{ notifications : "nhận"
     users ||--o{ audit_logs : "thực hiện"
@@ -169,6 +185,8 @@ erDiagram
     }
 
     events {
+        uuid wellness_owner_user_id FK
+        uuid wellness_resident_user_id FK
         uuid id PK
         uuid camera_id FK
         uuid zone_id FK
@@ -275,7 +293,12 @@ erDiagram
 
     wellness_schedules {
         uuid id PK
+        uuid owner_user_id FK
         uuid resident_user_id FK
+        integer version
+        timestamptz activation_started_at
+        timestamptz last_materialized_at
+        timestamptz deleted_at
         time check_at
         smallint lookback_hours
         int grace_seconds
@@ -340,6 +363,101 @@ erDiagram
         integer version
         integer synced_version
         timestamptz last_synced_at
+    }
+
+    fall_incidents {
+        uuid id PK
+        uuid camera_id FK
+        text source_session_id
+        text track_id
+        uuid episode_id
+        uuid event_id FK,UK
+        timestamptz candidate_started_at
+        timestamptz confirmed_at
+        text model_version
+        jsonb rule_snapshot
+        uuid result_id UK
+        jsonb pending_payload
+        text delivery_status
+        integer attempt_count
+        timestamptz available_at
+        uuid lease_token
+        timestamptz leased_until
+        timestamptz applied_at
+    }
+
+    fire_incidents {
+        uuid id PK
+        uuid camera_id FK
+        text source_session_id
+        uuid episode_id
+        uuid event_id FK,UK
+        timestamptz first_qualified_at
+        timestamptz confirmed_at
+        timestamptz observed_clear_at
+        text model_version
+        jsonb rule_snapshot
+        uuid result_id UK
+        jsonb pending_payload
+        text delivery_status
+        integer attempt_count
+        timestamptz available_at
+        uuid lease_token
+        timestamptz leased_until
+        timestamptz applied_at
+    }
+
+    resident_wellness_observations {
+        uuid observation_id PK
+        uuid owner_user_id FK
+        uuid resident_user_id FK
+        uuid known_face_id FK
+        uuid camera_id FK
+        uuid identity_event_id FK
+        text source_session_id
+        text track_id
+        text kind
+        timestamptz observed_at
+        timestamptz received_at
+        char payload_hash
+        jsonb evidence
+    }
+
+    resident_wellness_presence {
+        uuid owner_user_id PK,FK
+        uuid resident_user_id PK,FK
+        uuid observation_id FK
+        text state
+        timestamptz observed_at
+        timestamptz valid_until
+    }
+
+    wellness_check_runs {
+        uuid id PK
+        uuid schedule_id FK
+        uuid owner_user_id FK
+        uuid resident_user_id FK
+        date local_date
+        timestamptz scheduled_for
+        integer schedule_version
+        jsonb schedule_snapshot
+        timestamptz lookback_started_at
+        timestamptz lookback_ended_at
+        timestamptz last_activity_at
+        text presence_state
+        uuid presence_observation_id FK
+        integer grace_seconds
+        text status
+        text decision_reason
+        timestamptz evaluated_at
+        uuid event_id FK,UK
+        timestamptz request_sent_at
+        timestamptz confirmation_deadline_at
+        timestamptz delivery_deadline_at
+        integer attempt_count
+        timestamptz available_at
+        uuid lease_token
+        timestamptz leased_until
     }
 ```
 
@@ -768,6 +886,28 @@ Bảng quản lý trạng thái đồng bộ (synchronization) đặc trưng khu
 **Thiết kế bền vững:** Việc quản lý `version` và `synced_version` trực tiếp trong Database giúp chống mất mát dữ liệu (Data Loss) nếu AI Service bị sập ngang, tránh việc phải dùng hàng đợi (Message Queue) phức tạp mà dễ lỗi cho việc đồng bộ khuôn mặt.
 
 ---
+
+### 3.18 `fall_incidents` — US-16/17
+
+DDL: [0013_fall_incidents.sql](../../db/migrations/0013_fall_incidents.sql). Chỉ confirmed FALL được lưu; pose history/candidate ở AI tracker. Unique camera/source session/track/episode và event/result ID ngăn replay tạo event mới. Tạo event P1 và pending submission cùng transaction; triggers bảo vệ identity/model/rule/payload/confirmation timestamps. Delivery PENDING/PROCESSING/APPLIED có lease/retry indexes; không giữ transaction khi gọi network.
+
+### 3.19 `fire_incidents` — US-18
+
+DDL: [0014_fire_incidents.sql](../../db/migrations/0014_fire_incidents.sql). Partial unique camera WHERE observed_clear_at IS NULL giữ một active detector episode/camera qua source/AI restart. User resolve event không clear latch; chỉ chuỗi negative hợp lệ set observed_clear_at một lần. Pending/evidence immutable. Event FK RESTRICT: retention xóa cleared/applied incident trước event, không xóa active latch; camera deletion cascade dọn incident camera đã xóa.
+
+### 3.20 `resident_wellness_observations` và `resident_wellness_presence` — US-20
+
+DDL: [0015_wellness_check_runtime.sql](../../db/migrations/0015_wellness_check_runtime.sql). Ledger có observation UUID/hash idempotency, scoped identity event/face/camera, session/track, MOTION/ARRIVAL/DEPARTURE, observedAt/receivedAt riêng. Service kiểm chứng owner/resident/identity/motion/direction; FK không chứng minh cùng hộ. HOME/AWAY projection có expiry; thiếu/hết hạn là UNKNOWN khi đọc. Check trễ query ledger as-of scheduled_for, không lấy mù latest projection và không suy departure từ camera silence.
+
+Presence FK tới observation là NO ACTION deferred: purge không làm mất evidence ở commit, account cascade vẫn dọn được projection/ledger cùng transaction. Index owner/resident/observed_at phục vụ lookback/presence. Evidence không chứa image/embedding/token.
+
+### 3.21 `wellness_check_runs` và lịch/scope M5 — US-20
+
+Unique (schedule_id, local_date) giữ một occurrence/ngày địa phương; lịch 09:00/18:00 có IDs riêng. Snapshot config/version/lookback/grace immutable; terminal run không sửa quyết định. Run ALERT_CREATED khác lifecycle event: event có thể RESOLVED trong khi run vẫn ALERT_CREATED. Lease/retry/available_at hỗ trợ restart và nhiều worker.
+
+First successful resident dispatch lưu request_sent_at, deadline = request_sent_at + grace_seconds, default 300. Trigger không cho retry kéo dài cửa sổ; delivery_deadline_at riêng phát hiện request chưa gửi được. Services giữ event/run locks cùng thứ tự và route resident/caregiver explicit.
+
+Lịch thêm nullable owner cho legacy, version, activation_started_at, last_materialized_at và deleted_at. Backfill chỉ resident có đúng một active registered owner; ambiguous không đoán. DELETE soft-delete vì run FK RESTRICT; partial unique resident/checkAt chỉ các lịch chưa xóa, nên tạo lại cùng giờ không xóa lịch sử. Admission cursor tách last_checked_at. Events thêm optional wellness owner/resident và partial unique chỉ WELLNESS_TIMEOUT DETECTED/NOTIFIED/ESCALATED để không có nhiều check active của cùng resident/hộ. Role/event enums và seed rules cũ giữ nguyên.
 
 ## 4. Danh sách ENUM
 

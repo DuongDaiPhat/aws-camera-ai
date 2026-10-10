@@ -41,6 +41,8 @@ Khi các plan đề xuất trùng module hoặc hạ tầng, dùng quyết đị
 
 ## Danh mục tài liệu
 
+- [AWS Lambda và event-driven: technical guide](AWS_LAMBDA_EVENT_DRIVEN_TECHNICAL.md) — lộ trình học, hiện trạng code, triển khai từng dịch vụ, kiểm thử, vận hành và quản lý budget.
+
 ### Kế hoạch và yêu cầu
 
 | Tài liệu                                                                             | Nội dung                                                                     | Task |

@@ -828,10 +828,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Danh sach lich kiem tra hien dien */
+        /**
+         * Danh sach lich wellness theo quyen truy cap
+         * @description US-20. ADMIN/CAREGIVER manage schedules only for a registered resident in their household; assigned residents (normally role VIEWER) can read their own schedules. Resident identity uses active known_faces.linked_user_id and household camera ownership. All activity is resident-specific verified motion/arrival evidence, not arbitrary person detection or face match alone. Empty cameraIds means enabled cameras of this household. Time is HH:mm in an IANA timezone; 09:00 and 18:00 are two schedule records. Default lookbackHours=6, graceSeconds=300. No computer vision is performed by the scheduler.
+         */
         get: operations["listWellnessSchedules"];
         put?: never;
-        /** Tao lich kiem tra */
+        /**
+         * Tao lich wellness cho nguoi da dang ky
+         * @description US-20. ADMIN/CAREGIVER manage schedules only for a registered resident in their household; assigned residents (normally role VIEWER) can read their own schedules. Resident identity uses active known_faces.linked_user_id and household camera ownership. All activity is resident-specific verified motion/arrival evidence, not arbitrary person detection or face match alone. Empty cameraIds means enabled cameras of this household. Time is HH:mm in an IANA timezone; 09:00 and 18:00 are two schedule records. Default lookbackHours=6, graceSeconds=300. No computer vision is performed by the scheduler. New writes require a valid household link and a usable resident confirmation channel. Duplicate non-deleted resident/checkAt returns 409; never silently replace a schedule.
+         */
         post: operations["createWellnessSchedule"];
         delete?: never;
         options?: never;
@@ -851,12 +857,80 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Xoa lich kiem tra */
+        /**
+         * Xoa lich wellness va giu lich su kiem tra
+         * @description ADMIN/CAREGIVER of the schedule household. Soft-delete and disable future admission. Existing alerts, confirmations, deadlines and audit records continue.
+         */
         delete: operations["deleteWellnessSchedule"];
         options?: never;
         head?: never;
-        /** Cap nhat lich kiem tra */
+        /**
+         * Cap nhat tung phan lich wellness
+         * @description ADMIN/CAREGIVER of the schedule household. At least one field is required. Revalidate the merged schedule and its resident/cameras/timezone. Changes apply to future occurrences; existing evidence and confirmation deadlines retain their snapshots. Duplicate resident/checkAt returns 409.
+         */
         patch: operations["updateWellnessSchedule"];
+        trace?: never;
+    };
+    "/wellness-checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lich su va yeu cau wellness dang cho xac nhan
+         * @description ADMIN/CAREGIVER see household runs; assigned residents (normally role VIEWER) see only their own. Camera-less M5 events use explicit household/resident scope. Run status is the scheduler decision; eventStatus is the alert lifecycle. No image or inference call is needed.
+         */
+        get: operations["listWellnessChecks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/wellness-checks/{checkId}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                checkId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Nguoi duoc giam sat xac nhan Toi on hoac Can giup do
+         * @description US-20. Only the authenticated resident assigned to this check can confirm INITIAL through this endpoint, including role VIEWER. Existing /events/{eventId}/confirm ADMIN/CAREGIVER permissions remain unchanged. A sent request and NOTIFIED event are required. First successful resident-channel dispatch starts snapshotted graceSeconds (default 300); retries never extend it. Server transaction time must be strictly before confirmationDeadlineAt; at equality/after, atomically escalate and return 409. IM_OK -> RESOLVED; NEED_HELP -> ESCALATED immediately. Actor/time are server-derived. Same commandId/payload replays the original 200 response even after event changes; another/changed confirmation returns 409. Worker and confirmation lock the same event/run in fixed order. Do not resolve an already escalated event.
+         */
+        post: operations["confirmWellnessCheck"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/internal/wellness-observations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Nhan bang chung hoat dong va hien dien tu M1
+         * @description US-20, internal token only. Store trusted existing identity/motion/direction evidence; perform no computer vision and accept no user self-reported activity. observationId/payload are idempotent: identical retry -> DUPLICATE; changed payload -> 409. Store observedAt separately from receivedAt. Ordered ARRIVAL/MOTION => HOME; validated DEPARTURE => AWAY. Silence, unknown person, model failure and camera outage never mean AWAY or healthy activity. Expired presence means UNKNOWN. Late evidence may affect future checks but cannot silently resolve an existing timeout. M1 currently lacks a directional departure feed: integrate verified source evidence before claiming skip-away acceptance; never infer departure from a track ending.
+         */
+        post: operations["submitWellnessObservation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/emergency-contacts": {
@@ -911,6 +985,23 @@ export interface paths {
          * AI service tra ket qua suy luan ve cho orchestrator
          * @description US-11. Xac thuc bang `X-Internal-Token` (secret dung chung trong
          *     docker network), KHONG dung JWT nguoi dung.
+         *
+         *     US-16/US-17: M2A_FALL submits exactly one FALL_DETECTED result only
+         *     after continuously observed immobility strictly exceeds 15 seconds,
+         *     valid pose/evidence and REST_AREA checks succeed. Candidate/cancelled/
+         *     missing-pose observations produce internal logs only, not callbacks
+         *     with a success label or empty successful results.
+         *     Orchestrator first persists a separate FALL incident with priority P1,
+         *     detectedAt=confirmedAt and durable pending result in one transaction.
+         *     It does not overwrite an M1/M4 event already alerted or terminal.
+         *     Same camera/source-session/track/episode identifies one incident;
+         *     retry retains resultId, processedAt, confirmedAt and payload contents.
+         *     See FallResultMetadata for the M2a evidence contract. Existing generic
+         *     OtherAiResultSubmission remains shared with other AI modules.
+         *
+         *
+         *     US-18: M3_FIRE submits one confirmed FIRE_SMOKE_DETECTED result, priority P0, on a separately persisted camera incident; detectedAt=confirmedAt. One active detector episode per camera survives source/AI restarts and event resolution. Use FireResultMetadata; never submit single-frame candidates as success.
+         *     US-20: M5 wellness runs in the orchestrator without inference or this callback. Its resident request, deadline and caregiver routing use a scoped scheduler policy; the shared generic callback wire format remains unchanged.
          */
         post: operations["submitAiResult"];
         delete?: never;
@@ -1473,6 +1564,14 @@ export interface components {
             isFalseAlarm?: boolean;
             /** Format: date-time */
             detectedAt: string;
+            /**
+             * Format: uuid
+             * @description Present for M5 only; authorization uses assigned resident/household rather than camera.
+             */
+            wellnessResidentUserId?: string | null;
+            wellnessResidentName?: string | null;
+            /** Format: uuid */
+            wellnessCheckId?: string | null;
         };
         EventDetail: components["schemas"]["EventSummary"] & {
             /** @enum {string} */
@@ -1716,6 +1815,7 @@ export interface components {
             maxEscalationLevel?: number;
             isEnabled?: boolean;
         };
+        /** @description US-20 schedule. ownerUserId/version/configurationStatus are additive; legacy schedules with ambiguous household ownership require explicit repair before admission. */
         WellnessSchedule: {
             /** Format: uuid */
             id: string;
@@ -1723,30 +1823,80 @@ export interface components {
             residentUserId: string;
             residentName?: string;
             name?: string;
-            /** @example 09:00 */
             checkAt: string;
-            /** @description 1 = Thu Hai ... 7 = Chu Nhat. */
-            daysOfWeek?: number[];
+            /**
+             * @default [
+             *       1,
+             *       2,
+             *       3,
+             *       4,
+             *       5,
+             *       6,
+             *       7
+             *     ]
+             */
+            daysOfWeek: number[];
+            /** @default 6 */
             lookbackHours: number;
-            graceSeconds?: number;
-            /** @description Rong = xet moi camera cua ho. */
-            cameraIds?: string[];
-            timezone?: string;
+            /**
+             * @description Resident response window; default five minutes, explicitly configurable. Snapshot per occurrence.
+             * @default 300
+             */
+            graceSeconds: number;
+            /**
+             * @description Enabled household cameras only; empty means all enabled cameras of this household.
+             * @default []
+             */
+            cameraIds: string[];
+            /**
+             * @description IANA name validated against PostgreSQL pg_timezone_names. UTC timestamps are used on the wire.
+             * @default Asia/Ho_Chi_Minh
+             */
+            timezone: string;
+            /** @default true */
             isEnabled: boolean;
             /** Format: date-time */
             lastCheckedAt?: string | null;
+            /** Format: uuid */
+            readonly ownerUserId?: string | null;
+            readonly version?: number;
+            /** @enum {string} */
+            readonly configurationStatus?: "READY" | "INVALID_CONFIG";
         };
         CreateWellnessScheduleRequest: {
             /** Format: uuid */
             residentUserId: string;
             name?: string;
             checkAt: string;
-            daysOfWeek?: number[];
+            /**
+             * @default [
+             *       1,
+             *       2,
+             *       3,
+             *       4,
+             *       5,
+             *       6,
+             *       7
+             *     ]
+             */
+            daysOfWeek: number[];
             /** @default 6 */
             lookbackHours: number;
-            /** @default 300 */
+            /**
+             * @description Resident response window; default five minutes, explicitly configurable. Snapshot per occurrence.
+             * @default 300
+             */
             graceSeconds: number;
-            cameraIds?: string[];
+            /**
+             * @description Enabled household cameras only; empty means all enabled cameras of this household.
+             * @default []
+             */
+            cameraIds: string[];
+            /**
+             * @description IANA name validated against PostgreSQL pg_timezone_names. UTC timestamps are used on the wire.
+             * @default Asia/Ho_Chi_Minh
+             */
+            timezone: string;
             /** @default true */
             isEnabled: boolean;
         };
@@ -1777,7 +1927,19 @@ export interface components {
             disposition: "ACCEPTED" | "DUPLICATE" | "STALE";
             aggregateVersion: number;
         };
-        /** @description Technical failure is recorded independently. Only the state service may set AI_FAILED, and never downgrade an active risk or cancel its deadline. */
+        /**
+         * @description Technical failure is recorded independently. Only the state service
+         *     may set AI_FAILED, and never downgrade an active risk or cancel its
+         *     deadline. US-16/US-17 new M2a producers submit exactly one successful
+         *     M2A_FALL/FALL_DETECTED item, confidence=1 under fall-rule-evidence-v1,
+         *     error=null and complete FallResultMetadata after valid confirmation
+         *     outside REST_AREA. Score measures complete rule evidence, not a
+         *     calibrated fall probability. observationId is
+         *     fall:{sourceSessionId}:{trackId}:{episodeId}, revision=1; resultId and
+         *     payload stay immutable on retry. Non-confirmed tracking states are
+         *     not submitted. These M2a producer requirements do not narrow the
+         *     existing generic wire schema or change M3/M5 payloads.
+         */
         OtherAiResultSubmission: components["schemas"]["ResultIdentity"] & {
             /** @enum {string} */
             module?: "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M5_WELLNESS";
@@ -1790,9 +1952,73 @@ export interface components {
             label: string;
             confidence: number | null;
             boundingBox: components["schemas"]["NormalizedBox"] | null;
+            /** @description For confirmed M2A_FALL results, new producers validate the documented FallResultMetadata before submission. Kept generic for compatibility with existing modules; no overlapping oneOf branch is introduced. */
             metadata: {
                 [key: string]: unknown;
             };
+        };
+        /**
+         * @description US-16/US-17 documented evidence schema for new confirmed M2a producers.
+         *     This is not an additional AiResultRequest union branch; generic
+         *     OtherAiResultItem.metadata remains unchanged. Validate this evidence
+         *     in the producer before invoking the existing result service.
+         *
+         *     Only complete, currently valid pose evidence outside enabled REST_AREA
+         *     can confirm. Implicit wall-clock time, duplicate frames, missing pose
+         *     and time spent in a rest area never contribute to immobileSeconds.
+         *     Validate against active threshold/policy snapshots, finite full-image
+         *     geometry, identity and the camera's current zone-config version.
+         *
+         *     Persist a separate FALL_DETECTED/P1 incident with detectedAt=confirmedAt
+         *     and dedup key m2a-fall:{cameraId}:{sourceSessionId}:{trackId}:{episodeId}.
+         *     Do not mutate existing M1/M4 risk events or their deadlines. Keep the
+         *     pending result payload and resultId stable across retries/restarts.
+         *     Notification/escalation/confirmation use the existing engine and rule.
+         *     Never include images/base64, credentials, RTSP URLs or raw keypoints.
+         */
+        FallResultMetadata: {
+            /** Format: uuid */
+            cameraId: string;
+            trackId: string;
+            sourceSessionId: string;
+            /**
+             * Format: uuid
+             * @description Stable UUIDv5 from /pose/fall; namespace 6ba7b811-9dad-11d1-80b4-00c04fd430c8 (URL), name is compact UTF-8 JSON [cameraSlug, sourceSessionId, trackId, candidateStartedAt] with timestamp in UTC YYYY-MM-DDTHH:mm:ss.SSSZ. Never regenerate identity on retry.
+             */
+            episodeId: string;
+            frameId: string;
+            /** Format: date-time */
+            candidateStartedAt: string;
+            /**
+             * Format: date-time
+             * @description UTC capture time of the first frame confirming the episode; incident detectedAt uses this time. Must not precede candidateStartedAt.
+             */
+            confirmedAt: string;
+            /** @description Validated continuously observed immobility, strictly greater than thresholdSeconds; default requires >15 seconds. Movement, missing pose or invalid gaps reset this interval. */
+            immobileSeconds: number;
+            /** @default 15 */
+            thresholdSeconds: number;
+            /** @description Torso angle in degrees to horizontal, computed in full-image pixels. Must be strictly below the active threshold (default 30 degrees). */
+            torsoAngleDeg: number;
+            /** @description Full-image person bbox height/width; diagnostic, not an extra gate in v1. */
+            aspectRatio: number;
+            /** @description 1 minus torso-center y/full-image height; 2D proxy, not meters. Torso center is the mean of shoulder and hip midpoints. */
+            centerHeight: number;
+            /** @description Center drop relative to the frozen median center/height of 10 preceding valid pose frames; positive means downward. Candidate gate uses configurable threshold, default >=0.20. */
+            centerDropRatio: number;
+            /** @description Median displacement of quality-matched full-image landmark pairs divided by frozen bbox height and elapsed frame seconds, in body-heights/second. Strictly below configured motion threshold, default 0.05. */
+            motionScore: number;
+            /**
+             * @description Revalidated by orchestrator against enabled REST_AREA polygons for this camera using bbox center, including polygon boundary. Config/lookup errors cannot be treated as outside.
+             * @constant
+             */
+            inRestArea: false;
+            zoneConfigVersion: number;
+            /**
+             * @description Complete confirmed rule evidence yields confidence=1; this is not a calibrated probability or a MediaPipe/Frigate detection score.
+             * @constant
+             */
+            confidencePolicyVersion: "fall-rule-evidence-v1";
         };
         /** @description eventId must match path. Same resultId and payload is replay-safe; changed payload is IDEMPOTENCY_CONFLICT. Persist before 202. Older revisions cannot replace newer results. */
         ResultIdentity: {
@@ -1904,6 +2130,135 @@ export interface components {
                 confidence: number;
                 boundingBox: components["schemas"]["NormalizedBox"] | null;
                 metadata: components["schemas"]["ZoneResultMetadata"];
+            }[];
+        };
+        UpdateWellnessScheduleRequest: {
+            /** Format: uuid */
+            residentUserId?: string;
+            name?: string;
+            checkAt?: string;
+            daysOfWeek?: number[];
+            lookbackHours?: number;
+            /** @description Resident response window; default five minutes, explicitly configurable. Snapshot per occurrence. */
+            graceSeconds?: number;
+            /** @description Enabled household cameras only; empty means all enabled cameras of this household. */
+            cameraIds?: string[];
+            /** @description IANA name validated against PostgreSQL pg_timezone_names. UTC timestamps are used on the wire. */
+            timezone?: string;
+            isEnabled?: boolean;
+        };
+        WellnessCheck: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            scheduleId: string;
+            /** Format: uuid */
+            residentUserId: string;
+            /** Format: uuid */
+            ownerUserId?: string;
+            /** Format: date-time */
+            scheduledFor: string;
+            /** Format: date */
+            localDate: string;
+            scheduleVersion?: number;
+            /** @enum {string} */
+            status: "PENDING" | "PROCESSING" | "SKIPPED_ACTIVITY" | "SKIPPED_AWAY" | "SKIPPED_DISABLED" | "SKIPPED_SUPERSEDED" | "MISSED" | "ALERT_CREATED";
+            decisionReason?: string | null;
+            /** @enum {string} */
+            presenceState: "HOME" | "AWAY" | "UNKNOWN";
+            /** Format: date-time */
+            lookbackStartedAt: string;
+            /** Format: date-time */
+            lookbackEndedAt: string;
+            /** Format: date-time */
+            lastActivityAt?: string | null;
+            graceSeconds: number;
+            /** Format: uuid */
+            eventId: string | null;
+            eventStatus?: components["schemas"]["EventStatus"] | null;
+            /** Format: date-time */
+            evaluatedAt?: string | null;
+            /** Format: date-time */
+            requestSentAt: string | null;
+            /** Format: date-time */
+            confirmationDeadlineAt: string | null;
+            /** Format: date-time */
+            deliveryDeadlineAt?: string | null;
+        };
+        WellnessConfirmationRequest: {
+            /** Format: uuid */
+            commandId: string;
+            /** @enum {string} */
+            response: "IM_OK" | "NEED_HELP";
+            note?: string;
+        };
+        /** @description Trusted M1 integration only. Validate registered resident/household, scoped camera/session/track, identity event and motion/directional evidence. MOTION requires a verified moving identified track; a face match alone is insufficient. ARRIVAL/DEPARTURE require directionalEvidence from an explicitly configured household boundary. Reject future/stale observations under configured limits. New source IDs are not client JWT identities. */
+        WellnessObservationRequest: {
+            /** Format: uuid */
+            observationId: string;
+            /** Format: uuid */
+            ownerUserId: string;
+            /** Format: uuid */
+            residentUserId: string;
+            /** Format: uuid */
+            knownFaceId: string;
+            /** Format: uuid */
+            identityEventId: string;
+            /** Format: uuid */
+            cameraId: string;
+            sourceSessionId: string;
+            trackId: string;
+            /** @enum {string} */
+            kind: "MOTION" | "ARRIVAL" | "DEPARTURE";
+            /** Format: date-time */
+            observedAt: string;
+            directionalEvidence?: {
+                boundaryId: string;
+                /** @enum {string} */
+                direction: "ENTER" | "EXIT";
+                policyVersion: string;
+            };
+        } & (unknown & unknown & unknown);
+        WellnessObservationAccepted: {
+            /** Format: uuid */
+            observationId: string;
+            /** @enum {string} */
+            status: "ACCEPTED" | "DUPLICATE";
+            /** @description False for duplicate or out-of-order observations. Such evidence cannot overwrite newer presence. */
+            presenceUpdated: boolean;
+        };
+        /** @description US-18 documentation-only evidence schema for new M3_FIRE producers. OtherAiResultItem.metadata stays generic. Validate aligned unique frame IDs/timestamps, ordered span <= windowSeconds, every gap <= maxFrameGapSeconds, scores >= thresholdUsed and incident score fire-temporal-min-v1 before submission. No raw image, credentials or RTSP URL. */
+        FireResultMetadata: {
+            /** Format: uuid */
+            cameraId: string;
+            sourceSessionId: string;
+            /** Format: uuid */
+            episodeId: string;
+            frameId: string;
+            /** Format: date-time */
+            firstQualifiedAt: string;
+            /** Format: date-time */
+            confirmedAt: string;
+            qualifyingFrameIds: string[];
+            qualifyingFrameTimestamps: string[];
+            consecutiveFrames: number;
+            requiredFrames: number;
+            windowSeconds: number;
+            maxFrameGapSeconds: number;
+            thresholdUsed: number;
+            /** @enum {string} */
+            incidentConfidencePolicyVersion: "fire-temporal-min-v1";
+            labels: ("fire" | "smoke")[];
+            detections: {
+                /** @enum {string} */
+                label: "fire" | "smoke";
+                confidence: number;
+                boundingBox: {
+                    x: number;
+                    y: number;
+                    width: number;
+                    height: number;
+                };
             }[];
         };
     };
@@ -3563,25 +3918,28 @@ export interface operations {
     };
     listWellnessSchedules: {
         parameters: {
-            query?: never;
+            query?: {
+                residentUserId?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Danh sach lich */
+            /** @description Accessible schedules, excluding soft-deleted rows. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        data?: components["schemas"]["WellnessSchedule"][];
+                        data: components["schemas"]["WellnessSchedule"][];
                     };
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     createWellnessSchedule: {
@@ -3597,7 +3955,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Da tao */
+            /** @description Schedule created; no check runs before its next due occurrence. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -3607,6 +3965,9 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
         };
     };
     deleteWellnessSchedule: {
@@ -3620,13 +3981,15 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Da xoa */
+            /** @description Schedule soft-deleted. */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -3641,11 +4004,11 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateWellnessScheduleRequest"];
+                "application/json": components["schemas"]["UpdateWellnessScheduleRequest"];
             };
         };
         responses: {
-            /** @description Da cap nhat */
+            /** @description Updated schedule. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3654,7 +4017,109 @@ export interface operations {
                     "application/json": components["schemas"]["WellnessSchedule"];
                 };
             };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    listWellnessChecks: {
+        parameters: {
+            query?: {
+                residentUserId?: string;
+                scheduleId?: string;
+                page?: components["parameters"]["Page"];
+                pageSize?: components["parameters"]["PageSize"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accessible check history. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WellnessCheck"][];
+                        total: number;
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    confirmWellnessCheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                checkId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WellnessConfirmationRequest"];
+            };
+        };
+        responses: {
+            /** @description Authoritative resident confirmation or identical replay. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Confirmation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            /** @description ALREADY_CONFIRMED, INVALID_STATE, REQUEST_NOT_SENT or DEADLINE_EXPIRED; canonical state included. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConfirmationConflict"];
+                };
+            };
+        };
+    };
+    submitWellnessObservation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WellnessObservationRequest"];
+            };
+        };
+        responses: {
+            /** @description Persisted/deduplicated observation; ordered presence updated atomically. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WellnessObservationAccepted"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
         };
     };
     listEmergencyContacts: {

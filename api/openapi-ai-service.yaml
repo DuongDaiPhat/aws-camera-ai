@@ -12,8 +12,11 @@ info:
   title: CameraAI — AI Inference Service
   version: 0.1.0
   description: |
-    Suy luan AI cho tung module. Moi endpoint la STATELESS tru `/pose/fall`,
-    vi phat hien te nga can theo doi chuoi frame theo `trackId` (US-16/US-17).
+    Suy luan AI cho tung module. `/pose/fall` theo doi chuoi frame theo
+    camera/source session/track (US-16/US-17); `/fire/detect` theo doi chuoi
+    frame toan camera theo camera/source session (US-18). Cac endpoint khac
+    la STATELESS. M5 wellness (US-20) chi chay scheduler trong orchestrator,
+    khong goi endpoint inference, khong them model computer vision.
 
     ## Nguyen tac
     - Service KHONG ghi database va KHONG goi Telegram. Moi quyet dinh
@@ -204,12 +207,43 @@ paths:
       tags: [pose]
       summary: Danh gia mot frame trong chuoi theo doi te nga
       description: |
-        US-16/US-17. Service giu trang thai theo `trackId`:
-          - `MONITORING` — tu the binh thuong
-          - `CANDIDATE`  — truc than gan nam ngang, dang dem thoi gian
-          - `CONFIRMED`  — bat dong qua `FALL_IMMOBILITY_SECONDS` -> sinh canh bao
-          - `CANCELLED`  — dung day trong thoi gian theo doi, chi ghi log
-        Orchestrator chi tao su kien khi nhan `CONFIRMED`.
+        US-16/US-17; FR-DET-M2-01..05. Evaluate the exact full-camera
+        JPEG/PNG frame identified by frameTimestamp, without rotation or
+        letterboxing. An event snapshot or latest image with an unrelated
+        timestamp is not valid temporal evidence. New M2a producers always
+        send frameId, sourceSessionId, personBoundingBox and zoneConfigVersion.
+
+        Track state is isolated by (cameraSlug, sourceSessionId, trackId).
+        MONITORING becomes CANDIDATE only with 10 preceding valid pose frames,
+        torso angle strictly below 30 degrees and a sudden center drop.
+        The baseline is frozen at candidate creation. CONFIRMED requires a
+        currently valid abnormal pose and continuous observed immobility
+        strictly longer than FALL_IMMOBILITY_SECONDS (default 15 seconds).
+        Exactly 15 seconds is not sufficient; motion or an invalid frame gap
+        resets the immobility interval. Standing up cancels the candidate.
+
+        Missing/low-quality/ambiguous pose is poseAvailable=false, error=null.
+        Keep candidate identity for at most 5 seconds, reset immobileSeconds
+        immediately, then cancel even if no more frames arrive. Resuming pose
+        starts a new interval; missing time never contributes to confirmation.
+        Duplicate/out-of-order/stale frames do not advance history or timers.
+        Restart or source-session/coordinate changes clear unconfirmed state.
+        Use one stateful process/replica until shared tracking is implemented.
+
+        Orchestrator supplies inRestArea from enabled REST_AREA polygons of
+        this camera using the current person's bounding-box center; polygon
+        boundaries count as inside. Entering a rest area cancels tracking;
+        inRestArea=true must never return CONFIRMED. Orchestrator rechecks
+        camera/zone configuration before persistence. Only CONFIRMED with
+        valid identity/evidence, poseAvailable=true, error=null and outside
+        a rest area proposes a separate FALL_DETECTED/P1 incident. This
+        service neither persists incidents nor sends notifications.
+
+        CONFIRMED is latched for one episode until an observed standing pose
+        re-arms monitoring. Replayed confirmation retains the original
+        episodeId/confirmedAt; it is not a newly inferred fall. Technical
+        inference/decode failures return 200 with error != null, never a fall.
+        All thresholds and image limits are configurable, not hard-coded.
       operationId: evaluateFall
       requestBody:
         required: true
@@ -219,33 +253,255 @@ paths:
               type: object
               required: [image, trackId, cameraSlug, frameTimestamp]
               properties:
-                image: { type: string, format: binary }
-                trackId: { type: string }
-                cameraSlug: { type: string }
-                frameTimestamp: { type: string, format: date-time }
+                image:
+                  type: string
+                  format: binary
+                  description: Full-camera JPEG/PNG corresponding exactly to frameTimestamp. Default limits are 1048576 bytes and 2073600 decoded pixels; oversize input returns 413.
+                trackId: { type: string, minLength: 1, maxLength: 128 }
+                cameraSlug: { type: string, minLength: 1, maxLength: 64 }
+                frameTimestamp:
+                  type: string
+                  format: date-time
+                  description: UTC capture timestamp of this image, not request time. Must increase for new observations; default freshness limit 1 second and future tolerance 0.5 second.
+                frameId:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+                  description: Unique image identity within sourceSessionId. Optional for legacy callers; new producer always sends it. Duplicate identity cannot extend history, immobility or missing-pose grace.
+                sourceSessionId:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+                  default: legacy
+                  description: Source generation, changed on source restart. Part of track identity; new producer always sends it.
+                personBoundingBox:
+                  type: string
+                  maxLength: 512
+                  description: JSON-encoded normalized BoundingBox on the full image, with positive width/height, finite numbers, x+width<=1 and y+height<=1. Crop with padding, then transform landmarks back to full-image coordinates. Without this field accept only one unambiguously identified person; ambiguity is missing pose.
+                  example: '{"x":0.15,"y":0.55,"width":0.5,"height":0.4}'
+                zoneConfigVersion:
+                  type: integer
+                  minimum: 0
+                  description: Camera zone-config snapshot version used to compute inRestArea. Optional for legacy callers; new producer always sends it.
                 inRestArea:
                   type: boolean
                   default: false
-                  description: FR-DET-M2-05 — true thi khong bao gio tra CONFIRMED.
+                  description: FR-DET-M2-05. Derived by orchestrator, never by the browser. True suppresses confirmation and cancels any candidate; lookup/config errors must not be interpreted as false.
+            encoding:
+              image:
+                contentType: image/jpeg, image/png
       responses:
         "200":
           description: Trang thai theo doi hien tai
           content:
             application/json:
               schema: { $ref: "#/components/schemas/FallResponse" }
+              examples:
+                monitoring:
+                  summary: Valid standing pose, no candidate
+                  value:
+                    trackId: person-001
+                    cameraSlug: living_room
+                    sourceSessionId: source-001
+                    frameId: frame-001
+                    observedAt: "2026-10-09T05:00:00.000Z"
+                    state: MONITORING
+                    poseAvailable: true
+                    reason: NORMAL_POSTURE
+                    isReplay: false
+                    episodeId: null
+                    candidateStartedAt: null
+                    confirmedAt: null
+                    confidence: null
+                    confidencePolicyVersion: fall-rule-evidence-v1
+                    torsoAngleDeg: 85
+                    aspectRatio: 2.8
+                    centerHeight: 0.5
+                    centerDropRatio: 0
+                    motionScore: 0.1
+                    immobileSeconds: 0
+                    thresholdSeconds: 15
+                    missingPoseSeconds: 0
+                    keypointsDetected: 33
+                    boundingBox: { x: 0.2, y: 0.2, width: 0.2, height: 0.56 }
+                    modelVersion: pose-landmarker-lite-v1
+                    processedAt: "2026-10-09T05:00:00.050Z"
+                    error: null
+                candidate:
+                  summary: Horizontal torso and sudden drop, no alert yet
+                  value:
+                    trackId: person-001
+                    cameraSlug: living_room
+                    sourceSessionId: source-001
+                    frameId: frame-011
+                    observedAt: "2026-10-09T05:00:02.000Z"
+                    state: CANDIDATE
+                    poseAvailable: true
+                    reason: FALL_CANDIDATE
+                    isReplay: false
+                    episodeId: 79b7e17a-6343-5ccf-94bb-f98fce7ba8e4
+                    candidateStartedAt: "2026-10-09T05:00:02.000Z"
+                    confirmedAt: null
+                    confidence: null
+                    confidencePolicyVersion: fall-rule-evidence-v1
+                    torsoAngleDeg: 10
+                    aspectRatio: 0.8
+                    centerHeight: 0.2
+                    centerDropRatio: 0.3
+                    motionScore: 0.6
+                    immobileSeconds: 0
+                    thresholdSeconds: 15
+                    missingPoseSeconds: 0
+                    keypointsDetected: 33
+                    boundingBox: { x: 0.15, y: 0.55, width: 0.5, height: 0.4 }
+                    modelVersion: pose-landmarker-lite-v1
+                    processedAt: "2026-10-09T05:00:02.050Z"
+                    error: null
+                missingPose:
+                  summary: Missing pose retains identity, resets observed immobility
+                  value:
+                    trackId: person-001
+                    cameraSlug: living_room
+                    sourceSessionId: source-001
+                    frameId: frame-091
+                    observedAt: "2026-10-09T05:00:18.000Z"
+                    state: CANDIDATE
+                    poseAvailable: false
+                    reason: NO_POSE
+                    isReplay: false
+                    episodeId: 79b7e17a-6343-5ccf-94bb-f98fce7ba8e4
+                    candidateStartedAt: "2026-10-09T05:00:02.000Z"
+                    confirmedAt: null
+                    confidence: null
+                    confidencePolicyVersion: fall-rule-evidence-v1
+                    torsoAngleDeg: null
+                    aspectRatio: null
+                    centerHeight: null
+                    centerDropRatio: null
+                    motionScore: null
+                    immobileSeconds: 0
+                    thresholdSeconds: 15
+                    missingPoseSeconds: 2
+                    keypointsDetected: 0
+                    boundingBox: null
+                    modelVersion: pose-landmarker-lite-v1
+                    processedAt: "2026-10-09T05:00:18.050Z"
+                    error: null
+                confirmed:
+                  summary: More than 15 seconds of continuously observed immobility
+                  value:
+                    trackId: person-001
+                    cameraSlug: living_room
+                    sourceSessionId: source-001
+                    frameId: frame-088
+                    observedAt: "2026-10-09T05:00:17.400Z"
+                    state: CONFIRMED
+                    poseAvailable: true
+                    reason: IMMOBILE_CONFIRMED
+                    isReplay: false
+                    episodeId: 79b7e17a-6343-5ccf-94bb-f98fce7ba8e4
+                    candidateStartedAt: "2026-10-09T05:00:02.000Z"
+                    confirmedAt: "2026-10-09T05:00:17.400Z"
+                    confidence: 1
+                    confidencePolicyVersion: fall-rule-evidence-v1
+                    torsoAngleDeg: 10
+                    aspectRatio: 0.8
+                    centerHeight: 0.2
+                    centerDropRatio: 0.3
+                    motionScore: 0.01
+                    immobileSeconds: 15.2
+                    thresholdSeconds: 15
+                    missingPoseSeconds: 0
+                    keypointsDetected: 33
+                    boundingBox: { x: 0.15, y: 0.55, width: 0.5, height: 0.4 }
+                    modelVersion: pose-landmarker-lite-v1
+                    processedAt: "2026-10-09T05:00:17.450Z"
+                    error: null
+                cancelled:
+                  summary: Person stands up before confirmation, internal log only
+                  value:
+                    trackId: person-001
+                    cameraSlug: living_room
+                    sourceSessionId: source-001
+                    frameId: frame-051
+                    observedAt: "2026-10-09T05:00:10.000Z"
+                    state: CANCELLED
+                    poseAvailable: true
+                    reason: RECOVERED
+                    isReplay: false
+                    episodeId: 79b7e17a-6343-5ccf-94bb-f98fce7ba8e4
+                    candidateStartedAt: "2026-10-09T05:00:02.000Z"
+                    confirmedAt: null
+                    confidence: null
+                    confidencePolicyVersion: fall-rule-evidence-v1
+                    torsoAngleDeg: 85
+                    aspectRatio: 2.8
+                    centerHeight: 0.5
+                    centerDropRatio: 0
+                    motionScore: 0.1
+                    immobileSeconds: 0
+                    thresholdSeconds: 15
+                    missingPoseSeconds: 0
+                    keypointsDetected: 33
+                    boundingBox: { x: 0.2, y: 0.2, width: 0.2, height: 0.56 }
+                    modelVersion: pose-landmarker-lite-v1
+                    processedAt: "2026-10-09T05:00:10.050Z"
+                    error: null
+                restArea:
+                  summary: Enabled rest area suppresses a lying pose
+                  value:
+                    trackId: person-001
+                    state: CANCELLED
+                    poseAvailable: true
+                    reason: REST_AREA
+                    isReplay: false
+                    episodeId: null
+                    candidateStartedAt: null
+                    confirmedAt: null
+                    confidence: null
+                    confidencePolicyVersion: fall-rule-evidence-v1
+                    immobileSeconds: 0
+                    thresholdSeconds: 15
+                    missingPoseSeconds: 0
+                    modelVersion: pose-landmarker-lite-v1
+                    processedAt: "2026-10-09T05:00:10.050Z"
+                    error: null
+                inferenceError:
+                  summary: Technical error never proposes a fall incident
+                  value:
+                    trackId: person-001
+                    state: MONITORING
+                    poseAvailable: false
+                    reason: TECHNICAL_ERROR
+                    isReplay: false
+                    confidence: null
+                    immobileSeconds: 0
+                    boundingBox: null
+                    modelVersion: pose-landmarker-lite-v1
+                    processedAt: "2026-10-09T05:00:10.050Z"
+                    error:
+                      code: MODEL_NOT_LOADED
+                      message: Pose model is unavailable.
         "401":
           description: Thieu hoac sai X-Internal-Token
+        "413":
+          description: Encoded image or decoded pixel count exceeds the configured limit.
         "422":
-          description: Thieu truong bat buoc trong form-data
+          description: Missing/invalid form fields, timestamp or normalized personBoundingBox. Decode/inference failures are returned as 200 with error != null.
 
   /fire/detect:
     post:
-      tags: [fire]
-      summary: Phat hien lua/khoi tren mot frame
-      description: |
-        US-18. `confirmed = true` chi khi tin hieu xuat hien lien tuc tren
-        >= FIRE_MIN_CONSECUTIVE_FRAMES frame trong 5 giay (FR-DET-M3-02),
-        de loai nhieu tu den mau va anh nang.
+      tags:
+        - fire
+      summary: Phat hien lua/khoi va xac nhan chuoi frame toan camera
+      description: |-
+        US-18. Stateful per (cameraSlug, sourceSessionId); image is the full camera frame at frameTimestamp, even without a person. New producers send frameId/sourceSessionId. Each unique, ordered, fresh frame counts once, regardless of bounding-box count.
+
+        A qualifying frame has at least one fire/smoke detection with confidence >= thresholdUsed (default T_fire=0.50). Confirm at >= requiredFrames (default 3) consecutive qualifying frames whose first-to-last interval is <= windowSeconds (default 5), with no adjacent gap > maxFrameGapSeconds (default 1). Mixed fire/smoke labels qualify. Confirmation happens on the third frame; there is no mandatory five-second wait.
+
+        Negative/below-threshold frames and technical errors reset unconfirmed evidence; a gap/out-of-window starts a new eligible suffix. Duplicate, out-of-order and stale frames do not advance the counter or create new confirmation. Silence never confirms. Confirmed episode evidence is frozen for replay. The orchestrator persists one active episode per camera across source sessions and restarts, clearing only after 10 seconds of valid continuous negative observations; resolving an event does not clear it.
+
+        Episode UUIDv5 uses URL namespace 6ba7b811-9dad-11d1-80b4-00c04fd430c8 and compact UTF-8 JSON [cameraSlug,sourceSessionId,firstQualifiedAt], timestamp canonical UTC milliseconds. incidentConfidence is the minimum of each qualifying frame's maximum qualifying score (fire-temporal-min-v1), not the latest frame maximum. This service does not persist events or send notifications.
       operationId: detectFire
       requestBody:
         required: true
@@ -253,21 +509,258 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required: [image, cameraSlug, frameTimestamp]
+              required:
+                - image
+                - cameraSlug
+                - frameTimestamp
               properties:
-                image: { type: string, format: binary }
-                cameraSlug: { type: string }
-                frameTimestamp: { type: string, format: date-time }
+                image:
+                  type: string
+                  format: binary
+                  description: JPEG/PNG full frame captured at frameTimestamp; no person crop or repeated event snapshot.
+                cameraSlug:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+                frameTimestamp:
+                  type: string
+                  format: date-time
+                  description: UTC capture time with timezone, not processing time; validated for freshness and ordering.
+                frameId:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+                  description: Unique within sourceSessionId. New producers always send it; legacy identity derives from capture timestamp.
+                sourceSessionId:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+                  default: legacy
+                  description: Source generation; new producers always send it and change it on source restart.
+            encoding:
+              image:
+                contentType: image/jpeg, image/png
       responses:
         "200":
-          description: Ket qua phat hien
+          description: Detection/evidence; technical inference failures have error != null and confirmed=false.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/FireResponse" }
+              schema:
+                $ref: "#/components/schemas/FireResponse"
+              examples:
+                negative:
+                  value:
+                    confirmed: false
+                    detections: &a8 []
+                    modelVersion: fire-smoke-yolo11n-v1
+                    processedAt: 2026-10-09T05:00:00.050Z
+                    cameraSlug: living_room
+                    sourceSessionId: source-001
+                    frameId: fire-001
+                    observedAt: 2026-10-09T05:00:00.000Z
+                    isReplay: false
+                    consecutiveFrames: 0
+                    requiredFrames: 3
+                    maxConfidence: null
+                    episodeId: null
+                    firstQualifiedAt: null
+                    confirmedAt: null
+                    windowSeconds: 5
+                    maxFrameGapSeconds: 1
+                    thresholdUsed: 0.5
+                    qualifyingFrameIds: &a5 []
+                    qualifyingFrameTimestamps: &a6 []
+                    incidentConfidence: null
+                    confidencePolicyVersion: fire-temporal-min-v1
+                    reason: NEGATIVE
+                    error: null
+                candidate:
+                  value:
+                    confirmed: false
+                    detections: &a7
+                      - label: smoke
+                        confidence: 0.88
+                        boundingBox: &a1
+                          x: 0.2
+                          y: 0.1
+                          width: 0.35
+                          height: 0.4
+                    modelVersion: fire-smoke-yolo11n-v1
+                    processedAt: 2026-10-09T05:00:00.050Z
+                    cameraSlug: living_room
+                    sourceSessionId: source-001
+                    frameId: fire-001
+                    observedAt: 2026-10-09T05:00:00.000Z
+                    isReplay: false
+                    consecutiveFrames: 1
+                    requiredFrames: 3
+                    maxConfidence: 0.88
+                    episodeId: 3c497ebd-3226-58fc-9c4a-152c7b747c12
+                    firstQualifiedAt: 2026-10-09T05:00:00.000Z
+                    confirmedAt: null
+                    windowSeconds: 5
+                    maxFrameGapSeconds: 1
+                    thresholdUsed: 0.5
+                    qualifyingFrameIds:
+                      - fire-001
+                    qualifyingFrameTimestamps:
+                      - 2026-10-09T05:00:00.000Z
+                    incidentConfidence: null
+                    confidencePolicyVersion: fire-temporal-min-v1
+                    reason: INSUFFICIENT_FRAMES
+                    error: null
+                confirmed:
+                  value:
+                    confirmed: true
+                    detections: &a2
+                      - label: smoke
+                        confidence: 0.9
+                        boundingBox: *a1
+                    modelVersion: fire-smoke-yolo11n-v1
+                    processedAt: 2026-10-09T05:00:01.050Z
+                    cameraSlug: living_room
+                    sourceSessionId: source-001
+                    frameId: fire-003
+                    observedAt: 2026-10-09T05:00:01.000Z
+                    isReplay: false
+                    consecutiveFrames: 3
+                    requiredFrames: 3
+                    maxConfidence: 0.9
+                    episodeId: 3c497ebd-3226-58fc-9c4a-152c7b747c12
+                    firstQualifiedAt: 2026-10-09T05:00:00.000Z
+                    confirmedAt: 2026-10-09T05:00:01.000Z
+                    windowSeconds: 5
+                    maxFrameGapSeconds: 1
+                    thresholdUsed: 0.5
+                    qualifyingFrameIds: &a3
+                      - fire-001
+                      - fire-002
+                      - fire-003
+                    qualifyingFrameTimestamps: &a4
+                      - 2026-10-09T05:00:00.000Z
+                      - 2026-10-09T05:00:00.500Z
+                      - 2026-10-09T05:00:01.000Z
+                    incidentConfidence: 0.88
+                    confidencePolicyVersion: fire-temporal-min-v1
+                    reason: CONFIRMED
+                    error: null
+                replay:
+                  value:
+                    confirmed: true
+                    detections: *a2
+                    modelVersion: fire-smoke-yolo11n-v1
+                    processedAt: 2026-10-09T05:00:01.050Z
+                    cameraSlug: living_room
+                    sourceSessionId: source-001
+                    frameId: fire-003
+                    observedAt: 2026-10-09T05:00:01.000Z
+                    isReplay: true
+                    consecutiveFrames: 3
+                    requiredFrames: 3
+                    maxConfidence: 0.9
+                    episodeId: 3c497ebd-3226-58fc-9c4a-152c7b747c12
+                    firstQualifiedAt: 2026-10-09T05:00:00.000Z
+                    confirmedAt: 2026-10-09T05:00:01.000Z
+                    windowSeconds: 5
+                    maxFrameGapSeconds: 1
+                    thresholdUsed: 0.5
+                    qualifyingFrameIds: *a3
+                    qualifyingFrameTimestamps: *a4
+                    incidentConfidence: 0.88
+                    confidencePolicyVersion: fire-temporal-min-v1
+                    reason: REPLAY
+                    error: null
+                belowThreshold:
+                  value:
+                    confirmed: false
+                    detections:
+                      - label: smoke
+                        confidence: 0.4
+                        boundingBox: *a1
+                    modelVersion: fire-smoke-yolo11n-v1
+                    processedAt: 2026-10-09T05:00:00.050Z
+                    cameraSlug: living_room
+                    sourceSessionId: source-001
+                    frameId: fire-001
+                    observedAt: 2026-10-09T05:00:00.000Z
+                    isReplay: false
+                    consecutiveFrames: 0
+                    requiredFrames: 3
+                    maxConfidence: 0.4
+                    episodeId: null
+                    firstQualifiedAt: null
+                    confirmedAt: null
+                    windowSeconds: 5
+                    maxFrameGapSeconds: 1
+                    thresholdUsed: 0.5
+                    qualifyingFrameIds: *a5
+                    qualifyingFrameTimestamps: *a6
+                    incidentConfidence: null
+                    confidencePolicyVersion: fire-temporal-min-v1
+                    reason: BELOW_THRESHOLD
+                    error: null
+                gapReset:
+                  value:
+                    confirmed: false
+                    detections: *a7
+                    modelVersion: fire-smoke-yolo11n-v1
+                    processedAt: 2026-10-09T05:00:03.050Z
+                    cameraSlug: living_room
+                    sourceSessionId: source-001
+                    frameId: fire-004
+                    observedAt: 2026-10-09T05:00:03.000Z
+                    isReplay: false
+                    consecutiveFrames: 1
+                    requiredFrames: 3
+                    maxConfidence: 0.88
+                    episodeId: 0ef548b1-2348-5c72-82be-1d84f3e0d6c5
+                    firstQualifiedAt: 2026-10-09T05:00:03.000Z
+                    confirmedAt: null
+                    windowSeconds: 5
+                    maxFrameGapSeconds: 1
+                    thresholdUsed: 0.5
+                    qualifyingFrameIds:
+                      - fire-004
+                    qualifyingFrameTimestamps:
+                      - 2026-10-09T05:00:03.000Z
+                    incidentConfidence: null
+                    confidencePolicyVersion: fire-temporal-min-v1
+                    reason: FRAME_GAP
+                    error: null
+                modelError:
+                  value:
+                    confirmed: false
+                    detections: *a8
+                    modelVersion: fire-smoke-yolo11n-v1
+                    processedAt: 2026-10-09T05:00:00.050Z
+                    cameraSlug: living_room
+                    sourceSessionId: source-001
+                    frameId: fire-001
+                    observedAt: 2026-10-09T05:00:00.000Z
+                    isReplay: false
+                    consecutiveFrames: 0
+                    requiredFrames: 3
+                    maxConfidence: null
+                    episodeId: null
+                    firstQualifiedAt: null
+                    confirmedAt: null
+                    windowSeconds: 5
+                    maxFrameGapSeconds: 1
+                    thresholdUsed: 0.5
+                    qualifyingFrameIds: *a5
+                    qualifyingFrameTimestamps: *a6
+                    incidentConfidence: null
+                    confidencePolicyVersion: fire-temporal-min-v1
+                    reason: INFERENCE_ERROR
+                    error:
+                      code: MODEL_NOT_LOADED
+                      message: Fire/smoke model is unavailable.
         "401":
           description: Thieu hoac sai X-Internal-Token
+        "413":
+          description: Encoded bytes or decoded pixels exceed configured limits.
         "422":
-          description: Thieu truong bat buoc trong form-data
+          description: Missing/invalid fields or capture timestamp. Decode/inference failures return 200 with error != null.
 
 components:
   securitySchemes:
@@ -375,44 +868,263 @@ components:
     FallResponse:
       type: object
       required: [trackId, state, modelVersion, processedAt]
+      description: |
+        US-16/US-17. Existing required fields remain unchanged; new fields are
+        optional for compatibility, but the new producer/implementation must
+        provide complete identity/evidence before proposing an incident.
+        No-pose observations are not technical errors and cannot confirm a fall.
+        Geometry is measured on the full image, after undoing ROI transforms.
       properties:
         trackId: { type: string }
+        cameraSlug: { type: string }
+        sourceSessionId: { type: string }
+        frameId: { type: ["string", "null"] }
+        observedAt:
+          type: string
+          format: date-time
+          description: UTC capture timestamp, equal to request frameTimestamp.
         state:
           type: string
           enum: [MONITORING, CANDIDATE, CONFIRMED, CANCELLED]
-        confidence: { type: ["number", "null"], minimum: 0, maximum: 1 }
+        poseAvailable: { type: boolean }
+        reason:
+          type: string
+          description: Observation/state reason, e.g. NORMAL_POSTURE, HISTORY_INSUFFICIENT, FALL_CANDIDATE, IMMOBILE_CONFIRMED, NO_POSE, LOW_VISIBILITY, AMBIGUOUS_POSE, REST_AREA, RECOVERED, MISSING_TIMEOUT, OUT_OF_ORDER, FRAME_GAP, STALE_FRAME, TRACK_RESET, CANDIDATE_TIMEOUT or TECHNICAL_ERROR. Missing pose does not introduce a new public state.
+        isReplay:
+          type: boolean
+          description: True for a cached response to an already processed frame; does not advance observation clocks.
+        episodeId:
+          type: ["string", "null"]
+          format: uuid
+          description: Stable UUIDv5, null before a candidate. Namespace UUID is 6ba7b811-9dad-11d1-80b4-00c04fd430c8 (URL); name is the compact UTF-8 JSON array [cameraSlug, sourceSessionId, trackId, candidateStartedAt], with timestamp canonicalized to UTC YYYY-MM-DDTHH:mm:ss.SSSZ. Retry retains identity; a new fall after observed recovery uses a new candidate timestamp.
+        candidateStartedAt: { type: ["string", "null"], format: date-time }
+        confirmedAt:
+          type: ["string", "null"]
+          format: date-time
+          description: Capture time of the valid frame first confirming this episode. Null before confirmation; retained on replay. This becomes the separate FALL incident detectedAt, not the source track's start time.
+        confidence:
+          type: ["number", "null"]
+          minimum: 0
+          maximum: 1
+          description: fall-rule-evidence-v1 returns 1 only for CONFIRMED with complete rule evidence, otherwise null. Evidence completeness score, not a calibrated probability, Frigate person score or landmark visibility.
+        confidencePolicyVersion: { type: string, example: fall-rule-evidence-v1 }
         torsoAngleDeg:
           type: ["number", "null"]
-          description: Goc truc than so voi phuong ngang; duoi 30 do la dau hieu nam.
+          minimum: 0
+          maximum: 90
+          description: Degrees to horizontal from shoulder/hip midpoints in full-image pixels. atan2(abs(dy),abs(dx)); strictly below configured 30 degrees is horizontal. Null without valid geometry.
+        aspectRatio:
+          type: ["number", "null"]
+          exclusiveMinimum: 0
+          description: Person bounding-box height/width in full-image pixels; diagnostic in v1, not an extra confirmation gate.
+        centerHeight:
+          type: ["number", "null"]
+          description: 1 minus torso-center y normalized by full-image height. Torso center is the mean of shoulder and hip midpoints; 2D proxy, not height in meters.
+        centerDropRatio:
+          type: ["number", "null"]
+          description: Current torso-center y minus median y of the 10 preceding valid poses, divided by their median bbox height in pixels. Positive means downward motion. Default candidate gate >=0.20; baseline frozen during candidate tracking.
+        motionScore:
+          type: ["number", "null"]
+          minimum: 0
+          description: Median displacement of quality-matched full-image landmark pairs divided by frozen baseline bbox height and frame delta seconds, in body-heights/second. Default immobile gate <0.05; require at least 6 pairs including shoulders/hips. Missing/invalid frame gaps return null and reset continuity.
         immobileSeconds:
           type: number
-          description: So giay da bat dong lien tuc.
-        thresholdSeconds: { type: integer }
-        keypointsDetected: { type: integer, description: 0..33 (MediaPipe Pose). }
-        boundingBox: { $ref: "#/components/schemas/BoundingBox" }
+          minimum: 0
+          description: Continuously observed abnormal and immobile interval; resets on movement, missing pose or invalid gap. Confirmation requires strictly greater than thresholdSeconds, never wall-clock time through a blind interval.
+        thresholdSeconds: { type: integer, minimum: 1, default: 15 }
+        missingPoseSeconds:
+          type: number
+          minimum: 0
+          description: Seconds since the last valid pose, including transport silence. Candidate identity is cancelled at the configured 5-second grace limit; no confirmation is triggered by the cleanup timer.
+        keypointsDetected:
+          type: integer
+          minimum: 0
+          maximum: 33
+          description: Number of MediaPipe's 33 landmarks passing the configured quality gate; mandatory shoulder/hip geometry is validated independently.
+        boundingBox:
+          oneOf:
+            - $ref: "#/components/schemas/BoundingBox"
+            - type: "null"
+          description: Person box normalized to the full image, never crop coordinates. Null when no box can be established.
         modelVersion: { type: string }
         processedAt: { type: string, format: date-time }
-        error: { $ref: "#/components/schemas/InferenceError" }
+        error: { $ref: "#/components/schemas/FallInferenceError" }
+
+    FallInferenceError:
+      type: ["object", "null"]
+      required: [code, message]
+      description: M2a-specific technical error returned with HTTP 200; missing/occluded/low-visibility pose instead uses poseAvailable=false, reason and error=null. Does not change face/fire InferenceError.
+      properties:
+        code:
+          type: string
+          enum:
+            - IMAGE_DECODE_FAILED
+            - MODEL_NOT_LOADED
+            - PROVIDER_UNAVAILABLE
+            - TIMEOUT
+            - POSE_INFERENCE_FAILED
+        message: { type: string }
 
     FireResponse:
       type: object
-      required: [confirmed, detections, modelVersion, processedAt]
+      required:
+        - confirmed
+        - detections
+        - modelVersion
+        - processedAt
       properties:
         confirmed:
           type: boolean
-          description: True khi da du so frame lien tiep xac nhan (FR-DET-M3-02).
-        consecutiveFrames: { type: integer }
-        requiredFrames: { type: integer }
+          description: True only with a valid qualifying sequence; replay retains the frozen confirmation evidence.
+        consecutiveFrames:
+          type: integer
+          minimum: 0
+          maximum: 60
+        requiredFrames:
+          type: integer
+          minimum: 3
+          maximum: 60
+          default: 3
         detections:
           type: array
+          maxItems: 100
           items:
-            type: object
-            required: [label, confidence, boundingBox]
-            properties:
-              label: { type: string, enum: [fire, smoke] }
-              confidence: { type: number, minimum: 0, maximum: 1 }
-              boundingBox: { $ref: "#/components/schemas/BoundingBox" }
-        maxConfidence: { type: number, minimum: 0, maximum: 1 }
-        modelVersion: { type: string }
-        processedAt: { type: string, format: date-time }
-        error: { $ref: "#/components/schemas/InferenceError" }
+            $ref: "#/components/schemas/FireDetection"
+        maxConfidence:
+          type:
+            - number
+            - "null"
+          minimum: 0
+          maximum: 1
+          description: Current-frame maximum; null without detections or on technical error.
+        modelVersion:
+          type: string
+          minLength: 1
+          maxLength: 128
+        processedAt:
+          type: string
+          format: date-time
+        cameraSlug:
+          type: string
+          minLength: 1
+          maxLength: 128
+        sourceSessionId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        frameId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        observedAt:
+          type: string
+          format: date-time
+        isReplay:
+          type: boolean
+        episodeId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        firstQualifiedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        confirmedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        windowSeconds:
+          type: number
+          exclusiveMinimum: 0
+          default: 5
+        maxFrameGapSeconds:
+          type: number
+          exclusiveMinimum: 0
+          default: 1
+        thresholdUsed:
+          type: number
+          minimum: 0
+          maximum: 1
+        qualifyingFrameIds:
+          type: array
+          maxItems: 60
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 128
+        qualifyingFrameTimestamps:
+          type: array
+          maxItems: 60
+          uniqueItems: true
+          items:
+            type: string
+            format: date-time
+        incidentConfidence:
+          type:
+            - number
+            - "null"
+          minimum: 0
+          maximum: 1
+        confidencePolicyVersion:
+          type: string
+          enum:
+            - fire-temporal-min-v1
+        reason:
+          type: string
+          enum:
+            - NEGATIVE
+            - INSUFFICIENT_FRAMES
+            - CONFIRMED
+            - REPLAY
+            - BELOW_THRESHOLD
+            - FRAME_GAP
+            - WINDOW_EXPIRED
+            - STALE_FRAME
+            - OUT_OF_ORDER
+            - INFERENCE_ERROR
+            - ACTIVE_EPISODE
+        error:
+          $ref: "#/components/schemas/FireInferenceError"
+
+    FireDetection:
+      type: object
+      additionalProperties: false
+      required:
+        - label
+        - confidence
+        - boundingBox
+      properties:
+        label:
+          type: string
+          enum:
+            - fire
+            - smoke
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        boundingBox:
+          $ref: "#/components/schemas/BoundingBox"
+
+    FireInferenceError:
+      type:
+        - object
+        - "null"
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - IMAGE_DECODE_FAILED
+            - MODEL_NOT_LOADED
+            - PROVIDER_UNAVAILABLE
+            - TIMEOUT
+            - FIRE_INFERENCE_FAILED
+        message:
+          type: string
