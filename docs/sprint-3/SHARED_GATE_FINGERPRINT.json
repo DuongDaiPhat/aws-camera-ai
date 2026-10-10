@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-10",
+  "stories": ["US-16", "US-17", "US-18", "US-20"],
+  "contractMergeCommit": "97765fc710aefd0d76c0572f7e74c86fa10efdca",
+  "contractPullRequest": "https://github.com/DuongDaiPhat/aws-camera-ai/pull/24",
+  "dependencyStatus": "LOCAL_VERIFIED_PENDING_PUBLICATION",
+  "python": "3.11.13",
+  "lockTool": "pip-tools 7.4.1",
+  "hashes": {
+    "api/openapi.yaml": "60ecc1b5aedcca655d728642e443c2636cedabc32dc8ca0d2aa31f863f6240bb",
+    "api/openapi-ai-service.yaml": "5c7673f228afef7326da088971ee354d2f9be040f78325f1f18f9c75efac9d33",
+    "pnpm-lock.yaml": "99cf285b961721d2e83ac3cc6029008e7518b12386d310ec54e01a3832554d6a",
+    "packages/contracts/src/generated/orchestrator.ts": "ef42ee6cde2cbf8791fe8781891097ac67a1763889c96f49a4a39461eefbf0a7",
+    "packages/contracts/src/generated/ai-service.ts": "e91716c92af4b334f2145b0434befe96a82b1bed91c882e02e52ecc2dd660c84",
+    "services/ai-service/requirements-runtime.lock": "d3bfe81de503551d1bbd64c693ed9dc5d8634453a4241808fef6eb04e4d69bc0",
+    "services/ai-service/requirements-dev.lock": "293c4280f1a9a56cfb5c53ccf52caace3ca9a8467b4c9d6c2879b0f18b9b4045",
+    "services/ai-service/requirements-runtime-windows.lock": "a08ade35c26b5438499cf1755d11baf507c7c4c637d0cbc376a9cde93b6747ce",
+    "services/ai-service/requirements-dev-windows.lock": "85847fdaa08114a54b08f08faef008107d8ec51ec864b6e75df71a6c192cd4c4",
+    "services/ai-service/requirements-lock-tools.lock": "e93120bd440a0bfe15cb4eeb6601365fb02ef03dd22fc7f35d9622ef8dab26cc",
+    "services/ai-service/training/requirements-cpu-linux.lock": "39b0395d7ff7eabd5952cc3c9b02877c0df11205e5778d77d63e73cf600261a6",
+    "services/ai-service/model-manifest.json": "f9cf52f79421114d1d166ec230a1c0928febad08031fcc4f2fdc43e389fcbed1",
+    "db/migrations/0013_fall_incidents.sql": "3965fe35533103720a98fb9a0234a8d79e0e524b746bb8b2faada15b631e7cb5",
+    "db/migrations/0014_fire_incidents.sql": "4503f9135f2637d86eff6e098f5eab133a933255e3900c045fd83f441ee953a0",
+    "db/migrations/0015_wellness_check_runtime.sql": "04b824356399ac1400c2e1b0ca19f003db30d0449f405d760d94ef1623dd7ee5"
+  }
+}

@@ -12,7 +12,7 @@
     }
   },
   "scripts": {
-    "generate": "openapi-typescript ../../api/openapi.yaml -o ./src/generated/orchestrator.ts && openapi-typescript ../../api/openapi-ai-service.yaml -o ./src/generated/ai-service.ts",
+    "generate": "openapi-typescript --redocly ../../redocly.yaml && prettier --write src/generated/*.ts",
     "build": "tsc -p tsconfig.build.json",
     "prepare": "pnpm build",
     "lint": "eslint \"src/**/*.ts\"",

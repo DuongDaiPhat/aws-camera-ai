@@ -24,7 +24,7 @@ permissions:
 
 env:
   NODE_VERSION: "22"
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: "3.11.13"
 
 jobs:
   # -------------------------------------------------------------------
@@ -82,8 +82,16 @@ jobs:
   # -------------------------------------------------------------------
   python:
     name: Python (ruff · pytest)
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            lock: requirements-dev.lock
+          - os: windows-latest
+            lock: requirements-dev-windows.lock
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: services/ai-service
@@ -91,16 +99,40 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
+        if: runner.os == 'Linux'
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
           # Chi ro file de cache khong doan nham khi repo co them file Python khac
-          cache-dependency-path: services/ai-service/pyproject.toml
+          cache-dependency-path: services/ai-service/requirements*.lock
+
+      # CPython 3.11.13 is source-only upstream; use the same standalone build
+      # as the verified Windows baseline rather than silently changing Python.
+      - uses: astral-sh/setup-uv@v6
+        if: runner.os == 'Windows'
+        with:
+          version: "0.8.22"
+
+      - name: Create pinned Windows Python environment
+        if: runner.os == 'Windows'
+        run: |
+          uv venv --python ${{ env.PYTHON_VERSION }} --seed .venv
+          "$PWD/.venv/Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Linux system libraries for shared OpenCV/MediaPipe
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libgl1 libglib2.0-0 libportaudio2
 
       - name: Cai dependency
         run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          python -m pip install --require-hashes -r ${{ matrix.lock }}
+          python -m pip install --no-deps --no-build-isolation -e ".[dev,m2a,m3]"
+          python -m pip check
+
+      - name: Verify pinned model artifacts and shared runtime
+        run: |
+          python scripts/fetch_models.py --output-dir ../../artifacts/ci-models
+          python scripts/dependency_smoke.py --models-dir ../../artifacts/ci-models
 
       - name: Lint (ruff)
         run: ruff check .
@@ -110,6 +142,17 @@ jobs:
 
       - name: Unit test (pytest + coverage)
         run: pytest
+
+  training:
+    name: YOLO CPU (isolated lock · export smoke)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build isolated training environment from hash lock
+        run: docker build -t camerai-training-ci services/ai-service/training
+      - name: Two-class ONNX export compatibility (untrained graph)
+        run: docker run --rm camerai-training-ci
 
   # -------------------------------------------------------------------
   # 3. OpenAPI — spec phai hop le TRUOC khi code theo no (task 0.4)
@@ -137,6 +180,11 @@ jobs:
       - name: Lint spec orchestrator va AI service
         run: pnpm api:lint
 
+      - name: Generated contracts must match both frozen specs
+        run: |
+          pnpm contracts:generate
+          git diff --exit-code -- packages/contracts/src/generated
+
   # -------------------------------------------------------------------
   # 4. Database — migration phai chay duoc tren Postgres sach
   #    (bat duoc loi cu phap SQL truoc khi ai do keo ve may minh)
@@ -160,6 +208,18 @@ jobs:
           --health-retries 10
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Sprint 3 fresh, seeded upgrade, replay and constraint gate
+        run: node tools/scripts/sprint3-db-gate.mjs
 
       - name: Cai psql client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
@@ -245,7 +305,7 @@ jobs:
   ci-ok:
     name: CI xanh
     runs-on: ubuntu-latest
-    needs: [node, python, openapi, database, docker]
+    needs: [node, python, training, openapi, database, docker, commitlint]
     if: always()
     steps:
       - name: Kiem tra khong co job nao that bai

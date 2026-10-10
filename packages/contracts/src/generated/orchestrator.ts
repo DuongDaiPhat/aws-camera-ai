@@ -4,4300 +4,4357 @@
  */
 
 export interface paths {
-    "/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Kiem tra dich vu song */
-        get: operations["getHealth"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/auth/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Dang nhap bang email va mat khau
-         * @description FR-AUT-03: nam lan sai dau tra ve `401`. Lan thu sau tai khoan bi khoa
-         *     15 phut, ghi audit log va tra ve `423 Locked`.
-         */
-        post: operations["login"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Kiem tra dich vu song */
+    get: operations['getHealth'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/auth/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Lam moi access token
-         * @description Refresh token co the gui trong body hoac cookie HttpOnly `camerai_refresh`.
-         *     Sau khi dung, token cu bi thu hoi va duoc thay bang mot refresh token moi.
-         */
-        post: operations["refreshToken"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Dang nhap bang email va mat khau
+     * @description FR-AUT-03: nam lan sai dau tra ve `401`. Lan thu sau tai khoan bi khoa
+     *     15 phut, ghi audit log va tra ve `423 Locked`.
+     */
+    post: operations['login'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/refresh': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/auth/logout": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Dang xuat va thu hoi refresh token */
-        post: operations["logout"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Lam moi access token
+     * @description Refresh token co the gui trong body hoac cookie HttpOnly `camerai_refresh`.
+     *     Sau khi dung, token cu bi thu hoi va duoc thay bang mot refresh token moi.
+     */
+    post: operations['refreshToken'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/logout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/auth/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Thong tin nguoi dung hien tai */
-        get: operations["getCurrentUser"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Dang xuat va thu hoi refresh token */
+    post: operations['logout'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/auth/telegram/link": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Tao ma lien ket Telegram mot lan cho tai khoan da dang nhap
-         * @description US-14. Token chi tra ve mot lan, het han sau 10 phut. Gui `/start <token>`
-         *     trong private chat voi bot. Gioi han mot yeu cau moi phut; token cu bi vo hieu.
-         */
-        post: operations["createTelegramLink"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Thong tin nguoi dung hien tai */
+    get: operations['getCurrentUser'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/telegram/link': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Danh sach nguoi dung
-         * @description Chi ADMIN goi duoc (FR-AUT-05).
-         */
-        get: operations["listUsers"];
-        put?: never;
-        /** Tao nguoi dung moi */
-        post: operations["createUser"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Tao ma lien ket Telegram mot lan cho tai khoan da dang nhap
+     * @description US-14. Token chi tra ve mot lan, het han sau 10 phut. Gui `/start <token>`
+     *     trong private chat voi bot. Gioi han mot yeu cau moi phut; token cu bi vo hieu.
+     */
+    post: operations['createTelegramLink'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/users': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/users/{userId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                userId: components["parameters"]["UserId"];
-            };
-            cookie?: never;
-        };
-        /** Chi tiet nguoi dung */
-        get: operations["getUser"];
-        put?: never;
-        post?: never;
-        /** Vo hieu hoa nguoi dung */
-        delete: operations["deleteUser"];
-        options?: never;
-        head?: never;
-        /** Cap nhat nguoi dung */
-        patch: operations["updateUser"];
-        trace?: never;
+    /**
+     * Danh sach nguoi dung
+     * @description Chi ADMIN goi duoc (FR-AUT-05).
+     */
+    get: operations['listUsers'];
+    put?: never;
+    /** Tao nguoi dung moi */
+    post: operations['createUser'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/users/{userId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        userId: components['parameters']['UserId'];
+      };
+      cookie?: never;
     };
-    "/devices": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Danh sach thiet bi */
-        get: operations["listDevices"];
-        put?: never;
-        /** Dang ky thiet bi moi */
-        post: operations["createDevice"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Chi tiet nguoi dung */
+    get: operations['getUser'];
+    put?: never;
+    post?: never;
+    /** Vo hieu hoa nguoi dung */
+    delete: operations['deleteUser'];
+    options?: never;
+    head?: never;
+    /** Cap nhat nguoi dung */
+    patch: operations['updateUser'];
+    trace?: never;
+  };
+  '/devices': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/devices/{deviceId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deviceId: components["parameters"]["DeviceId"];
-            };
-            cookie?: never;
-        };
-        /** Chi tiet thiet bi */
-        get: operations["getDevice"];
-        put?: never;
-        post?: never;
-        /** Xoa thiet bi (xoa theo tang ca camera ben trong) */
-        delete: operations["deleteDevice"];
-        options?: never;
-        head?: never;
-        /** Cap nhat thiet bi */
-        patch: operations["updateDevice"];
-        trace?: never;
+    /** Danh sach thiet bi */
+    get: operations['listDevices'];
+    put?: never;
+    /** Dang ky thiet bi moi */
+    post: operations['createDevice'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/devices/{deviceId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        deviceId: components['parameters']['DeviceId'];
+      };
+      cookie?: never;
     };
-    "/cameras": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Danh sach camera */
-        get: operations["listCameras"];
-        put?: never;
-        /**
-         * Them camera
-         * @description `rtspUrl` chi duoc gui len, KHONG bao gio tra ve trong response
-         *     cho role khac ADMIN (NFR-09).
-         */
-        post: operations["createCamera"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Chi tiet thiet bi */
+    get: operations['getDevice'];
+    put?: never;
+    post?: never;
+    /** Xoa thiet bi (xoa theo tang ca camera ben trong) */
+    delete: operations['deleteDevice'];
+    options?: never;
+    head?: never;
+    /** Cap nhat thiet bi */
+    patch: operations['updateDevice'];
+    trace?: never;
+  };
+  '/cameras': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/cameras/{cameraId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        /** Chi tiet camera */
-        get: operations["getCamera"];
-        put?: never;
-        post?: never;
-        /** Xoa camera */
-        delete: operations["deleteCamera"];
-        options?: never;
-        head?: never;
-        /** Cap nhat camera */
-        patch: operations["updateCamera"];
-        trace?: never;
+    /** Danh sach camera */
+    get: operations['listCameras'];
+    put?: never;
+    /**
+     * Them camera
+     * @description `rtspUrl` chi duoc gui len, KHONG bao gio tra ve trong response
+     *     cho role khac ADMIN (NFR-09).
+     */
+    post: operations['createCamera'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cameras/{cameraId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
     };
-    "/cameras/{cameraId}/snapshot": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        /**
-         * Anh preview hien tai cua camera
-         * @description Dung lam nen de admin ve vung giam sat (US-12).
-         */
-        get: operations["getCameraSnapshot"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Chi tiet camera */
+    get: operations['getCamera'];
+    put?: never;
+    post?: never;
+    /** Xoa camera */
+    delete: operations['deleteCamera'];
+    options?: never;
+    head?: never;
+    /** Cap nhat camera */
+    patch: operations['updateCamera'];
+    trace?: never;
+  };
+  '/cameras/{cameraId}/snapshot': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
     };
-    "/cameras/{cameraId}/state": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /** Bat hoac tat camera (desired state) */
-        put: operations["updateCameraState"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Anh preview hien tai cua camera
+     * @description Dung lam nen de admin ve vung giam sat (US-12).
+     */
+    get: operations['getCameraSnapshot'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cameras/{cameraId}/state': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
     };
-    "/cameras/{cameraId}/runtime-status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        /** Lay trang thai runtime thuc te cua camera */
-        get: operations["getCameraRuntimeStatus"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    /** Bat hoac tat camera (desired state) */
+    put: operations['updateCameraState'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cameras/{cameraId}/runtime-status': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
     };
-    "/cameras/{cameraId}/source": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        /** Chi tiet nguon phat cua camera */
-        get: operations["getCameraSource"];
-        /** Cap nhat cau hinh nguon phat camera */
-        put: operations["updateCameraSource"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Lay trang thai runtime thuc te cua camera */
+    get: operations['getCameraRuntimeStatus'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cameras/{cameraId}/source': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
     };
-    "/cameras/{cameraId}/source/video": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Upload file video nguon phat cho camera */
-        post: operations["uploadCameraVideo"];
-        /** Xoa file video nguon phat cua camera */
-        delete: operations["deleteCameraVideo"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Chi tiet nguon phat cua camera */
+    get: operations['getCameraSource'];
+    /** Cap nhat cau hinh nguon phat camera */
+    put: operations['updateCameraSource'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cameras/{cameraId}/source/video': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
     };
-    "/cameras/{cameraId}/source/test": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Kiem tra ket noi toi nguon RTSP ma khong luu cau hinh */
-        post: operations["testCameraRtspConnection"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Upload file video nguon phat cho camera */
+    post: operations['uploadCameraVideo'];
+    /** Xoa file video nguon phat cua camera */
+    delete: operations['deleteCameraVideo'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cameras/{cameraId}/source/test': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
     };
-    "/cameras/{cameraId}/source/start": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Bat dau phat nguon camera (video publisher / webcam) */
-        post: operations["startCameraSource"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Kiem tra ket noi toi nguon RTSP ma khong luu cau hinh */
+    post: operations['testCameraRtspConnection'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cameras/{cameraId}/source/start': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
     };
-    "/cameras/{cameraId}/source/stop": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Dung phat nguon camera */
-        post: operations["stopCameraSource"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Bat dau phat nguon camera (video publisher / webcam) */
+    post: operations['startCameraSource'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cameras/{cameraId}/source/stop': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
     };
-    "/cameras/{cameraId}/source/browser-session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Cap phien publish WebRTC/WHIP cho webcam trinh duyet */
-        post: operations["createBrowserPublishSession"];
-        /** Thu hoi phien publish WebRTC/WHIP cho webcam trinh duyet */
-        delete: operations["revokeBrowserPublishSession"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Dung phat nguon camera */
+    post: operations['stopCameraSource'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cameras/{cameraId}/source/browser-session': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
     };
-    "/cameras/{cameraId}/frigate-sync/retry": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Thu lai dong bo cau hinh xuong Frigate */
-        post: operations["retryFrigateSync"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Cap phien publish WebRTC/WHIP cho webcam trinh duyet */
+    post: operations['createBrowserPublishSession'];
+    /** Thu hoi phien publish WebRTC/WHIP cho webcam trinh duyet */
+    delete: operations['revokeBrowserPublishSession'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cameras/{cameraId}/frigate-sync/retry': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
     };
-    "/cameras/{cameraId}/debug-stream": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        /** Lay thong tin luong debug va du lieu detection thuc te */
-        get: operations["getCameraDebugStream"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Thu lai dong bo cau hinh xuong Frigate */
+    post: operations['retryFrigateSync'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cameras/{cameraId}/debug-stream': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
     };
-    "/cameras/{cameraId}/zones": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        /** Danh sach vung cua mot camera */
-        get: operations["listZones"];
-        put?: never;
-        /**
-         * Tao vung giam sat moi
-         * @description Toa do da giac phai CHUAN HOA ve khoang 0..1 de doc lap do phan giai.
-         *     Orchestrator tu sinh lai cau hinh Frigate sau khi luu. Response thanh cong
-         *     chi xac nhan zone da duoc luu vao PostgreSQL; trang thai `frigateSync` cua
-         *     camera cho biet cau hinh da co hieu luc tren Frigate hay chua.
-         */
-        post: operations["createZone"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Lay thong tin luong debug va du lieu detection thuc te */
+    get: operations['getCameraDebugStream'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cameras/{cameraId}/zones': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
     };
-    "/zones/{zoneId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                zoneId: components["parameters"]["ZoneId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Xoa vung */
-        delete: operations["deleteZone"];
-        options?: never;
-        head?: never;
-        /** Cap nhat vung */
-        patch: operations["updateZone"];
-        trace?: never;
+    /** Danh sach vung cua mot camera */
+    get: operations['listZones'];
+    put?: never;
+    /**
+     * Tao vung giam sat moi
+     * @description Toa do da giac phai CHUAN HOA ve khoang 0..1 de doc lap do phan giai.
+     *     Orchestrator tu sinh lai cau hinh Frigate sau khi luu. Response thanh cong
+     *     chi xac nhan zone da duoc luu vao PostgreSQL; trang thai `frigateSync` cua
+     *     camera cho biet cau hinh da co hieu luc tren Frigate hay chua.
+     */
+    post: operations['createZone'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/zones/{zoneId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        zoneId: components['parameters']['ZoneId'];
+      };
+      cookie?: never;
     };
-    "/known-faces": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Danh sach nguoi quen
-         * @description Danh sach thuoc user trong access token; khong suy dien quyen ho gia dinh.
-         */
-        get: operations["listKnownFaces"];
-        put?: never;
-        /**
-         * Dang ky nguoi quen tu 1-5 anh
-         * @description FR-DEV-06: anh khong phat hien duoc khuon mat -> `422` voi
-         *     `code = NO_FACE_DETECTED`.
-         *     Anh co nhieu hon 1 khuon mat -> `422` voi `code = MULTIPLE_FACES`
-         *     kem `details.images[]` de nguoi dung chon cho tung anh.
-         *     Chi ADMIN duoc tao. Owner lay tu access token, khong nhan tu client.
-         *     faceSelections la JSON array trong mot multipart text field.
-         *     FR-DEV-08: he thong chi luu embedding, KHONG luu anh goc.
-         */
-        post: operations["createKnownFace"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Xoa vung */
+    delete: operations['deleteZone'];
+    options?: never;
+    head?: never;
+    /** Cap nhat vung */
+    patch: operations['updateZone'];
+    trace?: never;
+  };
+  '/known-faces': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/known-faces/{knownFaceId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                knownFaceId: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Xoa vinh vien du lieu khuon mat
-         * @description FR-DEV-07 / FR-DAT-03: xoa THAT khoi DB va khoi Rekognition
-         *     Collection neu dang dung. Khong soft-delete. Ghi audit log.
-         */
-        delete: operations["deleteKnownFace"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Danh sach nguoi quen
+     * @description Danh sach thuoc user trong access token; khong suy dien quyen ho gia dinh.
+     */
+    get: operations['listKnownFaces'];
+    put?: never;
+    /**
+     * Dang ky nguoi quen tu 1-5 anh
+     * @description FR-DEV-06: anh khong phat hien duoc khuon mat -> `422` voi
+     *     `code = NO_FACE_DETECTED`.
+     *     Anh co nhieu hon 1 khuon mat -> `422` voi `code = MULTIPLE_FACES`
+     *     kem `details.images[]` de nguoi dung chon cho tung anh.
+     *     Chi ADMIN duoc tao. Owner lay tu access token, khong nhan tu client.
+     *     faceSelections la JSON array trong mot multipart text field.
+     *     FR-DEV-08: he thong chi luu embedding, KHONG luu anh goc.
+     */
+    post: operations['createKnownFace'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/known-faces/{knownFaceId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        knownFaceId: string;
+      };
+      cookie?: never;
     };
-    "/events": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Danh sach su kien co loc va phan trang
-         * @description Mac dinh sap xep theo `detectedAt` giam dan (US-06, US-21).
-         */
-        get: operations["listEvents"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Xoa vinh vien du lieu khuon mat
+     * @description FR-DEV-07 / FR-DAT-03: xoa THAT khoi DB va khoi Rekognition
+     *     Collection neu dang dung. Khong soft-delete. Ghi audit log.
+     */
+    delete: operations['deleteKnownFace'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/events': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/events/stats": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * So lieu tong hop cho dashboard
-         * @description FR-DSH-01 — the so lieu tren dau dashboard (US-06).
-         *     Dem tren cua so `windowHours` gio gan nhat, mac dinh 24 gio.
-         */
-        get: operations["getEventStats"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Danh sach su kien co loc va phan trang
+     * @description Mac dinh sap xep theo `detectedAt` giam dan (US-06, US-21).
+     */
+    get: operations['listEvents'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/events/stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/events/stream": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Luong su kien thoi gian thuc (Server-Sent Events)
-         * @description FR-DSH-02: dashboard tu cap nhat khong can F5.
-         *     Moi su kien la mot SSE message: `event: event.created` hoac
-         *     `event: event.updated`, phan `data` la `EventSummary` dang JSON.
-         *     Client gui `Authorization` qua query `?token=` vi EventSource
-         *     khong dat duoc header.
-         */
-        get: operations["streamEvents"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * So lieu tong hop cho dashboard
+     * @description FR-DSH-01 — the so lieu tren dau dashboard (US-06).
+     *     Dem tren cua so `windowHours` gio gan nhat, mac dinh 24 gio.
+     */
+    get: operations['getEventStats'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/events/stream': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/events/{eventId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        /** Chi tiet su kien */
-        get: operations["getEvent"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Danh dau bao dong gia hoac giu lai su kien
-         * @description FR-EVT-06: `isFalseAlarm` la nguon du lieu that de do FAR (US-22).
-         *     FR-DAT-02: `retain = true` giu media khoi bi lifecycle xoa.
-         */
-        patch: operations["updateEvent"];
-        trace?: never;
+    /**
+     * Luong su kien thoi gian thuc (Server-Sent Events)
+     * @description FR-DSH-02: dashboard tu cap nhat khong can F5.
+     *     Moi su kien la mot SSE message: `event: event.created` hoac
+     *     `event: event.updated`, phan `data` la `EventSummary` dang JSON.
+     *     Client gui `Authorization` qua query `?token=` vi EventSource
+     *     khong dat duoc header.
+     */
+    get: operations['streamEvents'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/events/{eventId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
     };
-    "/events/{eventId}/confirm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Xac nhan su kien ("Toi on" / "Can giup do")
-         * @description FR-ESC-03/04/09. Chi lan xac nhan DAU TIEN quyet dinh trang thai;
-         *     lan bam sau tra ve `409 ALREADY_CONFIRMED` va van duoc ghi lai
-         *     de kiem toan (US-14).
-         */
-        post: operations["confirmEvent"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Chi tiet su kien */
+    get: operations['getEvent'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Danh dau bao dong gia hoac giu lai su kien
+     * @description FR-EVT-06: `isFalseAlarm` la nguon du lieu that de do FAR (US-22).
+     *     FR-DAT-02: `retain = true` giu media khoi bi lifecycle xoa.
+     */
+    patch: operations['updateEvent'];
+    trace?: never;
+  };
+  '/events/{eventId}/confirm': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
     };
-    "/events/{eventId}/close": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Dong su kien khan cap sau khi tiep nhan xu ly
-         * @description FR-ESC-04/09. Dong su kien dang o trang thai ESCALATED thanh CLOSED.
-         *     Ghi nhan nguoi dong, thoi diem va ly do dong su kien.
-         */
-        post: operations["closeEvent"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Xac nhan su kien ("Toi on" / "Can giup do")
+     * @description FR-ESC-03/04/09. Chi lan xac nhan DAU TIEN quyet dinh trang thai;
+     *     lan bam sau tra ve `409 ALREADY_CONFIRMED` va van duoc ghi lai
+     *     de kiem toan (US-14).
+     */
+    post: operations['confirmEvent'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/events/{eventId}/close': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
     };
-    "/events/{eventId}/media": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        /**
-         * Danh sach media cua su kien kem presigned URL
-         * @description FR-EVT-07 — URL het han sau 15 phut, khong lo credential bucket.
-         */
-        get: operations["listEventMedia"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Dong su kien khan cap sau khi tiep nhan xu ly
+     * @description FR-ESC-04/09. Dong su kien dang o trang thai ESCALATED thanh CLOSED.
+     *     Ghi nhan nguoi dong, thoi diem va ly do dong su kien.
+     */
+    post: operations['closeEvent'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/events/{eventId}/media': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
     };
-    "/events/{eventId}/history": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        /**
-         * Lich su chuyen trang thai cua su kien
-         * @description FR-EVT-05 — ai xac nhan, luc nao, qua kenh nao.
-         */
-        get: operations["getEventHistory"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Danh sach media cua su kien kem presigned URL
+     * @description FR-EVT-07 — URL het han sau 15 phut, khong lo credential bucket.
+     */
+    get: operations['listEventMedia'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/events/{eventId}/history': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
     };
-    "/events/{eventId}/notifications": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        /**
-         * Danh sach thong bao da gui cho su kien
-         * @description FR-NOT-04 — theo doi kenh nao gui thanh cong, kenh nao that bai.
-         */
-        get: operations["listEventNotifications"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Lich su chuyen trang thai cua su kien
+     * @description FR-EVT-05 — ai xac nhan, luc nao, qua kenh nao.
+     */
+    get: operations['getEventHistory'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/events/{eventId}/notifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
     };
-    "/media/{mediaId}/url": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                mediaId: string;
-            };
-            cookie?: never;
-        };
-        /** Sinh presigned URL moi cho mot media */
-        get: operations["getMediaUrl"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Danh sach thong bao da gui cho su kien
+     * @description FR-NOT-04 — theo doi kenh nao gui thanh cong, kenh nao that bai.
+     */
+    get: operations['listEventNotifications'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/media/{mediaId}/url': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        mediaId: string;
+      };
+      cookie?: never;
     };
-    "/escalation-rules": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Danh sach quy tac leo thang theo loai su kien */
-        get: operations["listEscalationRules"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Sinh presigned URL moi cho mot media */
+    get: operations['getMediaUrl'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/escalation-rules': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/escalation-rules/{eventType}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventType: components["schemas"]["EventType"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Cap nhat nguong va thoi gian cho
-         * @description FR-ADM-02: thay doi co hieu luc trong vong 60 giay, khong can restart.
-         *     FR-ADM-03: `tLow > tHigh` bi tu choi voi `400 INVALID_THRESHOLD`.
-         */
-        put: operations["updateEscalationRule"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Update thresholds only (US-15)
-         * @description ADMIN only. Atomic version check; preserve channels/priority/flags. New events see committed changes within 60 seconds.
-         */
-        patch: operations["updateEscalationThresholds"];
-        trace?: never;
+    /** Danh sach quy tac leo thang theo loai su kien */
+    get: operations['listEscalationRules'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/escalation-rules/{eventType}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventType: components['schemas']['EventType'];
+      };
+      cookie?: never;
     };
-    "/wellness-schedules": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Danh sach lich wellness theo quyen truy cap
-         * @description US-20. ADMIN/CAREGIVER manage schedules only for a registered resident in their household; assigned residents (normally role VIEWER) can read their own schedules. Resident identity uses active known_faces.linked_user_id and household camera ownership. All activity is resident-specific verified motion/arrival evidence, not arbitrary person detection or face match alone. Empty cameraIds means enabled cameras of this household. Time is HH:mm in an IANA timezone; 09:00 and 18:00 are two schedule records. Default lookbackHours=6, graceSeconds=300. No computer vision is performed by the scheduler.
-         */
-        get: operations["listWellnessSchedules"];
-        put?: never;
-        /**
-         * Tao lich wellness cho nguoi da dang ky
-         * @description US-20. ADMIN/CAREGIVER manage schedules only for a registered resident in their household; assigned residents (normally role VIEWER) can read their own schedules. Resident identity uses active known_faces.linked_user_id and household camera ownership. All activity is resident-specific verified motion/arrival evidence, not arbitrary person detection or face match alone. Empty cameraIds means enabled cameras of this household. Time is HH:mm in an IANA timezone; 09:00 and 18:00 are two schedule records. Default lookbackHours=6, graceSeconds=300. No computer vision is performed by the scheduler. New writes require a valid household link and a usable resident confirmation channel. Duplicate non-deleted resident/checkAt returns 409; never silently replace a schedule.
-         */
-        post: operations["createWellnessSchedule"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    /**
+     * Cap nhat nguong va thoi gian cho
+     * @description FR-ADM-02: thay doi co hieu luc trong vong 60 giay, khong can restart.
+     *     FR-ADM-03: `tLow > tHigh` bi tu choi voi `400 INVALID_THRESHOLD`.
+     */
+    put: operations['updateEscalationRule'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update thresholds only (US-15)
+     * @description ADMIN only. Atomic version check; preserve channels/priority/flags. New events see committed changes within 60 seconds.
+     */
+    patch: operations['updateEscalationThresholds'];
+    trace?: never;
+  };
+  '/wellness-schedules': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/wellness-schedules/{scheduleId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                scheduleId: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Xoa lich wellness va giu lich su kiem tra
-         * @description ADMIN/CAREGIVER of the schedule household. Soft-delete and disable future admission. Existing alerts, confirmations, deadlines and audit records continue.
-         */
-        delete: operations["deleteWellnessSchedule"];
-        options?: never;
-        head?: never;
-        /**
-         * Cap nhat tung phan lich wellness
-         * @description ADMIN/CAREGIVER of the schedule household. At least one field is required. Revalidate the merged schedule and its resident/cameras/timezone. Changes apply to future occurrences; existing evidence and confirmation deadlines retain their snapshots. Duplicate resident/checkAt returns 409.
-         */
-        patch: operations["updateWellnessSchedule"];
-        trace?: never;
+    /**
+     * Danh sach lich wellness theo quyen truy cap
+     * @description US-20. ADMIN/CAREGIVER manage schedules only for a registered resident in their household; assigned residents (normally role VIEWER) can read their own schedules. Resident identity uses active known_faces.linked_user_id and household camera ownership. All activity is resident-specific verified motion/arrival evidence, not arbitrary person detection or face match alone. Empty cameraIds means enabled cameras of this household. Time is HH:mm in an IANA timezone; 09:00 and 18:00 are two schedule records. Default lookbackHours=6, graceSeconds=300. No computer vision is performed by the scheduler.
+     */
+    get: operations['listWellnessSchedules'];
+    put?: never;
+    /**
+     * Tao lich wellness cho nguoi da dang ky
+     * @description US-20. ADMIN/CAREGIVER manage schedules only for a registered resident in their household; assigned residents (normally role VIEWER) can read their own schedules. Resident identity uses active known_faces.linked_user_id and household camera ownership. All activity is resident-specific verified motion/arrival evidence, not arbitrary person detection or face match alone. Empty cameraIds means enabled cameras of this household. Time is HH:mm in an IANA timezone; 09:00 and 18:00 are two schedule records. Default lookbackHours=6, graceSeconds=300. No computer vision is performed by the scheduler. New writes require a valid household link and a usable resident confirmation channel. Duplicate non-deleted resident/checkAt returns 409; never silently replace a schedule.
+     */
+    post: operations['createWellnessSchedule'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/wellness-schedules/{scheduleId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        scheduleId: string;
+      };
+      cookie?: never;
     };
-    "/wellness-checks": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Lich su va yeu cau wellness dang cho xac nhan
-         * @description ADMIN/CAREGIVER see household runs; assigned residents (normally role VIEWER) see only their own. Camera-less M5 events use explicit household/resident scope. Run status is the scheduler decision; eventStatus is the alert lifecycle. No image or inference call is needed.
-         */
-        get: operations["listWellnessChecks"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Xoa lich wellness va giu lich su kiem tra
+     * @description ADMIN/CAREGIVER of the schedule household. Soft-delete and disable future admission. Existing alerts, confirmations, deadlines and audit records continue.
+     */
+    delete: operations['deleteWellnessSchedule'];
+    options?: never;
+    head?: never;
+    /**
+     * Cap nhat tung phan lich wellness
+     * @description ADMIN/CAREGIVER of the schedule household. At least one field is required. Revalidate the merged schedule and its resident/cameras/timezone. Changes apply to future occurrences; existing evidence and confirmation deadlines retain their snapshots. Duplicate resident/checkAt returns 409.
+     */
+    patch: operations['updateWellnessSchedule'];
+    trace?: never;
+  };
+  '/wellness-checks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/wellness-checks/{checkId}/confirm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                checkId: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Nguoi duoc giam sat xac nhan Toi on hoac Can giup do
-         * @description US-20. Only the authenticated resident assigned to this check can confirm INITIAL through this endpoint, including role VIEWER. Existing /events/{eventId}/confirm ADMIN/CAREGIVER permissions remain unchanged. A sent request and NOTIFIED event are required. First successful resident-channel dispatch starts snapshotted graceSeconds (default 300); retries never extend it. Server transaction time must be strictly before confirmationDeadlineAt; at equality/after, atomically escalate and return 409. IM_OK -> RESOLVED; NEED_HELP -> ESCALATED immediately. Actor/time are server-derived. Same commandId/payload replays the original 200 response even after event changes; another/changed confirmation returns 409. Worker and confirmation lock the same event/run in fixed order. Do not resolve an already escalated event.
-         */
-        post: operations["confirmWellnessCheck"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Lich su va yeu cau wellness dang cho xac nhan
+     * @description ADMIN/CAREGIVER see household runs; assigned residents (normally role VIEWER) see only their own. Camera-less M5 events use explicit household/resident scope. Run status is the scheduler decision; eventStatus is the alert lifecycle. No image or inference call is needed.
+     */
+    get: operations['listWellnessChecks'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/wellness-checks/{checkId}/confirm': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        checkId: string;
+      };
+      cookie?: never;
     };
-    "/internal/wellness-observations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Nhan bang chung hoat dong va hien dien tu M1
-         * @description US-20, internal token only. Store trusted existing identity/motion/direction evidence; perform no computer vision and accept no user self-reported activity. observationId/payload are idempotent: identical retry -> DUPLICATE; changed payload -> 409. Store observedAt separately from receivedAt. Ordered ARRIVAL/MOTION => HOME; validated DEPARTURE => AWAY. Silence, unknown person, model failure and camera outage never mean AWAY or healthy activity. Expired presence means UNKNOWN. Late evidence may affect future checks but cannot silently resolve an existing timeout. M1 currently lacks a directional departure feed: integrate verified source evidence before claiming skip-away acceptance; never infer departure from a track ending.
-         */
-        post: operations["submitWellnessObservation"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Nguoi duoc giam sat xac nhan Toi on hoac Can giup do
+     * @description US-20. Only the authenticated resident assigned to this check can confirm INITIAL through this endpoint, including role VIEWER. Existing /events/{eventId}/confirm ADMIN/CAREGIVER permissions remain unchanged. A sent request and NOTIFIED event are required. First successful resident-channel dispatch starts snapshotted graceSeconds (default 300); retries never extend it. Server transaction time must be strictly before confirmationDeadlineAt; at equality/after, atomically escalate and return 409. IM_OK -> RESOLVED; NEED_HELP -> ESCALATED immediately. Actor/time are server-derived. Same commandId/payload replays the original 200 response even after event changes; another/changed confirmation returns 409. Worker and confirmation lock the same event/run in fixed order. Do not resolve an already escalated event.
+     */
+    post: operations['confirmWellnessCheck'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/internal/wellness-observations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/emergency-contacts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Danh sach lien he khan cap theo thu tu uu tien */
-        get: operations["listEmergencyContacts"];
-        put?: never;
-        /** Them lien he khan cap (toi da 3) */
-        post: operations["createEmergencyContact"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Nhan bang chung hoat dong va hien dien tu M1
+     * @description US-20, internal token only. Store trusted existing identity/motion/direction evidence; perform no computer vision and accept no user self-reported activity. observationId/payload are idempotent: identical retry -> DUPLICATE; changed payload -> 409. Store observedAt separately from receivedAt. Ordered ARRIVAL/MOTION => HOME; validated DEPARTURE => AWAY. Silence, unknown person, model failure and camera outage never mean AWAY or healthy activity. Expired presence means UNKNOWN. Late evidence may affect future checks but cannot silently resolve an existing timeout. M1 currently lacks a directional departure feed: integrate verified source evidence before claiming skip-away acceptance; never infer departure from a track ending.
+     */
+    post: operations['submitWellnessObservation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/emergency-contacts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/emergency-contacts/{contactId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                contactId: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Xoa lien he khan cap */
-        delete: operations["deleteEmergencyContact"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Danh sach lien he khan cap theo thu tu uu tien */
+    get: operations['listEmergencyContacts'];
+    put?: never;
+    /** Them lien he khan cap (toi da 3) */
+    post: operations['createEmergencyContact'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/emergency-contacts/{contactId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        contactId: string;
+      };
+      cookie?: never;
     };
-    "/internal/events/{eventId}/ai-result": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * AI service tra ket qua suy luan ve cho orchestrator
-         * @description US-11. Xac thuc bang `X-Internal-Token` (secret dung chung trong
-         *     docker network), KHONG dung JWT nguoi dung.
-         *
-         *     US-16/US-17: M2A_FALL submits exactly one FALL_DETECTED result only
-         *     after continuously observed immobility strictly exceeds 15 seconds,
-         *     valid pose/evidence and REST_AREA checks succeed. Candidate/cancelled/
-         *     missing-pose observations produce internal logs only, not callbacks
-         *     with a success label or empty successful results.
-         *     Orchestrator first persists a separate FALL incident with priority P1,
-         *     detectedAt=confirmedAt and durable pending result in one transaction.
-         *     It does not overwrite an M1/M4 event already alerted or terminal.
-         *     Same camera/source-session/track/episode identifies one incident;
-         *     retry retains resultId, processedAt, confirmedAt and payload contents.
-         *     See FallResultMetadata for the M2a evidence contract. Existing generic
-         *     OtherAiResultSubmission remains shared with other AI modules.
-         *
-         *
-         *     US-18: M3_FIRE submits one confirmed FIRE_SMOKE_DETECTED result, priority P0, on a separately persisted camera incident; detectedAt=confirmedAt. One active detector episode per camera survives source/AI restarts and event resolution. Use FireResultMetadata; never submit single-frame candidates as success.
-         *     US-20: M5 wellness runs in the orchestrator without inference or this callback. Its resident request, deadline and caregiver routing use a scoped scheduler policy; the shared generic callback wire format remains unchanged.
-         */
-        post: operations["submitAiResult"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Xoa lien he khan cap */
+    delete: operations['deleteEmergencyContact'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/internal/events/{eventId}/ai-result': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
     };
-    "/webhooks/telegram": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Callback khi nguoi dung bam nut trong Telegram
-         * @description US-14. Xac thuc bang header `X-Telegram-Bot-Api-Secret-Token`.
-         *     Body la Update object cua Telegram. update_id duoc ghi inbox duy nhat
-         *     truoc khi ACK 200; worker xu ly bat dong bo qua confirmation service US-13.
-         *     Kiem tra actor da lien ket, quyen camera, notification, chat/message va TTL.
-         *     Replay khong tao them confirmation. Callback da xu ly/sai quyen duoc ACK,
-         *     ket qua tra qua answerCallbackQuery; edit tin nhan duoc retry rieng.
-         */
-        post: operations["telegramWebhook"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * AI service tra ket qua suy luan ve cho orchestrator
+     * @description US-11. Xac thuc bang `X-Internal-Token` (secret dung chung trong
+     *     docker network), KHONG dung JWT nguoi dung.
+     *
+     *     US-16/US-17: M2A_FALL submits exactly one FALL_DETECTED result only
+     *     after continuously observed immobility strictly exceeds 15 seconds,
+     *     valid pose/evidence and REST_AREA checks succeed. Candidate/cancelled/
+     *     missing-pose observations produce internal logs only, not callbacks
+     *     with a success label or empty successful results.
+     *     Orchestrator first persists a separate FALL incident with priority P1,
+     *     detectedAt=confirmedAt and durable pending result in one transaction.
+     *     It does not overwrite an M1/M4 event already alerted or terminal.
+     *     Same camera/source-session/track/episode identifies one incident;
+     *     retry retains resultId, processedAt, confirmedAt and payload contents.
+     *     See FallResultMetadata for the M2a evidence contract. Existing generic
+     *     OtherAiResultSubmission remains shared with other AI modules.
+     *
+     *
+     *     US-18: M3_FIRE submits one confirmed FIRE_SMOKE_DETECTED result, priority P0, on a separately persisted camera incident; detectedAt=confirmedAt. One active detector episode per camera survives source/AI restarts and event resolution. Use FireResultMetadata; never submit single-frame candidates as success.
+     *     US-20: M5 wellness runs in the orchestrator without inference or this callback. Its resident request, deadline and caregiver routing use a scoped scheduler policy; the shared generic callback wire format remains unchanged.
+     */
+    post: operations['submitAiResult'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/webhooks/telegram': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/webhooks/connect": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Callback ket qua cuoc goi tu Amazon Connect
-         * @description US-27 — nguoi nghe bam phim 1 de xac nhan da tiep nhan.
-         */
-        post: operations["connectWebhook"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Callback khi nguoi dung bam nut trong Telegram
+     * @description US-14. Xac thuc bang header `X-Telegram-Bot-Api-Secret-Token`.
+     *     Body la Update object cua Telegram. update_id duoc ghi inbox duy nhat
+     *     truoc khi ACK 200; worker xu ly bat dong bo qua confirmation service US-13.
+     *     Kiem tra actor da lien ket, quyen camera, notification, chat/message va TTL.
+     *     Replay khong tao them confirmation. Callback da xu ly/sai quyen duoc ACK,
+     *     ket qua tra qua answerCallbackQuery; edit tin nhan duoc retry rieng.
+     */
+    post: operations['telegramWebhook'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/webhooks/connect': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    get?: never;
+    put?: never;
+    /**
+     * Callback ket qua cuoc goi tu Amazon Connect
+     * @description US-27 — nguoi nghe bam phim 1 de xac nhan da tiep nhan.
+     */
+    post: operations['connectWebhook'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        /** @enum {string} */
-        UserRole: "ADMIN" | "CAREGIVER" | "VIEWER";
-        /** @enum {string} */
-        EventType: "PERSON_DETECTED" | "UNKNOWN_PERSON" | "RESTRICTED_ZONE" | "FALL_DETECTED" | "FIRE_SMOKE_DETECTED" | "WELLNESS_TIMEOUT";
-        /** @enum {string} */
-        EventStatus: "DETECTED" | "LOGGED_ONLY" | "NOTIFIED" | "ESCALATED" | "RESOLVED" | "CLOSED" | "AI_FAILED";
-        /** @enum {string} */
-        PriorityLevel: "P0" | "P1" | "P2" | "P3";
-        /** @enum {string} */
-        PersonStatus: "KNOWN" | "UNKNOWN" | "UNDETERMINED";
-        /**
-         * @description REST_AREA (giuong/sofa) khong sinh canh bao te nga — FR-DET-M2-05.
-         * @enum {string}
-         */
-        ZoneType: "RESTRICTED" | "REST_AREA" | "NORMAL";
-        /** @enum {string} */
-        MediaType: "SNAPSHOT" | "CLIP" | "THUMBNAIL";
-        /** @enum {string} */
-        NotificationChannel: "TELEGRAM" | "SNS_EMAIL" | "SNS_SMS" | "CONNECT_CALL" | "DASHBOARD" | "WEBHOOK";
-        /** @enum {string} */
-        NotificationStatus: "PENDING" | "SENT" | "FAILED" | "CONFIRMED" | "SKIPPED";
-        /** @enum {string} */
-        ConfirmationResponse: "IM_OK" | "NEED_HELP" | "ACKNOWLEDGED";
-        /** @enum {string} */
-        ConfirmationPhase: "INITIAL" | "EMERGENCY";
-        /** @enum {string} */
-        DeviceStatus: "ONLINE" | "OFFLINE" | "DEGRADED" | "DISABLED";
-        ErrorResponse: {
-            error: {
-                code: components["schemas"]["CameraErrorCode"];
-                /** @description Thong diep tieng Viet hien thi duoc cho nguoi dung. */
-                message: string;
-                details?: {
-                    [key: string]: unknown;
-                };
-                /** @description FR-LOG-02 — dung de tra log xuyen service. */
-                traceId: string;
-            };
+  schemas: {
+    /** @enum {string} */
+    UserRole: 'ADMIN' | 'CAREGIVER' | 'VIEWER';
+    /** @enum {string} */
+    EventType:
+      | 'PERSON_DETECTED'
+      | 'UNKNOWN_PERSON'
+      | 'RESTRICTED_ZONE'
+      | 'FALL_DETECTED'
+      | 'FIRE_SMOKE_DETECTED'
+      | 'WELLNESS_TIMEOUT';
+    /** @enum {string} */
+    EventStatus:
+      'DETECTED' | 'LOGGED_ONLY' | 'NOTIFIED' | 'ESCALATED' | 'RESOLVED' | 'CLOSED' | 'AI_FAILED';
+    /** @enum {string} */
+    PriorityLevel: 'P0' | 'P1' | 'P2' | 'P3';
+    /** @enum {string} */
+    PersonStatus: 'KNOWN' | 'UNKNOWN' | 'UNDETERMINED';
+    /**
+     * @description REST_AREA (giuong/sofa) khong sinh canh bao te nga — FR-DET-M2-05.
+     * @enum {string}
+     */
+    ZoneType: 'RESTRICTED' | 'REST_AREA' | 'NORMAL';
+    /** @enum {string} */
+    MediaType: 'SNAPSHOT' | 'CLIP' | 'THUMBNAIL';
+    /** @enum {string} */
+    NotificationChannel:
+      'TELEGRAM' | 'SNS_EMAIL' | 'SNS_SMS' | 'CONNECT_CALL' | 'DASHBOARD' | 'WEBHOOK';
+    /** @enum {string} */
+    NotificationStatus: 'PENDING' | 'SENT' | 'FAILED' | 'CONFIRMED' | 'SKIPPED';
+    /** @enum {string} */
+    ConfirmationResponse: 'IM_OK' | 'NEED_HELP' | 'ACKNOWLEDGED';
+    /** @enum {string} */
+    ConfirmationPhase: 'INITIAL' | 'EMERGENCY';
+    /** @enum {string} */
+    DeviceStatus: 'ONLINE' | 'OFFLINE' | 'DEGRADED' | 'DISABLED';
+    ErrorResponse: {
+      error: {
+        code: components['schemas']['CameraErrorCode'];
+        /** @description Thong diep tieng Viet hien thi duoc cho nguoi dung. */
+        message: string;
+        details?: {
+          [key: string]: unknown;
         };
-        /**
-         * @description Stable errors returned by camera source, runtime and Frigate operations.
-         * @enum {string}
-         */
-        CameraErrorCode: "ACCOUNT_LOCKED" | "CAMERA_NOT_FOUND" | "CAMERA_SOURCE_NOT_FOUND" | "SOURCE_NOT_CONFIGURED" | "SOURCE_UNAVAILABLE" | "WEBCAM_PERMISSION_DENIED" | "WEBCAM_PUBLISH_FAILED" | "VIDEO_INVALID_FORMAT" | "VIDEO_TOO_LARGE" | "VIDEO_NOT_FOUND" | "FFMPEG_START_FAILED" | "FRIGATE_SYNC_FAILED" | "FRIGATE_UNAVAILABLE" | "MEDIAMTX_UNAVAILABLE" | "CAMERA_ALREADY_TRANSITIONING" | "CONFIG_VERSION_CONFLICT" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "INVALID_REFRESH_TOKEN" | "INVALID_SLUG" | "INVALID_TOKEN" | "EVENT_NOT_FOUND" | "UNAUTHORIZED";
-        PaginatedResponse: {
-            data: unknown[];
-            meta: {
-                page: number;
-                pageSize: number;
-                total: number;
-            };
-        };
-        HealthStatus: {
-            /** @enum {string} */
-            status: "ok" | "degraded";
-            service: string;
-            version: string;
-            uptimeSeconds?: number;
-            /** Format: date-time */
-            timestamp?: string;
-        };
-        LoginRequest: {
-            /** Format: email */
-            email: string;
-            /** Format: password */
-            password: string;
-        };
-        AuthTokens: {
-            accessToken: string;
-            refreshToken: string;
-            /** @description So giay con hieu luc cua access token (mac dinh 3600). */
-            expiresIn: number;
-            user: components["schemas"]["User"];
-        };
-        User: {
-            /** Format: uuid */
-            id: string;
-            /** Format: email */
-            email: string;
-            fullName: string;
-            role: components["schemas"]["UserRole"];
-            phoneE164?: string | null;
-            telegramChatId?: string | null;
-            isActive: boolean;
-            /** Format: date-time */
-            lastLoginAt?: string | null;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        CreateUserRequest: {
-            /** Format: email */
-            email: string;
-            password?: string;
-            fullName: string;
-            role: components["schemas"]["UserRole"];
-            phoneE164?: string;
-            telegramChatId?: string;
-        };
-        UpdateUserRequest: {
-            fullName?: string;
-            role?: components["schemas"]["UserRole"];
-            phoneE164?: string;
-            telegramChatId?: string;
-            isActive?: boolean;
-        };
-        Device: {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            /** @enum {string} */
-            deviceType: "EDGE_GATEWAY" | "NVR" | "STANDALONE_CAM";
-            serialNumber?: string | null;
-            locationLabel?: string | null;
-            status: components["schemas"]["DeviceStatus"];
-            agentVersion?: string | null;
-            /** Format: date-time */
-            lastHeartbeatAt?: string | null;
-            cameraCount?: number;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        CreateDeviceRequest: {
-            name: string;
-            /** @enum {string} */
-            deviceType?: "EDGE_GATEWAY" | "NVR" | "STANDALONE_CAM";
-            serialNumber?: string;
-            locationLabel?: string;
-        };
-        Camera: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            deviceId: string;
-            name: string;
-            /** @description Khoa noi voi Frigate. Bat bien sau khi tao. */
-            slug: string;
-            /** @description Chi tra ve cho role ADMIN; cac role khac nhan null (NFR-09). */
-            rtspUrl?: string | null;
-            detectWidth?: number;
-            detectHeight?: number;
-            fps?: number;
-            timezone?: string;
-            isEnabled: boolean;
-            detectionEnabled?: boolean;
-            retentionDays?: number;
-            sourceType?: components["schemas"]["CameraSourceType"];
-            runtimeStatus: components["schemas"]["CameraRuntimeStatus"];
-            source: components["schemas"]["CameraSourceInfo"];
-            frigateSync: components["schemas"]["CameraFrigateSyncInfo"];
-            frigateSettings: components["schemas"]["CameraFrigateSettings"];
-            debugCapabilities: components["schemas"]["CameraDebugCapabilities"];
-            configVersion?: number;
-            /** @enum {string} */
-            syncStatus?: "PENDING" | "SYNCED" | "FAILED";
-            zoneCount?: number;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        CameraSourceInfo: {
-            type: components["schemas"]["CameraSourceType"];
-            displayName?: string | null;
-            isPublishing: boolean;
-            lastError?: string | null;
-            requiresBrowserPublisher: boolean;
-        };
-        CameraFrigateSyncInfo: {
-            /** @enum {string} */
-            status: "PENDING" | "SYNCED" | "FAILED";
-            configVersion: number;
-            appliedVersion?: number | null;
-            errorCode?: string | null;
-            errorMessage?: string | null;
-        };
-        CameraFrigateSettings: {
-            detectWidth: number;
-            detectHeight: number;
-            detectFps: number;
-            minInitializedFrames: number;
-            maxDisappearedFrames: number;
-            /** Format: float */
-            personMinScore: number;
-            /** Format: float */
-            personThreshold: number;
-            personMinArea: number;
-            snapshotsEnabled: boolean;
-            snapshotBoundingBox: boolean;
-            recordingEnabled: boolean;
-            detectionRetentionDays: number;
-        };
-        CameraDebugCapabilities: {
-            personBoundary: boolean;
-            zoneBoundary: boolean;
-        };
-        /** @enum {string} */
-        CameraSourceType: "RTSP" | "BROWSER_WEBCAM" | "VIDEO_FILE";
-        /** @enum {string} */
-        CameraRuntimeStatus: "ONLINE" | "OFFLINE" | "STARTING" | "FAILED" | "DISABLED";
-        /** @enum {string} */
-        CameraSourceRuntimeStatus: "NOT_CONFIGURED" | "STARTING" | "ONLINE" | "OFFLINE" | "FAILED" | "STOPPED";
-        CameraPreview: components["schemas"]["MediaUrl"] & {
-            /** Format: uuid */
-            cameraId: string;
-            width: number;
-            height: number;
-            /** Format: date-time */
-            capturedAt: string;
-        };
-        /** @description ADMIN input only. VIDEO_FILE uses an uploaded object ID, never a server path or shell command. */
-        CameraSourceSettings: {
-            sourceType: components["schemas"]["CameraSourceType"];
-            rtspUrl?: string;
-            /** Format: uuid */
-            videoObjectId?: string;
-            /** @default true */
-            videoLoop: boolean;
-        } & ({
-            /** @constant */
-            sourceType?: "RTSP";
-        } | {
-            /** @constant */
-            sourceType?: "BROWSER_WEBCAM";
-        } | {
-            /** @constant */
-            sourceType?: "VIDEO_FILE";
-        });
-        CreateCameraRequest: {
-            source?: components["schemas"]["CameraSourceSettings"];
-            /** Format: uuid */
-            deviceId: string;
-            name: string;
-            slug: string;
-            rtspUrl?: string;
-            /** @default 1280 */
-            detectWidth: number;
-            /** @default 720 */
-            detectHeight: number;
-            /** @default 5 */
-            fps: number;
-            /** @default Asia/Ho_Chi_Minh */
-            timezone: string;
-        } | unknown | unknown;
-        /** @description Khong doi duoc `slug` — doi slug se lam dut lien ket voi Frigate. */
-        UpdateCameraRequest: {
-            source?: components["schemas"]["CameraSourceSettings"];
-            name?: string;
-            rtspUrl?: string;
-            fps?: number;
-            detectWidth?: number;
-            detectHeight?: number;
-            isEnabled?: boolean;
-            detectionEnabled?: boolean;
-            retentionDays?: number;
-            minInitializedFrames?: number;
-            maxDisappearedFrames?: number;
-            /** Format: float */
-            personMinScore?: number;
-            /** Format: float */
-            personThreshold?: number;
-            personMinArea?: number;
-            snapshotsEnabled?: boolean;
-            snapshotBoundingBox?: boolean;
-            recordingEnabled?: boolean;
-            detectionRetentionDays?: number;
-        };
-        RtspConnectionTestRequest: {
-            rtspUrl: string;
-            /** @enum {string} */
-            transport: "TCP" | "UDP";
-        };
-        RtspConnectionTestResult: {
-            success: boolean;
-            message: string;
-            latencyMs: number | null;
-        };
-        UpdateCameraStateRequest: {
-            isEnabled: boolean;
-        };
-        CameraSourceDetail: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            cameraId: string;
-            sourceType: components["schemas"]["CameraSourceType"];
-            /** @description Chi tra ve gia tri da che credential cho role ADMIN. */
-            rtspUrl?: string | null;
-            videoOriginalName?: string | null;
-            /** @default true */
-            videoLoop: boolean;
-            /**
-             * @default TCP
-             * @enum {string}
-             */
-            transport: "TCP" | "UDP";
-            inputFormat?: string | null;
-            webcamDeviceLabel?: string | null;
-            status: components["schemas"]["CameraSourceRuntimeStatus"];
-            lastErrorCode?: string | null;
-            lastErrorMessage?: string | null;
-            /** Format: date-time */
-            startedAt?: string | null;
-            /** Format: date-time */
-            stoppedAt?: string | null;
-            /** Format: date-time */
-            updatedAt?: string;
-        };
-        UpdateCameraSourceRequest: {
-            sourceType: components["schemas"]["CameraSourceType"];
-            rtspUrl?: string;
-            /** Format: uuid */
-            videoObjectId?: string;
-            /** @default true */
-            videoLoop: boolean;
-            /**
-             * @default TCP
-             * @enum {string}
-             */
-            transport: "TCP" | "UDP";
-            inputFormat?: string;
-            webcamDeviceLabel?: string;
-        };
-        CameraRuntimeStatusResponse: {
-            /** Format: uuid */
-            cameraId: string;
-            runtimeStatus: components["schemas"]["CameraRuntimeStatus"];
-            isPublishing: boolean;
-            /** @enum {string} */
-            frigateSyncStatus: "PENDING" | "SYNCED" | "FAILED";
-            /** Format: date-time */
-            lastCheckedAt: string;
-            details?: {
-                sourceType?: components["schemas"]["CameraSourceType"];
-                errorCode?: string | null;
-                errorMessage?: string | null;
-            };
-        };
-        CameraDebugDetection: {
-            /** @description Stable Frigate track ID */
-            id?: string;
-            label: string;
-            confidence: number;
-            /** @description [ymin, xmin, ymax, xmax] normalized 0..1 */
-            box: number[];
-            /** @description [x, y] normalized 0..1 */
-            footPoint?: number[];
-            /** @description Frigate detector observation timestamp in milliseconds */
-            observedAt?: number;
-        };
-        CameraDebugStream: {
-            /** Format: uuid */
-            cameraId: string;
-            streamUrl: string;
-            snapshotUrl?: string | null;
-            /** @description Server Unix time in milliseconds */
-            serverTime?: number;
-            /** @description Recent per-frame tracking samples, ordered by frameTime. Empty when the Frigate metadata bridge is unavailable; MQTT events are not frame samples. */
-            detectionFrames?: {
-                /** @description Frigate frame Unix timestamp in milliseconds */
-                frameTime: number;
-                detections: components["schemas"]["CameraDebugDetection"][];
-            }[];
-            detections: components["schemas"]["CameraDebugDetection"][];
-            activeZones: string[];
-        };
-        BrowserPublishSession: {
-            /** @description URL WebRTC WHIP publish endpoint */
-            publishUrl: string;
-            /** @description Camera slug hoac stream key */
-            streamKey: string;
-            /** @description Token bao mat phien publish ngan han */
-            token: string;
-            /** Format: date-time */
-            expiresAt: string;
-        };
-        FrigateSyncResult: {
-            /** Format: uuid */
-            cameraId: string;
-            configVersion: number;
-            /** @enum {string} */
-            syncStatus: "PENDING" | "SYNCED" | "FAILED";
-            errorCode?: string | null;
-            errorMessage?: string | null;
-        };
-        /**
-         * @description Da giac voi toa do CHUAN HOA 0..1 theo [x, y].
-         * @example [
-         *       [
-         *         0.4,
-         *         0.3
-         *       ],
-         *       [
-         *         0.95,
-         *         0.3
-         *       ],
-         *       [
-         *         0.95,
-         *         0.9
-         *       ],
-         *       [
-         *         0.4,
-         *         0.9
-         *       ]
-         *     ]
-         */
-        Polygon: number[][];
-        Zone: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            cameraId: string;
-            name: string;
-            slug: string;
-            zoneType: components["schemas"]["ZoneType"];
-            polygon: components["schemas"]["Polygon"];
-            /** @description FR-DET-M4-02 — di luot qua duoi nguong nay khong sinh canh bao. */
-            minDwellSeconds: number;
-            /** @example 06:00 */
-            activeFrom: string | null;
-            /** @example 22:00 */
-            activeTo: string | null;
-            isEnabled: boolean;
-        };
-        CreateZoneRequest: {
-            name: string;
-            slug: string;
-            zoneType: components["schemas"]["ZoneType"];
-            polygon: components["schemas"]["Polygon"];
-            /** @default 2 */
-            minDwellSeconds: number;
-            /** @description Hai dau cung null la ca ngay; khoang [activeFrom, activeTo) co the qua nua dem. */
-            activeFrom?: string | null;
-            /** @description Khong duoc bang activeFrom. */
-            activeTo?: string | null;
-        };
-        UpdateZoneRequest: {
-            name?: string;
-            zoneType?: components["schemas"]["ZoneType"];
-            polygon?: components["schemas"]["Polygon"];
-            minDwellSeconds?: number;
-            activeFrom?: string | null;
-            activeTo?: string | null;
-            isEnabled?: boolean;
-        };
-        /**
-         * @description Khong co truong anh: FR-DEV-08 cam luu anh goc, chi luu embedding
-         *     va embedding khong bao gio duoc tra ra ngoai qua API.
-         */
-        KnownFace: {
-            /** @enum {string} */
-            recognitionStatus?: "READY" | "SYNC_PENDING";
-            /** Format: uuid */
-            id: string;
-            personName: string;
-            relationship?: string | null;
-            /** Format: uuid */
-            linkedUserId?: string | null;
-            /** @enum {string} */
-            provider: "LOCAL" | "REKOGNITION";
-            modelVersion?: string;
-            sourceImageCount?: number;
-            isActive: boolean;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        FaceSelectionDetails: {
-            images: {
-                imageIndex: number;
-                code?: string;
-                faces: {
-                    faceIndex: number;
-                    boundingBox: {
-                        x: number;
-                        y: number;
-                        width: number;
-                        height: number;
-                    };
-                }[];
-            }[];
-        };
-        EventSummary: {
-            /** Format: uuid */
-            id: string;
-            eventType: components["schemas"]["EventType"];
-            status: components["schemas"]["EventStatus"];
-            priority: components["schemas"]["PriorityLevel"];
-            camera?: {
-                /** Format: uuid */
-                id?: string;
-                name?: string;
-            } | null;
-            zone?: {
-                /**
-                 * Format: uuid
-                 * @description Null neu zone da bi xoa; name van la snapshot lich su.
-                 */
-                id?: string | null;
-                name?: string;
-            } | null;
-            confidence?: number | null;
-            personStatus?: components["schemas"]["PersonStatus"];
-            matchedPersonName?: string | null;
-            /** @description Presigned URL het han 15 phut. */
-            thumbnailUrl?: string | null;
-            isFalseAlarm?: boolean;
-            /** Format: date-time */
-            detectedAt: string;
-            /**
-             * Format: uuid
-             * @description Present for M5 only; authorization uses assigned resident/household rather than camera.
-             */
-            wellnessResidentUserId?: string | null;
-            wellnessResidentName?: string | null;
-            /** Format: uuid */
-            wellnessCheckId?: string | null;
-        };
-        EventDetail: components["schemas"]["EventSummary"] & {
-            /** @enum {string} */
-            source?: "FRIGATE" | "AI_SERVICE" | "SCHEDULER" | "MANUAL";
-            trackId?: string | null;
-            aiLabel?: string | null;
-            /** Format: date-time */
-            aiProcessedAt?: string | null;
-            aiModelVersion?: string | null;
-            /** @description FR-EVT-04 — giu du chi tiet tung nhan AI. */
-            aiResults?: components["schemas"]["AiResultItem"][];
-            aggregateVersion?: number;
-            retain?: boolean;
-            /** Format: uuid */
-            correlationId?: string;
-            /** Format: date-time */
-            escalationDeadlineAt?: string | null;
-            /** Format: date-time */
-            notifiedAt?: string | null;
-            /** Format: date-time */
-            escalatedAt?: string | null;
-            /** Format: date-time */
-            resolvedAt?: string | null;
-            /** Format: date-time */
-            closedAt?: string | null;
-            media?: components["schemas"]["EventMedia"][];
-            statusHistory?: components["schemas"]["EventStatusHistoryEntry"][];
-            version?: number;
-            ruleSnapshot?: {
-                [key: string]: unknown;
-            } | null;
-            triggeringResults?: components["schemas"]["AiResultItem"][];
-        };
-        AiResultItem: {
-            /** Format: uuid */
-            resultId: string;
-            observationId: string;
-            revision: number;
-            /** @enum {string} */
-            module: "M1_FACE" | "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M4_ZONE" | "M5_WELLNESS";
-            label: string | null;
-            confidence: number | null;
-            modelVersion: string;
-            /** Format: date-time */
-            processedAt: string;
-            /** @enum {string} */
-            status: "SUCCESS" | "ERROR";
-            error?: components["schemas"]["ResultError"] | null;
-            /** @description Toa do chuan hoa 0..1. */
-            boundingBox?: {
-                x?: number;
-                y?: number;
-                width?: number;
-                height?: number;
-            } | null;
-            metadata?: {
-                [key: string]: unknown;
-            };
-        };
-        EventMedia: {
-            /** Format: uuid */
-            id: string;
-            mediaType: components["schemas"]["MediaType"];
-            /**
-             * Format: uri
-             * @description Presigned URL.
-             */
-            url: string;
-            /** Format: date-time */
-            expiresAt: string;
-            contentType?: string;
-            sizeBytes?: number | null;
-            width?: number | null;
-            height?: number | null;
-            durationMs?: number | null;
-            /** Format: date-time */
-            createdAt?: string;
-        };
-        MediaUrl: {
-            /** Format: uri */
-            url: string;
-            /** Format: date-time */
-            expiresAt: string;
-        };
-        EventStatusHistoryEntry: {
-            fromStatus?: components["schemas"]["EventStatus"];
-            toStatus: components["schemas"]["EventStatus"];
-            /**
-             * @example TIMEOUT
-             * @example USER_CONFIRMED
-             * @example AI_RESULT
-             */
-            reason?: string | null;
-            /** @enum {string} */
-            actorType: "SYSTEM" | "USER" | "SCHEDULER" | "EMERGENCY_CONTACT";
-            actorName?: string | null;
-            channel?: components["schemas"]["NotificationChannel"];
-            /** Format: date-time */
-            createdAt: string;
-        };
-        /** @description FR-DSH-01 — so lieu tong hop cho cac the tren dau dashboard (US-06). */
-        EventStats: {
-            /** @description Cua so thong ke tinh nguoc tu hien tai. */
-            windowHours: number;
-            totalEvents: number;
-            /** @description So su kien co nguoi (PERSON_DETECTED, UNKNOWN_PERSON, RESTRICTED_ZONE) — US-03. */
-            personDetectedCount: number;
-            /** @description DETECTED / NOTIFIED / ESCALATED — con cho nguoi dung xu ly. */
-            pendingCount: number;
-            /** @description RESOLVED / CLOSED. */
-            resolvedCount: number;
-            falseAlarmCount: number;
-            /** @description Camera dang bat va thuoc thiet bi co status ONLINE. */
-            cameraOnlineCount: number;
-            cameraTotalCount: number;
-            /** Format: date-time */
-            latestEventAt?: string | null;
-            /** @description Su kien chua xu ly gan nhat, dung cho dong mo ta the "Can chu y ngay". */
-            latestPendingEvent?: {
-                /** Format: uuid */
-                id?: string;
-                eventType?: components["schemas"]["EventType"];
-                priority?: components["schemas"]["PriorityLevel"];
-                cameraName?: string | null;
-                zoneName?: string | null;
-                /** Format: date-time */
-                detectedAt?: string;
-            } | null;
-            byType: {
-                eventType: components["schemas"]["EventType"];
-                count: number;
-            }[];
-            byPriority: {
-                priority: components["schemas"]["PriorityLevel"];
-                count: number;
-            }[];
-        };
-        /** @description Actor and timestamp come from authenticated server context. IM_OK/NEED_HELP only in NOTIFIED; ACKNOWLEDGED only in ESCALATED by an authorized emergency handler. Confirmation phases are independent. */
-        ConfirmEventRequest: {
-            /**
-             * Format: uuid
-             * @description Stable per action/retry. Identical replay returns original confirmation; changed payload conflicts. Legacy requests without this field still use first-confirmation protection.
-             */
-            commandId?: string;
-            response: components["schemas"]["ConfirmationResponse"];
-            note?: string;
-        };
-        /** @description Dong su kien khan cap sau khi tiep nhan va xu ly. */
-        CloseEventRequest: {
-            /** Format: uuid */
-            commandId?: string;
-            note?: string;
-        };
-        Confirmation: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            eventId: string;
-            phase: components["schemas"]["ConfirmationPhase"];
-            response: components["schemas"]["ConfirmationResponse"];
-            channel: components["schemas"]["NotificationChannel"];
-            confirmedByName?: string | null;
-            note?: string | null;
-            /** Format: date-time */
-            respondedAt: string;
-            /** @description IM_OK -> RESOLVED, NEED_HELP -> ESCALATED, ACKNOWLEDGED -> CLOSED (FR-ESC-03/04). */
-            resultingStatus: components["schemas"]["EventStatus"];
-        };
-        ConfirmationConflict: components["schemas"]["ErrorResponse"] & {
-            error?: {
-                /** @enum {string} */
-                code?: "ALREADY_CONFIRMED" | "INVALID_STATE" | "IDEMPOTENCY_CONFLICT";
-                details: {
-                    canonicalStatus: components["schemas"]["EventStatus"];
-                    confirmation: components["schemas"]["Confirmation"] | null;
-                };
-            };
-        };
-        Notification: {
-            /** Format: uuid */
-            id: string;
-            channel: components["schemas"]["NotificationChannel"];
-            status: components["schemas"]["NotificationStatus"];
-            /** @description 0 = caregiver, 1..3 = lien he khan cap theo thu tu. */
-            escalationLevel: number;
-            recipientName?: string | null;
-            attemptCount?: number;
-            errorCode?: string | null;
-            errorMessage?: string | null;
-            /** Format: date-time */
-            sentAt?: string | null;
-            /** Format: date-time */
-            confirmedAt?: string | null;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        EscalationRule: {
-            version?: number;
-            /** @description Thời gian hiệu lực nhánh tin cậy cao; dùng highWaitSeconds đã lưu, không tự chia đôi. */
-            readonly effectiveHighWaitSeconds?: number;
-            /** @description Thời gian nhập tay cho confidence >= T_high, phải nhỏ hơn tWaitSeconds. Null với rule không dùng nhánh này. */
-            highWaitSeconds?: number | null;
-            eventType: components["schemas"]["EventType"];
-            priority: components["schemas"]["PriorityLevel"];
-            /** @description Duoi nguong nay -> LOGGED_ONLY, khong lam phien ai. */
-            tLow?: number | null;
-            /** @description Tu nguong nay -> NOTIFIED kem hen gio ngan. */
-            tHigh?: number | null;
-            /** @description Het thoi gian nay khong co phan hoi -> ESCALATED (FR-ESC-02). */
-            tWaitSeconds: number;
-            /** @description US-19 — chay/khoi vao thang NOTIFIED bat ke confidence. */
-            skipLoggedOnly?: boolean;
-            notifyChannels?: components["schemas"]["NotificationChannel"][];
-            escalateChannels?: components["schemas"]["NotificationChannel"][];
-            /** @description Tên hiển thị tiếng Việt của loại sự kiện. */
-            displayName?: string;
-            maxEscalationLevel?: number;
-            isEnabled: boolean;
-            /** Format: date-time */
-            updatedAt?: string;
-            /** @description Tên người dùng cập nhật gần nhất. */
-            updatedByName?: string | null;
-        };
-        /** @description tLow <= tHigh; WELLNESS_TIMEOUT requires both null. Other alert types require both numbers. highWaitSeconds is a non-negative integer less than tWaitSeconds when applicable. Updates only future evaluations; existing deadlines are not reset. */
-        UpdateEscalationThresholdsRequest: {
-            tLow: number | null;
-            tHigh: number | null;
-            tWaitSeconds: number;
-            /** @description Nhập tay, phải nhỏ hơn tWaitSeconds; bỏ trường này để giữ giá trị đang lưu. Null với FIRE/WELLNESS không dùng nhánh chia theo confidence. */
-            highWaitSeconds?: number | null;
-            expectedVersion: number;
-        };
-        UpdateEscalationRuleRequest: {
-            priority: components["schemas"]["PriorityLevel"];
-            tLow?: number | null;
-            tHigh?: number | null;
-            tWaitSeconds: number;
-            skipLoggedOnly?: boolean;
-            notifyChannels?: components["schemas"]["NotificationChannel"][];
-            escalateChannels?: components["schemas"]["NotificationChannel"][];
-            maxEscalationLevel?: number;
-            isEnabled?: boolean;
-        };
-        /** @description US-20 schedule. ownerUserId/version/configurationStatus are additive; legacy schedules with ambiguous household ownership require explicit repair before admission. */
-        WellnessSchedule: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            residentUserId: string;
-            residentName?: string;
-            name?: string;
-            checkAt: string;
-            /**
-             * @default [
-             *       1,
-             *       2,
-             *       3,
-             *       4,
-             *       5,
-             *       6,
-             *       7
-             *     ]
-             */
-            daysOfWeek: number[];
-            /** @default 6 */
-            lookbackHours: number;
-            /**
-             * @description Resident response window; default five minutes, explicitly configurable. Snapshot per occurrence.
-             * @default 300
-             */
-            graceSeconds: number;
-            /**
-             * @description Enabled household cameras only; empty means all enabled cameras of this household.
-             * @default []
-             */
-            cameraIds: string[];
-            /**
-             * @description IANA name validated against PostgreSQL pg_timezone_names. UTC timestamps are used on the wire.
-             * @default Asia/Ho_Chi_Minh
-             */
-            timezone: string;
-            /** @default true */
-            isEnabled: boolean;
-            /** Format: date-time */
-            lastCheckedAt?: string | null;
-            /** Format: uuid */
-            readonly ownerUserId?: string | null;
-            readonly version?: number;
-            /** @enum {string} */
-            readonly configurationStatus?: "READY" | "INVALID_CONFIG";
-        };
-        CreateWellnessScheduleRequest: {
-            /** Format: uuid */
-            residentUserId: string;
-            name?: string;
-            checkAt: string;
-            /**
-             * @default [
-             *       1,
-             *       2,
-             *       3,
-             *       4,
-             *       5,
-             *       6,
-             *       7
-             *     ]
-             */
-            daysOfWeek: number[];
-            /** @default 6 */
-            lookbackHours: number;
-            /**
-             * @description Resident response window; default five minutes, explicitly configurable. Snapshot per occurrence.
-             * @default 300
-             */
-            graceSeconds: number;
-            /**
-             * @description Enabled household cameras only; empty means all enabled cameras of this household.
-             * @default []
-             */
-            cameraIds: string[];
-            /**
-             * @description IANA name validated against PostgreSQL pg_timezone_names. UTC timestamps are used on the wire.
-             * @default Asia/Ho_Chi_Minh
-             */
-            timezone: string;
-            /** @default true */
-            isEnabled: boolean;
-        };
-        EmergencyContact: {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            phoneE164: string;
-            /** Format: email */
-            email?: string | null;
-            priorityOrder: number;
-            /** @description SNS/Connect sandbox chi goi duoc so da verify (US-26, US-27). */
-            isVerified: boolean;
-            isEnabled?: boolean;
-        };
-        CreateEmergencyContactRequest: {
-            name: string;
-            phoneE164: string;
-            /** Format: email */
-            email?: string;
-            priorityOrder: number;
-        };
-        AiResultRequest: components["schemas"]["FaceResultSubmission"] | components["schemas"]["ZoneResultSubmission"] | components["schemas"]["OtherAiResultSubmission"];
-        AiResultAccepted: {
-            /** Format: uuid */
-            resultId: string;
-            /** @enum {string} */
-            disposition: "ACCEPTED" | "DUPLICATE" | "STALE";
-            aggregateVersion: number;
-        };
-        /**
-         * @description Technical failure is recorded independently. Only the state service
-         *     may set AI_FAILED, and never downgrade an active risk or cancel its
-         *     deadline. US-16/US-17 new M2a producers submit exactly one successful
-         *     M2A_FALL/FALL_DETECTED item, confidence=1 under fall-rule-evidence-v1,
-         *     error=null and complete FallResultMetadata after valid confirmation
-         *     outside REST_AREA. Score measures complete rule evidence, not a
-         *     calibrated fall probability. observationId is
-         *     fall:{sourceSessionId}:{trackId}:{episodeId}, revision=1; resultId and
-         *     payload stay immutable on retry. Non-confirmed tracking states are
-         *     not submitted. These M2a producer requirements do not narrow the
-         *     existing generic wire schema or change M3/M5 payloads.
-         */
-        OtherAiResultSubmission: components["schemas"]["ResultIdentity"] & {
-            /** @enum {string} */
-            module?: "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M5_WELLNESS";
-            results: components["schemas"]["OtherAiResultItem"][];
-            error: components["schemas"]["ResultError"] | null;
-        };
-        OtherAiResultItem: {
-            /** @enum {string} */
-            module: "M2A_FALL" | "M2B_POSTURE" | "M3_FIRE" | "M5_WELLNESS";
-            label: string;
-            confidence: number | null;
-            boundingBox: components["schemas"]["NormalizedBox"] | null;
-            /** @description For confirmed M2A_FALL results, new producers validate the documented FallResultMetadata before submission. Kept generic for compatibility with existing modules; no overlapping oneOf branch is introduced. */
-            metadata: {
-                [key: string]: unknown;
-            };
-        };
-        /**
-         * @description US-16/US-17 documented evidence schema for new confirmed M2a producers.
-         *     This is not an additional AiResultRequest union branch; generic
-         *     OtherAiResultItem.metadata remains unchanged. Validate this evidence
-         *     in the producer before invoking the existing result service.
-         *
-         *     Only complete, currently valid pose evidence outside enabled REST_AREA
-         *     can confirm. Implicit wall-clock time, duplicate frames, missing pose
-         *     and time spent in a rest area never contribute to immobileSeconds.
-         *     Validate against active threshold/policy snapshots, finite full-image
-         *     geometry, identity and the camera's current zone-config version.
-         *
-         *     Persist a separate FALL_DETECTED/P1 incident with detectedAt=confirmedAt
-         *     and dedup key m2a-fall:{cameraId}:{sourceSessionId}:{trackId}:{episodeId}.
-         *     Do not mutate existing M1/M4 risk events or their deadlines. Keep the
-         *     pending result payload and resultId stable across retries/restarts.
-         *     Notification/escalation/confirmation use the existing engine and rule.
-         *     Never include images/base64, credentials, RTSP URLs or raw keypoints.
-         */
-        FallResultMetadata: {
-            /** Format: uuid */
-            cameraId: string;
-            trackId: string;
-            sourceSessionId: string;
-            /**
-             * Format: uuid
-             * @description Stable UUIDv5 from /pose/fall; namespace 6ba7b811-9dad-11d1-80b4-00c04fd430c8 (URL), name is compact UTF-8 JSON [cameraSlug, sourceSessionId, trackId, candidateStartedAt] with timestamp in UTC YYYY-MM-DDTHH:mm:ss.SSSZ. Never regenerate identity on retry.
-             */
-            episodeId: string;
-            frameId: string;
-            /** Format: date-time */
-            candidateStartedAt: string;
-            /**
-             * Format: date-time
-             * @description UTC capture time of the first frame confirming the episode; incident detectedAt uses this time. Must not precede candidateStartedAt.
-             */
-            confirmedAt: string;
-            /** @description Validated continuously observed immobility, strictly greater than thresholdSeconds; default requires >15 seconds. Movement, missing pose or invalid gaps reset this interval. */
-            immobileSeconds: number;
-            /** @default 15 */
-            thresholdSeconds: number;
-            /** @description Torso angle in degrees to horizontal, computed in full-image pixels. Must be strictly below the active threshold (default 30 degrees). */
-            torsoAngleDeg: number;
-            /** @description Full-image person bbox height/width; diagnostic, not an extra gate in v1. */
-            aspectRatio: number;
-            /** @description 1 minus torso-center y/full-image height; 2D proxy, not meters. Torso center is the mean of shoulder and hip midpoints. */
-            centerHeight: number;
-            /** @description Center drop relative to the frozen median center/height of 10 preceding valid pose frames; positive means downward. Candidate gate uses configurable threshold, default >=0.20. */
-            centerDropRatio: number;
-            /** @description Median displacement of quality-matched full-image landmark pairs divided by frozen bbox height and elapsed frame seconds, in body-heights/second. Strictly below configured motion threshold, default 0.05. */
-            motionScore: number;
-            /**
-             * @description Revalidated by orchestrator against enabled REST_AREA polygons for this camera using bbox center, including polygon boundary. Config/lookup errors cannot be treated as outside.
-             * @constant
-             */
-            inRestArea: false;
-            zoneConfigVersion: number;
-            /**
-             * @description Complete confirmed rule evidence yields confidence=1; this is not a calibrated probability or a MediaPipe/Frigate detection score.
-             * @constant
-             */
-            confidencePolicyVersion: "fall-rule-evidence-v1";
-        };
-        /** @description eventId must match path. Same resultId and payload is replay-safe; changed payload is IDEMPOTENCY_CONFLICT. Persist before 202. Older revisions cannot replace newer results. */
-        ResultIdentity: {
-            /** @constant */
-            schemaVersion: 1;
-            /** Format: uuid */
-            resultId: string;
-            /** Format: uuid */
-            eventId: string;
-            observationId: string;
-            revision: number;
-            module: string;
-            modelVersion: string;
-            /** Format: date-time */
-            processedAt: string;
-        };
-        FaceResultMetadata: {
-            similarity: number | null;
-            /** @default 0.6 */
-            thresholdUsed: number;
-            confidencePolicyVersion: string;
-            qualityReason: string | null;
-        };
-        /** @description KNOWN confidence=similarity; UNKNOWN=1-similarity; loaded empty collection uses similarity=null and confidence=1 with empty-collection-v1. UNDETERMINED has null confidence/similarity and a qualityReason. Scores are not calibrated probabilities. */
-        FaceResultItem: {
-            /** @constant */
-            module: "M1_FACE";
-            /** @enum {string} */
-            label: "KNOWN" | "UNKNOWN" | "UNDETERMINED";
-            confidence: number | null;
-            boundingBox: components["schemas"]["NormalizedBox"] | null;
-            metadata: components["schemas"]["FaceResultMetadata"];
-        };
-        /** @description Normalized coordinates; x+width and y+height must not exceed 1. */
-        NormalizedBox: {
+        /** @description FR-LOG-02 — dung de tra log xuyen service. */
+        traceId: string;
+      };
+    };
+    /**
+     * @description Stable errors returned by camera source, runtime and Frigate operations.
+     * @enum {string}
+     */
+    CameraErrorCode:
+      | 'ACCOUNT_LOCKED'
+      | 'CAMERA_NOT_FOUND'
+      | 'CAMERA_SOURCE_NOT_FOUND'
+      | 'SOURCE_NOT_CONFIGURED'
+      | 'SOURCE_UNAVAILABLE'
+      | 'WEBCAM_PERMISSION_DENIED'
+      | 'WEBCAM_PUBLISH_FAILED'
+      | 'VIDEO_INVALID_FORMAT'
+      | 'VIDEO_TOO_LARGE'
+      | 'VIDEO_NOT_FOUND'
+      | 'FFMPEG_START_FAILED'
+      | 'FRIGATE_SYNC_FAILED'
+      | 'FRIGATE_UNAVAILABLE'
+      | 'MEDIAMTX_UNAVAILABLE'
+      | 'CAMERA_ALREADY_TRANSITIONING'
+      | 'CONFIG_VERSION_CONFLICT'
+      | 'FORBIDDEN'
+      | 'INVALID_CREDENTIALS'
+      | 'INVALID_REFRESH_TOKEN'
+      | 'INVALID_SLUG'
+      | 'INVALID_TOKEN'
+      | 'EVENT_NOT_FOUND'
+      | 'UNAUTHORIZED';
+    PaginatedResponse: {
+      data: unknown[];
+      meta: {
+        page: number;
+        pageSize: number;
+        total: number;
+      };
+    };
+    HealthStatus: {
+      /** @enum {string} */
+      status: 'ok' | 'degraded';
+      service: string;
+      version: string;
+      uptimeSeconds?: number;
+      /** Format: date-time */
+      timestamp?: string;
+    };
+    LoginRequest: {
+      /** Format: email */
+      email: string;
+      /** Format: password */
+      password: string;
+    };
+    AuthTokens: {
+      accessToken: string;
+      refreshToken: string;
+      /** @description So giay con hieu luc cua access token (mac dinh 3600). */
+      expiresIn: number;
+      user: components['schemas']['User'];
+    };
+    User: {
+      /** Format: uuid */
+      id: string;
+      /** Format: email */
+      email: string;
+      fullName: string;
+      role: components['schemas']['UserRole'];
+      phoneE164?: string | null;
+      telegramChatId?: string | null;
+      isActive: boolean;
+      /** Format: date-time */
+      lastLoginAt?: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    CreateUserRequest: {
+      /** Format: email */
+      email: string;
+      password?: string;
+      fullName: string;
+      role: components['schemas']['UserRole'];
+      phoneE164?: string;
+      telegramChatId?: string;
+    };
+    UpdateUserRequest: {
+      fullName?: string;
+      role?: components['schemas']['UserRole'];
+      phoneE164?: string;
+      telegramChatId?: string;
+      isActive?: boolean;
+    };
+    Device: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      /** @enum {string} */
+      deviceType: 'EDGE_GATEWAY' | 'NVR' | 'STANDALONE_CAM';
+      serialNumber?: string | null;
+      locationLabel?: string | null;
+      status: components['schemas']['DeviceStatus'];
+      agentVersion?: string | null;
+      /** Format: date-time */
+      lastHeartbeatAt?: string | null;
+      cameraCount?: number;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    CreateDeviceRequest: {
+      name: string;
+      /** @enum {string} */
+      deviceType?: 'EDGE_GATEWAY' | 'NVR' | 'STANDALONE_CAM';
+      serialNumber?: string;
+      locationLabel?: string;
+    };
+    Camera: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      deviceId: string;
+      name: string;
+      /** @description Khoa noi voi Frigate. Bat bien sau khi tao. */
+      slug: string;
+      /** @description Chi tra ve cho role ADMIN; cac role khac nhan null (NFR-09). */
+      rtspUrl?: string | null;
+      detectWidth?: number;
+      detectHeight?: number;
+      fps?: number;
+      timezone?: string;
+      isEnabled: boolean;
+      detectionEnabled?: boolean;
+      retentionDays?: number;
+      sourceType?: components['schemas']['CameraSourceType'];
+      runtimeStatus: components['schemas']['CameraRuntimeStatus'];
+      source: components['schemas']['CameraSourceInfo'];
+      frigateSync: components['schemas']['CameraFrigateSyncInfo'];
+      frigateSettings: components['schemas']['CameraFrigateSettings'];
+      debugCapabilities: components['schemas']['CameraDebugCapabilities'];
+      configVersion?: number;
+      /** @enum {string} */
+      syncStatus?: 'PENDING' | 'SYNCED' | 'FAILED';
+      zoneCount?: number;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    CameraSourceInfo: {
+      type: components['schemas']['CameraSourceType'];
+      displayName?: string | null;
+      isPublishing: boolean;
+      lastError?: string | null;
+      requiresBrowserPublisher: boolean;
+    };
+    CameraFrigateSyncInfo: {
+      /** @enum {string} */
+      status: 'PENDING' | 'SYNCED' | 'FAILED';
+      configVersion: number;
+      appliedVersion?: number | null;
+      errorCode?: string | null;
+      errorMessage?: string | null;
+    };
+    CameraFrigateSettings: {
+      detectWidth: number;
+      detectHeight: number;
+      detectFps: number;
+      minInitializedFrames: number;
+      maxDisappearedFrames: number;
+      /** Format: float */
+      personMinScore: number;
+      /** Format: float */
+      personThreshold: number;
+      personMinArea: number;
+      snapshotsEnabled: boolean;
+      snapshotBoundingBox: boolean;
+      recordingEnabled: boolean;
+      detectionRetentionDays: number;
+    };
+    CameraDebugCapabilities: {
+      personBoundary: boolean;
+      zoneBoundary: boolean;
+    };
+    /** @enum {string} */
+    CameraSourceType: 'RTSP' | 'BROWSER_WEBCAM' | 'VIDEO_FILE';
+    /** @enum {string} */
+    CameraRuntimeStatus: 'ONLINE' | 'OFFLINE' | 'STARTING' | 'FAILED' | 'DISABLED';
+    /** @enum {string} */
+    CameraSourceRuntimeStatus:
+      'NOT_CONFIGURED' | 'STARTING' | 'ONLINE' | 'OFFLINE' | 'FAILED' | 'STOPPED';
+    CameraPreview: components['schemas']['MediaUrl'] & {
+      /** Format: uuid */
+      cameraId: string;
+      width: number;
+      height: number;
+      /** Format: date-time */
+      capturedAt: string;
+    };
+    /** @description ADMIN input only. VIDEO_FILE uses an uploaded object ID, never a server path or shell command. */
+    CameraSourceSettings: {
+      sourceType: components['schemas']['CameraSourceType'];
+      rtspUrl?: string;
+      /** Format: uuid */
+      videoObjectId?: string;
+      /** @default true */
+      videoLoop: boolean;
+    } & (
+      | {
+          /** @constant */
+          sourceType?: 'RTSP';
+        }
+      | {
+          /** @constant */
+          sourceType?: 'BROWSER_WEBCAM';
+        }
+      | {
+          /** @constant */
+          sourceType?: 'VIDEO_FILE';
+        }
+    );
+    CreateCameraRequest:
+      | {
+          source?: components['schemas']['CameraSourceSettings'];
+          /** Format: uuid */
+          deviceId: string;
+          name: string;
+          slug: string;
+          rtspUrl?: string;
+          /** @default 1280 */
+          detectWidth: number;
+          /** @default 720 */
+          detectHeight: number;
+          /** @default 5 */
+          fps: number;
+          /** @default Asia/Ho_Chi_Minh */
+          timezone: string;
+        }
+      | unknown
+      | unknown;
+    /** @description Khong doi duoc `slug` — doi slug se lam dut lien ket voi Frigate. */
+    UpdateCameraRequest: {
+      source?: components['schemas']['CameraSourceSettings'];
+      name?: string;
+      rtspUrl?: string;
+      fps?: number;
+      detectWidth?: number;
+      detectHeight?: number;
+      isEnabled?: boolean;
+      detectionEnabled?: boolean;
+      retentionDays?: number;
+      minInitializedFrames?: number;
+      maxDisappearedFrames?: number;
+      /** Format: float */
+      personMinScore?: number;
+      /** Format: float */
+      personThreshold?: number;
+      personMinArea?: number;
+      snapshotsEnabled?: boolean;
+      snapshotBoundingBox?: boolean;
+      recordingEnabled?: boolean;
+      detectionRetentionDays?: number;
+    };
+    RtspConnectionTestRequest: {
+      rtspUrl: string;
+      /** @enum {string} */
+      transport: 'TCP' | 'UDP';
+    };
+    RtspConnectionTestResult: {
+      success: boolean;
+      message: string;
+      latencyMs: number | null;
+    };
+    UpdateCameraStateRequest: {
+      isEnabled: boolean;
+    };
+    CameraSourceDetail: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      cameraId: string;
+      sourceType: components['schemas']['CameraSourceType'];
+      /** @description Chi tra ve gia tri da che credential cho role ADMIN. */
+      rtspUrl?: string | null;
+      videoOriginalName?: string | null;
+      /** @default true */
+      videoLoop: boolean;
+      /**
+       * @default TCP
+       * @enum {string}
+       */
+      transport: 'TCP' | 'UDP';
+      inputFormat?: string | null;
+      webcamDeviceLabel?: string | null;
+      status: components['schemas']['CameraSourceRuntimeStatus'];
+      lastErrorCode?: string | null;
+      lastErrorMessage?: string | null;
+      /** Format: date-time */
+      startedAt?: string | null;
+      /** Format: date-time */
+      stoppedAt?: string | null;
+      /** Format: date-time */
+      updatedAt?: string;
+    };
+    UpdateCameraSourceRequest: {
+      sourceType: components['schemas']['CameraSourceType'];
+      rtspUrl?: string;
+      /** Format: uuid */
+      videoObjectId?: string;
+      /** @default true */
+      videoLoop: boolean;
+      /**
+       * @default TCP
+       * @enum {string}
+       */
+      transport: 'TCP' | 'UDP';
+      inputFormat?: string;
+      webcamDeviceLabel?: string;
+    };
+    CameraRuntimeStatusResponse: {
+      /** Format: uuid */
+      cameraId: string;
+      runtimeStatus: components['schemas']['CameraRuntimeStatus'];
+      isPublishing: boolean;
+      /** @enum {string} */
+      frigateSyncStatus: 'PENDING' | 'SYNCED' | 'FAILED';
+      /** Format: date-time */
+      lastCheckedAt: string;
+      details?: {
+        sourceType?: components['schemas']['CameraSourceType'];
+        errorCode?: string | null;
+        errorMessage?: string | null;
+      };
+    };
+    CameraDebugDetection: {
+      /** @description Stable Frigate track ID */
+      id?: string;
+      label: string;
+      confidence: number;
+      /** @description [ymin, xmin, ymax, xmax] normalized 0..1 */
+      box: number[];
+      /** @description [x, y] normalized 0..1 */
+      footPoint?: number[];
+      /** @description Frigate detector observation timestamp in milliseconds */
+      observedAt?: number;
+    };
+    CameraDebugStream: {
+      /** Format: uuid */
+      cameraId: string;
+      streamUrl: string;
+      snapshotUrl?: string | null;
+      /** @description Server Unix time in milliseconds */
+      serverTime?: number;
+      /** @description Recent per-frame tracking samples, ordered by frameTime. Empty when the Frigate metadata bridge is unavailable; MQTT events are not frame samples. */
+      detectionFrames?: {
+        /** @description Frigate frame Unix timestamp in milliseconds */
+        frameTime: number;
+        detections: components['schemas']['CameraDebugDetection'][];
+      }[];
+      detections: components['schemas']['CameraDebugDetection'][];
+      activeZones: string[];
+    };
+    BrowserPublishSession: {
+      /** @description URL WebRTC WHIP publish endpoint */
+      publishUrl: string;
+      /** @description Camera slug hoac stream key */
+      streamKey: string;
+      /** @description Token bao mat phien publish ngan han */
+      token: string;
+      /** Format: date-time */
+      expiresAt: string;
+    };
+    FrigateSyncResult: {
+      /** Format: uuid */
+      cameraId: string;
+      configVersion: number;
+      /** @enum {string} */
+      syncStatus: 'PENDING' | 'SYNCED' | 'FAILED';
+      errorCode?: string | null;
+      errorMessage?: string | null;
+    };
+    /**
+     * @description Da giac voi toa do CHUAN HOA 0..1 theo [x, y].
+     * @example [
+     *       [
+     *         0.4,
+     *         0.3
+     *       ],
+     *       [
+     *         0.95,
+     *         0.3
+     *       ],
+     *       [
+     *         0.95,
+     *         0.9
+     *       ],
+     *       [
+     *         0.4,
+     *         0.9
+     *       ]
+     *     ]
+     */
+    Polygon: number[][];
+    Zone: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      cameraId: string;
+      name: string;
+      slug: string;
+      zoneType: components['schemas']['ZoneType'];
+      polygon: components['schemas']['Polygon'];
+      /** @description FR-DET-M4-02 — di luot qua duoi nguong nay khong sinh canh bao. */
+      minDwellSeconds: number;
+      /** @example 06:00 */
+      activeFrom: string | null;
+      /** @example 22:00 */
+      activeTo: string | null;
+      isEnabled: boolean;
+    };
+    CreateZoneRequest: {
+      name: string;
+      slug: string;
+      zoneType: components['schemas']['ZoneType'];
+      polygon: components['schemas']['Polygon'];
+      /** @default 2 */
+      minDwellSeconds: number;
+      /** @description Hai dau cung null la ca ngay; khoang [activeFrom, activeTo) co the qua nua dem. */
+      activeFrom?: string | null;
+      /** @description Khong duoc bang activeFrom. */
+      activeTo?: string | null;
+    };
+    UpdateZoneRequest: {
+      name?: string;
+      zoneType?: components['schemas']['ZoneType'];
+      polygon?: components['schemas']['Polygon'];
+      minDwellSeconds?: number;
+      activeFrom?: string | null;
+      activeTo?: string | null;
+      isEnabled?: boolean;
+    };
+    /**
+     * @description Khong co truong anh: FR-DEV-08 cam luu anh goc, chi luu embedding
+     *     va embedding khong bao gio duoc tra ra ngoai qua API.
+     */
+    KnownFace: {
+      /** @enum {string} */
+      recognitionStatus?: 'READY' | 'SYNC_PENDING';
+      /** Format: uuid */
+      id: string;
+      personName: string;
+      relationship?: string | null;
+      /** Format: uuid */
+      linkedUserId?: string | null;
+      /** @enum {string} */
+      provider: 'LOCAL' | 'REKOGNITION';
+      modelVersion?: string;
+      sourceImageCount?: number;
+      isActive: boolean;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    FaceSelectionDetails: {
+      images: {
+        imageIndex: number;
+        code?: string;
+        faces: {
+          faceIndex: number;
+          boundingBox: {
             x: number;
             y: number;
             width: number;
             height: number;
+          };
+        }[];
+      }[];
+    };
+    EventSummary: {
+      /** Format: uuid */
+      id: string;
+      eventType: components['schemas']['EventType'];
+      status: components['schemas']['EventStatus'];
+      priority: components['schemas']['PriorityLevel'];
+      camera?: {
+        /** Format: uuid */
+        id?: string;
+        name?: string;
+      } | null;
+      zone?: {
+        /**
+         * Format: uuid
+         * @description Null neu zone da bi xoa; name van la snapshot lich su.
+         */
+        id?: string | null;
+        name?: string;
+      } | null;
+      confidence?: number | null;
+      personStatus?: components['schemas']['PersonStatus'];
+      matchedPersonName?: string | null;
+      /** @description Presigned URL het han 15 phut. */
+      thumbnailUrl?: string | null;
+      isFalseAlarm?: boolean;
+      /** Format: date-time */
+      detectedAt: string;
+      /**
+       * Format: uuid
+       * @description Present for M5 only; authorization uses assigned resident/household rather than camera.
+       */
+      wellnessResidentUserId?: string | null;
+      wellnessResidentName?: string | null;
+      /** Format: uuid */
+      wellnessCheckId?: string | null;
+    };
+    EventDetail: components['schemas']['EventSummary'] & {
+      /** @enum {string} */
+      source?: 'FRIGATE' | 'AI_SERVICE' | 'SCHEDULER' | 'MANUAL';
+      trackId?: string | null;
+      aiLabel?: string | null;
+      /** Format: date-time */
+      aiProcessedAt?: string | null;
+      aiModelVersion?: string | null;
+      /** @description FR-EVT-04 — giu du chi tiet tung nhan AI. */
+      aiResults?: components['schemas']['AiResultItem'][];
+      aggregateVersion?: number;
+      retain?: boolean;
+      /** Format: uuid */
+      correlationId?: string;
+      /** Format: date-time */
+      escalationDeadlineAt?: string | null;
+      /** Format: date-time */
+      notifiedAt?: string | null;
+      /** Format: date-time */
+      escalatedAt?: string | null;
+      /** Format: date-time */
+      resolvedAt?: string | null;
+      /** Format: date-time */
+      closedAt?: string | null;
+      media?: components['schemas']['EventMedia'][];
+      statusHistory?: components['schemas']['EventStatusHistoryEntry'][];
+      version?: number;
+      ruleSnapshot?: {
+        [key: string]: unknown;
+      } | null;
+      triggeringResults?: components['schemas']['AiResultItem'][];
+    };
+    AiResultItem: {
+      /** Format: uuid */
+      resultId: string;
+      observationId: string;
+      revision: number;
+      /** @enum {string} */
+      module: 'M1_FACE' | 'M2A_FALL' | 'M2B_POSTURE' | 'M3_FIRE' | 'M4_ZONE' | 'M5_WELLNESS';
+      label: string | null;
+      confidence: number | null;
+      modelVersion: string;
+      /** Format: date-time */
+      processedAt: string;
+      /** @enum {string} */
+      status: 'SUCCESS' | 'ERROR';
+      error?: components['schemas']['ResultError'] | null;
+      /** @description Toa do chuan hoa 0..1. */
+      boundingBox?: {
+        x?: number;
+        y?: number;
+        width?: number;
+        height?: number;
+      } | null;
+      metadata?: {
+        [key: string]: unknown;
+      };
+    };
+    EventMedia: {
+      /** Format: uuid */
+      id: string;
+      mediaType: components['schemas']['MediaType'];
+      /**
+       * Format: uri
+       * @description Presigned URL.
+       */
+      url: string;
+      /** Format: date-time */
+      expiresAt: string;
+      contentType?: string;
+      sizeBytes?: number | null;
+      width?: number | null;
+      height?: number | null;
+      durationMs?: number | null;
+      /** Format: date-time */
+      createdAt?: string;
+    };
+    MediaUrl: {
+      /** Format: uri */
+      url: string;
+      /** Format: date-time */
+      expiresAt: string;
+    };
+    EventStatusHistoryEntry: {
+      fromStatus?: components['schemas']['EventStatus'];
+      toStatus: components['schemas']['EventStatus'];
+      /**
+       * @example TIMEOUT
+       * @example USER_CONFIRMED
+       * @example AI_RESULT
+       */
+      reason?: string | null;
+      /** @enum {string} */
+      actorType: 'SYSTEM' | 'USER' | 'SCHEDULER' | 'EMERGENCY_CONTACT';
+      actorName?: string | null;
+      channel?: components['schemas']['NotificationChannel'];
+      /** Format: date-time */
+      createdAt: string;
+    };
+    /** @description FR-DSH-01 — so lieu tong hop cho cac the tren dau dashboard (US-06). */
+    EventStats: {
+      /** @description Cua so thong ke tinh nguoc tu hien tai. */
+      windowHours: number;
+      totalEvents: number;
+      /** @description So su kien co nguoi (PERSON_DETECTED, UNKNOWN_PERSON, RESTRICTED_ZONE) — US-03. */
+      personDetectedCount: number;
+      /** @description DETECTED / NOTIFIED / ESCALATED — con cho nguoi dung xu ly. */
+      pendingCount: number;
+      /** @description RESOLVED / CLOSED. */
+      resolvedCount: number;
+      falseAlarmCount: number;
+      /** @description Camera dang bat va thuoc thiet bi co status ONLINE. */
+      cameraOnlineCount: number;
+      cameraTotalCount: number;
+      /** Format: date-time */
+      latestEventAt?: string | null;
+      /** @description Su kien chua xu ly gan nhat, dung cho dong mo ta the "Can chu y ngay". */
+      latestPendingEvent?: {
+        /** Format: uuid */
+        id?: string;
+        eventType?: components['schemas']['EventType'];
+        priority?: components['schemas']['PriorityLevel'];
+        cameraName?: string | null;
+        zoneName?: string | null;
+        /** Format: date-time */
+        detectedAt?: string;
+      } | null;
+      byType: {
+        eventType: components['schemas']['EventType'];
+        count: number;
+      }[];
+      byPriority: {
+        priority: components['schemas']['PriorityLevel'];
+        count: number;
+      }[];
+    };
+    /** @description Actor and timestamp come from authenticated server context. IM_OK/NEED_HELP only in NOTIFIED; ACKNOWLEDGED only in ESCALATED by an authorized emergency handler. Confirmation phases are independent. */
+    ConfirmEventRequest: {
+      /**
+       * Format: uuid
+       * @description Stable per action/retry. Identical replay returns original confirmation; changed payload conflicts. Legacy requests without this field still use first-confirmation protection.
+       */
+      commandId?: string;
+      response: components['schemas']['ConfirmationResponse'];
+      note?: string;
+    };
+    /** @description Dong su kien khan cap sau khi tiep nhan va xu ly. */
+    CloseEventRequest: {
+      /** Format: uuid */
+      commandId?: string;
+      note?: string;
+    };
+    Confirmation: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      eventId: string;
+      phase: components['schemas']['ConfirmationPhase'];
+      response: components['schemas']['ConfirmationResponse'];
+      channel: components['schemas']['NotificationChannel'];
+      confirmedByName?: string | null;
+      note?: string | null;
+      /** Format: date-time */
+      respondedAt: string;
+      /** @description IM_OK -> RESOLVED, NEED_HELP -> ESCALATED, ACKNOWLEDGED -> CLOSED (FR-ESC-03/04). */
+      resultingStatus: components['schemas']['EventStatus'];
+    };
+    ConfirmationConflict: components['schemas']['ErrorResponse'] & {
+      error?: {
+        /** @enum {string} */
+        code?: 'ALREADY_CONFIRMED' | 'INVALID_STATE' | 'IDEMPOTENCY_CONFLICT';
+        details: {
+          canonicalStatus: components['schemas']['EventStatus'];
+          confirmation: components['schemas']['Confirmation'] | null;
         };
-        /** @description Successful label equals personStatus. KNOWN requires matchedKnownFaceId; other labels require null. Technical errors omit personStatus; AI_FAILED is event state, never a person label. Server verifies owner/model/collection and resolves name. */
-        FaceResultSubmission: components["schemas"]["ResultIdentity"] & ({
-            /** @constant */
-            module?: "M1_FACE";
-            /** Format: uuid */
-            requestId: string;
-            collectionVersion: number;
-            personStatus?: components["schemas"]["PersonStatus"];
-            /** Format: uuid */
-            matchedKnownFaceId: string | null;
-            results: components["schemas"]["FaceResultItem"][];
-            error: components["schemas"]["ResultError"] | null;
-        } & ({
+      };
+    };
+    Notification: {
+      /** Format: uuid */
+      id: string;
+      channel: components['schemas']['NotificationChannel'];
+      status: components['schemas']['NotificationStatus'];
+      /** @description 0 = caregiver, 1..3 = lien he khan cap theo thu tu. */
+      escalationLevel: number;
+      recipientName?: string | null;
+      attemptCount?: number;
+      errorCode?: string | null;
+      errorMessage?: string | null;
+      /** Format: date-time */
+      sentAt?: string | null;
+      /** Format: date-time */
+      confirmedAt?: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    EscalationRule: {
+      version?: number;
+      /** @description Thời gian hiệu lực nhánh tin cậy cao; dùng highWaitSeconds đã lưu, không tự chia đôi. */
+      readonly effectiveHighWaitSeconds?: number;
+      /** @description Thời gian nhập tay cho confidence >= T_high, phải nhỏ hơn tWaitSeconds. Null với rule không dùng nhánh này. */
+      highWaitSeconds?: number | null;
+      eventType: components['schemas']['EventType'];
+      priority: components['schemas']['PriorityLevel'];
+      /** @description Duoi nguong nay -> LOGGED_ONLY, khong lam phien ai. */
+      tLow?: number | null;
+      /** @description Tu nguong nay -> NOTIFIED kem hen gio ngan. */
+      tHigh?: number | null;
+      /** @description Het thoi gian nay khong co phan hoi -> ESCALATED (FR-ESC-02). */
+      tWaitSeconds: number;
+      /** @description US-19 — chay/khoi vao thang NOTIFIED bat ke confidence. */
+      skipLoggedOnly?: boolean;
+      notifyChannels?: components['schemas']['NotificationChannel'][];
+      escalateChannels?: components['schemas']['NotificationChannel'][];
+      /** @description Tên hiển thị tiếng Việt của loại sự kiện. */
+      displayName?: string;
+      maxEscalationLevel?: number;
+      isEnabled: boolean;
+      /** Format: date-time */
+      updatedAt?: string;
+      /** @description Tên người dùng cập nhật gần nhất. */
+      updatedByName?: string | null;
+    };
+    /** @description tLow <= tHigh; WELLNESS_TIMEOUT requires both null. Other alert types require both numbers. highWaitSeconds is a non-negative integer less than tWaitSeconds when applicable. Updates only future evaluations; existing deadlines are not reset. */
+    UpdateEscalationThresholdsRequest: {
+      tLow: number | null;
+      tHigh: number | null;
+      tWaitSeconds: number;
+      /** @description Nhập tay, phải nhỏ hơn tWaitSeconds; bỏ trường này để giữ giá trị đang lưu. Null với FIRE/WELLNESS không dùng nhánh chia theo confidence. */
+      highWaitSeconds?: number | null;
+      expectedVersion: number;
+    };
+    UpdateEscalationRuleRequest: {
+      priority: components['schemas']['PriorityLevel'];
+      tLow?: number | null;
+      tHigh?: number | null;
+      tWaitSeconds: number;
+      skipLoggedOnly?: boolean;
+      notifyChannels?: components['schemas']['NotificationChannel'][];
+      escalateChannels?: components['schemas']['NotificationChannel'][];
+      maxEscalationLevel?: number;
+      isEnabled?: boolean;
+    };
+    /** @description US-20 schedule. ownerUserId/version/configurationStatus are additive; legacy schedules with ambiguous household ownership require explicit repair before admission. */
+    WellnessSchedule: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      residentUserId: string;
+      residentName?: string;
+      name?: string;
+      checkAt: string;
+      /**
+       * @default [
+       *       1,
+       *       2,
+       *       3,
+       *       4,
+       *       5,
+       *       6,
+       *       7
+       *     ]
+       */
+      daysOfWeek: number[];
+      /** @default 6 */
+      lookbackHours: number;
+      /**
+       * @description Resident response window; default five minutes, explicitly configurable. Snapshot per occurrence.
+       * @default 300
+       */
+      graceSeconds: number;
+      /**
+       * @description Enabled household cameras only; empty means all enabled cameras of this household.
+       * @default []
+       */
+      cameraIds: string[];
+      /**
+       * @description IANA name validated against PostgreSQL pg_timezone_names. UTC timestamps are used on the wire.
+       * @default Asia/Ho_Chi_Minh
+       */
+      timezone: string;
+      /** @default true */
+      isEnabled: boolean;
+      /** Format: date-time */
+      lastCheckedAt?: string | null;
+      /** Format: uuid */
+      readonly ownerUserId?: string | null;
+      readonly version?: number;
+      /** @enum {string} */
+      readonly configurationStatus?: 'READY' | 'INVALID_CONFIG';
+    };
+    CreateWellnessScheduleRequest: {
+      /** Format: uuid */
+      residentUserId: string;
+      name?: string;
+      checkAt: string;
+      /**
+       * @default [
+       *       1,
+       *       2,
+       *       3,
+       *       4,
+       *       5,
+       *       6,
+       *       7
+       *     ]
+       */
+      daysOfWeek: number[];
+      /** @default 6 */
+      lookbackHours: number;
+      /**
+       * @description Resident response window; default five minutes, explicitly configurable. Snapshot per occurrence.
+       * @default 300
+       */
+      graceSeconds: number;
+      /**
+       * @description Enabled household cameras only; empty means all enabled cameras of this household.
+       * @default []
+       */
+      cameraIds: string[];
+      /**
+       * @description IANA name validated against PostgreSQL pg_timezone_names. UTC timestamps are used on the wire.
+       * @default Asia/Ho_Chi_Minh
+       */
+      timezone: string;
+      /** @default true */
+      isEnabled: boolean;
+    };
+    EmergencyContact: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      phoneE164: string;
+      /** Format: email */
+      email?: string | null;
+      priorityOrder: number;
+      /** @description SNS/Connect sandbox chi goi duoc so da verify (US-26, US-27). */
+      isVerified: boolean;
+      isEnabled?: boolean;
+    };
+    CreateEmergencyContactRequest: {
+      name: string;
+      phoneE164: string;
+      /** Format: email */
+      email?: string;
+      priorityOrder: number;
+    };
+    AiResultRequest:
+      | components['schemas']['FaceResultSubmission']
+      | components['schemas']['ZoneResultSubmission']
+      | components['schemas']['OtherAiResultSubmission'];
+    AiResultAccepted: {
+      /** Format: uuid */
+      resultId: string;
+      /** @enum {string} */
+      disposition: 'ACCEPTED' | 'DUPLICATE' | 'STALE';
+      aggregateVersion: number;
+    };
+    /**
+     * @description Technical failure is recorded independently. Only the state service
+     *     may set AI_FAILED, and never downgrade an active risk or cancel its
+     *     deadline. US-16/US-17 new M2a producers submit exactly one successful
+     *     M2A_FALL/FALL_DETECTED item, confidence=1 under fall-rule-evidence-v1,
+     *     error=null and complete FallResultMetadata after valid confirmation
+     *     outside REST_AREA. Score measures complete rule evidence, not a
+     *     calibrated fall probability. observationId is
+     *     fall:{sourceSessionId}:{trackId}:{episodeId}, revision=1; resultId and
+     *     payload stay immutable on retry. Non-confirmed tracking states are
+     *     not submitted. These M2a producer requirements do not narrow the
+     *     existing generic wire schema or change M3/M5 payloads.
+     */
+    OtherAiResultSubmission: components['schemas']['ResultIdentity'] & {
+      /** @enum {string} */
+      module?: 'M2A_FALL' | 'M2B_POSTURE' | 'M3_FIRE' | 'M5_WELLNESS';
+      results: components['schemas']['OtherAiResultItem'][];
+      error: components['schemas']['ResultError'] | null;
+    };
+    OtherAiResultItem: {
+      /** @enum {string} */
+      module: 'M2A_FALL' | 'M2B_POSTURE' | 'M3_FIRE' | 'M5_WELLNESS';
+      label: string;
+      confidence: number | null;
+      boundingBox: components['schemas']['NormalizedBox'] | null;
+      /** @description For confirmed M2A_FALL results, new producers validate the documented FallResultMetadata before submission. Kept generic for compatibility with existing modules; no overlapping oneOf branch is introduced. */
+      metadata: {
+        [key: string]: unknown;
+      };
+    };
+    /**
+     * @description US-16/US-17 documented evidence schema for new confirmed M2a producers.
+     *     This is not an additional AiResultRequest union branch; generic
+     *     OtherAiResultItem.metadata remains unchanged. Validate this evidence
+     *     in the producer before invoking the existing result service.
+     *
+     *     Only complete, currently valid pose evidence outside enabled REST_AREA
+     *     can confirm. Implicit wall-clock time, duplicate frames, missing pose
+     *     and time spent in a rest area never contribute to immobileSeconds.
+     *     Validate against active threshold/policy snapshots, finite full-image
+     *     geometry, identity and the camera's current zone-config version.
+     *
+     *     Persist a separate FALL_DETECTED/P1 incident with detectedAt=confirmedAt
+     *     and dedup key m2a-fall:{cameraId}:{sourceSessionId}:{trackId}:{episodeId}.
+     *     Do not mutate existing M1/M4 risk events or their deadlines. Keep the
+     *     pending result payload and resultId stable across retries/restarts.
+     *     Notification/escalation/confirmation use the existing engine and rule.
+     *     Never include images/base64, credentials, RTSP URLs or raw keypoints.
+     */
+    FallResultMetadata: {
+      /** Format: uuid */
+      cameraId: string;
+      trackId: string;
+      sourceSessionId: string;
+      /**
+       * Format: uuid
+       * @description Stable UUIDv5 from /pose/fall; namespace 6ba7b811-9dad-11d1-80b4-00c04fd430c8 (URL), name is compact UTF-8 JSON [cameraSlug, sourceSessionId, trackId, candidateStartedAt] with timestamp in UTC YYYY-MM-DDTHH:mm:ss.SSSZ. Never regenerate identity on retry.
+       */
+      episodeId: string;
+      frameId: string;
+      /** Format: date-time */
+      candidateStartedAt: string;
+      /**
+       * Format: date-time
+       * @description UTC capture time of the first frame confirming the episode; incident detectedAt uses this time. Must not precede candidateStartedAt.
+       */
+      confirmedAt: string;
+      /** @description Validated continuously observed immobility, strictly greater than thresholdSeconds; default requires >15 seconds. Movement, missing pose or invalid gaps reset this interval. */
+      immobileSeconds: number;
+      /** @default 15 */
+      thresholdSeconds: number;
+      /** @description Torso angle in degrees to horizontal, computed in full-image pixels. Must be strictly below the active threshold (default 30 degrees). */
+      torsoAngleDeg: number;
+      /** @description Full-image person bbox height/width; diagnostic, not an extra gate in v1. */
+      aspectRatio: number;
+      /** @description 1 minus torso-center y/full-image height; 2D proxy, not meters. Torso center is the mean of shoulder and hip midpoints. */
+      centerHeight: number;
+      /** @description Center drop relative to the frozen median center/height of 10 preceding valid pose frames; positive means downward. Candidate gate uses configurable threshold, default >=0.20. */
+      centerDropRatio: number;
+      /** @description Median displacement of quality-matched full-image landmark pairs divided by frozen bbox height and elapsed frame seconds, in body-heights/second. Strictly below configured motion threshold, default 0.05. */
+      motionScore: number;
+      /**
+       * @description Revalidated by orchestrator against enabled REST_AREA polygons for this camera using bbox center, including polygon boundary. Config/lookup errors cannot be treated as outside.
+       * @constant
+       */
+      inRestArea: false;
+      zoneConfigVersion: number;
+      /**
+       * @description Complete confirmed rule evidence yields confidence=1; this is not a calibrated probability or a MediaPipe/Frigate detection score.
+       * @constant
+       */
+      confidencePolicyVersion: 'fall-rule-evidence-v1';
+    };
+    /** @description eventId must match path. Same resultId and payload is replay-safe; changed payload is IDEMPOTENCY_CONFLICT. Persist before 202. Older revisions cannot replace newer results. */
+    ResultIdentity: {
+      /** @constant */
+      schemaVersion: 1;
+      /** Format: uuid */
+      resultId: string;
+      /** Format: uuid */
+      eventId: string;
+      observationId: string;
+      revision: number;
+      module: string;
+      modelVersion: string;
+      /** Format: date-time */
+      processedAt: string;
+    };
+    FaceResultMetadata: {
+      similarity: number | null;
+      /** @default 0.6 */
+      thresholdUsed: number;
+      confidencePolicyVersion: string;
+      qualityReason: string | null;
+    };
+    /** @description KNOWN confidence=similarity; UNKNOWN=1-similarity; loaded empty collection uses similarity=null and confidence=1 with empty-collection-v1. UNDETERMINED has null confidence/similarity and a qualityReason. Scores are not calibrated probabilities. */
+    FaceResultItem: {
+      /** @constant */
+      module: 'M1_FACE';
+      /** @enum {string} */
+      label: 'KNOWN' | 'UNKNOWN' | 'UNDETERMINED';
+      confidence: number | null;
+      boundingBox: components['schemas']['NormalizedBox'] | null;
+      metadata: components['schemas']['FaceResultMetadata'];
+    };
+    /** @description Normalized coordinates; x+width and y+height must not exceed 1. */
+    NormalizedBox: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
+    /** @description Successful label equals personStatus. KNOWN requires matchedKnownFaceId; other labels require null. Technical errors omit personStatus; AI_FAILED is event state, never a person label. Server verifies owner/model/collection and resolves name. */
+    FaceResultSubmission: components['schemas']['ResultIdentity'] &
+      ({
+        /** @constant */
+        module?: 'M1_FACE';
+        /** Format: uuid */
+        requestId: string;
+        collectionVersion: number;
+        personStatus?: components['schemas']['PersonStatus'];
+        /** Format: uuid */
+        matchedKnownFaceId: string | null;
+        results: components['schemas']['FaceResultItem'][];
+        error: components['schemas']['ResultError'] | null;
+      } & (
+        | {
             results?: unknown;
             error?: null;
-        } | {
+          }
+        | {
             results?: unknown;
             matchedKnownFaceId?: null;
-            error?: components["schemas"]["ResultError"];
-        }));
-        /** @description Sanitized error; never contains credentials, images or embeddings. */
-        ResultError: {
-            code: string;
-            message: string;
-        };
-        ZoneResultMetadata: {
-            /** Format: uuid */
-            zoneId: string;
-            zoneNameSnapshot: string;
-            /** Format: uuid */
-            cameraId: string;
-            trackId: string;
-            /** Format: date-time */
-            observedAt: string;
-            /** Format: date-time */
-            enteredAt: string | null;
-            dwellSeconds: number | null;
-            /**
-             * @description Frigate confirmed current_zones after configured loitering_time. Exact zone entry time and dwell duration are unavailable and must remain null.
-             * @constant
-             */
-            dwellEvidence?: "FRIGATE_CURRENT_ZONE_LOITERING";
-            minDwellSeconds: number;
-            /** @constant */
-            scheduleActive: true;
-            zoneConfigVersion: number;
-            /** @constant */
-            scoreSource: "FRIGATE_PERSON_DETECTION";
-        } & ({
-            /** Format: date-time */
-            enteredAt?: string;
-            dwellSeconds?: number;
-        } | {
-            /** @constant */
-            dwellEvidence: "FRIGATE_CURRENT_ZONE_LOITERING";
-            enteredAt?: null;
-            dwellSeconds?: null;
-        });
-        /** @description Only submit enabled RESTRICTED zones with proven dwell and active schedule. Score comes from the matching Frigate person observation, never fabricated as 1. Missing score is diagnostic, not a risk result. Deduplicate event/zone/track; modelVersion identifies detector and metadata identifies config. */
-        ZoneResultSubmission: components["schemas"]["ResultIdentity"] & {
-            /** @constant */
-            module?: "M4_ZONE";
-            error: null;
-            results: {
-                /** @constant */
-                module: "M4_ZONE";
-                /** @constant */
-                label: "RESTRICTED_ZONE";
-                confidence: number;
-                boundingBox: components["schemas"]["NormalizedBox"] | null;
-                metadata: components["schemas"]["ZoneResultMetadata"];
-            }[];
-        };
-        UpdateWellnessScheduleRequest: {
-            /** Format: uuid */
-            residentUserId?: string;
-            name?: string;
-            checkAt?: string;
-            daysOfWeek?: number[];
-            lookbackHours?: number;
-            /** @description Resident response window; default five minutes, explicitly configurable. Snapshot per occurrence. */
-            graceSeconds?: number;
-            /** @description Enabled household cameras only; empty means all enabled cameras of this household. */
-            cameraIds?: string[];
-            /** @description IANA name validated against PostgreSQL pg_timezone_names. UTC timestamps are used on the wire. */
-            timezone?: string;
-            isEnabled?: boolean;
-        };
-        WellnessCheck: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            scheduleId: string;
-            /** Format: uuid */
-            residentUserId: string;
-            /** Format: uuid */
-            ownerUserId?: string;
-            /** Format: date-time */
-            scheduledFor: string;
-            /** Format: date */
-            localDate: string;
-            scheduleVersion?: number;
-            /** @enum {string} */
-            status: "PENDING" | "PROCESSING" | "SKIPPED_ACTIVITY" | "SKIPPED_AWAY" | "SKIPPED_DISABLED" | "SKIPPED_SUPERSEDED" | "MISSED" | "ALERT_CREATED";
-            decisionReason?: string | null;
-            /** @enum {string} */
-            presenceState: "HOME" | "AWAY" | "UNKNOWN";
-            /** Format: date-time */
-            lookbackStartedAt: string;
-            /** Format: date-time */
-            lookbackEndedAt: string;
-            /** Format: date-time */
-            lastActivityAt?: string | null;
-            graceSeconds: number;
-            /** Format: uuid */
-            eventId: string | null;
-            eventStatus?: components["schemas"]["EventStatus"] | null;
-            /** Format: date-time */
-            evaluatedAt?: string | null;
-            /** Format: date-time */
-            requestSentAt: string | null;
-            /** Format: date-time */
-            confirmationDeadlineAt: string | null;
-            /** Format: date-time */
-            deliveryDeadlineAt?: string | null;
-        };
-        WellnessConfirmationRequest: {
-            /** Format: uuid */
-            commandId: string;
-            /** @enum {string} */
-            response: "IM_OK" | "NEED_HELP";
-            note?: string;
-        };
-        /** @description Trusted M1 integration only. Validate registered resident/household, scoped camera/session/track, identity event and motion/directional evidence. MOTION requires a verified moving identified track; a face match alone is insufficient. ARRIVAL/DEPARTURE require directionalEvidence from an explicitly configured household boundary. Reject future/stale observations under configured limits. New source IDs are not client JWT identities. */
-        WellnessObservationRequest: {
-            /** Format: uuid */
-            observationId: string;
-            /** Format: uuid */
-            ownerUserId: string;
-            /** Format: uuid */
-            residentUserId: string;
-            /** Format: uuid */
-            knownFaceId: string;
-            /** Format: uuid */
-            identityEventId: string;
-            /** Format: uuid */
-            cameraId: string;
-            sourceSessionId: string;
-            trackId: string;
-            /** @enum {string} */
-            kind: "MOTION" | "ARRIVAL" | "DEPARTURE";
-            /** Format: date-time */
-            observedAt: string;
-            directionalEvidence?: {
-                boundaryId: string;
-                /** @enum {string} */
-                direction: "ENTER" | "EXIT";
-                policyVersion: string;
-            };
-        } & (unknown & unknown & unknown);
-        WellnessObservationAccepted: {
-            /** Format: uuid */
-            observationId: string;
-            /** @enum {string} */
-            status: "ACCEPTED" | "DUPLICATE";
-            /** @description False for duplicate or out-of-order observations. Such evidence cannot overwrite newer presence. */
-            presenceUpdated: boolean;
-        };
-        /** @description US-18 documentation-only evidence schema for new M3_FIRE producers. OtherAiResultItem.metadata stays generic. Validate aligned unique frame IDs/timestamps, ordered span <= windowSeconds, every gap <= maxFrameGapSeconds, scores >= thresholdUsed and incident score fire-temporal-min-v1 before submission. No raw image, credentials or RTSP URL. */
-        FireResultMetadata: {
-            /** Format: uuid */
-            cameraId: string;
-            sourceSessionId: string;
-            /** Format: uuid */
-            episodeId: string;
-            frameId: string;
-            /** Format: date-time */
-            firstQualifiedAt: string;
-            /** Format: date-time */
-            confirmedAt: string;
-            qualifyingFrameIds: string[];
-            qualifyingFrameTimestamps: string[];
-            consecutiveFrames: number;
-            requiredFrames: number;
-            windowSeconds: number;
-            maxFrameGapSeconds: number;
-            thresholdUsed: number;
-            /** @enum {string} */
-            incidentConfidencePolicyVersion: "fire-temporal-min-v1";
-            labels: ("fire" | "smoke")[];
-            detections: {
-                /** @enum {string} */
-                label: "fire" | "smoke";
-                confidence: number;
-                boundingBox: {
-                    x: number;
-                    y: number;
-                    width: number;
-                    height: number;
-                };
-            }[];
-        };
+            error?: components['schemas']['ResultError'];
+          }
+      ));
+    /** @description Sanitized error; never contains credentials, images or embeddings. */
+    ResultError: {
+      code: string;
+      message: string;
     };
-    responses: {
-        /** @description Du lieu gui len khong hop le */
-        BadRequest: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ErrorResponse"];
-            };
-        };
-        /** @description Chua xac thuc hoac token het han (FR-AUT-06) */
-        Unauthorized: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ErrorResponse"];
-            };
-        };
-        /** @description Khong du quyen cho vai tro hien tai (FR-AUT-05) */
-        Forbidden: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ErrorResponse"];
-            };
-        };
-        /** @description Khong tim thay tai nguyen */
-        NotFound: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ErrorResponse"];
-            };
-        };
-        /** @description Xung dot voi du lieu da ton tai */
-        Conflict: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ErrorResponse"];
-            };
-        };
+    ZoneResultMetadata: {
+      /** Format: uuid */
+      zoneId: string;
+      zoneNameSnapshot: string;
+      /** Format: uuid */
+      cameraId: string;
+      trackId: string;
+      /** Format: date-time */
+      observedAt: string;
+      /** Format: date-time */
+      enteredAt: string | null;
+      dwellSeconds: number | null;
+      /**
+       * @description Frigate confirmed current_zones after configured loitering_time. Exact zone entry time and dwell duration are unavailable and must remain null.
+       * @constant
+       */
+      dwellEvidence?: 'FRIGATE_CURRENT_ZONE_LOITERING';
+      minDwellSeconds: number;
+      /** @constant */
+      scheduleActive: true;
+      zoneConfigVersion: number;
+      /** @constant */
+      scoreSource: 'FRIGATE_PERSON_DETECTION';
+    } & (
+      | {
+          /** Format: date-time */
+          enteredAt?: string;
+          dwellSeconds?: number;
+        }
+      | {
+          /** @constant */
+          dwellEvidence: 'FRIGATE_CURRENT_ZONE_LOITERING';
+          enteredAt?: null;
+          dwellSeconds?: null;
+        }
+    );
+    /** @description Only submit enabled RESTRICTED zones with proven dwell and active schedule. Score comes from the matching Frigate person observation, never fabricated as 1. Missing score is diagnostic, not a risk result. Deduplicate event/zone/track; modelVersion identifies detector and metadata identifies config. */
+    ZoneResultSubmission: components['schemas']['ResultIdentity'] & {
+      /** @constant */
+      module?: 'M4_ZONE';
+      error: null;
+      results: {
+        /** @constant */
+        module: 'M4_ZONE';
+        /** @constant */
+        label: 'RESTRICTED_ZONE';
+        confidence: number;
+        boundingBox: components['schemas']['NormalizedBox'] | null;
+        metadata: components['schemas']['ZoneResultMetadata'];
+      }[];
     };
-    parameters: {
-        Page: number;
-        PageSize: number;
-        UserId: string;
-        DeviceId: string;
-        CameraId: string;
-        ZoneId: string;
-        EventId: string;
+    UpdateWellnessScheduleRequest: {
+      /** Format: uuid */
+      residentUserId?: string;
+      name?: string;
+      checkAt?: string;
+      daysOfWeek?: number[];
+      lookbackHours?: number;
+      /** @description Resident response window; default five minutes, explicitly configurable. Snapshot per occurrence. */
+      graceSeconds?: number;
+      /** @description Enabled household cameras only; empty means all enabled cameras of this household. */
+      cameraIds?: string[];
+      /** @description IANA name validated against PostgreSQL pg_timezone_names. UTC timestamps are used on the wire. */
+      timezone?: string;
+      isEnabled?: boolean;
     };
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    WellnessCheck: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      scheduleId: string;
+      /** Format: uuid */
+      residentUserId: string;
+      /** Format: uuid */
+      ownerUserId?: string;
+      /** Format: date-time */
+      scheduledFor: string;
+      /** Format: date */
+      localDate: string;
+      scheduleVersion?: number;
+      /** @enum {string} */
+      status:
+        | 'PENDING'
+        | 'PROCESSING'
+        | 'SKIPPED_ACTIVITY'
+        | 'SKIPPED_AWAY'
+        | 'SKIPPED_DISABLED'
+        | 'SKIPPED_SUPERSEDED'
+        | 'MISSED'
+        | 'ALERT_CREATED';
+      decisionReason?: string | null;
+      /** @enum {string} */
+      presenceState: 'HOME' | 'AWAY' | 'UNKNOWN';
+      /** Format: date-time */
+      lookbackStartedAt: string;
+      /** Format: date-time */
+      lookbackEndedAt: string;
+      /** Format: date-time */
+      lastActivityAt?: string | null;
+      graceSeconds: number;
+      /** Format: uuid */
+      eventId: string | null;
+      eventStatus?: components['schemas']['EventStatus'] | null;
+      /** Format: date-time */
+      evaluatedAt?: string | null;
+      /** Format: date-time */
+      requestSentAt: string | null;
+      /** Format: date-time */
+      confirmationDeadlineAt: string | null;
+      /** Format: date-time */
+      deliveryDeadlineAt?: string | null;
+    };
+    WellnessConfirmationRequest: {
+      /** Format: uuid */
+      commandId: string;
+      /** @enum {string} */
+      response: 'IM_OK' | 'NEED_HELP';
+      note?: string;
+    };
+    /** @description Trusted M1 integration only. Validate registered resident/household, scoped camera/session/track, identity event and motion/directional evidence. MOTION requires a verified moving identified track; a face match alone is insufficient. ARRIVAL/DEPARTURE require directionalEvidence from an explicitly configured household boundary. Reject future/stale observations under configured limits. New source IDs are not client JWT identities. */
+    WellnessObservationRequest: {
+      /** Format: uuid */
+      observationId: string;
+      /** Format: uuid */
+      ownerUserId: string;
+      /** Format: uuid */
+      residentUserId: string;
+      /** Format: uuid */
+      knownFaceId: string;
+      /** Format: uuid */
+      identityEventId: string;
+      /** Format: uuid */
+      cameraId: string;
+      sourceSessionId: string;
+      trackId: string;
+      /** @enum {string} */
+      kind: 'MOTION' | 'ARRIVAL' | 'DEPARTURE';
+      /** Format: date-time */
+      observedAt: string;
+      directionalEvidence?: {
+        boundaryId: string;
+        /** @enum {string} */
+        direction: 'ENTER' | 'EXIT';
+        policyVersion: string;
+      };
+    } & (unknown & unknown & unknown);
+    WellnessObservationAccepted: {
+      /** Format: uuid */
+      observationId: string;
+      /** @enum {string} */
+      status: 'ACCEPTED' | 'DUPLICATE';
+      /** @description False for duplicate or out-of-order observations. Such evidence cannot overwrite newer presence. */
+      presenceUpdated: boolean;
+    };
+    /** @description US-18 documentation-only evidence schema for new M3_FIRE producers. OtherAiResultItem.metadata stays generic. Validate aligned unique frame IDs/timestamps, ordered span <= windowSeconds, every gap <= maxFrameGapSeconds, scores >= thresholdUsed and incident score fire-temporal-min-v1 before submission. No raw image, credentials or RTSP URL. */
+    FireResultMetadata: {
+      /** Format: uuid */
+      cameraId: string;
+      sourceSessionId: string;
+      /** Format: uuid */
+      episodeId: string;
+      frameId: string;
+      /** Format: date-time */
+      firstQualifiedAt: string;
+      /** Format: date-time */
+      confirmedAt: string;
+      qualifyingFrameIds: string[];
+      qualifyingFrameTimestamps: string[];
+      consecutiveFrames: number;
+      requiredFrames: number;
+      windowSeconds: number;
+      maxFrameGapSeconds: number;
+      thresholdUsed: number;
+      /** @enum {string} */
+      incidentConfidencePolicyVersion: 'fire-temporal-min-v1';
+      labels: ('fire' | 'smoke')[];
+      detections: {
+        /** @enum {string} */
+        label: 'fire' | 'smoke';
+        confidence: number;
+        boundingBox: {
+          x: number;
+          y: number;
+          width: number;
+          height: number;
+        };
+      }[];
+    };
+  };
+  responses: {
+    /** @description Du lieu gui len khong hop le */
+    BadRequest: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': components['schemas']['ErrorResponse'];
+      };
+    };
+    /** @description Chua xac thuc hoac token het han (FR-AUT-06) */
+    Unauthorized: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': components['schemas']['ErrorResponse'];
+      };
+    };
+    /** @description Khong du quyen cho vai tro hien tai (FR-AUT-05) */
+    Forbidden: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': components['schemas']['ErrorResponse'];
+      };
+    };
+    /** @description Khong tim thay tai nguyen */
+    NotFound: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': components['schemas']['ErrorResponse'];
+      };
+    };
+    /** @description Xung dot voi du lieu da ton tai */
+    Conflict: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': components['schemas']['ErrorResponse'];
+      };
+    };
+  };
+  parameters: {
+    Page: number;
+    PageSize: number;
+    UserId: string;
+    DeviceId: string;
+    CameraId: string;
+    ZoneId: string;
+    EventId: string;
+  };
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    getHealth: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Dich vu hoat dong binh thuong */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HealthStatus"];
-                };
-            };
-            /** @description Dich vu suy giam — mot phu thuoc khong khoi dung duoc */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HealthStatus"];
-                };
-            };
-        };
-    };
-    login: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LoginRequest"];
-            };
-        };
-        responses: {
-            /** @description Dang nhap thanh cong */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthTokens"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            /** @description Sai email hoac mat khau */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Tai khoan dang bi khoa tam thoi (FR-AUT-03) */
-            423: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    refreshToken: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    refreshToken?: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Token moi */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthTokens"];
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-        };
-    };
-    logout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Da dang xuat */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            401: components["responses"]["Unauthorized"];
-        };
-    };
-    getCurrentUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Ho so nguoi dung */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["User"];
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-        };
-    };
-    createTelegramLink: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Ma lien ket da duoc tao */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        linkToken: string;
-                        /** Format: date-time */
-                        expiresAt: string;
-                    };
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-            /** @description Yeu cau lien ket qua thuong xuyen */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    listUsers: {
-        parameters: {
-            query?: {
-                page?: components["parameters"]["Page"];
-                pageSize?: components["parameters"]["PageSize"];
-                role?: components["schemas"]["UserRole"];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Danh sach nguoi dung */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse"] & {
-                        data?: components["schemas"]["User"][];
-                    };
-                };
-            };
-            403: components["responses"]["Forbidden"];
-        };
-    };
-    createUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateUserRequest"];
-            };
-        };
-        responses: {
-            /** @description Da tao */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["User"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            409: components["responses"]["Conflict"];
-        };
-    };
-    getUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                userId: components["parameters"]["UserId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Nguoi dung */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["User"];
-                };
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    deleteUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                userId: components["parameters"]["UserId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Da vo hieu hoa */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    updateUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                userId: components["parameters"]["UserId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateUserRequest"];
-            };
-        };
-        responses: {
-            /** @description Da cap nhat */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["User"];
-                };
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    listDevices: {
-        parameters: {
-            query?: {
-                page?: components["parameters"]["Page"];
-                pageSize?: components["parameters"]["PageSize"];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Danh sach thiet bi */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse"] & {
-                        data?: components["schemas"]["Device"][];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-        };
-    };
-    createDevice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateDeviceRequest"];
-            };
-        };
-        responses: {
-            /** @description Da tao */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Device"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-        };
-    };
-    getDevice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deviceId: components["parameters"]["DeviceId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Thiet bi */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Device"];
-                };
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    deleteDevice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deviceId: components["parameters"]["DeviceId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Da xoa */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    updateDevice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deviceId: components["parameters"]["DeviceId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateDeviceRequest"];
-            };
-        };
-        responses: {
-            /** @description Da cap nhat */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Device"];
-                };
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    listCameras: {
-        parameters: {
-            query?: {
-                deviceId?: string;
-                isEnabled?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Danh sach camera */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data?: components["schemas"]["Camera"][];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-        };
-    };
-    createCamera: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateCameraRequest"];
-            };
-        };
-        responses: {
-            /** @description Da tao */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Camera"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            409: components["responses"]["Conflict"];
-        };
-    };
-    getCamera: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Camera */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Camera"];
-                };
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    deleteCamera: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Da xoa */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    updateCamera: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateCameraRequest"];
-            };
-        };
-        responses: {
-            /** @description Da cap nhat */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Camera"];
-                };
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    getCameraSnapshot: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Presigned URL cua anh preview */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CameraPreview"];
-                };
-            };
-            404: components["responses"]["NotFound"];
-            /** @description Camera dang offline, khong lay duoc frame */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    updateCameraState: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateCameraStateRequest"];
-            };
-        };
-        responses: {
-            /** @description Trang thai camera sau khi cap nhat */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Camera"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-        };
-    };
-    getCameraRuntimeStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Trang thai runtime thuc te */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CameraRuntimeStatusResponse"];
-                };
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    getCameraSource: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Thong tin chi tiet nguon phat */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CameraSourceDetail"];
-                };
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    updateCameraSource: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateCameraSourceRequest"];
-            };
-        };
-        responses: {
-            /** @description Nguon phat sau khi cap nhat */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CameraSourceDetail"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            404: components["responses"]["NotFound"];
-        };
-    };
-    uploadCameraVideo: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /**
-                     * Format: binary
-                     * @description File video (MP4 hoac MKV, toi da theo CAMERA_VIDEO_MAX_BYTES)
-                     */
-                    file: string;
-                    /** @default true */
-                    loop?: boolean;
-                };
-            };
-        };
-        responses: {
-            /** @description Nguon phat video sau khi upload */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CameraSourceDetail"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            404: components["responses"]["NotFound"];
-        };
-    };
-    deleteCameraVideo: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Da xoa file video thanh cong */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    testCameraRtspConnection: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RtspConnectionTestRequest"];
-            };
-        };
-        responses: {
-            /** @description Ket qua kiem tra RTSP */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RtspConnectionTestResult"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-        };
-    };
-    startCameraSource: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Nguon phat da khoi dong */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CameraSourceDetail"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            404: components["responses"]["NotFound"];
-        };
-    };
-    stopCameraSource: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Nguon phat da dung */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CameraSourceDetail"];
-                };
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    createBrowserPublishSession: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Thong tin publish WebRTC */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BrowserPublishSession"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            404: components["responses"]["NotFound"];
-        };
-    };
-    revokeBrowserPublishSession: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Da thu hoi phien publish thanh cong */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    retryFrigateSync: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Ket qua thu lai dong bo */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FrigateSyncResult"];
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-        };
-    };
-    getCameraDebugStream: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Thong tin luong debug va du lieu detection */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CameraDebugStream"];
-                };
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    listZones: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Danh sach vung */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data?: components["schemas"]["Zone"][];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-        };
-    };
-    createZone: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cameraId: components["parameters"]["CameraId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateZoneRequest"];
-            };
-        };
-        responses: {
-            /** @description Da tao */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Zone"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-        };
-    };
-    deleteZone: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                zoneId: components["parameters"]["ZoneId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Da xoa */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-        };
-    };
-    updateZone: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                zoneId: components["parameters"]["ZoneId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateZoneRequest"];
-            };
-        };
-        responses: {
-            /** @description Da cap nhat */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Zone"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-        };
-    };
-    listKnownFaces: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Danh sach nguoi quen */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data?: components["schemas"]["KnownFace"][];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-        };
-    };
-    createKnownFace: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    personName: string;
-                    relationship?: string;
-                    /** Format: uuid */
-                    linkedUserId?: string;
-                    /** @description Same image order as images; null means auto-select only if exactly one face. Required selections for ambiguous images are returned by validation. Resubmit original files; server does not retain them between requests. */
-                    faceSelections?: (number | null)[];
-                    images: string[];
-                };
-            };
-        };
-        responses: {
-            /** @description Da dang ky */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KnownFace"];
-                };
-            };
-            /** @description INVALID_IMAGE */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-            /** @description FORBIDDEN */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description KNOWN_FACE_NAME_EXISTS or KNOWN_FACE_LIMIT */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description IMAGE_TOO_LARGE */
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description NO_FACE_DETECTED, MULTIPLE_FACES, FACE_SELECTION_INVALID, FACE_IMAGES_INCONSISTENT. details follows FaceSelectionDetails when images require correction. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description RATE_LIMITED */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description FACE_PROVIDER_UNAVAILABLE */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    deleteKnownFace: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                knownFaceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Da xoa DB va ghi audit; collection dang cho dong bo. Khong coi la da xoa hoan tat. */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @enum {string} */
-                        recognitionStatus: "SYNC_PENDING";
-                    };
-                };
-            };
-            /** @description Da xoa DB va dong bo collection */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            401: components["responses"]["Unauthorized"];
-            /** @description Chi ADMIN duoc xoa */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            404: components["responses"]["NotFound"];
-            /** @description FACE_PROVIDER_UNAVAILABLE */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    listEvents: {
-        parameters: {
-            query?: {
-                page?: components["parameters"]["Page"];
-                pageSize?: components["parameters"]["PageSize"];
-                /** @description Co the truyen nhieu lan */
-                eventType?: components["schemas"]["EventType"][];
-                status?: components["schemas"]["EventStatus"][];
-                priority?: components["schemas"]["PriorityLevel"][];
-                cameraId?: string;
-                zoneId?: string;
-                /** @description Loc tu thoi diem nay (ISO-8601) */
-                from?: string;
-                to?: string;
-                isFalseAlarm?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Danh sach su kien */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse"] & {
-                        data?: components["schemas"]["EventSummary"][];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-        };
-    };
-    getEventStats: {
-        parameters: {
-            query?: {
-                /** @description Cua so thong ke tinh nguoc tu hien tai. */
-                windowHours?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description So lieu tong hop */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EventStats"];
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-        };
-    };
-    streamEvents: {
-        parameters: {
-            query: {
-                token: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Luong SSE */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "text/event-stream": string;
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-        };
-    };
-    getEvent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Su kien day du kem media, ket qua AI va lich su trang thai */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EventDetail"];
-                };
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    updateEvent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    isFalseAlarm?: boolean;
-                    retain?: boolean;
-                };
-            };
-        };
-        responses: {
-            /** @description Da cap nhat */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EventDetail"];
-                };
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    confirmEvent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ConfirmEventRequest"];
-            };
-        };
-        responses: {
-            /** @description Da xac nhan */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Confirmation"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            /** @description Su kien da duoc xu ly boi nguoi khac */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ConfirmationConflict"];
-                };
-            };
-        };
-    };
-    closeEvent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["CloseEventRequest"];
-            };
-        };
-        responses: {
-            /** @description Da dong su kien thanh cong */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Confirmation"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            /** @description Su kien khong o trang thai ESCALATED hoac da duoc dong */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ConfirmationConflict"];
-                };
-            };
-        };
-    };
-    listEventMedia: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Danh sach media */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data?: components["schemas"]["EventMedia"][];
-                    };
-                };
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    getEventHistory: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Lich su trang thai */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data?: components["schemas"]["EventStatusHistoryEntry"][];
-                    };
-                };
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    listEventNotifications: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Danh sach thong bao */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data?: components["schemas"]["Notification"][];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-        };
-    };
-    getMediaUrl: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                mediaId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Presigned URL */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MediaUrl"];
-                };
-            };
-            404: components["responses"]["NotFound"];
-            /** @description Media da bi xoa theo chinh sach luu tru (FR-DAT-01) */
-            410: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    listEscalationRules: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Danh sach quy tac */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data?: components["schemas"]["EscalationRule"][];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-        };
-    };
-    updateEscalationRule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventType: components["schemas"]["EventType"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateEscalationRuleRequest"];
-            };
-        };
-        responses: {
-            /** @description Da cap nhat */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EscalationRule"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            403: components["responses"]["Forbidden"];
-        };
-    };
-    updateEscalationThresholds: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventType: components["schemas"]["EventType"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateEscalationThresholdsRequest"];
-            };
-        };
-        responses: {
-            /** @description Updated rule */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EscalationRule"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            /** @description RULE_VERSION_CONFLICT; reload canonical rule before retry. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    listWellnessSchedules: {
-        parameters: {
-            query?: {
-                residentUserId?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Accessible schedules, excluding soft-deleted rows. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["WellnessSchedule"][];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-        };
-    };
-    createWellnessSchedule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateWellnessScheduleRequest"];
-            };
-        };
-        responses: {
-            /** @description Schedule created; no check runs before its next due occurrence. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WellnessSchedule"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-        };
-    };
-    deleteWellnessSchedule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                scheduleId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Schedule soft-deleted. */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-        };
-    };
-    updateWellnessSchedule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                scheduleId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateWellnessScheduleRequest"];
-            };
-        };
-        responses: {
-            /** @description Updated schedule. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WellnessSchedule"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-        };
-    };
-    listWellnessChecks: {
-        parameters: {
-            query?: {
-                residentUserId?: string;
-                scheduleId?: string;
-                page?: components["parameters"]["Page"];
-                pageSize?: components["parameters"]["PageSize"];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Accessible check history. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["WellnessCheck"][];
-                        total: number;
-                    };
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-        };
-    };
-    confirmWellnessCheck: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                checkId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WellnessConfirmationRequest"];
-            };
-        };
-        responses: {
-            /** @description Authoritative resident confirmation or identical replay. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Confirmation"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            /** @description ALREADY_CONFIRMED, INVALID_STATE, REQUEST_NOT_SENT or DEADLINE_EXPIRED; canonical state included. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ConfirmationConflict"];
-                };
-            };
-        };
-    };
-    submitWellnessObservation: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WellnessObservationRequest"];
-            };
-        };
-        responses: {
-            /** @description Persisted/deduplicated observation; ordered presence updated atomically. */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WellnessObservationAccepted"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-        };
-    };
-    listEmergencyContacts: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Danh sach lien he */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data?: components["schemas"]["EmergencyContact"][];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-        };
-    };
-    createEmergencyContact: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateEmergencyContactRequest"];
-            };
-        };
-        responses: {
-            /** @description Da tao */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmergencyContact"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            409: components["responses"]["Conflict"];
-        };
-    };
-    deleteEmergencyContact: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                contactId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Da xoa */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            404: components["responses"]["NotFound"];
-        };
-    };
-    submitAiResult: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: components["parameters"]["EventId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AiResultRequest"];
-            };
-        };
-        responses: {
-            /** @description Da tiep nhan, dang chuyen cho escalation engine */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AiResultAccepted"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-        };
-    };
-    telegramWebhook: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-Telegram-Bot-Api-Secret-Token": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    [key: string]: unknown;
-                };
-            };
-        };
-        responses: {
-            /** @description Da luu ben vung update hoac nhan update trung lap */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            /** @description Update ID/callback ID da ton tai voi noi dung khac */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Khong luu duoc inbox, Telegram can gui lai */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    connectWebhook: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    contactId: string;
-                    /** @enum {string} */
-                    outcome: "ANSWERED_CONFIRMED" | "ANSWERED_NO_INPUT" | "NO_ANSWER" | "FAILED";
-                    /** Format: date-time */
-                    answeredAt?: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Da xu ly */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            401: components["responses"]["Unauthorized"];
-            /** @description Khong tim thay notification khop voi contactId */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
+  getHealth: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Dich vu hoat dong binh thuong */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HealthStatus'];
+        };
+      };
+      /** @description Dich vu suy giam — mot phu thuoc khong khoi dung duoc */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HealthStatus'];
+        };
+      };
+    };
+  };
+  login: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LoginRequest'];
+      };
+    };
+    responses: {
+      /** @description Dang nhap thanh cong */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AuthTokens'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      /** @description Sai email hoac mat khau */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Tai khoan dang bi khoa tam thoi (FR-AUT-03) */
+      423: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  refreshToken: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          refreshToken?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Token moi */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AuthTokens'];
+        };
+      };
+      401: components['responses']['Unauthorized'];
+    };
+  };
+  logout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Da dang xuat */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components['responses']['Unauthorized'];
+    };
+  };
+  getCurrentUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Ho so nguoi dung */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['User'];
+        };
+      };
+      401: components['responses']['Unauthorized'];
+    };
+  };
+  createTelegramLink: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Ma lien ket da duoc tao */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            linkToken: string;
+            /** Format: date-time */
+            expiresAt: string;
+          };
+        };
+      };
+      401: components['responses']['Unauthorized'];
+      /** @description Yeu cau lien ket qua thuong xuyen */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  listUsers: {
+    parameters: {
+      query?: {
+        page?: components['parameters']['Page'];
+        pageSize?: components['parameters']['PageSize'];
+        role?: components['schemas']['UserRole'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Danh sach nguoi dung */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PaginatedResponse'] & {
+            data?: components['schemas']['User'][];
+          };
+        };
+      };
+      403: components['responses']['Forbidden'];
+    };
+  };
+  createUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateUserRequest'];
+      };
+    };
+    responses: {
+      /** @description Da tao */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['User'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      409: components['responses']['Conflict'];
+    };
+  };
+  getUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        userId: components['parameters']['UserId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Nguoi dung */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['User'];
+        };
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  deleteUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        userId: components['parameters']['UserId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Da vo hieu hoa */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  updateUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        userId: components['parameters']['UserId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateUserRequest'];
+      };
+    };
+    responses: {
+      /** @description Da cap nhat */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['User'];
+        };
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  listDevices: {
+    parameters: {
+      query?: {
+        page?: components['parameters']['Page'];
+        pageSize?: components['parameters']['PageSize'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Danh sach thiet bi */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PaginatedResponse'] & {
+            data?: components['schemas']['Device'][];
+          };
+        };
+      };
+      401: components['responses']['Unauthorized'];
+    };
+  };
+  createDevice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateDeviceRequest'];
+      };
+    };
+    responses: {
+      /** @description Da tao */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Device'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+    };
+  };
+  getDevice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        deviceId: components['parameters']['DeviceId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Thiet bi */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Device'];
+        };
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  deleteDevice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        deviceId: components['parameters']['DeviceId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Da xoa */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  updateDevice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        deviceId: components['parameters']['DeviceId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateDeviceRequest'];
+      };
+    };
+    responses: {
+      /** @description Da cap nhat */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Device'];
+        };
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  listCameras: {
+    parameters: {
+      query?: {
+        deviceId?: string;
+        isEnabled?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Danh sach camera */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data?: components['schemas']['Camera'][];
+          };
+        };
+      };
+      401: components['responses']['Unauthorized'];
+    };
+  };
+  createCamera: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCameraRequest'];
+      };
+    };
+    responses: {
+      /** @description Da tao */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Camera'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      409: components['responses']['Conflict'];
+    };
+  };
+  getCamera: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Camera */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Camera'];
+        };
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  deleteCamera: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Da xoa */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  updateCamera: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateCameraRequest'];
+      };
+    };
+    responses: {
+      /** @description Da cap nhat */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Camera'];
+        };
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  getCameraSnapshot: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Presigned URL cua anh preview */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CameraPreview'];
+        };
+      };
+      404: components['responses']['NotFound'];
+      /** @description Camera dang offline, khong lay duoc frame */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  updateCameraState: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateCameraStateRequest'];
+      };
+    };
+    responses: {
+      /** @description Trang thai camera sau khi cap nhat */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Camera'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+    };
+  };
+  getCameraRuntimeStatus: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Trang thai runtime thuc te */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CameraRuntimeStatusResponse'];
+        };
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  getCameraSource: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Thong tin chi tiet nguon phat */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CameraSourceDetail'];
+        };
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  updateCameraSource: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateCameraSourceRequest'];
+      };
+    };
+    responses: {
+      /** @description Nguon phat sau khi cap nhat */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CameraSourceDetail'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      404: components['responses']['NotFound'];
+    };
+  };
+  uploadCameraVideo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /**
+           * Format: binary
+           * @description File video (MP4 hoac MKV, toi da theo CAMERA_VIDEO_MAX_BYTES)
+           */
+          file: string;
+          /** @default true */
+          loop?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Nguon phat video sau khi upload */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CameraSourceDetail'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      404: components['responses']['NotFound'];
+    };
+  };
+  deleteCameraVideo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Da xoa file video thanh cong */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  testCameraRtspConnection: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RtspConnectionTestRequest'];
+      };
+    };
+    responses: {
+      /** @description Ket qua kiem tra RTSP */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RtspConnectionTestResult'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+    };
+  };
+  startCameraSource: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Nguon phat da khoi dong */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CameraSourceDetail'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      404: components['responses']['NotFound'];
+    };
+  };
+  stopCameraSource: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Nguon phat da dung */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CameraSourceDetail'];
+        };
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  createBrowserPublishSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Thong tin publish WebRTC */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BrowserPublishSession'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      404: components['responses']['NotFound'];
+    };
+  };
+  revokeBrowserPublishSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Da thu hoi phien publish thanh cong */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  retryFrigateSync: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Ket qua thu lai dong bo */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FrigateSyncResult'];
+        };
+      };
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+    };
+  };
+  getCameraDebugStream: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Thong tin luong debug va du lieu detection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CameraDebugStream'];
+        };
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  listZones: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Danh sach vung */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data?: components['schemas']['Zone'][];
+          };
+        };
+      };
+      401: components['responses']['Unauthorized'];
+      404: components['responses']['NotFound'];
+    };
+  };
+  createZone: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cameraId: components['parameters']['CameraId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateZoneRequest'];
+      };
+    };
+    responses: {
+      /** @description Da tao */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Zone'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+      409: components['responses']['Conflict'];
+    };
+  };
+  deleteZone: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        zoneId: components['parameters']['ZoneId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Da xoa */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+    };
+  };
+  updateZone: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        zoneId: components['parameters']['ZoneId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateZoneRequest'];
+      };
+    };
+    responses: {
+      /** @description Da cap nhat */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Zone'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+      409: components['responses']['Conflict'];
+    };
+  };
+  listKnownFaces: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Danh sach nguoi quen */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data?: components['schemas']['KnownFace'][];
+          };
+        };
+      };
+      401: components['responses']['Unauthorized'];
+    };
+  };
+  createKnownFace: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          personName: string;
+          relationship?: string;
+          /** Format: uuid */
+          linkedUserId?: string;
+          /** @description Same image order as images; null means auto-select only if exactly one face. Required selections for ambiguous images are returned by validation. Resubmit original files; server does not retain them between requests. */
+          faceSelections?: (number | null)[];
+          images: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Da dang ky */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['KnownFace'];
+        };
+      };
+      /** @description INVALID_IMAGE */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      401: components['responses']['Unauthorized'];
+      /** @description FORBIDDEN */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description KNOWN_FACE_NAME_EXISTS or KNOWN_FACE_LIMIT */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description IMAGE_TOO_LARGE */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description NO_FACE_DETECTED, MULTIPLE_FACES, FACE_SELECTION_INVALID, FACE_IMAGES_INCONSISTENT. details follows FaceSelectionDetails when images require correction. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description RATE_LIMITED */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description FACE_PROVIDER_UNAVAILABLE */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  deleteKnownFace: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        knownFaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Da xoa DB va ghi audit; collection dang cho dong bo. Khong coi la da xoa hoan tat. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            recognitionStatus: 'SYNC_PENDING';
+          };
+        };
+      };
+      /** @description Da xoa DB va dong bo collection */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components['responses']['Unauthorized'];
+      /** @description Chi ADMIN duoc xoa */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components['responses']['NotFound'];
+      /** @description FACE_PROVIDER_UNAVAILABLE */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  listEvents: {
+    parameters: {
+      query?: {
+        page?: components['parameters']['Page'];
+        pageSize?: components['parameters']['PageSize'];
+        /** @description Co the truyen nhieu lan */
+        eventType?: components['schemas']['EventType'][];
+        status?: components['schemas']['EventStatus'][];
+        priority?: components['schemas']['PriorityLevel'][];
+        cameraId?: string;
+        zoneId?: string;
+        /** @description Loc tu thoi diem nay (ISO-8601) */
+        from?: string;
+        to?: string;
+        isFalseAlarm?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Danh sach su kien */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PaginatedResponse'] & {
+            data?: components['schemas']['EventSummary'][];
+          };
+        };
+      };
+      401: components['responses']['Unauthorized'];
+    };
+  };
+  getEventStats: {
+    parameters: {
+      query?: {
+        /** @description Cua so thong ke tinh nguoc tu hien tai. */
+        windowHours?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description So lieu tong hop */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EventStats'];
+        };
+      };
+      401: components['responses']['Unauthorized'];
+    };
+  };
+  streamEvents: {
+    parameters: {
+      query: {
+        token: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Luong SSE */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'text/event-stream': string;
+        };
+      };
+      401: components['responses']['Unauthorized'];
+    };
+  };
+  getEvent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Su kien day du kem media, ket qua AI va lich su trang thai */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EventDetail'];
+        };
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  updateEvent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          isFalseAlarm?: boolean;
+          retain?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Da cap nhat */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EventDetail'];
+        };
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  confirmEvent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ConfirmEventRequest'];
+      };
+    };
+    responses: {
+      /** @description Da xac nhan */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Confirmation'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+      /** @description Su kien da duoc xu ly boi nguoi khac */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ConfirmationConflict'];
+        };
+      };
+    };
+  };
+  closeEvent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['CloseEventRequest'];
+      };
+    };
+    responses: {
+      /** @description Da dong su kien thanh cong */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Confirmation'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+      /** @description Su kien khong o trang thai ESCALATED hoac da duoc dong */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ConfirmationConflict'];
+        };
+      };
+    };
+  };
+  listEventMedia: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Danh sach media */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data?: components['schemas']['EventMedia'][];
+          };
+        };
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  getEventHistory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Lich su trang thai */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data?: components['schemas']['EventStatusHistoryEntry'][];
+          };
+        };
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  listEventNotifications: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Danh sach thong bao */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data?: components['schemas']['Notification'][];
+          };
+        };
+      };
+      401: components['responses']['Unauthorized'];
+      404: components['responses']['NotFound'];
+    };
+  };
+  getMediaUrl: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        mediaId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Presigned URL */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MediaUrl'];
+        };
+      };
+      404: components['responses']['NotFound'];
+      /** @description Media da bi xoa theo chinh sach luu tru (FR-DAT-01) */
+      410: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  listEscalationRules: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Danh sach quy tac */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data?: components['schemas']['EscalationRule'][];
+          };
+        };
+      };
+      401: components['responses']['Unauthorized'];
+    };
+  };
+  updateEscalationRule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventType: components['schemas']['EventType'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateEscalationRuleRequest'];
+      };
+    };
+    responses: {
+      /** @description Da cap nhat */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EscalationRule'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      403: components['responses']['Forbidden'];
+    };
+  };
+  updateEscalationThresholds: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventType: components['schemas']['EventType'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateEscalationThresholdsRequest'];
+      };
+    };
+    responses: {
+      /** @description Updated rule */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EscalationRule'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+      /** @description RULE_VERSION_CONFLICT; reload canonical rule before retry. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  listWellnessSchedules: {
+    parameters: {
+      query?: {
+        residentUserId?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Accessible schedules, excluding soft-deleted rows. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: components['schemas']['WellnessSchedule'][];
+          };
+        };
+      };
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+    };
+  };
+  createWellnessSchedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateWellnessScheduleRequest'];
+      };
+    };
+    responses: {
+      /** @description Schedule created; no check runs before its next due occurrence. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['WellnessSchedule'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      409: components['responses']['Conflict'];
+    };
+  };
+  deleteWellnessSchedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        scheduleId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Schedule soft-deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+    };
+  };
+  updateWellnessSchedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        scheduleId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateWellnessScheduleRequest'];
+      };
+    };
+    responses: {
+      /** @description Updated schedule. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['WellnessSchedule'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+      409: components['responses']['Conflict'];
+    };
+  };
+  listWellnessChecks: {
+    parameters: {
+      query?: {
+        residentUserId?: string;
+        scheduleId?: string;
+        page?: components['parameters']['Page'];
+        pageSize?: components['parameters']['PageSize'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Accessible check history. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: components['schemas']['WellnessCheck'][];
+            total: number;
+          };
+        };
+      };
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+    };
+  };
+  confirmWellnessCheck: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        checkId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['WellnessConfirmationRequest'];
+      };
+    };
+    responses: {
+      /** @description Authoritative resident confirmation or identical replay. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Confirmation'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+      /** @description ALREADY_CONFIRMED, INVALID_STATE, REQUEST_NOT_SENT or DEADLINE_EXPIRED; canonical state included. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ConfirmationConflict'];
+        };
+      };
+    };
+  };
+  submitWellnessObservation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['WellnessObservationRequest'];
+      };
+    };
+    responses: {
+      /** @description Persisted/deduplicated observation; ordered presence updated atomically. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['WellnessObservationAccepted'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+      409: components['responses']['Conflict'];
+    };
+  };
+  listEmergencyContacts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Danh sach lien he */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data?: components['schemas']['EmergencyContact'][];
+          };
+        };
+      };
+      401: components['responses']['Unauthorized'];
+    };
+  };
+  createEmergencyContact: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateEmergencyContactRequest'];
+      };
+    };
+    responses: {
+      /** @description Da tao */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmergencyContact'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      409: components['responses']['Conflict'];
+    };
+  };
+  deleteEmergencyContact: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        contactId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Da xoa */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: components['responses']['NotFound'];
+    };
+  };
+  submitAiResult: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AiResultRequest'];
+      };
+    };
+    responses: {
+      /** @description Da tiep nhan, dang chuyen cho escalation engine */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AiResultAccepted'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      404: components['responses']['NotFound'];
+      409: components['responses']['Conflict'];
+    };
+  };
+  telegramWebhook: {
+    parameters: {
+      query?: never;
+      header: {
+        'X-Telegram-Bot-Api-Secret-Token': string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          [key: string]: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description Da luu ben vung update hoac nhan update trung lap */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      /** @description Update ID/callback ID da ton tai voi noi dung khac */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Khong luu duoc inbox, Telegram can gui lai */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  connectWebhook: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          contactId: string;
+          /** @enum {string} */
+          outcome: 'ANSWERED_CONFIRMED' | 'ANSWERED_NO_INPUT' | 'NO_ANSWER' | 'FAILED';
+          /** Format: date-time */
+          answeredAt?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Da xu ly */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components['responses']['Unauthorized'];
+      /** @description Khong tim thay notification khop voi contactId */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
 }

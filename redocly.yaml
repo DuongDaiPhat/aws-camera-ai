@@ -11,5 +11,9 @@ rules:
 apis:
   orchestrator:
     root: api/openapi.yaml
+    x-openapi-ts:
+      output: packages/contracts/src/generated/orchestrator.ts
   ai-service:
     root: api/openapi-ai-service.yaml
+    x-openapi-ts:
+      output: packages/contracts/src/generated/ai-service.ts
