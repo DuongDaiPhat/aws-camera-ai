@@ -90,9 +90,10 @@ def test_calculate_pose_geometry_valid_standing() -> None:
 
 
 def test_calculate_pose_geometry_rejects_low_visibility() -> None:
-    # Vai trai visibility thap < 0.6
+    # Ca 2 vai visibility thap < 0.6
     kps = make_dummy_keypoints(visibility=0.9)
     kps[LEFT_SHOULDER] = NormalizedKeypoint(x=0.45, y=0.2, visibility=0.4)
+    kps[RIGHT_SHOULDER] = NormalizedKeypoint(x=0.55, y=0.2, visibility=0.4)
     geom = calculate_pose_geometry(
         keypoints=kps,
         image_width=1920,

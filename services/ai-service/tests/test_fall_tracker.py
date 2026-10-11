@@ -212,3 +212,55 @@ def test_fall_tracker_registry_and_sweeper() -> None:
 
     # Sweep khi chua co timeout
     assert registry.sweep_all() == 0
+
+
+def test_fall_tracker_persistent_prone_and_immobility_confirms() -> None:
+    tracker = FallTracker("cam1", "sess1", "track_prone")
+    t0 = datetime(2026, 10, 11, 12, 0, 0, tzinfo=UTC)
+    # Tư thế nằm: góc 40 độ (< 45 độ), trọng tâm đã nằm sẵn ở 300px
+    geom_prone = make_geom(angle=40.0, center_y=300.0, height=100.0)
+    kps = make_kps()
+
+    # Nạp 10 frame nằm sẵn (không có sudden drop)
+    for i in range(10):
+        tracker.evaluate_frame(
+            observed_at=t0 + timedelta(milliseconds=i * 200),
+            frame_id=f"f{i}",
+            keypoints=kps,
+            geometry=geom_prone,
+            pose_available=True,
+            reason="NORMAL_POSTURE",
+        )
+
+    # Frame 11: sau 10 frame nằm liên tục -> Persistent Prone kích hoạt CANDIDATE
+    res_cand = tracker.evaluate_frame(
+        observed_at=t0 + timedelta(milliseconds=10 * 200),
+        frame_id="f10",
+        keypoints=kps,
+        geometry=geom_prone,
+        pose_available=True,
+        reason="NORMAL_POSTURE",
+    )
+    assert res_cand["state"] == "CANDIDATE"
+    assert res_cand["reason"] == "PRONE_CANDIDATE"
+
+    # Duy trì nằm bất động thêm 16 giây (vượt ngưỡng 15s)
+    # Gửi frame cách mỗi 500ms
+    current_time = t0 + timedelta(milliseconds=10 * 200)
+    last_res = res_cand
+    for step in range(1, 33):  # 32 * 0.5s = 16.0s
+        current_time += timedelta(milliseconds=500)
+        last_res = tracker.evaluate_frame(
+            observed_at=current_time,
+            frame_id=f"f_immobile_{step}",
+            keypoints=kps,
+            geometry=geom_prone,
+            pose_available=True,
+            reason="NORMAL_POSTURE",
+        )
+
+    # Sau > 15s bất động -> Phải chuyển sang CONFIRMED
+    assert last_res["state"] == "CONFIRMED"
+    assert last_res["reason"] == "IMMOBILE_CONFIRMED"
+    assert last_res["confidence"] == 1.0
+
