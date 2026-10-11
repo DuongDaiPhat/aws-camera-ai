@@ -152,7 +152,18 @@ class PoseEstimator:
             result = self._landmarker.detect(mp_image)
 
         if not result.pose_landmarks or len(result.pose_landmarks) == 0:
-            return None, None, False, "NO_POSE"
+            if person_bbox is not None:
+                # Fallback: bbox quá hẹp, thử lại trên toàn bộ ảnh
+                full_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+                mp_full = mp.Image(image_format=mp.ImageFormat.SRGB, data=full_rgb)
+                with self._infer_lock:
+                    result = self._landmarker.detect(mp_full)
+                if not result.pose_landmarks or len(result.pose_landmarks) == 0:
+                    return None, None, False, "NO_POSE"
+                x_min, y_min = 0, 0
+                crop_w, crop_h = img_w, img_h
+            else:
+                return None, None, False, "NO_POSE"
 
         raw_landmarks = result.pose_landmarks[0]
         if len(raw_landmarks) < 33:
@@ -188,6 +199,33 @@ class PoseEstimator:
             bbox_height=effective_bbox_h,
             min_visibility=self._min_visibility,
         )
+
+        if geometry is None and person_bbox is not None and (crop_w != img_w or crop_h != img_h):
+            # Fallback 2: crop bị mất hông/vai, thử lại trên toàn ảnh
+            full_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+            mp_full = mp.Image(image_format=mp.ImageFormat.SRGB, data=full_rgb)
+            with self._infer_lock:
+                full_res = self._landmarker.detect(mp_full)
+            if full_res.pose_landmarks and len(full_res.pose_landmarks) > 0 and len(full_res.pose_landmarks[0]) >= 33:
+                fallback_kps = [
+                    NormalizedKeypoint(
+                        x=float(lm.x),
+                        y=float(lm.y),
+                        z=float(lm.z),
+                        visibility=float(getattr(lm, "visibility", 1.0) or 1.0),
+                    )
+                    for lm in full_res.pose_landmarks[0]
+                ]
+                fallback_geom = calculate_pose_geometry(
+                    keypoints=fallback_kps,
+                    image_width=img_w,
+                    image_height=img_h,
+                    bbox_width=effective_bbox_w,
+                    bbox_height=effective_bbox_h,
+                    min_visibility=self._min_visibility,
+                )
+                if fallback_geom is not None:
+                    return fallback_kps, fallback_geom, True, "NORMAL_POSTURE"
 
         if geometry is None:
             return full_keypoints, None, False, "LOW_VISIBILITY"

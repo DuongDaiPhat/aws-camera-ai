@@ -104,13 +104,13 @@ def calculate_pose_geometry(
     if len(keypoints) < 33:
         return None
 
-    # Quality gate cho 4 khop trong yeu
-    if (
-        keypoints[LEFT_SHOULDER].visibility < min_visibility
-        or keypoints[RIGHT_SHOULDER].visibility < min_visibility
-        or keypoints[LEFT_HIP].visibility < min_visibility
-        or keypoints[RIGHT_HIP].visibility < min_visibility
-    ):
+    # Quality gate: Phai co it nhat 1 vai va 1 hong dat chat luong (ho tro tu the nam nghieng)
+    has_left_shoulder = keypoints[LEFT_SHOULDER].visibility >= min_visibility
+    has_right_shoulder = keypoints[RIGHT_SHOULDER].visibility >= min_visibility
+    has_left_hip = keypoints[LEFT_HIP].visibility >= min_visibility
+    has_right_hip = keypoints[RIGHT_HIP].visibility >= min_visibility
+
+    if not (has_left_shoulder or has_right_shoulder) or not (has_left_hip or has_right_hip):
         return None
 
     # Tinh so keypoints dat visibility
@@ -134,8 +134,19 @@ def calculate_pose_geometry(
         keypoints[RIGHT_HIP].y * image_height,
     )
 
-    s_mid = PixelPoint((s_left.x + s_right.x) / 2.0, (s_left.y + s_right.y) / 2.0)
-    h_mid = PixelPoint((h_left.x + h_right.x) / 2.0, (h_left.y + h_right.y) / 2.0)
+    if has_left_shoulder and has_right_shoulder:
+        s_mid = PixelPoint((s_left.x + s_right.x) / 2.0, (s_left.y + s_right.y) / 2.0)
+    elif has_left_shoulder:
+        s_mid = s_left
+    else:
+        s_mid = s_right
+
+    if has_left_hip and has_right_hip:
+        h_mid = PixelPoint((h_left.x + h_right.x) / 2.0, (h_left.y + h_right.y) / 2.0)
+    elif has_left_hip:
+        h_mid = h_left
+    else:
+        h_mid = h_right
 
     torso_angle = calculate_torso_angle(s_mid, h_mid)
 
