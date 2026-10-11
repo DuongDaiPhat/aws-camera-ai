@@ -18,6 +18,7 @@ import { EscalationModule } from './escalation/escalation.module';
 import { ZonesModule } from './zones/zones.module';
 import { FaceRecognitionModule } from './face-recognition/face-recognition.module';
 import { WellnessModule } from './wellness/wellness.module';
+import { FallDetectionModule } from './fall-detection/fall-detection.module';
 import { BullModule } from '@nestjs/bullmq';
 
 /**
@@ -60,6 +61,7 @@ import { BullModule } from '@nestjs/bullmq';
     ZonesModule,
     FaceRecognitionModule,
     WellnessModule,
+    FallDetectionModule,
   ],
 })
 export class AppModule {}

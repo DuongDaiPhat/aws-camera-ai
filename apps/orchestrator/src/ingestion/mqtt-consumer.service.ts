@@ -22,6 +22,7 @@ import { FrigateEventAfterDto, FrigateEventMessageDto } from './dto/frigate-even
 import { FrigateDetectionTrackerService } from '../frigate/frigate-detection-tracker.service';
 import { ZoneScheduleService } from '../zones/zone-schedule.service';
 import { ZoneResultProducerService, ZoneResultContext } from './zone-result-producer.service';
+import { PoseFrameConsumer } from '../fall-detection/consumer/pose-frame.consumer';
 
 const DEFAULT_MQTT_CONNECT_TIMEOUT_MS = 10_000;
 const DEFAULT_MQTT_RECONNECT_PERIOD_MS = 3_000;
@@ -64,6 +65,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     private readonly zoneScheduleService: ZoneScheduleService = new ZoneScheduleService(),
     @Optional() @InjectQueue('face-recognition') private readonly faceQueue?: Queue,
     @Optional() private readonly wellnessSource?: WellnessSourceAdapter,
+    @Optional() private readonly poseFrameConsumer?: PoseFrameConsumer,
   ) {}
 
   onModuleInit(): void {
@@ -86,6 +88,10 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     const framesTopic = this.configService.get<string>(
       'MQTT_TOPIC_CAMERA_FRAMES',
       'frigate/camerai/frames',
+    );
+    const poseFramesTopic = this.configService.get<string>(
+      'MQTT_TOPIC_POSE_FRAMES',
+      'frigate/camerai/pose/frames',
     );
     const reconnectPeriodMs = Number(
       this.configService.get<string | number>(
@@ -111,13 +117,13 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     });
 
     this.client.on('connect', () => {
-      this.logger.log(`Da ket noi MQTT Broker thanh cong. Dang subscribe topic: ${topic}`);
-      this.client?.subscribe([topic, framesTopic], (error) => {
+      this.logger.log(`Da ket noi MQTT Broker thanh cong. Dang subscribe topic: ${topic}, ${framesTopic}, ${poseFramesTopic}`);
+      this.client?.subscribe([topic, framesTopic, poseFramesTopic], (error) => {
         if (error) {
-          this.logger.error(`Subscribe topic ${topic} that bai:`, error);
+          this.logger.error(`Subscribe topics that bai:`, error);
           return;
         }
-        this.logger.log(`Da subscribe topic ${topic}`);
+        this.logger.log(`Da subscribe cac topic MQTT.`);
       });
     });
 
@@ -126,6 +132,18 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     });
 
     this.client.on('message', (receivedTopic, buffer) => {
+      // Pose frame binary stream handling (US-16, US-17)
+      if (receivedTopic === poseFramesTopic) {
+        if (this.poseFrameConsumer) {
+          this.poseFrameConsumer.handlePoseFrame(buffer).catch((error: unknown) => {
+            this.logger.warn(
+              `Pose frame processing error: ${error instanceof Error ? error.message : String(error)}`,
+            );
+          });
+        }
+        return;
+      }
+
       // Frame telemetry must not wait for snapshot downloads or database writes.
       if (receivedTopic === framesTopic) {
         if (buffer.length > 128 * 1024) return;
