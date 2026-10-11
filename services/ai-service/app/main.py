@@ -14,7 +14,7 @@ import logging
 from fastapi import FastAPI
 
 from app.config import get_settings
-from app.routers import face, health
+from app.routers import face, health, pose
 
 settings = get_settings()
 logging.basicConfig(level=settings.log_level)
@@ -29,3 +29,4 @@ app = FastAPI(
 
 app.include_router(health.router)
 app.include_router(face.router)
+app.include_router(pose.router)
