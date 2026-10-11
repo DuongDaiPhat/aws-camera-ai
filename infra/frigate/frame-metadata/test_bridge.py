@@ -143,6 +143,45 @@ class FramePayloadTest(unittest.TestCase):
         self.assertEqual(res2["frameTime"], 123.55)
         self.assertEqual(res2["objects"][0]["observedAt"], 123.4)
 
+    def test_normalize_box_pixel_and_normalized(self):
+        from bridge import normalize_box
+
+        # Pixel coordinates on 1280x720
+        box = [72, 128, 360, 640]  # ymin=72, xmin=128, ymax=360, xmax=640
+        norm = normalize_box(box, 1280, 720)
+        self.assertAlmostEqual(norm["x"], 0.1, places=2)
+        self.assertAlmostEqual(norm["y"], 0.1, places=2)
+        self.assertAlmostEqual(norm["width"], 0.4, places=2)
+        self.assertAlmostEqual(norm["height"], 0.4, places=2)
+
+        # Already normalized
+        norm_box = [0.2, 0.3, 0.8, 0.9]
+        res = normalize_box(norm_box, 1280, 720)
+        self.assertAlmostEqual(res["x"], 0.3, places=2)
+        self.assertAlmostEqual(res["y"], 0.2, places=2)
+        self.assertAlmostEqual(res["width"], 0.6, places=2)
+        self.assertAlmostEqual(res["height"], 0.6, places=2)
+
+    def test_pose_envelope_pack_unpack_roundtrip(self):
+        from bridge import build_pose_frame_header, pack_pose_frame_envelope, unpack_pose_frame_envelope
+
+        people = [
+            {"id": "track-1", "score": 0.9, "box": [10, 20, 100, 200], "observedAt": 123.4}
+        ]
+        header = build_pose_frame_header("cam_living_room", 123.5, people)
+        self.assertEqual(header["schemaVersion"], 1)
+        self.assertEqual(header["cameraSlug"], "cam_living_room")
+        self.assertEqual(len(header["persons"]), 1)
+        self.assertEqual(header["persons"][0]["trackId"], "track-1")
+
+        fake_jpeg = b"\xff\xd8\xff\xd9"
+        envelope = pack_pose_frame_envelope(header, fake_jpeg)
+        self.assertGreater(len(envelope), 4)
+
+        unpacked_header, unpacked_jpeg = unpack_pose_frame_envelope(envelope)
+        self.assertEqual(unpacked_header["cameraSlug"], "cam_living_room")
+        self.assertEqual(unpacked_jpeg, fake_jpeg)
+
 
 if __name__ == "__main__":
     unittest.main()
