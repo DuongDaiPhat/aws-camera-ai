@@ -183,4 +183,14 @@ async def evaluate_fall(
     if bbox_dict:
         result_dict["boundingBox"] = bbox_dict
 
+    logger.info(
+        "[POSE_EVAL] track=%s state=%s reason=%s poseAvail=%s angle=%s immobile=%.1fs",
+        track_id,
+        result_dict.get("state"),
+        result_dict.get("reason"),
+        result_dict.get("poseAvailable"),
+        f"{result_dict.get('torsoAngleDeg'):.1f}" if result_dict.get("torsoAngleDeg") is not None else "None",
+        result_dict.get("immobileSeconds") or 0.0,
+    )
+
     return FallResponse(**result_dict)

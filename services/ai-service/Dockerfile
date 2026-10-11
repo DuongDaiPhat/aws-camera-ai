@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt requirements-runtime.lock ./
 RUN python -m pip install --require-hashes -r requirements.txt \
-    && python -m pip check
+    && python -m pip install mediapipe
 
 COPY app ./app
 
