@@ -151,6 +151,10 @@ services:
     environment:
       TZ: ${TZ}
       MQTT_TOPIC_CAMERA_FRAMES: ${MQTT_TOPIC_CAMERA_FRAMES:-frigate/camerai/frames}
+      FRIGATE_POSE_FRAMES_ENABLED: "true"
+      FRIGATE_POSE_MAX_FPS: "5.0"
+      FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS: "30.0"
+      MQTT_TOPIC_POSE_FRAMES: ${MQTT_TOPIC_POSE_FRAMES:-frigate/camerai/pose/frames}
     ports:
       - "${PORT_FRIGATE:-5000}:5000"
     volumes:
@@ -183,6 +187,7 @@ services:
       FACE_MAX_PIXELS: ${FACE_MAX_PIXELS:-12000000}
       FACE_MAX_CONCURRENT: ${FACE_MAX_CONCURRENT:-2}
       FALL_IMMOBILITY_SECONDS: ${FALL_IMMOBILITY_SECONDS}
+      POSE_MODEL_PATH: /app/models/pose_landmarker_lite.task
       FIRE_MIN_CONSECUTIVE_FRAMES: ${FIRE_MIN_CONSECUTIVE_FRAMES}
       AWS_REGION: ${AWS_REGION}
       REKOGNITION_COLLECTION_ID: ${REKOGNITION_COLLECTION_ID}
@@ -229,6 +234,7 @@ services:
       MEDIAMTX_PUBLISH_PASSWORD: ${MEDIAMTX_PUBLISH_PASSWORD:-local-dev-password}
       CAMERA_VIDEO_STORAGE_PATH: /workspace/storage/videos
       REDIS_HOST: redis
+      M2A_ENABLED: "true"
     ports:
       - "${PORT_ORCHESTRATOR:-3001}:3001"
     volumes:

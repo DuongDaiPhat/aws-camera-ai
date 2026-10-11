@@ -6,7 +6,7 @@ import signal
 import time
 
 
-MAX_OBJECT_AGE_SECONDS = float(os.getenv("FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS", "0.25"))
+MAX_OBJECT_AGE_SECONDS = float(os.getenv("FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS", "30.0"))
 FRIGATE_POSE_FRAMES_ENABLED = os.getenv("FRIGATE_POSE_FRAMES_ENABLED", "false").lower() in ("true", "1")
 MQTT_TOPIC_POSE_FRAMES = os.getenv("MQTT_TOPIC_POSE_FRAMES", "frigate/camerai/pose/frames")
 MAX_POSE_FPS = float(os.getenv("FRIGATE_POSE_MAX_FPS", "5.0"))
@@ -105,6 +105,9 @@ def is_valid_person(obj, frame_time, max_age=MAX_OBJECT_AGE_SECONDS):
         return False
     if obj.get("box") is None:
         return False
+    # Nguoi bat dong (stationary) van la nguoi hop le dang co mat trong khung hinh (US-16, US-17)
+    if obj.get("stationary", False) or obj.get("motionless_count", 0) > 0:
+        return True
     obj_frame_time = obj.get("frame_time")
     if obj_frame_time is None or not isinstance(obj_frame_time, (int, float)):
         return False
@@ -196,18 +199,19 @@ def main():
                     min_interval = 1.0 / MAX_POSE_FPS if MAX_POSE_FPS > 0 else 0.2
                     if frame_time - last_pose_time.get(camera, 0.0) >= min_interval:
                         header = build_pose_frame_header(camera, frame_time, result["objects"])
-                        # Doc frame shared memory neu co
-                        frame_path = f"/tmp/cache/{camera}_{frame_time}.jpg"
+                        # Doc frame anh thuc te tu Frigate local HTTP API
                         jpeg_bytes = b""
-                        if os.path.exists(frame_path):
-                            try:
-                                with open(frame_path, "rb") as f:
-                                    jpeg_bytes = f.read()
-                            except OSError:
-                                jpeg_bytes = b""
+                        try:
+                            import urllib.request
+                            with urllib.request.urlopen(
+                                f"http://127.0.0.1:5000/api/{camera}/latest.jpg", timeout=0.5
+                            ) as resp:
+                                jpeg_bytes = resp.read()
+                        except Exception as fetch_err:
+                            pass
+
                         if not jpeg_bytes:
-                            # 1x1 dummy JPEG header neu chua co shared memory frame file
-                            jpeg_bytes = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xdb\x00C\x00\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19\x12\x13\x0f\x14\x1d\x1a\x1f\x1e\x1d\x1a\x1c\x1c $.' \",#\x1c\x1c(7),01444\x1f'9=82<.342\xff\xc0\x00\x0b\x08\x00\x01\x00\x01\x01\x01\x11\x00\xff\xc4\x00\x1f\x00\x00\x01\x05\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\xff\xda\x00\x08\x01\x01\x00\x00?\x00\xbf\x00\xff\xd9"
+                            continue
                         try:
                             envelope = pack_pose_frame_envelope(header, jpeg_bytes)
                             client.publish(MQTT_TOPIC_POSE_FRAMES, envelope, qos=0, retain=False)
