@@ -351,21 +351,31 @@ export class WellnessService {
     const observedAtDate = new Date(dto.observedAt);
     const validUntilDate = new Date(observedAtDate.getTime() + 24 * 60 * 60 * 1000); // 24h TTL
 
-    await this.repository.saveObservation({
-      observation_id: dto.observationId,
-      owner_user_id: dto.ownerUserId,
-      resident_user_id: dto.residentUserId,
-      known_face_id: dto.knownFaceId,
-      camera_id: dto.cameraId,
-      identity_event_id: dto.identityEventId,
-      source_session_id: dto.sourceSessionId,
-      track_id: dto.trackId,
-      kind: dto.kind,
-      observed_at: observedAtDate,
-      received_at: new Date(),
-      payload_hash: payloadHash,
-      evidence: (dto.directionalEvidence as unknown as Record<string, unknown>) ?? {},
-    });
+    try {
+      await this.repository.saveObservation({
+        observation_id: dto.observationId,
+        owner_user_id: dto.ownerUserId,
+        resident_user_id: dto.residentUserId,
+        known_face_id: dto.knownFaceId ?? null,
+        camera_id: dto.cameraId ?? null,
+        identity_event_id: dto.identityEventId ?? null,
+        source_session_id: dto.sourceSessionId,
+        track_id: dto.trackId,
+        kind: dto.kind,
+        observed_at: observedAtDate,
+        received_at: new Date(),
+        payload_hash: payloadHash,
+        evidence: (dto.directionalEvidence as unknown as Record<string, unknown>) ?? {},
+      });
+    } catch (err: unknown) {
+      if ((err as { code?: string }).code === '23503') {
+        const detail = (err as { detail?: string }).detail ?? '';
+        throw new BadRequestException(
+          `Khóa ngoại không hợp lệ: ${detail || 'identityEventId, cameraId hoặc knownFaceId không tồn tại'}`,
+        );
+      }
+      throw err;
+    }
 
     let newState: 'HOME' | 'AWAY' | null = null;
     if (dto.kind === 'ARRIVAL' || dto.kind === 'MOTION') {

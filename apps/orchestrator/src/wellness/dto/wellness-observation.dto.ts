@@ -3,13 +3,16 @@ import {
   IsISO8601,
   IsOptional,
   IsString,
-  IsUUID,
+  Matches,
   MaxLength,
   MinLength,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+const UUID_PATTERN =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 export class DirectionalEvidenceDto {
   @ApiProperty({
@@ -41,46 +44,48 @@ export class DirectionalEvidenceDto {
 
 export class WellnessObservationDto {
   @ApiProperty({
-    example: '44444444-4444-4444-4444-444444444444',
+    example: '33333333-3333-4333-8333-444444444401',
     description: 'UUID duy nhất của quan sát (chống trùng lặp)',
   })
-  @IsUUID()
+  @Matches(UUID_PATTERN, { message: 'observationId must be a UUID' })
   observationId!: string;
 
   @ApiProperty({
     example: '11111111-1111-4111-8111-111111111111',
     description: 'ID chủ hộ (owner/caregiver/admin)',
   })
-  @IsUUID()
+  @Matches(UUID_PATTERN, { message: 'ownerUserId must be a UUID' })
   ownerUserId!: string;
 
   @ApiProperty({
     example: '22222222-2222-4222-8222-222222222222',
     description: 'ID người được giám sát (resident)',
   })
-  @IsUUID()
+  @Matches(UUID_PATTERN, { message: 'residentUserId must be a UUID' })
   residentUserId!: string;
 
-  @ApiProperty({
-    example: '33333333-3333-4333-8333-333333333333',
-    description: 'ID khuôn mặt đã nhận diện trong known_faces',
+  @ApiPropertyOptional({
+    example: 'dd3657f8-dc20-4b90-8848-057c96849502',
+    description: 'ID khuôn mặt đã nhận diện trong known_faces (nếu có)',
   })
-  @IsUUID()
-  knownFaceId!: string;
+  @IsOptional()
+  @Matches(UUID_PATTERN, { message: 'knownFaceId must be a UUID' })
+  knownFaceId?: string;
 
-  @ApiProperty({
-    example: '55555555-5555-4555-8555-555555555555',
-    description: 'ID sự kiện nhận diện danh tính (PERSON_DETECTED)',
+  @ApiPropertyOptional({
+    description: 'ID sự kiện nhận diện danh tính (PERSON_DETECTED) (nếu có)',
   })
-  @IsUUID()
-  identityEventId!: string;
+  @IsOptional()
+  @Matches(UUID_PATTERN, { message: 'identityEventId must be a UUID' })
+  identityEventId?: string;
 
-  @ApiProperty({
-    example: '66666666-6666-4666-8666-666666666666',
-    description: 'ID camera ghi nhận',
+  @ApiPropertyOptional({
+    example: '22222222-2222-2222-2222-222222222221',
+    description: 'ID camera ghi nhận (nếu có)',
   })
-  @IsUUID()
-  cameraId!: string;
+  @IsOptional()
+  @Matches(UUID_PATTERN, { message: 'cameraId must be a UUID' })
+  cameraId?: string;
 
   @ApiProperty({
     example: 'session_cam_living_room_01',

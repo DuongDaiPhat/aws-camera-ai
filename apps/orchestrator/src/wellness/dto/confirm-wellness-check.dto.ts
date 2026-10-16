@@ -1,12 +1,15 @@
-import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsIn, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+const UUID_PATTERN =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 export class ConfirmWellnessCheckDto {
   @ApiProperty({
     example: '33333333-3333-4333-8333-333333333333',
     description: 'UUID duy nhất của lệnh xác nhận (idempotency key)',
   })
-  @IsUUID()
+  @Matches(UUID_PATTERN, { message: 'commandId must be a UUID' })
   commandId!: string;
 
   @ApiProperty({

@@ -16,7 +16,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateWellnessScheduleDto {
   @ApiPropertyOptional({
-    example: '11111111-1111-4111-8111-111111111111',
+    example: '22222222-2222-4222-8222-222222222222',
     description: 'ID người được giám sát',
   })
   @IsOptional()
@@ -78,12 +78,13 @@ export class UpdateWellnessScheduleDto {
   graceSeconds?: number;
 
   @ApiPropertyOptional({
-    example: ['22222222-2222-2222-2222-222222222222'],
-    description: 'Danh sách ID camera áp dụng',
+    example: [],
+    description: 'Danh sách ID camera áp dụng (rỗng = mọi camera được bật của hộ)',
+    default: [],
   })
   @IsOptional()
   @IsArray()
-  @IsUUID('4', { each: true })
+  @IsUUID(undefined, { each: true })
   cameraIds?: string[];
 
   @ApiPropertyOptional({
