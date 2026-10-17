@@ -1,6 +1,7 @@
 """Integration test cho PoseEstimator voi model thuc te (smoke test)."""
 
 import numpy as np
+import pytest
 
 from app.services.pose_estimator import PoseEstimator
 
@@ -8,7 +9,10 @@ from app.services.pose_estimator import PoseEstimator
 def test_pose_estimator_blank_image() -> None:
     # Tao anh den 640x480
     blank = np.zeros((480, 640, 3), dtype=np.uint8)
-    estimator = PoseEstimator.get_instance()
+    try:
+        estimator = PoseEstimator.get_instance()
+    except FileNotFoundError:
+        pytest.skip("Pose model not available for smoke test")
 
     keypoints, geometry, pose_available, reason = estimator.estimate(
         image_bgr=blank,
@@ -24,7 +28,10 @@ def test_pose_estimator_blank_image() -> None:
 
 def test_pose_estimator_empty_image() -> None:
     empty = np.zeros((0, 0, 3), dtype=np.uint8)
-    estimator = PoseEstimator.get_instance()
+    try:
+        estimator = PoseEstimator.get_instance()
+    except FileNotFoundError:
+        pytest.skip("Pose model not available for smoke test")
 
     _, _, pose_available, reason = estimator.estimate(empty)
     assert pose_available is False
