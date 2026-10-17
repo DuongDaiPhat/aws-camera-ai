@@ -91,11 +91,11 @@ docker exec camerai-ai pytest /app/tests/test_pose_geometry.py /app/tests/test_f
 ```
 - **Kết quả kỳ vọng:** `11 passed` (100% passed).
 
-### 4.2. Kiểm thử Backend Orchestrator (Fall Detection Module)
+### 4.2. Kiểm thử Backend Orchestrator (Fall Detection Module & Media Service)
 ```powershell
-docker exec camerai-orchestrator pnpm test src/fall-detection
+docker exec camerai-orchestrator pnpm test src/fall-detection test/media.service.spec.ts
 ```
-- **Kết quả kỳ vọng:** `5 test suites passed, 28 tests passed` (100% passed).
+- **Kết quả kỳ vọng:** `6 test suites passed, 34 tests passed` (100% passed).
 
 ---
 
@@ -126,7 +126,9 @@ docker exec camerai-orchestrator pnpm test src/fall-detection
 
 ### Bước 4: Quan sát Kết quả Phản hồi
 - Trên **Web Dashboard**: Sự kiện màu đỏ **P1 Khẩn cấp - `FALL_DETECTED` (Phát hiện té ngã)** lập tức xuất hiện ở đầu danh sách sự kiện, kèm chuông âm thanh cảnh báo khẩn cấp.
-- Trên **Telegram** (nếu đã liên kết bot): Nhận tin nhắn thông báo P1 khẩn cấp có đính kèm ảnh bằng chứng và vị trí camera.
+- **Xem ảnh bằng chứng Snapshot**: Bấm vào sự kiện để mở modal **Chi tiết sự kiện**, bạn sẽ thấy bức ảnh chụp khung hình camera tại thời điểm ngã hiển thị rõ ràng người nằm trên sàn, ngày giờ phát hiện và vị trí camera.
+- **Tương tác xác nhận**: Người dùng hoặc người thân có thể bấm nút **"Tôi ổn (An toàn)"** hoặc **"Cần giúp đỡ (Leo thang)"**.
+- Trên **Telegram** (nếu đã cấu hình bot): Nhận tin nhắn thông báo P1 khẩn cấp có đính kèm ảnh bằng chứng và vị trí camera.
 
 ---
 
@@ -163,3 +165,24 @@ docker logs -f camerai-orchestrator | Select-String "M2A|FALL"
    Nếu bạn nằm xuống nhưng đứng dậy ở giây thứ 8 $\to$ AI ghi nhận `angle > 45°` $\to$ Chuyển trạng thái `CANCELLED (reason: RECOVERED)` $\to$ Không phát chuông báo động sai (AC17-2).
 2. **Nằm trong vùng nghỉ ngơi (Vùng Giường/Sofa - REST_AREA):**  
    Nếu camera có cấu hình zone loại `REST_AREA` (ví dụ khu vực ghế sofa `rest_area_sofa`) và người nằm trong vùng này $\to$ Hệ thống tự động lọc bỏ và gắn cờ `inRestArea=true` $\to$ Không kích hoạt báo động ngã (AC17-3).
+
+---
+
+## 8. Kinh nghiệm & Lưu ý khi Kiểm thử Trực tiếp (Troubleshooting & Tips)
+
+1. **Góc đặt Camera & Tránh mất Bounding Box khi nằm:**
+   - Các mô hình phát hiện người (như MobileNet SSD trên Frigate) được tối ưu cho người đứng hoặc ngồi. Khi nằm dài trên sàn, tỷ lệ cơ thể chuyển sang chiều ngang ($W \gg H$), độ tin cậy nhận diện có thể bị sụt giảm nếu nằm sát mép camera hoặc ánh sáng yếu.
+   - **Mẹo:** Đặt webcam ở góc hơi cao nhìn chéo xuống sàn, đảm bảo camera nhìn thấy trọn vẹn toàn bộ cơ thể (vai, thân và chân).
+2. **Cơ chế Tự động Tái kích hoạt (Re-arm):**
+   - Sau khi một sự kiện té ngã đã được xác nhận (`CONFIRMED`), hệ thống khóa chống trùng lặp (Dedup) theo episode.
+   - Để kiểm thử lượt ngã tiếp theo, bạn cần **đứng thẳng người dậy hẳn (góc thân $> 60^\circ$)** trong vài giây để hệ thống tự động reset (`re-arm MONITORING`), hoặc bước ra khỏi khung hình camera để Frigate cấp Track ID mới.
+3. **Mẹo rút ngắn thời gian kiểm thử (Fast Dev Testing):**
+   - Thay vì phải nằm đợi đủ 15 giây mỗi lần kiểm thử, bạn có thể chỉnh biến môi trường trong file `.env`:
+     ```dotenv
+     FALL_IMMOBILITY_SECONDS=5
+     ```
+   - Sau đó khởi động lại:
+     ```powershell
+     docker restart camerai-orchestrator camerai-ai
+     ```
+   - Lúc này hệ thống chỉ cần 5 giây bất động là đã kích hoạt chuông cảnh báo P1.
