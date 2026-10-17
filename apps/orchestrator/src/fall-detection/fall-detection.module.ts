@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AiResultsModule } from '../ai-results/ai-results.module';
 import { CamerasModule } from '../cameras/cameras.module';
+import { MediaModule } from '../media/media.module';
 import { ZonesModule } from '../zones/zones.module';
 import { PoseInferenceAdapter } from './adapter/pose-inference.adapter';
 import { PoseFrameConsumer } from './consumer/pose-frame.consumer';
@@ -9,7 +10,7 @@ import { RestAreaEvaluator } from './evaluator/rest-area.evaluator';
 import { FallIncidentRepository } from './repository/fall-incident.repository';
 
 @Module({
-  imports: [CamerasModule, ZonesModule, AiResultsModule],
+  imports: [CamerasModule, ZonesModule, AiResultsModule, MediaModule],
   providers: [
     PoseInferenceAdapter,
     RestAreaEvaluator,

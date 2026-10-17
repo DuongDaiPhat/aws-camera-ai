@@ -3,6 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AiResultsService } from '../../ai-results/ai-results.service';
 import type { SubmitAiResultDto } from '../../ai-results/dto/submit-ai-result.dto';
+import { MediaService } from '../../media/media.service';
 import { PoseInferenceAdapter } from '../adapter/pose-inference.adapter';
 import type { PosePersonDto } from '../dto/pose-frame.dto';
 import { RestAreaEvaluator } from '../evaluator/rest-area.evaluator';
@@ -31,6 +32,7 @@ export class FallIncidentCoordinator {
     private readonly poseInferenceAdapter: PoseInferenceAdapter,
     private readonly fallIncidentRepository: FallIncidentRepository,
     private readonly aiResultsService: AiResultsService,
+    private readonly mediaService: MediaService,
   ) {
     this.fallImmobilitySeconds = Number(
       this.configService.get<string | number>(
@@ -150,7 +152,22 @@ export class FallIncidentCoordinator {
       return;
     }
 
-    // 2. Kích hoạt luồng AI Result submission -> phát SSE lên Web Dashboard & Telegram P1
+    // 2. Lưu ảnh snapshot bằng chứng từ khung hình xác nhận ngã
+    if (context.imageBytes && context.imageBytes.length > 0) {
+      try {
+        await this.mediaService.storeBufferSnapshot(
+          incidentResult.eventId,
+          context.imageBytes,
+          confirmedAt,
+        );
+      } catch (mediaError) {
+        this.logger.error(
+          `Lỗi khi lưu ảnh snapshot bằng chứng cho sự kiện té ngã ${incidentResult.eventId}: ${mediaError instanceof Error ? mediaError.message : String(mediaError)}`,
+        );
+      }
+    }
+
+    // 3. Kích hoạt luồng AI Result submission -> phát SSE lên Web Dashboard & Telegram P1
     const submitDto: SubmitAiResultDto = {
       schemaVersion: 1,
       resultId: incidentResult.resultId,
