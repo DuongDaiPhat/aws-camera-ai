@@ -38,13 +38,16 @@ class PoseEstimator:
         if not resolved_path.is_absolute():
             # Tim tu project root hoac thu muc services/ai-service hoac cac thu muc cha
             for base in [Path.cwd(), *Path(__file__).resolve().parents]:
-                candidate = base / resolved_path
-                if candidate.exists():
-                    resolved_path = candidate
-                    break
-                alt_candidate = base / "models" / resolved_path.name
-                if alt_candidate.exists():
-                    resolved_path = alt_candidate
+                candidates = [
+                    base / resolved_path,
+                    base / "models" / resolved_path.name,
+                    base / "artifacts" / "models" / resolved_path.name,
+                    base / "artifacts" / "ci-models" / resolved_path.name,
+                    base / "ci-models" / resolved_path.name,
+                ]
+                found = next((c for c in candidates if c.exists()), None)
+                if found:
+                    resolved_path = found
                     break
 
         if not resolved_path.exists():
