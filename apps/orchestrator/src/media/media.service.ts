@@ -111,6 +111,44 @@ export class MediaService {
   }
 
   /**
+   * Lưu snapshot trực tiếp từ buffer ảnh vào MinIO/S3 + bảng event_media.
+   * Dùng cho các sự kiện AI pipeline (như FALL_DETECTED) có sẵn frame ảnh JPEG.
+   */
+  async storeBufferSnapshot(
+    eventId: string,
+    buffer: Buffer,
+    eventDate: Date,
+    filename = 'snapshot.jpg',
+  ): Promise<EventMediaRecord | null> {
+    const existingMedia = await this.eventMediaRepository.findMediaByEventIdAndType(
+      eventId,
+      'SNAPSHOT',
+    );
+    if (existingMedia) {
+      return existingMedia;
+    }
+
+    const objectKey = this.buildObjectKey(eventDate, eventId, filename);
+
+    try {
+      await this.storageService.upload(objectKey, buffer, 'image/jpeg');
+
+      return await this.eventMediaRepository.createEventMedia({
+        eventId,
+        mediaType: 'SNAPSHOT',
+        storageProvider: this.storageProvider,
+        bucket: this.storageBucket,
+        objectKey,
+        contentType: 'image/jpeg',
+        sizeBytes: buffer.length,
+      });
+    } catch (error) {
+      this.logger.error(`Loi khi luu buffer snapshot cho event ${eventId}`, error);
+      return null;
+    }
+  }
+
+  /**
    * Tải video clip từ Frigate và lưu vào MinIO/S3 + bảng event_media (cho P0/P1).
    */
   async downloadAndStoreClip(

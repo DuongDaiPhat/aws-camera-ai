@@ -1,5 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import type { AiResultsService } from '../../ai-results/ai-results.service';
+import type { MediaService } from '../../media/media.service';
 import type { PoseInferenceAdapter, FallResponse } from '../adapter/pose-inference.adapter';
 import { FallIncidentCoordinator, ProcessFrameContext } from './fall-incident.coordinator';
 import type { RestAreaEvaluator } from '../evaluator/rest-area.evaluator';
@@ -12,6 +13,7 @@ describe('FallIncidentCoordinator', () => {
   let mockPoseInferenceAdapter: jest.Mocked<PoseInferenceAdapter>;
   let mockFallIncidentRepository: jest.Mocked<FallIncidentRepository>;
   let mockAiResultsService: jest.Mocked<AiResultsService>;
+  let mockMediaService: jest.Mocked<MediaService>;
 
   beforeEach(() => {
     mockConfigService = {
@@ -38,12 +40,17 @@ describe('FallIncidentCoordinator', () => {
       submit: jest.fn().mockResolvedValue({} as never),
     } as unknown as jest.Mocked<AiResultsService>;
 
+    mockMediaService = {
+      storeBufferSnapshot: jest.fn().mockResolvedValue(null),
+    } as unknown as jest.Mocked<MediaService>;
+
     coordinator = new FallIncidentCoordinator(
       mockConfigService,
       mockRestAreaEvaluator,
       mockPoseInferenceAdapter,
       mockFallIncidentRepository,
       mockAiResultsService,
+      mockMediaService,
     );
   });
 
@@ -104,6 +111,11 @@ describe('FallIncidentCoordinator', () => {
       context.persons[0].boundingBox,
     );
     expect(mockFallIncidentRepository.createConfirmedIncident).toHaveBeenCalledTimes(1);
+    expect(mockMediaService.storeBufferSnapshot).toHaveBeenCalledWith(
+      'evt-111',
+      context.imageBytes,
+      new Date('2026-10-11T10:00:00.000Z'),
+    );
     expect(mockAiResultsService.submit).toHaveBeenCalledWith(
       'evt-111',
       expect.objectContaining({
