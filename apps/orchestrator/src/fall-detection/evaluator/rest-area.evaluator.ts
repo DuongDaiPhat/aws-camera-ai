@@ -54,7 +54,11 @@ export class RestAreaEvaluator {
     try {
       const zones = await this.zonesRepository.listByCameraId(cameraId);
       const restAreaZones = zones.filter(
-        (z) => z.zone_type === 'REST_AREA' && z.is_enabled && Array.isArray(z.polygon) && z.polygon.length >= 3,
+        (z) =>
+          z.zone_type === 'REST_AREA' &&
+          z.is_enabled &&
+          Array.isArray(z.polygon) &&
+          z.polygon.length >= 3,
       );
 
       if (restAreaZones.length === 0) {

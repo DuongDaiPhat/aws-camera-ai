@@ -13,6 +13,7 @@
 > **KHÔNG CẦN TRAIN MODEL CHO US-17.**
 
 ### Lý do:
+
 1. **AI Core đã hoàn thành ở US-16**:
    - Thuật toán MediaPipe trích xuất 33 keypoints, tính góc nghiêng thân người, phát hiện hạ thấp trọng tâm và bộ đếm bất động liên tục 15 giây đã được hoàn thiện trong AI Service (`POST /pose/fall`).
 2. **US-17 là nhiệm vụ tích hợp hệ thống (System Integration & Alerting)**:
@@ -23,11 +24,11 @@
 
 ## 2. Tiêu chí nghiệm thu (Acceptance Criteria) của US-17
 
-| ID | Điều kiện (Given / When) | Kết quả mong đợi (Then) |
-| :--- | :--- | :--- |
+| ID         | Điều kiện (Given / When)                                                                                                              | Kết quả mong đợi (Then)                                                                                                                                 |
+| :--------- | :------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **AC17-1** | Một candidate FALL đang được theo dõi; tư thế bất thường duy trì liên tục $> 15$ giây VÀ dịch chuyển keypoint dưới ngưỡng chuyển động | Tạo đúng một sự kiện `FALL_DETECTED` với **Priority P1**, lưu vào `fall_incidents` và kích hoạt luồng cảnh báo khẩn cấp (SSE Web Dashboard & Telegram). |
-| **AC17-2** | Một candidate FALL đang được theo dõi; người đó đứng dậy trong vòng 15 giây | Hủy candidate (`CANCELLED`, reason `RECOVERED`), **chỉ ghi log nội bộ, KHÔNG tạo cảnh báo**. |
-| **AC17-3** | Người nằm trên giường/sofa trong vùng đã đánh dấu là "vùng nghỉ" (`REST_AREA`) khi phát hiện tư thế nằm | Bỏ qua, **KHÔNG tạo cảnh báo té ngã**. |
+| **AC17-2** | Một candidate FALL đang được theo dõi; người đó đứng dậy trong vòng 15 giây                                                           | Hủy candidate (`CANCELLED`, reason `RECOVERED`), **chỉ ghi log nội bộ, KHÔNG tạo cảnh báo**.                                                            |
+| **AC17-3** | Người nằm trên giường/sofa trong vùng đã đánh dấu là "vùng nghỉ" (`REST_AREA`) khi phát hiện tư thế nằm                               | Bỏ qua, **KHÔNG tạo cảnh báo té ngã**.                                                                                                                  |
 
 ---
 
@@ -49,7 +50,7 @@ sequenceDiagram
     Orch->>Orch: Kiểm tra tâm người có thuộc REST_AREA không (AC17-3)
     Orch->>AI: POST /pose/fall (image, trackId, inRestArea, timestamp)
     AI-->>Orch: FallResponse (state: CANDIDATE / CANCELLED / CONFIRMED)
-    
+
     alt Người đứng dậy trong 15s (AC17-2)
         AI-->>Orch: state = CANCELLED (RECOVERED)
         Orch->>Orch: Ghi log nội bộ, không tạo cảnh báo
@@ -66,6 +67,7 @@ sequenceDiagram
 ## 4. Danh sách các công việc cụ thể cần thực hiện
 
 ### Giai đoạn 1: Consumer Frame & Binary Envelope (`apps/orchestrator/src/fall-detection/`)
+
 1. Tạo module `fall-detection.module.ts`.
 2. Tạo `pose-frame.consumer.ts` lắng nghe topic `MQTT_TOPIC_POSE_FRAMES` (`frigate/camerai/pose/frames`).
 3. Giải mã Binary Envelope v1:
@@ -74,18 +76,21 @@ sequenceDiagram
    - Kiểm tra cờ bật tính năng `M2A_ENABLED`.
 
 ### Giai đoạn 2: Bộ đánh giá vùng nghỉ (`RestAreaEvaluator`)
+
 1. Dựa vào `camera_id`, truy vấn danh sách zone đang hoạt động có `zone_type = 'REST_AREA'`.
 2. Lấy tâm điểm của `personBoundingBox` $(x + w/2, y + h/2)$ làm điểm neo (anchor).
 3. Sử dụng thuật toán Point-in-Polygon (Ray casting) để kiểm tra điểm neo có nằm trong đa giác vùng nghỉ hay không:
    - Nếu `inRestArea = true`: Đánh dấu cờ truyền sang AI Service để loại trừ cảnh báo giả (AC17-3).
 
 ### Giai đoạn 3: AI Inference Client (`PoseInferenceAdapter`)
+
 1. Tạo HTTP Client gửi `multipart/form-data` sang endpoint `http://ai-service:8000/pose/fall`:
    - Gửi file ảnh `image`, `trackId`, `cameraSlug`, `frameTimestamp`, `personBoundingBox`, `inRestArea`.
    - Đính kèm header bảo mật `X-Internal-Token`.
    - Timeout tối đa 2000ms.
 
 ### Giai đoạn 4: Điều phối & Lưu trữ sự kiện Té ngã (`FallIncidentCoordinator`)
+
 1. **Xử lý kết quả `CONFIRMED` (AC17-1)**:
    - Kiểm tra chống trùng lặp (Dedup) theo khóa duy nhất: `(camera_id, source_session_id, track_id, episode_id)`.
    - Thực thi Database Transaction:
@@ -97,6 +102,7 @@ sequenceDiagram
    - Chỉ ghi log mức `DEBUG` trong Orchestrator, **tuyệt đối không tạo sự kiện và không phát cảnh báo**.
 
 ### Giai đoạn 5: Cấu hình môi trường & Kích hoạt hệ thống
+
 1. Bổ sung các biến cấu hình trong `.env` và `docker-compose.yml`:
    - `M2A_ENABLED=true`
    - `FRIGATE_POSE_FRAMES_ENABLED=true`
@@ -105,6 +111,7 @@ sequenceDiagram
 2. Đăng ký `FallDetectionModule` vào `app.module.ts`.
 
 ### Giai đoạn 6: Kiểm thử tự động & Nghiệm thu trực quan trước Camera
+
 1. **Unit Tests (Coverage $\ge 60\%$)**:
    - Test giải mã binary envelope (frame header + JPEG).
    - Test thuật toán Point-in-Polygon cho `REST_AREA`.
@@ -125,4 +132,3 @@ sequenceDiagram
 - [ ] **Task 17.5**: Xây dựng `FallIncidentCoordinator` xử lý hủy (`CANCELLED` - AC17-2) hoặc xác nhận (`CONFIRMED` - AC17-1), ghi database `fall_incidents` và kích hoạt `AiResultsService.submit`.
 - [ ] **Task 17.6**: Viết bộ Unit & Integration Tests đạt test coverage $\ge 60\%$.
 - [ ] **Task 17.7**: Kích hoạt hệ thống E2E và nghiệm thu thực tế 3 kịch bản trước Camera.
-

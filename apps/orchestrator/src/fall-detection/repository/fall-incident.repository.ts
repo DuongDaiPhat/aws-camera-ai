@@ -72,12 +72,14 @@ export class FallIncidentRepository {
         };
       }
 
-const DEFAULT_FALL_IMMOBILITY_WINDOW_MS = 15_000;
+      const DEFAULT_FALL_IMMOBILITY_WINDOW_MS = 15_000;
 
       // Đảm bảo confirmed_at > candidate_started_at theo ràng buộc DB fall_incidents_time_order
       let candidateStartedAt = input.candidateStartedAt;
       if (input.confirmedAt.getTime() <= candidateStartedAt.getTime()) {
-        candidateStartedAt = new Date(input.confirmedAt.getTime() - DEFAULT_FALL_IMMOBILITY_WINDOW_MS);
+        candidateStartedAt = new Date(
+          input.confirmedAt.getTime() - DEFAULT_FALL_IMMOBILITY_WINDOW_MS,
+        );
       }
 
       const dedupKey = `m2a-fall:${input.cameraId}:${input.sourceSessionId}:${input.trackId}:${input.episodeId}`;

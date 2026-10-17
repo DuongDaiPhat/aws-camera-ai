@@ -58,7 +58,10 @@ export class FallIncidentCoordinator {
     const { cameraId, cameraSlug, sourceSessionId, frameId, frameTimestamp, imageBytes } = context;
 
     // AC17-3: Kiểm tra người có nằm trong vùng nghỉ (REST_AREA) không
-    const inRestArea = await this.restAreaEvaluator.isPersonInRestArea(cameraId, person.boundingBox);
+    const inRestArea = await this.restAreaEvaluator.isPersonInRestArea(
+      cameraId,
+      person.boundingBox,
+    );
 
     const response = await this.poseInferenceAdapter.evaluateFall({
       imageBytes,
@@ -146,9 +149,7 @@ export class FallIncidentCoordinator {
     });
 
     if (!incidentResult.isNew) {
-      this.logger.debug(
-        `Incident té ngã episode ${episodeId} đã được xử lý trước đó (deduped)`,
-      );
+      this.logger.debug(`Incident té ngã episode ${episodeId} đã được xử lý trước đó (deduped)`);
       return;
     }
 

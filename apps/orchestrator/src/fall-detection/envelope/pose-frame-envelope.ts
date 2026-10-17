@@ -18,7 +18,9 @@ export function unpackPoseFrameEnvelope(buffer: Buffer): UnpackedPoseFrame | nul
   }
 
   if (buffer.length > MAX_ENVELOPE_BYTES) {
-    logger.warn(`Envelope vượt quá giới hạn cho phép (${buffer.length} > ${MAX_ENVELOPE_BYTES} bytes)`);
+    logger.warn(
+      `Envelope vượt quá giới hạn cho phép (${buffer.length} > ${MAX_ENVELOPE_BYTES} bytes)`,
+    );
     return null;
   }
 
@@ -38,7 +40,9 @@ export function unpackPoseFrameEnvelope(buffer: Buffer): UnpackedPoseFrame | nul
     const headerUtf8 = buffer.subarray(4, 4 + headerLength).toString('utf8');
     headerJson = JSON.parse(headerUtf8);
   } catch (error) {
-    logger.warn(`Lỗi parse JSON header trong envelope: ${error instanceof Error ? error.message : String(error)}`);
+    logger.warn(
+      `Lỗi parse JSON header trong envelope: ${error instanceof Error ? error.message : String(error)}`,
+    );
     return null;
   }
 
@@ -79,7 +83,11 @@ function isValidPoseFrameHeader(obj: unknown): obj is PoseFrameHeaderDto {
   for (const p of h.persons) {
     if (!p || typeof p !== 'object') return false;
     const person = p as Record<string, unknown>;
-    if (typeof person.trackId !== 'string' || !person.boundingBox || typeof person.observedAt !== 'number') {
+    if (
+      typeof person.trackId !== 'string' ||
+      !person.boundingBox ||
+      typeof person.observedAt !== 'number'
+    ) {
       return false;
     }
     const box = person.boundingBox as Record<string, unknown>;

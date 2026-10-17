@@ -10,11 +10,11 @@ Hệ thống sử dụng mô hình **Google MediaPipe Pose Landmarker** để tr
 
 ### Danh sách mô hình cần thiết
 
-| Tên File | Mô tả | Kích thước | Nơi lưu trữ trong dự án |
-| :--- | :--- | :--- | :--- |
-| **`pose_landmarker_lite.task`** *(Bắt buộc cho M2a)* | Model MediaPipe Pose Landmarker (bản Lite, tối ưu CPU) | ~9.2 MB | `services/ai-service/models/pose_landmarker_lite.task` |
-| **`face_detection_yunet_2023mar.onnx`** *(M1)* | Model phát hiện khuôn mặt YuNet OpenCV Zoo | ~350 KB | `services/ai-service/models/face_detection_yunet_2023mar.onnx` |
-| **`face_recognition_sface_2021dec.onnx`** *(M1)* | Model nhận diện & trích xuất vector SFace | ~38 MB | `services/ai-service/models/face_recognition_sface_2021dec.onnx` |
+| Tên File                                             | Mô tả                                                  | Kích thước | Nơi lưu trữ trong dự án                                          |
+| :--------------------------------------------------- | :----------------------------------------------------- | :--------- | :--------------------------------------------------------------- |
+| **`pose_landmarker_lite.task`** _(Bắt buộc cho M2a)_ | Model MediaPipe Pose Landmarker (bản Lite, tối ưu CPU) | ~9.2 MB    | `services/ai-service/models/pose_landmarker_lite.task`           |
+| **`face_detection_yunet_2023mar.onnx`** _(M1)_       | Model phát hiện khuôn mặt YuNet OpenCV Zoo             | ~350 KB    | `services/ai-service/models/face_detection_yunet_2023mar.onnx`   |
+| **`face_recognition_sface_2021dec.onnx`** _(M1)_     | Model nhận diện & trích xuất vector SFace              | ~38 MB     | `services/ai-service/models/face_recognition_sface_2021dec.onnx` |
 
 ### Link tải chính thức và Lệnh tải nhanh
 
@@ -24,12 +24,14 @@ Thành viên có thể tải file mô hình `pose_landmarker_lite.task` từ kho
   `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task`
 
 #### Lệnh tải tự động qua PowerShell (Windows):
+
 ```powershell
 New-Item -ItemType Directory -Force -Path "services/ai-service/models"
 Invoke-WebRequest -Uri "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task" -OutFile "services/ai-service/models/pose_landmarker_lite.task"
 ```
 
 #### Lệnh tải tự động qua cURL / Wget (Linux/macOS):
+
 ```bash
 mkdir -p services/ai-service/models
 curl -L -o services/ai-service/models/pose_landmarker_lite.task \
@@ -74,9 +76,11 @@ docker restart camerai-orchestrator camerai-ai camerai-frigate
 ```
 
 Kiểm tra trạng thái các container bằng lệnh:
+
 ```powershell
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 ```
+
 > Tất cả các container `camerai-orchestrator`, `camerai-ai`, `camerai-frigate`, `camerai-web`, `camerai-postgres`, `camerai-mosquitto`, `camerai-mediamtx` phải ở trạng thái **Up** (healthy).
 
 ---
@@ -86,15 +90,19 @@ docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 Trước khi thử nghiệm với camera thực tế, hãy chạy bộ test để xác nhận toàn bộ logic hoạt động chính xác:
 
 ### 4.1. Kiểm thử AI Service (MediaPipe, Pose Geometry, Fall Tracker)
+
 ```powershell
 docker exec camerai-ai pytest /app/tests/test_pose_geometry.py /app/tests/test_fall_tracker.py -v
 ```
+
 - **Kết quả kỳ vọng:** `11 passed` (100% passed).
 
 ### 4.2. Kiểm thử Backend Orchestrator (Fall Detection Module & Media Service)
+
 ```powershell
 docker exec camerai-orchestrator pnpm test src/fall-detection test/media.service.spec.ts
 ```
+
 - **Kết quả kỳ vọng:** `6 test suites passed, 34 tests passed` (100% passed).
 
 ---
@@ -102,10 +110,12 @@ docker exec camerai-orchestrator pnpm test src/fall-detection test/media.service
 ## 5. Quy trình Kiểm thử Trực tiếp (End-to-End Live Test)
 
 ### Bước 1: Mở Web Dashboard
+
 - Truy cập trình duyệt: [http://localhost:3000](http://localhost:3000).
 - Đăng nhập tài khoản quản trị (hoặc tài khoản giám sát).
 
 ### Bước 2: Bật phát luồng Webcam
+
 - Điều hướng vào camera phòng khách (`cam_living_room`).
 - Bấm **"Bật xem trước Webcam"** $\to$ sau đó bấm **"Bắt đầu truyền phát WHIP"**.
 - Trình duyệt sẽ phát luồng webcam trực tiếp lên MediaMTX thông qua WebRTC (WHIP).
@@ -115,6 +125,7 @@ docker exec camerai-orchestrator pnpm test src/fall-detection test/media.service
 > Trình duyệt có cơ chế tiết kiệm tài nguyên khi ẩn tab hoặc chuyển sang tab khác sẽ làm ngắt luồng WebRTC $\to$ MediaMTX ngắt stream (báo lỗi 404) $\to$ Frigate mất nguồn cấp video.
 
 ### Bước 3: Mô phỏng hành động Té ngã
+
 1. **Giai đoạn nhận diện (2-3 giây đầu):**  
    Đứng hoặc ngồi trước webcam để Frigate phát hiện người, gán `track_id` và bắt đầu theo dõi.
 2. **Giai đoạn ngã & bất động ($\ge 15$ giây):**  
@@ -125,6 +136,7 @@ docker exec camerai-orchestrator pnpm test src/fall-detection test/media.service
    - Sau khi đủ 15 giây bất động, trạng thái chuyển sang `CONFIRMED`.
 
 ### Bước 4: Quan sát Kết quả Phản hồi
+
 - Trên **Web Dashboard**: Sự kiện màu đỏ **P1 Khẩn cấp - `FALL_DETECTED` (Phát hiện té ngã)** lập tức xuất hiện ở đầu danh sách sự kiện, kèm chuông âm thanh cảnh báo khẩn cấp.
 - **Xem ảnh bằng chứng Snapshot**: Bấm vào sự kiện để mở modal **Chi tiết sự kiện**, bạn sẽ thấy bức ảnh chụp khung hình camera tại thời điểm ngã hiển thị rõ ràng người nằm trên sàn, ngày giờ phát hiện và vị trí camera.
 - **Tương tác xác nhận**: Người dùng hoặc người thân có thể bấm nút **"Tôi ổn (An toàn)"** hoặc **"Cần giúp đỡ (Leo thang)"**.
@@ -137,10 +149,13 @@ docker exec camerai-orchestrator pnpm test src/fall-detection test/media.service
 Mở 1 cửa sổ PowerShell riêng để xem hệ thống đếm giây bất động trực tiếp:
 
 ### Theo dõi AI Service:
+
 ```powershell
 docker logs -f camerai-ai | Select-String "POSE_EVAL"
 ```
-*Bạn sẽ thấy log đếm tăng dần:*
+
+_Bạn sẽ thấy log đếm tăng dần:_
+
 ```text
 [POSE_EVAL] track=... state=CANDIDATE reason=FALL_POSTURE angle=5.2 immobile=3.4s
 [POSE_EVAL] track=... state=CANDIDATE reason=FALL_POSTURE angle=4.1 immobile=10.2s
@@ -148,10 +163,13 @@ docker logs -f camerai-ai | Select-String "POSE_EVAL"
 ```
 
 ### Theo dõi Backend Orchestrator:
+
 ```powershell
 docker logs -f camerai-orchestrator | Select-String "M2A|FALL"
 ```
-*Bạn sẽ thấy log kích hoạt sự kiện P1:*
+
+_Bạn sẽ thấy log kích hoạt sự kiện P1:_
+
 ```text
 [FallIncidentCoordinator] [M2A_CONFIRMED] Track ... camera cam_living_room ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
 [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera cam_living_room

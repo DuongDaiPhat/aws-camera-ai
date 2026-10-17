@@ -28,12 +28,13 @@ export class PoseInferenceAdapter implements IPoseInferenceAdapter {
   private readonly timeoutMs: number;
 
   constructor(private readonly configService: ConfigService) {
-    this.aiServiceUrl = this.configService.get<string>(
-      'AI_SERVICE_URL',
-      'http://ai-service:8000',
-    ).replace(/\/+$/, '');
+    this.aiServiceUrl = this.configService
+      .get<string>('AI_SERVICE_URL', 'http://ai-service:8000')
+      .replace(/\/+$/, '');
     this.internalToken = this.configService.get<string>('AI_INTERNAL_TOKEN', '');
-    this.timeoutMs = Number(this.configService.get<string | number>('POSE_REQUEST_TIMEOUT_MS', 2000));
+    this.timeoutMs = Number(
+      this.configService.get<string | number>('POSE_REQUEST_TIMEOUT_MS', 2000),
+    );
   }
 
   async evaluateFall(request: EvaluateFallRequest): Promise<FallResponse | null> {
