@@ -189,7 +189,9 @@ async def evaluate_fall(
         result_dict.get("state"),
         result_dict.get("reason"),
         result_dict.get("poseAvailable"),
-        f"{result_dict.get('torsoAngleDeg'):.1f}" if result_dict.get("torsoAngleDeg") is not None else "None",
+        f"{result_dict.get('torsoAngleDeg'):.1f}"
+        if result_dict.get("torsoAngleDeg") is not None
+        else "None",
         result_dict.get("immobileSeconds") or 0.0,
     )
 

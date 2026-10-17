@@ -95,6 +95,79 @@ class PoseEstimator:
             except Exception as e:
                 logger.warning("Loi khi dong PoseLandmarker: %s", e)
 
+    def _crop_roi(
+        self,
+        image_bgr: np.ndarray,
+        person_bbox: dict[str, float] | None,
+        img_w: int,
+        img_h: int,
+    ) -> tuple[np.ndarray, int, int, int, int, float, float] | None:
+        """Crop vung ROI nguoi voi padding 10%."""
+        if person_bbox is None:
+            return image_bgr, img_w, img_h, 0, 0, 1.0, 1.0
+
+        bx = person_bbox.get("x", 0.0)
+        by = person_bbox.get("y", 0.0)
+        bw = person_bbox.get("width", 1.0)
+        bh = person_bbox.get("height", 1.0)
+
+        pad_w = bw * self._padding_ratio
+        pad_h = bh * self._padding_ratio
+
+        x_min = max(0, int((bx - pad_w) * img_w))
+        y_min = max(0, int((by - pad_h) * img_h))
+        x_max = min(img_w, int((bx + bw + pad_w) * img_w))
+        y_max = min(img_h, int((by + bh + pad_h) * img_h))
+
+        crop_w = x_max - x_min
+        crop_h = y_max - y_min
+        if crop_w <= 0 or crop_h <= 0:
+            return None
+
+        crop_bgr = image_bgr[y_min:y_max, x_min:x_max]
+        return crop_bgr, crop_w, crop_h, x_min, y_min, bw, bh
+
+    def _fallback_full_frame(
+        self,
+        image_bgr: np.ndarray,
+        img_w: int,
+        img_h: int,
+        effective_bbox_w: float,
+        effective_bbox_h: float,
+    ) -> tuple[list[NormalizedKeypoint], PoseGeometry] | None:
+        """Fallback nhan dien tren toan bo anh neu crop ROI bi hut keypoints."""
+        full_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+        mp_full = mp.Image(image_format=mp.ImageFormat.SRGB, data=full_rgb)
+        with self._infer_lock:
+            full_res = self._landmarker.detect(mp_full)
+        if (
+            not full_res.pose_landmarks
+            or len(full_res.pose_landmarks) == 0
+            or len(full_res.pose_landmarks[0]) < 33
+        ):
+            return None
+
+        fallback_kps = [
+            NormalizedKeypoint(
+                x=float(lm.x),
+                y=float(lm.y),
+                z=float(lm.z),
+                visibility=float(getattr(lm, "visibility", 1.0) or 1.0),
+            )
+            for lm in full_res.pose_landmarks[0]
+        ]
+        fallback_geom = calculate_pose_geometry(
+            keypoints=fallback_kps,
+            image_width=img_w,
+            image_height=img_h,
+            bbox_width=effective_bbox_w,
+            bbox_height=effective_bbox_h,
+            min_visibility=self._min_visibility,
+        )
+        if fallback_geom is None:
+            return None
+        return fallback_kps, fallback_geom
+
     def estimate(
         self,
         image_bgr: np.ndarray,
@@ -114,37 +187,12 @@ class PoseEstimator:
         if img_h == 0 or img_w == 0:
             return None, None, False, "EMPTY_IMAGE"
 
-        # Neu co bbox, crop voi padding 10%
-        if person_bbox is not None:
-            bx = person_bbox.get("x", 0.0)
-            by = person_bbox.get("y", 0.0)
-            bw = person_bbox.get("width", 1.0)
-            bh = person_bbox.get("height", 1.0)
+        crop_info = self._crop_roi(image_bgr, person_bbox, img_w, img_h)
+        if crop_info is None:
+            return None, None, False, "DEGENERATE_BBOX"
 
-            pad_w = bw * self._padding_ratio
-            pad_h = bh * self._padding_ratio
+        crop_bgr, crop_w, crop_h, x_min, y_min, eff_w, eff_h = crop_info
 
-            x_min = max(0, int((bx - pad_w) * img_w))
-            y_min = max(0, int((by - pad_h) * img_h))
-            x_max = min(img_w, int((bx + bw + pad_w) * img_w))
-            y_max = min(img_h, int((by + bh + pad_h) * img_h))
-
-            crop_w = x_max - x_min
-            crop_h = y_max - y_min
-            if crop_w <= 0 or crop_h <= 0:
-                return None, None, False, "DEGENERATE_BBOX"
-
-            crop_bgr = image_bgr[y_min:y_max, x_min:x_max]
-            effective_bbox_w = bw
-            effective_bbox_h = bh
-        else:
-            x_min, y_min = 0, 0
-            crop_w, crop_h = img_w, img_h
-            crop_bgr = image_bgr
-            effective_bbox_w = 1.0
-            effective_bbox_h = 1.0
-
-        # Chuyen BGR sang RGB cho MediaPipe Image
         crop_rgb = cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2RGB)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=crop_rgb)
 
@@ -153,79 +201,45 @@ class PoseEstimator:
 
         if not result.pose_landmarks or len(result.pose_landmarks) == 0:
             if person_bbox is not None:
-                # Fallback: bbox quá hẹp, thử lại trên toàn bộ ảnh
-                full_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
-                mp_full = mp.Image(image_format=mp.ImageFormat.SRGB, data=full_rgb)
-                with self._infer_lock:
-                    result = self._landmarker.detect(mp_full)
-                if not result.pose_landmarks or len(result.pose_landmarks) == 0:
-                    return None, None, False, "NO_POSE"
-                x_min, y_min = 0, 0
-                crop_w, crop_h = img_w, img_h
-            else:
-                return None, None, False, "NO_POSE"
+                fallback = self._fallback_full_frame(image_bgr, img_w, img_h, eff_w, eff_h)
+                if fallback is not None:
+                    kps, geom = fallback
+                    return kps, geom, True, "NORMAL_POSTURE"
+            return None, None, False, "NO_POSE"
 
         raw_landmarks = result.pose_landmarks[0]
         if len(raw_landmarks) < 33:
             return None, None, False, "INCOMPLETE_KEYPOINTS"
 
-        # Transform landmarks tu crop ve full-frame normalized coordinates
         full_keypoints: list[NormalizedKeypoint] = []
         for lm in raw_landmarks:
-            px_in_crop = lm.x * crop_w
-            py_in_crop = lm.y * crop_h
-            px_in_full = px_in_crop + x_min
-            py_in_full = py_in_crop + y_min
-
-            norm_x = px_in_full / float(img_w)
-            norm_y = py_in_full / float(img_h)
+            px_in_full = (lm.x * crop_w) + x_min
+            py_in_full = (lm.y * crop_h) + y_min
             visibility = float(getattr(lm, "visibility", 1.0) or 1.0)
 
             full_keypoints.append(
                 NormalizedKeypoint(
-                    x=norm_x,
-                    y=norm_y,
+                    x=px_in_full / float(img_w),
+                    y=py_in_full / float(img_h),
                     z=float(lm.z),
                     visibility=visibility,
                 )
             )
 
-        # Tinh toan dac trung hinh hoc tren he toa do anh goc
         geometry = calculate_pose_geometry(
             keypoints=full_keypoints,
             image_width=img_w,
             image_height=img_h,
-            bbox_width=effective_bbox_w,
-            bbox_height=effective_bbox_h,
+            bbox_width=eff_w,
+            bbox_height=eff_h,
             min_visibility=self._min_visibility,
         )
 
         if geometry is None and person_bbox is not None and (crop_w != img_w or crop_h != img_h):
-            # Fallback 2: crop bị mất hông/vai, thử lại trên toàn ảnh
-            full_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
-            mp_full = mp.Image(image_format=mp.ImageFormat.SRGB, data=full_rgb)
-            with self._infer_lock:
-                full_res = self._landmarker.detect(mp_full)
-            if full_res.pose_landmarks and len(full_res.pose_landmarks) > 0 and len(full_res.pose_landmarks[0]) >= 33:
-                fallback_kps = [
-                    NormalizedKeypoint(
-                        x=float(lm.x),
-                        y=float(lm.y),
-                        z=float(lm.z),
-                        visibility=float(getattr(lm, "visibility", 1.0) or 1.0),
-                    )
-                    for lm in full_res.pose_landmarks[0]
-                ]
-                fallback_geom = calculate_pose_geometry(
-                    keypoints=fallback_kps,
-                    image_width=img_w,
-                    image_height=img_h,
-                    bbox_width=effective_bbox_w,
-                    bbox_height=effective_bbox_h,
-                    min_visibility=self._min_visibility,
-                )
-                if fallback_geom is not None:
-                    return fallback_kps, fallback_geom, True, "NORMAL_POSTURE"
+            fallback = self._fallback_full_frame(image_bgr, img_w, img_h, eff_w, eff_h)
+            if fallback is not None:
+                kps, geom = fallback
+                return kps, geom, True, "NORMAL_POSTURE"
 
         if geometry is None:
             return full_keypoints, None, False, "LOW_VISIBILITY"
