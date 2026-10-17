@@ -263,4 +263,3 @@ def test_fall_tracker_persistent_prone_and_immobility_confirms() -> None:
     assert last_res["state"] == "CONFIRMED"
     assert last_res["reason"] == "IMMOBILE_CONFIRMED"
     assert last_res["confidence"] == 1.0
-
