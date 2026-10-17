@@ -37,7 +37,10 @@ describe('RestAreaEvaluator and isPointInPolygon', () => {
 
     it('returns false when polygon has fewer than 3 vertices', () => {
       // Arrange & Act
-      const invalidPolygon = [[0.1, 0.1], [0.2, 0.2]];
+      const invalidPolygon = [
+        [0.1, 0.1],
+        [0.2, 0.2],
+      ];
 
       // Assert
       expect(isPointInPolygon(0.15, 0.15, invalidPolygon)).toBe(false);

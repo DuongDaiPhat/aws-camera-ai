@@ -115,7 +115,9 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     });
 
     this.client.on('connect', () => {
-      this.logger.log(`Da ket noi MQTT Broker thanh cong. Dang subscribe topic: ${topic}, ${framesTopic}, ${poseFramesTopic}`);
+      this.logger.log(
+        `Da ket noi MQTT Broker thanh cong. Dang subscribe topic: ${topic}, ${framesTopic}, ${poseFramesTopic}`,
+      );
       this.client?.subscribe([topic, framesTopic, poseFramesTopic], (error) => {
         if (error) {
           this.logger.error(`Subscribe topics that bai:`, error);
