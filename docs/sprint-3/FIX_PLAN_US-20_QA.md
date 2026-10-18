@@ -2,7 +2,7 @@
 
 ## Phạm vi và baseline
 
-Thực hiện trên `codex/fix-us20-wellness`, bắt đầu từ `feat/US-20-wellness-check` commit `872a895`. Giữ nguyên working tree người dùng ở `docs/testing`. Một AI thực hiện, không chia subagent theo plan E2E. Không sửa các lỗi M2a hoặc merge main trong đợt sửa riêng US-20 này.
+Thực hiện trên `fix/US-20-wellness-check`, bắt đầu từ `feat/US-20-wellness-check` commit `872a895`. Giữ nguyên working tree người dùng ở `docs/testing`. Một AI thực hiện, không chia subagent theo plan E2E. Không sửa các lỗi M2a hoặc merge main trong đợt sửa riêng US-20 này.
 
 Nguồn: `PLAN_US-20_WELLNESS_CHECK_E2E.md`, OpenAPI/generated contracts, migrations và bảng QA `docs/test/US16_US17_US20_2026-10-18` ở checkout gốc. US-20 có 24 case: 16 Failed, 4 Blocked, 4 Passed. Giữ lịch sử QA cũ; kết quả retest ghi riêng, đúng schema 16 cột.
 

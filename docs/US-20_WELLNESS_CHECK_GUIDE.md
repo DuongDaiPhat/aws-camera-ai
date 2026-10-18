@@ -1,5 +1,7 @@
 # Hướng dẫn Kiểm thử và Tổng quan Chức năng Nhánh US-20 (Wellness Check)
 
+> **Cập nhật bản sửa 18/10/2026:** dùng [hướng dẫn manual US20 và Telegram](test/US20_FIX_2026-10-18/MANUAL_US20_TELEGRAM.md) cho nhánh `fix/US-20-wellness-check`. Các ví dụ seed, observation và SQL bên dưới thuộc phiên bản cũ: không dùng để chèn run/SENT hoặc kết luận E2E PASS. Lịch mới phải đặt giờ tương lai; deadline bắt đầu từ lần gửi thành công đầu tiên; face-only chưa đủ bằng chứng hoạt động.
+
 > Tài liệu này mô tả chi tiết chức năng và quy trình kiểm thử cho nhánh `feat/US-20-wellness-check` (User Story 20 — M5: Wellness check định kỳ, cảnh báo quá hạn).
 
 ---

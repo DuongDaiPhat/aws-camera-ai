@@ -6,8 +6,8 @@
 
 - [Bảng retest16 cột](TEST_CASES_RETEST.md), [kết quả máy đọc](case_results.json), [manifest/revisions/checksums](manifest.json).
 - [Kế hoạch đã thực thi](../../sprint-3/FIX_PLAN_US-20_QA.md), [runbook](../../sprint-3/RUNBOOK_M5_WELLNESS.md), [cách chạy lại](REPRODUCE.md).
-- Bản sửa production: `ba138441326f2b5ff1b7fd540e5b323afff5cc01`, nhánh `codex/fix-us20-wellness`, base US20 `872a895cd88ac8303bfe448831873aea562dfba5`.
-- Snapshot ghép thử: `e36eee7` trên `codex/verify-us20-combined`, ghép pose/fall `549f9c0` với bản sửa. Snapshot có thêm fixture hồi quy, không merge vào main.
+- Bản sửa production: `ba138441326f2b5ff1b7fd540e5b323afff5cc01`, nhánh `fix/US-20-wellness-check`, base US20 `872a895cd88ac8303bfe448831873aea562dfba5`.
+- Snapshot ghép thử: `e36eee7` trên `test/US-16-US-17-US-20-integration`, ghép pose/fall `549f9c0` với bản sửa. Snapshot có thêm fixture hồi quy, không merge vào main.
 
 Các số Passed ở đây không phải tuyên bố đã kiểm thử camera/Telegram production hoặc mọi interleaving có thể xảy ra. Những giới hạn này được ghi rõ bên dưới và trong Remarks từng case.
 
@@ -77,3 +77,7 @@ Resident xác nhận IM_OK qua API/DB và thấy trạng thái đã giải quy�
 Caregiver tạo/sửa/bật/tắt lịch; lịch sử resident được giữ lại:
 
 ![Giao diện quản lý lịch](evidence/caregiver-schedules.png)
+
+## Sửa quy ước Git và kiểm thử thủ công
+
+Tên nhánh hiện tại đã sửa theo GIT_WORKFLOW.md. Các SHA trong evidence là snapshot đã chạy test trước khi sửa message commit; nội dung commit giữ nguyên. Xem [bảng SHA cũ → mới](GIT_NAMING_CORRECTION.json) và [hướng dẫn manual US20 gồm Telegram thật](MANUAL_US20_TELEGRAM.md).

@@ -2,7 +2,7 @@
 
 ## Revision và môi trường
 
-Nhánh sửa `codex/fix-us20-wellness`; production fix commit `ba13844`; test timeout bổ sung nằm cùng commit bàn giao báo cáo. Snapshot ghép thử hai feature `e36eee7`, có thêm fixture chờ đúng ACK log MQTT. Main không đổi. Các kết quả và SHA-256 ở [manifest.json](manifest.json).
+Nhánh sửa `fix/US-20-wellness-check`; production fix commit `ba13844`; test timeout bổ sung nằm cùng commit bàn giao báo cáo. Snapshot ghép thử hai feature `e36eee7`, có thêm fixture chờ đúng ACK log MQTT. Main không đổi. Các kết quả và SHA-256 ở [manifest.json](manifest.json).
 
 Windows, Node22.20.0, pnpm9.12.0 đúng lockfile, Python3.11.13 cho bridge; PostgreSQL16-alpine, Docker Desktop. Cài dependencies từ lockfile, không dùng `.env` thật. Phiên này dùng runtime pnpm đã cache tại `D:/hoc tap/project 1/aws-camera-ai/artifacts/qa-tooling/node_modules/pnpm/bin/pnpm.cjs` vì pnpm global bị kẹt khi tự chuyển phiên bản. Có thể gọi `node <đường-dẫn-đó> ...` thay lệnh pnpm bên dưới.
 
@@ -108,3 +108,7 @@ Mở `http://localhost:55436/login`. Tài khoản disposable `resident@us20.loca
 3. Xem ảnh `resident-im-ok.png` và `caregiver-schedules.png`. UI trước dispatch/terminal, retry command, lỗi và empty state được kiểm thử bằng React interactions.
 
 SSE refresh/scope được kiểm tra riêng qua production EventsService/repository; browser harness dùng polling để tải trạng thái. Không dùng harness này để kết luận toàn pipeline camera hoặc Telegram staging. Khi xong, dừng đúng các tiến trình/container QA vừa tạo; không dùng `docker compose down -v` hoặc prune dữ liệu khác.
+
+## Sửa quy ước Git và kiểm thử thủ công
+
+Tên nhánh hiện tại đã sửa theo GIT_WORKFLOW.md. Các SHA trong evidence là snapshot đã chạy test trước khi sửa message commit; nội dung commit giữ nguyên. Xem [bảng SHA cũ → mới](GIT_NAMING_CORRECTION.json) và [hướng dẫn manual US20 gồm Telegram thật](MANUAL_US20_TELEGRAM.md).

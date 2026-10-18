@@ -1,0 +1,55 @@
+{
+  "branches": [
+    {
+      "old": "codex/fix-us20-wellness",
+      "new": "fix/US-20-wellness-check"
+    },
+    {
+      "old": "codex/verify-us20-combined",
+      "new": "test/US-16-US-17-US-20-integration"
+    },
+    {
+      "old": "codex/qa-us16-us17-us20",
+      "new": "test/US-16-US-17-US-20-qa"
+    }
+  ],
+  "commits": [
+    {
+      "old": "ba138441326f2b5ff1b7fd540e5b323afff5cc01",
+      "new": "11cdffe2a52a3f160eacedb45e87432e9e06b607",
+      "subject": "fix(orchestrator): repair scoped scheduling delivery and resident confirmation",
+      "treeUnchanged": true
+    },
+    {
+      "old": "5c61c16a7aa1e8fa555194efb20ce3e4422f02c2",
+      "new": "eb3510306e316d5f77e1c21a1d6700d2eb556506",
+      "subject": "test(orchestrator): record completed US-20 retest and timeout recovery evidence",
+      "treeUnchanged": true
+    },
+    {
+      "old": "971c35843b0bbbf897f1ce10365ffa43e7c6e6d2",
+      "new": "d0ab3cefcdc6337bccf96b932bd58697462dbc9b",
+      "subject": "docs(docs): normalize QA evidence and finalize portable checksums",
+      "treeUnchanged": true
+    },
+    {
+      "old": "9c1fc959fe86cfb67effbebe7c1159389bb58340",
+      "new": "7c2c56502cf44a47d65088c60cedfefbae1d1aea",
+      "subject": "test(repo): combine pose fall with wellness fixes for regression",
+      "treeUnchanged": true
+    },
+    {
+      "old": "e36eee7f439a0a8b02d4610850ecaea7927a3c12",
+      "new": "40e5da6c706ea329ee7f8e6645bc035f89becb8d",
+      "subject": "test(orchestrator): align broker readiness and verify wellness timeout recovery",
+      "treeUnchanged": true
+    },
+    {
+      "old": "c8f14a31822bc697cc28a69e56893313fe88831c",
+      "new": "1dc300e20933f9b1c7095c0cc0fadb8eb938fb3c",
+      "subject": "test(repo): combine pose fall and wellness for verification",
+      "treeUnchanged": true
+    }
+  ],
+  "note": "Only unpublished commits rewritten. Trees unchanged; original tested SHA references and evidence retained as historical snapshots."
+}
