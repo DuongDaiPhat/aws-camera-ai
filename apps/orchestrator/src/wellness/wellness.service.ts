@@ -1,13 +1,18 @@
+import type { components } from '@cam/contracts';
 import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createHash } from 'node:crypto';
+import type { PoolClient } from 'pg';
 import type { TokenClaims } from '../auth/auth.types';
 import { WellnessRepository } from './wellness.repository';
+import { canonicalJson, wellnessInteger } from './wellness-policy';
 import type {
   CreateWellnessScheduleDto,
   UpdateWellnessScheduleDto,
@@ -17,142 +22,149 @@ import type {
 } from './dto';
 import type { WellnessScheduleRecord, WellnessCheckRunRecord } from './wellness.types';
 
+export interface WellnessConfirmationSource {
+  channel: 'TELEGRAM';
+  notificationId: string;
+  telegramUserId: string;
+  chatId: string;
+  messageId: string;
+  updateId: string;
+  ttlSeconds: number;
+}
 @Injectable()
 export class WellnessService {
-  constructor(private readonly repository: WellnessRepository) {}
-
-  // -------------------------------------------------------------
-  // SCHEDULES
-  // -------------------------------------------------------------
-
+  constructor(
+    private readonly repository: WellnessRepository,
+    @Optional() private readonly config: ConfigService = new ConfigService(),
+  ) {}
   async listSchedules(
     user: TokenClaims,
     residentUserId?: string,
   ): Promise<WellnessScheduleRecord[]> {
-    return await this.repository.listSchedules(user.sub, user.role, residentUserId);
+    return this.repository.listSchedules(user.sub, user.role, residentUserId);
   }
-
-  async getScheduleById(user: TokenClaims, scheduleId: string): Promise<WellnessScheduleRecord> {
-    const schedule = await this.repository.getScheduleById(scheduleId);
-    if (!schedule) {
-      throw new NotFoundException('Không tìm thấy lịch kiểm tra');
-    }
-
-    if (user.role === 'CAREGIVER' && schedule.owner_user_id !== user.sub) {
-      throw new ForbiddenException('Bạn không có quyền xem lịch kiểm tra này');
-    }
-    if (user.role === 'VIEWER' && schedule.resident_user_id !== user.sub) {
-      throw new ForbiddenException('Bạn chỉ có thể xem lịch của chính mình');
-    }
-
-    return schedule;
+  async getScheduleById(user: TokenClaims, id: string): Promise<WellnessScheduleRecord> {
+    const row = await this.repository.getScheduleById(id);
+    if (!row) throw new NotFoundException('Không tìm thấy lịch kiểm tra');
+    this.authorizeSchedule(user, row);
+    return row;
   }
-
+  private authorizeSchedule(user: TokenClaims, row: WellnessScheduleRecord): void {
+    if (
+      (user.role === 'CAREGIVER' && row.owner_user_id !== user.sub) ||
+      (user.role === 'VIEWER' && row.resident_user_id !== user.sub)
+    )
+      throw new ForbiddenException('Bạn không có quyền xem hoặc sửa lịch này');
+  }
+  private requireManager(user: TokenClaims): void {
+    if (!['ADMIN', 'CAREGIVER'].includes(user.role))
+      throw new ForbiddenException('Chỉ người giám sát hoặc quản trị viên được quản lý lịch');
+  }
+  private async validateSchedule(
+    owner: string,
+    resident: string,
+    cameras: string[],
+    timezone: string,
+    enabled: boolean,
+    client?: PoolClient,
+  ): Promise<void> {
+    if (!(await this.repository.verifyResidentHouseholdLink(owner, resident, client)))
+      throw new BadRequestException('Người được giám sát chưa liên kết với hộ này');
+    if (!(await this.repository.timezoneExists(timezone, client)))
+      throw new BadRequestException('Múi giờ IANA không hợp lệ');
+    const available = await this.repository.enabledCameraIds(owner, cameras, client);
+    if (cameras.some((id) => !available.includes(id)))
+      throw new BadRequestException('Camera không thuộc hộ hoặc đã tắt');
+    if (enabled && !(await this.repository.residentCanReceive(resident, client)))
+      throw new BadRequestException('Người được giám sát cần liên kết Telegram trước khi bật lịch');
+  }
   async createSchedule(
     user: TokenClaims,
     dto: CreateWellnessScheduleDto,
   ): Promise<WellnessScheduleRecord> {
-    if (user.role !== 'ADMIN' && user.role !== 'CAREGIVER') {
-      throw new ForbiddenException('Chỉ Caregiver hoặc Admin mới có quyền tạo lịch');
-    }
-
-    const isValidResident = await this.repository.verifyResidentHouseholdLink(
+    this.requireManager(user);
+    await this.validateSchedule(
       user.sub,
       dto.residentUserId,
+      dto.cameraIds ?? [],
+      dto.timezone ?? 'Asia/Ho_Chi_Minh',
+      dto.isEnabled ?? true,
     );
-    if (!isValidResident) {
-      throw new BadRequestException('Người được giám sát không hợp lệ');
+    if (await this.repository.findConflictingSchedule(dto.residentUserId, dto.checkAt))
+      throw new ConflictException('Đã có lịch kiểm tra vào giờ này');
+    try {
+      return await this.repository.createSchedule({
+        ownerUserId: user.sub,
+        residentUserId: dto.residentUserId,
+        name: dto.name ?? 'Kiểm tra sức khỏe',
+        checkAt: dto.checkAt,
+        daysOfWeek: dto.daysOfWeek ?? [1, 2, 3, 4, 5, 6, 7],
+        lookbackHours: dto.lookbackHours ?? 6,
+        graceSeconds: dto.graceSeconds ?? 300,
+        cameraIds: dto.cameraIds ?? [],
+        timezone: dto.timezone ?? 'Asia/Ho_Chi_Minh',
+        isEnabled: dto.isEnabled ?? true,
+      });
+    } catch (error) {
+      if ((error as { code?: string }).code === '23505')
+        throw new ConflictException('Đã có lịch kiểm tra vào giờ này');
+      throw error;
     }
-
-    const conflict = await this.repository.findConflictingSchedule(dto.residentUserId, dto.checkAt);
-    if (conflict) {
-      throw new ConflictException(`Đã tồn tại lịch kiểm tra vào lúc ${dto.checkAt} cho người này`);
-    }
-
-    return await this.repository.createSchedule({
-      ownerUserId: user.sub,
-      residentUserId: dto.residentUserId,
-      name: dto.name,
-      checkAt: dto.checkAt,
-      daysOfWeek: dto.daysOfWeek,
-      lookbackHours: dto.lookbackHours ?? 6,
-      graceSeconds: dto.graceSeconds ?? 300,
-      cameraIds: dto.cameraIds ?? [],
-      timezone: dto.timezone ?? 'Asia/Ho_Chi_Minh',
-      isEnabled: dto.isEnabled ?? true,
-    });
   }
-
   async updateSchedule(
     user: TokenClaims,
-    scheduleId: string,
+    id: string,
     dto: UpdateWellnessScheduleDto,
   ): Promise<WellnessScheduleRecord> {
-    if (user.role !== 'ADMIN' && user.role !== 'CAREGIVER') {
-      throw new ForbiddenException('Chỉ Caregiver hoặc Admin mới có quyền sửa lịch');
-    }
-
-    const existing = await this.repository.getScheduleById(scheduleId);
-    if (!existing) {
-      throw new NotFoundException('Không tìm thấy lịch kiểm tra');
-    }
-
-    if (user.role === 'CAREGIVER' && existing.owner_user_id !== user.sub) {
-      throw new ForbiddenException('Bạn không có quyền sửa lịch kiểm tra này');
-    }
-
-    const targetResidentId = dto.residentUserId ?? existing.resident_user_id;
-    const targetCheckAt = dto.checkAt ?? existing.check_at;
-
-    if (dto.residentUserId !== undefined || dto.checkAt !== undefined) {
-      const conflict = await this.repository.findConflictingSchedule(
-        targetResidentId,
-        targetCheckAt,
-        scheduleId,
+    this.requireManager(user);
+    if (!Object.keys(dto).some((key) => dto[key as keyof UpdateWellnessScheduleDto] !== undefined))
+      throw new BadRequestException('Cần ít nhất một trường cập nhật');
+    return this.repository.transaction(async (client) => {
+      await client.query('SELECT id FROM wellness_schedules WHERE id=$1 FOR UPDATE', [id]);
+      const existing = await this.repository.getScheduleById(id, client);
+      if (!existing) throw new NotFoundException('Không tìm thấy lịch kiểm tra');
+      this.authorizeSchedule(user, existing);
+      const owner = existing.owner_user_id ?? user.sub,
+        resident = dto.residentUserId ?? existing.resident_user_id;
+      await this.validateSchedule(
+        owner,
+        resident,
+        dto.cameraIds ?? existing.camera_ids,
+        dto.timezone ?? existing.timezone,
+        dto.isEnabled ?? existing.is_enabled,
+        client,
       );
-      if (conflict) {
-        throw new ConflictException(
-          `Đã tồn tại lịch kiểm tra vào lúc ${targetCheckAt} cho người này`,
-        );
-      }
-    }
-
-    const updated = await this.repository.updateSchedule(scheduleId, dto);
-    if (!updated) {
-      throw new NotFoundException('Không tìm thấy lịch kiểm tra để cập nhật');
-    }
-    return updated;
+      if (
+        await this.repository.findConflictingSchedule(
+          resident,
+          dto.checkAt ?? existing.check_at,
+          id,
+          client,
+        )
+      )
+        throw new ConflictException('Đã có lịch kiểm tra vào giờ này');
+      if (!existing.owner_user_id)
+        await client.query('UPDATE wellness_schedules SET owner_user_id=$2 WHERE id=$1', [
+          id,
+          owner,
+        ]);
+      const result = await this.repository.updateSchedule(id, dto, client);
+      if (!result) throw new NotFoundException('Không tìm thấy lịch kiểm tra');
+      return result;
+    });
   }
-
-  async deleteSchedule(user: TokenClaims, scheduleId: string): Promise<void> {
-    if (user.role !== 'ADMIN' && user.role !== 'CAREGIVER') {
-      throw new ForbiddenException('Chỉ Caregiver hoặc Admin mới có quyền xóa lịch');
-    }
-
-    const existing = await this.repository.getScheduleById(scheduleId);
-    if (!existing) {
+  async deleteSchedule(user: TokenClaims, id: string): Promise<void> {
+    this.requireManager(user);
+    const row = await this.getScheduleById(user, id);
+    this.authorizeSchedule(user, row);
+    if (!(await this.repository.deleteSchedule(id)))
       throw new NotFoundException('Không tìm thấy lịch kiểm tra');
-    }
-
-    if (user.role === 'CAREGIVER' && existing.owner_user_id !== user.sub) {
-      throw new ForbiddenException('Bạn không có quyền xóa lịch kiểm tra này');
-    }
-
-    const deleted = await this.repository.deleteSchedule(scheduleId);
-    if (!deleted) {
-      throw new NotFoundException('Không tìm thấy lịch kiểm tra');
-    }
   }
-
-  // -------------------------------------------------------------
-  // CHECKS & CONFIRMATION
-  // -------------------------------------------------------------
-
   async listChecks(
     user: TokenClaims,
     query: ListWellnessChecksQueryDto,
   ): Promise<{ data: WellnessCheckRunRecord[]; total: number }> {
-    return await this.repository.listChecks(user.sub, user.role, {
+    return this.repository.listChecks(user.sub, user.role, {
       residentUserId: query.residentUserId,
       scheduleId: query.scheduleId,
       page: query.page ?? 1,
@@ -164,242 +176,254 @@ export class WellnessService {
     user: TokenClaims,
     checkId: string,
     dto: ConfirmWellnessCheckDto,
-  ): Promise<{
-    id: string;
-    eventId: string;
-    response: string;
-    respondedAt: string;
-    isAuthoritative: boolean;
-  }> {
-    const client = await this.repository.getPoolClient();
-    try {
-      await client.query('BEGIN');
-
-      const check = await this.repository.getCheckById(checkId, client);
-      if (!check) {
-        throw new NotFoundException('Không tìm thấy yêu cầu kiểm tra');
-      }
-
-      // Chỉ đúng resident được chỉ định mới được xác nhận qua endpoint này (US-20)
-      if (check.resident_user_id !== user.sub) {
-        throw new ForbiddenException(
-          'Chỉ người được giám sát của lượt kiểm tra này mới có quyền xác nhận',
-        );
-      }
-
-      if (!check.event_id) {
-        throw new BadRequestException('Lượt kiểm tra không có sự kiện cảnh báo liên kết');
-      }
-
-      // Kiểm tra request đã được gửi tới resident chưa
-      if (!check.request_sent_at) {
+    source?: WellnessConfirmationSource,
+  ): Promise<components['schemas']['Confirmation'] & { isAuthoritative: boolean }> {
+    const outcome = await this.repository.transaction(async (client) => {
+      let check = await this.repository.getCheckById(checkId, client);
+      if (!check) throw new NotFoundException('Không tìm thấy yêu cầu kiểm tra');
+      if (check.resident_user_id !== user.sub)
+        throw new ForbiddenException('Chỉ người được giám sát được xác nhận yêu cầu này');
+      if (!check.event_id)
         throw new ConflictException({
-          error: {
-            code: 'REQUEST_NOT_SENT',
-            message: 'Yêu cầu kiểm tra chưa được gửi tới thiết bị của người nhà.',
-          },
+          error: { code: 'INVALID_STATE', message: 'Lượt kiểm tra không có cảnh báo' },
         });
+      const event = (
+        await client.query('SELECT id,status,version FROM events WHERE id=$1 FOR UPDATE', [
+          check.event_id,
+        ])
+      ).rows[0];
+      await client.query('SELECT id FROM wellness_check_runs WHERE id=$1 FOR UPDATE', [checkId]);
+      check = await this.repository.getCheckById(checkId, client);
+      if (!check || !event) throw new NotFoundException('Không tìm thấy yêu cầu kiểm tra');
+      const now = await this.repository.databaseNow(client);
+      if (source) {
+        const notification = await client.query(
+          `SELECT 1 FROM notifications n JOIN users u ON u.id=n.recipient_user_id
+          WHERE n.id=$1 AND n.event_id=$2 AND n.recipient_user_id=$3 AND n.status='SENT'
+            AND n.escalation_level=0 AND n.provider_chat_id=$4 AND n.provider_message_id=$5
+            AND u.telegram_user_id=$6 AND u.telegram_chat_id=$4 AND u.is_active AND u.telegram_linked_at IS NOT NULL
+            AND n.sent_at>$7::timestamptz-($8::int*interval '1 second')`,
+          [
+            source.notificationId,
+            check.event_id,
+            user.sub,
+            source.chatId,
+            source.messageId,
+            source.telegramUserId,
+            now,
+            source.ttlSeconds,
+          ],
+        );
+        if (!notification.rows.length)
+          throw new ForbiddenException('Nguồn xác nhận Telegram không hợp lệ hoặc đã hết hạn');
       }
-
-      // Khóa bản ghi event để tránh race condition
-      const eventRes = await client.query(
-        `SELECT id, status, version, escalation_deadline_at FROM events WHERE id = $1 FOR UPDATE`,
-        [check.event_id],
-      );
-      if (eventRes.rows.length === 0) {
-        throw new NotFoundException('Không tìm thấy sự kiện tương ứng');
-      }
-      const event = eventRes.rows[0];
-
-      // Kiểm tra idempotency: đã có confirmation với commandId này chưa
-      const existingConf = await client.query(
-        `SELECT id, event_id, response, responded_at, is_authoritative, source_message_id
-         FROM confirmations
-         WHERE event_id = $1 AND source_message_id = $2`,
+      const existing = await client.query(
+        `SELECT id,event_id,response,note,user_id,responded_at,is_authoritative,channel
+        FROM confirmations WHERE event_id=$1 AND source_message_id=$2`,
         [check.event_id, dto.commandId],
       );
-
-      if (existingConf.rows.length > 0) {
-        const conf = existingConf.rows[0];
-        if (conf.response === dto.response) {
-          await client.query('COMMIT');
-          return {
-            id: conf.id,
-            eventId: conf.event_id,
-            response: conf.response,
-            respondedAt: new Date(conf.responded_at).toISOString(),
-            isAuthoritative: conf.is_authoritative,
-          };
-        }
-        throw new ConflictException('CommandId đã được sử dụng với nội dung phản hồi khác');
-      }
-
-      const now = new Date();
-
-      // Kiểm tra quá hạn deadline (5 phút = 300s)
-      if (check.confirmation_deadline_at && now >= check.confirmation_deadline_at) {
-        // Tự động leo thang nếu sự kiện vẫn còn ở NOTIFIED
-        if (event.status === 'NOTIFIED') {
-          await client.query(
-            `UPDATE events
-             SET status = 'ESCALATED', escalated_at = now(), version = version + 1
-             WHERE id = $1`,
-            [event.id],
-          );
-          await client.query(
-            `INSERT INTO event_status_history (event_id, from_status, to_status, reason, actor_type, metadata)
-             VALUES ($1, 'NOTIFIED', 'ESCALATED', 'TIMEOUT', 'SYSTEM', jsonb_build_object('deadlineExpired', true))`,
-            [event.id],
-          );
-          // Gửi thông báo leo thang tới Caregiver
-          await client.query(
-            `INSERT INTO notifications (event_id, recipient_user_id, channel, status, escalation_level, payload)
-             VALUES ($1, $2, 'TELEGRAM', 'PENDING', 1, jsonb_build_object('reason', 'RESIDENT_TIMEOUT_ESCALATED', 'priority', 'P2'))`,
-            [event.id, check.owner_user_id],
-          );
-        }
-
-        await client.query('COMMIT');
-        throw new ConflictException({
-          error: {
-            code: 'DEADLINE_EXPIRED',
-            message:
-              'Đã hết thời hạn xác nhận (quá hạn 5 phút). Cảnh báo đã được chuyển tới người chăm sóc.',
+      if (existing.rows.length) {
+        const row = existing.rows[0];
+        if (
+          row.response !== dto.response ||
+          (row.note ?? null) !== (dto.note ?? null) ||
+          row.user_id !== user.sub
+        )
+          throw new ConflictException({
+            error: {
+              code: 'IDEMPOTENCY_CONFLICT',
+              message: 'Mã lệnh đã được dùng với nội dung khác',
+            },
+          });
+        return {
+          confirmation: {
+            id: row.id,
+            eventId: row.event_id,
+            phase: 'INITIAL' as const,
+            channel: row.channel as components['schemas']['NotificationChannel'],
+            note: row.note ?? null,
+            resultingStatus: (row.response === 'IM_OK' ? 'RESOLVED' : 'ESCALATED') as
+              'RESOLVED' | 'ESCALATED',
+            response: row.response as 'IM_OK' | 'NEED_HELP',
+            respondedAt: new Date(row.responded_at).toISOString(),
+            isAuthoritative: row.is_authoritative as boolean,
           },
+        };
+      }
+      if (!check.request_sent_at)
+        throw new ConflictException({
+          error: { code: 'REQUEST_NOT_SENT', message: 'Yêu cầu chưa được gửi thành công' },
         });
-      }
-
-      // Xử lý phản hồi hợp lệ trước deadline
-      const targetStatus = dto.response === 'IM_OK' ? 'RESOLVED' : 'ESCALATED';
-
-      await client.query(
-        `UPDATE events
-         SET status = $2,
-             resolved_at = CASE WHEN $2 = 'RESOLVED' THEN now() ELSE resolved_at END,
-             escalated_at = CASE WHEN $2 = 'ESCALATED' THEN now() ELSE escalated_at END,
-             escalation_deadline_at = NULL,
-             version = version + 1
-         WHERE id = $1`,
-        [event.id, targetStatus],
-      );
-
-      await client.query(
-        `INSERT INTO event_status_history (event_id, from_status, to_status, reason, actor_type, actor_user_id, channel, metadata)
-         VALUES ($1, $2, $3, 'USER_CONFIRMED', 'USER', $4, 'DASHBOARD', jsonb_build_object('response', $5, 'note', $6))`,
-        [event.id, event.status, targetStatus, user.sub, dto.response, dto.note ?? null],
-      );
-
-      const confRes = await client.query(
-        `INSERT INTO confirmations (
-          event_id, user_id, channel, response, is_authoritative, note, source_message_id, responded_at
-        ) VALUES (
-          $1, $2, 'DASHBOARD', $3, true, $4, $5, now()
-        ) RETURNING id, responded_at`,
-        [event.id, user.sub, dto.response, dto.note ?? null, dto.commandId],
-      );
-
-      // Nếu người nhà bấm "Cần giúp đỡ" (NEED_HELP) -> Escalate khẩn cấp tới Caregiver
-      if (dto.response === 'NEED_HELP') {
-        await client.query(
-          `INSERT INTO notifications (event_id, recipient_user_id, channel, status, escalation_level, payload)
-           VALUES ($1, $2, 'TELEGRAM', 'PENDING', 1, jsonb_build_object('reason', 'RESIDENT_REQUESTED_HELP', 'priority', 'P2', 'note', $3))`,
-          [event.id, check.owner_user_id, dto.note ?? null],
+      if (event.status !== 'NOTIFIED')
+        throw new ConflictException({
+          error: { code: 'INVALID_STATE', message: 'Sự kiện đã được xử lý' },
+          eventStatus: event.status,
+        });
+      if (!check.confirmation_deadline_at || now >= check.confirmation_deadline_at) {
+        await this.repository.escalateWellness(
+          check.event_id!,
+          check.owner_user_id,
+          'TIMEOUT',
+          client,
         );
+        return { expired: true };
       }
-
-      await client.query('COMMIT');
-
-      const confRow = confRes.rows[0];
+      const previous = await client.query(
+        "SELECT id FROM confirmations WHERE event_id=$1 AND is_authoritative AND phase='INITIAL'",
+        [check.event_id],
+      );
+      if (previous.rows.length)
+        throw new ConflictException({
+          error: { code: 'ALREADY_CONFIRMED', message: 'Yêu cầu đã được xác nhận' },
+        });
+      const channel: 'TELEGRAM' | 'DASHBOARD' = source ? 'TELEGRAM' : 'DASHBOARD';
+      if (dto.response === 'NEED_HELP')
+        await this.repository.escalateWellness(
+          check.event_id!,
+          check.owner_user_id,
+          'RESIDENT_REQUESTED_HELP',
+          client,
+        );
+      else {
+        await client.query(
+          `UPDATE events SET status='RESOLVED',resolved_at=$2,escalation_deadline_at=NULL,
+          version=version+1,aggregate_version=aggregate_version+1 WHERE id=$1 AND status='NOTIFIED'`,
+          [check.event_id, now],
+        );
+        await this.repository.enqueueEventUpdate(check.event_id!, client);
+      }
+      await client.query(
+        `INSERT INTO event_status_history(event_id,from_status,to_status,reason,actor_type,actor_user_id,channel,metadata)
+        VALUES($1,$2,$3::event_status,'USER_CONFIRMED','USER',$4,$5::notification_channel,
+          jsonb_build_object('response',$6::text,'note',$7::text))`,
+        [
+          check.event_id,
+          event.status,
+          dto.response === 'IM_OK' ? 'RESOLVED' : 'ESCALATED',
+          user.sub,
+          channel,
+          dto.response,
+          dto.note ?? null,
+        ],
+      );
+      const record = (
+        await client.query(
+          `INSERT INTO confirmations(event_id,user_id,channel,response,phase,is_authoritative,note,
+        source_message_id,source_update_id,notification_id,responded_at)
+        VALUES($1,$2,$3::notification_channel,$4::confirmation_response,'INITIAL',true,$5,$6,$7,$8,$9) RETURNING id,responded_at`,
+          [
+            check.event_id,
+            user.sub,
+            channel,
+            dto.response,
+            dto.note ?? null,
+            dto.commandId,
+            source?.updateId ?? null,
+            source?.notificationId ?? null,
+            now,
+          ],
+        )
+      ).rows[0];
+      await client.query(
+        `UPDATE notifications SET status='SKIPPED',lease_token=NULL,lease_until=NULL,next_retry_at=NULL
+        WHERE event_id=$1 AND escalation_level=0 AND status IN ('PENDING','FAILED')`,
+        [check.event_id],
+      );
       return {
-        id: confRow.id,
-        eventId: event.id,
-        response: dto.response,
-        respondedAt: new Date(confRow.responded_at).toISOString(),
-        isAuthoritative: true,
+        confirmation: {
+          id: record.id as string,
+          eventId: check.event_id!,
+          phase: 'INITIAL' as const,
+          channel,
+          note: dto.note ?? null,
+          resultingStatus: (dto.response === 'IM_OK' ? 'RESOLVED' : 'ESCALATED') as
+            'RESOLVED' | 'ESCALATED',
+          response: dto.response,
+          respondedAt: new Date(record.responded_at).toISOString(),
+          isAuthoritative: true,
+        },
       };
-    } catch (err) {
-      await client.query('ROLLBACK');
-      throw err;
-    } finally {
-      client.release();
-    }
+    });
+    if ('expired' in outcome)
+      throw new ConflictException({
+        error: { code: 'DEADLINE_EXPIRED', message: 'Đã hết thời gian phản hồi' },
+        eventStatus: 'ESCALATED',
+      });
+    return outcome.confirmation!;
   }
-
-  // -------------------------------------------------------------
-  // OBSERVATIONS & PRESENCE
-  // -------------------------------------------------------------
 
   async submitObservation(dto: WellnessObservationDto): Promise<{
     observationId: string;
     status: 'ACCEPTED' | 'DUPLICATE';
     presenceUpdated: boolean;
   }> {
-    const payloadHash = createHash('sha256').update(JSON.stringify(dto)).digest('hex');
-
-    const existing = await this.repository.findObservationById(dto.observationId);
-    if (existing) {
-      if (existing.payload_hash === payloadHash) {
+    const hash = createHash('sha256').update(canonicalJson(dto)).digest('hex');
+    return this.repository.transaction(async (client) => {
+      await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
+        dto.observationId,
+      ]);
+      const existing = await this.repository.findObservationById(dto.observationId, client);
+      if (existing) {
+        if (existing.payload_hash !== hash)
+          throw new ConflictException('Observation ID đã được dùng với nội dung khác');
         return {
           observationId: dto.observationId,
-          status: 'DUPLICATE',
+          status: 'DUPLICATE' as const,
           presenceUpdated: false,
         };
       }
-      throw new ConflictException('ObservationId đã tồn tại với nội dung dữ liệu khác');
-    }
-
-    const observedAtDate = new Date(dto.observedAt);
-    const validUntilDate = new Date(observedAtDate.getTime() + 24 * 60 * 60 * 1000); // 24h TTL
-
-    try {
-      await this.repository.saveObservation({
-        observation_id: dto.observationId,
-        owner_user_id: dto.ownerUserId,
-        resident_user_id: dto.residentUserId,
-        known_face_id: dto.knownFaceId ?? null,
-        camera_id: dto.cameraId ?? null,
-        identity_event_id: dto.identityEventId ?? null,
-        source_session_id: dto.sourceSessionId,
-        track_id: dto.trackId,
-        kind: dto.kind,
-        observed_at: observedAtDate,
-        received_at: new Date(),
-        payload_hash: payloadHash,
-        evidence: (dto.directionalEvidence as unknown as Record<string, unknown>) ?? {},
-      });
-    } catch (err: unknown) {
-      if ((err as { code?: string }).code === '23503') {
-        const detail = (err as { detail?: string }).detail ?? '';
-        throw new BadRequestException(
-          `Khóa ngoại không hợp lệ: ${detail || 'identityEventId, cameraId hoặc knownFaceId không tồn tại'}`,
-        );
-      }
-      throw err;
-    }
-
-    let newState: 'HOME' | 'AWAY' | null = null;
-    if (dto.kind === 'ARRIVAL' || dto.kind === 'MOTION') {
-      newState = 'HOME';
-    } else if (dto.kind === 'DEPARTURE') {
-      newState = 'AWAY';
-    }
-
-    if (newState) {
-      await this.repository.updatePresence({
-        owner_user_id: dto.ownerUserId,
-        resident_user_id: dto.residentUserId,
-        state: newState,
-        observation_id: dto.observationId,
-        observed_at: observedAtDate,
-        valid_until: validUntilDate,
-        updated_at: new Date(),
-      });
-    }
-
-    return {
-      observationId: dto.observationId,
-      status: 'ACCEPTED',
-      presenceUpdated: newState !== null,
-    };
+      const now = await this.repository.databaseNow(client),
+        observed = new Date(dto.observedAt);
+      const age = wellnessInteger(this.config, 'WELLNESS_OBSERVATION_MAX_AGE_SECONDS', 86400);
+      const skew = wellnessInteger(this.config, 'WELLNESS_CLOCK_SKEW_SECONDS', 5, 60);
+      if (
+        !Number.isFinite(observed.getTime()) ||
+        observed.getTime() > now.getTime() + skew * 1000 ||
+        observed.getTime() < now.getTime() - age * 1000
+      )
+        throw new BadRequestException('Quan sát quá cũ hoặc có thời gian tương lai không hợp lệ');
+      if (!dto.knownFaceId || !dto.identityEventId || !dto.cameraId)
+        throw new BadRequestException('Thiếu bằng chứng danh tính/camera');
+      if (
+        dto.kind !== 'MOTION' &&
+        (!dto.directionalEvidence ||
+          dto.directionalEvidence.direction !== (dto.kind === 'ARRIVAL' ? 'ENTER' : 'EXIT'))
+      )
+        throw new BadRequestException('Thiếu hoặc sai bằng chứng hướng di chuyển');
+      const evidence = await this.repository.verifyObservationSource(dto, client);
+      if (!evidence)
+        throw new BadRequestException('Quan sát không khớp nguồn M1/Frigate đã xác minh');
+      await this.repository.saveObservation(
+        {
+          observation_id: dto.observationId,
+          owner_user_id: dto.ownerUserId,
+          resident_user_id: dto.residentUserId,
+          known_face_id: dto.knownFaceId,
+          camera_id: dto.cameraId,
+          identity_event_id: dto.identityEventId,
+          source_session_id: dto.sourceSessionId,
+          track_id: dto.trackId,
+          kind: dto.kind,
+          observed_at: observed,
+          received_at: now,
+          payload_hash: hash,
+          evidence,
+        },
+        client,
+      );
+      const presenceUpdated = await this.repository.updatePresence(
+        {
+          owner_user_id: dto.ownerUserId,
+          resident_user_id: dto.residentUserId,
+          state: dto.kind === 'DEPARTURE' ? 'AWAY' : 'HOME',
+          observation_id: dto.observationId,
+          observed_at: observed,
+          valid_until: new Date(observed.getTime() + this.repository.presenceTtlSeconds * 1000),
+          updated_at: now,
+        },
+        client,
+      );
+      return { observationId: dto.observationId, status: 'ACCEPTED' as const, presenceUpdated };
+    });
   }
 }

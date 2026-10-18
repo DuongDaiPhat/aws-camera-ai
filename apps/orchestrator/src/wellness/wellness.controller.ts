@@ -26,6 +26,7 @@ import { Public } from '../auth/public.decorator';
 import { JwtAuthGuard, type AuthenticatedRequest } from '../auth/jwt-auth.guard';
 import { InternalTokenGuard } from '../ai-results/internal-token.guard';
 import { WellnessService } from './wellness.service';
+import { scheduleResponse, checkResponse } from './wellness-policy';
 import {
   CreateWellnessScheduleDto,
   UpdateWellnessScheduleDto,
@@ -56,7 +57,7 @@ export class WellnessController {
     @Query() query: ListWellnessSchedulesQueryDto,
   ) {
     const data = await this.wellnessService.listSchedules(req.auth!, query.residentUserId);
-    return { data };
+    return { data: data.map(scheduleResponse) };
   }
 
   @Post('wellness-schedules')
@@ -85,7 +86,7 @@ export class WellnessController {
   })
   @ApiResponse({ status: 201, description: 'Lịch đã tạo thành công' })
   async createSchedule(@Req() req: AuthenticatedRequest, @Body() dto: CreateWellnessScheduleDto) {
-    return await this.wellnessService.createSchedule(req.auth!, dto);
+    return scheduleResponse(await this.wellnessService.createSchedule(req.auth!, dto));
   }
 
   @Patch('wellness-schedules/:scheduleId')
@@ -115,7 +116,7 @@ export class WellnessController {
     @Param('scheduleId', ParseUUIDPipe) scheduleId: string,
     @Body() dto: UpdateWellnessScheduleDto,
   ) {
-    return await this.wellnessService.updateSchedule(req.auth!, scheduleId, dto);
+    return scheduleResponse(await this.wellnessService.updateSchedule(req.auth!, scheduleId, dto));
   }
 
   @Delete('wellness-schedules/:scheduleId')
@@ -148,10 +149,12 @@ export class WellnessController {
     summary: 'Lịch sử và yêu cầu wellness đang chờ xác nhận (US-20)',
   })
   async listChecks(@Req() req: AuthenticatedRequest, @Query() query: ListWellnessChecksQueryDto) {
-    return await this.wellnessService.listChecks(req.auth!, query);
+    const result = await this.wellnessService.listChecks(req.auth!, query);
+    return { ...result, data: result.data.map(checkResponse) };
   }
 
   @Post('wellness-checks/:checkId/confirm')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('bearer')
   @ApiOperation({
@@ -190,6 +193,7 @@ export class WellnessController {
   @Public()
   @UseGuards(InternalTokenGuard)
   @Post('internal/wellness-observations')
+  @HttpCode(HttpStatus.ACCEPTED)
   @ApiHeader({
     name: 'X-Internal-Token',
     required: true,

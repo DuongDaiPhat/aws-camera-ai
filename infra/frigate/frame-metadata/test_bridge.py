@@ -26,6 +26,8 @@ class FramePayloadTest(unittest.TestCase):
                         "score": 0.95,
                         "box": [10, 20, 100, 200],
                         "observedAt": 123.4,
+                        "isMoving": False,
+                        "sourceSessionId": None,
                     }
                 ],
             },
@@ -48,7 +50,9 @@ class FramePayloadTest(unittest.TestCase):
             "false_positive": False,
             "frame_time": 123.35,  # age = 123.5 - 123.35 = 0.15s <= 0.25s
         }
-        result = frame_payload(["cam_test", "frame", 123.5, [stale_person, fresh_person], [], []])
+        result = frame_payload(
+            ["cam_test", "frame", 123.5, [stale_person, fresh_person], [], []]
+        )
         self.assertEqual(len(result["objects"]), 1)
         self.assertEqual(result["objects"][0]["id"], "p_fresh")
         self.assertEqual(result["objects"][0]["observedAt"], 123.35)
@@ -91,7 +95,35 @@ class FramePayloadTest(unittest.TestCase):
             {**base, "label": "car"},
             {**base, "box": None},
         ]
-        self.assertEqual(frame_payload(["cam_test", "frame", 123.5, objects, [], []])["objects"], [])
+        self.assertEqual(
+            frame_payload(["cam_test", "frame", 123.5, objects, [], []])["objects"], []
+        )
+
+    def test_wellness_motion_requires_explicit_metadata_and_stable_session(self):
+        person = {
+            "id": "p1",
+            "label": "person",
+            "score": 0.95,
+            "box": [10, 20, 100, 200],
+            "false_positive": False,
+            "frame_time": 123.4,
+            "start_time": 120.123456,
+            "motionless_count": 0,
+            "stationary": False,
+        }
+        moving = frame_payload(["cam_test", "frame", 123.5, [person], [], []])[
+            "objects"
+        ][0]
+        self.assertTrue(moving["isMoving"])
+        self.assertEqual(moving["sourceSessionId"], "cam_test:120.123456")
+        still = frame_payload(
+            ["cam_test", "frame", 123.5, [{**person, "stationary": True}], [], []]
+        )["objects"][0]
+        self.assertFalse(still["isMoving"])
+        restarted = frame_payload(
+            ["cam_test", "frame", 123.5, [{**person, "start_time": 121.0}], [], []]
+        )["objects"][0]
+        self.assertNotEqual(moving["sourceSessionId"], restarted["sourceSessionId"])
 
     def test_same_observed_at_retained_across_newer_frames(self):
         person = {

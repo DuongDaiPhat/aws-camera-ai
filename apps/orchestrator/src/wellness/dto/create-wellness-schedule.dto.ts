@@ -1,5 +1,8 @@
 import {
   IsArray,
+  ArrayMinSize,
+  ArrayMaxSize,
+  ArrayUnique,
   IsBoolean,
   IsInt,
   IsOptional,
@@ -27,10 +30,11 @@ export class CreateWellnessScheduleDto {
     description: 'Tên lịch kiểm tra',
     maxLength: 120,
   })
+  @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(120)
-  name!: string;
+  name?: string;
 
   @ApiProperty({
     example: '09:00',
@@ -46,11 +50,15 @@ export class CreateWellnessScheduleDto {
     example: [1, 2, 3, 4, 5, 6, 7],
     description: 'Các ngày trong tuần (1 = Thứ Hai ... 7 = Chủ Nhật theo ISO 8601)',
   })
+  @IsOptional()
   @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(7)
+  @ArrayUnique()
   @IsInt({ each: true })
   @Min(1, { each: true })
   @Max(7, { each: true })
-  daysOfWeek!: number[];
+  daysOfWeek?: number[];
 
   @ApiPropertyOptional({
     example: 6,
@@ -83,6 +91,8 @@ export class CreateWellnessScheduleDto {
   })
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(100)
+  @ArrayUnique()
   @IsUUID(undefined, { each: true })
   cameraIds?: string[];
 

@@ -17,7 +17,7 @@ describe('WellnessSchedulerService (US-20)', () => {
     lookback_ended_at: new Date(Date.now() - 60000),
     grace_seconds: 300,
     lease_token: 'lease-token-1',
-    schedule_snapshot: {},
+    schedule_snapshot: { cameraIds: ['cam-1'] },
   };
 
   const mockSchedule = {
@@ -61,6 +61,31 @@ describe('WellnessSchedulerService (US-20)', () => {
       get: jest.fn().mockReturnValue(undefined),
     } as unknown as jest.Mocked<ConfigService>;
 
+    Object.assign(repository, {
+      verifyResidentHouseholdLink: jest.fn().mockResolvedValue(true),
+      databaseNow: jest.fn().mockImplementation(async () => new Date()),
+      enqueueEventUpdate: jest.fn(),
+      retryRun: jest.fn(),
+      processWellnessTimeouts: jest.fn(),
+      transaction: jest.fn().mockImplementation(async (action) => {
+        const client = await repository.getPoolClient();
+        const original = client.query.bind(client);
+        client.query = jest.fn().mockImplementation((sql: string, params: unknown[]) =>
+          sql.includes('SELECT lease_token,leased_until')
+            ? Promise.resolve({
+                rows: [
+                  {
+                    lease_token: mockRun.lease_token,
+                    leased_until: new Date(Date.now() + 30000),
+                    schedule_version: 1,
+                  },
+                ],
+              })
+            : original(sql, params),
+        );
+        return action(client);
+      }),
+    });
     scheduler = new WellnessSchedulerService(repository, configService);
   });
 
@@ -134,13 +159,11 @@ describe('WellnessSchedulerService (US-20)', () => {
 
       await scheduler.evaluateSingleRun(mockRun);
 
-      // Tạo event P2 WELLNESS_TIMEOUT
       expect(mockClient.query).toHaveBeenCalledWith(
-        expect.stringContaining(
-          "INSERT INTO events (\n          event_type, status, priority, source, detected_at, notified_at,\n          wellness_owner_user_id, wellness_resident_user_id, zone_name\n        ) VALUES (\n          'WELLNESS_TIMEOUT', 'NOTIFIED', 'P2', 'SCHEDULER'",
-        ),
-        [mockRun.owner_user_id, mockRun.resident_user_id],
+        expect.stringContaining("VALUES('WELLNESS_TIMEOUT','NOTIFIED','P2','SCHEDULER'"),
+        expect.arrayContaining([mockRun.owner_user_id, mockRun.resident_user_id]),
       );
+      expect(repository.recordDeliverySuccess).not.toHaveBeenCalled();
 
       // Tạo notification gửi cho resident (người được giám sát)
       expect(mockClient.query).toHaveBeenCalledWith(
@@ -186,17 +209,8 @@ describe('WellnessSchedulerService (US-20)', () => {
 
       await scheduler.processTimeouts();
 
-      // Cập nhật trạng thái sự kiện sang ESCALATED
-      expect(mockClient.query).toHaveBeenCalledWith(
-        expect.stringContaining("UPDATE events\n           SET status = 'ESCALATED'"),
-        ['evt-overdue-1'],
-      );
-
-      // Gửi thông báo leo thang khẩn cấp tới Caregiver
-      expect(mockClient.query).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO notifications'),
-        expect.arrayContaining(['evt-overdue-1', 'caregiver-owner-1']),
-      );
+      // Locking, SQL and routing are exercised in wellness-db.integration.spec.ts.
+      expect(repository.processWellnessTimeouts).toHaveBeenCalledWith(50);
     });
   });
 });

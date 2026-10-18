@@ -1,147 +1,65 @@
 import { Injectable, Logger, type OnModuleInit, type OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WellnessRepository } from './wellness.repository';
+import { wellnessInteger } from './wellness-policy';
 import type { WellnessScheduleRecord } from './wellness.types';
 
 @Injectable()
 export class WellnessSchedulerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(WellnessSchedulerService.name);
   private timer: NodeJS.Timeout | null = null;
-  private isProcessing = false;
-  private readonly pollIntervalMs: number;
+  private running = false;
+  private readonly pollMs: number;
   private readonly batchSize: number;
   private readonly leaseSeconds: number;
-  private readonly catchUpSeconds: number;
-
+  private readonly catchupSeconds: number;
+  private readonly reconcileSeconds: number;
+  private readonly deliverySeconds: number;
   constructor(
     private readonly repository: WellnessRepository,
-    private readonly configService: ConfigService,
+    private readonly config: ConfigService,
   ) {
-    this.pollIntervalMs = Number(
-      this.configService.get<number>('WELLNESS_POLL_INTERVAL_MS') ?? 5000,
-    );
-    this.batchSize = Number(this.configService.get<number>('WELLNESS_BATCH_SIZE') ?? 50);
-    this.leaseSeconds = Number(this.configService.get<number>('WELLNESS_RUN_LEASE_SECONDS') ?? 30);
-    this.catchUpSeconds = Number(this.configService.get<number>('WELLNESS_CATCHUP_SECONDS') ?? 300);
+    this.pollMs = wellnessInteger(config, 'WELLNESS_POLL_INTERVAL_MS', 5000, 60000);
+    this.batchSize = wellnessInteger(config, 'WELLNESS_BATCH_SIZE', 50, 500);
+    this.leaseSeconds = wellnessInteger(config, 'WELLNESS_RUN_LEASE_SECONDS', 30, 3600);
+    this.catchupSeconds = wellnessInteger(config, 'WELLNESS_CATCHUP_SECONDS', 300);
+    this.reconcileSeconds = wellnessInteger(config, 'WELLNESS_RECONCILE_LOOKBACK_SECONDS', 86400);
+    this.deliverySeconds = wellnessInteger(config, 'WELLNESS_DELIVERY_TIMEOUT_SECONDS', 60, 3600);
   }
-
   onModuleInit(): void {
-    this.logger.log(
-      `Khởi động WellnessScheduler (chu kỳ ${this.pollIntervalMs}ms, batch ${this.batchSize})`,
-    );
     void this.tick();
-
-    this.timer = setInterval(() => {
-      void this.tick();
-    }, this.pollIntervalMs);
+    this.timer = setInterval(() => void this.tick(), this.pollMs);
+    this.timer.unref();
   }
-
   onModuleDestroy(): void {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = null;
-    }
-    this.logger.log('Đã dừng WellnessScheduler');
+    if (this.timer) clearInterval(this.timer);
+    this.timer = null;
   }
-
-  /**
-   * Một chu kỳ quét và đánh giá scheduler
-   */
   async tick(): Promise<void> {
-    if (this.isProcessing) return;
-    this.isProcessing = true;
-
+    if (this.running) return;
+    this.running = true;
     try {
-      // 1. Phục hồi các lease quá hạn
-      await this.repository.reclaimExpiredLeases();
-
-      // 2. Sinh các lượt chạy đến hạn (materialize occurrences)
-      await this.materializeDueOccurrences();
-
-      // 3. Đánh giá các lượt chạy đang PENDING
-      await this.evaluatePendingRuns();
-
-      // 4. Quét các lượt kiểm tra quá hạn phản hồi (5 phút) hoặc quá hạn gửi
+      // Existing alerts must drain even when new admissions are disabled.
       await this.processTimeouts();
-    } catch (err) {
-      this.logger.error('Lỗi trong chu kỳ WellnessScheduler', err);
+      if (String(this.config.get('M5_ENABLED', 'false')) !== 'true') return;
+      await this.repository.reclaimExpiredLeases();
+      await this.materializeDueOccurrences();
+      await this.evaluatePendingRuns();
+    } catch (error) {
+      this.logger.error('Wellness scheduler tick failed', error);
     } finally {
-      this.isProcessing = false;
+      this.running = false;
     }
   }
-
-  /**
-   * Sinh bản ghi wellness_check_runs cho các lịch đã đến giờ kiểm tra trong ngày
-   */
   async materializeDueOccurrences(): Promise<void> {
-    const schedules = await this.repository.getActiveEnabledSchedules();
-    const now = new Date();
-
-    for (const schedule of schedules) {
-      const occurrence = this.computeScheduleOccurrence(schedule, now);
-      if (!occurrence) continue;
-
-      // Chỉ materialize khi đã đến hoặc qua thời điểm scheduled_for
-      if (now >= occurrence.scheduledFor) {
-        await this.repository.insertCheckRunIfNotExists({
-          scheduleId: schedule.id,
-          ownerUserId: schedule.owner_user_id!,
-          residentUserId: schedule.resident_user_id,
-          localDate: occurrence.localDate,
-          scheduledFor: occurrence.scheduledFor,
-          scheduleVersion: schedule.version,
-          scheduleSnapshot: {
-            name: schedule.name,
-            checkAt: schedule.check_at,
-            daysOfWeek: schedule.days_of_week,
-            lookbackHours: schedule.lookback_hours,
-            graceSeconds: schedule.grace_seconds,
-            cameraIds: schedule.camera_ids,
-            timezone: schedule.timezone,
-          },
-          lookbackStartedAt: occurrence.lookbackStartedAt,
-          lookbackEndedAt: occurrence.lookbackEndedAt,
-          graceSeconds: schedule.grace_seconds,
-          availableAt: occurrence.scheduledFor,
-        });
-
-        await this.repository.updateScheduleLastCheckedAt(schedule.id, now);
-      }
-    }
+    await this.repository.materializeOccurrences(this.reconcileSeconds, this.batchSize);
   }
-
-  /**
-   * Đánh giá các lượt chạy (runs) đang ở trạng thái PENDING
-   */
   async evaluatePendingRuns(): Promise<void> {
-    const client = await this.repository.getPoolClient();
-    try {
-      await client.query('BEGIN');
-      const runs = await this.repository.claimPendingRuns(
-        this.batchSize,
-        this.leaseSeconds,
-        client,
-      );
-      await client.query('COMMIT');
-
-      for (const run of runs) {
-        await this.evaluateSingleRun(run);
-      }
-    } catch (err) {
-      try {
-        await client.query('ROLLBACK');
-      } catch {
-        // ignore rollback error
-      }
-      this.logger.error('Lỗi khi claim pending wellness runs', err);
-    } finally {
-      client.release();
-    }
+    const runs = await this.repository.transaction((client) =>
+      this.repository.claimPendingRuns(this.batchSize, this.leaseSeconds, client),
+    );
+    for (const run of runs) await this.evaluateSingleRun(run);
   }
-
-  /**
-   * Thực thi logic quyết định cho từng run
-   */
   async evaluateSingleRun(run: {
     id: string;
     schedule_id: string;
@@ -155,274 +73,150 @@ export class WellnessSchedulerService implements OnModuleInit, OnModuleDestroy {
     schedule_snapshot: Record<string, unknown>;
   }): Promise<void> {
     if (!run.lease_token) return;
-
-    const client = await this.repository.getPoolClient();
     try {
-      await client.query('BEGIN');
-
-      const now = new Date();
-
-      // 1. Kiểm tra lịch còn tồn tại và đang bật không
-      const schedule = await this.repository.getScheduleById(run.schedule_id, client);
-      if (!schedule || !schedule.is_enabled || schedule.deleted_at !== null) {
-        await this.repository.updateRunDecision(
-          run.id,
-          run.lease_token,
-          'SKIPPED_DISABLED',
-          { decisionReason: 'Schedule đã bị tắt hoặc xóa trước khi đánh giá' },
+      await this.repository.transaction(async (client) => {
+        await client.query('SELECT id FROM wellness_schedules WHERE id=$1 FOR UPDATE', [
+          run.schedule_id,
+        ]);
+        await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
+          `${run.owner_user_id}:${run.resident_user_id}`,
+        ]);
+        const current = (
+          await client.query(
+            'SELECT lease_token,leased_until,schedule_version FROM wellness_check_runs WHERE id=$1 FOR UPDATE',
+            [run.id],
+          )
+        ).rows[0];
+        const now = await this.repository.databaseNow(client);
+        if (!current || current.lease_token !== run.lease_token || current.leased_until <= now)
+          return;
+        const schedule = await this.repository.getScheduleById(run.schedule_id, client);
+        const decide = async (
+          status: Parameters<WellnessRepository['updateRunDecision']>[2],
+          options: Parameters<WellnessRepository['updateRunDecision']>[3] = {},
+        ): Promise<void> => {
+          await this.repository.updateRunDecision(
+            run.id,
+            run.lease_token!,
+            status,
+            { ...options, evaluatedAt: now },
+            client,
+          );
+          await client.query('UPDATE wellness_schedules SET last_checked_at=$2 WHERE id=$1', [
+            run.schedule_id,
+            now,
+          ]);
+        };
+        if (!schedule?.is_enabled || schedule.deleted_at) {
+          await decide('SKIPPED_DISABLED');
+          return;
+        }
+        if (schedule.version !== current.schedule_version) {
+          await decide('SKIPPED_SUPERSEDED', { decisionReason: 'Schedule configuration changed' });
+          return;
+        }
+        if (now.getTime() - new Date(run.scheduled_for).getTime() > this.catchupSeconds * 1000) {
+          await decide('MISSED', { decisionReason: 'Scheduler catch-up window exceeded' });
+          this.logger.warn(`Wellness occurrence MISSED runId=${run.id}`);
+          return;
+        }
+        if (
+          !(await this.repository.verifyResidentHouseholdLink(
+            run.owner_user_id,
+            run.resident_user_id,
+            client,
+          ))
+        )
+          throw new Error('Resident household link is no longer valid');
+        const presence = await this.repository.getPresenceState(
+          run.owner_user_id,
+          run.resident_user_id,
+          new Date(run.scheduled_for),
           client,
         );
-        await client.query('COMMIT');
-        return;
-      }
-
-      // 2. Kiểm tra nếu quá hạn catch-up (downtime quá lâu)
-      const latenessSeconds = (now.getTime() - new Date(run.scheduled_for).getTime()) / 1000;
-      if (latenessSeconds > this.catchUpSeconds) {
-        await this.repository.updateRunDecision(
-          run.id,
-          run.lease_token,
-          'MISSED',
-          {
-            decisionReason: `Quá hạn catch-up (${Math.round(latenessSeconds)}s > ${this.catchUpSeconds}s)`,
-          },
-          client,
+        if (presence === 'AWAY') {
+          await decide('SKIPPED_AWAY', { presenceState: 'AWAY' });
+          return;
+        }
+        const cameras = Array.isArray(run.schedule_snapshot.cameraIds)
+          ? run.schedule_snapshot.cameraIds.filter((id): id is string => typeof id === 'string')
+          : [];
+        const activity = cameras.length
+          ? await this.repository.findActivityInWindow(
+              run.owner_user_id,
+              run.resident_user_id,
+              cameras,
+              new Date(run.lookback_started_at),
+              new Date(run.lookback_ended_at),
+              client,
+            )
+          : null;
+        if (activity) {
+          await decide('SKIPPED_ACTIVITY', { lastActivityAt: activity, presenceState: 'HOME' });
+          return;
+        }
+        if (
+          await this.repository.hasActiveUnresolvedWellnessEvent(
+            run.owner_user_id,
+            run.resident_user_id,
+            client,
+          )
+        ) {
+          await decide('SKIPPED_SUPERSEDED', {
+            decisionReason: 'An active resident request already exists',
+          });
+          return;
+        }
+        const event = (
+          await client.query(
+            `INSERT INTO events(event_type,status,priority,source,detected_at,notified_at,
+          wellness_owner_user_id,wellness_resident_user_id,dedup_key,rule_snapshot,aggregate_version)
+          VALUES('WELLNESS_TIMEOUT','NOTIFIED','P2','SCHEDULER',$1,$1,$2,$3,$4,$5::jsonb,1) RETURNING id`,
+            [
+              now,
+              run.owner_user_id,
+              run.resident_user_id,
+              `m5-wellness:${run.schedule_id}:${new Date(run.scheduled_for).toISOString()}`,
+              JSON.stringify({
+                priority: 'P2',
+                graceSeconds: run.grace_seconds,
+                residentUserId: run.resident_user_id,
+                ownerUserId: run.owner_user_id,
+              }),
+            ],
+          )
+        ).rows[0];
+        await client.query(
+          `INSERT INTO event_status_history(event_id,from_status,to_status,reason,actor_type,metadata)
+          VALUES($1,'DETECTED','NOTIFIED','NO_ACTIVITY_IN_WINDOW','SCHEDULER',jsonb_build_object('runId',$2::text,'scheduleId',$3::text))`,
+          [event.id, run.id, run.schedule_id],
         );
-        await client.query('COMMIT');
-        return;
-      }
-
-      // 3. Kiểm tra nếu người đó đã rời nhà (Module 1 ghi nhận DEPARTURE còn hạn)
-      const presenceState = await this.repository.getPresenceState(
-        run.owner_user_id,
-        run.resident_user_id,
-        run.scheduled_for,
-        client,
-      );
-
-      if (presenceState === 'AWAY') {
-        this.logger.log(
-          `Bỏ qua kiểm tra wellness (${run.id}) cho resident=${run.resident_user_id}: Người nhà đã rời khỏi nhà (AWAY).`,
+        await client.query(
+          `INSERT INTO notifications(event_id,recipient_user_id,channel,status,escalation_level,payload)
+          VALUES($1,$2,'TELEGRAM','PENDING',0,jsonb_build_object('eventType','WELLNESS_TIMEOUT','priority','P2','checkId',$3::text))`,
+          [event.id, run.resident_user_id, run.id],
         );
-        await this.repository.updateRunDecision(
-          run.id,
-          run.lease_token,
-          'SKIPPED_AWAY',
-          {
-            decisionReason: 'Module 1 ghi nhận người đó đã rời khỏi nhà (AWAY)',
-            presenceState: 'AWAY',
-          },
-          client,
-        );
-        await client.query('COMMIT');
-        return;
-      }
-
-      // 4. Kiểm tra hoạt động (motion/arrival) trong cửa sổ lookback
-      const cameraIds = Array.isArray(schedule.camera_ids) ? schedule.camera_ids : [];
-      const lastActivityAt = await this.repository.findActivityInWindow(
-        run.owner_user_id,
-        run.resident_user_id,
-        cameraIds,
-        new Date(run.lookback_started_at),
-        new Date(run.lookback_ended_at),
-        client,
-      );
-
-      if (lastActivityAt) {
-        this.logger.log(
-          `Bỏ qua kiểm tra wellness (${run.id}): Đã phát hiện hoạt động lúc ${lastActivityAt.toISOString()}`,
-        );
-        await this.repository.updateRunDecision(
-          run.id,
-          run.lease_token,
-          'SKIPPED_ACTIVITY',
-          {
-            decisionReason: 'Đã phát hiện chuyển động của người đã đăng ký trong cửa sổ',
-            lastActivityAt,
-            presenceState: 'HOME',
-          },
-          client,
-        );
-        await client.query('COMMIT');
-        return;
-      }
-
-      // 5. Kiểm tra nếu đã có sự kiện wellness chưa xử lý
-      const existingActiveEventId = await this.repository.hasActiveUnresolvedWellnessEvent(
-        run.owner_user_id,
-        run.resident_user_id,
-        client,
-      );
-
-      if (existingActiveEventId) {
-        await this.repository.updateRunDecision(
-          run.id,
-          run.lease_token,
-          'SKIPPED_SUPERSEDED',
-          { decisionReason: `Đang có sự kiện wellness chưa xử lý (${existingActiveEventId})` },
-          client,
-        );
-        await client.query('COMMIT');
-        return;
-      }
-
-      // 6. KHÔNG có hoạt động -> Tạo sự kiện WELLNESS_TIMEOUT priority P2
-      this.logger.warn(
-        `Phát hiện không có hoạt động cho resident=${run.resident_user_id} trong ${schedule.lookback_hours}h qua. Tạo sự kiện WELLNESS_TIMEOUT (P2).`,
-      );
-
-      const eventRes = await client.query(
-        `INSERT INTO events (
-          event_type, status, priority, source, detected_at, notified_at,
-          wellness_owner_user_id, wellness_resident_user_id, zone_name
-        ) VALUES (
-          'WELLNESS_TIMEOUT', 'NOTIFIED', 'P2', 'SCHEDULER', now(), now(),
-          $1, $2, 'Kiểm tra sức khỏe định kỳ'
-        ) RETURNING id`,
-        [run.owner_user_id, run.resident_user_id],
-      );
-      const eventId = eventRes.rows[0].id;
-
-      await client.query(
-        `INSERT INTO event_status_history (
-          event_id, from_status, to_status, reason, actor_type, metadata
-        ) VALUES (
-          $1, 'DETECTED', 'NOTIFIED', 'NO_ACTIVITY_IN_WINDOW', 'SCHEDULER',
-          jsonb_build_object('runId', $2, 'scheduleId', $3)
-        )`,
-        [eventId, run.id, run.schedule_id],
-      );
-
-      // Tạo notification intent gửi tới người được giám sát (resident)
-      await client.query(
-        `INSERT INTO notifications (
-          event_id, recipient_user_id, channel, status, escalation_level, payload
-        ) VALUES (
-          $1, $2, 'TELEGRAM', 'PENDING', 0,
-          jsonb_build_object('eventType', 'WELLNESS_TIMEOUT', 'priority', 'P2', 'checkId', $3)
-        )`,
-        [eventId, run.resident_user_id, run.id],
-      );
-
-      // Đánh dấu ALERT_CREATED và thiết lập deadline gửi ban đầu
-      const deliveryDeadlineAt = new Date(now.getTime() + 60 * 1000); // 60 giây timeout gửi
-      await this.repository.updateRunDecision(
+        await decide('ALERT_CREATED', {
+          eventId: event.id,
+          presenceState: presence,
+          deliveryDeadlineAt: new Date(now.getTime() + this.deliverySeconds * 1000),
+        });
+        await this.repository.enqueueEventUpdate(event.id, client);
+      });
+    } catch (error) {
+      this.logger.error(`Wellness evaluation failed runId=${run.id}`, error);
+      await this.repository.retryRun(
         run.id,
         run.lease_token,
-        'ALERT_CREATED',
-        {
-          decisionReason: 'Không có hoạt động hợp lệ trong khoảng thời gian quy định',
-          eventId,
-          presenceState: 'HOME',
-          deliveryDeadlineAt,
-        },
-        client,
+        error instanceof Error ? error.message : 'Evaluation failed',
       );
-
-      // Thiết lập luôn request_sent_at và confirmation_deadline_at cho kênh dashboard/resident
-      await this.repository.recordDeliverySuccess(eventId, now, run.grace_seconds, client);
-
-      // Cập nhật escalation_deadline_at trên event (5 phút = 300 giây)
-      const confirmationDeadline = new Date(now.getTime() + run.grace_seconds * 1000);
-      await client.query(`UPDATE events SET escalation_deadline_at = $2 WHERE id = $1`, [
-        eventId,
-        confirmationDeadline,
-      ]);
-
-      await client.query('COMMIT');
-    } catch (err) {
-      try {
-        await client.query('ROLLBACK');
-      } catch {
-        // ignore rollback error
-      }
-      this.logger.error(`Lỗi khi đánh giá wellness run ${run.id}`, err);
-    } finally {
-      client.release();
     }
   }
-
-  /**
-   * Quét và xử lý tự động các lượt kiểm tra quá hạn xác nhận 5 phút -> Escalate sang Caregiver
-   */
   async processTimeouts(): Promise<void> {
-    const client = await this.repository.getPoolClient();
-    try {
-      await client.query('BEGIN');
-
-      const now = new Date();
-
-      // Tìm các events WELLNESS_TIMEOUT quá hạn deadline 5 phút mà chưa phản hồi
-      const dueRes = await client.query(
-        `SELECT e.id, e.wellness_owner_user_id, e.wellness_resident_user_id, e.escalation_deadline_at, r.id AS run_id
-         FROM events e
-         LEFT JOIN wellness_check_runs r ON r.event_id = e.id
-         WHERE e.event_type = 'WELLNESS_TIMEOUT'
-           AND e.status = 'NOTIFIED'
-           AND e.escalation_deadline_at IS NOT NULL
-           AND e.escalation_deadline_at <= $1
-         FOR UPDATE OF e SKIP LOCKED
-         LIMIT $2`,
-        [now, this.batchSize],
-      );
-
-      for (const row of dueRes.rows) {
-        this.logger.warn(
-          `Sự kiện wellness ${row.id} đã hết 5 phút mà người nhà không xác nhận. Tự động ESCALATE tới Caregiver!`,
-        );
-
-        await client.query(
-          `UPDATE events
-           SET status = 'ESCALATED', escalated_at = now(), escalation_deadline_at = NULL, version = version + 1
-           WHERE id = $1`,
-          [row.id],
-        );
-
-        await client.query(
-          `INSERT INTO event_status_history (
-            event_id, from_status, to_status, reason, actor_type, metadata
-          ) VALUES (
-            $1, 'NOTIFIED', 'ESCALATED', 'TIMEOUT', 'SYSTEM',
-            jsonb_build_object('timeoutSeconds', 300, 'recovered', true)
-          )`,
-          [row.id],
-        );
-
-        // Tạo thông báo khẩn cấp gửi tới Caregiver (chủ hộ)
-        if (row.wellness_owner_user_id) {
-          await client.query(
-            `INSERT INTO notifications (
-              event_id, recipient_user_id, channel, status, escalation_level, payload
-            ) VALUES (
-              $1, $2, 'TELEGRAM', 'PENDING', 1,
-              jsonb_build_object(
-                'reason', 'WELLNESS_TIMEOUT_NO_RESPONSE',
-                'priority', 'P2',
-                'residentUserId', row.wellness_resident_user_id
-              )
-            )`,
-            [row.id, row.wellness_owner_user_id],
-          );
-        }
-      }
-
-      await client.query('COMMIT');
-    } catch (err) {
-      try {
-        await client.query('ROLLBACK');
-      } catch {
-        // ignore
-      }
-      this.logger.error('Lỗi khi quét deadline timeout wellness', err);
-    } finally {
-      client.release();
-    }
+    await this.repository.processWellnessTimeouts(this.batchSize);
   }
 
-  /**
-   * Tính toán thời điểm chạy tiếp theo dựa trên múi giờ và cấu hình lịch
-   */
+  /** Unit-testable civil-time calculation. Admission itself uses PostgreSQL AT TIME ZONE. */
   computeScheduleOccurrence(
     schedule: WellnessScheduleRecord,
     now: Date,
@@ -433,54 +227,56 @@ export class WellnessSchedulerService implements OnModuleInit, OnModuleDestroy {
     lookbackEndedAt: Date;
   } | null {
     try {
-      const [hoursStr, minutesStr] = schedule.check_at.split(':');
-      const targetHours = parseInt(hoursStr, 10);
-      const targetMinutes = parseInt(minutesStr, 10);
-
-      // Định dạng ngày theo múi giờ chỉ định
       const formatter = new Intl.DateTimeFormat('en-CA', {
         timeZone: schedule.timezone,
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
       });
-      const localDate = formatter.format(now); // YYYY-MM-DD
-
-      // Lấy ngày trong tuần (1 = Thứ Hai ... 7 = Chủ Nhật)
-      const dayOfWeekFormatter = new Intl.DateTimeFormat('en-US', {
+      const date = formatter.format(now),
+        [year, month, day] = date.split('-').map(Number),
+        [hour, minute] = schedule.check_at.split(':').map(Number);
+      const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay() || 7;
+      if (!schedule.days_of_week.includes(weekday)) return null;
+      const local = Date.UTC(year, month - 1, day, hour, minute);
+      const partsFormatter = new Intl.DateTimeFormat('en-CA', {
         timeZone: schedule.timezone,
-        weekday: 'short',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23',
       });
-      const weekdayStr = dayOfWeekFormatter.format(now);
-      const weekdayMap: Record<string, number> = {
-        Mon: 1,
-        Tue: 2,
-        Wed: 3,
-        Thu: 4,
-        Fri: 5,
-        Sat: 6,
-        Sun: 7,
+      const parts = (value: number): number => {
+        const p = Object.fromEntries(
+          partsFormatter.formatToParts(new Date(value)).map((part) => [part.type, part.value]),
+        );
+        return Date.UTC(
+          Number(p.year),
+          Number(p.month) - 1,
+          Number(p.day),
+          Number(p.hour),
+          Number(p.minute),
+          Number(p.second),
+        );
       };
-      const currentDayOfWeek = weekdayMap[weekdayStr] ?? 1;
-
-      if (!schedule.days_of_week.includes(currentDayOfWeek)) {
-        return null;
-      }
-
-      // Tạo Date object tương ứng với local date và target time
-      // Mặc định tạo theo chuẩn UTC approximation rồi căn chỉnh theo timezone
-      const [year, month, day] = localDate.split('-').map(Number);
-      const scheduledFor = new Date(Date.UTC(year, month - 1, day, targetHours, targetMinutes));
-
-      const lookbackHours = schedule.lookback_hours ?? 6;
-      const lookbackStartedAt = new Date(scheduledFor.getTime() - lookbackHours * 60 * 60 * 1000);
-      const lookbackEndedAt = scheduledFor;
-
+      const offsets = new Set(
+        [-36, 0, 36].map((hours) => {
+          const value = local + hours * 3600000;
+          return parts(value) - value;
+        }),
+      );
+      const candidates = [...offsets].map((offset) => local - offset);
+      const exact = candidates.filter((value) => parts(value) === local);
+      // PostgreSQL chooses the later instant for a fold; a gap uses the pre-transition offset.
+      const scheduledFor = new Date(Math.max(...(exact.length ? exact : candidates)));
       return {
-        localDate,
+        localDate: date,
         scheduledFor,
-        lookbackStartedAt,
-        lookbackEndedAt,
+        lookbackStartedAt: new Date(scheduledFor.getTime() - schedule.lookback_hours * 3600000),
+        lookbackEndedAt: scheduledFor,
       };
     } catch {
       return null;

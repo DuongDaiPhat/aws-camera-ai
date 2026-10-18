@@ -81,6 +81,37 @@ describe('WellnessService (US-20)', () => {
       findDueDeliveryTimeouts: jest.fn(),
     } as unknown as jest.Mocked<WellnessRepository>;
 
+    Object.assign(repository, {
+      presenceTtlSeconds: 86400,
+      databaseNow: jest.fn().mockResolvedValue(new Date('2026-10-14T08:30:00Z')),
+      timezoneExists: jest.fn().mockResolvedValue(true),
+      enabledCameraIds: jest.fn().mockResolvedValue([]),
+      residentCanReceive: jest.fn().mockResolvedValue(true),
+      verifyObservationSource: jest
+        .fn()
+        .mockResolvedValue({ source: 'FRIGATE_METADATA', isMoving: true }),
+      enqueueEventUpdate: jest.fn(),
+      escalateWellness: jest.fn(),
+      transaction: jest.fn().mockImplementation(async (action) => {
+        const client = await repository.getPoolClient();
+        await client.query('BEGIN');
+        try {
+          const value = await action(client);
+          await client.query('COMMIT');
+          return value;
+        } catch (error) {
+          await client.query('ROLLBACK');
+          throw error;
+        } finally {
+          client.release();
+        }
+      }),
+    });
+    repository.getPoolClient.mockResolvedValue({
+      query: jest.fn().mockResolvedValue({ rows: [] }),
+      release: jest.fn(),
+    } as any);
+    repository.updatePresence.mockResolvedValue(true);
     service = new WellnessService(repository);
   });
 
@@ -172,7 +203,7 @@ describe('WellnessService (US-20)', () => {
     const createMockClient = (options: { eventStatus?: string; existingConfirmation?: any }) => {
       return {
         query: jest.fn().mockImplementation((queryText: string) => {
-          if (queryText.includes('SELECT id, status, version')) {
+          if (queryText.replaceAll(' ', '').includes('SELECTid,status,version')) {
             return Promise.resolve({
               rows: [
                 {
@@ -184,7 +215,7 @@ describe('WellnessService (US-20)', () => {
               ],
             });
           }
-          if (queryText.includes('SELECT id, event_id, response')) {
+          if (queryText.replaceAll(' ', '').includes('SELECTid,event_id,response')) {
             return Promise.resolve({
               rows: options.existingConfirmation ? [options.existingConfirmation] : [],
             });
@@ -203,6 +234,7 @@ describe('WellnessService (US-20)', () => {
     it('xác nhận "Tôi ổn" (IM_OK) trong vòng 5 phút chuyển event sang RESOLVED', async () => {
       const mockClient = createMockClient({ eventStatus: 'NOTIFIED' });
       repository.getPoolClient.mockResolvedValue(mockClient as any);
+      repository.databaseNow.mockResolvedValue(new Date());
 
       repository.getCheckById.mockResolvedValue({
         ...mockSchedule,
@@ -240,10 +272,8 @@ describe('WellnessService (US-20)', () => {
       expect(res.response).toBe('IM_OK');
       expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
       expect(mockClient.query).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'UPDATE events\n         SET status = $2,\n             resolved_at',
-        ),
-        expect.arrayContaining([mockEventId, 'RESOLVED']),
+        expect.stringContaining("UPDATE events SET status='RESOLVED'"),
+        expect.arrayContaining([mockEventId]),
       );
       expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
     });
@@ -271,6 +301,7 @@ describe('WellnessService (US-20)', () => {
     it('từ chối khi quá hạn 5 phút và tự động escalate tới Caregiver', async () => {
       const mockClient = createMockClient({ eventStatus: 'NOTIFIED' });
       repository.getPoolClient.mockResolvedValue(mockClient as any);
+      repository.databaseNow.mockResolvedValue(new Date());
 
       repository.getCheckById.mockResolvedValue({
         ...mockSchedule,
@@ -288,11 +319,14 @@ describe('WellnessService (US-20)', () => {
         }),
       ).rejects.toThrow(ConflictException);
 
-      // Xác nhận có gọi UPDATE events SET status = 'ESCALATED'
-      expect(mockClient.query).toHaveBeenCalledWith(
-        expect.stringContaining("UPDATE events\n             SET status = 'ESCALATED'"),
-        [mockEventId],
+      expect(repository.escalateWellness).toHaveBeenCalledWith(
+        mockEventId,
+        caregiverUser.sub,
+        'TIMEOUT',
+        mockClient,
       );
+      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+      expect(mockClient.query).not.toHaveBeenCalledWith('ROLLBACK');
     });
 
     it('idempotency: gửi lại cùng commandId và cùng response trả về kết quả 200 trước đó', async () => {
@@ -302,6 +336,9 @@ describe('WellnessService (US-20)', () => {
           event_id: mockEventId,
           response: 'IM_OK',
           responded_at: new Date('2026-10-14T09:02:00Z'),
+          channel: 'DASHBOARD',
+          user_id: residentUser.sub,
+          note: null,
           is_authoritative: true,
           source_message_id: 'cmd-replay-1',
         },
@@ -351,6 +388,7 @@ describe('WellnessService (US-20)', () => {
         expect.objectContaining({
           state: 'HOME',
         }),
+        expect.anything(),
       );
     });
 
@@ -381,6 +419,7 @@ describe('WellnessService (US-20)', () => {
         expect.objectContaining({
           state: 'AWAY',
         }),
+        expect.anything(),
       );
     });
   });

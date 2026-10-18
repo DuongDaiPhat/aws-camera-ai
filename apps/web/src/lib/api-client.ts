@@ -83,11 +83,14 @@ async function request<T>(path: string, init: RequestInit, canRefresh: boolean):
   if (!response.ok) {
     const body = (await response.json().catch(() => ({}))) as {
       error?: { code?: string; message?: string; traceId?: string; details?: unknown };
+      message?: string | string[];
     };
     throw new ApiError(
       response.status,
       body.error?.code ?? 'UNKNOWN',
-      body.error?.message ?? response.statusText,
+      body.error?.message ??
+        (Array.isArray(body.message) ? body.message.join('; ') : body.message) ??
+        response.statusText,
       body.error?.traceId,
       body.error?.details,
     );

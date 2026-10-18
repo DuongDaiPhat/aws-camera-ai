@@ -64,28 +64,25 @@ export class WellnessObservationDto {
   @Matches(UUID_PATTERN, { message: 'residentUserId must be a UUID' })
   residentUserId!: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     example: 'dd3657f8-dc20-4b90-8848-057c96849502',
-    description: 'ID khuôn mặt đã nhận diện trong known_faces (nếu có)',
+    description: 'ID khuôn mặt đã nhận diện trong known_faces',
   })
-  @IsOptional()
   @Matches(UUID_PATTERN, { message: 'knownFaceId must be a UUID' })
-  knownFaceId?: string;
+  knownFaceId!: string;
 
-  @ApiPropertyOptional({
-    description: 'ID sự kiện nhận diện danh tính (PERSON_DETECTED) (nếu có)',
+  @ApiProperty({
+    description: 'ID sự kiện nhận diện danh tính (PERSON_DETECTED)',
   })
-  @IsOptional()
   @Matches(UUID_PATTERN, { message: 'identityEventId must be a UUID' })
-  identityEventId?: string;
+  identityEventId!: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     example: '22222222-2222-2222-2222-222222222221',
-    description: 'ID camera ghi nhận (nếu có)',
+    description: 'ID camera ghi nhận',
   })
-  @IsOptional()
   @Matches(UUID_PATTERN, { message: 'cameraId must be a UUID' })
-  cameraId?: string;
+  cameraId!: string;
 
   @ApiProperty({
     example: 'session_cam_living_room_01',

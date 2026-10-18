@@ -1,6 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import type { Pool, PoolClient } from 'pg';
 import { PG_POOL } from '../database/database.module';
+import { wellnessInteger } from './wellness-policy';
+import type { WellnessObservationDto } from './dto';
 import type { UserRole } from '@cam/contracts';
 import type {
   WellnessScheduleRecord,
@@ -38,7 +41,140 @@ export interface UpdateScheduleInput {
 
 @Injectable()
 export class WellnessRepository {
-  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+  readonly presenceTtlSeconds: number;
+  constructor(
+    @Inject(PG_POOL) private readonly pool: Pool,
+    @Optional() config: ConfigService = new ConfigService(),
+  ) {
+    this.presenceTtlSeconds = wellnessInteger(config, 'WELLNESS_PRESENCE_TTL_SECONDS', 86400);
+  }
+
+  async transaction<T>(action: (client: PoolClient) => Promise<T>): Promise<T> {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const result = await action(client);
+      await client.query('COMMIT');
+      return result;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async databaseNow(client?: PoolClient): Promise<Date> {
+    return (await (client ?? this.pool).query<{ now: Date }>('SELECT clock_timestamp() AS now'))
+      .rows[0].now;
+  }
+
+  async enabledCameraIds(owner: string, ids: string[], client?: PoolClient): Promise<string[]> {
+    const result = await (client ?? this.pool).query<{ id: string }>(
+      `SELECT c.id FROM cameras c JOIN devices d ON d.id=c.device_id
+      WHERE d.owner_user_id=$1 AND c.is_enabled AND (cardinality($2::uuid[])=0 OR c.id=ANY($2::uuid[])) ORDER BY c.id`,
+      [owner, ids],
+    );
+    return result.rows.map((row) => row.id);
+  }
+
+  async timezoneExists(timezone: string, client?: PoolClient): Promise<boolean> {
+    return (
+      (
+        await (client ?? this.pool).query('SELECT 1 FROM pg_timezone_names WHERE name=$1', [
+          timezone,
+        ])
+      ).rows.length > 0
+    );
+  }
+
+  async residentCanReceive(resident: string, client?: PoolClient): Promise<boolean> {
+    return (
+      (
+        await (client ?? this.pool).query(
+          `SELECT 1 FROM users WHERE id=$1 AND is_active
+      AND telegram_user_id IS NOT NULL AND telegram_chat_id IS NOT NULL AND telegram_linked_at IS NOT NULL`,
+          [resident],
+        )
+      ).rows.length > 0
+    );
+  }
+
+  async verifyObservationSource(
+    dto: WellnessObservationDto,
+    client: PoolClient,
+  ): Promise<Record<string, unknown> | null> {
+    const res = await client.query(
+      `SELECT s.evidence FROM resident_wellness_source_evidence s
+      JOIN resident_wellness_track_links l ON l.camera_id=s.camera_id AND l.source_session_id=s.source_session_id AND l.track_id=s.track_id
+      JOIN cameras c ON c.id=s.camera_id JOIN devices d ON d.id=c.device_id
+      JOIN known_faces k ON k.id=l.known_face_id JOIN users u ON u.id=l.resident_user_id
+      JOIN events e ON e.id=l.identity_event_id
+      WHERE s.observation_id=$1 AND d.owner_user_id=$2 AND l.owner_user_id=$2 AND l.resident_user_id=$3
+        AND k.id=$4 AND e.id=$5 AND c.id=$6 AND s.source_session_id=$7 AND s.track_id=$8
+        AND s.kind=$9 AND s.observed_at=$10 AND k.is_active AND u.is_active AND c.is_enabled
+        AND k.linked_user_id=$3 AND k.owner_user_id=$2 AND e.camera_id=c.id AND e.track_id=s.track_id
+        AND e.person_status='KNOWN' AND e.matched_known_face_id=k.id
+        AND s.observed_at BETWEEN l.observed_at AND l.valid_until
+        AND ($9='MOTION' OR s.evidence->'directionalEvidence'=$11::jsonb)`,
+      [
+        dto.observationId,
+        dto.ownerUserId,
+        dto.residentUserId,
+        dto.knownFaceId,
+        dto.identityEventId,
+        dto.cameraId,
+        dto.sourceSessionId,
+        dto.trackId,
+        dto.kind,
+        new Date(dto.observedAt),
+        JSON.stringify(dto.directionalEvidence ?? null),
+      ],
+    );
+    return res.rows[0]?.evidence ?? null;
+  }
+
+  async enqueueEventUpdate(eventId: string, client: PoolClient): Promise<void> {
+    await client.query(
+      `INSERT INTO outbox_messages(event_id,aggregate_version,message_type,payload)
+      SELECT id,aggregate_version,'event.updated','{}'::jsonb FROM events WHERE id=$1
+      ON CONFLICT(event_id,aggregate_version,message_type) DO NOTHING`,
+      [eventId],
+    );
+  }
+
+  async escalateWellness(
+    eventId: string,
+    owner: string,
+    reason: string,
+    client: PoolClient,
+  ): Promise<void> {
+    const changed = await client.query(
+      `UPDATE events SET status='ESCALATED',escalated_at=clock_timestamp(),
+      escalation_deadline_at=NULL,version=version+1,aggregate_version=aggregate_version+1
+      WHERE id=$1 AND status='NOTIFIED' RETURNING id`,
+      [eventId],
+    );
+    if (!changed.rowCount) return;
+    if (reason !== 'RESIDENT_REQUESTED_HELP')
+      await client.query(
+        `INSERT INTO event_status_history(event_id,from_status,to_status,reason,actor_type)
+      VALUES($1,'NOTIFIED','ESCALATED',$2,'SYSTEM')`,
+        [eventId, reason],
+      );
+    await client.query(
+      `INSERT INTO notifications(event_id,recipient_user_id,channel,status,escalation_level,payload)
+      VALUES($1,$2,'TELEGRAM','PENDING',1,jsonb_build_object('reason',$3::text,'priority','P2'))`,
+      [eventId, owner, reason],
+    );
+    await client.query(
+      `INSERT INTO notifications(event_id,emergency_contact_id,channel,status,escalation_level,payload)
+      SELECT $1,id,'CONNECT_CALL','PENDING',priority_order,jsonb_build_object('reason',$3::text,'priority','P2')
+      FROM emergency_contacts WHERE owner_user_id=$2 AND is_enabled AND is_verified`,
+      [eventId, owner, reason],
+    );
+    await this.enqueueEventUpdate(eventId, client);
+  }
 
   async getPoolClient(): Promise<PoolClient> {
     return await this.pool.connect();
@@ -254,7 +390,6 @@ export class WellnessRepository {
             SELECT 1 FROM known_faces kf
             WHERE kf.owner_user_id = $2 AND kf.linked_user_id = $1 AND kf.is_active = true
           )
-          OR u.role = 'VIEWER'
         )
     `;
     const res = await db.query(sql, [residentUserId, ownerUserId]);
@@ -320,21 +455,26 @@ export class WellnessRepository {
   ): Promise<WellnessPresenceState> {
     const db = client ?? this.pool;
     const sql = `
-      SELECT state, valid_until, observed_at
-      FROM resident_wellness_presence
-      WHERE owner_user_id = $1 AND resident_user_id = $2
-    `;
-    const res = await db.query(sql, [ownerUserId, residentUserId]);
+      WITH latest AS (
+        SELECT kind,observed_at FROM resident_wellness_observations
+        WHERE owner_user_id=$1 AND resident_user_id=$2 AND observed_at <= $3
+          AND received_at<=clock_timestamp() AND observed_at>$3::timestamptz-($4::int*interval '1 second')
+        ORDER BY observed_at DESC FETCH FIRST 1 ROW WITH TIES
+      ) SELECT CASE WHEN count(DISTINCT (kind='DEPARTURE'))>1 THEN 'UNKNOWN'
+                    WHEN bool_and(kind='DEPARTURE') THEN 'AWAY' ELSE 'HOME' END AS state,
+               max(observed_at) AS observed_at,max(observed_at)+($4::int*interval '1 second') AS valid_until
+        FROM latest HAVING count(*)>0`;
+    const res = await db.query(sql, [ownerUserId, residentUserId, asOf, this.presenceTtlSeconds]);
     if (res.rows.length === 0) return 'UNKNOWN';
 
     const row = res.rows[0];
-    if (new Date(row.valid_until) < asOf) {
+    if (new Date(row.valid_until) <= asOf || new Date(row.observed_at) > asOf) {
       return 'UNKNOWN';
     }
     return row.state as WellnessPresenceState;
   }
 
-  async updatePresence(presence: WellnessPresenceRecord, client?: PoolClient): Promise<void> {
+  async updatePresence(presence: WellnessPresenceRecord, client?: PoolClient): Promise<boolean> {
     const db = client ?? this.pool;
     const sql = `
       INSERT INTO resident_wellness_presence (
@@ -347,9 +487,9 @@ export class WellnessRepository {
           observed_at = EXCLUDED.observed_at,
           valid_until = EXCLUDED.valid_until,
           updated_at = now()
-      WHERE EXCLUDED.observed_at >= resident_wellness_presence.observed_at
+      WHERE EXCLUDED.observed_at > resident_wellness_presence.observed_at
     `;
-    await db.query(sql, [
+    const result = await db.query(sql, [
       presence.owner_user_id,
       presence.resident_user_id,
       presence.state,
@@ -357,6 +497,7 @@ export class WellnessRepository {
       presence.observed_at,
       presence.valid_until,
     ]);
+    return result.rowCount === 1;
   }
 
   async findActivityInWindow(
@@ -374,6 +515,7 @@ export class WellnessRepository {
       "kind IN ('MOTION', 'ARRIVAL')",
       'observed_at >= $3',
       'observed_at <= $4',
+      'received_at <= clock_timestamp()',
     ];
     const params: unknown[] = [ownerUserId, residentUserId, windowStart, windowEnd];
 
@@ -570,10 +712,10 @@ export class WellnessRepository {
     client?: PoolClient,
   ): Promise<void> {
     const db = client ?? this.pool;
-    await db.query(
-      `UPDATE wellness_schedules SET last_checked_at = $2, last_materialized_at = $2 WHERE id = $1`,
-      [scheduleId, checkedAt],
-    );
+    await db.query(`UPDATE wellness_schedules SET last_checked_at = $2 WHERE id = $1`, [
+      scheduleId,
+      checkedAt,
+    ]);
   }
 
   async claimPendingRuns(
@@ -629,18 +771,25 @@ export class WellnessRepository {
       lastActivityAt?: Date | null;
       presenceState?: WellnessPresenceState;
       deliveryDeadlineAt?: Date | null;
+      evaluatedAt?: Date;
     },
     client: PoolClient,
   ): Promise<void> {
     const fields = [
       'status = $3',
       'decision_reason = $4',
-      'evaluated_at = now()',
+      'evaluated_at = $5',
       'leased_until = NULL',
       'lease_token = NULL',
       'updated_at = now()',
     ];
-    const params: unknown[] = [runId, leaseToken, status, options.decisionReason ?? null];
+    const params: unknown[] = [
+      runId,
+      leaseToken,
+      status,
+      options.decisionReason ?? null,
+      options.evaluatedAt ?? (await this.databaseNow(client)),
+    ];
 
     if (options.eventId) {
       params.push(options.eventId);
@@ -662,26 +811,32 @@ export class WellnessRepository {
     const sql = `
       UPDATE wellness_check_runs
       SET ${fields.join(', ')}
-      WHERE id = $1 AND lease_token = $2
+      WHERE id = $1 AND lease_token = $2 AND status='PROCESSING'
     `;
-    await client.query(sql, params);
+    const result = await client.query(sql, params);
+    if (result.rowCount !== 1)
+      throw new Error('Wellness run lease no longer belongs to this worker.');
   }
 
   async recordDeliverySuccess(
     eventId: string,
     sentAt: Date,
-    graceSeconds: number,
+    _graceSeconds: number,
     client: PoolClient,
   ): Promise<boolean> {
     const sql = `
       UPDATE wellness_check_runs
-      SET request_sent_at = $2,
-          confirmation_deadline_at = $2 + ($3 * INTERVAL '1 second'),
+      SET request_sent_at = $2::timestamptz,
+          confirmation_deadline_at = $2::timestamptz + grace_seconds * INTERVAL '1 second',
           updated_at = now()
       WHERE event_id = $1 AND request_sent_at IS NULL
+        AND EXISTS(SELECT 1 FROM events e WHERE e.id=$1 AND e.status='NOTIFIED')
+        AND EXISTS(SELECT 1 FROM notifications n WHERE n.event_id=$1 AND n.status='SENT'
+          AND n.escalation_level=0 AND n.sent_at=$2::timestamptz
+          AND n.recipient_user_id=wellness_check_runs.resident_user_id)
       RETURNING id
     `;
-    const res = await client.query(sql, [eventId, sentAt, graceSeconds]);
+    const res = await client.query(sql, [eventId, sentAt]);
     return res.rows.length > 0;
   }
 
@@ -708,6 +863,143 @@ export class WellnessRepository {
 
   // -------------------------------------------------------------
   // MAPPERS
+
+  async materializeOccurrences(lookbackSeconds: number, batchSize: number): Promise<number> {
+    let total = 0;
+    const schedules = await this.getActiveEnabledSchedules();
+    const ordered = schedules.sort(
+      (a, b) => (a.last_materialized_at?.getTime() ?? 0) - (b.last_materialized_at?.getTime() ?? 0),
+    );
+    for (const schedule of ordered.slice(0, batchSize)) {
+      total += await this.transaction(async (client) => {
+        const locked = await client.query(
+          'SELECT id FROM wellness_schedules WHERE id=$1 FOR UPDATE SKIP LOCKED',
+          [schedule.id],
+        );
+        if (!locked.rows.length) return 0;
+        const current = await this.getScheduleById(schedule.id, client);
+        if (!current?.is_enabled || !current.owner_user_id) return 0;
+        if (
+          !(await this.verifyResidentHouseholdLink(
+            current.owner_user_id,
+            current.resident_user_id,
+            client,
+          )) ||
+          !(await this.residentCanReceive(current.resident_user_id, client))
+        )
+          return 0;
+        const now = await this.databaseNow(client);
+        const floor = new Date(
+          Math.max(
+            current.activation_started_at.getTime(),
+            current.last_materialized_at?.getTime() ?? 0,
+            now.getTime() - lookbackSeconds * 1000,
+          ),
+        );
+        const cameraIds = await this.enabledCameraIds(
+          current.owner_user_id,
+          current.camera_ids,
+          client,
+        );
+        const due = await client.query<{ local_date: string; scheduled_for: Date }>(
+          `WITH days AS (
+          SELECT (($1::timestamptz AT TIME ZONE $3)::date+n)::date AS day FROM generate_series(0,
+            ($2::timestamptz AT TIME ZONE $3)::date-($1::timestamptz AT TIME ZONE $3)::date) AS n
+        ) SELECT to_char(day,'YYYY-MM-DD') AS local_date,(day+$4::time) AT TIME ZONE $3 AS scheduled_for
+          FROM days WHERE EXTRACT(isodow FROM day)::int=ANY($5::int[])
+            AND (day+$4::time) AT TIME ZONE $3 BETWEEN $1 AND $2 ORDER BY day`,
+          [floor, now, current.timezone, current.check_at, current.days_of_week],
+        );
+        let count = 0;
+        for (const occurrence of due.rows) {
+          if (
+            await this.insertCheckRunIfNotExists(
+              {
+                scheduleId: current.id,
+                ownerUserId: current.owner_user_id,
+                residentUserId: current.resident_user_id,
+                localDate: occurrence.local_date,
+                scheduledFor: occurrence.scheduled_for,
+                scheduleVersion: current.version,
+                scheduleSnapshot: {
+                  name: current.name,
+                  checkAt: current.check_at,
+                  timezone: current.timezone,
+                  daysOfWeek: current.days_of_week,
+                  lookbackHours: current.lookback_hours,
+                  graceSeconds: current.grace_seconds,
+                  cameraIds,
+                },
+                lookbackStartedAt: new Date(
+                  occurrence.scheduled_for.getTime() - current.lookback_hours * 3600000,
+                ),
+                lookbackEndedAt: occurrence.scheduled_for,
+                graceSeconds: current.grace_seconds,
+                availableAt: occurrence.scheduled_for,
+              },
+              client,
+            )
+          )
+            count++;
+        }
+        await client.query('UPDATE wellness_schedules SET last_materialized_at=$2 WHERE id=$1', [
+          current.id,
+          now,
+        ]);
+        return count;
+      });
+    }
+    return total;
+  }
+
+  async retryRun(runId: string, leaseToken: string, error: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE wellness_check_runs SET status='PENDING',lease_token=NULL,leased_until=NULL,
+      available_at=clock_timestamp()+LEAST(60,2^LEAST(attempt_count,5)) * interval '1 second',last_error=$3
+      WHERE id=$1 AND status='PROCESSING' AND lease_token=$2`,
+      [runId, leaseToken, error.slice(0, 500)],
+    );
+  }
+
+  async processWellnessTimeouts(batchSize: number): Promise<void> {
+    await this.transaction(async (client) => {
+      const events = await client.query<{ id: string; wellness_owner_user_id: string }>(
+        `SELECT e.id,e.wellness_owner_user_id
+        FROM events e JOIN wellness_check_runs r ON r.event_id=e.id
+        WHERE e.event_type='WELLNESS_TIMEOUT' AND e.status='NOTIFIED'
+          AND (e.escalation_deadline_at<=clock_timestamp() OR
+            (r.request_sent_at IS NULL AND r.delivery_deadline_at<=clock_timestamp()))
+        ORDER BY e.detected_at LIMIT $1 FOR UPDATE OF e SKIP LOCKED`,
+        [batchSize],
+      );
+      for (const event of events.rows) {
+        const run = (
+          await client.query<WellnessCheckRunRecord>(
+            'SELECT * FROM wellness_check_runs WHERE event_id=$1 FOR UPDATE',
+            [event.id],
+          )
+        ).rows[0];
+        const now = await this.databaseNow(client);
+        if (
+          run.request_sent_at &&
+          run.confirmation_deadline_at &&
+          now >= run.confirmation_deadline_at
+        )
+          await this.escalateWellness(event.id, event.wellness_owner_user_id, 'TIMEOUT', client);
+        else if (
+          !run.request_sent_at &&
+          run.delivery_deadline_at &&
+          now >= run.delivery_deadline_at
+        )
+          await this.escalateWellness(
+            event.id,
+            event.wellness_owner_user_id,
+            'DELIVERY_FAILED',
+            client,
+          );
+      }
+    });
+  }
   // -------------------------------------------------------------
 
   private mapScheduleRow(row: Record<string, unknown>): WellnessScheduleRecord {
@@ -741,7 +1033,10 @@ export class WellnessRepository {
       schedule_id: String(row.schedule_id),
       owner_user_id: String(row.owner_user_id),
       resident_user_id: String(row.resident_user_id),
-      local_date: String(row.local_date),
+      local_date:
+        row.local_date instanceof Date
+          ? `${row.local_date.getFullYear()}-${String(row.local_date.getMonth() + 1).padStart(2, '0')}-${String(row.local_date.getDate()).padStart(2, '0')}`
+          : String(row.local_date),
       scheduled_for: new Date(row.scheduled_for as string),
       schedule_version: Number(row.schedule_version),
       schedule_snapshot: (row.schedule_snapshot as Record<string, unknown>) ?? {},

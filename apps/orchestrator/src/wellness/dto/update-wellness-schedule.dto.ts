@@ -1,5 +1,8 @@
 import {
   IsArray,
+  ArrayMinSize,
+  ArrayMaxSize,
+  ArrayUnique,
   IsBoolean,
   IsInt,
   IsOptional,
@@ -50,6 +53,9 @@ export class UpdateWellnessScheduleDto {
   })
   @IsOptional()
   @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(7)
+  @ArrayUnique()
   @IsInt({ each: true })
   @Min(1, { each: true })
   @Max(7, { each: true })
@@ -84,6 +90,8 @@ export class UpdateWellnessScheduleDto {
   })
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(100)
+  @ArrayUnique()
   @IsUUID(undefined, { each: true })
   cameraIds?: string[];
 

@@ -1,4 +1,6 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { WellnessSourceAdapter } from '../wellness/wellness-source.adapter';
+import type { SubmitAiResultDto } from './dto/submit-ai-result.dto';
+import { Optional, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EVENT_TYPES, type EventType } from '@cam/contracts';
 import { EscalationEngineService } from '../escalation/escalation-engine.service';
@@ -113,6 +115,7 @@ export class AiResultOutboxService implements OnModuleInit, OnModuleDestroy {
     private readonly eventsRepository: EventsRepository,
     private readonly eventsService: EventsService,
     private readonly escalationEngine: EscalationEngineService,
+    @Optional() private readonly wellnessSource?: WellnessSourceAdapter,
   ) {
     this.pollMs = requiredPositiveInteger(configService, 'AI_RESULT_OUTBOX_POLL_MS');
     this.leaseSeconds = requiredPositiveInteger(configService, 'AI_RESULT_OUTBOX_LEASE_SECONDS');
@@ -151,6 +154,12 @@ export class AiResultOutboxService implements OnModuleInit, OnModuleDestroy {
   private async dispatchOne(message: AiResultOutboxRow): Promise<void> {
     const { id: messageId, event_id: eventId } = message;
     try {
+      if (message.message_type === 'wellness.identity') {
+        if (!this.wellnessSource) throw new Error('Wellness identity consumer unavailable');
+        await this.wellnessSource.associateIdentity(message.payload as SubmitAiResultDto);
+        await this.aiResultsRepository.markOutboxProcessed(messageId);
+        return;
+      }
       const snapshot = await this.aiResultsRepository.findEscalationSnapshot(eventId);
       if (!snapshot) {
         throw new Error(`Không tìm thấy event ${eventId} của outbox message ${messageId}`);
@@ -199,7 +208,15 @@ export class AiResultOutboxService implements OnModuleInit, OnModuleDestroy {
       throw new Error(`Không tìm thấy event ${eventId} của outbox message ${messageId}`);
     }
     const summary = await this.eventsService.toEventSummary(record);
-    this.eventsService.emitEvent(summary, 'event.updated');
+    if (record.event_type === 'WELLNESS_TIMEOUT')
+      this.eventsService.emitEvent(
+        summary,
+        'event.updated',
+        [record.wellness_owner_user_id, record.wellness_resident_user_id].filter(
+          (id): id is string => !!id,
+        ),
+      );
+    else this.eventsService.emitEvent(summary, 'event.updated');
     await this.aiResultsRepository.markOutboxProcessed(messageId);
   }
 }

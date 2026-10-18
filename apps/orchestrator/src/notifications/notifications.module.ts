@@ -1,3 +1,4 @@
+import { WellnessModule } from '../wellness/wellness.module';
 import { Module } from '@nestjs/common';
 import { EscalationModule } from '../escalation/escalation.module';
 import { EventsModule } from '../events/events.module';
@@ -18,7 +19,7 @@ import { TelegramWebhookRepository } from './telegram/telegram-webhook.repositor
 import { TelegramWebhookService } from './telegram/telegram-webhook.service';
 
 @Module({
-  imports: [EscalationModule, EventsModule],
+  imports: [EscalationModule, EventsModule, WellnessModule],
   controllers: [TelegramLinkController, TelegramWebhookController],
   providers: [
     TelegramCallbackService,

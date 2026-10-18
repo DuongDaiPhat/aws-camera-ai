@@ -39,6 +39,11 @@ erDiagram
     users ||--o{ resident_wellness_observations : "resident và owner"
     known_faces |o--o{ resident_wellness_observations : "identity evidence"
     cameras |o--o{ resident_wellness_observations : "motion và direction"
+    cameras ||--o{ resident_wellness_track_links : "session và track"
+    users ||--o{ resident_wellness_track_links : "resident và owner"
+    known_faces ||--o{ resident_wellness_track_links : "identity verified"
+    events ||--o{ resident_wellness_track_links : "M1 identity event"
+    cameras ||--o{ resident_wellness_source_evidence : "moving track metadata"
     events |o--o{ resident_wellness_observations : "identity event"
     resident_wellness_observations ||--o{ resident_wellness_presence : "latest evidence"
     resident_wellness_observations |o--o{ wellness_check_runs : "presence snapshot"
@@ -902,6 +907,8 @@ DDL: [0015_wellness_check_runtime.sql](../../db/migrations/0015_wellness_check_r
 Presence FK tới observation là NO ACTION deferred: purge không làm mất evidence ở commit, account cascade vẫn dọn được projection/ledger cùng transaction. Index owner/resident/observed_at phục vụ lookback/presence. Evidence không chứa image/embedding/token.
 
 ### 3.21 `wellness_check_runs` và lịch/scope M5 — US-20
+
+Migration bổ sung [0016_wellness_source_evidence.sql](../../db/migrations/0016_wellness_source_evidence.sql) tạo `resident_wellness_track_links`: khóa chính camera/session/track, owner/resident/known_face/identity_event FKs, observed_at và valid_until. `resident_wellness_source_evidence` có observation UUID PK, camera FK, session/track, kind, observed_at/received_at và evidence JSON object. Không lưu ảnh, embedding hoặc token. Nguồn metadata được persist trước khi observation được chấp nhận; internal JSON phải khớp association/provenance. Association có TTL; camera/session/track khác không dùng lại identity. Hai bảng dọn dữ liệu quá tuổi observation theo batch; ledger/presence/run giữ nguyên chính sách audit. Xem [runbook M5](../sprint-3/RUNBOOK_M5_WELLNESS.md).
 
 Unique (schedule_id, local_date) giữ một occurrence/ngày địa phương; lịch 09:00/18:00 có IDs riêng. Snapshot config/version/lookback/grace immutable; terminal run không sửa quyết định. Run ALERT_CREATED khác lifecycle event: event có thể RESOLVED trong khi run vẫn ALERT_CREATED. Lease/retry/available_at hỗ trợ restart và nhiều worker.
 

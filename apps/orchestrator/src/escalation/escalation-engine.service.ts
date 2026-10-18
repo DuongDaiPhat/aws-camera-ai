@@ -301,6 +301,10 @@ export class EscalationEngineService {
         throw new NotFoundException(`Không tìm thấy sự kiện ${eventId}`);
       }
 
+      if (event.event_type === 'WELLNESS_TIMEOUT')
+        throw new ConflictException(
+          'Yêu cầu wellness phải được xác nhận bởi người được giám sát qua US-20',
+        );
       const replay = await this.findInitialTelegramReplay(client, eventId, actorUserId, params);
       if (replay) {
         await client.query('COMMIT');
@@ -459,6 +463,15 @@ export class EscalationEngineService {
       const event = await this.repository.findEventForUpdate(client, eventId);
       if (!event) {
         throw new NotFoundException(`Không tìm thấy sự kiện ${eventId}`);
+      }
+
+      if (event.event_type === 'WELLNESS_TIMEOUT') {
+        const scope = await client.query(
+          `SELECT 1 FROM events e JOIN users u ON u.id=$2 WHERE e.id=$1 AND u.is_active AND (u.role='ADMIN' OR e.wellness_owner_user_id=u.id)`,
+          [eventId, actorUserId],
+        );
+        if (!scope.rows.length)
+          throw new ForbiddenException('Bạn không có quyền đóng yêu cầu của hộ khác');
       }
 
       // Kiem tra su kien phai dang o trang thai ESCALATED

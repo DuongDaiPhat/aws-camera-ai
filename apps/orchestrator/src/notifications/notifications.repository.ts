@@ -164,19 +164,48 @@ export class NotificationsRepository {
     kind: 'PHOTO' | 'TEXT' | null = null,
     text: string | null = null,
   ): Promise<void> {
-    const result = await this.database.query<{ id: string }>(
-      `
-      UPDATE notifications
-      SET status = 'SENT', provider_chat_id = $3, provider_message_id = $4,
-          telegram_message_kind = $5, telegram_message_text = $6,
-          sent_at = now(), failed_at = NULL, next_retry_at = NULL,
-          error_code = NULL, error_message = NULL, lease_token = NULL, lease_until = NULL
-      WHERE id = $1 AND lease_token = $2 AND status IN ('PENDING', 'FAILED')
-      RETURNING id
-    `,
-      [job.id, job.leaseToken, chatId, messageId, kind, text],
-    );
-    if (result.rowCount !== 1) throw new Error('Telegram notification lease đã hết hiệu lực.');
+    await this.database.transaction(async (client) => {
+      const event = (
+        await client.query('SELECT event_type,status FROM events WHERE id=$1 FOR UPDATE', [
+          job.eventId,
+        ])
+      ).rows[0];
+      const sent = await client.query<{ sent_at: Date }>(
+        `UPDATE notifications SET status='SENT',provider_chat_id=$3,
+        provider_message_id=$4,telegram_message_kind=$5,telegram_message_text=$6,sent_at=clock_timestamp(),
+        failed_at=NULL,next_retry_at=NULL,error_code=NULL,error_message=NULL,lease_token=NULL,lease_until=NULL
+        WHERE id=$1 AND lease_token=$2 AND status IN ('PENDING','FAILED') RETURNING sent_at`,
+        [job.id, job.leaseToken, chatId, messageId, kind, text],
+      );
+      if (sent.rowCount !== 1) throw new Error('Telegram notification lease is no longer valid.');
+      if (event?.event_type === 'WELLNESS_TIMEOUT' && job.escalationLevel === 0) {
+        await client.query('SELECT id FROM wellness_check_runs WHERE event_id=$1 FOR UPDATE', [
+          job.eventId,
+        ]);
+        if (event.status !== 'NOTIFIED') return;
+        const run = await client.query<{ confirmation_deadline_at: Date }>(
+          `UPDATE wellness_check_runs r
+          SET request_sent_at=$2::timestamptz,confirmation_deadline_at=$2::timestamptz+grace_seconds*interval '1 second'
+          WHERE event_id=$1 AND request_sent_at IS NULL
+            AND EXISTS(SELECT 1 FROM notifications n WHERE n.id=$3 AND n.recipient_user_id=r.resident_user_id)
+          RETURNING confirmation_deadline_at`,
+          [job.eventId, sent.rows[0].sent_at, job.id],
+        );
+        if (run.rows.length)
+          await client.query(
+            `UPDATE events SET escalation_deadline_at=$2,version=version+1,
+          aggregate_version=aggregate_version+1 WHERE id=$1`,
+            [job.eventId, run.rows[0].confirmation_deadline_at],
+          );
+        if (run.rows.length)
+          await client.query(
+            `INSERT INTO outbox_messages(event_id,aggregate_version,message_type,payload)
+          SELECT id,aggregate_version,'event.updated','{}'::jsonb FROM events WHERE id=$1
+          ON CONFLICT(event_id,aggregate_version,message_type) DO NOTHING`,
+            [job.eventId],
+          );
+      }
+    });
   }
 
   async markSkipped(job: TelegramNotificationJob): Promise<void> {

@@ -45,10 +45,15 @@ describe('WellnessController (US-20)', () => {
       checkAt: '09:00',
       daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
     };
-    service.createSchedule.mockResolvedValue({ id: 'sched-1' } as any);
+    service.createSchedule.mockResolvedValue({
+      id: 'sched-1',
+      check_at: '09:00:00',
+      owner_user_id: 'owner',
+    } as any);
 
     const res = await controller.createSchedule(mockRequest, dto);
-    expect(res).toEqual({ id: 'sched-1' });
+    expect(res).toMatchObject({ id: 'sched-1', checkAt: '09:00', configurationStatus: 'READY' });
+    expect(res).not.toHaveProperty('check_at');
     expect(service.createSchedule).toHaveBeenCalledWith(mockRequest.auth, dto);
   });
 
@@ -63,6 +68,9 @@ describe('WellnessController (US-20)', () => {
       id: 'conf-1',
       eventId: 'evt-1',
       response: 'IM_OK',
+      phase: 'INITIAL',
+      channel: 'DASHBOARD',
+      resultingStatus: 'RESOLVED',
       respondedAt: new Date().toISOString(),
       isAuthoritative: true,
     });
