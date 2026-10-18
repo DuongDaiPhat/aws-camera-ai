@@ -51,6 +51,8 @@ Migration gate:18 file trên DB fresh trong Testcontainers; upgrade0015→0016 c
 
 ## Bằng chứng và xử lý lỗi môi trường
 
+Text logs được chuẩn hóa UTF-8/LF và bỏ whitespace cuối dòng/EOF để nội dung versioned có checksum ổn định trên Windows. Không bỏ assertion hoặc thông báo lỗi. Manifest ghi riêng SHA-256 của evidence và Git blob source tại testSourceCommit.
+
 - [Unit US20](evidence/unit-results.json), [unit snapshot ghép](evidence/combined-unit-results.json), [integration cuối snapshot ghép](evidence/combined-integration-results.json), [Web](evidence/web.txt), [Web snapshot ghép](evidence/combined-web.txt).
 - [Build](evidence/build.txt), [migration](evidence/migration.txt), [typecheck](evidence/typecheck.txt), [lint](evidence/lint.txt), [API](evidence/api.txt), [bridge](evidence/bridge.txt).
 - Các lần đầu Jest gặp EPERM cache chưa chạy được test; chạy lại bằng cache tại workspace và quyền thực thi phù hợp. Không tính lần đó là test sản phẩm Failed.

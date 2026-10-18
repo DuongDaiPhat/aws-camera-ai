@@ -76,4 +76,3 @@ api\openapi-ai-service.yaml: validated in 89ms
 
 Woohoo! Your API descriptions are valid. 🎉
 You have 5 warnings.
-
