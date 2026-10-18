@@ -1,0 +1,7 @@
+Scope: 4 of 5 workspace projects
+packages/contracts typecheck$ tsc --noEmit
+packages/contracts typecheck: Done
+apps/orchestrator typecheck$ tsc --noEmit
+apps/web typecheck$ tsc --noEmit
+apps/web typecheck: Done
+apps/orchestrator typecheck: Done

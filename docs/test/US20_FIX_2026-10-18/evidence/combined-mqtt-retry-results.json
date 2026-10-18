@@ -1,0 +1,89 @@
+{
+  "numFailedTestSuites": 1,
+  "numFailedTests": 3,
+  "numPassedTestSuites": 0,
+  "numPassedTests": 0,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 1,
+  "numTotalTests": 3,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1792333666361,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["US-08 - Integration MQTT đến PostgreSQL"],
+          "duration": 3433,
+          "failureDetails": [{}],
+          "failureMessages": [
+            "Error: Consumer không subscribe topic frigate/events trong 3000 ms\n    at waitUntil (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\us20-combined-check\\apps\\orchestrator\\test\\mqtt-db.integration.spec.ts:162:9)\n    at waitForSubscription (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\us20-combined-check\\apps\\orchestrator\\test\\mqtt-db.integration.spec.ts:296:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\us20-combined-check\\apps\\orchestrator\\test\\mqtt-db.integration.spec.ts:332:5)"
+          ],
+          "fullName": "US-08 - Integration MQTT đến PostgreSQL tạo đúng một bản ghi trong vòng 3 giây khi publish message Frigate hợp lệ",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "tạo đúng một bản ghi trong vòng 3 giây khi publish message Frigate hợp lệ"
+        },
+        {
+          "ancestorTitles": ["US-08 - Integration MQTT đến PostgreSQL"],
+          "duration": 3274,
+          "failureDetails": [{}],
+          "failureMessages": [
+            "Error: Consumer không subscribe topic frigate/events trong 3000 ms\n    at waitUntil (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\us20-combined-check\\apps\\orchestrator\\test\\mqtt-db.integration.spec.ts:162:9)\n    at waitForSubscription (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\us20-combined-check\\apps\\orchestrator\\test\\mqtt-db.integration.spec.ts:296:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\us20-combined-check\\apps\\orchestrator\\test\\mqtt-db.integration.spec.ts:388:5)"
+          ],
+          "fullName": "US-08 - Integration MQTT đến PostgreSQL giữ một bản ghi trong suốt vòng đời new-update-end qua ranh giới 10 giây",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "giữ một bản ghi trong suốt vòng đời new-update-end qua ranh giới 10 giây"
+        },
+        {
+          "ancestorTitles": ["US-08 - Integration MQTT đến PostgreSQL"],
+          "duration": 3259,
+          "failureDetails": [{}],
+          "failureMessages": [
+            "Error: Consumer không subscribe topic frigate/events trong 3000 ms\n    at waitUntil (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\us20-combined-check\\apps\\orchestrator\\test\\mqtt-db.integration.spec.ts:162:9)\n    at waitForSubscription (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\us20-combined-check\\apps\\orchestrator\\test\\mqtt-db.integration.spec.ts:296:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\us20-combined-check\\apps\\orchestrator\\test\\mqtt-db.integration.spec.ts:450:5)"
+          ],
+          "fullName": "US-08 - Integration MQTT đến PostgreSQL không ghi message lỗi và consumer vẫn xử lý message hợp lệ tiếp theo",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "không ghi message lỗi và consumer vẫn xử lý message hợp lệ tiếp theo"
+        }
+      ],
+      "endTime": 1792333695540,
+      "message": "  ● US-08 - Integration MQTT đến PostgreSQL › tạo đúng một bản ghi trong vòng 3 giây khi publish message Frigate hợp lệ\n\n    Consumer không subscribe topic frigate/events trong 3000 ms\n\n      160 |   }\n      161 |\n    > 162 |   throw new Error(failureMessage);\n          |         ^\n      163 | }\n      164 |\n      165 | function loggerContains(spy: jest.SpyInstance, expectedMessage: string): boolean {\n\n      at waitUntil (test/mqtt-db.integration.spec.ts:162:9)\n      at waitForSubscription (test/mqtt-db.integration.spec.ts:296:5)\n      at Object.<anonymous> (test/mqtt-db.integration.spec.ts:332:5)\n\n  ● US-08 - Integration MQTT đến PostgreSQL › giữ một bản ghi trong suốt vòng đời new-update-end qua ranh giới 10 giây\n\n    Consumer không subscribe topic frigate/events trong 3000 ms\n\n      160 |   }\n      161 |\n    > 162 |   throw new Error(failureMessage);\n          |         ^\n      163 | }\n      164 |\n      165 | function loggerContains(spy: jest.SpyInstance, expectedMessage: string): boolean {\n\n      at waitUntil (test/mqtt-db.integration.spec.ts:162:9)\n      at waitForSubscription (test/mqtt-db.integration.spec.ts:296:5)\n      at Object.<anonymous> (test/mqtt-db.integration.spec.ts:388:5)\n\n  ● US-08 - Integration MQTT đến PostgreSQL › không ghi message lỗi và consumer vẫn xử lý message hợp lệ tiếp theo\n\n    Consumer không subscribe topic frigate/events trong 3000 ms\n\n      160 |   }\n      161 |\n    > 162 |   throw new Error(failureMessage);\n          |         ^\n      163 | }\n      164 |\n      165 | function loggerContains(spy: jest.SpyInstance, expectedMessage: string): boolean {\n\n      at waitUntil (test/mqtt-db.integration.spec.ts:162:9)\n      at waitForSubscription (test/mqtt-db.integration.spec.ts:296:5)\n      at Object.<anonymous> (test/mqtt-db.integration.spec.ts:450:5)\n",
+      "name": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\us20-combined-check\\apps\\orchestrator\\test\\mqtt-db.integration.spec.ts",
+      "startTime": 1792333666837,
+      "status": "failed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}

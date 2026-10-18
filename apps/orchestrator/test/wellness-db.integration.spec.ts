@@ -706,6 +706,51 @@ describe('US20 real PostgreSQL + HTTP delivery + API acceptance', () => {
     ).toBe('1');
     expect((await row('SELECT count(*) FROM wellness_check_runs')).count).toBe('1');
   });
+  it('TC020/021: recovered SENT request times out through the real deadline worker while admission is disabled', async () => {
+    const { run } = await makeRun();
+    const event = await row(
+      `INSERT INTO events(event_type,status,priority,source,detected_at,wellness_owner_user_id,wellness_resident_user_id,escalation_deadline_at)
+      VALUES('WELLNESS_TIMEOUT','NOTIFIED','P2','SCHEDULER',clock_timestamp()-interval '303 seconds',$1,$2,clock_timestamp()-interval '1 second') RETURNING id`,
+      [owner, resident],
+    );
+    // Persisted recovery fixture; never rewrite an already completed run or its first SENT.
+    await pool.query(
+      `WITH timing AS (SELECT clock_timestamp()-interval '301 seconds' AS sent)
+      UPDATE wellness_check_runs SET status='ALERT_CREATED',event_id=$2,evaluated_at=timing.sent-interval '1 second',
+        request_sent_at=timing.sent,confirmation_deadline_at=timing.sent+interval '300 seconds',
+        delivery_deadline_at=timing.sent+interval '59 seconds' FROM timing WHERE id=$1`,
+      [run.id, event.id],
+    );
+    await pool.query(
+      "INSERT INTO notifications(event_id,recipient_user_id,channel,status,escalation_level,sent_at) VALUES($1,$2,'TELEGRAM','SENT',0,clock_timestamp()-interval '301 seconds')",
+      [event.id, resident],
+    );
+    const disabled = new WellnessSchedulerService(
+      repository,
+      new ConfigService({ M5_ENABLED: 'false' }),
+    );
+    await disabled.tick();
+    await disabled.tick();
+    expect((await row('SELECT status FROM events WHERE id=$1', [event.id])).status).toBe(
+      'ESCALATED',
+    );
+    expect(
+      (
+        await row(
+          "SELECT count(*) FROM event_status_history WHERE event_id=$1 AND reason='TIMEOUT'",
+          [event.id],
+        )
+      ).count,
+    ).toBe('1');
+    expect(
+      (
+        await row(
+          "SELECT recipient_user_id FROM notifications WHERE event_id=$1 AND escalation_level=1 AND channel='TELEGRAM'",
+          [event.id],
+        )
+      ).recipient_user_id,
+    ).toBe(owner);
+  });
   it('TC015/016/017/020: assigned Telegram callback checks actor/chat/message, confirms once, rejects changed replay', async () => {
     const check = await alert();
     await worker.runOnce();

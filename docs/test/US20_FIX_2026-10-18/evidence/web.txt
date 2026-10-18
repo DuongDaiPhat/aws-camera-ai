@@ -1,0 +1,282 @@
+The CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.
+
+ RUN  v2.1.9 C:/Users/ADMIN/.codex/visualizations/2026/10/18/01a14e4d-7ffe-7073-9f17-463257072541/us20-fixes/apps/web
+
+ ✓ src/lib/api-client.spec.ts (5 tests) 24ms
+ ✓ src/components/cameras/__tests__/webcam-publish.spec.ts (2 tests) 17ms
+ ✓ src/lib/cameras-client.spec.ts (14 tests) 39ms
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > keeps a box through a brief missed detection, then removes a person who really left
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=HOLD lastSeenBefore=1000 lastSeenAfter=1000 observedAt=1000 frameTime=1067 ageMs=67
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1134 observedAt=1134 frameTime=1134 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=HOLD lastSeenBefore=1134 lastSeenAfter=1134 observedAt=1134 frameTime=1300 ageMs=166
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=REMOVE lastSeenBefore=1134 lastSeenAfter=1134 observedAt=1134 frameTime=1634 ageMs=500
+
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > does not blink during a short transport gap but expires disconnected cameras
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=REMOVE lastSeenBefore=1000 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=1050 reason=stream_stale
+
+ ✓ src/lib/events-client.spec.ts (13 tests) 32ms
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > attenuates alternating detector jitter while a person is stationary
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1067 lastSeenAfter=1134 observedAt=1134 frameTime=1134 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1134 lastSeenAfter=1201 observedAt=1201 frameTime=1201 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1201 lastSeenAfter=1268 observedAt=1268 frameTime=1268 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1268 lastSeenAfter=1335 observedAt=1335 frameTime=1335 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1335 lastSeenAfter=1402 observedAt=1402 frameTime=1402 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1402 lastSeenAfter=1469 observedAt=1469 frameTime=1469 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1469 lastSeenAfter=1536 observedAt=1536 frameTime=1536 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1536 lastSeenAfter=1603 observedAt=1603 frameTime=1603 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1603 lastSeenAfter=1670 observedAt=1670 frameTime=1670 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1670 lastSeenAfter=1737 observedAt=1737 frameTime=1737 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1737 lastSeenAfter=1804 observedAt=1804 frameTime=1804 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1804 lastSeenAfter=1871 observedAt=1871 frameTime=1871 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1871 lastSeenAfter=1938 observedAt=1938 frameTime=1938 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1938 lastSeenAfter=2005 observedAt=2005 frameTime=2005 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=2005 lastSeenAfter=2072 observedAt=2072 frameTime=2072 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=2072 lastSeenAfter=2139 observedAt=2139 frameTime=2139 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=2139 lastSeenAfter=2206 observedAt=2206 frameTime=2206 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=2206 lastSeenAfter=2273 observedAt=2273 frameTime=2273 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=2273 lastSeenAfter=2340 observedAt=2340 frameTime=2340 ageMs=0
+
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > animates a large movement quickly instead of jumping or chasing for a long time
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > does not restart filtering on duplicate polls or replay out-of-order frames
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > renders fast movement at the measured position on the next animation frame
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1067 lastSeenAfter=1134 observedAt=1134 frameTime=1134 ageMs=0
+
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > keeps the newest position when fast motion and a stop arrive in one batch
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1067 lastSeenAfter=1134 observedAt=1134 frameTime=1134 ageMs=0
+
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > updates vertical movement for a small person without waiting between 5 FPS samples
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1200 observedAt=1200 frameTime=1200 ageMs=0
+
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > does not leave a duplicate ghost when the detector changes ID at the same location
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=replacement objectId=replacement action=REASSOCIATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > reassociates fast-moving person when ID changes without duplicate ghost boxes
+[PERSON_DEBUG][TRACK] trackId=id-1 objectId=id-1 action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=id-2 objectId=id-2 action=REASSOCIATE lastSeenBefore=1000 lastSeenAfter=1200 observedAt=1200 frameTime=1200 ageMs=0
+ ✓ src/components/cameras/__tests__/live-person-tracker.spec.ts (16 tests) 19ms
+
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > keeps independent people separate and does not merge them
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-b objectId=person-b action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-b objectId=person-b action=UPDATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > preserves two distinct people walking near each other without merging into one
+[PERSON_DEBUG][TRACK] trackId=person-1 objectId=person-1 action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-2 objectId=person-2 action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-1 objectId=person-1 action=UPDATE lastSeenBefore=1000 lastSeenAfter=1200 observedAt=1200 frameTime=1200 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-2 objectId=person-2 action=UPDATE lastSeenBefore=1000 lastSeenAfter=1200 observedAt=1200 frameTime=1200 ageMs=0
+
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > standardizes video-file box fit to 1:1 without arbitrary shrinking
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > expires track after TRACK_HOLD_MS from observedAt when newer frames carry the same stale observation
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=DUPLICATE lastSeenBefore=1000 lastSeenAfter=1000 observedAt=1000 frameTime=1100 ageMs=100
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=DUPLICATE lastSeenBefore=1000 lastSeenAfter=1000 observedAt=1000 frameTime=1200 ageMs=200
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=REMOVE lastSeenBefore=1000 lastSeenAfter=1000 observedAt=1000 frameTime=1200 ageMs=500 reason=person_stale
+
+stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > extends track lifetime when a genuinely new observation arrives
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1200 observedAt=1200 frameTime=1200 ageMs=0
+[PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=REMOVE lastSeenBefore=1200 lastSeenAfter=1200 observedAt=1200 frameTime=1200 ageMs=500 reason=person_stale
+
+ ✓ src/components/cameras/__tests__/CameraCard.spec.tsx (3 tests) 21ms
+ ✓ src/components/cameras/__tests__/CameraList.spec.tsx (2 tests) 22ms
+ ✓ src/components/settings/EscalationRuleCard.spec.tsx (14 tests) 99ms
+ ✓ src/components/cameras/__tests__/CameraGridView.spec.tsx (3 tests) 32ms
+ ✓ src/components/cameras/__tests__/CameraPreview.spec.tsx (6 tests) 36ms
+ ✓ src/components/cameras/__tests__/CameraView.spec.tsx (3 tests) 28ms
+ ✓ src/components/settings/EscalationWaitControl.spec.tsx (6 tests) 30ms
+ ✓ src/lib/format.spec.ts (7 tests) 13ms
+ ✓ src/components/cameras/__tests__/detection-timeline.spec.ts (6 tests) 13ms
+ ✓ src/components/ui/Pagination.spec.tsx (5 tests) 23ms
+ ✓ src/components/cameras/__tests__/CameraSourceForm.spec.tsx (4 tests) 26ms
+ ✓ src/lib/known-faces-client.spec.ts (3 tests) 20ms
+ ✓ src/lib/escalation-wait-settings.spec.ts (25 tests) 13ms
+ ✓ src/components/events/EventCard.spec.tsx (10 tests) 38ms
+ ✓ src/components/cameras/__tests__/VideoSourceUploader.spec.tsx (5 tests) 24ms
+ ✓ src/components/cameras/__tests__/geometry-utils.spec.ts (6 tests) 9ms
+ ✓ src/lib/escalation-rules-client.spec.ts (2 tests) 13ms
+ ✓ src/lib/mock-events.spec.ts (4 tests) 10ms
+ ✓ src/components/ui/EmptyState.spec.tsx (2 tests) 21ms
+ ✓ src/hooks/useCameraSnapshot.spec.ts (3 tests) 8ms
+ ✓ src/components/cameras/__tests__/CameraStatusBadge.spec.tsx (4 tests) 22ms
+ ✓ src/lib/zone-geometry.spec.ts (3 tests) 9ms
+ ✓ src/components/cameras/__tests__/WebcamPublisher.spec.tsx (1 test) 11ms
+ ✓ src/components/cameras/__tests__/CameraLiveStream.spec.tsx (1 test) 10ms
+ ✓ src/middleware.spec.ts (3 tests) 4ms
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > resident sees own pending request, stable command on retry, error and refresh after conflict
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > resident sees own pending request, stable command on retry, error and refresh after conflict
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > resident sees own pending request, stable command on retry, error and refresh after conflict
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > resident sees own pending request, stable command on retry, error and refresh after conflict
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > hides actions before dispatch and for terminal/foreign requests; renders empty/error states
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > hides actions before dispatch and for terminal/foreign requests; renders empty/error states
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > shows an empty history
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > shows an empty history
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > offers retry when loading fails
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > offers retry when loading fails
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+Warning: The current testing environment is not configured to support act(...)
+
+stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > offers retry when loading fails
+Warning: The current testing environment is not configured to support act(...)
+
+ ✓ src/components/wellness/WellnessView.spec.tsx (5 tests) 169ms
+ ✓ src/components/cameras/__tests__/CameraSettingsPanel.spec.tsx (10 tests) 224ms
+
+ Test Files  32 passed (32)
+      Tests  196 passed (196)
+   Start at  18:32:39
+   Duration  6.53s (transform 3.41s, setup 0ms, collect 10.02s, tests 1.08s, environment 3.34s, prepare 15.74s)
+
