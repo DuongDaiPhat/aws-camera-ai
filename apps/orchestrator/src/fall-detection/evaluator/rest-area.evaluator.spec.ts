@@ -131,16 +131,13 @@ describe('RestAreaEvaluator and isPointInPolygon', () => {
       expect(result).toBe(false);
     });
 
-    it('fails closed and returns false if repository throws an error', async () => {
+    it('propagates lookup failures so the coordinator cannot treat them as outside REST_AREA', async () => {
       // Arrange
       mockZonesRepo.listByCameraId.mockRejectedValue(new Error('Database offline'));
       const bbox = { x: 0.3, y: 0.3, width: 0.2, height: 0.2 };
 
       // Act
-      const result = await evaluator.isPersonInRestArea('cam-1', bbox);
-
-      // Assert
-      expect(result).toBe(false);
+      await expect(evaluator.isPersonInRestArea('cam-1', bbox)).rejects.toThrow('Database offline');
     });
   });
 });
