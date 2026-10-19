@@ -5,3 +5,9 @@
 *.jpeg binary
 *.gif binary
 *.ico binary
+
+# Preserve captured evidence bytes so recorded SHA-256 manifests survive checkout.
+docs/test/US16_US17_FIX_2026-10-19/** -text
+docs/test/US16_US17_TIMER_DEBUG_2026-10-19/** -text
+docs/test/US16_US17_DATASET_EVAL_2026-10-19/** -text
+docs/test/US16_US17_BRANCH_COMPARISON_2026-10-19/** -text
