@@ -1,16 +1,26 @@
-"""Frigate 0.18 per-frame metadata only; never copies or encodes video."""
+"""Publish metadata immediately; encode timestamp-bound pose frames on a bounded worker."""
 
 import json
+import logging
+import math
 import os
+import queue
 import signal
+import threading
 import time
+import uuid
+from contextlib import suppress
 
 MAX_OBJECT_AGE_SECONDS = float(
     os.getenv("FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS", "30.0")
 )
-FRIGATE_POSE_FRAMES_ENABLED = os.getenv("FRIGATE_POSE_FRAMES_ENABLED", "false").lower() in ("true", "1")
+FRIGATE_POSE_FRAMES_ENABLED = os.getenv("FRIGATE_POSE_FRAMES_ENABLED", "false").lower() in (
+    "true",
+    "1",
+)
 MQTT_TOPIC_POSE_FRAMES = os.getenv("MQTT_TOPIC_POSE_FRAMES", "frigate/camerai/pose/frames")
 MAX_POSE_FPS = float(os.getenv("FRIGATE_POSE_MAX_FPS", "5.0"))
+POSE_SAMPLING_JITTER_RATIO = 0.1
 MAX_ENVELOPE_BYTES = 1024 * 1024  # 1 MiB
 MAX_HEADER_BYTES = 32 * 1024  # 32 KiB
 
@@ -106,9 +116,6 @@ def is_valid_person(obj, frame_time, max_age=MAX_OBJECT_AGE_SECONDS):
         return False
     if obj.get("box") is None:
         return False
-    # Nguoi bat dong (stationary) van la nguoi hop le dang co mat trong khung hinh (US-16, US-17)
-    if obj.get("stationary", False) or obj.get("motionless_count", 0) > 0:
-        return True
     obj_frame_time = obj.get("frame_time")
     if obj_frame_time is None or not isinstance(obj_frame_time, (int, float)):
         return False
@@ -158,19 +165,143 @@ def frame_payload(payload, max_age=MAX_OBJECT_AGE_SECONDS):
     return {"camera": camera, "frameTime": frame_time, "objects": people}
 
 
+def read_timestamped_frame(frame_manager, frame_name, width, height):
+    """Frigate 0.18 detection/video names the exact I420 shared-memory buffer.
+
+    Never substitute a newer frame when the named segment has already expired.
+    close() releases our reference only; cleanup()/delete() would unlink Frigate's data.
+    """
+    if width <= 0 or height <= 0 or width % 2 or height % 2:
+        return None
+    try:
+        frame = frame_manager.get(frame_name, (height * 3 // 2, width))
+        return frame.copy() if frame is not None else None
+    finally:
+        frame_manager.close(frame_name)
+
+
+class PoseFramePublisher:
+    """One encoding worker with a two-frame queue; overload drops old work."""
+
+    def __init__(self, client):
+        self.client = client
+        self.session_id = str(uuid.uuid4())
+        self.queue = queue.Queue(maxsize=2)
+        self.stopped = threading.Event()
+        self.thread = threading.Thread(target=self._run, daemon=True, name="pose-encoder")
+
+    def start(self):
+        self.thread.start()
+
+    def offer(self, metadata, frame, frame_name):
+        packet = (metadata, frame, frame_name)
+        try:
+            self.queue.put_nowait(packet)
+        except queue.Full:
+            with suppress(queue.Empty):
+                self.queue.get_nowait()
+            try:
+                self.queue.put_nowait(packet)
+            except queue.Full:
+                logging.debug("Pose queue full; frame dropped")
+
+    def close(self):
+        self.stopped.set()
+        self.thread.join(timeout=2)
+
+    def _run(self):
+        import cv2
+
+        while not self.stopped.is_set():
+            try:
+                metadata, frame, frame_name = self.queue.get(timeout=0.2)
+            except queue.Empty:
+                continue
+            age = time.time() - metadata["frameTime"]
+            if age > 1.0 or age < -0.5:
+                continue
+            try:
+                image = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+                height, width = image.shape[:2]
+                # Frigate emits xyxy boxes; legacy normalize_box expects yxyx.
+                people = [
+                    {**p, "box": [p["box"][1], p["box"][0], p["box"][3], p["box"][2]]}
+                    for p in metadata["objects"]
+                ]
+                header = build_pose_frame_header(
+                    metadata["camera"],
+                    metadata["frameTime"],
+                    people,
+                    width,
+                    height,
+                    self.session_id,
+                )
+                header["frameId"] = f"{frame_name}:{metadata['frameTime']}"
+                ok, jpeg = cv2.imencode(".jpg", image)
+                if not ok:
+                    logging.warning("Pose JPEG encode failed")
+                    continue
+                if time.time() - metadata["frameTime"] > 1.0:
+                    continue
+                self.client.publish(
+                    MQTT_TOPIC_POSE_FRAMES,
+                    pack_pose_frame_envelope(header, jpeg.tobytes()),
+                    qos=0,
+                    retain=False,
+                )
+            except (ValueError, KeyError, OSError, cv2.error):
+                logging.exception("Pose encode/publish failed")
+
+
+def offer_pose_capture(publisher, frame_manager, config, metadata, frame_name, next_pose_time):
+    """Copy only sampled named frames; metadata publication never waits for encoding."""
+    if not metadata.get("objects"):
+        return
+    camera = metadata["camera"]
+    frame_time = metadata["frameTime"]
+    min_interval = 1.0 / MAX_POSE_FPS if MAX_POSE_FPS > 0 else 0.2
+    # Preserve the sampling phase: resetting it to every accepted timestamp halves
+    # a nominal 5 Hz stream whenever a capture interval is just below 200 ms.
+    deadline = next_pose_time.get(camera, frame_time)
+    if frame_time + min_interval * POSE_SAMPLING_JITTER_RATIO < deadline:
+        return
+    detect = {
+        **config.get("detect", {}),
+        **config.get("cameras", {}).get(camera, {}).get("detect", {}),
+    }
+    width, height = detect.get("width"), detect.get("height")
+    if not isinstance(width, int) or not isinstance(height, int):
+        logging.warning("Pose frame skipped: unknown detect shape for %s", camera)
+        return
+    frame = read_timestamped_frame(frame_manager, frame_name, width, height)
+    if frame is not None:
+        publisher.offer(metadata, frame, frame_name)
+        elapsed_periods = max(1, math.floor((frame_time - deadline) / min_interval) + 1)
+        next_pose_time[camera] = deadline + elapsed_periods * min_interval
+
+
 def main():
     import paho.mqtt.client as mqtt
     import yaml
     import zmq
 
     with open("/config/config.yml", encoding="utf-8") as config_file:
-        config = yaml.safe_load(os.path.expandvars(config_file.read()))["mqtt"]
+        full_config = yaml.safe_load(os.path.expandvars(config_file.read()))
+        config = full_config["mqtt"]
     client = mqtt.Client(client_id="camerai-frame-metadata")
     if config.get("user"):
         client.username_pw_set(config["user"], config.get("password"))
     client.max_queued_messages_set(2)
     client.connect(config["host"], config.get("port", 1883))
     client.loop_start()
+    frame_manager = None
+    pose_publisher = None
+    if FRIGATE_POSE_FRAMES_ENABLED:
+        from frigate.util.image import SharedMemoryFrameManager
+
+        frame_manager = SharedMemoryFrameManager()
+        pose_publisher = PoseFramePublisher(client)
+        pose_publisher.start()
     context = zmq.Context()
     socket = context.socket(zmq.SUB)
     socket.setsockopt(zmq.RCVHWM, 32)
@@ -182,7 +313,7 @@ def main():
         nonlocal running
         running = False
 
-    last_pose_time = {}
+    next_pose_time = {}
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
     print("CameraAI frame metadata bridge ready (Frigate 0.18)", flush=True)
@@ -192,7 +323,8 @@ def main():
                 continue
             try:
                 message = socket.recv_string().split(" ", 1)[1]
-                result = frame_payload(json.loads(message))
+                raw_payload = json.loads(message)
+                result = frame_payload(raw_payload)
                 frame_time = result["frameTime"]
                 if time.time() - frame_time > 1:
                     continue
@@ -203,34 +335,20 @@ def main():
                     retain=False,
                 )
 
-                # M2a Pose Frames Publisher (US-16)
-                if FRIGATE_POSE_FRAMES_ENABLED and result.get("objects"):
-                    camera = result["camera"]
-                    min_interval = 1.0 / MAX_POSE_FPS if MAX_POSE_FPS > 0 else 0.2
-                    if frame_time - last_pose_time.get(camera, 0.0) >= min_interval:
-                        header = build_pose_frame_header(camera, frame_time, result["objects"])
-                        # Doc frame anh thuc te tu Frigate local HTTP API
-                        jpeg_bytes = b""
-                        try:
-                            import urllib.request
-                            with urllib.request.urlopen(
-                                f"http://127.0.0.1:5000/api/{camera}/latest.jpg", timeout=0.5
-                            ) as resp:
-                                jpeg_bytes = resp.read()
-                        except Exception as fetch_err:
-                            pass
-
-                        if not jpeg_bytes:
-                            continue
-                        try:
-                            envelope = pack_pose_frame_envelope(header, jpeg_bytes)
-                            client.publish(MQTT_TOPIC_POSE_FRAMES, envelope, qos=0, retain=False)
-                            last_pose_time[camera] = frame_time
-                        except (ValueError, OSError) as e:
-                            print(f"[POSE_FRAME_ERROR] Failed to pack/publish envelope: {e}", flush=True)
+                if pose_publisher:
+                    offer_pose_capture(
+                        pose_publisher,
+                        frame_manager,
+                        full_config,
+                        result,
+                        raw_payload[1],
+                        next_pose_time,
+                    )
             except (ValueError, TypeError, KeyError):
                 print("Invalid Frigate frame metadata skipped", flush=True)
     finally:
+        if pose_publisher:
+            pose_publisher.close()
         socket.close(linger=0)
         context.term()
         client.loop_stop()
