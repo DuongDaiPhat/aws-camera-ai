@@ -129,6 +129,23 @@ def test_calculate_center_drop_ratio() -> None:
     assert calculate_center_drop_ratio(100.0, history_centers, 0.0) == 0.0
 
 
+@pytest.mark.parametrize("index", [11, 12, 23, 24])
+@pytest.mark.parametrize("value", [0.59, float("nan")])
+def test_all_four_vital_joints_required(index: int, value: float) -> None:
+    kps = make_dummy_keypoints()
+    kps[index] = NormalizedKeypoint(x=0.5, y=0.3, visibility=value)
+    assert calculate_pose_geometry(kps, 640, 480, 0.5, 0.8) is None
+
+
+def test_degenerate_geometry_is_not_a_horizontal_torso() -> None:
+    kps = make_dummy_keypoints(shoulder_y=0.5, hip_y=0.5)
+    assert calculate_pose_geometry(kps, 640, 480, 0.5, 0.8) is None
+    kps = make_dummy_keypoints()
+    assert calculate_pose_geometry(kps, 640, 480, 0, 0.8) is None
+    kps[11] = NormalizedKeypoint(x=float("inf"), y=0.3)
+    assert calculate_pose_geometry(kps, 640, 480, 0.5, 0.8) is None
+
+
 def test_calculate_motion_score() -> None:
     kps_prev = make_dummy_keypoints(shoulder_y=0.7, hip_y=0.7, visibility=0.9)
     # Khong dich chuyen
