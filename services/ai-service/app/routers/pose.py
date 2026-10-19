@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import secrets
+import threading
 from datetime import UTC, datetime
 
 import cv2
@@ -29,6 +31,7 @@ def authenticate(x_internal_token: str = Header(default="", alias="X-Internal-To
 
 
 router = APIRouter(prefix="/pose", tags=["pose"], dependencies=[Depends(authenticate)])
+inference_slots = threading.BoundedSemaphore(get_settings().pose_max_concurrent_requests)
 
 
 def _parse_timestamp(frame_timestamp: str) -> datetime:
@@ -57,7 +60,8 @@ def _parse_bbox(person_bounding_box: str | None) -> dict[str, float] | None:
         bw = float(parsed.get("width", 0.0))
         bh = float(parsed.get("height", 0.0))
         if (
-            bw <= 0.0
+            not all(math.isfinite(v) for v in (bx, by, bw, bh))
+            or bw <= 0.0
             or bh <= 0.0
             or bx < 0.0
             or by < 0.0
@@ -93,7 +97,7 @@ def _decode_and_validate_image(image_bytes: bytes, max_pixels: int) -> np.ndarra
     operation_id="evaluateFall",
     summary="Danh gia mot frame trong chuoi theo doi te nga",
 )
-async def evaluate_fall(
+def evaluate_fall(
     image: UploadFile = File(...),  # noqa: B008
     track_id: str = Form(alias="trackId"),  # noqa: B008
     camera_slug: str = Form(alias="cameraSlug"),  # noqa: B008
@@ -110,7 +114,8 @@ async def evaluate_fall(
     observed_at = _parse_timestamp(frame_timestamp)
     bbox_dict = _parse_bbox(person_bounding_box)
 
-    image_bytes = await image.read()
+    # FastAPI runs this synchronous endpoint in its worker pool, keeping health/face responsive.
+    image_bytes = image.file.read(settings.pose_max_image_bytes + 1)
     if len(image_bytes) > settings.pose_max_image_bytes:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
@@ -118,49 +123,93 @@ async def evaluate_fall(
         )
 
     now_utc = datetime.now(UTC).isoformat()
+    if not settings.m2a_enabled:
+        FallTrackerRegistry.reset_instance()
+        return FallResponse.model_validate(
+            dict(
+                trackId=track_id,
+                cameraSlug=camera_slug,
+                sourceSessionId=source_session_id,
+                frameId=frame_id,
+                observedAt=observed_at.isoformat(),
+                state="MONITORING",
+                poseAvailable=False,
+                reason="M2A_DISABLED",
+                modelVersion=settings.pose_model_version,
+                processedAt=now_utc,
+                error=FallInferenceError(
+                    code="PROVIDER_UNAVAILABLE", message="M2a admission is disabled"
+                ),
+            )
+        )
     image_bgr = _decode_and_validate_image(image_bytes, settings.pose_max_image_pixels)
     if image_bgr is None:
-        return FallResponse(
-            trackId=track_id,
-            cameraSlug=camera_slug,
-            sourceSessionId=source_session_id,
-            frameId=frame_id,
-            observedAt=observed_at.isoformat(),
-            state="MONITORING",
-            poseAvailable=False,
-            reason="IMAGE_DECODE_FAILED",
-            isReplay=False,
-            modelVersion=settings.pose_model_version,
-            processedAt=now_utc,
-            error=FallInferenceError(
-                code="IMAGE_DECODE_FAILED",
-                message="Khong the decode du lieu anh thanh anh mau.",
-            ),
+        return FallResponse.model_validate(
+            dict(
+                trackId=track_id,
+                cameraSlug=camera_slug,
+                sourceSessionId=source_session_id,
+                frameId=frame_id,
+                observedAt=observed_at.isoformat(),
+                state="MONITORING",
+                poseAvailable=False,
+                reason="IMAGE_DECODE_FAILED",
+                isReplay=False,
+                modelVersion=settings.pose_model_version,
+                processedAt=now_utc,
+                error=FallInferenceError(
+                    code="IMAGE_DECODE_FAILED",
+                    message="Khong the decode du lieu anh thanh anh mau.",
+                ),
+            )
         )
 
     try:
-        estimator = PoseEstimator.get_instance()
-        keypoints, geometry, pose_available, reason = estimator.estimate(
-            image_bgr=image_bgr,
-            person_bbox=bbox_dict,
-        )
+        if not inference_slots.acquire(blocking=False):
+            return FallResponse.model_validate(
+                dict(
+                    trackId=track_id,
+                    cameraSlug=camera_slug,
+                    sourceSessionId=source_session_id,
+                    frameId=frame_id,
+                    observedAt=observed_at.isoformat(),
+                    state="MONITORING",
+                    poseAvailable=False,
+                    reason="PROVIDER_UNAVAILABLE",
+                    modelVersion=settings.pose_model_version,
+                    processedAt=now_utc,
+                    error=FallInferenceError(
+                        code="PROVIDER_UNAVAILABLE", message="Pose workers are busy"
+                    ),
+                )
+            )
+        try:
+            estimator = PoseEstimator.get_instance()
+            keypoints, geometry, pose_available, reason = estimator.estimate(
+                image_bgr=image_bgr,
+                person_bbox=bbox_dict,
+            )
+        finally:
+            inference_slots.release()
     except FileNotFoundError as e:
-        return FallResponse(
-            trackId=track_id,
-            cameraSlug=camera_slug,
-            sourceSessionId=source_session_id,
-            frameId=frame_id,
-            observedAt=observed_at.isoformat(),
-            state="MONITORING",
-            poseAvailable=False,
-            reason="MODEL_NOT_LOADED",
-            isReplay=False,
-            modelVersion=settings.pose_model_version,
-            processedAt=now_utc,
-            error=FallInferenceError(
-                code="MODEL_NOT_LOADED",
-                message=str(e),
-            ),
+        return FallResponse.model_validate(
+            dict(
+                trackId=track_id,
+                cameraSlug=camera_slug,
+                sourceSessionId=source_session_id,
+                frameId=frame_id,
+                observedAt=observed_at.isoformat(),
+                state="MONITORING",
+                poseAvailable=False,
+                reason="MODEL_NOT_LOADED",
+                isReplay=False,
+                modelVersion=settings.pose_model_version,
+                processedAt=now_utc,
+                error=FallInferenceError(
+                    code="MODEL_NOT_LOADED",
+                    message=str(e),
+                ),
+            )
         )
 
     registry = FallTrackerRegistry.get_instance()
@@ -183,7 +232,7 @@ async def evaluate_fall(
     if bbox_dict:
         result_dict["boundingBox"] = bbox_dict
 
-    logger.info(
+    logger.debug(
         "[POSE_EVAL] track=%s state=%s reason=%s poseAvail=%s angle=%s immobile=%.1fs",
         track_id,
         result_dict.get("state"),
@@ -195,4 +244,4 @@ async def evaluate_fall(
         result_dict.get("immobileSeconds") or 0.0,
     )
 
-    return FallResponse(**result_dict)
+    return FallResponse.model_validate(dict(**result_dict))

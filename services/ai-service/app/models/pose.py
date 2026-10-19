@@ -66,7 +66,7 @@ class FallResponse(BaseModel):
     center_drop_ratio: float | None = Field(None, alias="centerDropRatio")
     motion_score: float | None = Field(None, alias="motionScore")
     immobile_seconds: float = Field(0.0, alias="immobileSeconds")
-    threshold_seconds: int = Field(15, alias="thresholdSeconds")
+    threshold_seconds: int = Field(3, alias="thresholdSeconds")
     missing_pose_seconds: float = Field(0.0, alias="missingPoseSeconds")
     keypoints_detected: int = Field(0, alias="keypointsDetected")
     bounding_box: BoundingBox | None = Field(None, alias="boundingBox")

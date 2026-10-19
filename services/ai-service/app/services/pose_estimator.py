@@ -7,6 +7,7 @@ nhung transform 33 landmarks nguoc ve he toa do pixel cua anh goc.
 from __future__ import annotations
 
 import logging
+import math
 import threading
 from pathlib import Path
 
@@ -59,13 +60,14 @@ class PoseEstimator:
         self._model_path = str(resolved_path)
         self._min_visibility = settings.pose_min_visibility
         self._padding_ratio = settings.pose_roi_padding_ratio
+        self._min_association_iou = settings.pose_min_association_iou
         self._infer_lock = threading.Lock()
 
         base_options = mp_python.BaseOptions(model_asset_path=self._model_path)
         options = vision.PoseLandmarkerOptions(
             base_options=base_options,
             running_mode=vision.RunningMode.IMAGE,
-            num_poses=1,
+            num_poses=2,
             min_pose_detection_confidence=0.5,
             min_pose_presence_confidence=0.5,
             min_tracking_confidence=0.5,
@@ -137,28 +139,18 @@ class PoseEstimator:
         img_h: int,
         effective_bbox_w: float,
         effective_bbox_h: float,
+        person_bbox: dict[str, float],
     ) -> tuple[list[NormalizedKeypoint], PoseGeometry] | None:
         """Fallback nhan dien tren toan bo anh neu crop ROI bi hut keypoints."""
         full_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
         mp_full = mp.Image(image_format=mp.ImageFormat.SRGB, data=full_rgb)
         with self._infer_lock:
             full_res = self._landmarker.detect(mp_full)
-        if (
-            not full_res.pose_landmarks
-            or len(full_res.pose_landmarks) == 0
-            or len(full_res.pose_landmarks[0]) < 33
-        ):
+        fallback_kps, _reason = self._select_pose(
+            full_res.pose_landmarks, person_bbox, img_w, img_h, img_w, img_h, 0, 0
+        )
+        if fallback_kps is None:
             return None
-
-        fallback_kps = [
-            NormalizedKeypoint(
-                x=float(lm.x),
-                y=float(lm.y),
-                z=float(lm.z),
-                visibility=float(getattr(lm, "visibility", 1.0) or 1.0),
-            )
-            for lm in full_res.pose_landmarks[0]
-        ]
         fallback_geom = calculate_pose_geometry(
             keypoints=fallback_kps,
             image_width=img_w,
@@ -170,6 +162,72 @@ class PoseEstimator:
         if fallback_geom is None:
             return None
         return fallback_kps, fallback_geom
+
+    def _select_pose(
+        self,
+        poses: list,
+        person_bbox: dict[str, float] | None,
+        img_w: int,
+        img_h: int,
+        crop_w: int,
+        crop_h: int,
+        x_min: int,
+        y_min: int,
+    ) -> tuple[list[NormalizedKeypoint] | None, str]:
+        """Reject ambiguous assignments, clipped vital joints and unrelated full-frame poses."""
+        if not poses:
+            return None, "NO_POSE"
+        if person_bbox is None and len(poses) != 1:
+            return None, "AMBIGUOUS_POSE"
+        matches = []
+        reason = "POSE_ASSOCIATION_FAILED"
+        for landmarks in poses:
+            if len(landmarks) < 33:
+                reason = "INCOMPLETE_KEYPOINTS"
+                continue
+            vital = [landmarks[i] for i in (11, 12, 23, 24)]
+            if any(
+                not all(math.isfinite(v) for v in (lm.x, lm.y, lm.visibility))
+                or lm.visibility < self._min_visibility
+                or not (0 <= lm.x <= 1 and 0 <= lm.y <= 1)
+                for lm in vital
+            ):
+                reason = "LOW_VISIBILITY"
+                continue
+            kps = [
+                NormalizedKeypoint(
+                    x=(lm.x * crop_w + x_min) / img_w,
+                    y=(lm.y * crop_h + y_min) / img_h,
+                    z=float(lm.z),
+                    visibility=float(lm.visibility),
+                )
+                for lm in landmarks
+            ]
+            if person_bbox is not None:
+                visible = [
+                    kp
+                    for kp in kps
+                    if math.isfinite(kp.x)
+                    and math.isfinite(kp.y)
+                    and math.isfinite(kp.visibility)
+                    and kp.visibility >= self._min_visibility
+                ]
+                x1 = max(0.0, min(kp.x for kp in visible))
+                y1 = max(0.0, min(kp.y for kp in visible))
+                x2 = min(1.0, max(kp.x for kp in visible))
+                y2 = min(1.0, max(kp.y for kp in visible))
+                bx, by = person_bbox["x"], person_bbox["y"]
+                bw, bh = person_bbox["width"], person_bbox["height"]
+                intersection = max(0.0, min(x2, bx + bw) - max(x1, bx)) * max(
+                    0.0, min(y2, by + bh) - max(y1, by)
+                )
+                union = max(0.0, x2 - x1) * max(0.0, y2 - y1) + bw * bh - intersection
+                if union <= 0 or intersection / union < self._min_association_iou:
+                    continue
+            matches.append(kps)
+        if len(matches) > 1:
+            return None, "AMBIGUOUS_POSE"
+        return (matches[0], "NORMAL_POSTURE") if matches else (None, reason)
 
     def estimate(
         self,
@@ -202,32 +260,18 @@ class PoseEstimator:
         with self._infer_lock:
             result = self._landmarker.detect(mp_image)
 
-        if not result.pose_landmarks or len(result.pose_landmarks) == 0:
-            if person_bbox is not None:
-                fallback = self._fallback_full_frame(image_bgr, img_w, img_h, eff_w, eff_h)
+        full_keypoints, reason = self._select_pose(
+            result.pose_landmarks, person_bbox, img_w, img_h, crop_w, crop_h, x_min, y_min
+        )
+        if full_keypoints is None:
+            if person_bbox is not None and reason != "AMBIGUOUS_POSE":
+                fallback = self._fallback_full_frame(
+                    image_bgr, img_w, img_h, eff_w, eff_h, person_bbox
+                )
                 if fallback is not None:
                     kps, geom = fallback
                     return kps, geom, True, "NORMAL_POSTURE"
-            return None, None, False, "NO_POSE"
-
-        raw_landmarks = result.pose_landmarks[0]
-        if len(raw_landmarks) < 33:
-            return None, None, False, "INCOMPLETE_KEYPOINTS"
-
-        full_keypoints: list[NormalizedKeypoint] = []
-        for lm in raw_landmarks:
-            px_in_full = (lm.x * crop_w) + x_min
-            py_in_full = (lm.y * crop_h) + y_min
-            visibility = float(getattr(lm, "visibility", 1.0) or 1.0)
-
-            full_keypoints.append(
-                NormalizedKeypoint(
-                    x=px_in_full / float(img_w),
-                    y=py_in_full / float(img_h),
-                    z=float(lm.z),
-                    visibility=visibility,
-                )
-            )
+            return None, None, False, reason
 
         geometry = calculate_pose_geometry(
             keypoints=full_keypoints,
@@ -239,7 +283,7 @@ class PoseEstimator:
         )
 
         if geometry is None and person_bbox is not None and (crop_w != img_w or crop_h != img_h):
-            fallback = self._fallback_full_frame(image_bgr, img_w, img_h, eff_w, eff_h)
+            fallback = self._fallback_full_frame(image_bgr, img_w, img_h, eff_w, eff_h, person_bbox)
             if fallback is not None:
                 kps, geom = fallback
                 return kps, geom, True, "NORMAL_POSTURE"

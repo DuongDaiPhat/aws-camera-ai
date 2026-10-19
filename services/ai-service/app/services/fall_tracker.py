@@ -13,11 +13,13 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
 import uuid
 from collections import deque
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from statistics import median
 
 from app.config import get_settings
 from app.services.pose_geometry import (
@@ -79,6 +81,9 @@ class FallTracker:
         self.immobile_seconds: float = 0.0
         self.missing_pose_seconds: float = 0.0
         self.last_observation: PoseObservation | None = None
+        self.last_frame_at: datetime | None = None
+        self.seen_frame_ids: deque[str] = deque(maxlen=256)
+        self._lock = threading.RLock()
 
     def _generate_episode_id(self, candidate_time: datetime) -> str:
         """Tao episodeId on dinh bang UUIDv5 theo contract."""
@@ -98,6 +103,32 @@ class FallTracker:
         in_rest_area: bool = False,
     ) -> dict:
         """Xu ly mot frame moi va cap nhat state machine."""
+        with self._lock:
+            return self._evaluate_frame(
+                observed_at, frame_id, keypoints, geometry, pose_available, reason, in_rest_area
+            )
+
+    def _evaluate_frame(
+        self,
+        observed_at: datetime,
+        frame_id: str | None,
+        keypoints: Sequence[NormalizedKeypoint] | None,
+        geometry: PoseGeometry | None,
+        pose_available: bool,
+        reason: str,
+        in_rest_area: bool,
+    ) -> dict:
+        # Reject replays before any state, history or recovery mutation.
+        if (self.last_frame_at is not None and observed_at <= self.last_frame_at) or (
+            frame_id is not None and frame_id in self.seen_frame_ids
+        ):
+            return self._build_result(
+                observed_at, frame_id, geometry, pose_available, self.reason, is_replay=True
+            )
+        self.last_frame_at = observed_at
+        if frame_id is not None:
+            self.seen_frame_ids.append(frame_id)
+
         if in_rest_area:
             return self._handle_in_rest_area(observed_at, frame_id, geometry, pose_available)
 
@@ -116,6 +147,8 @@ class FallTracker:
         geometry: PoseGeometry | None,
         pose_available: bool,
     ) -> dict:
+        self.history.clear()
+        self.last_observation = None
         if self.state == "CANDIDATE":
             logger.info("Track %s entered REST_AREA -> cancel candidate", self.track_id)
             self.state = "CANCELLED"
@@ -176,6 +209,13 @@ class FallTracker:
         frame_id: str | None,
         reason: str,
     ) -> dict:
+        # A missing observation always breaks the continuous immobility interval.
+        self.immobile_seconds = 0.0
+        self.last_observation = None
+        # History contains valid observations, not a count of consecutive requests.
+        # Preserve a short quality dropout; age and gap limits still invalidate old
+        # baselines on the next valid frame. Never preserve the immobility timer.
+        self.reason = reason or "NO_POSE"
         if self.state == "CANDIDATE":
             if self.last_valid_pose_at:
                 elapsed = (observed_at - self.last_valid_pose_at).total_seconds()
@@ -183,7 +223,7 @@ class FallTracker:
             else:
                 self.missing_pose_seconds = 0.0
 
-            if self.missing_pose_seconds > self.settings.fall_missing_pose_grace_seconds:
+            if self.missing_pose_seconds >= self.settings.fall_missing_pose_grace_seconds:
                 logger.info(
                     "Track %s missing pose > %ss -> CANCELLED",
                     self.track_id,
@@ -214,6 +254,27 @@ class FallTracker:
         dt_seconds = 0.0
         if self.last_valid_pose_at:
             dt_seconds = max(0.0, (observed_at - self.last_valid_pose_at).total_seconds())
+
+        if dt_seconds > self.settings.fall_max_valid_frame_gap_seconds:
+            logger.debug(
+                "[POSE_CONTINUITY_RESET] camera=%s track=%s gap=%.3fs max=%.3fs",
+                self.camera_slug,
+                self.track_id,
+                dt_seconds,
+                self.settings.fall_max_valid_frame_gap_seconds,
+            )
+            self.immobile_seconds = 0.0
+            self.last_observation = None
+            self.history.clear()
+        if (
+            self.state == "CANDIDATE"
+            and dt_seconds >= self.settings.fall_missing_pose_grace_seconds
+        ):
+            self.state = "CANCELLED"
+            self.reason = "MISSING_TIMEOUT"
+            return self._build_result(
+                observed_at, frame_id, geometry, True, self.reason, is_replay=False
+            )
 
         self.last_valid_pose_at = observed_at
         self.missing_pose_seconds = 0.0
@@ -265,36 +326,41 @@ class FallTracker:
                 is_replay=False,
             )
 
-        if geometry.torso_angle_deg < self.settings.fall_torso_angle_threshold_deg:
-            motion_score: float | None = None
-            if self.last_observation:
-                img_w = (
-                    int(geometry.bbox_width_px / geometry.aspect_ratio)
-                    if geometry.aspect_ratio > 0
-                    else 1920
-                )
+        motion_score: float | None = None
+        frozen_drop = (
+            (geometry.center_y_px - self.baseline_center_y_px) / self.baseline_scale_px
+            if self.baseline_scale_px > 0
+            else 0.0
+        )
+        if (
+            geometry.torso_angle_deg < self.settings.fall_torso_angle_threshold_deg
+            and frozen_drop >= self.settings.fall_center_drop_ratio
+        ):
+            if (
+                self.last_observation
+                and self.last_observation.geometry.torso_angle_deg
+                < self.settings.fall_torso_angle_threshold_deg
+                and (self.last_observation.geometry.center_y_px - self.baseline_center_y_px)
+                / self.baseline_scale_px
+                >= self.settings.fall_center_drop_ratio
+            ):
                 motion_score = calculate_motion_score(
                     current_keypoints=keypoints,
                     previous_keypoints=self.last_observation.keypoints,
-                    image_width=img_w,
-                    image_height=int(geometry.bbox_height_px),
+                    image_width=geometry.image_width,
+                    image_height=geometry.image_height,
                     dt_seconds=dt_seconds,
                     baseline_scale_px=self.baseline_scale_px,
                     min_visibility=self.settings.pose_min_visibility,
                     max_gap_seconds=self.settings.fall_max_valid_frame_gap_seconds,
                 )
 
-            is_moving = False
-            if motion_score is not None:
-                is_moving = motion_score >= self.settings.fall_motion_speed_threshold
-            elif self.last_observation and dt_seconds > 0 and self.baseline_scale_px > 0:
-                center_disp = abs(geometry.center_y_px - self.last_observation.geometry.center_y_px)
-                center_speed = center_disp / (self.baseline_scale_px * dt_seconds)
-                is_moving = center_speed >= self.settings.fall_motion_speed_threshold
-
-            if not is_moving:
-                self.immobile_seconds += dt_seconds
-                logger.info(
+            if (
+                motion_score is not None
+                and motion_score < self.settings.fall_motion_speed_threshold
+            ):
+                self.immobile_seconds = round(self.immobile_seconds + dt_seconds, 6)
+                logger.debug(
                     "Track %s CANDIDATE: immobile=%.1fs / %.1fs (angle=%.1f)",
                     self.track_id,
                     self.immobile_seconds,
@@ -313,9 +379,10 @@ class FallTracker:
                 else:
                     self.reason = "FALL_CANDIDATE"
             else:
-                self.immobile_seconds = max(0.0, self.immobile_seconds - dt_seconds * 2)
+                self.immobile_seconds = 0.0
                 self.reason = "FALL_CANDIDATE"
         else:
+            self.immobile_seconds = 0.0
             self.reason = "FALL_CANDIDATE"
 
         # Max candidate duration guard (AC17-2)
@@ -350,11 +417,16 @@ class FallTracker:
         current_obs: PoseObservation,
     ) -> dict:
         center_drop_ratio = 0.0
+        while (
+            self.history
+            and (observed_at - self.history[0].observed_at).total_seconds()
+            > self.settings.fall_history_max_seconds
+        ):
+            self.history.popleft()
         if len(self.history) >= self.settings.fall_history_frame_count:
             history_centers = [obs.geometry.center_y_px for obs in self.history]
             history_heights = [obs.geometry.bbox_height_px for obs in self.history]
-            sorted_h = sorted(history_heights)
-            scale_prev = sorted_h[len(sorted_h) // 2]
+            scale_prev = median(history_heights)
 
             center_drop_ratio = calculate_center_drop_ratio(
                 current_center_y_px=geometry.center_y_px,
@@ -367,23 +439,12 @@ class FallTracker:
                 and center_drop_ratio >= self.settings.fall_center_drop_ratio
             )
 
-            recent_history = list(self.history)[-self.settings.fall_prone_consecutive_frames :]
-            recent_prone_count = sum(
-                1
-                for obs in recent_history
-                if obs.geometry.torso_angle_deg < self.settings.fall_torso_angle_threshold_deg
-            )
-            is_persistent_prone = (
-                recent_prone_count >= self.settings.fall_prone_consecutive_frames
-                and geometry.torso_angle_deg < self.settings.fall_torso_angle_threshold_deg
-            )
-
-            if is_sudden_drop or is_persistent_prone:
+            if is_sudden_drop:
                 self.state = "CANDIDATE"
-                self.reason = "FALL_CANDIDATE" if is_sudden_drop else "PRONE_CANDIDATE"
+                self.reason = "FALL_CANDIDATE"
                 self.candidate_started_at = observed_at
                 self.baseline_scale_px = max(10.0, scale_prev)
-                self.baseline_center_y_px = sorted(history_centers)[len(history_centers) // 2]
+                self.baseline_center_y_px = median(history_centers)
                 self.episode_id = self._generate_episode_id(observed_at)
                 self.immobile_seconds = 0.0
                 logger.info(
@@ -439,6 +500,24 @@ class FallTracker:
 
         confidence_val: float | None = 1.0 if self.state == "CONFIRMED" else None
 
+        logger.debug(
+            "[POSE_TRACK] camera=%s track=%s frame=%s time=%s state=%s reason=%s "
+            "history=%d/%d pose=%s angle=%s drop=%s motion=%s immobile=%.3fs",
+            self.camera_slug,
+            self.track_id,
+            frame_id,
+            observed_at.isoformat(),
+            self.state,
+            reason,
+            len(self.history),
+            self.settings.fall_history_frame_count,
+            pose_available,
+            geometry.torso_angle_deg if geometry else None,
+            drop_val,
+            motion_score,
+            self.immobile_seconds,
+        )
+
         return {
             "trackId": self.track_id,
             "cameraSlug": self.camera_slug,
@@ -461,7 +540,7 @@ class FallTracker:
             "centerHeight": geometry.center_height if geometry else None,
             "centerDropRatio": drop_val,
             "motionScore": motion_score,
-            "immobileSeconds": round(self.immobile_seconds, 2),
+            "immobileSeconds": round(self.immobile_seconds, 6),
             "thresholdSeconds": int(self.settings.fall_immobility_seconds),
             "missingPoseSeconds": round(self.missing_pose_seconds, 2),
             "keypointsDetected": geometry.keypoints_detected if geometry else 0,
@@ -472,10 +551,14 @@ class FallTracker:
         }
 
     def sweep(self, now: datetime) -> bool:
+        with self._lock:
+            return self._sweep(now)
+
+    def _sweep(self, now: datetime) -> bool:
         if self.state == "CANDIDATE":
             if self.last_valid_pose_at:
                 elapsed = (now - self.last_valid_pose_at).total_seconds()
-                if elapsed > self.settings.fall_missing_pose_grace_seconds:
+                if elapsed >= self.settings.fall_missing_pose_grace_seconds:
                     logger.info(
                         "Track %s swept: missing pose > %ss -> CANCELLED",
                         self.track_id,

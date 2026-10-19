@@ -42,6 +42,8 @@ class PoseGeometry:
     bbox_height_px: float
     bbox_width_px: float
     keypoints_detected: int
+    image_width: int = 1920
+    image_height: int = 1080
 
 
 # Indices theo chuan MediaPipe Pose 33 landmarks
@@ -84,7 +86,8 @@ def calculate_torso_angle(
     vy = shoulder_mid.y - hip_mid.y
     angle_rad = math.atan2(abs(vy), abs(vx))
     angle_deg = math.degrees(angle_rad)
-    return round(angle_deg, 2)
+    # Stabilize floating point at exact boundaries without rounding 29.999 to 30.
+    return round(angle_deg, 10)
 
 
 def calculate_pose_geometry(
@@ -101,16 +104,20 @@ def calculate_pose_geometry(
     - Du 33 landmarks.
     - Hai vai (11, 12) va hai hong (23, 24) co visibility >= min_visibility.
     """
-    if len(keypoints) < 33:
+    if (
+        len(keypoints) < 33
+        or image_width <= 0
+        or image_height <= 0
+        or not all(math.isfinite(v) and v > 0 for v in (bbox_width, bbox_height))
+    ):
         return None
 
-    # Quality gate: Phai co it nhat 1 vai va 1 hong dat chat luong (ho tro tu the nam nghieng)
-    has_left_shoulder = keypoints[LEFT_SHOULDER].visibility >= min_visibility
-    has_right_shoulder = keypoints[RIGHT_SHOULDER].visibility >= min_visibility
-    has_left_hip = keypoints[LEFT_HIP].visibility >= min_visibility
-    has_right_hip = keypoints[RIGHT_HIP].visibility >= min_visibility
-
-    if not (has_left_shoulder or has_right_shoulder) or not (has_left_hip or has_right_hip):
+    vital = (LEFT_SHOULDER, RIGHT_SHOULDER, LEFT_HIP, RIGHT_HIP)
+    if any(
+        not all(math.isfinite(v) for v in (keypoints[i].x, keypoints[i].y, keypoints[i].visibility))
+        or keypoints[i].visibility < min_visibility
+        for i in vital
+    ):
         return None
 
     # Tinh so keypoints dat visibility
@@ -134,19 +141,10 @@ def calculate_pose_geometry(
         keypoints[RIGHT_HIP].y * image_height,
     )
 
-    if has_left_shoulder and has_right_shoulder:
-        s_mid = PixelPoint((s_left.x + s_right.x) / 2.0, (s_left.y + s_right.y) / 2.0)
-    elif has_left_shoulder:
-        s_mid = s_left
-    else:
-        s_mid = s_right
-
-    if has_left_hip and has_right_hip:
-        h_mid = PixelPoint((h_left.x + h_right.x) / 2.0, (h_left.y + h_right.y) / 2.0)
-    elif has_left_hip:
-        h_mid = h_left
-    else:
-        h_mid = h_right
+    s_mid = PixelPoint((s_left.x + s_right.x) / 2.0, (s_left.y + s_right.y) / 2.0)
+    h_mid = PixelPoint((h_left.x + h_right.x) / 2.0, (h_left.y + h_right.y) / 2.0)
+    if math.hypot(s_mid.x - h_mid.x, s_mid.y - h_mid.y) <= 1e-6:
+        return None
 
     torso_angle = calculate_torso_angle(s_mid, h_mid)
 
@@ -167,6 +165,8 @@ def calculate_pose_geometry(
         bbox_height_px=bbox_h_px,
         bbox_width_px=bbox_w_px,
         keypoints_detected=detected_count,
+        image_width=image_width,
+        image_height=image_height,
     )
 
 
@@ -192,7 +192,7 @@ def calculate_center_drop_ratio(
 
     drop_pixels = current_center_y_px - median_y
     drop_ratio = drop_pixels / baseline_bbox_height_px
-    return round(drop_ratio, 4)
+    return drop_ratio
 
 
 def calculate_motion_score(
