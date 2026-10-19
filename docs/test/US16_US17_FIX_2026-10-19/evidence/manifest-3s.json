@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-19T09:01:28.003357+00:00",
+  "thresholdSeconds": 3,
+  "comparison": ">",
+  "missingPoseGraceSeconds": 5,
+  "branch": "fix/US-16-US-17-pose-fall",
+  "sourceSHA256": {
+    "services/ai-service/app/config.py": "eb73d91ce9a8aa0aaadb4360c7963eef59178b84f7966fb718d362c6c3aa331f",
+    "services/ai-service/app/models/pose.py": "b4ca5486af1ecbc4de9065a69f4558e9aa14c755763877ec9d7dd5c1cb3c6624",
+    "services/ai-service/tests/test_qa_pose.py": "7a1184f76245966de2ab6ca5d8539a34786190a631ed4ce0e73a5c5bd8805d0c",
+    "apps/orchestrator/src/fall-detection/adapter/pose-inference.adapter.ts": "376d997b18fec095cb305eebe3db40146d6168060d098c4ab8ae67b7213cc348",
+    "apps/orchestrator/src/fall-detection/adapter/validate-fall-response.ts": "9d1d7dcd2507538f71e363fe906a71d5d4e818d828bcf402e33c36d9bbd3b688",
+    "apps/orchestrator/src/fall-detection/coordinator/fall-incident.coordinator.ts": "4bd2669b070bdad4419356f839dbf1f69e20663f4759b589b2bcb75676c87248",
+    "docs/sprint-3/PLAN_US-16_US-17_POSE_FALL_E2E.md": "7e98c1f3b97e8c8197f87504d750c0d08d80aa4107d51398c22f6c1b6359c098",
+    "api/openapi.yaml": "21596894ca962dc52c9b10395321822f41cf2f73d49a68a24668aad4cab486f3",
+    "api/openapi-ai-service.yaml": "c97ba1836b87d3af7391039670667d20a02883b17aa4317063e7568883bd953c",
+    "packages/contracts/src/generated/ai-service.ts": "7e60e8dbb0bb7e657e3678c843fefa17223f14f2165e7ba4ef53db6578182792",
+    "packages/contracts/src/generated/orchestrator.ts": "08355ae0f01accf9cd61212418503bc974f27aa36bdfdd21db09fd6c2e07f2f7",
+    "docker-compose.yml": "8b6203d24692eae84b32ba49de412d03cd2d114f7cc5d1f3c669a22e66867f53",
+    ".env.example": "88bcf591c446684e3bc7ca7b3b60b04ae0c2cda6f9501e4b50c5b02fb513c4f6"
+  },
+  "tests": {
+    "aiPassed": 71,
+    "fallPassed": 48,
+    "integration": "BLOCKED: Docker Desktop Linux engine unavailable"
+  },
+  "dataset": {
+    "clips": 103,
+    "fall": 72,
+    "nonFall": 31,
+    "fallClipsWithConfirmationTail": 39,
+    "clipTP": 4,
+    "clipFP": 0,
+    "clipFN": 68,
+    "clipTN": 31,
+    "candidateFallClips": 33,
+    "inferenceP95Ms": 65.67478000051779
+  },
+  "baseline15sEvidence": "Preserved separately; not a 3s acceptance result."
+}

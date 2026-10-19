@@ -1,0 +1,209 @@
+#1 [internal] load local bake definitions
+#1 reading from stdin 588B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 722B 0.1s done
+#2 DONE 0.1s
+
+#3 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#3 ...
+
+#4 [auth] docker/dockerfile:pull token for registry-1.docker.io
+#4 DONE 0.0s
+
+#3 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#3 DONE 2.3s
+
+#5 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+#5 resolve docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e 0.1s done
+#5 CACHED
+
+#6 [internal] load metadata for docker.io/library/python:3.11.13-slim-bookworm@sha256:86adf8dbadc3d6e82ee5dd2c74bec2e1c2467cdad47886280501df722372d2e1
+#6 ...
+
+#7 [auth] library/python:pull token for registry-1.docker.io
+#7 DONE 0.0s
+
+#6 [internal] load metadata for docker.io/library/python:3.11.13-slim-bookworm@sha256:86adf8dbadc3d6e82ee5dd2c74bec2e1c2467cdad47886280501df722372d2e1
+#6 DONE 1.5s
+
+#8 [internal] load .dockerignore
+#8 transferring context: 148B 0.0s done
+#8 DONE 0.0s
+
+#9 [internal] load build context
+#9 transferring context: 103.42kB 0.0s done
+#9 DONE 0.1s
+
+#10 [1/6] FROM docker.io/library/python:3.11.13-slim-bookworm@sha256:86adf8dbadc3d6e82ee5dd2c74bec2e1c2467cdad47886280501df722372d2e1
+#10 resolve docker.io/library/python:3.11.13-slim-bookworm@sha256:86adf8dbadc3d6e82ee5dd2c74bec2e1c2467cdad47886280501df722372d2e1 0.1s done
+#10 DONE 0.1s
+
+#11 [2/6] WORKDIR /app
+#11 CACHED
+
+#12 [3/6] RUN apt-get update && apt-get install -y --no-install-recommends     libgl1 libglib2.0-0 libportaudio2     && rm -rf /var/lib/apt/lists/*
+#12 CACHED
+
+#13 [4/6] COPY requirements.txt requirements-runtime.lock ./
+#13 CACHED
+
+#14 [5/6] RUN python -m pip install --require-hashes -r requirements.txt
+#14 4.615 Collecting absl-py==2.5.1 (from -r requirements-runtime.lock (line 7))
+#14 4.807   Downloading absl_py-2.5.1-py3-none-any.whl (137 kB)
+#14 4.892      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 137.7/137.7 kB 1.6 MB/s eta 0:00:00
+#14 4.945 Collecting annotated-doc==0.0.5 (from -r requirements-runtime.lock (line 11))
+#14 4.990   Downloading annotated_doc-0.0.5-py3-none-any.whl (5.3 kB)
+#14 5.040 Collecting annotated-types==0.8.0 (from -r requirements-runtime.lock (line 15))
+#14 5.084   Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+#14 5.167 Collecting anyio==4.15.1 (from -r requirements-runtime.lock (line 19))
+#14 5.213   Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+#14 5.228      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 132.1/132.1 kB 12.9 MB/s eta 0:00:00
+#14 5.627 Collecting cffi==2.1.1 (from -r requirements-runtime.lock (line 25))
+#14 5.690   Downloading cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (217 kB)
+#14 5.707      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 217.8/217.8 kB 17.2 MB/s eta 0:00:00
+#14 5.776 Collecting click==8.5.0 (from -r requirements-runtime.lock (line 127))
+#14 5.831   Downloading click-8.5.0-py3-none-any.whl (125 kB)
+#14 5.839      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 125.3/125.3 kB 28.4 MB/s eta 0:00:00
+#14 5.894 Collecting coloredlogs==15.0.1 (from -r requirements-runtime.lock (line 131))
+#14 5.937   Downloading coloredlogs-15.0.1-py2.py3-none-any.whl (46 kB)
+#14 5.941      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 46.0/46.0 kB 109.7 MB/s eta 0:00:00
+#14 6.075 Collecting contourpy==1.3.3 (from -r requirements-runtime.lock (line 135))
+#14 6.121   Downloading contourpy-1.3.3-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (355 kB)
+#14 6.162      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 355.2/355.2 kB 10.2 MB/s eta 0:00:00
+#14 6.209 Collecting cycler==0.12.1 (from -r requirements-runtime.lock (line 209))
+#14 6.253   Downloading cycler-0.12.1-py3-none-any.whl (8.3 kB)
+#14 6.418 Collecting fastapi==0.143.0 (from -r requirements-runtime.lock (line 213))
+#14 6.459   Downloading fastapi-0.143.0-py3-none-any.whl (144 kB)
+#14 6.473      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 144.7/144.7 kB 14.1 MB/s eta 0:00:00
+#14 6.528 Collecting flatbuffers==25.12.19 (from -r requirements-runtime.lock (line 217))
+#14 6.576   Downloading flatbuffers-25.12.19-py2.py3-none-any.whl (26 kB)
+#14 7.846 Collecting fonttools==4.66.1 (from -r requirements-runtime.lock (line 222))
+#14 7.900   Downloading fonttools-4.66.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (5.4 MB)
+#14 9.158      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.4/5.4 MB 4.4 MB/s eta 0:00:00
+#14 9.245 Collecting h11==0.16.0 (from -r requirements-runtime.lock (line 282))
+#14 9.288   Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+#14 9.399 Collecting httptools==0.9.0 (from -r requirements-runtime.lock (line 286))
+#14 9.443   Downloading httptools-0.9.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (499 kB)
+#14 9.481      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 499.1/499.1 kB 14.6 MB/s eta 0:00:00
+#14 9.562 Collecting humanfriendly==10.0 (from -r requirements-runtime.lock (line 406))
+#14 9.604   Downloading humanfriendly-10.0-py2.py3-none-any.whl (86 kB)
+#14 9.615      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 86.8/86.8 kB 13.4 MB/s eta 0:00:00
+#14 9.688 Collecting idna==3.20 (from -r requirements-runtime.lock (line 410))
+#14 9.733   Downloading idna-3.20-py3-none-any.whl (69 kB)
+#14 9.745      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 69.6/69.6 kB 9.7 MB/s eta 0:00:00
+#14 9.929 Collecting kiwisolver==1.5.1 (from -r requirements-runtime.lock (line 414))
+#14 9.990   Downloading kiwisolver-1.5.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (1.4 MB)
+#14 10.09      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.4/1.4 MB 14.6 MB/s eta 0:00:00
+#14 10.71 Collecting matplotlib==3.11.2 (from -r requirements-runtime.lock (line 557))
+#14 10.76   Downloading matplotlib-3.11.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (9.9 MB)
+#14 11.93      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.9/9.9 MB 8.5 MB/s eta 0:00:00
+#14 12.15 Collecting mediapipe==0.10.32 (from -r requirements-runtime.lock (line 612))
+#14 12.20   Downloading mediapipe-0.10.32-py3-none-manylinux_2_28_x86_64.whl (10.3 MB)
+#14 13.99      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.3/10.3 MB 5.8 MB/s eta 0:00:00
+#14 14.08 Collecting mpmath==1.3.0 (from -r requirements-runtime.lock (line 617))
+#14 14.13   Downloading mpmath-1.3.0-py3-none-any.whl (536 kB)
+#14 14.21      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 536.2/536.2 kB 8.5 MB/s eta 0:00:00
+#14 15.10 Collecting numpy==1.26.4 (from -r requirements-runtime.lock (line 621))
+#14 15.15   Downloading numpy-1.26.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (18.3 MB)
+#14 17.08      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 18.3/18.3 MB 9.2 MB/s eta 0:00:00
+#14 17.63 Collecting onnxruntime==1.20.1 (from -r requirements-runtime.lock (line 665))
+#14 17.72   Downloading onnxruntime-1.20.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (13.3 MB)
+#14 19.16      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.3/13.3 MB 10.4 MB/s eta 0:00:00
+#14 19.41 Collecting opencv-contrib-python==4.10.0.84 (from -r requirements-runtime.lock (line 688))
+#14 19.46   Downloading opencv_contrib_python-4.10.0.84-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (68.7 MB)
+#14 30.79      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 68.7/68.7 MB 6.4 MB/s eta 0:00:00
+#14 31.12 Collecting opentelemetry-api==1.45.1 (from -r requirements-runtime.lock (line 699))
+#14 31.17   Downloading opentelemetry_api-1.45.1-py3-none-any.whl (60 kB)
+#14 31.17      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 60.3/60.3 kB 30.5 MB/s eta 0:00:00
+#14 31.24 Collecting packaging==26.3 (from -r requirements-runtime.lock (line 703))
+#14 31.28   Downloading packaging-26.3-py3-none-any.whl (129 kB)
+#14 31.29      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 130.0/130.0 kB 18.1 MB/s eta 0:00:00
+#14 31.66 Collecting pillow==12.3.0 (from -r requirements-runtime.lock (line 709))
+#14 31.72   Downloading pillow-12.3.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (6.9 MB)
+#14 32.93      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.9/6.9 MB 5.8 MB/s eta 0:00:00
+#14 33.49 Collecting protobuf==7.36.2 (from -r requirements-runtime.lock (line 800))
+#14 33.54   Downloading protobuf-7.36.2-cp310-abi3-manylinux2014_x86_64.whl (343 kB)
+#14 33.59      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 343.2/343.2 kB 7.1 MB/s eta 0:00:00
+#14 33.66 Collecting pycparser==3.11 (from -r requirements-runtime.lock (line 810))
+#14 33.71   Downloading pycparser-3.11-py3-none-any.whl (51 kB)
+#14 33.71      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 51.2/51.2 kB 23.4 MB/s eta 0:00:00
+#14 34.23 Collecting pydantic==2.14.0 (from -r requirements-runtime.lock (line 814))
+#14 34.29   Downloading pydantic-2.14.0-py3-none-any.whl (487 kB)
+#14 34.36      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 487.1/487.1 kB 8.4 MB/s eta 0:00:00
+#14 37.73 Collecting pydantic-core==2.50.0 (from -r requirements-runtime.lock (line 821))
+#14 37.81   Downloading pydantic_core-2.50.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.2 MB)
+#14 38.03      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 10.1 MB/s eta 0:00:00
+#14 38.10 Collecting pydantic-settings==2.15.0 (from -r requirements-runtime.lock (line 960))
+#14 38.14   Downloading pydantic_settings-2.15.0-py3-none-any.whl (69 kB)
+#14 38.15      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 69.4/69.4 kB 10.1 MB/s eta 0:00:00
+#14 38.25 Collecting pyparsing==3.3.3 (from -r requirements-runtime.lock (line 964))
+#14 38.29   Downloading pyparsing-3.3.3-py3-none-any.whl (126 kB)
+#14 38.34      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 126.4/126.4 kB 3.5 MB/s eta 0:00:00
+#14 38.43 Collecting python-dateutil==2.9.0.post0 (from -r requirements-runtime.lock (line 968))
+#14 38.47   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+#14 38.50      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 229.9/229.9 kB 12.3 MB/s eta 0:00:00
+#14 38.58 Collecting python-dotenv==1.2.4 (from -r requirements-runtime.lock (line 972))
+#14 38.63   Downloading python_dotenv-1.2.4-py3-none-any.whl (23 kB)
+#14 38.69 Collecting python-multipart==0.0.32 (from -r requirements-runtime.lock (line 978))
+#14 38.73   Downloading python_multipart-0.0.32-py3-none-any.whl (30 kB)
+#14 38.85 Collecting pyyaml==6.0.3 (from -r requirements-runtime.lock (line 982))
+#14 38.93   Downloading pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (806 kB)
+#14 39.02      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 806.6/806.6 kB 9.4 MB/s eta 0:00:00
+#14 39.08 Collecting six==1.17.0 (from -r requirements-runtime.lock (line 1057))
+#14 39.14   Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+#14 39.22 Collecting sounddevice==0.5.6 (from -r requirements-runtime.lock (line 1061))
+#14 39.28   Downloading sounddevice-0.5.6-py3-none-any.whl (32 kB)
+#14 39.41 Collecting starlette==1.7.0 (from -r requirements-runtime.lock (line 1069))
+#14 39.46   Downloading starlette-1.7.0-py3-none-any.whl (78 kB)
+#14 39.48      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 79.0/79.0 kB 4.4 MB/s eta 0:00:00
+#14 39.56 Collecting sympy==1.14.0 (from -r requirements-runtime.lock (line 1073))
+#14 39.61   Downloading sympy-1.14.0-py3-none-any.whl (6.3 MB)
+#14 40.28      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.3/6.3 MB 9.5 MB/s eta 0:00:00
+#14 40.62 Collecting typing-extensions==4.16.0 (from -r requirements-runtime.lock (line 1077))
+#14 40.67   Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+#14 40.68      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 45.6/45.6 kB 18.7 MB/s eta 0:00:00
+#14 40.73 Collecting typing-inspection==0.4.4 (from -r requirements-runtime.lock (line 1088))
+#14 40.78   Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+#14 40.88 Collecting uvicorn==0.54.0 (from -r requirements-runtime.lock (line 1095))
+#14 40.93   Downloading uvicorn-0.54.0-py3-none-any.whl (87 kB)
+#14 40.94      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 87.4/87.4 kB 7.3 MB/s eta 0:00:00
+#14 41.12 Collecting uvloop==0.23.0 (from -r requirements-runtime.lock (line 1099))
+#14 41.17   Downloading uvloop-0.23.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.0 MB)
+#14 41.56      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.0/4.0 MB 10.1 MB/s eta 0:00:00
+#14 41.74 Collecting watchfiles==1.3.0 (from -r requirements-runtime.lock (line 1162))
+#14 41.78   Downloading watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (458 kB)
+#14 41.84      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 458.4/458.4 kB 8.4 MB/s eta 0:00:00
+#14 42.37 Collecting websockets==17.2 (from -r requirements-runtime.lock (line 1197))
+#14 42.45   Downloading websockets-17.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (225 kB)
+#14 42.49      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 225.0/225.0 kB 8.3 MB/s eta 0:00:00
+#14 43.79 Installing collected packages: mpmath, flatbuffers, websockets, uvloop, typing-extensions, sympy, six, pyyaml, python-multipart, python-dotenv, pyparsing, pycparser, protobuf, pillow, packaging, numpy, kiwisolver, idna, humanfriendly, httptools, h11, fonttools, cycler, click, annotated-types, annotated-doc, absl-py, uvicorn, typing-inspection, python-dateutil, pydantic-core, opentelemetry-api, opencv-contrib-python, contourpy, coloredlogs, cffi, anyio, watchfiles, starlette, sounddevice, pydantic, onnxruntime, matplotlib, pydantic-settings, mediapipe, fastapi
+#14 105.7 Successfully installed absl-py-2.5.1 annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.15.1 cffi-2.1.1 click-8.5.0 coloredlogs-15.0.1 contourpy-1.3.3 cycler-0.12.1 fastapi-0.143.0 flatbuffers-25.12.19 fonttools-4.66.1 h11-0.16.0 httptools-0.9.0 humanfriendly-10.0 idna-3.20 kiwisolver-1.5.1 matplotlib-3.11.2 mediapipe-0.10.32 mpmath-1.3.0 numpy-1.26.4 onnxruntime-1.20.1 opencv-contrib-python-4.10.0.84 opentelemetry-api-1.45.1 packaging-26.3 pillow-12.3.0 protobuf-7.36.2 pycparser-3.11 pydantic-2.14.0 pydantic-core-2.50.0 pydantic-settings-2.15.0 pyparsing-3.3.3 python-dateutil-2.9.0.post0 python-dotenv-1.2.4 python-multipart-0.0.32 pyyaml-6.0.3 six-1.17.0 sounddevice-0.5.6 starlette-1.7.0 sympy-1.14.0 typing-extensions-4.16.0 typing-inspection-0.4.4 uvicorn-0.54.0 uvloop-0.23.0 watchfiles-1.3.0 websockets-17.2
+#14 105.7 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+#14 106.0 
+#14 106.0 [notice] A new release of pip is available: 24.0 -> 26.2.1
+#14 106.0 [notice] To update, run: pip install --upgrade pip
+#14 DONE 114.2s
+
+#15 [6/6] COPY app ./app
+#15 DONE 0.5s
+
+#16 exporting to image
+#16 exporting layers
+#16 exporting layers 43.4s done
+#16 exporting manifest sha256:ff12a7d55972fae30efe4d72d67ada3ebbab84376db83dcfdce12b18365d6126 0.1s done
+#16 exporting config sha256:fb3f305ffccf156bf76ca850c81d12cfed9a348837c97fb1c85bc3c136e88e6a
+#16 exporting config sha256:fb3f305ffccf156bf76ca850c81d12cfed9a348837c97fb1c85bc3c136e88e6a 0.1s done
+#16 exporting attestation manifest sha256:8fb4345e0d4691cbdd5d4aa2439f6da47072f062b0ec225bb2c58820cae9e324
+#16 exporting attestation manifest sha256:8fb4345e0d4691cbdd5d4aa2439f6da47072f062b0ec225bb2c58820cae9e324 0.1s done
+#16 exporting manifest list sha256:a309c4e44aad3a1a618af667c8a0be9a7773921f39ce44c96c74513b7130ac8b
+#16 exporting manifest list sha256:a309c4e44aad3a1a618af667c8a0be9a7773921f39ce44c96c74513b7130ac8b 0.1s done
+#16 naming to docker.io/library/camerai-ai-service:latest 0.0s done
+#16 unpacking to docker.io/library/camerai-ai-service:latest
+#16 unpacking to docker.io/library/camerai-ai-service:latest 41.1s done
+#16 DONE 85.2s
+
+#17 resolving provenance for metadata file
+#17 DONE 0.1s
+ camerai-ai-service  Built

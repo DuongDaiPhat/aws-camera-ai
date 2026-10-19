@@ -1,0 +1,91 @@
+[Nest] 11380  - 19/10/2026, 01.19.45     LOG [MinioStorageService] Khoi tao MinIO Storage Adapter (endpoint: http://localhost:32795, presign: http://localhost:32795, bucket: fall-evidence)
+[Nest] 11380  - 19/10/2026, 01.19.45    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track person camera fall_qa ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 11380  - 19/10/2026, 01.19.45     LOG [FallIncidentRepository] Đã tạo incident té ngã (event: ffcd715d-cc08-4de6-972d-e00ffd862b25, incident: cd727ee4-de3c-4a2f-a5cb-2beacc161eb9, episode: 571f68db-69c5-4139-9e4d-67d6d7ef490f)
+[Nest] 11380  - 19/10/2026, 01.19.45     LOG [AiResultsService] Object:
+{
+  "correlationId": "b9bd7d7a-ed4f-4f5c-8899-a51ee389ea87",
+  "eventId": "ffcd715d-cc08-4de6-972d-e00ffd862b25",
+  "resultId": "fb5ef396-78e7-4e0c-8dfa-7ebcbb7f8f23",
+  "module": "M2A_FALL",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 11380  - 19/10/2026, 01.19.45     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera fall_qa (track: person, event: ffcd715d-cc08-4de6-972d-e00ffd862b25)
+[Nest] 11380  - 19/10/2026, 01.19.46    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track person camera fall_qa ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 11380  - 19/10/2026, 01.19.46   DEBUG [FallIncidentCoordinator] Incident té ngã episode 571f68db-69c5-4139-9e4d-67d6d7ef490f đã được xử lý trước đó (deduped)
+[Nest] 11380  - 19/10/2026, 01.19.46    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track person camera fall_qa ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [FallIncidentRepository] Đã tạo incident té ngã (event: ad084615-d7a6-40fa-bc12-6ccaa15bcd87, incident: 42df45da-ce49-47df-8a29-c86a5bfd73a8, episode: 933f399d-281c-4480-a1fb-26ea689999a5)
+[Nest] 11380  - 19/10/2026, 01.19.46   ERROR [FallIncidentCoordinator] Lỗi khi submit kết quả AI té ngã cho event ad084615-d7a6-40fa-bc12-6ccaa15bcd87: Transient submit failure
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [AiResultsService] Object:
+{
+  "correlationId": "995e0eea-d491-4dc1-a39a-dbcdd9948327",
+  "eventId": "ad084615-d7a6-40fa-bc12-6ccaa15bcd87",
+  "resultId": "88d8d099-9949-4c45-951e-0f7931d1e4fe",
+  "module": "M2A_FALL",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 11380  - 19/10/2026, 01.19.46    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track person camera fall_qa ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 11380  - 19/10/2026, 01.19.46    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track person camera fall_qa ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [FallIncidentRepository] Đã tạo incident té ngã (event: cd6368fa-6471-4f41-80e1-2ae897d770c5, incident: 72dc9d2e-0ee8-4b32-b17b-c4255a26c22a, episode: 0d40baba-de87-45bd-88ea-08f4d26c7fe6)
+[Nest] 11380  - 19/10/2026, 01.19.46    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track person camera fall_qa ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [AiResultsService] Object:
+{
+  "correlationId": "99e6271e-249d-4931-a0a2-c959d8a6514a",
+  "eventId": "cd6368fa-6471-4f41-80e1-2ae897d770c5",
+  "resultId": "f5c673a5-9e68-4844-9edc-4358aa3b0f68",
+  "module": "M2A_FALL",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [AiResultsService] Object:
+{
+  "correlationId": "99e6271e-249d-4931-a0a2-c959d8a6514a",
+  "eventId": "cd6368fa-6471-4f41-80e1-2ae897d770c5",
+  "resultId": "f5c673a5-9e68-4844-9edc-4358aa3b0f68",
+  "module": "M2A_FALL",
+  "disposition": "DUPLICATE"
+}
+
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera fall_qa (track: person, event: cd6368fa-6471-4f41-80e1-2ae897d770c5)
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [AiResultsService] Object:
+{
+  "correlationId": "99e6271e-249d-4931-a0a2-c959d8a6514a",
+  "eventId": "cd6368fa-6471-4f41-80e1-2ae897d770c5",
+  "resultId": "f5c673a5-9e68-4844-9edc-4358aa3b0f68",
+  "module": "M2A_FALL",
+  "disposition": "DUPLICATE"
+}
+
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera fall_qa (track: person, event: cd6368fa-6471-4f41-80e1-2ae897d770c5)
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera fall_qa (track: person, event: cd6368fa-6471-4f41-80e1-2ae897d770c5)
+[Nest] 11380  - 19/10/2026, 01.19.46    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track person camera fall_qa ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [FallIncidentRepository] Đã tạo incident té ngã (event: 2a7eeaa7-a3ce-4af2-bdb4-346a66226c8e, incident: 43619099-3bfa-497a-aaa9-a4ea2cdb1326, episode: c8eb10ca-c935-4f2a-b65f-d47880f711a5)
+[Nest] 11380  - 19/10/2026, 01.19.46   ERROR [FallIncidentCoordinator] Lỗi khi submit kết quả AI té ngã cho event 2a7eeaa7-a3ce-4af2-bdb4-346a66226c8e: Interrupted
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [AiResultsService] Object:
+{
+  "correlationId": "87291732-ab0e-4d64-bba4-d23afcfb3184",
+  "eventId": "2a7eeaa7-a3ce-4af2-bdb4-346a66226c8e",
+  "resultId": "a9b9fe28-e1c2-4337-9c0f-fe0343f5db1a",
+  "module": "M2A_FALL",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 11380  - 19/10/2026, 01.19.46     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+PASS test/fall-runtime.integration.spec.ts (33.656 s)
+  US16/17 production pipeline with PostgreSQL16, MQTT and MinIO
+    √ MQTT envelope → HTTP adapter → incident/receipt/outbox → P1 + SSE + real snapshot URL (505 ms)
+    √ restarts pending delivery with the exact immutable payload even without another camera frame (185 ms)
+    √ serializes concurrent first delivery and preserves one event and one original resultId (172 ms)
+    √ reclaims an expired lease after crash and keeps evidence immutable (567 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        34.251 s
+Ran all test suites.

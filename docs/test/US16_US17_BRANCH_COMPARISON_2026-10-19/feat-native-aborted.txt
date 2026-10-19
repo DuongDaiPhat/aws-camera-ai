@@ -1,0 +1,30 @@
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+W0000 00:00:1792409075.944908    2320 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1792409075.965363    2320 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1792409076.172816   32892 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.
+[1/103] Home_01_video (20).mp4
+[2/103] Coffee_room_01_video (15).mp4
+Traceback (most recent call last):
+  File "D:\hoc tap\project 1\aws-camera-ai\artifacts\run_feat_evaluation.py", line 55, in <module>
+    runpy.run_path(str(harness), run_name="__main__")
+  File "<frozen runpy>", line 291, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\hoc tap\project 1\aws-camera-ai\docs\test\US16_US17_BRANCH_COMPARISON_2026-10-19\comparison-evaluator.py", line 355, in <module>
+    main()
+  File "D:\hoc tap\project 1\aws-camera-ai\docs\test\US16_US17_BRANCH_COMPARISON_2026-10-19\comparison-evaluator.py", line 241, in main
+    clips.append(replay(path, row, estimator, args.sample_fps))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\hoc tap\project 1\aws-camera-ai\docs\test\US16_US17_BRANCH_COMPARISON_2026-10-19\comparison-evaluator.py", line 154, in replay
+    state = tracker.evaluate_frame(
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\.codex\worktrees\us16-us17-feat-eval\aws-camera-ai\services\ai-service\app\services\fall_tracker.py", line 110, in evaluate_frame
+    return self._handle_valid_pose(observed_at, frame_id, keypoints, geometry)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\.codex\worktrees\us16-us17-feat-eval\aws-camera-ai\services\ai-service\app\services\fall_tracker.py", line 235, in _handle_valid_pose
+    return self._step_candidate_state(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\.codex\worktrees\us16-us17-feat-eval\aws-camera-ai\services\ai-service\app\services\fall_tracker.py", line 342, in _step_candidate_state
+    motion_score=motion_score,
+                 ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'motion_score' where it is not associated with a value

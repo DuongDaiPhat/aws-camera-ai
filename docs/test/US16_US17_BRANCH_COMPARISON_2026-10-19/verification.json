@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "clipsEach": 103,
+  "checks": [
+    "Same ordered clips, video/annotation SHA-256, timestamps, sample counts, model and dependency versions",
+    "All shared settings equal in feat-matched and fix; feat native threshold 15s, matched/fix 3s",
+    "Feat sources match hashes and clean branch context; fix source matches historical result hashes",
+    "All clips retained in operational metrics; common error-free cohort uses same clip IDs"
+  ],
+  "commonErrorFreeClips": 87
+}

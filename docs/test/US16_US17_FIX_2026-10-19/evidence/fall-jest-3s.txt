@@ -1,0 +1,39 @@
+[Nest] 5576  - 19/10/2026, 15.59.09    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track track-1 camera cam-livingroom ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 5576  - 19/10/2026, 15.59.09     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera cam-livingroom (track: track-1, event: evt-111)
+[Nest] 5576  - 19/10/2026, 15.59.09   DEBUG [FallIncidentCoordinator] [M2A_CANDIDATE_CANCELLED] Track track-1 trên camera cam-livingroom đã hủy candidate (reason: RECOVERED)
+[Nest] 5576  - 19/10/2026, 15.59.09    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track track-1 camera cam-livingroom ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 5576  - 19/10/2026, 15.59.09   DEBUG [FallIncidentCoordinator] Incident té ngã episode 22222222-2222-4222-8222-222222222222 đã được xử lý trước đó (deduped)
+PASS src/fall-detection/coordinator/fall-incident.coordinator.spec.ts (29.649 s)
+[Nest] 5576  - 19/10/2026, 15.59.12   ERROR [RestAreaEvaluator] Lỗi khi kiểm tra REST_AREA cho camera 11111111-1111-4111-8111-111111111111: DB unavailable
+[Nest] 5576  - 19/10/2026, 15.59.12   ERROR [FallIncidentCoordinator] Fall processing failed for qa-camera/qa-track: DB unavailable
+[Nest] 5576  - 19/10/2026, 15.59.12   ERROR [FallIncidentCoordinator] Lỗi khi submit kết quả AI té ngã cho event event: temporary submit failure
+[Nest] 5576  - 19/10/2026, 15.59.12    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+[Nest] 5576  - 19/10/2026, 15.59.12    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+[Nest] 5576  - 19/10/2026, 15.59.12   DEBUG [PoseFrameConsumer] Bỏ qua pose frame cũ: delay 1.10s > 1s
+[Nest] 5576  - 19/10/2026, 15.59.12   DEBUG [PoseFrameConsumer] Bỏ qua pose frame cũ: delay -0.60s > 1s
+[Nest] 5576  - 19/10/2026, 15.59.12    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track qa-track camera qa-camera ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 5576  - 19/10/2026, 15.59.12    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track qa-track camera qa-camera ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 5576  - 19/10/2026, 15.59.12     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera qa-camera (track: qa-track, event: event)
+PASS test/qa-fall.spec.ts
+PASS src/fall-detection/consumer/pose-frame.consumer.spec.ts
+[Nest] 5576  - 19/10/2026, 15.59.15   ERROR [RestAreaEvaluator] Lỗi khi kiểm tra REST_AREA cho camera cam-1: Database offline
+[Nest] 5576  - 19/10/2026, 15.59.14   DEBUG [PoseFrameConsumer] Bỏ qua pose frame cũ: delay 5.00s > 1s
+[Nest] 5576  - 19/10/2026, 15.59.15   DEBUG [RestAreaEvaluator] Người tại tâm (0.400, 0.400) nằm trong REST_AREA "Giường ngủ" (zone-1)
+PASS src/fall-detection/evaluator/rest-area.evaluator.spec.ts
+PASS src/fall-detection/envelope/pose-frame-envelope.spec.ts
+[Nest] 5576  - 19/10/2026, 15.59.17   ERROR [PoseInferenceAdapter] Lỗi gọi AI Service /pose/fall: Network connection refused
+[Nest] 5576  - 19/10/2026, 15.59.16    WARN [PoseFrameEnvelope] Dữ liệu envelope quá ngắn (< 4 bytes)
+[Nest] 5576  - 19/10/2026, 15.59.16    WARN [PoseFrameEnvelope] Envelope vượt quá giới hạn cho phép (1048586 > 1048576 bytes)
+[Nest] 5576  - 19/10/2026, 15.59.16    WARN [PoseFrameEnvelope] Header length không hợp lệ: 33792 bytes
+[Nest] 5576  - 19/10/2026, 15.59.16    WARN [PoseFrameEnvelope] Header bị cắt xén (4 + 50 > 20)
+[Nest] 5576  - 19/10/2026, 15.59.16    WARN [PoseFrameEnvelope] Lỗi parse JSON header trong envelope: Unexpected token 'o', "not-json{" is not valid JSON
+[Nest] 5576  - 19/10/2026, 15.59.16    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+[Nest] 5576  - 19/10/2026, 15.59.16    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+[Nest] 5576  - 19/10/2026, 15.59.17    WARN [PoseInferenceAdapter] AI Service /pose/fall trả về HTTP 500: Internal Server Error
+PASS src/fall-detection/adapter/pose-inference.adapter.spec.ts
+
+Test Suites: 6 passed, 6 total
+Tests:       48 passed, 48 total
+Snapshots:   0 total
+Time:        38.55 s
+Ran all test suites matching /fall-detection|qa-fall/i.

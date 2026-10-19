@@ -1,0 +1,23 @@
+{
+  "ai-tests.txt": "261d20c2f0c6a59c1edc647a0fa2f2ca511f5d8f1e2f920d44d5d8c764803fb1",
+  "bridge-tests.txt": "35468b2f00d2eb51a7f91fe7a77f3a4c2580be16a82de1f8e41e8dc8e2950a25",
+  "clip-results.csv": "f7c3537870144fbd100fa779679b287d810eabfd747c58292e89ac5e51dfe8e6",
+  "configuration.csv": "b23fa46b89388c57d3bd5521f4db2cf23370c288705ba69471d32ff4da67a7e7",
+  "dataset-inventory.json": "3b3ba6414837ef20cb9eaf09a4c487bdcc3ee1ca41e57f74803cdb0e2f08cfcc",
+  "dataset-results.json": "66c41666517809b985236313f943a38041f9835cd8c7d3cfb9f60392c2d4a6b2",
+  "dataset-run.txt": "eed6365041d5b2978779bf69bb191fe4875decda3ca7fa4a6e32410c102c3062",
+  "dependency-smoke-linux.txt": "36e725063c246e386b1f2b0b0c84556bf4628e083fd77697937c1c6d24789a03",
+  "docker-build.txt": "8165258fa6eb475238312e1409d4c012620c9c8f6aefb2177dd9ba2bba750271",
+  "env-after.json": "81958a2aad642f75d6a280e7c51860b5146b0b7d50bd9332148cf840fe1ecfe0",
+  "env-before.json": "476372f221bfe8d107ffaa13743a5d46fbaa84bb96c1b0060645130d0b49b2b9",
+  "evaluator-manifest-run.py": "f269d2a977012d2c41808ca2806f5afb2dbea01fb1d464e44c5adb0e1e8028ce",
+  "metrics.csv": "6f13620c78cbd68702b3287436e82ab4842c7cc923e21c7b7ea16356369a69db",
+  "pipeline-after.json": "39a5e2adb97c9be7fa4b92b4596dedce39c21c1d03533dffaa6a526acbfbdef9",
+  "REPORT.md": "9de6685672afbfcf8a8d67a9f80e8f198f6c85dd0d605afed054fef13b9c32bc",
+  "runtime-after.json": "493e620f957af67c5a135ecc56db23af4385f39bf90dc8b3c850fd9e52e7dc55",
+  "runtime-before.json": "493e620f957af67c5a135ecc56db23af4385f39bf90dc8b3c850fd9e52e7dc55",
+  "runtime-final.json": "493e620f957af67c5a135ecc56db23af4385f39bf90dc8b3c850fd9e52e7dc55",
+  "supplementary-results.json": "dc5075ff4c0c9599430a4543e76528ff298e9a6c7d15d1ae8e5d87a5b271d38d",
+  "supplementary-run.txt": "86b6bcb23042732b436e1616a5330887d572a7e75685c3fcfb8ae08a80040fa2",
+  "verification.json": "8ad35f70adf0b2429d12ee96be18c24932625ba1ea66186e7c0e2f23969ff3d2"
+}

@@ -1,0 +1,53 @@
+{
+  "feat": {
+    "variant": "matched",
+    "checkout": "C:\\Users\\ADMIN\\.codex\\worktrees\\us16-us17-feat-eval\\aws-camera-ai",
+    "branch": "feat/US-16-US-17-pose-fall",
+    "commit": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+    "trackedChanges": "",
+    "imports": {
+      "PoseEstimator": "C:\\Users\\ADMIN\\.codex\\worktrees\\us16-us17-feat-eval\\aws-camera-ai\\services\\ai-service\\app\\services\\pose_estimator.py",
+      "FallTracker": "C:\\Users\\ADMIN\\.codex\\worktrees\\us16-us17-feat-eval\\aws-camera-ai\\services\\ai-service\\app\\services\\fall_tracker.py"
+    },
+    "nativeConfiguration": {
+      "m2a_enabled": true,
+      "pose_model_path": "artifacts/models/pose_landmarker_lite.task",
+      "pose_model_version": "pose-landmarker-lite-v1",
+      "pose_min_visibility": 0.5,
+      "pose_min_association_iou": 0.3,
+      "pose_roi_padding_ratio": 0.1,
+      "fall_history_frame_count": 10,
+      "fall_history_max_seconds": 3.0,
+      "fall_torso_angle_threshold_deg": 45.0,
+      "fall_center_drop_ratio": 0.2,
+      "fall_immobility_seconds": 15.0,
+      "fall_motion_speed_threshold": 0.05,
+      "fall_max_valid_frame_gap_seconds": 1.2,
+      "fall_missing_pose_grace_seconds": 5.0,
+      "fall_recovery_angle_deg": 60.0,
+      "fall_candidate_max_seconds": 60.0,
+      "fall_prone_consecutive_frames": 3,
+      "pose_track_ttl_seconds": 60.0,
+      "pose_max_concurrent_requests": 2,
+      "pose_max_tracks": 128,
+      "pose_max_image_bytes": 1048576,
+      "pose_max_image_pixels": 2073600,
+      "pose_request_timeout_ms": 2000,
+      "pose_track_sweep_interval_ms": 250
+    },
+    "harnessSha256": "5fb5699f266c81067ddb3c25de60f4c42728ddfb1f258f59bc06f32a5f4c995f"
+  },
+  "fix": {
+    "branch": "fix/US-16-US-17-pose-fall",
+    "headCommit": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+    "workingTreeModified": true,
+    "evaluatedSourceSha256": {
+      "D:\\hoc tap\\project 1\\aws-camera-ai\\services\\ai-service\\scripts\\evaluate_fall_dataset.py": "f269d2a977012d2c41808ca2806f5afb2dbea01fb1d464e44c5adb0e1e8028ce",
+      "app\\services\\pose_estimator.py": "b0bf02819226e8843f067dced53268ddfd6280a15a069ff0582c0a2f3d736feb",
+      "app\\services\\pose_geometry.py": "0e634d649c837f960d3946c308d198992223acb5e5573bb4925c7cece0ae443f",
+      "app\\services\\fall_tracker.py": "9252b0a467bfdc40094db409684497e0cecd56d522426164eff3922b19c0067d",
+      "app\\config.py": "0628d5731a3a9ee970f441e299ebffb6ad4b66279fa0bf503d833253bb20e064"
+    },
+    "referenceReport": "../US16_US17_DATASET_EVAL_2026-10-19/REPORT.md"
+  }
+}

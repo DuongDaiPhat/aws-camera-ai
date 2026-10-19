@@ -1,0 +1,76 @@
+FAIL test/fall-runtime.integration.spec.ts (52.82 s)
+  US16/17 production pipeline with PostgreSQL16, MQTT and MinIO
+    × MQTT envelope → HTTP adapter → incident/receipt/outbox → P1 + SSE + real snapshot URL (3 ms)
+    × restarts pending delivery with the exact immutable payload even without another camera frame
+    × serializes concurrent first delivery and preserves one event and one original resultId (1 ms)
+    × reclaims an expired lease after crash and keeps evidence immutable
+
+  ● US16/17 production pipeline with PostgreSQL16, MQTT and MinIO › MQTT envelope → HTTP adapter → incident/receipt/outbox → P1 + SSE + real snapshot URL
+
+    Could not find a working container runtime strategy
+
+      54 |
+      55 |   beforeAll(async () => {
+    > 56 |     const postgres = await new GenericContainer('postgres:16-alpine')
+         |                      ^
+      57 |       .withEnvironment({
+      58 |         POSTGRES_DB: 'fall_test',
+      59 |         POSTGRES_USER: 'qa',
+
+      at getContainerRuntimeClient (../../node_modules/.pnpm/testcontainers@12.1.0/node_modules/testcontainers/build/container-runtime/clients/client.js:67:11)
+      at GenericContainer.start (../../node_modules/.pnpm/testcontainers@12.1.0/node_modules/testcontainers/build/generic-container/generic-container.js:62:24)
+      at Object.<anonymous> (test/fall-runtime.integration.spec.ts:56:22)
+
+  ● US16/17 production pipeline with PostgreSQL16, MQTT and MinIO › restarts pending delivery with the exact immutable payload even without another camera frame
+
+    Could not find a working container runtime strategy
+
+      54 |
+      55 |   beforeAll(async () => {
+    > 56 |     const postgres = await new GenericContainer('postgres:16-alpine')
+         |                      ^
+      57 |       .withEnvironment({
+      58 |         POSTGRES_DB: 'fall_test',
+      59 |         POSTGRES_USER: 'qa',
+
+      at getContainerRuntimeClient (../../node_modules/.pnpm/testcontainers@12.1.0/node_modules/testcontainers/build/container-runtime/clients/client.js:67:11)
+      at GenericContainer.start (../../node_modules/.pnpm/testcontainers@12.1.0/node_modules/testcontainers/build/generic-container/generic-container.js:62:24)
+      at Object.<anonymous> (test/fall-runtime.integration.spec.ts:56:22)
+
+  ● US16/17 production pipeline with PostgreSQL16, MQTT and MinIO › serializes concurrent first delivery and preserves one event and one original resultId
+
+    Could not find a working container runtime strategy
+
+      54 |
+      55 |   beforeAll(async () => {
+    > 56 |     const postgres = await new GenericContainer('postgres:16-alpine')
+         |                      ^
+      57 |       .withEnvironment({
+      58 |         POSTGRES_DB: 'fall_test',
+      59 |         POSTGRES_USER: 'qa',
+
+      at getContainerRuntimeClient (../../node_modules/.pnpm/testcontainers@12.1.0/node_modules/testcontainers/build/container-runtime/clients/client.js:67:11)
+      at GenericContainer.start (../../node_modules/.pnpm/testcontainers@12.1.0/node_modules/testcontainers/build/generic-container/generic-container.js:62:24)
+      at Object.<anonymous> (test/fall-runtime.integration.spec.ts:56:22)
+
+  ● US16/17 production pipeline with PostgreSQL16, MQTT and MinIO › reclaims an expired lease after crash and keeps evidence immutable
+
+    Could not find a working container runtime strategy
+
+      54 |
+      55 |   beforeAll(async () => {
+    > 56 |     const postgres = await new GenericContainer('postgres:16-alpine')
+         |                      ^
+      57 |       .withEnvironment({
+      58 |         POSTGRES_DB: 'fall_test',
+      59 |         POSTGRES_USER: 'qa',
+
+      at getContainerRuntimeClient (../../node_modules/.pnpm/testcontainers@12.1.0/node_modules/testcontainers/build/container-runtime/clients/client.js:67:11)
+      at GenericContainer.start (../../node_modules/.pnpm/testcontainers@12.1.0/node_modules/testcontainers/build/generic-container/generic-container.js:62:24)
+      at Object.<anonymous> (test/fall-runtime.integration.spec.ts:56:22)
+
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 4 total
+Snapshots:   0 total
+Time:        55.76 s
+Ran all test suites.

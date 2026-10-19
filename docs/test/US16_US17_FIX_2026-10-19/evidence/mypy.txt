@@ -1,0 +1,10 @@
+app\services\face_collection.py:57: error: Unexpected keyword argument "owner_scope_id" for "SyncResponse"; did you mean "ownerScopeId"?  [call-arg]
+app\services\face_embedder.py:51: error: Unexpected keyword argument "model_version" for "EmbedResponse"; did you mean "modelVersion"?  [call-arg]
+app\services\face_matcher.py:49: error: Unexpected keyword argument "request_id" for "MatchResponse"; did you mean "requestId"?  [call-arg]
+app\services\face_matcher.py:49: error: Unexpected keyword argument "collection_version" for "MatchResponse"; did you mean "collectionVersion"?  [call-arg]
+app\services\face_matcher.py:49: error: Unexpected keyword argument "person_status" for "MatchResponse"; did you mean "personStatus"?  [call-arg]
+app\services\face_matcher.py:49: error: Unexpected keyword argument "threshold_used" for "MatchResponse"; did you mean "thresholdUsed"?  [call-arg]
+app\services\face_matcher.py:49: error: Unexpected keyword argument "model_version" for "MatchResponse"; did you mean "modelVersion"?  [call-arg]
+app\services\face_matcher.py:49: error: Unexpected keyword argument "processed_at" for "MatchResponse"; did you mean "processedAt"?  [call-arg]
+app\services\face_matcher.py:49: error: Unexpected keyword argument "bounding_box" for "MatchResponse"; did you mean "boundingBox"?  [call-arg]
+Found 9 errors in 3 files (checked 17 source files)
