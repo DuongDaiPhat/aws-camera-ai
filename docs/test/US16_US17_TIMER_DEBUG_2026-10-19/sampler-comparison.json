@@ -1,0 +1,6 @@
+{
+  "scope": "simulation of sampler on captured real metadata timestamps, not a live post-deploy measurement",
+  "metadataFrames": 86,
+  "oldSamplerFrames": 51,
+  "newSamplerFrames": 81
+}

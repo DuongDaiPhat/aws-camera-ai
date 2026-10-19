@@ -1,0 +1,1 @@
+{"exactNamedSharedMemoryCopy": "PASS", "I420ToJpeg": "PASS", "xyxyBbox": "PASS", "captureTimestampPreserved": "PASS", "nonRetainedQos0": "PASS", "scope": "synthetic shared-memory integration inside pinned Frigate container; not a live camera replay"}

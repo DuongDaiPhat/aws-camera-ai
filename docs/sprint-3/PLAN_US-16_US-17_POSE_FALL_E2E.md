@@ -2,12 +2,15 @@
 
 > Sprint 3 · Một người phụ trách E2E (E theo backlog) · Một AI Agent duy nhất.
 > Ngày lập: 09/10/2026 · Baseline khảo sát: commit `865dc6e`.
+> Đối chiếu cấu hình và đánh giá dataset ngày 19/10/2026: [báo cáo thực thi](../test/US16_US17_DATASET_EVAL_2026-10-19/REPORT.md). Cấu hình runtime đúng baseline không đồng nghĩa mô hình đạt chất lượng hoặc đã qua nghiệm thu E2E.
 > US-16: 5 SP; US-17: 3 SP theo backlog hiện có. Không tự suy ra số issue GitHub.
 > Đây là kế hoạch triển khai, chưa phải xác nhận tính năng đã chạy hoặc hai spec đã được merge/chốt trong repository.
 
+> Cập nhật yêu cầu ngày 19/10/2026: ngưỡng mặc định xác nhận đổi từ hơn 15 giây sang **hơn 3 giây** bất động liên tục. Đúng 3,000 giây chưa xác nhận; missing grace vẫn 5 giây.
+
 ## 1. Mục tiêu, phạm vi và tài liệu bắt buộc
 
-Triển khai trọn luồng: Frigate cung cấp chuỗi ảnh có người → MediaPipe trích xuất 33 landmark → theo dõi candidate theo người/camera → xác nhận bất động liên tục trên 15 giây → lưu `FALL_DETECTED`, priority `P1` → escalation/Telegram hiện có → dashboard/SSE và xác nhận của người dùng.
+Triển khai trọn luồng: Frigate cung cấp chuỗi ảnh có người → MediaPipe trích xuất 33 landmark → theo dõi candidate theo người/camera → xác nhận bất động liên tục trên 3 giây → lưu `FALL_DETECTED`, priority `P1` → escalation/Telegram hiện có → dashboard/SSE và xác nhận của người dùng.
 
 Người phụ trách làm toàn bộ contract, dependency, dữ liệu frame, inference, backend, UI, test và tài liệu bằng cùng một AI Agent. Không chia FE/BE/AI cho nhiều người hoặc chạy subagent. Reviewer kiểm tra và nghiệm thu theo quy trình Git; reviewer không phải người triển khai thứ hai.
 
@@ -24,32 +27,32 @@ Chỉ triển khai M2a. Không thêm M2b, M3, wellness, nhà cung cấp AI mới
 
 ### Acceptance criteria giữ nguyên
 
-| ID     | Given / When                                                                            | Then                                                                                              |
-| ------ | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| AC16-1 | Chuỗi frame Frigate chứa `person`; MediaPipe Pose trả 33 landmark                       | Tính tỷ lệ height/width bounding box, góc trục thân với phương ngang và độ cao trọng tâm đại diện |
-| AC16-2 | Góc trục thân `< 30°` và trọng tâm hạ thấp đột ngột so với 10 frame trước               | Tạo candidate FALL và bắt đầu theo dõi thời gian                                                  |
-| AC16-3 | Không trích xuất được pose, bị che khuất hoặc ra khỏi ảnh                               | Giữ candidate tối đa 5 giây rồi hủy; không tạo cảnh báo từ dữ liệu thiếu                          |
-| AC17-1 | Candidate có tư thế bất thường liên tục `> 15 giây` và chuyển động landmark dưới ngưỡng | Tạo đúng một sự kiện `FALL_DETECTED`, priority `P1`, đi qua luồng cảnh báo hiện có                |
-| AC17-2 | Người đứng dậy trong 15 giây                                                            | Hủy candidate, chỉ log nội bộ M2a, không tạo cảnh báo té ngã                                      |
-| AC17-3 | Người nằm trên giường/sofa thuộc `REST_AREA` đã đánh dấu                                | Không tạo cảnh báo té ngã                                                                         |
+| ID     | Given / When                                                                           | Then                                                                                              |
+| ------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| AC16-1 | Chuỗi frame Frigate chứa `person`; MediaPipe Pose trả 33 landmark                      | Tính tỷ lệ height/width bounding box, góc trục thân với phương ngang và độ cao trọng tâm đại diện |
+| AC16-2 | Góc trục thân `< 30°` và trọng tâm hạ thấp đột ngột so với 10 frame trước              | Tạo candidate FALL và bắt đầu theo dõi thời gian                                                  |
+| AC16-3 | Không trích xuất được pose, bị che khuất hoặc ra khỏi ảnh                              | Giữ candidate tối đa 5 giây rồi hủy; không tạo cảnh báo từ dữ liệu thiếu                          |
+| AC17-1 | Candidate có tư thế bất thường liên tục `> 3 giây` và chuyển động landmark dưới ngưỡng | Tạo đúng một sự kiện `FALL_DETECTED`, priority `P1`, đi qua luồng cảnh báo hiện có                |
+| AC17-2 | Người đứng dậy trong 3 giây                                                            | Hủy candidate, chỉ log nội bộ M2a, không tạo cảnh báo té ngã                                      |
+| AC17-3 | Người nằm trên giường/sofa thuộc `REST_AREA` đã đánh dấu                               | Không tạo cảnh báo té ngã                                                                         |
 
-Quy tắc biên: đúng 15,000 giây chưa xác nhận; phải lớn hơn 15. Đúng 30° không đáp ứng điều kiện `< 30°`. Tại thời điểm hết 5 giây thiếu pose, hủy candidate. Priority `P1` là mức sự kiện, khác với persona P1 là người giám sát.
+Quy tắc biên: đúng 3,000 giây chưa xác nhận; phải lớn hơn 3. Đúng 30° không đáp ứng điều kiện `< 30°`. Tại thời điểm hết 5 giây thiếu pose, hủy candidate. Priority `P1` là mức sự kiện, khác với persona P1 là người giám sát.
 
 ## 2. Hiện trạng và các quyết định kiến trúc
 
 ### 2.1. Thành phần dùng lại
 
-| Thành phần       | Hiện trạng đã khảo sát                                                      | Quyết định                                                                 |
-| ---------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| AI API           | `POST /pose/fall`, `evaluateFall`, `FallResponse` đã có trong spec          | Hiện thực endpoint này; không thêm `/fall/detect` trùng chức năng          |
-| AI runtime       | `app/main.py` mới include health/face; `config.py` có ngưỡng 15 giây và 30° | Thêm router/service M2a riêng, không sửa thuật toán M1                     |
-| Nhãn và priority | `FALL_DETECTED`, `M2A_FALL`, P1 đã có; migration seed có rule FALL          | Không thêm enum hoặc sửa migration lịch sử                                 |
-| Nhận kết quả AI  | `AiResultsService`, receipts, aggregator, outbox, internal token đã có      | Dùng lại để lưu kết quả, phát SSE và gọi escalation                        |
-| Vùng nghỉ        | Zone đã có `REST_AREA`, polygon và trạng thái bật/tắt                       | Dùng dữ liệu vùng hiện có; không tạo hệ quản lý zone thứ hai               |
-| Frame telemetry  | Bridge Frigate 0.18 phát camera/track/box/timestamp, không phát ảnh         | Bổ sung đường ảnh dành riêng M2a, giữ nguyên đường metadata và live player |
-| Ảnh M1           | `FrigateMediaAdapter.getCroppedSnapshot()` lấy snapshot của event           | Không dùng ảnh này làm chuỗi thời gian M2a: ảnh event có thể lặp/cũ        |
-| Backend queue    | Redis/BullMQ đã có                                                          | Không thêm broker/hàng đợi/framework mới; M2a có worker và giới hạn riêng  |
-| UI               | Event list/detail, AI labels, SSE, confirmation đã có                       | Hiển thị FALL và bằng chứng tối thiểu trong UI hiện có                     |
+| Thành phần       | Hiện trạng đã khảo sát                                                     | Quyết định                                                                 |
+| ---------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| AI API           | `POST /pose/fall`, `evaluateFall`, `FallResponse` đã có trong spec         | Hiện thực endpoint này; không thêm `/fall/detect` trùng chức năng          |
+| AI runtime       | `app/main.py` mới include health/face; `config.py` có ngưỡng 3 giây và 30° | Thêm router/service M2a riêng, không sửa thuật toán M1                     |
+| Nhãn và priority | `FALL_DETECTED`, `M2A_FALL`, P1 đã có; migration seed có rule FALL         | Không thêm enum hoặc sửa migration lịch sử                                 |
+| Nhận kết quả AI  | `AiResultsService`, receipts, aggregator, outbox, internal token đã có     | Dùng lại để lưu kết quả, phát SSE và gọi escalation                        |
+| Vùng nghỉ        | Zone đã có `REST_AREA`, polygon và trạng thái bật/tắt                      | Dùng dữ liệu vùng hiện có; không tạo hệ quản lý zone thứ hai               |
+| Frame telemetry  | Bridge Frigate 0.18 phát camera/track/box/timestamp, không phát ảnh        | Bổ sung đường ảnh dành riêng M2a, giữ nguyên đường metadata và live player |
+| Ảnh M1           | `FrigateMediaAdapter.getCroppedSnapshot()` lấy snapshot của event          | Không dùng ảnh này làm chuỗi thời gian M2a: ảnh event có thể lặp/cũ        |
+| Backend queue    | Redis/BullMQ đã có                                                         | Không thêm broker/hàng đợi/framework mới; M2a có worker và giới hạn riêng  |
+| UI               | Event list/detail, AI labels, SSE, confirmation đã có                      | Hiển thị FALL và bằng chứng tối thiểu trong UI hiện có                     |
 
 ### 2.2. Chốt trách nhiệm
 
@@ -215,7 +218,7 @@ Kiểm tra pose thuộc track bằng extent landmark và bbox: tối thiểu ove
 
 ## 6. Chốt đặc trưng hình học và các ngưỡng ban đầu
 
-Các giá trị ngoài 15 giây, 5 giây, 30° và history 10 frame là **baseline kỹ thuật để bắt đầu calibration**, không phải kết quả tối ưu đã đo. Tất cả đọc từ Settings/ConfigService và ghi `.env.example`, được chốt lại cùng phiên bản policy trước nghiệm thu.
+Các giá trị ngoài 3 giây, 5 giây, 30° và history 10 frame là **baseline kỹ thuật để bắt đầu calibration**, không phải kết quả tối ưu đã đo. Tất cả đọc từ Settings/ConfigService và ghi `.env.example`, được chốt lại cùng phiên bản policy trước nghiệm thu.
 
 ### 6.1. Hệ tọa độ và công thức
 
@@ -244,14 +247,14 @@ Các giá trị ngoài 15 giây, 5 giây, 30° và history 10 frame là **baseli
 | `FALL_HISTORY_MAX_SECONDS`              | 3,0                 | History không được kéo dài vô hạn khi FPS thấp                 |
 | `FALL_TORSO_ANGLE_THRESHOLD_DEG`        | 30                  | Điều kiện nghiêm ngặt `<`                                      |
 | `FALL_CENTER_DROP_RATIO`                | 0,20                | Drop tối thiểu tính theo chiều cao baseline                    |
-| `FALL_IMMOBILITY_SECONDS`               | 15                  | Điều kiện nghiêm ngặt `>`                                      |
+| `FALL_IMMOBILITY_SECONDS`               | 3                   | Điều kiện nghiêm ngặt `>`                                      |
 | `FALL_MOTION_SPEED_THRESHOLD`           | 0,05                | Bất động khi motionScore `<` ngưỡng                            |
 | `FALL_MAX_VALID_FRAME_GAP_SECONDS`      | 0,60                | Gap lớn hơn làm mất continuity                                 |
 | `FALL_MISSING_POSE_GRACE_SECONDS`       | 5                   | Grace giữ identity candidate, không giữ timer bất động         |
 | `FALL_RECOVERY_ANGLE_DEG`               | 60                  | Tư thế dựng thân trở lại; đứng quan sát hợp lệ hủy candidate   |
 | `FALL_CANDIDATE_MAX_SECONDS`            | 60                  | TTL candidate chưa xác nhận, tránh giữ vô hạn                  |
 | `POSE_TRACK_TTL_SECONDS`                | 60                  | Dọn track không còn quan sát; không thay grace 5 giây          |
-| `POSE_SAMPLE_FPS`                       | 5                   | Sample publisher                                               |
+| `POSE_SAMPLE_FPS`                       | 5                   | Compose ánh xạ sang `FRIGATE_POSE_MAX_FPS` của publisher       |
 | `POSE_MAX_CONCURRENT_REQUESTS`          | 2                   | Semaphore inference riêng, không chiếm quota M1                |
 | `POSE_MAX_TRACKS`                       | 128                 | Giới hạn memory/history, eviction có metrics                   |
 | `POSE_MAX_IMAGE_BYTES`                  | 1048576             | Đồng bộ giới hạn transport/API                                 |
@@ -259,7 +262,9 @@ Các giá trị ngoài 15 giây, 5 giây, 30° và history 10 frame là **baseli
 | `POSE_REQUEST_TIMEOUT_MS`               | 2000                | Timeout HTTP; lỗi/gap làm mất continuity                       |
 | `POSE_TRACK_SWEEP_INTERVAL_MS`          | 250                 | Cleanup grace/TTL ngay cả khi hết frame                        |
 
-Validate ranges và quan hệ threshold lúc startup. Ngưỡng detector/pose và rule escalation là hai bộ cấu hình khác nhau; không dùng `tWaitSeconds` làm 15 giây xác nhận. Config đổi trong runtime cần tạo tracker mới/reset candidate, không nối hai khoảng bằng chứng dùng ngưỡng khác.
+Validate ranges và quan hệ threshold lúc startup. Ngưỡng detector/pose và rule escalation là hai bộ cấu hình khác nhau; không dùng `tWaitSeconds` làm 3 giây xác nhận. Config đổi trong runtime cần tạo tracker mới/reset candidate, không nối hai khoảng bằng chứng dùng ngưỡng khác.
+
+Local test: đặt `M2A_ENABLED=true`, `FRIGATE_POSE_FRAMES_ENABLED=true`; giữ mặc định tắt trong `.env.example`. AI nhận các biến bảng trên qua `docker-compose.yml`, orchestrator nhận `.env`, publisher nhận `POSE_SAMPLE_FPS` qua tên biến riêng. `POSE_MODEL_PATH` trên host trỏ tới file trong `services/ai-service/models`; Compose mount thư mục đó read-only và dùng `/app/models/pose_landmarker_lite.task`. Kiểm tra SHA-256 theo `services/ai-service/model-manifest.json`. Đổi `.env` cần recreate các service bị ảnh hưởng; restart đơn thuần không cập nhật environment của container. Lưu settings thực tế sau recreate để đối chiếu khi replay offline.
 
 ## 7. State machine và thời gian bất động
 
@@ -267,7 +272,7 @@ Validate ranges và quan hệ threshold lúc startup. Ngưỡng detector/pose v�
 | -------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | MONITORING                 | Đủ 10 history; angle/drop đạt; ngoài vùng nghỉ                               | Tạo episode, đóng băng baseline, vào CANDIDATE; chưa có cảnh báo                |
 | CANDIDATE                  | Pose abnormal, motion dưới ngưỡng, dt hợp lệ                                 | Bắt đầu/tiếp tục interval bất động liên tục bằng frameTimestamp                 |
-| CANDIDATE                  | Interval đủ `>15s`, pose hiện tại hợp lệ, vùng nghỉ false                    | Vào CONFIRMED, trả bằng chứng và confirmedAt; orchestrator tạo incident một lần |
+| CANDIDATE                  | Interval đủ `>3s`, pose hiện tại hợp lệ, vùng nghỉ false                     | Vào CONFIRMED, trả bằng chứng và confirmedAt; orchestrator tạo incident một lần |
 | CANDIDATE                  | Đứng dậy: angle `>=60°` ở pose hợp lệ                                        | CANCELLED, reason RECOVERED; chỉ log M2a                                        |
 | CANDIDATE                  | Có chuyển động trên ngưỡng hoặc tư thế không còn abnormal nhưng chưa đứng rõ | Reset immobileSeconds về 0; không cộng dồn interval rời rạc                     |
 | CANDIDATE                  | Thiếu pose/ảnh/assignment, gap quá ngưỡng                                    | Giữ identity candidate tối đa 5s; reset interval bất động ngay; không xác nhận  |
@@ -380,11 +385,11 @@ Tên file cuối cùng theo trách nhiệm thực tế, không bắt buộc tạ
 | Geometry  | Box width=0, NaN/Infinity, landmark ngoài ROI, nhiều người overlap         | Reject/thiếu pose có lý do, không dùng người khác                      |
 | History   | 9 frame trước; đủ 10; frame hiện tại không được tính vào baseline          | Chỉ đủ 10 history mới xét drop                                         |
 | Threshold | Angle 29,999°/30°; drop dưới/bằng 0,20                                     | Đúng strict/inclusive đã chốt                                          |
-| Timer     | 14,999s / 15,000s / 15,001s có quan sát hợp lệ                             | Hai trường hợp đầu chưa confirm; trường hợp cuối confirm               |
+| Timer     | 2,999s / 3,000s / 3,001s có quan sát hợp lệ                                | Hai trường hợp đầu chưa confirm; trường hợp cuối confirm               |
 | Motion    | Motion dưới/bằng/trên threshold; FPS/dt khác nhau                          | Bằng hoặc trên không bất động; dt chuẩn hóa đúng                       |
-| Motion    | Bất động 8s, chuyển động, bất động 8s                                      | Không cộng thành 16s                                                   |
+| Motion    | Bất động 2s, chuyển động, bất động 2s                                      | Không cộng thành 4s                                                    |
 | Recovery  | Đứng trước ngưỡng; đứng khi đã có khoảng abnormal chưa đủ                  | Hủy, chỉ log M2a; không nhãn FALL                                      |
-| Missing   | Mất pose khi đã bất động 14s; chờ 2s                                       | Không confirm bằng dữ liệu thiếu                                       |
+| Missing   | Mất pose khi đã bất động 2,8s; chờ 2s                                      | Không confirm bằng dữ liệu thiếu                                       |
 | Missing   | Pose trở lại ở 4,9s; đúng 5s; không còn request nào                        | Trước grace: interval mới; đúng grace/không request: sweep hủy         |
 | Identity  | Hai camera cùng trackId; hai track cùng camera; track/session đổi          | History độc lập; không nối thời gian/pose                              |
 | Ordering  | Duplicate, out-of-order, concurrent requests, clock lùi                    | Không cộng frame/time, không đua state                                 |
@@ -394,7 +399,7 @@ Tên file cuối cùng theo trách nhiệm thực tế, không bắt buộc tạ
 | HTTP      | Token sai, bbox JSON lỗi, payload lớn, image decode lỗi, model unavailable | 401/422/413/200+error đúng contract                                    |
 | Contract  | Request/response/example từ hai spec, mapping AI→callback                  | CamelCase/null/units đúng; regenerate không có diff còn sót            |
 
-Test thời gian dùng fake clock/frameTimestamp, không sleep 15 giây cho mọi unit test. Fake estimator kiểm tra state machine; ít nhất một integration test dùng model thật để xác minh landmark/transform. Test mock không thay nghiệm thu model/video thật.
+Test thời gian dùng fake clock/frameTimestamp, không sleep 3 giây cho mọi unit test. Fake estimator kiểm tra state machine; ít nhất một integration test dùng model thật để xác minh landmark/transform. Test mock không thay nghiệm thu model/video thật.
 
 ### 11.2. Integration và hồi quy
 
@@ -416,8 +421,8 @@ Hồi quy tối thiểu: US-01/02 MQTT + dedup/media; US-03/04 auth; US-06 list/
 
 Tạo bộ clip có ground truth timestamp/track và checksum; phát qua MediaMTX → Frigate như camera thật. Nghiệm thu bằng clip mô phỏng hoặc diễn viên an toàn, không yêu cầu người nhà tự ngã nguy hiểm.
 
-1. Đứng/đi → ngã ngoài REST_AREA → nằm bất động trên 15s: trước ngưỡng không alert; sau frame hợp lệ vượt ngưỡng có một FALL P1, ảnh đúng người, SSE/Telegram/confirmation hoạt động.
-2. Cúi nhặt đồ hoặc nằm xuống rồi đứng lại dưới 15s: candidate nếu có bị hủy, không notification FALL.
+1. Đứng/đi → ngã ngoài REST_AREA → nằm bất động trên 3s: trước ngưỡng không alert; sau frame hợp lệ vượt ngưỡng có một FALL P1, ảnh đúng người, SSE/Telegram/confirmation hoạt động.
+2. Cúi nhặt đồ hoặc nằm xuống rồi đứng lại dưới 3s: candidate nếu có bị hủy, không notification FALL.
 3. Nằm trên giường/sofa trong REST_AREA trên 20s: không FALL; có thể có event khác độc lập theo rule cũ.
 4. Candidate bị che khuất ở giây 14: không xác nhận trong thời gian mù, hủy sau 5s; pose trở lại trước grace phải đếm interval mới.
 5. Hai người: một đi lại, một ngã; không tráo track hoặc suppress người ngoài vùng do người trong vùng nghỉ.
@@ -472,7 +477,7 @@ Rollback code bằng image/commit trước; schema mới additive giữ để kh
 - [ ] PR dependency merge trước logic; runtime/dev/CI/Docker dùng lock, chỉ một OpenCV distribution, model checksum được chốt.
 - [ ] Cả hai OpenAPI có reservation/namespace/frozen SHA, merge contract trước code; generated types khớp và người làm API khác có quy trình extension rõ ràng.
 - [ ] Đủ 33 output landmark/quality gate, geometry trên ảnh đầy đủ, history 10 frame và điều kiện `<30°`/drop đúng.
-- [ ] `>15s` bất động liên tục mới confirm; thiếu pose không tính thời gian, sweep hủy sau tối đa 5s.
+- [ ] `>3s` bất động liên tục mới confirm; thiếu pose không tính thời gian, sweep hủy sau tối đa 5s.
 - [ ] Đứng lại/cúi/REST_AREA không tạo cảnh báo FALL; đa người/camera không tráo history.
 - [ ] FALL P1 tạo đúng một incident/episode với detectedAt=confirmedAt; retry/crash không nhân bản.
 - [ ] Event M1/M4 đã alert/terminal không chặn FALL riêng; trạng thái/deadline/confirmation cũ giữ đúng hành vi.

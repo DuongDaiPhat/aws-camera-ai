@@ -1,0 +1,43 @@
+........................................................................ [ 98%]
+.                                                                        [100%]
+============================== warnings summary ===============================
+..\..\artifacts\ai-gate-windows\Lib\site-packages\fastapi\testclient.py:1
+  D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_pose_router.py::test_evaluate_fall_timestamp_validation
+  D:\hoc tap\project 1\aws-camera-ai\services\ai-service\app\routers\pose.py:114: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    observed_at = _parse_timestamp(frame_timestamp)
+
+tests/test_pose_router.py::test_evaluate_fall_bbox_validation
+tests/test_pose_router.py::test_nonfinite_bbox_is_rejected
+  D:\hoc tap\project 1\aws-camera-ai\services\ai-service\app\routers\pose.py:115: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    bbox_dict = _parse_bbox(person_bounding_box)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============================== tests coverage ================================
+______________ coverage: platform win32, python 3.11.13-final-0 _______________
+
+Name                                    Stmts   Miss  Cover   Missing
+---------------------------------------------------------------------
+app\__init__.py                             0      0   100%
+app\config.py                              55      0   100%
+app\main.py                                26      9    65%   28-30, 35-41
+app\models\face.py                         54      0   100%
+app\models\pose.py                         42      0   100%
+app\routers\__init__.py                     0      0   100%
+app\routers\face.py                        58      7    88%   30, 35, 50-51, 70-71, 89
+app\routers\health.py                      16      0   100%
+app\routers\pose.py                        86      7    92%   42, 57, 87, 120, 169, 194-195
+app\services\embedding_codec.py            21      0   100%
+app\services\face_collection.py            35      0   100%
+app\services\face_embedder.py              90      9    90%   31-37, 44, 55, 63-64, 78-79, 89
+app\services\face_matcher.py               72      6    92%   47, 64-65, 86-87, 96
+app\services\fall_tracker.py              211     29    86%   153-156, 178-188, 224, 290-293, 370-371, 377-384, 410, 559-561, 566
+app\services\fall_tracker_registry.py      49      5    90%   54-60, 83, 86
+app\services\pose_estimator.py            121     44    64%   40-51, 54, 88-91, 95-99, 110, 128, 153-172, 195, 209-210, 213-250
+app\services\pose_geometry.py             111     11    90%   142-145, 149-152, 194, 224, 233, 247, 252
+---------------------------------------------------------------------
+TOTAL                                    1047    127    88%
+Required test coverage of 60.0% reached. Total coverage: 87.87%
+73 passed, 4 warnings in 10.53s

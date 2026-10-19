@@ -70,3 +70,12 @@ Verification của snapshot:
 - Typecheck đầy đủ còn lỗi baseline ở repo: fresh compiler so với types HEAD có cùng bộ diagnostics (orchestrator 61, web 9), không thêm lỗi từ contracts mới. Không sửa mã hiện hữu ngoài scope để làm báo cáo xanh.
 - DDL đã kiểm tra tĩnh (transaction, references, uniqueness/lease/snapshot và historical migration diff); ERD có 29 bảng. Docker PostgreSQL không khả dụng trong phiên này, chưa chạy fresh/upgrade/constraint/concurrency trên PostgreSQL 16, chưa apply DB thật.
 - Generated output phải ổn định sau generate lần hai; format/diff/local links được kiểm tra trước bàn giao. Runtime/model/E2E của stories vẫn theo các gate trong plan.
+
+## Cập nhật US16/17 ngày 19/10/2026 — ngưỡng bất động 3 giây
+
+Theo yêu cầu người dùng, default `FALL_IMMOBILITY_SECONDS` và `thresholdSeconds` đổi từ 15 sang 3. Giữ điều kiện strict `>`: đúng 3,000 giây chưa xác nhận; 3,001 giây có thể xác nhận khi đủ bằng chứng. Missing grace vẫn 5 giây. Hai OpenAPI và generated contracts đã được đồng bộ; không đổi shape request/response, DB migration hoặc escalation deadline. Đây là thay đổi hành vi default, chưa merge/release; bằng chứng ngưỡng 15 giây cũ không thay thế retest 3 giây.
+
+| Spec                          | SHA-256 sau thay đổi                                               |
+| ----------------------------- | ------------------------------------------------------------------ |
+| `api/openapi.yaml`            | `21596894ca962dc52c9b10395321822f41cf2f73d49a68a24668aad4cab486f3` |
+| `api/openapi-ai-service.yaml` | `c97ba1836b87d3af7391039670667d20a02883b17aa4317063e7568883bd953c` |

@@ -1,0 +1,755 @@
+TAP version 13
+# Subtest: config.example.yml của Frigate
+    # Subtest: phiên bản
+        # Subtest: ghim image Frigate theo phiên bản cụ thể, không dùng stable/latest
+        ok 1 - ghim image Frigate theo phiên bản cụ thể, không dùng stable/latest
+          ---
+          duration_ms: 0.9073
+          type: 'test'
+          ...
+        # Subtest: version trong config khớp major.minor của image
+        ok 2 - version trong config khớp major.minor của image
+          ---
+          duration_ms: 0.3274
+          type: 'test'
+          ...
+        # Subtest: mount config.yml read-write để Orchestrator đồng bộ cấu hình đã kiểm tra
+        ok 3 - mount config.yml read-write để Orchestrator đồng bộ cấu hình đã kiểm tra
+          ---
+          duration_ms: 0.2996
+          type: 'test'
+          ...
+        # Subtest: config.yml sinh ra bị gitignore
+        ok 4 - config.yml sinh ra bị gitignore
+          ---
+          duration_ms: 0.6731
+          type: 'test'
+          ...
+        # Subtest: DB của Frigate nằm trên một volume được mount
+        ok 5 - DB của Frigate nằm trên một volume được mount
+          ---
+          duration_ms: 0.2206
+          type: 'test'
+          ...
+        1..5
+    ok 1 - phiên bản
+      ---
+      duration_ms: 3.2663
+      type: 'suite'
+      ...
+    # Subtest: US-02 · MQTT
+        # Subtest: bật MQTT và trỏ tới đúng service mosquitto trong compose
+        ok 1 - bật MQTT và trỏ tới đúng service mosquitto trong compose
+          ---
+          duration_ms: 0.2986
+          type: 'test'
+          ...
+        # Subtest: topic sự kiện khớp MQTT_TOPIC_FRIGATE mà orchestrator subscribe
+        ok 2 - topic sự kiện khớp MQTT_TOPIC_FRIGATE mà orchestrator subscribe
+          ---
+          duration_ms: 0.7817
+          type: 'test'
+          ...
+        # Subtest: bật snapshot để message có has_snapshot = true
+        ok 3 - bật snapshot để message có has_snapshot = true
+          ---
+          duration_ms: 0.2828
+          type: 'test'
+          ...
+        1..3
+    ok 2 - US-02 · MQTT
+      ---
+      duration_ms: 1.945
+      type: 'suite'
+      ...
+    # Subtest: US-01 · phát hiện person
+        # Subtest: theo dõi person với min_score theo AC và threshold không thấp hơn min_score
+        ok 1 - theo dõi person với min_score theo AC và threshold không thấp hơn min_score
+          ---
+          duration_ms: 1.3421
+          type: 'test'
+          ...
+        # Subtest: chỉ tạo track khi người xuất hiện liên tục từ 1 giây
+        ok 2 - chỉ tạo track khi người xuất hiện liên tục từ 1 giây
+          ---
+          duration_ms: 0.2379
+          type: 'test'
+          ...
+        # Subtest: max_disappeared dài hơn min_initialized để không cắt một người thành nhiều track
+        ok 3 - max_disappeared dài hơn min_initialized để không cắt một người thành nhiều track
+          ---
+          duration_ms: 0.1164
+          type: 'test'
+          ...
+        # Subtest: fps không vượt 10 theo khuyến nghị của Frigate
+        ok 4 - fps không vượt 10 theo khuyến nghị của Frigate
+          ---
+          duration_ms: 0.0961
+          type: 'test'
+          ...
+        # Subtest: khai detect width và height cùng nhau (Frigate từ chối nếu thiếu một)
+        ok 5 - khai detect width và height cùng nhau (Frigate từ chối nếu thiếu một)
+          ---
+          duration_ms: 0.0836
+          type: 'test'
+          ...
+        # Subtest: khai đúng một detector
+        ok 6 - khai đúng một detector
+          ---
+          duration_ms: 0.0849
+          type: 'test'
+          ...
+        1..6
+    ok 3 - US-01 · phát hiện person
+      ---
+      duration_ms: 2.2149
+      type: 'suite'
+      ...
+    # Subtest: US-01 · tự kết nối lại khi mất luồng
+        # Subtest: phát hiện mất frame và thử lại trong vòng 30 giây theo AC
+        ok 1 - phát hiện mất frame và thử lại trong vòng 30 giây theo AC
+          ---
+          duration_ms: 0.1337
+          type: 'test'
+          ...
+        1..1
+    ok 4 - US-01 · tự kết nối lại khi mất luồng
+      ---
+      duration_ms: 0.2194
+      type: 'suite'
+      ...
+    # Subtest: camera
+        # Subtest: có ít nhất một camera đang bật
+        ok 1 - có ít nhất một camera đang bật
+          ---
+          duration_ms: 0.1905
+          type: 'test'
+          ...
+        # Subtest: tên camera là slug hợp lệ theo DB và OpenAPI
+        ok 2 - tên camera là slug hợp lệ theo DB và OpenAPI
+          ---
+          duration_ms: 0.2907
+          type: 'test'
+          ...
+        # Subtest: mỗi camera có đúng một input vai trò detect
+        ok 3 - mỗi camera có đúng một input vai trò detect
+          ---
+          duration_ms: 0.27
+          type: 'test'
+          ...
+        # Subtest: input RTSP trỏ vào mediamtx với path đã khai trong mediamtx.yml
+        ok 4 - input RTSP trỏ vào mediamtx với path đã khai trong mediamtx.yml
+          ---
+          duration_ms: 0.2717
+          type: 'test'
+          ...
+        # Subtest: không chứa credential trong URL RTSP (NFR-09)
+        ok 5 - không chứa credential trong URL RTSP (NFR-09)
+          ---
+          duration_ms: 0.2134
+          type: 'test'
+          ...
+        # Subtest: zone là đa giác ít nhất 3 điểm với tọa độ chuẩn hóa 0..1
+        ok 6 - zone là đa giác ít nhất 3 điểm với tọa độ chuẩn hóa 0..1
+          ---
+          duration_ms: 0.3582
+          type: 'test'
+          ...
+        1..6
+    ok 5 - camera
+      ---
+      duration_ms: 1.8586
+      type: 'suite'
+      ...
+    1..5
+ok 1 - config.example.yml của Frigate
+  ---
+  duration_ms: 77.0008
+  type: 'suite'
+  ...
+# Subtest: parseCliArgs
+    # Subtest: trả giá trị mặc định khi không truyền tham số
+    ok 1 - trả giá trị mặc định khi không truyền tham số
+      ---
+      duration_ms: 4.7618
+      type: 'test'
+      ...
+    # Subtest: đọc đủ 4 tham số và bỏ qua dấu -- do pnpm chuyển tiếp
+    ok 2 - đọc đủ 4 tham số và bỏ qua dấu -- do pnpm chuyển tiếp
+      ---
+      duration_ms: 0.26
+      type: 'test'
+      ...
+    # Subtest: không làm hỏng DEFAULT_OPTIONS giữa các lần gọi
+    ok 3 - không làm hỏng DEFAULT_OPTIONS giữa các lần gọi
+      ---
+      duration_ms: 0.5804
+      type: 'test'
+      ...
+    # Subtest: báo lỗi khi tham số thiếu giá trị thay vì nuốt tham số kế tiếp làm giá trị
+    ok 4 - báo lỗi khi tham số thiếu giá trị thay vì nuốt tham số kế tiếp làm giá trị
+      ---
+      duration_ms: 0.5962
+      type: 'test'
+      ...
+    # Subtest: báo lỗi khi tham số cuối cùng thiếu giá trị
+    ok 5 - báo lỗi khi tham số cuối cùng thiếu giá trị
+      ---
+      duration_ms: 0.3838
+      type: 'test'
+      ...
+    # Subtest: báo lỗi khi gõ nhầm tên tham số thay vì lặng lẽ nghe mọi camera
+    ok 6 - báo lỗi khi gõ nhầm tên tham số thay vì lặng lẽ nghe mọi camera
+      ---
+      duration_ms: 0.2571
+      type: 'test'
+      ...
+    # Subtest: không nhận tên khóa nội bộ như --timeoutSeconds
+    ok 7 - không nhận tên khóa nội bộ như --timeoutSeconds
+      ---
+      duration_ms: 0.4346
+      type: 'test'
+      ...
+    # Subtest: không nhận thuộc tính kế thừa của Object như --toString, --constructor
+    ok 8 - không nhận thuộc tính kế thừa của Object như --toString, --constructor
+      ---
+      duration_ms: 0.3309
+      type: 'test'
+      ...
+    # Subtest: báo lỗi với đối số không bắt đầu bằng --
+    ok 9 - báo lỗi với đối số không bắt đầu bằng --
+      ---
+      duration_ms: 0.3417
+      type: 'test'
+      ...
+    # Subtest: từ chối --timeout "abc"
+    ok 10 - từ chối --timeout "abc"
+      ---
+      duration_ms: 0.7424
+      type: 'test'
+      ...
+    # Subtest: từ chối --timeout "0"
+    ok 11 - từ chối --timeout "0"
+      ---
+      duration_ms: 0.2612
+      type: 'test'
+      ...
+    # Subtest: từ chối --timeout "-5"
+    ok 12 - từ chối --timeout "-5"
+      ---
+      duration_ms: 0.1354
+      type: 'test'
+      ...
+    # Subtest: từ chối --timeout "NaN"
+    ok 13 - từ chối --timeout "NaN"
+      ---
+      duration_ms: 0.1069
+      type: 'test'
+      ...
+    # Subtest: từ chối --timeout "Infinity"
+    ok 14 - từ chối --timeout "Infinity"
+      ---
+      duration_ms: 0.1024
+      type: 'test'
+      ...
+    # Subtest: từ chối --timeout ""
+    ok 15 - từ chối --timeout ""
+      ---
+      duration_ms: 0.1026
+      type: 'test'
+      ...
+    # Subtest: nhận --timeout là số thập phân
+    ok 16 - nhận --timeout là số thập phân
+      ---
+      duration_ms: 0.2943
+      type: 'test'
+      ...
+    # Subtest: từ chối --timeout vượt giới hạn setTimeout (nếu không sẽ hết giờ ngay lập tức)
+    ok 17 - từ chối --timeout vượt giới hạn setTimeout (nếu không sẽ hết giờ ngay lập tức)
+      ---
+      duration_ms: 0.4593
+      type: 'test'
+      ...
+    # Subtest: nhận --timeout đúng bằng giới hạn và giới hạn không tràn setTimeout
+    ok 18 - nhận --timeout đúng bằng giới hạn và giới hạn không tràn setTimeout
+      ---
+      duration_ms: 0.3016
+      type: 'test'
+      ...
+    1..18
+ok 2 - parseCliArgs
+  ---
+  duration_ms: 12.8887
+  type: 'suite'
+  ...
+# Subtest: validateEventMessage
+    # Subtest: chấp nhận message new thật từ Frigate 0.18
+    ok 1 - chấp nhận message new thật từ Frigate 0.18
+      ---
+      duration_ms: 0.7321
+      type: 'test'
+      ...
+    # Subtest: chấp nhận message update và end hợp lệ
+    ok 2 - chấp nhận message update và end hợp lệ
+      ---
+      duration_ms: 0.3204
+      type: 'test'
+      ...
+    # Subtest: chấp nhận zone có tên và snapshot chưa có
+    ok 3 - chấp nhận zone có tên và snapshot chưa có
+      ---
+      duration_ms: 0.2174
+      type: 'test'
+      ...
+    # Subtest: từ chối payload không phải object: null
+    ok 4 - từ chối payload không phải object: null
+      ---
+      duration_ms: 0.1436
+      type: 'test'
+      ...
+    # Subtest: từ chối payload không phải object: 42
+    ok 5 - từ chối payload không phải object: 42
+      ---
+      duration_ms: 0.0832
+      type: 'test'
+      ...
+    # Subtest: từ chối payload không phải object: "chuoi"
+    ok 6 - từ chối payload không phải object: "chuoi"
+      ---
+      duration_ms: 0.0783
+      type: 'test'
+      ...
+    # Subtest: từ chối payload không phải object: []
+    ok 7 - từ chối payload không phải object: []
+      ---
+      duration_ms: 0.0683
+      type: 'test'
+      ...
+    # Subtest: từ chối payload không phải object: true
+    ok 8 - từ chối payload không phải object: true
+      ---
+      duration_ms: 0.1412
+      type: 'test'
+      ...
+    # Subtest: từ chối type lạ
+    ok 9 - từ chối type lạ
+      ---
+      duration_ms: 0.162
+      type: 'test'
+      ...
+    # Subtest: từ chối after = undefined
+    ok 10 - từ chối after = undefined
+      ---
+      duration_ms: 0.1152
+      type: 'test'
+      ...
+    # Subtest: từ chối after = null
+    ok 11 - từ chối after = null
+      ---
+      duration_ms: 1.0615
+      type: 'test'
+      ...
+    # Subtest: từ chối after = []
+    ok 12 - từ chối after = []
+      ---
+      duration_ms: 0.0967
+      type: 'test'
+      ...
+    # Subtest: từ chối after = "x"
+    ok 13 - từ chối after = "x"
+      ---
+      duration_ms: 0.0687
+      type: 'test'
+      ...
+    # Subtest: báo thiếu camera_id khi payload không có after.camera
+    ok 14 - báo thiếu camera_id khi payload không có after.camera
+      ---
+      duration_ms: 0.1954
+      type: 'test'
+      ...
+    # Subtest: báo thiếu label khi payload không có after.label
+    ok 15 - báo thiếu label khi payload không có after.label
+      ---
+      duration_ms: 0.0812
+      type: 'test'
+      ...
+    # Subtest: báo thiếu track_id khi payload không có after.id
+    ok 16 - báo thiếu track_id khi payload không có after.id
+      ---
+      duration_ms: 0.1946
+      type: 'test'
+      ...
+    # Subtest: báo thiếu zones[] khi payload không có after.current_zones
+    ok 17 - báo thiếu zones[] khi payload không có after.current_zones
+      ---
+      duration_ms: 0.0883
+      type: 'test'
+      ...
+    # Subtest: báo thiếu entered_zones[] khi payload không có after.entered_zones
+    ok 18 - báo thiếu entered_zones[] khi payload không có after.entered_zones
+      ---
+      duration_ms: 0.0818
+      type: 'test'
+      ...
+    # Subtest: báo thiếu score khi payload không có after.score
+    ok 19 - báo thiếu score khi payload không có after.score
+      ---
+      duration_ms: 0.0613
+      type: 'test'
+      ...
+    # Subtest: báo thiếu top_score khi payload không có after.top_score
+    ok 20 - báo thiếu top_score khi payload không có after.top_score
+      ---
+      duration_ms: 0.06
+      type: 'test'
+      ...
+    # Subtest: báo thiếu bounding box khi payload không có after.box
+    ok 21 - báo thiếu bounding box khi payload không có after.box
+      ---
+      duration_ms: 0.0614
+      type: 'test'
+      ...
+    # Subtest: báo thiếu timestamp khi payload không có after.frame_time
+    ok 22 - báo thiếu timestamp khi payload không có after.frame_time
+      ---
+      duration_ms: 0.0709
+      type: 'test'
+      ...
+    # Subtest: báo thiếu start_time khi payload không có after.start_time
+    ok 23 - báo thiếu start_time khi payload không có after.start_time
+      ---
+      duration_ms: 0.0704
+      type: 'test'
+      ...
+    # Subtest: báo thiếu has_snapshot khi payload không có after.has_snapshot
+    ok 24 - báo thiếu has_snapshot khi payload không có after.has_snapshot
+      ---
+      duration_ms: 0.0635
+      type: 'test'
+      ...
+    # Subtest: từ chối after.camera = ""
+    ok 25 - từ chối after.camera = ""
+      ---
+      duration_ms: 0.1903
+      type: 'test'
+      ...
+    # Subtest: từ chối after.id = 123
+    ok 26 - từ chối after.id = 123
+      ---
+      duration_ms: 0.3745
+      type: 'test'
+      ...
+    # Subtest: từ chối after.current_zones = "bep"
+    ok 27 - từ chối after.current_zones = "bep"
+      ---
+      duration_ms: 0.0946
+      type: 'test'
+      ...
+    # Subtest: từ chối after.entered_zones = [1,2]
+    ok 28 - từ chối after.entered_zones = [1,2]
+      ---
+      duration_ms: 0.0736
+      type: 'test'
+      ...
+    # Subtest: từ chối after.score = "0.8"
+    ok 29 - từ chối after.score = "0.8"
+      ---
+      duration_ms: 0.0679
+      type: 'test'
+      ...
+    # Subtest: từ chối after.score = null
+    ok 30 - từ chối after.score = null
+      ---
+      duration_ms: 0.06
+      type: 'test'
+      ...
+    # Subtest: từ chối after.score = 7.5
+    ok 31 - từ chối after.score = 7.5
+      ---
+      duration_ms: 0.0702
+      type: 'test'
+      ...
+    # Subtest: từ chối after.score = -0.1
+    ok 32 - từ chối after.score = -0.1
+      ---
+      duration_ms: 0.0616
+      type: 'test'
+      ...
+    # Subtest: từ chối after.top_score = 1.01
+    ok 33 - từ chối after.top_score = 1.01
+      ---
+      duration_ms: 0.1053
+      type: 'test'
+      ...
+    # Subtest: từ chối after.box = [1,2,3]
+    ok 34 - từ chối after.box = [1,2,3]
+      ---
+      duration_ms: 0.0751
+      type: 'test'
+      ...
+    # Subtest: từ chối after.box = [1,2,3,"4"]
+    ok 35 - từ chối after.box = [1,2,3,"4"]
+      ---
+      duration_ms: 0.0743
+      type: 'test'
+      ...
+    # Subtest: từ chối after.box = [500,400,100,50]
+    ok 36 - từ chối after.box = [500,400,100,50]
+      ---
+      duration_ms: 0.0655
+      type: 'test'
+      ...
+    # Subtest: từ chối after.box = [-1,0,10,10]
+    ok 37 - từ chối after.box = [-1,0,10,10]
+      ---
+      duration_ms: 0.0598
+      type: 'test'
+      ...
+    # Subtest: từ chối after.frame_time = "1789613958"
+    ok 38 - từ chối after.frame_time = "1789613958"
+      ---
+      duration_ms: 0.0685
+      type: 'test'
+      ...
+    # Subtest: từ chối after.has_snapshot = "true"
+    ok 39 - từ chối after.has_snapshot = "true"
+      ---
+      duration_ms: 0.1102
+      type: 'test'
+      ...
+    # Subtest: chấp nhận biên điểm 0 và 1, box suy biến 1 điểm
+    ok 40 - chấp nhận biên điểm 0 và 1, box suy biến 1 điểm
+      ---
+      duration_ms: 0.1744
+      type: 'test'
+      ...
+    # Subtest: từ chối message end thiếu end_time
+    ok 41 - từ chối message end thiếu end_time
+      ---
+      duration_ms: 0.1275
+      type: 'test'
+      ...
+    # Subtest: từ chối message end có end_time trước start_time
+    ok 42 - từ chối message end có end_time trước start_time
+      ---
+      duration_ms: 0.1223
+      type: 'test'
+      ...
+    # Subtest: gom mọi lỗi trong một lần kiểm tra thay vì dừng ở lỗi đầu tiên
+    ok 43 - gom mọi lỗi trong một lần kiểm tra thay vì dừng ở lỗi đầu tiên
+      ---
+      duration_ms: 0.1107
+      type: 'test'
+      ...
+    1..43
+ok 3 - validateEventMessage
+  ---
+  duration_ms: 7.4704
+  type: 'suite'
+  ...
+# Subtest: formatEventSummary
+    # Subtest: in đủ camera, track, điểm, box và đường dẫn snapshot
+    ok 1 - in đủ camera, track, điểm, box và đường dẫn snapshot
+      ---
+      duration_ms: 2.6898
+      type: 'test'
+      ...
+    # Subtest: ghi (chưa có) khi chưa có snapshot và in end_time với message end
+    ok 2 - ghi (chưa có) khi chưa có snapshot và in end_time với message end
+      ---
+      duration_ms: 0.2069
+      type: 'test'
+      ...
+    1..2
+ok 4 - formatEventSummary
+  ---
+  duration_ms: 3.0061
+  type: 'suite'
+  ...
+# Subtest: createAcceptanceChecker
+    # Subtest: thành công khi thấy new rồi end cùng track_id
+    ok 1 - thành công khi thấy new rồi end cùng track_id
+      ---
+      duration_ms: 0.7976
+      type: 'test'
+      ...
+    # Subtest: không thành công khi end thuộc track bắt đầu trước lúc script nghe
+    ok 2 - không thành công khi end thuộc track bắt đầu trước lúc script nghe
+      ---
+      duration_ms: 0.3043
+      type: 'test'
+      ...
+    # Subtest: không ghép new và end của hai track khác nhau
+    ok 3 - không ghép new và end của hai track khác nhau
+      ---
+      duration_ms: 0.2306
+      type: 'test'
+      ...
+    # Subtest: bỏ qua message khác label hoặc khác camera và không đếm vào thống kê
+    ok 4 - bỏ qua message khác label hoặc khác camera và không đếm vào thống kê
+      ---
+      duration_ms: 0.1562
+      type: 'test'
+      ...
+    # Subtest: bỏ qua dòng trống
+    ok 5 - bỏ qua dòng trống
+      ---
+      duration_ms: 0.1034
+      type: 'test'
+      ...
+    # Subtest: báo lỗi ngay khi payload không phải JSON
+    ok 6 - báo lỗi ngay khi payload không phải JSON
+      ---
+      duration_ms: 0.164
+      type: 'test'
+      ...
+    # Subtest: báo lỗi message thiếu after thay vì lặng lẽ bỏ qua vì không lọc được label
+    ok 7 - báo lỗi message thiếu after thay vì lặng lẽ bỏ qua vì không lọc được label
+      ---
+      duration_ms: 0.2107
+      type: 'test'
+      ...
+    # Subtest: báo lỗi ngay với message sai dù trước đó có track hợp lệ đang mở
+    ok 8 - báo lỗi ngay với message sai dù trước đó có track hợp lệ đang mở
+      ---
+      duration_ms: 0.2117
+      type: 'test'
+      ...
+    # Subtest: gợi ý đúng nguyên nhân khi hết giờ
+    ok 9 - gợi ý đúng nguyên nhân khi hết giờ
+      ---
+      duration_ms: 0.6957
+      type: 'test'
+      ...
+    1..9
+ok 5 - createAcceptanceChecker
+  ---
+  duration_ms: 3.5139
+  type: 'suite'
+  ...
+# Subtest: initConfig
+    # Subtest: tạo config.yml từ file mẫu khi chưa có
+    ok 1 - tạo config.yml từ file mẫu khi chưa có
+      ---
+      duration_ms: 17.2112
+      type: 'test'
+      ...
+    # Subtest: giữ nguyên config.yml đã chỉnh tay khi không có --force
+    ok 2 - giữ nguyên config.yml đã chỉnh tay khi không có --force
+      ---
+      duration_ms: 12.0682
+      type: 'test'
+      ...
+    # Subtest: ghi đè config.yml khi có --force
+    ok 3 - ghi đè config.yml khi có --force
+      ---
+      duration_ms: 13.2375
+      type: 'test'
+      ...
+    # Subtest: gỡ thư mục rỗng Docker tạo nhầm rồi tạo file
+    ok 4 - gỡ thư mục rỗng Docker tạo nhầm rồi tạo file
+      ---
+      duration_ms: 9.5987
+      type: 'test'
+      ...
+    # Subtest: không xóa thư mục config.yml có nội dung, ném ConfigInitError
+    ok 5 - không xóa thư mục config.yml có nội dung, ném ConfigInitError
+      ---
+      duration_ms: 11.4281
+      type: 'test'
+      ...
+    # Subtest: ném ConfigInitError dễ hiểu khi thiếu file mẫu thay vì stack trace của fs
+    ok 6 - ném ConfigInitError dễ hiểu khi thiếu file mẫu thay vì stack trace của fs
+      ---
+      duration_ms: 4.7181
+      type: 'test'
+      ...
+    # Subtest: ném ConfigInitError khi đường dẫn file mẫu là thư mục
+    ok 7 - ném ConfigInitError khi đường dẫn file mẫu là thư mục
+      ---
+      duration_ms: 4.1917
+      type: 'test'
+      ...
+    # Subtest: chạy lại lần hai không đổi gì (idempotent)
+    ok 8 - chạy lại lần hai không đổi gì (idempotent)
+      ---
+      duration_ms: 6.3988
+      type: 'test'
+      ...
+    1..8
+ok 6 - initConfig
+  ---
+  duration_ms: 80.606
+  type: 'suite'
+  ...
+# Subtest: frigate-init.mjs (CLI)
+    # Subtest: thoát mã 1 với thông báo gọn, không stack trace, khi repo thiếu file mẫu
+    ok 1 - thoát mã 1 với thông báo gọn, không stack trace, khi repo thiếu file mẫu
+      ---
+      duration_ms: 133.521
+      type: 'test'
+      ...
+    1..1
+ok 7 - frigate-init.mjs (CLI)
+  ---
+  duration_ms: 133.7748
+  type: 'suite'
+  ...
+# Subtest: parseValidationOutput
+    # Subtest: nhận config hợp lệ
+    ok 1 - nhận config hợp lệ
+      ---
+      duration_ms: 3.1434
+      type: 'test'
+      ...
+    # Subtest: không bị lừa bởi dòng "valid" Frigate in ra sau khi vào safe mode
+    ok 2 - không bị lừa bởi dòng "valid" Frigate in ra sau khi vào safe mode
+      ---
+      duration_ms: 0.5225
+      type: 'test'
+      ...
+    # Subtest: tách từng lỗi gồm dòng, khóa, giá trị, thông điệp với xuống dòng CRLF
+    ok 3 - tách từng lỗi gồm dòng, khóa, giá trị, thông điệp với xuống dòng CRLF
+      ---
+      duration_ms: 0.219
+      type: 'test'
+      ...
+    # Subtest: coi là không hợp lệ khi báo "not valid" mà không tách được dòng lỗi nào
+    ok 4 - coi là không hợp lệ khi báo "not valid" mà không tách được dòng lỗi nào
+      ---
+      duration_ms: 0.308
+      type: 'test'
+      ...
+    # Subtest: coi là không hợp lệ khi Frigate không khởi động được cả safe mode
+    ok 5 - coi là không hợp lệ khi Frigate không khởi động được cả safe mode
+      ---
+      duration_ms: 0.2039
+      type: 'test'
+      ...
+    # Subtest: coi là không hợp lệ khi output rỗng hoặc docker lỗi giữa chừng
+    ok 6 - coi là không hợp lệ khi output rỗng hoặc docker lỗi giữa chừng
+      ---
+      duration_ms: 0.1658
+      type: 'test'
+      ...
+    # Subtest: bỏ qua dòng Key/Value lạc khi chưa gặp Line \#
+    ok 7 - bỏ qua dòng Key/Value lạc khi chưa gặp Line \#
+      ---
+      duration_ms: 0.2918
+      type: 'test'
+      ...
+    1..7
+ok 8 - parseValidationOutput
+  ---
+  duration_ms: 6.3033
+  type: 'suite'
+  ...
+1..8
+# tests 109
+# suites 13
+# pass 109
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 432.7106

@@ -1,0 +1,11 @@
+﻿metric,candidate,confirmed,unit
+TP,35,6,clips
+FP,0,0,clips
+FN,37,66,clips
+TN,31,31,clips
+precision,1.0,1.0,ratio
+recall,0.4861111111111111,0.08333333333333333,ratio
+f1,0.6542056074766355,0.15384615384615385,ratio
+specificity,1.0,1.0,ratio
+accuracy,0.6407766990291263,0.3592233009708738,ratio
+balancedAccuracy,0.7430555555555556,0.5416666666666666,ratio

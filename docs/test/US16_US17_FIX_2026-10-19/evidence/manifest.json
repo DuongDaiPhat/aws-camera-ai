@@ -1,0 +1,71 @@
+{
+  "createdAt": "2026-10-18T18:27:37.387989+00:00",
+  "branch": "fix/US-16-US-17-pose-fall",
+  "baseCommit": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+  "sourceSHA256": {
+    ".env.example": "b229ba6f46615613145eecbec47921f22d7cecf8b3cf81ba450bff7a0d21f49e",
+    "apps/orchestrator/src/fall-detection/adapter/pose-inference.adapter.spec.ts": "7819ac3b76c8ecc52ad1e304e8272b6b30bc4a30b37892f8c40a495c49995d7e",
+    "apps/orchestrator/src/fall-detection/adapter/pose-inference.adapter.ts": "0bce92f9608dc9bf4c431661c0f6cb0e6cd30fd8dab815cefc6cbe59a4328203",
+    "apps/orchestrator/src/fall-detection/consumer/pose-frame.consumer.ts": "77aca16f430e3d92e066647c7780ce7caecb67e14b65ef837437075054f234aa",
+    "apps/orchestrator/src/fall-detection/coordinator/fall-incident.coordinator.spec.ts": "882e02b082e41927007eb0f6ff5a3933f45673894d847f2770b9412988eaf692",
+    "apps/orchestrator/src/fall-detection/coordinator/fall-incident.coordinator.ts": "7e92ad19a623cafd5f37641d50ae9e1fd1e8df8f3828eeed68fdd120bc527ee4",
+    "apps/orchestrator/src/fall-detection/envelope/pose-frame-envelope.ts": "e67d326e7a33ae60a5e1f965ef067360ce0b4f2089bd289f5e431c8a515b393e",
+    "apps/orchestrator/src/fall-detection/evaluator/rest-area.evaluator.spec.ts": "84d00448192bcd2af81385a14edbab95bd62666461648aa39d6112fffade5c13",
+    "apps/orchestrator/src/fall-detection/evaluator/rest-area.evaluator.ts": "70d738ef5505d9f0c0519bb3e41f55bf95d5b3581384468e31302496884a974d",
+    "apps/orchestrator/src/fall-detection/fall-detection.module.ts": "144c44a686ddf1d482bb4ab8b2f4c3de8318f3b50315dbf5b6982c3ae43c65b7",
+    "apps/orchestrator/src/fall-detection/repository/fall-incident.repository.ts": "dd18c49bf60ef877b165997577fcdb2840909d635c21702a669ab5d704f690bb",
+    "docker-compose.yml": "33b2884b60f89919b8bf6d9909771ac102c06c843f9cee0d9facc10a9de78f15",
+    "infra/frigate/frame-metadata/bridge.py": "de21a3ac84a5829f26cd4efbca0a5be2bb578766a6b9034c5ee551ef6f482293",
+    "infra/frigate/frame-metadata/service/run": "b501678d3b3b35856ed9691f3d5f2dc8c7b1b1dbc6f945a4cba83bf2b9b38cb4",
+    "infra/frigate/frame-metadata/test_bridge.py": "f0d14f558c0d291b0595d5710d2189754585676adb85d5683a85669e4a317522",
+    "services/ai-service/app/config.py": "38796ccd79adead2d3fc1d4913e1aae30b4a57213895b9c17883304ee1bb8fb3",
+    "services/ai-service/app/main.py": "fe7b42bd54c634f5058ce327930a24dfd2cd40d39ceee997b9bd7f7f56ae5bc8",
+    "services/ai-service/app/routers/pose.py": "84c1f93fdf3870b8be5152f8637cfd135b7349466bfcb2e76232ef328abcb629",
+    "services/ai-service/app/services/fall_tracker.py": "2578e1ba7bf33509f22fa1d844d4ad187e821f52f9d12176e537dd62fd8477f7",
+    "services/ai-service/app/services/pose_geometry.py": "a3181a5f239ef37c7443d209b12a0858ca90f402f7d0b0f1c7d6427864b5e255",
+    "services/ai-service/tests/test_fall_tracker.py": "9d636c9db5824c196218c86554be006057a01929b37f261c1bafb035c38ecd6b",
+    "services/ai-service/tests/test_pose_router.py": "1cbf88a4be7dcc3356d007da9be93aefcaf94377c63147444689d54f5fbac0cf",
+    "apps/orchestrator/src/fall-detection/adapter/validate-fall-response.ts": "476ee137569dceffebf64b2a53bcda812cfe03315e715bcef8977393d304a50a",
+    "apps/orchestrator/src/fall-detection/fall-delivery.worker.ts": "82204e960b6ef84c9992773b2d25fb096bff7ae6ad3be1f382c0ec551aad8255",
+    "apps/orchestrator/test/fall-runtime.integration.spec.ts": "50af96a3c73bd807fea0c7d85cdb6ecda9add3c9c7c4b1cfc08aa04311d7821f",
+    "apps/orchestrator/test/qa-fall.spec.ts": "f6970c2363dd6b866635620d17770a03a89fa4b1f771ab57433c73d3da93b8ef",
+    "services/ai-service/scripts/evaluate_fall_dataset.py": "4079e73194cfdc596f2f5754d33855f5fbf7a65939aac38f3ff6bd79966cb64d",
+    "services/ai-service/tests/test_qa_pose.py": "a83100b9e4e367651db7cf0d9d7e7af4022c7d0461473619a5227cff9c0036f6",
+    "docs/test/US16_US17_US20_2026-10-18/TEST_CASES_EXECUTED.md": "b27fffbcf4e30252815e49949ec71dc9353584075f08ea6bfb540c2ff5db1a7a",
+    "docs/test/US16_US17_US20_2026-10-18/DEFECTS.md": "e7b7637fe814940fe4a10a17864593f58c22c9b12f185728b6efb8f053eb1a3b"
+  },
+  "modelSHA256": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a",
+  "datasetManifestSHA256": "a7f68dc90de8cba5e1d80919fabe0464f773e2c10f5ed9904104195a3ffa9d05",
+  "datasetSummary": {
+    "clips": 103,
+    "fall": 72,
+    "nonFall": 31,
+    "fallClipsWith15sTail": 0,
+    "clipTP": 0,
+    "clipFP": 0,
+    "clipFN": 72,
+    "clipTN": 31,
+    "candidateFallClips": 33,
+    "inferenceP95Ms": 41.2915150007393
+  },
+  "testCases": {
+    "Passed": 20,
+    "Failed": 0,
+    "Blocked": 4
+  },
+  "tests": {
+    "orchestrator": 375,
+    "fallRetest": 48,
+    "ai": 71,
+    "bridge": 11,
+    "runtimeIntegration": 4,
+    "tools": 109
+  },
+  "limitations": [
+    "Four live acceptance cases remain blocked; see REPORT.md.",
+    "Positive pipeline inference is scripted; offline dataset uses the actual model.",
+    "Mypy has 9 existing errors in unchanged face modules.",
+    "ESLint has warnings, zero errors.",
+    "Changes remain local and uncommitted; existing user changes are preserved."
+  ]
+}

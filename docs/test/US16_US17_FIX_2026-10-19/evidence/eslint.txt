@@ -1,0 +1,24 @@
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\fall-detection\coordinator\fall-incident.coordinator.ts
+  123:3  warning  Async method 'handleConfirmedFall' has too many lines (109). Maximum allowed is 60  max-lines-per-function
+  123:3  warning  Async method 'handleConfirmedFall' has a complexity of 24. Maximum allowed is 12    complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\fall-detection\envelope\pose-frame-envelope.ts
+  65:1  warning  Function 'isValidPoseFrameHeader' has too many lines (65). Maximum allowed is 60  max-lines-per-function
+  65:1  warning  Function 'isValidPoseFrameHeader' has a complexity of 41. Maximum allowed is 12   complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\fall-detection\repository\fall-incident.repository.ts
+  55:3  warning  Async method 'createConfirmedIncident' has too many lines (89). Maximum allowed is 60  max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\fall-runtime.integration.spec.ts
+  136:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  139:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  142:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  209:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\qa-fall.spec.ts
+  38:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  56:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+✖ 11 problems (0 errors, 11 warnings)
+
