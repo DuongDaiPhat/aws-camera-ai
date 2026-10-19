@@ -4,7 +4,8 @@ import { CamerasRepository } from '../../cameras/cameras.repository';
 import { FallIncidentCoordinator } from '../coordinator/fall-incident.coordinator';
 import { unpackPoseFrameEnvelope } from '../envelope/pose-frame-envelope';
 
-const DEFAULT_MAX_STALE_FRAME_SECONDS = 2.5;
+const DEFAULT_MAX_STALE_FRAME_SECONDS = 1;
+const MAX_FUTURE_FRAME_SECONDS = 0.5;
 
 @Injectable()
 export class PoseFrameConsumer {
@@ -17,7 +18,7 @@ export class PoseFrameConsumer {
     private readonly camerasRepository: CamerasRepository,
     private readonly fallIncidentCoordinator: FallIncidentCoordinator,
   ) {
-    this.isM2aEnabled = this.configService.get<string>('M2A_ENABLED', 'true') === 'true';
+    this.isM2aEnabled = this.configService.get<string>('M2A_ENABLED', 'false') === 'true';
     this.maxStaleFrameSeconds = Number(
       this.configService.get<string | number>(
         'POSE_MAX_STALE_FRAME_SECONDS',
@@ -43,7 +44,10 @@ export class PoseFrameConsumer {
 
     // Kiểm tra độ tươi (freshness) của khung hình (bỏ qua frame cũ > threshold)
     const nowSeconds = Date.now() / 1000;
-    if (nowSeconds - header.frameTimestamp > this.maxStaleFrameSeconds) {
+    if (
+      nowSeconds - header.frameTimestamp > this.maxStaleFrameSeconds ||
+      header.frameTimestamp - nowSeconds > MAX_FUTURE_FRAME_SECONDS
+    ) {
       this.logger.debug(
         `Bỏ qua pose frame cũ: delay ${(nowSeconds - header.frameTimestamp).toFixed(2)}s > ${this.maxStaleFrameSeconds}s`,
       );

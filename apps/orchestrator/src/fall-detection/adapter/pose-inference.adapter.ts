@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { AiComponents } from '@cam/contracts';
 import type { NormalizedBBox } from '../dto/pose-frame.dto';
+import { isValidFallResponse } from './validate-fall-response';
 
 export type FallResponse = AiComponents['schemas']['FallResponse'];
 
@@ -72,7 +73,17 @@ export class PoseInferenceAdapter implements IPoseInferenceAdapter {
         return null;
       }
 
-      const data = (await response.json()) as FallResponse;
+      const data: unknown = await response.json();
+      if (
+        !isValidFallResponse(
+          data,
+          request,
+          Number(this.configService.get('FALL_IMMOBILITY_SECONDS', 3)),
+        )
+      ) {
+        this.logger.warn('Rejected invalid pose response identity or evidence');
+        return null;
+      }
       return data;
     } catch (error) {
       const isAbort = error instanceof Error && error.name === 'TimeoutError';

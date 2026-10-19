@@ -8,6 +8,7 @@ import { PoseFrameConsumer } from './consumer/pose-frame.consumer';
 import { FallIncidentCoordinator } from './coordinator/fall-incident.coordinator';
 import { RestAreaEvaluator } from './evaluator/rest-area.evaluator';
 import { FallIncidentRepository } from './repository/fall-incident.repository';
+import { FallDeliveryWorker } from './fall-delivery.worker';
 
 @Module({
   imports: [CamerasModule, ZonesModule, AiResultsModule, MediaModule],
@@ -17,6 +18,7 @@ import { FallIncidentRepository } from './repository/fall-incident.repository';
     FallIncidentRepository,
     FallIncidentCoordinator,
     PoseFrameConsumer,
+    FallDeliveryWorker,
   ],
   exports: [
     PoseFrameConsumer,
