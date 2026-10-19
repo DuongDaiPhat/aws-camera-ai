@@ -23,7 +23,7 @@ def make_test_image_bytes(w: int = 100, h: int = 100) -> bytes:
 
 @pytest.fixture
 def client_with_token(monkeypatch: pytest.MonkeyPatch) -> Generator[TestClient, None, None]:
-    test_settings = Settings(ai_internal_token="secret-token-123")
+    test_settings = Settings(ai_internal_token="secret-token-123", m2a_enabled=True)
     monkeypatch.setattr(pose, "get_settings", lambda: test_settings)
     app.dependency_overrides[get_settings] = lambda: test_settings
     yield TestClient(app)
@@ -146,3 +146,39 @@ def test_evaluate_fall_success_flow(
     assert result["torsoAngleDeg"] == 85.0
     assert result["poseAvailable"] is True
     assert result["error"] is None
+
+
+def test_disabled_pose_does_not_call_estimator(
+    client_with_token: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    pose.get_settings().m2a_enabled = False
+    estimator = Mock()
+    monkeypatch.setattr(PoseEstimator, "get_instance", estimator)
+    response = client_with_token.post(
+        "/pose/fall",
+        data={
+            "trackId": "disabled",
+            "cameraSlug": "cam",
+            "frameTimestamp": "2026-10-19T00:00:00Z",
+        },
+        files={"image": ("frame.jpg", make_test_image_bytes())},
+        headers={"X-Internal-Token": "secret-token-123"},
+    )
+    assert response.status_code == 200
+    assert response.json()["reason"] == "M2A_DISABLED"
+    estimator.assert_not_called()
+
+
+def test_nonfinite_bbox_is_rejected(client_with_token: TestClient) -> None:
+    response = client_with_token.post(
+        "/pose/fall",
+        data={
+            "trackId": "person",
+            "cameraSlug": "cam",
+            "frameTimestamp": "2026-10-19T00:00:00Z",
+            "personBoundingBox": '{"x": NaN, "y": 0, "width": 0.5, "height": 0.5}',
+        },
+        files={"image": ("frame.jpg", make_test_image_bytes())},
+        headers={"X-Internal-Token": "secret-token-123"},
+    )
+    assert response.status_code == 422
