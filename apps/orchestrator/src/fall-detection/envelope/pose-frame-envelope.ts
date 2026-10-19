@@ -52,6 +52,9 @@ export function unpackPoseFrameEnvelope(buffer: Buffer): UnpackedPoseFrame | nul
   }
 
   const imageBytes = buffer.subarray(4 + headerLength);
+  if (imageBytes.length < 4 || imageBytes[0] !== 0xff || imageBytes[1] !== 0xd8) {
+    return null;
+  }
 
   return {
     header: headerJson,
@@ -64,7 +67,7 @@ function isValidPoseFrameHeader(obj: unknown): obj is PoseFrameHeaderDto {
   const h = obj as Record<string, unknown>;
 
   if (
-    typeof h.schemaVersion !== 'number' ||
+    h.schemaVersion !== 1 ||
     typeof h.sourceSessionId !== 'string' ||
     typeof h.frameId !== 'string' ||
     typeof h.cameraSlug !== 'string' ||
@@ -75,6 +78,18 @@ function isValidPoseFrameHeader(obj: unknown): obj is PoseFrameHeaderDto {
   ) {
     return false;
   }
+  if (
+    !h.sourceSessionId ||
+    !h.frameId ||
+    !h.cameraSlug ||
+    !Number.isFinite(h.frameTimestamp) ||
+    h.frameTimestamp <= 0 ||
+    !Number.isInteger(h.frameWidth) ||
+    h.frameWidth <= 0 ||
+    !Number.isInteger(h.frameHeight) ||
+    h.frameHeight <= 0
+  )
+    return false;
 
   if (h.persons.length > MAX_PERSONS_PER_FRAME) {
     return false;
@@ -90,6 +105,9 @@ function isValidPoseFrameHeader(obj: unknown): obj is PoseFrameHeaderDto {
     ) {
       return false;
     }
+    if (!person.trackId || !Number.isFinite(person.observedAt) || person.observedAt <= 0) {
+      return false;
+    }
     const box = person.boundingBox as Record<string, unknown>;
     if (
       typeof box.x !== 'number' ||
@@ -99,6 +117,16 @@ function isValidPoseFrameHeader(obj: unknown): obj is PoseFrameHeaderDto {
     ) {
       return false;
     }
+    if (
+      ![box.x, box.y, box.width, box.height].every(Number.isFinite) ||
+      box.x < 0 ||
+      box.y < 0 ||
+      box.width <= 0 ||
+      box.height <= 0 ||
+      box.x + box.width > 1.0001 ||
+      box.y + box.height > 1.0001
+    )
+      return false;
   }
 
   return true;

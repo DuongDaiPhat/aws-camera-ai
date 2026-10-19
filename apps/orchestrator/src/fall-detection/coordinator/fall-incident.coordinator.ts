@@ -5,11 +5,12 @@ import { AiResultsService } from '../../ai-results/ai-results.service';
 import type { SubmitAiResultDto } from '../../ai-results/dto/submit-ai-result.dto';
 import { MediaService } from '../../media/media.service';
 import { PoseInferenceAdapter } from '../adapter/pose-inference.adapter';
+import { isValidFallResponse } from '../adapter/validate-fall-response';
 import type { PosePersonDto } from '../dto/pose-frame.dto';
 import { RestAreaEvaluator } from '../evaluator/rest-area.evaluator';
 import { FallIncidentRepository } from '../repository/fall-incident.repository';
 
-const DEFAULT_FALL_IMMOBILITY_SECONDS = 15;
+const DEFAULT_FALL_IMMOBILITY_SECONDS = 3;
 
 export interface ProcessFrameContext {
   cameraId: string;
@@ -47,7 +48,13 @@ export class FallIncidentCoordinator {
    */
   async processFrame(context: ProcessFrameContext): Promise<void> {
     for (const person of context.persons) {
-      await this.processPersonTrack(context, person);
+      try {
+        await this.processPersonTrack(context, person);
+      } catch (error) {
+        this.logger.error(
+          `Fall processing failed for ${context.cameraSlug}/${person.trackId}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
     }
   }
 
@@ -74,11 +81,23 @@ export class FallIncidentCoordinator {
       inRestArea,
     });
 
-    if (!response) {
+    if (
+      !isValidFallResponse(
+        response,
+        {
+          trackId: person.trackId,
+          cameraSlug,
+          sourceSessionId,
+          frameId,
+          frameTimestamp: frameTimestamp.toISOString(),
+        },
+        this.fallImmobilitySeconds,
+      )
+    ) {
       return;
     }
 
-    // AC17-2: Khi người đứng dậy trong 15s hoặc candidate bị hủy -> chỉ ghi log nội bộ, KHÔNG cảnh báo
+    // AC17-2: Khi người đứng dậy trong 3s hoặc candidate bị hủy -> chỉ ghi log nội bộ, KHÔNG cảnh báo
     if (response.state === 'CANCELLED') {
       this.logger.debug(
         `[M2A_CANDIDATE_CANCELLED] Track ${person.trackId} trên camera ${cameraSlug} đã hủy candidate (reason: ${response.reason})`,
@@ -87,12 +106,12 @@ export class FallIncidentCoordinator {
     }
 
     if (response.state === 'CANDIDATE') {
-      this.logger.log(
+      this.logger.debug(
         `[M2A_CANDIDATE] Track ${person.trackId} camera ${cameraSlug}: bất động ${response.immobileSeconds ?? 0}s / ${this.fallImmobilitySeconds}s (góc thân: ${response.torsoAngleDeg ?? 'N/A'}°)`,
       );
     }
 
-    // AC17-1: Khi tư thế ngã và bất động duy trì > 15s -> CONFIRMED
+    // AC17-1: Khi tư thế ngã và bất động duy trì > 3s -> CONFIRMED
     if (response.state === 'CONFIRMED' && !inRestArea && response.error === null) {
       this.logger.warn(
         `[M2A_CONFIRMED] Track ${person.trackId} camera ${cameraSlug} ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...`,
@@ -108,12 +127,10 @@ export class FallIncidentCoordinator {
   ): Promise<void> {
     const { cameraId, cameraSlug, sourceSessionId, frameId } = context;
 
-    const episodeId = response.episodeId ?? randomUUID();
-    const defaultWindowMs = this.fallImmobilitySeconds * 1000;
-    const confirmedAt = response.confirmedAt ? new Date(response.confirmedAt) : new Date();
-    const candidateStartedAt = response.candidateStartedAt
-      ? new Date(response.candidateStartedAt)
-      : new Date(confirmedAt.getTime() - defaultWindowMs);
+    if (!response.episodeId || !response.confirmedAt || !response.candidateStartedAt) return;
+    const episodeId = response.episodeId;
+    const confirmedAt = new Date(response.confirmedAt);
+    const candidateStartedAt = new Date(response.candidateStartedAt);
     const resultId = randomUUID();
 
     const ruleSnapshot: Record<string, unknown> = {
@@ -126,53 +143,10 @@ export class FallIncidentCoordinator {
       policyVersion: response.confidencePolicyVersion ?? 'fall-rule-evidence-v1',
     };
 
-    const pendingPayload: Record<string, unknown> = {
-      cameraSlug,
-      trackId: person.trackId,
-      episodeId,
-      confidence: response.confidence ?? 1.0,
-      ruleSnapshot,
-    };
-
-    // 1. Lưu bản ghi sự kiện và incident vào database (Idempotent theo episode)
-    const incidentResult = await this.fallIncidentRepository.createConfirmedIncident({
-      cameraId,
-      sourceSessionId,
-      trackId: person.trackId,
-      episodeId,
-      candidateStartedAt,
-      confirmedAt,
-      modelVersion: response.modelVersion,
-      ruleSnapshot,
-      resultId,
-      pendingPayload,
-    });
-
-    if (!incidentResult.isNew) {
-      this.logger.debug(`Incident té ngã episode ${episodeId} đã được xử lý trước đó (deduped)`);
-      return;
-    }
-
-    // 2. Lưu ảnh snapshot bằng chứng từ khung hình xác nhận ngã
-    if (context.imageBytes && context.imageBytes.length > 0) {
-      try {
-        await this.mediaService.storeBufferSnapshot(
-          incidentResult.eventId,
-          context.imageBytes,
-          confirmedAt,
-        );
-      } catch (mediaError) {
-        this.logger.error(
-          `Lỗi khi lưu ảnh snapshot bằng chứng cho sự kiện té ngã ${incidentResult.eventId}: ${mediaError instanceof Error ? mediaError.message : String(mediaError)}`,
-        );
-      }
-    }
-
-    // 3. Kích hoạt luồng AI Result submission -> phát SSE lên Web Dashboard & Telegram P1
     const submitDto: SubmitAiResultDto = {
       schemaVersion: 1,
-      resultId: incidentResult.resultId,
-      eventId: incidentResult.eventId,
+      resultId,
+      eventId: '',
       observationId: `fall:${sourceSessionId}:${person.trackId}:${episodeId}`,
       revision: 1,
       module: 'M2A_FALL',
@@ -212,8 +186,48 @@ export class FallIncidentCoordinator {
       error: null,
     };
 
+    // 1. Lưu bản ghi sự kiện và incident vào database (Idempotent theo episode)
+    const incidentResult = await this.fallIncidentRepository.createConfirmedIncident({
+      cameraId,
+      sourceSessionId,
+      trackId: person.trackId,
+      episodeId,
+      candidateStartedAt,
+      confirmedAt,
+      modelVersion: response.modelVersion,
+      ruleSnapshot,
+      resultId,
+      pendingPayload: submitDto,
+    });
+
+    if (incidentResult.deliveryStatus === 'APPLIED') {
+      this.logger.debug(`Incident té ngã episode ${episodeId} đã được xử lý trước đó (deduped)`);
+      return;
+    }
+
+    // 2. Lưu ảnh snapshot bằng chứng từ khung hình xác nhận ngã
+    if (incidentResult.isNew && context.imageBytes.length > 0) {
+      try {
+        await this.mediaService.storeBufferSnapshot(
+          incidentResult.eventId,
+          context.imageBytes,
+          confirmedAt,
+        );
+      } catch (mediaError) {
+        this.logger.error(
+          `Lỗi khi lưu ảnh snapshot bằng chứng cho sự kiện té ngã ${incidentResult.eventId}: ${mediaError instanceof Error ? mediaError.message : String(mediaError)}`,
+        );
+      }
+    }
+
     try {
-      await this.aiResultsService.submit(incidentResult.eventId, submitDto);
+      const receipt = await this.aiResultsService.submit(
+        incidentResult.eventId,
+        incidentResult.pendingPayload,
+      );
+      if (!['ACCEPTED', 'DUPLICATE'].includes(receipt.disposition)) {
+        throw new Error(`Fall submission was not applied: ${receipt.disposition}`);
+      }
       await this.fallIncidentRepository.markApplied(incidentResult.fallIncidentId);
 
       this.logger.log(

@@ -83,7 +83,7 @@ export class RestAreaEvaluator {
         `Lỗi khi kiểm tra REST_AREA cho camera ${cameraId}: ${error instanceof Error ? error.message : String(error)}`,
       );
       // M2a fail-closed theo spec: không coi lỗi DB là ngoài vùng nghỉ để tránh cảnh báo sai
-      return false;
+      throw error;
     }
   }
 }
