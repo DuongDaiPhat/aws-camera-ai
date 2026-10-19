@@ -1,4 +1,5 @@
 import { ConfigService } from '@nestjs/config';
+import type { SubmitAiResultDto } from '../../ai-results/dto/submit-ai-result.dto';
 import type { AiResultsService } from '../../ai-results/ai-results.service';
 import type { MediaService } from '../../media/media.service';
 import type { PoseInferenceAdapter, FallResponse } from '../adapter/pose-inference.adapter';
@@ -18,7 +19,7 @@ describe('FallIncidentCoordinator', () => {
   beforeEach(() => {
     mockConfigService = {
       get: jest.fn().mockImplementation((key: string, defaultVal: unknown) => {
-        if (key === 'FALL_IMMOBILITY_SECONDS') return 15;
+        if (key === 'FALL_IMMOBILITY_SECONDS') return 3;
         return defaultVal;
       }),
     } as unknown as jest.Mocked<ConfigService>;
@@ -32,12 +33,21 @@ describe('FallIncidentCoordinator', () => {
     } as unknown as jest.Mocked<PoseInferenceAdapter>;
 
     mockFallIncidentRepository = {
-      createConfirmedIncident: jest.fn(),
+      createConfirmedIncident: jest
+        .fn()
+        .mockImplementation((input: { pendingPayload: SubmitAiResultDto }) => ({
+          eventId: 'evt-111',
+          fallIncidentId: 'inc-222',
+          resultId: 'res-333',
+          isNew: true,
+          deliveryStatus: 'PENDING',
+          pendingPayload: { ...input.pendingPayload, eventId: 'evt-111', resultId: 'res-333' },
+        })),
       markApplied: jest.fn(),
     } as unknown as jest.Mocked<FallIncidentRepository>;
 
     mockAiResultsService = {
-      submit: jest.fn().mockResolvedValue({} as never),
+      submit: jest.fn().mockResolvedValue({ disposition: 'ACCEPTED' } as never),
     } as unknown as jest.Mocked<AiResultsService>;
 
     mockMediaService = {
@@ -75,14 +85,19 @@ describe('FallIncidentCoordinator', () => {
     const context = createContext();
     const confirmedFallResponse: FallResponse = {
       trackId: 'track-1',
+      cameraSlug: 'cam-livingroom',
+      sourceSessionId: 'sess-abc',
+      frameId: 'frame-100',
+      observedAt: '2026-10-11T10:00:00.000Z',
+      poseAvailable: true,
       state: 'CONFIRMED',
       reason: 'IMMOBILITY_THRESHOLD_EXCEEDED',
-      episodeId: 'episode-uuid-999',
+      episodeId: '22222222-2222-4222-8222-222222222222',
       candidateStartedAt: '2026-10-11T09:59:44.000Z',
       confirmedAt: '2026-10-11T10:00:00.000Z',
       immobileSeconds: 16.0,
-      thresholdSeconds: 15.0,
-      torsoAngleDeg: 82.5,
+      thresholdSeconds: 3.0,
+      torsoAngleDeg: 10.0,
       aspectRatio: 1.8,
       centerHeight: 0.25,
       centerDropRatio: 0.65,
@@ -95,13 +110,6 @@ describe('FallIncidentCoordinator', () => {
     };
 
     mockPoseInferenceAdapter.evaluateFall.mockResolvedValue(confirmedFallResponse);
-    mockFallIncidentRepository.createConfirmedIncident.mockResolvedValue({
-      eventId: 'evt-111',
-      fallIncidentId: 'inc-222',
-      resultId: 'res-333',
-      isNew: true,
-    });
-
     // Act
     await coordinator.processFrame(context);
 
@@ -137,13 +145,18 @@ describe('FallIncidentCoordinator', () => {
     const context = createContext();
     const cancelledResponse: FallResponse = {
       trackId: 'track-1',
+      cameraSlug: 'cam-livingroom',
+      sourceSessionId: 'sess-abc',
+      frameId: 'frame-100',
+      observedAt: '2026-10-11T10:00:00.000Z',
+      poseAvailable: true,
       state: 'CANCELLED',
       reason: 'RECOVERED',
-      episodeId: 'episode-uuid-999',
+      episodeId: '22222222-2222-4222-8222-222222222222',
       candidateStartedAt: '2026-10-11T09:59:50.000Z',
       confirmedAt: null,
       immobileSeconds: 4.5,
-      thresholdSeconds: 15.0,
+      thresholdSeconds: 3.0,
       torsoAngleDeg: 25.0,
       aspectRatio: 0.6,
       centerHeight: 0.7,
@@ -173,14 +186,19 @@ describe('FallIncidentCoordinator', () => {
 
     const confirmedFallResponse: FallResponse = {
       trackId: 'track-1',
+      cameraSlug: 'cam-livingroom',
+      sourceSessionId: 'sess-abc',
+      frameId: 'frame-100',
+      observedAt: '2026-10-11T10:00:00.000Z',
+      poseAvailable: true,
       state: 'CONFIRMED',
       reason: 'IMMOBILITY_THRESHOLD_EXCEEDED',
-      episodeId: 'episode-uuid-999',
+      episodeId: '22222222-2222-4222-8222-222222222222',
       candidateStartedAt: '2026-10-11T09:59:44.000Z',
       confirmedAt: '2026-10-11T10:00:00.000Z',
       immobileSeconds: 16.0,
-      thresholdSeconds: 15.0,
-      torsoAngleDeg: 85.0,
+      thresholdSeconds: 3.0,
+      torsoAngleDeg: 10.0,
       aspectRatio: 1.9,
       centerHeight: 0.2,
       centerDropRatio: 0.7,
@@ -207,14 +225,19 @@ describe('FallIncidentCoordinator', () => {
     const context = createContext();
     const confirmedFallResponse: FallResponse = {
       trackId: 'track-1',
+      cameraSlug: 'cam-livingroom',
+      sourceSessionId: 'sess-abc',
+      frameId: 'frame-100',
+      observedAt: '2026-10-11T10:00:00.000Z',
+      poseAvailable: true,
       state: 'CONFIRMED',
       reason: 'IMMOBILITY_THRESHOLD_EXCEEDED',
-      episodeId: 'episode-uuid-999',
+      episodeId: '22222222-2222-4222-8222-222222222222',
       candidateStartedAt: '2026-10-11T09:59:44.000Z',
       confirmedAt: '2026-10-11T10:00:00.000Z',
       immobileSeconds: 16.0,
-      thresholdSeconds: 15.0,
-      torsoAngleDeg: 80.0,
+      thresholdSeconds: 3.0,
+      torsoAngleDeg: 10.0,
       aspectRatio: 1.7,
       centerHeight: 0.25,
       centerDropRatio: 0.6,
@@ -231,9 +254,21 @@ describe('FallIncidentCoordinator', () => {
       eventId: 'evt-111',
       fallIncidentId: 'inc-222',
       resultId: 'res-333',
-      isNew: false, // Already processed
+      isNew: false,
+      deliveryStatus: 'APPLIED',
+      pendingPayload: {
+        schemaVersion: 1,
+        resultId: 'res-333',
+        eventId: 'evt-111',
+        observationId: 'fall',
+        revision: 1,
+        module: 'M2A_FALL',
+        modelVersion: 'qa',
+        processedAt: '2026-10-11T10:00:00.100Z',
+        results: [],
+        error: null,
+      },
     });
-
     // Act
     await coordinator.processFrame(context);
 
