@@ -987,7 +987,7 @@ export interface paths {
      *     docker network), KHONG dung JWT nguoi dung.
      *
      *     US-16/US-17: M2A_FALL submits exactly one FALL_DETECTED result only
-     *     after continuously observed immobility strictly exceeds 15 seconds,
+     *     after continuously observed immobility strictly exceeds 3 seconds,
      *     valid pose/evidence and REST_AREA checks succeed. Candidate/cancelled/
      *     missing-pose observations produce internal logs only, not callbacks
      *     with a success label or empty successful results.
@@ -2036,9 +2036,9 @@ export interface components {
        * @description UTC capture time of the first frame confirming the episode; incident detectedAt uses this time. Must not precede candidateStartedAt.
        */
       confirmedAt: string;
-      /** @description Validated continuously observed immobility, strictly greater than thresholdSeconds; default requires >15 seconds. Movement, missing pose or invalid gaps reset this interval. */
+      /** @description Validated continuously observed immobility, strictly greater than thresholdSeconds; default requires >3 seconds. Movement, missing pose or invalid gaps reset this interval. */
       immobileSeconds: number;
-      /** @default 15 */
+      /** @default 3 */
       thresholdSeconds: number;
       /** @description Torso angle in degrees to horizontal, computed in full-image pixels. Must be strictly below the active threshold (default 30 degrees). */
       torsoAngleDeg: number;

@@ -218,8 +218,8 @@ paths:
         torso angle strictly below 30 degrees and a sudden center drop.
         The baseline is frozen at candidate creation. CONFIRMED requires a
         currently valid abnormal pose and continuous observed immobility
-        strictly longer than FALL_IMMOBILITY_SECONDS (default 15 seconds).
-        Exactly 15 seconds is not sufficient; motion or an invalid frame gap
+        strictly longer than FALL_IMMOBILITY_SECONDS (default 3 seconds).
+        Exactly 3 seconds is not sufficient; motion or an invalid frame gap
         resets the immobility interval. Standing up cancels the candidate.
 
         Missing/low-quality/ambiguous pose is poseAvailable=false, error=null.
@@ -320,7 +320,7 @@ paths:
                     centerDropRatio: 0
                     motionScore: 0.1
                     immobileSeconds: 0
-                    thresholdSeconds: 15
+                    thresholdSeconds: 3
                     missingPoseSeconds: 0
                     keypointsDetected: 33
                     boundingBox: { x: 0.2, y: 0.2, width: 0.2, height: 0.56 }
@@ -350,7 +350,7 @@ paths:
                     centerDropRatio: 0.3
                     motionScore: 0.6
                     immobileSeconds: 0
-                    thresholdSeconds: 15
+                    thresholdSeconds: 3
                     missingPoseSeconds: 0
                     keypointsDetected: 33
                     boundingBox: { x: 0.15, y: 0.55, width: 0.5, height: 0.4 }
@@ -380,7 +380,7 @@ paths:
                     centerDropRatio: null
                     motionScore: null
                     immobileSeconds: 0
-                    thresholdSeconds: 15
+                    thresholdSeconds: 3
                     missingPoseSeconds: 2
                     keypointsDetected: 0
                     boundingBox: null
@@ -388,20 +388,20 @@ paths:
                     processedAt: "2026-10-09T05:00:18.050Z"
                     error: null
                 confirmed:
-                  summary: More than 15 seconds of continuously observed immobility
+                  summary: More than 3 seconds of continuously observed immobility
                   value:
                     trackId: person-001
                     cameraSlug: living_room
                     sourceSessionId: source-001
-                    frameId: frame-088
-                    observedAt: "2026-10-09T05:00:17.400Z"
+                    frameId: frame-027
+                    observedAt: "2026-10-09T05:00:05.200Z"
                     state: CONFIRMED
                     poseAvailable: true
                     reason: IMMOBILE_CONFIRMED
                     isReplay: false
                     episodeId: 79b7e17a-6343-5ccf-94bb-f98fce7ba8e4
                     candidateStartedAt: "2026-10-09T05:00:02.000Z"
-                    confirmedAt: "2026-10-09T05:00:17.400Z"
+                    confirmedAt: "2026-10-09T05:00:05.200Z"
                     confidence: 1
                     confidencePolicyVersion: fall-rule-evidence-v1
                     torsoAngleDeg: 10
@@ -409,13 +409,13 @@ paths:
                     centerHeight: 0.2
                     centerDropRatio: 0.3
                     motionScore: 0.01
-                    immobileSeconds: 15.2
-                    thresholdSeconds: 15
+                    immobileSeconds: 3.2
+                    thresholdSeconds: 3
                     missingPoseSeconds: 0
                     keypointsDetected: 33
                     boundingBox: { x: 0.15, y: 0.55, width: 0.5, height: 0.4 }
                     modelVersion: pose-landmarker-lite-v1
-                    processedAt: "2026-10-09T05:00:17.450Z"
+                    processedAt: "2026-10-09T05:00:05.250Z"
                     error: null
                 cancelled:
                   summary: Person stands up before confirmation, internal log only
@@ -440,7 +440,7 @@ paths:
                     centerDropRatio: 0
                     motionScore: 0.1
                     immobileSeconds: 0
-                    thresholdSeconds: 15
+                    thresholdSeconds: 3
                     missingPoseSeconds: 0
                     keypointsDetected: 33
                     boundingBox: { x: 0.2, y: 0.2, width: 0.2, height: 0.56 }
@@ -461,7 +461,7 @@ paths:
                     confidence: null
                     confidencePolicyVersion: fall-rule-evidence-v1
                     immobileSeconds: 0
-                    thresholdSeconds: 15
+                    thresholdSeconds: 3
                     missingPoseSeconds: 0
                     modelVersion: pose-landmarker-lite-v1
                     processedAt: "2026-10-09T05:00:10.050Z"
@@ -931,7 +931,7 @@ components:
           type: number
           minimum: 0
           description: Continuously observed abnormal and immobile interval; resets on movement, missing pose or invalid gap. Confirmation requires strictly greater than thresholdSeconds, never wall-clock time through a blind interval.
-        thresholdSeconds: { type: integer, minimum: 1, default: 15 }
+        thresholdSeconds: { type: integer, minimum: 1, default: 3 }
         missingPoseSeconds:
           type: number
           minimum: 0
