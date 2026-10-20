@@ -59,6 +59,8 @@ class Settings(BaseSettings):
     fall_missing_pose_grace_seconds: float = Field(5.0, gt=0, allow_inf_nan=False)
     fall_recovery_angle_deg: float = Field(60.0, gt=0, le=90, allow_inf_nan=False)
     fall_candidate_max_seconds: float = Field(60.0, gt=0, allow_inf_nan=False)
+    fall_torso_shrink_ratio: float = Field(0.55, gt=0, le=1, allow_inf_nan=False)
+    fall_aspect_ratio_threshold: float = Field(0.90, gt=0, le=5, allow_inf_nan=False)
     pose_track_ttl_seconds: float = Field(60.0, gt=0, allow_inf_nan=False)
     pose_max_concurrent_requests: int = Field(2, ge=1)
     pose_max_tracks: int = Field(128, ge=1)

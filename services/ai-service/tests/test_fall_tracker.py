@@ -7,15 +7,24 @@ from app.services.fall_tracker_registry import FallTrackerRegistry
 from app.services.pose_geometry import NormalizedKeypoint, PoseGeometry
 
 
-def make_geom(angle: float = 85.0, center_y: float = 300.0, height: float = 200.0) -> PoseGeometry:
+def make_geom(
+    angle: float = 85.0,
+    center_y: float = 300.0,
+    height: float = 200.0,
+    aspect_ratio: float = 2.5,
+    torso_length: float = 120.0,
+    angle_3d: float = 85.0,
+) -> PoseGeometry:
     return PoseGeometry(
         torso_angle_deg=angle,
         center_height=0.6,
-        aspect_ratio=2.5,
+        aspect_ratio=aspect_ratio,
         center_y_px=center_y,
         bbox_height_px=height,
         bbox_width_px=80.0,
         keypoints_detected=33,
+        torso_length_px=torso_length,
+        torso_angle_3d_deg=angle_3d,
     )
 
 
@@ -228,3 +237,43 @@ def test_fall_tracker_startup_prone_never_creates_candidate() -> None:
         )
         assert result["state"] == "MONITORING"
         assert result["episodeId"] is None
+
+
+def test_fall_tracker_axial_fall_candidate() -> None:
+    """Nga doc camera: goc 2D van dung (75 do) nhung than co ngan va drop >= 0.20 -> CANDIDATE."""
+    tracker = FallTracker("cam1", "sess1", "track_axial")
+    t0 = datetime(2026, 10, 11, 12, 0, 0, tzinfo=UTC)
+    kps = make_kps()
+    geom_standing = make_geom(angle=85.0, center_y=200.0, height=200.0, torso_length=120.0, angle_3d=85.0)
+
+    # 10 frame dung thang
+    for i in range(10):
+        tracker.evaluate_frame(
+            observed_at=t0 + timedelta(milliseconds=i * 200),
+            frame_id=f"f{i}",
+            keypoints=kps,
+            geometry=geom_standing,
+            pose_available=True,
+            reason="NORMAL_POSTURE",
+        )
+
+    # Frame 11: Nga doc huong vao camera (goc 2D van 75 do, nhung torso_length co lai con 40px (<55%), drop tu 200 -> 300)
+    geom_axial_fall = make_geom(
+        angle=75.0,
+        center_y=300.0,
+        height=100.0,
+        aspect_ratio=0.8,
+        torso_length=40.0,
+        angle_3d=25.0,
+    )
+    res_axial = tracker.evaluate_frame(
+        observed_at=t0 + timedelta(milliseconds=11 * 200),
+        frame_id="f11",
+        keypoints=kps,
+        geometry=geom_axial_fall,
+        pose_available=True,
+        reason="NORMAL_POSTURE",
+    )
+    assert res_axial["state"] == "CANDIDATE"
+    assert res_axial["reason"] in ("FALL_CANDIDATE", "AXIAL_FALL_CANDIDATE")
+    assert res_axial["episodeId"] is not None
