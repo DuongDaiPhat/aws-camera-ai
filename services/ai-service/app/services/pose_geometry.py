@@ -44,6 +44,8 @@ class PoseGeometry:
     keypoints_detected: int
     image_width: int = 1920
     image_height: int = 1080
+    torso_length_px: float = 0.0
+    torso_angle_3d_deg: float = 90.0
 
 
 # Indices theo chuan MediaPipe Pose 33 landmarks
@@ -143,10 +145,20 @@ def calculate_pose_geometry(
 
     s_mid = PixelPoint((s_left.x + s_right.x) / 2.0, (s_left.y + s_right.y) / 2.0)
     h_mid = PixelPoint((h_left.x + h_right.x) / 2.0, (h_left.y + h_right.y) / 2.0)
-    if math.hypot(s_mid.x - h_mid.x, s_mid.y - h_mid.y) <= 1e-6:
+    torso_len_px = math.hypot(s_mid.x - h_mid.x, s_mid.y - h_mid.y)
+    if torso_len_px <= 1e-6:
         return None
 
     torso_angle = calculate_torso_angle(s_mid, h_mid)
+
+    # Tinh goc than trong khong gian 3D (truc chieu sau Z)
+    s_z = (keypoints[LEFT_SHOULDER].z + keypoints[RIGHT_SHOULDER].z) / 2.0 * image_width
+    h_z = (keypoints[LEFT_HIP].z + keypoints[RIGHT_HIP].z) / 2.0 * image_width
+    vx_2d = abs(s_mid.x - h_mid.x)
+    vy_2d = abs(s_mid.y - h_mid.y)
+    vz = abs(s_z - h_z)
+    v_horiz_3d = math.sqrt(vx_2d**2 + vz**2)
+    torso_angle_3d = round(math.degrees(math.atan2(vy_2d, max(1.0, v_horiz_3d))), 2)
 
     # Trong tam dai dien than C = (S + H) / 2
     c_y_px = (s_mid.y + h_mid.y) / 2.0
@@ -167,6 +179,8 @@ def calculate_pose_geometry(
         keypoints_detected=detected_count,
         image_width=image_width,
         image_height=image_height,
+        torso_length_px=round(torso_len_px, 2),
+        torso_angle_3d_deg=torso_angle_3d,
     )
 
 

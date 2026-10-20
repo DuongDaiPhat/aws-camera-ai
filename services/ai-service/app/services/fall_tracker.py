@@ -70,6 +70,7 @@ class FallTracker:
         # Baseline dong bang khi tao candidate
         self.baseline_scale_px: float = 0.0
         self.baseline_center_y_px: float = 0.0
+        self.baseline_torso_length_px: float = 0.0
 
         # Candidate identity & timestamps
         self.episode_id: str | None = None
@@ -332,21 +333,42 @@ class FallTracker:
             if self.baseline_scale_px > 0
             else 0.0
         )
-        if (
-            geometry.torso_angle_deg < self.settings.fall_torso_angle_threshold_deg
-            and frozen_drop >= self.settings.fall_center_drop_ratio
-        ):
-            if (
-                self.last_observation
-                and self.last_observation.geometry.torso_angle_deg
+        torso_shrink = (
+            geometry.torso_length_px / max(10.0, self.baseline_torso_length_px)
+            if self.baseline_torso_length_px > 0
+            else 1.0
+        )
+        is_abnormal = (
+            (
+                min(geometry.torso_angle_deg, geometry.torso_angle_3d_deg)
                 < self.settings.fall_torso_angle_threshold_deg
-                and (self.last_observation.geometry.center_y_px - self.baseline_center_y_px)
+                or torso_shrink < self.settings.fall_torso_shrink_ratio
+                or geometry.aspect_ratio < self.settings.fall_aspect_ratio_threshold
+            )
+            and frozen_drop >= self.settings.fall_center_drop_ratio
+        )
+        if is_abnormal and self.last_observation is not None:
+            prev_obs = self.last_observation
+            prev_shrink = (
+                prev_obs.geometry.torso_length_px / max(10.0, self.baseline_torso_length_px)
+                if self.baseline_torso_length_px > 0
+                else 1.0
+            )
+            prev_abnormal = (
+                (
+                    min(prev_obs.geometry.torso_angle_deg, prev_obs.geometry.torso_angle_3d_deg)
+                    < self.settings.fall_torso_angle_threshold_deg
+                    or prev_shrink < self.settings.fall_torso_shrink_ratio
+                    or prev_obs.geometry.aspect_ratio < self.settings.fall_aspect_ratio_threshold
+                )
+                and (prev_obs.geometry.center_y_px - self.baseline_center_y_px)
                 / self.baseline_scale_px
                 >= self.settings.fall_center_drop_ratio
-            ):
+            )
+            if prev_abnormal:
                 motion_score = calculate_motion_score(
                     current_keypoints=keypoints,
-                    previous_keypoints=self.last_observation.keypoints,
+                    previous_keypoints=prev_obs.keypoints,
                     image_width=geometry.image_width,
                     image_height=geometry.image_height,
                     dt_seconds=dt_seconds,
@@ -426,7 +448,9 @@ class FallTracker:
         if len(self.history) >= self.settings.fall_history_frame_count:
             history_centers = [obs.geometry.center_y_px for obs in self.history]
             history_heights = [obs.geometry.bbox_height_px for obs in self.history]
+            history_torso_lens = [obs.geometry.torso_length_px for obs in self.history]
             scale_prev = median(history_heights)
+            prev_torso_len = median(history_torso_lens) if history_torso_lens else 0.0
 
             center_drop_ratio = calculate_center_drop_ratio(
                 current_center_y_px=geometry.center_y_px,
@@ -434,25 +458,45 @@ class FallTracker:
                 baseline_bbox_height_px=scale_prev,
             )
 
-            is_sudden_drop = (
-                geometry.torso_angle_deg < self.settings.fall_torso_angle_threshold_deg
+            torso_shrink_ratio = (
+                geometry.torso_length_px / max(10.0, prev_torso_len)
+                if prev_torso_len > 0
+                else 1.0
+            )
+
+            # Dieu kien A: Nga ngang hoac goc 3D (giu nguyen chuan AC16-2 < 30 do va drop >= 0.20)
+            is_angle_fall = (
+                min(geometry.torso_angle_deg, geometry.torso_angle_3d_deg)
+                < self.settings.fall_torso_angle_threshold_deg
                 and center_drop_ratio >= self.settings.fall_center_drop_ratio
             )
 
-            if is_sudden_drop:
+            # Dieu kien B: Nga doc camera (than co ngan > 45% hoac bbox bep va co roi trong tam)
+            is_axial_fall = (
+                (
+                    torso_shrink_ratio < self.settings.fall_torso_shrink_ratio
+                    or geometry.aspect_ratio < self.settings.fall_aspect_ratio_threshold
+                )
+                and center_drop_ratio >= self.settings.fall_center_drop_ratio
+            )
+
+            if is_angle_fall or is_axial_fall:
                 self.state = "CANDIDATE"
-                self.reason = "FALL_CANDIDATE"
+                self.reason = "FALL_CANDIDATE" if is_angle_fall else "AXIAL_FALL_CANDIDATE"
                 self.candidate_started_at = observed_at
                 self.baseline_scale_px = max(10.0, scale_prev)
                 self.baseline_center_y_px = median(history_centers)
+                self.baseline_torso_length_px = max(10.0, prev_torso_len)
                 self.episode_id = self._generate_episode_id(observed_at)
                 self.immobile_seconds = 0.0
                 logger.info(
-                    "Track %s entered CANDIDATE (%s): angle=%.1f, drop=%.2f",
+                    "Track %s entered CANDIDATE (%s): angle=%.1f, angle_3d=%.1f, drop=%.2f, shrink=%.2f",
                     self.track_id,
                     self.reason,
                     geometry.torso_angle_deg,
+                    geometry.torso_angle_3d_deg,
                     center_drop_ratio,
+                    torso_shrink_ratio,
                 )
             else:
                 self.reason = "NORMAL_POSTURE"
