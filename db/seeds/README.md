@@ -39,6 +39,20 @@ Mật khẩu: Admin@12345
 
 Mật khẩu trên chỉ dùng để demo local và được lưu trong database dưới dạng Argon2id.
 
+## Tài khoản kiểm thử US-20
+
+File `0003_test_users.sql` bổ sung hai tài khoản riêng:
+
+| Email             | Quyền       | Mật khẩu dev  |
+| ----------------- | ----------- | ------------- |
+| `caregiver@local` | `CAREGIVER` | `Admin@12345` |
+| `viewer@local`    | `VIEWER`    | `Admin@12345` |
+
+Runner `pnpm seed` tự đọc file này. Chạy lại cập nhật hai tài khoản theo email,
+không tạo tài khoản trùng. Seed chưa gán camera, liên kết khuôn mặt hay Telegram.
+Để kiểm thử US-20, cần camera thuộc caregiver, khuôn mặt thật liên kết viewer với
+đúng hộ và Telegram đã xác minh cho từng tài khoản.
+
 ## Dữ liệu tiếp theo của Sprint 1 (US-07)
 
 Tạo file `0001_demo_data.sql` với:
