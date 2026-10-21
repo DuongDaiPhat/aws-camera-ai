@@ -15,6 +15,13 @@ INSERT INTO users (id, email, password_hash, full_name, role) VALUES
     '$argon2id$v=19$m=65536,p=4,t=3$t/FGrLv6QCsVGRNKlgaoPA$VEX5Op2XTiAYQEvy1dUIbsuGGAqE98grgmHV3Y90gyo',
     'Caregiver User',
     'CAREGIVER'
+),
+(
+    '22222222-2222-4222-8222-222222222222',
+    'resident@camerai.local',
+    '$argon2id$v=19$m=65536,p=4,t=3$t/FGrLv6QCsVGRNKlgaoPA$VEX5Op2XTiAYQEvy1dUIbsuGGAqE98grgmHV3Y90gyo',
+    'Ong Noi (Resident)',
+    'VIEWER'
 )
 ON CONFLICT (email) DO UPDATE
 SET password_hash = EXCLUDED.password_hash,

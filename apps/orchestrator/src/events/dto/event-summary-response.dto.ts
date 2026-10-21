@@ -20,6 +20,9 @@ export class EventZoneDto {
 }
 
 export class EventSummaryDto {
+  wellnessResidentUserId?: string | null;
+  wellnessResidentName?: string | null;
+  wellnessCheckId?: string | null;
   id!: string;
   eventType!: EventType;
   status!: EventStatus;

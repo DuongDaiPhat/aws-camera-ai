@@ -1,9 +1,13 @@
+import { WellnessService } from '../../wellness/wellness.service';
+import { createHash } from 'node:crypto';
+import type { TokenClaims } from '../../auth/auth.types';
 import {
   ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { EventsService } from '../../events/events.service';
 import { EscalationEngineService } from '../../escalation/escalation-engine.service';
@@ -20,6 +24,7 @@ export class TelegramCallbackService {
     private readonly engine: EscalationEngineService,
     private readonly config: TelegramWorkConfig,
     @Inject(EventsService) private readonly events: Pick<EventsService, 'publishCommittedUpdate'>,
+    @Optional() private readonly wellness?: WellnessService,
   ) {}
 
   async confirm(update: TelegramCallback): Promise<string> {
@@ -28,20 +33,49 @@ export class TelegramCallbackService {
     const target = await this.repository.findCallbackTarget(parsed.notificationId, update.actorId);
     if (!target) return 'Bạn không có quyền xác nhận tin này.';
     try {
-      await this.engine.confirmInitial(target.eventId, target.actorUserId, {
-        response: parsed.response,
-        channel: 'TELEGRAM',
-        notificationId: parsed.notificationId,
-        sourceMessageId: update.messageId,
-        sourceUpdateId: String(update.updateId),
-        telegramSource: {
+      if (target.wellnessCheckId && this.wellness) {
+        const hash = createHash('sha256')
+          .update('wellness-callback:' + update.updateId + ':' + parsed.notificationId)
+          .digest('hex');
+        const commandId =
+          hash.slice(0, 8) +
+          '-' +
+          hash.slice(8, 12) +
+          '-4' +
+          hash.slice(13, 16) +
+          '-a' +
+          hash.slice(17, 20) +
+          '-' +
+          hash.slice(20, 32);
+        await this.wellness.confirmCheck(
+          { sub: target.actorUserId, role: 'VIEWER' } as TokenClaims,
+          target.wellnessCheckId,
+          { commandId, response: parsed.response },
+          {
+            channel: 'TELEGRAM',
+            notificationId: parsed.notificationId,
+            telegramUserId: update.actorId,
+            chatId: update.chatId,
+            messageId: update.messageId,
+            updateId: String(update.updateId),
+            ttlSeconds: this.config.callbackTtlSeconds,
+          },
+        );
+      } else
+        await this.engine.confirmInitial(target.eventId, target.actorUserId, {
+          response: parsed.response,
+          channel: 'TELEGRAM',
           notificationId: parsed.notificationId,
-          telegramUserId: update.actorId,
-          chatId: update.chatId,
-          messageId: update.messageId,
-          ttlSeconds: this.config.callbackTtlSeconds,
-        },
-      });
+          sourceMessageId: update.messageId,
+          sourceUpdateId: String(update.updateId),
+          telegramSource: {
+            notificationId: parsed.notificationId,
+            telegramUserId: update.actorId,
+            chatId: update.chatId,
+            messageId: update.messageId,
+            ttlSeconds: this.config.callbackTtlSeconds,
+          },
+        });
       await this.events.publishCommittedUpdate(target.eventId);
       return parsed.response === 'IM_OK'
         ? 'Đã xác nhận bạn an toàn.'

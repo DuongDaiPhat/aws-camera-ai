@@ -35,6 +35,10 @@ Người thêm DB migration khác lấy số tiếp theo sau rebase. Nếu số 
 
 ## 3. Quy trình đóng contract
 
+### Bổ sung sửa QA US-20 ngày 18/10/2026
+
+Migration `0016_wellness_source_evidence.sql` được dành cho association M1 và provenance metadata chuyển động. Đây là thay đổi DB additive trên `fix/US-20-wellness-check`; chưa merge/main hoặc apply DB thật. Hai OpenAPI, generated contracts, enums và dependency lock giữ baseline frozen; runtime được sửa cho đúng contract đã có. Fresh PostgreSQL16, upgrade0015→0016 có lịch legacy và runner replay được ghi tại [báo cáo retest](../test/US20_FIX_2026-10-18/REPORT.md). Nếu số0016 có contributor khác dùng trước merge, cần phối hợp migration mới, không sửa migration đã triển khai trên môi trường khác.
+
 1. Base Git commit của phiên chuẩn bị: `865dc6e`. Local spec hash được ghi ở mục 4 sau kiểm tra; hash chưa thay thế merge commit/PR.
 2. Một integrator merge contract PR trước feature; bắt buộc review A+B theo API_GUIDE/GIT_WORKFLOW. Điền PR URL, full merge SHA và owner người thực hiện vào reservation khi có thật; hiện chưa tạo PR.
 3. Contributor API mới checkout/rebase commit đó, đăng ký namespace khác. Thay operation/schema shared phải coordinated contract PR trước code. Không copy spec từ branch cũ hoặc merge ours/theirs toàn file.

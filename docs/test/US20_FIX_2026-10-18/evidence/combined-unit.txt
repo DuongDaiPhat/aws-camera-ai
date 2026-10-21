@@ -1,0 +1,317 @@
+PASS test/cameras.service.spec.ts (31.593 s)
+  ● Console
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=camera_cong_chinh objectId=live-person frameTime=1792333444653 observedAt=1792333444653 receivedAt=1792333444653 action=ACCEPT
+
+      129 |     }
+      130 |
+    > 131 |     console.warn(
+          |             ^
+      132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+      133 |     );
+      134 |
+
+      at FrigateFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:131:13)
+      at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/cameras.service.spec.ts:170:33)
+
+PASS test/mqtt-consumer.service.spec.ts (21.967 s)
+PASS test/events.service.spec.ts
+PASS test/wellness.service.spec.ts
+PASS test/escalation-engine.service.spec.ts
+PASS test/ffmpeg-source-runner.spec.ts
+[Nest] 27884  - 18/10/2026, 21.24.33   ERROR [FrigateSyncService] Đồng bộ Frigate thất bại cho camera camera_cong_chinh:
+fetch failed: ECONNREFUSED 127.0.0.1:5000
+PASS test/frigate-sync.service.spec.ts
+PASS test/media.service.spec.ts
+PASS test/cameras.controller.spec.ts (8.022 s)
+PASS test/escalation-policy.spec.ts
+PASS test/wellness-scheduler.service.spec.ts
+PASS src/fall-detection/coordinator/fall-incident.coordinator.spec.ts
+[Nest] 27884  - 18/10/2026, 21.24.43   ERROR [EventsRepository] Lỗi khi ghi event vào PostgreSQL (dedupKey: dedup-1, trackId: track-1)
+[Nest] 27884  - 18/10/2026, 21.24.43   ERROR [EventsRepository] Error: DB Error
+[Nest] 27884  - 18/10/2026, 21.24.43    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track track-1 camera cam-livingroom ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 27884  - 18/10/2026, 21.24.43     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera cam-livingroom (track: track-1, event: evt-111)
+[Nest] 27884  - 18/10/2026, 21.24.43   DEBUG [FallIncidentCoordinator] [M2A_CANDIDATE_CANCELLED] Track track-1 trên camera cam-livingroom đã hủy candidate (reason: RECOVERED)
+[Nest] 27884  - 18/10/2026, 21.24.43    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track track-1 camera cam-livingroom ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 27884  - 18/10/2026, 21.24.43   DEBUG [FallIncidentCoordinator] Incident té ngã episode episode-uuid-999 đã được xử lý trước đó (deduped)
+PASS test/events.repository.spec.ts
+PASS test/auth.service.spec.ts
+PASS test/ai-result.aggregator.spec.ts
+[Nest] 27884  - 18/10/2026, 21.24.44   ERROR [FrigateConfigService] Lỗi khi phân tích cú pháp YAML cấu hình Frigate:
+[Nest] 27884  - 18/10/2026, 21.24.44   ERROR [FrigateConfigService] YAMLParseError: Flow sequence in block collection must be sufficiently indented and end with a ] at line 1, column 23:
+
+invalid: [yaml: broken
+                      ^
+
+PASS test/frigate-config.service.spec.ts
+PASS test/notification-retry-worker.spec.ts
+PASS test/escalation-rules.service.spec.ts
+PASS test/face-recognition.worker.spec.ts
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 27884  - 18/10/2026, 21.24.47    WARN [FaceRecognitionWorker] Không lấy được ảnh crop cho track track-1
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "683f2755-e047-446e-8614-0f87095a0059",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNKNOWN",
+  "hasError": false
+}
+
+[Nest] 27884  - 18/10/2026, 21.24.47     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+PASS test/escalation-rule-policy.spec.ts
+PASS test/ai-result.validator.spec.ts
+PASS test/escalation-rules.repository.spec.ts
+PASS test/wellness-policy.spec.ts
+PASS test/known-faces.spec.ts
+[Nest] 27884  - 18/10/2026, 21.24.50     LOG [KnownFacesService] Received 2 images for registration
+[Nest] 27884  - 18/10/2026, 21.24.50     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 27884  - 18/10/2026, 21.24.50     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 27884  - 18/10/2026, 21.24.50    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=webrtc path=cam_other hasToken=false hasQuery=true
+[Nest] 27884  - 18/10/2026, 21.24.50    WARN [MediaMtxAuthController] MediaMTX auth denied action=publish protocol=webrtc path=cam_front hasToken=true hasQuery=false
+[Nest] 27884  - 18/10/2026, 21.24.50    WARN [MediaMtxAuthController] MediaMTX auth denied action=publish protocol=webrtc path=cam_other hasToken=true hasQuery=false
+[Nest] 27884  - 18/10/2026, 21.24.50    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=webrtc path=cam_front hasToken=true hasQuery=false
+[Nest] 27884  - 18/10/2026, 21.24.50    WARN [MediaMtxAuthController] MediaMTX auth denied action=publish protocol=rtsp path=cam_front hasToken=true hasQuery=false
+PASS test/media-mtx-auth.controller.spec.ts
+PASS test/zone-result-producer.service.spec.ts
+PASS test/escalation-rules.controller.spec.ts
+[Nest] 27884  - 18/10/2026, 21.24.52   ERROR [AiResultOutboxService] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "messageId": "22222222-2222-4222-8222-222222222222",
+  "err": "database unavailable"
+}
+
+Xử lý AI result outbox thất bại
+PASS test/ai-result-outbox.service.spec.ts
+PASS src/fall-detection/consumer/pose-frame.consumer.spec.ts
+[Nest] 27884  - 18/10/2026, 21.24.53   DEBUG [PoseFrameConsumer] Bỏ qua pose frame cũ: delay 5.00s > 1s
+PASS test/escalation-deadline-worker.service.spec.ts
+[Nest] 27884  - 18/10/2026, 21.24.53   ERROR [RestAreaEvaluator] Lỗi khi kiểm tra REST_AREA cho camera cam-1: Database offline
+PASS src/fall-detection/evaluator/rest-area.evaluator.spec.ts
+[Nest] 27884  - 18/10/2026, 21.24.53   DEBUG [RestAreaEvaluator] Người tại tâm (0.400, 0.400) nằm trong REST_AREA "Giường ngủ" (zone-1)
+PASS test/auth.controller.spec.ts
+PASS test/telegram-webhook.spec.ts
+PASS src/fall-detection/envelope/pose-frame-envelope.spec.ts
+[Nest] 27884  - 18/10/2026, 21.24.55    WARN [PoseFrameEnvelope] Dữ liệu envelope quá ngắn (< 4 bytes)
+[Nest] 27884  - 18/10/2026, 21.24.55    WARN [PoseFrameEnvelope] Envelope vượt quá giới hạn cho phép (1048586 > 1048576 bytes)
+[Nest] 27884  - 18/10/2026, 21.24.55    WARN [PoseFrameEnvelope] Header length không hợp lệ: 33792 bytes
+[Nest] 27884  - 18/10/2026, 21.24.55    WARN [PoseFrameEnvelope] Header bị cắt xén (4 + 50 > 20)
+[Nest] 27884  - 18/10/2026, 21.24.55    WARN [PoseFrameEnvelope] Lỗi parse JSON header trong envelope: Unexpected token 'o', "not-json{" is not valid JSON
+[Nest] 27884  - 18/10/2026, 21.24.55    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+[Nest] 27884  - 18/10/2026, 21.24.55    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+PASS test/media-mtx.service.spec.ts
+PASS test/wellness.controller.spec.ts
+PASS test/events.controller.spec.ts
+PASS test/frigate-detection-tracker.service.spec.ts
+PASS test/frigate-frame-buffer.spec.ts
+  ● Console
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=a frameTime=10000 observedAt=9900 receivedAt=10100 action=ACCEPT
+
+      129 |     }
+      130 |
+    > 131 |     console.warn(
+          |             ^
+      132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+      133 |     );
+      134 |
+
+      at FrigateFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:131:13)
+      at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:12:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test frameTime=10100 receivedAt=10300 action=DROP reason=out_of_order_or_duplicate
+
+      45 |     const frames = this.cameras.get(sample.camera) ?? [];
+      46 |     if (frames.length && frames[frames.length - 1].frameTime >= frameTime) {
+    > 47 |       console.warn(
+         |               ^
+      48 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${sample.camera} frameTime=${frameTime} receivedAt=${now} action=DROP reason=out_of_order_or_duplicate`,
+      49 |       );
+      50 |       return;
+
+      at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:47:15)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:17:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test frameTime=1000 receivedAt=10000 action=DROP reason=out_of_window
+
+      38 |     const frameTime = toMilliseconds(sample.frameTime);
+      39 |     if (frameTime < now - MAX_AGE_MS || frameTime > now + 1000) {
+    > 40 |       console.warn(
+         |               ^
+      41 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${sample.camera} frameTime=${frameTime} receivedAt=${now} action=DROP reason=out_of_window`,
+      42 |       );
+      43 |       return;
+
+      at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:40:15)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:25:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test frameTime=20000 receivedAt=10000 action=DROP reason=out_of_window
+
+      38 |     const frameTime = toMilliseconds(sample.frameTime);
+      39 |     if (frameTime < now - MAX_AGE_MS || frameTime > now + 1000) {
+    > 40 |       console.warn(
+         |               ^
+      41 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${sample.camera} frameTime=${frameTime} receivedAt=${now} action=DROP reason=out_of_window`,
+      42 |       );
+      43 |       return;
+
+      at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:40:15)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:26:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=a frameTime=10000 receivedAt=10000 action=DROP reason=malformed_geometry
+
+      100 |     ) {
+      101 |       if (label === 'person') {
+    > 102 |         console.warn(
+          |                 ^
+      103 |           `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id ?? 'unknown'} frameTime=${frameTimeMs} receivedAt=${now} action=DROP reason=malformed_geometry`,
+      104 |         );
+      105 |       }
+
+      at FrigateFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:102:17)
+      at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:29:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=p1 frameTime=123500 observedAt=123400 receivedAt=124000 action=ACCEPT
+
+      129 |     }
+      130 |
+    > 131 |     console.warn(
+          |             ^
+      132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+      133 |     );
+      134 |
+
+      at FrigateFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:131:13)
+      at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:47:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=p_no_obs frameTime=10000 receivedAt=10100 action=DROP reason=missing_observed_at
+
+      115 |
+      116 |     if (rawObserved === undefined || !Number.isFinite(rawObserved)) {
+    > 117 |       console.warn(
+          |               ^
+      118 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} receivedAt=${now} action=DROP reason=missing_observed_at`,
+      119 |       );
+      120 |       return null;
+
+      at FrigateFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:117:15)
+      at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:71:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=p_future frameTime=10000 observedAt=10200 receivedAt=10100 action=DROP reason=future_observed_at
+
+      123 |     const observedAtMs = toMilliseconds(rawObserved);
+      124 |     if (observedAtMs > frameTimeMs + 50) {
+    > 125 |       console.warn(
+          |               ^
+      126 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=DROP reason=future_observed_at`,
+      127 |       );
+      128 |       return null;
+
+      at FrigateFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:125:15)
+      at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:71:12)
+
+[Nest] 27884  - 18/10/2026, 21.24.57   ERROR [PoseInferenceAdapter] Lỗi gọi AI Service /pose/fall: Network connection refused
+PASS src/fall-detection/adapter/pose-inference.adapter.spec.ts
+[Nest] 27884  - 18/10/2026, 21.24.57    WARN [PoseInferenceAdapter] AI Service /pose/fall trả về HTTP 500: Internal Server Error
+PASS test/jwt-auth.guard.spec.ts
+PASS test/telegram.adapter.spec.ts
+PASS test/frigate-client.service.spec.ts
+PASS test/rtsp-source-tester.service.spec.ts
+PASS test/jwt-token.service.spec.ts
+PASS test/media.controller.spec.ts
+PASS test/telegram-link.service.spec.ts
+PASS test/internal-token.guard.spec.ts
+PASS test/telegram-message-builder.spec.ts
+PASS test/zone-schedule.service.spec.ts
+PASS test/zone-geometry.validator.spec.ts
+PASS test/argon2-password-hasher.spec.ts
+PASS test/health.service.spec.ts
+
+Test Suites: 53 passed, 53 total
+Tests:       395 passed, 395 total
+Snapshots:   0 total
+Time:        92.327 s
+Ran all test suites.
+Test results written to: ..\..\artifacts-unit-results.json

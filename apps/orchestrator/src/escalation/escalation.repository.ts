@@ -338,7 +338,7 @@ export class EscalationRepository {
         version, detected_at, escalation_deadline_at, notified_at, escalated_at,
         resolved_at, closed_at, rule_snapshot, triggering_results
       FROM events
-      WHERE status = 'NOTIFIED'
+      WHERE status = 'NOTIFIED' AND event_type <> 'WELLNESS_TIMEOUT'
         AND escalation_deadline_at IS NOT NULL
         AND escalation_deadline_at <= now()
       ORDER BY

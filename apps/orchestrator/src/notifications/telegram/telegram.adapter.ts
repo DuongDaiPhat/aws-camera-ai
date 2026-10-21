@@ -25,8 +25,22 @@ interface TelegramMessageResponse {
 export class TelegramAdapter implements TelegramChannel {
   private readonly token: string | undefined;
   private readonly timeoutMs: number;
+  private readonly baseUrl: string;
 
   constructor(config: ConfigService) {
+    const base = new URL(config.get<string>('TELEGRAM_API_BASE_URL') ?? 'https://api.telegram.org');
+    const local = ['127.0.0.1', 'localhost', '[::1]'].includes(base.hostname);
+    if (
+      (!local && base.origin !== 'https://api.telegram.org') ||
+      base.username ||
+      base.password ||
+      base.pathname !== '/' ||
+      base.search ||
+      base.hash
+    ) {
+      throw new Error('TELEGRAM_API_BASE_URL must be the official API or a loopback test server.');
+    }
+    this.baseUrl = base.origin;
     this.token = config.get<string>('TELEGRAM_BOT_TOKEN') || undefined;
     if (config.get<string>('TELEGRAM_ENABLED') === 'true' && !this.token) {
       throw new Error('TELEGRAM_BOT_TOKEN bắt buộc khi TELEGRAM_ENABLED=true.');
@@ -102,7 +116,7 @@ export class TelegramAdapter implements TelegramChannel {
     const isForm = body instanceof FormData;
     let response: Response;
     try {
-      response = await fetch(`https://api.telegram.org/bot${this.token}/${method}`, {
+      response = await fetch(`${this.baseUrl}/bot${this.token}/${method}`, {
         method: 'POST',
         headers: isForm ? undefined : { 'Content-Type': 'application/json' },
         body: isForm ? body : JSON.stringify(body),

@@ -1,0 +1,122 @@
+{
+  "US-20-TC-001": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-01: PostgreSQL materializer 09:00→02:00Z và 18:00→11:00Z, ISO weekday, cursor/unique local date. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-002": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-01: PostgreSQL16 DST gap07:30Z/fold06:30Z, không phụ thuộc host timezone. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-003": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-02: activation và admission cursor được kiểm tra trước insert, không tạo run trước bật lịch. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-004": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-03: unit xác minh không gọi materialize/claim khi off; DB timeout/delivery failure vẫn drain. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-005": {
+    "baseline": "Passed",
+    "result": "Passed",
+    "evidence": "Baseline Passed. CRUD/cross-household/other resident403; M5 event list/detail/stats/SSE scoped theo actor. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-006": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-13: range validators, days nonempty/unique, IANA pg_timezone_names, empty PATCH400. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-007": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-12: real HTTP201/200/202/204; JWT/internal guard; camelCase và Confirmation đủ required fields. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-008": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-04: active registered face link, owner camera scope, PATCH revalidate trạng thái merged. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-009": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-05/07: DTO bắt buộc source IDs, source evidence join chính xác; face-only/unknown/expired không tạo HOME/AWAY. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-010": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-06: key reorder DUPLICATE, changed payload409; transaction rollback không để ledger mồ côi. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-011": {
+    "baseline": "Passed",
+    "result": "Passed",
+    "evidence": "Baseline Passed. PostgreSQL16 CRUD/soft delete, start/end inclusive, end-1ms không lấy motion ngoài window; as-of/expiry/conflict. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-012": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-10: SQL thật, lease/reclaim, hai scheduler song song, decision atomic; MISSED/disabled/superseded. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-013": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-10: một event P2/WELLNESS_TIMEOUT/SCHEDULER, camera/confidence null, một intent đúng resident. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-014": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-08: PENDING/HTTP503 không khởi tạo deadline; actual HTTP SENT đặt snapshot300s, edit không reset. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-015": {
+    "baseline": "Passed",
+    "result": "Passed",
+    "evidence": "Baseline Passed. IM_OK/NEED_HELP tại299.999s; equality300s và300.001s conflict+commit escalation; không gia hạn. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-016": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-09: DB tests CLOSED/RESOLVED/ESCALATED không thêm authoritative; concurrent confirmations có một kết quả. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-017": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-06: identical command replay giữ nguyên full HTTP response; changed note409, không confirmation thứ hai. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-018": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. BUG-M5-11: enum/SQL thật cho IM_OK resolve và NEED_HELP escalate; history một transition, đúng caregiver. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-019": {
+    "baseline": "Blocked",
+    "result": "Passed",
+    "evidence": "Baseline Blocked. GAP01: M1 validated result→receipt/outbox wellness.identity→claim/adapter→moving metadata→ledger; TTL/session/track, direction config. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-020": {
+    "baseline": "Blocked",
+    "result": "Passed",
+    "evidence": "Baseline Blocked. GAP02: scheduler/PG→real local HTTP provider→SENT→assigned VIEWER Telegram callback; recovered SENT timeout worker/caregiver khi flag off. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-021": {
+    "baseline": "Failed",
+    "result": "Passed",
+    "evidence": "Baseline Failed. Nghiệm thu cục bộ ghép các assertion lịch/X6h/P2/firstSENT+300s/IM_OK/boundary/timeout/NEED_HELP/dedup. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-022": {
+    "baseline": "Blocked",
+    "result": "Passed",
+    "evidence": "Baseline Blocked. GAP01/BUG-M5-07: adapter departure→scheduler SKIPPED_AWAY; arrival→HOME; unknown/face-only/expired/conflicting evidence không suy AWAY. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-023": {
+    "baseline": "Blocked",
+    "result": "Passed",
+    "evidence": "Baseline Blocked. GAP03: React interaction tests5 ca và browser AuthModule/WellnessModule/DB thật: resident IM_OK; caregiver create/edit/off/on/delete/history. SSE scope được test service+DB. Evidence: evidence/combined-integration-results.json; evidence/unit-results.json; evidence/web.txt; evidence/resident-im-ok.png; evidence/caregiver-schedules.png. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  },
+  "US-20-TC-024": {
+    "baseline": "Passed",
+    "result": "Passed",
+    "evidence": "Baseline Passed. Snapshot ghép thử riêng:395 unit/module,196 Web,87 integration; typecheck/lint/format đạt. Không thay main; không chứng nhận các lỗi M2a cũ đã được sửa. Evidence: evidence/combined-unit-results.json; evidence/combined-web.txt; evidence/combined-integration-results.json; combined-typecheck/lint/format-check.txt. Giới hạn local/synthetic/provider được giải thích trong REPORT.md."
+  }
+}

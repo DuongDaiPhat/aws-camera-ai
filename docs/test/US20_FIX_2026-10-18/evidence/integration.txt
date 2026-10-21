@@ -1,0 +1,34 @@
+PASS test/wellness-db.integration.spec.ts (57.878 s)
+  US20 real PostgreSQL + HTTP delivery + API acceptance
+    √ TC019: accepted M1 result persists durable identity work; real outbox claims and invokes adapter (799 ms)
+    √ TC001/002/004/012: 09:00 + 18:00 local, activation/cursor, one occurrence per local date (762 ms)
+    √ TC002 DST 2026-03-08 matches PostgreSQL gap/fold (573 ms)
+    √ TC002 DST 2026-11-01 matches PostgreSQL gap/fold (563 ms)
+    √ TC003/006/007/008: role/household/camera validation and merged PATCH (582 ms)
+    √ TC005/009/011: closed window boundaries, last activity, as-of AWAY and expiry (587 ms)
+    √ TC009/022: conflicting timestamps and expired/unknown identity never prove AWAY (583 ms)
+    √ TC010/016/017: canonical replay, conflicting payload, provenance, out-of-order and rollback (748 ms)
+    √ TC019/022: production M1 adapter requires motion, exact session/track and configured direction (868 ms)
+    √ TC013/014/020: no activity → P2 camera-less → actual HTTP SENT → exact 300s snapshot deadline (779 ms)
+    √ TC014/015/018: failed HTTP never starts deadline, flag off still drains delivery failures once (619 ms)
+    √ TC020/021: recovered SENT request times out through the real deadline worker while admission is disabled (540 ms)
+    √ TC015/016/017/020: assigned Telegram callback checks actor/chat/message, confirms once, rejects changed replay (794 ms)
+    √ TC015/018/021: at deadline + 0ms commits escalation and returns 409 (725 ms)
+    √ TC015/018/021: at deadline + 1ms commits escalation and returns 409 (628 ms)
+    √ TC015/021: NEED_HELP immediately notifies caregiver, concurrent confirmations yield one authoritative result (661 ms)
+    √ TC006/007/023/024: real HTTP schema/status, JWT scope, resident confirm and internal token (924 ms)
+    √ TC018/020/023: HTTP IM_OK persists one confirmation and expected caregiver routing (700 ms)
+    √ TC018/020/023: HTTP NEED_HELP persists one confirmation and expected caregiver routing (675 ms)
+    √ TC011/012/021/022: scheduler commits SKIPPED_AWAY and SKIPPED_ACTIVITY; missed, disabled and superseded runs stay terminal (1131 ms)
+    √ TC005/007: M5 event lists, details, stats and SSE expose resident context only to its household (738 ms)
+    √ TC016: rejects a new command for CLOSED without creating an authoritative confirmation (707 ms)
+    √ TC016: rejects a new command for RESOLVED without creating an authoritative confirmation (637 ms)
+    √ TC016: rejects a new command for ESCALATED without creating an authoritative confirmation (659 ms)
+    √ TC012/021: two scheduler replicas create one active request; expired leases recover (663 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       25 passed, 25 total
+Snapshots:   0 total
+Time:        60.125 s
+Ran all test suites within paths "test/wellness-db.integration.spec.ts".
+Test results written to: ..\..\artifacts-integration-results.json

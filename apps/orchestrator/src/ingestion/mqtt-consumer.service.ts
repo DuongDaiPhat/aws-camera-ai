@@ -1,3 +1,4 @@
+import { WellnessSourceAdapter } from '../wellness/wellness-source.adapter';
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
@@ -62,6 +63,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     @Optional()
     private readonly zoneScheduleService: ZoneScheduleService = new ZoneScheduleService(),
     @Optional() @InjectQueue('face-recognition') private readonly faceQueue?: Queue,
+    @Optional() private readonly wellnessSource?: WellnessSourceAdapter,
   ) {}
 
   onModuleInit(): void {
@@ -128,7 +130,9 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       if (receivedTopic === framesTopic) {
         if (buffer.length > 128 * 1024) return;
         try {
-          this.detectionTracker.frames.accept(JSON.parse(buffer.toString('utf8')) as unknown);
+          const payload: unknown = JSON.parse(buffer.toString('utf8'));
+          this.detectionTracker.frames.accept(payload);
+          this.wellnessSource?.enqueueFrame(payload);
         } catch {
           this.logger.warn('Invalid camera frame metadata');
         }
@@ -425,6 +429,10 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
             cameraSlug: message.after.camera,
             ownerScopeId,
             collectionVersion,
+            sourceSessionId:
+              typeof message.after.start_time === 'number'
+                ? message.after.camera + ':' + message.after.start_time.toFixed(6)
+                : undefined,
           });
         }
       } else if (isPromoted || hasNewSnapshot) {

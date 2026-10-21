@@ -1,0 +1,96 @@
+{
+  "numFailedTestSuites": 0,
+  "numFailedTests": 0,
+  "numPassedTestSuites": 1,
+  "numPassedTests": 4,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 1,
+  "numTotalTests": 4,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1792323435694,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["EscalationRulesRepository Integration (US-15)"],
+          "duration": 51,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "EscalationRulesRepository Integration (US-15) findAll trả về đúng 6 default rules theo thứ tự priority (P0 -> P3)",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 8,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "findAll trả về đúng 6 default rules theo thứ tự priority (P0 -> P3)"
+        },
+        {
+          "ancestorTitles": ["EscalationRulesRepository Integration (US-15)"],
+          "duration": 6,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "EscalationRulesRepository Integration (US-15) findByEventType trả về chi tiết rule",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 6,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "findByEventType trả về chi tiết rule"
+        },
+        {
+          "ancestorTitles": ["EscalationRulesRepository Integration (US-15)"],
+          "duration": 82,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "EscalationRulesRepository Integration (US-15) updateThresholdsAtomic cập nhật nguyên tử, tăng version và ghi audit log",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 9,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "updateThresholdsAtomic cập nhật nguyên tử, tăng version và ghi audit log"
+        },
+        {
+          "ancestorTitles": ["EscalationRulesRepository Integration (US-15)"],
+          "duration": 7,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "EscalationRulesRepository Integration (US-15) updateThresholdsAtomic ném RuleNotFoundError khi event_type không tồn tại",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "updateThresholdsAtomic ném RuleNotFoundError khi event_type không tồn tại"
+        }
+      ],
+      "endTime": 1792323444884,
+      "message": "",
+      "name": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\us20-fixes\\apps\\orchestrator\\test\\escalation-rules.repository.integration.spec.ts",
+      "startTime": 1792323436121,
+      "status": "passed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}

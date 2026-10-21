@@ -1,0 +1,707 @@
+FAIL test/wellness-db.integration.spec.ts (29.909 s)
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC019: accepted M1 result persists durable identity work; real outbox claims and invokes adapter
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC001/002/004/012: 09:00 + 18:00 local, activation/cursor, one occurrence per local date
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC002 DST 2026-03-08 matches PostgreSQL gap/fold
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC002 DST 2026-11-01 matches PostgreSQL gap/fold
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC003/006/007/008: role/household/camera validation and merged PATCH
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC005/009/011: closed window boundaries, last activity, as-of AWAY and expiry
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC009/022: conflicting timestamps and expired/unknown identity never prove AWAY
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC010/016/017: canonical replay, conflicting payload, provenance, out-of-order and rollback
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC019/022: production M1 adapter requires motion, exact session/track and configured direction
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC013/014/020: no activity → P2 camera-less → actual HTTP SENT → exact 300s snapshot deadline
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC014/015/018: failed HTTP never starts deadline, flag off still drains delivery failures once
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC015/016/017/020: assigned Telegram callback checks actor/chat/message, confirms once, rejects changed replay
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC015/018/021: at deadline + 0ms commits escalation and returns 409
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC015/018/021: at deadline + 1ms commits escalation and returns 409
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC015/021: NEED_HELP immediately notifies caregiver, concurrent confirmations yield one authoritative result
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC006/007/023/024: real HTTP schema/status, JWT scope, resident confirm and internal token
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC018/020/023: HTTP IM_OK persists one confirmation and expected caregiver routing
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC018/020/023: HTTP NEED_HELP persists one confirmation and expected caregiver routing
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC011/012/021/022: scheduler commits SKIPPED_AWAY and SKIPPED_ACTIVITY; missed, disabled and superseded runs stay terminal
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC005/007: M5 event lists, details, stats and SSE expose resident context only to its household
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC016: rejects a new command for CLOSED without creating an authoritative confirmation
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC016: rejects a new command for RESOLVED without creating an authoritative confirmation
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC016: rejects a new command for ESCALATED without creating an authoritative confirmation
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+  ● US20 real PostgreSQL + HTTP delivery + API acceptance › TC012/021: two scheduler replicas create one active request; expired leases recover
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      203 |     providerFails = false;
+      204 |     // Explicitly restricted disposable database, never the application's configured database.
+    > 205 |     await pool.query('TRUNCATE users CASCADE');
+          |     ^
+      206 |     owner = (
+      207 |       await row(
+      208 |         "INSERT INTO users(email,password_hash,full_name,role,telegram_chat_id,telegram_user_id,telegram_linked_at) VALUES('owner@qa.local','test','Caregiver QA','CAREGIVER','owner-chat','owner-user',now()) RETURNING id",
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/wellness-db.integration.spec.ts:205:5)
+
+[Nest] 29208  - 18/10/2026, 21.25.13     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-us11, eventId=f7643be3-deb9-4f19-bae3-cc3a8b205224
+[Nest] 29208  - 18/10/2026, 21.25.13     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "f7643be3-deb9-4f19-bae3-cc3a8b205224",
+  "trackId": "track-us11",
+  "requestId": "ac76c34a-2d86-4311-9759-e376a7baf23f",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.13     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Object:
+{
+  "correlationId": "bef597e3-3dff-4a25-92fc-983aff415fa1",
+  "eventId": "f7643be3-deb9-4f19-bae3-cc3a8b205224",
+  "resultId": "ac76c34a-2d86-4311-9759-e376a7baf23f",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-us11, eventId=bfdbc949-bfba-4eff-8f27-4a69057d5358
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "bfdbc949-bfba-4eff-8f27-4a69057d5358",
+  "trackId": "track-us11",
+  "requestId": "f02271d0-c218-446f-ae2c-b10549aff6f3",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Object:
+{
+  "correlationId": "91a1edaa-947d-484f-b9ec-859f1956b0e8",
+  "eventId": "bfdbc949-bfba-4eff-8f27-4a69057d5358",
+  "resultId": "f02271d0-c218-446f-ae2c-b10549aff6f3",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Object:
+{
+  "correlationId": "50efd771-7a1f-4b4f-9ed7-7dc732bcc78e",
+  "eventId": "75c3ca1b-bc3d-46f1-83d5-7468165e2d09",
+  "resultId": "92675323-8fda-4dfe-bf05-292c2eac09a6",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Object:
+{
+  "correlationId": "c8fac0a2-d34d-4597-896c-1cfc6a9889cc",
+  "eventId": "6da08607-45b6-42f2-b936-1aae679eb89f",
+  "resultId": "0492ce20-9898-4d5b-8a5d-281cfab5cfbc",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "b27e79f3-17b5-4528-9305-ebcf6b6d919b",
+  "eventId": "27040004-4b83-41a5-bf92-a12d1cff32c1",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Object:
+{
+  "correlationId": "b27e79f3-17b5-4528-9305-ebcf6b6d919b",
+  "eventId": "27040004-4b83-41a5-bf92-a12d1cff32c1",
+  "resultId": "2c7d53ec-e8be-5bd7-8a4c-9bb78ec2bb0e",
+  "module": "M4_ZONE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "b27e79f3-17b5-4528-9305-ebcf6b6d919b",
+  "eventId": "27040004-4b83-41a5-bf92-a12d1cff32c1",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Object:
+{
+  "correlationId": "b27e79f3-17b5-4528-9305-ebcf6b6d919b",
+  "eventId": "27040004-4b83-41a5-bf92-a12d1cff32c1",
+  "resultId": "2c7d53ec-e8be-5bd7-8a4c-9bb78ec2bb0e",
+  "module": "M4_ZONE",
+  "disposition": "DUPLICATE"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "06c19d61-3391-474b-aa0d-120dd17ef66d",
+  "eventId": "344ddb88-44ba-4443-86d2-3572118267b4",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Object:
+{
+  "correlationId": "06c19d61-3391-474b-aa0d-120dd17ef66d",
+  "eventId": "344ddb88-44ba-4443-86d2-3572118267b4",
+  "resultId": "82647fe6-c932-564f-9d80-b3f612153e5d",
+  "module": "M4_ZONE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "06c19d61-3391-474b-aa0d-120dd17ef66d",
+  "eventId": "344ddb88-44ba-4443-86d2-3572118267b4",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Object:
+{
+  "correlationId": "06c19d61-3391-474b-aa0d-120dd17ef66d",
+  "eventId": "344ddb88-44ba-4443-86d2-3572118267b4",
+  "resultId": "82647fe6-c932-564f-9d80-b3f612153e5d",
+  "module": "M4_ZONE",
+  "disposition": "DUPLICATE"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Object:
+{
+  "correlationId": "608f2e50-081f-4a68-808c-bd8834b475e1",
+  "eventId": "358dcbab-fb38-464a-a42a-25c394682aa2",
+  "resultId": "fb781063-95f0-5e96-94ee-aaf381b9ee5d",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Object:
+{
+  "correlationId": "d0f91d3b-0630-4370-acbf-f4e66a523378",
+  "eventId": "64aa3d7c-7147-4dff-9e90-a958925f2563",
+  "resultId": "90f9e1c5-607e-5240-b859-c8c92a50978e",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Object:
+{
+  "correlationId": "57b8b9d1-5d73-43cf-821a-b1e32baf71d0",
+  "eventId": "eade841d-5a7f-4496-b0eb-108485053ee3",
+  "resultId": "26aee77b-9169-5b7b-8d38-cf5bdbf7c26c",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Object:
+{
+  "correlationId": "846ec72d-2d10-4679-9a70-15b1d181126a",
+  "eventId": "3e9f3326-bb13-4867-9ef3-c0d68e17c4b2",
+  "resultId": "a5d3b3e3-741b-5671-be5c-f7a24cd16384",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Object:
+{
+  "correlationId": "af5edd49-751e-41f7-b59e-31bc9fd1cc86",
+  "eventId": "57a9d59a-25a9-4f6f-85b9-d2e07ac3f906",
+  "resultId": "faac9dd2-ea93-5f77-a7c3-63e536d30135",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 29208  - 18/10/2026, 21.25.14     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+PASS test/ai-results-db.integration.spec.ts (10.885 s)
+[Nest] 29208  - 18/10/2026, 21.25.23    WARN [TelegramWorkWorker] Sửa tin Telegram lỗi notificationId=cf85185d-0fbd-49e5-8e12-c2a9181c950e code=TELEGRAM_NETWORK
+[Nest] 29208  - 18/10/2026, 21.25.24    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=1c87b095-8843-46ab-928e-27135f339b9b correlationId=14181fc6-b82c-46cf-84b3-801348c70ba4
+[Nest] 29208  - 18/10/2026, 21.25.24    WARN [NotificationRetryWorker] Telegram delivery failed eventId=1c87b095-8843-46ab-928e-27135f339b9b correlationId=14181fc6-b82c-46cf-84b3-801348c70ba4 attempt=1 code=TELEGRAM_503
+[Nest] 29208  - 18/10/2026, 21.25.24    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=1c87b095-8843-46ab-928e-27135f339b9b correlationId=14181fc6-b82c-46cf-84b3-801348c70ba4
+[Nest] 29208  - 18/10/2026, 21.25.24    WARN [NotificationRetryWorker] Telegram delivery failed eventId=1c87b095-8843-46ab-928e-27135f339b9b correlationId=14181fc6-b82c-46cf-84b3-801348c70ba4 attempt=2 code=TELEGRAM_503
+[Nest] 29208  - 18/10/2026, 21.25.24    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=1c87b095-8843-46ab-928e-27135f339b9b correlationId=14181fc6-b82c-46cf-84b3-801348c70ba4
+[Nest] 29208  - 18/10/2026, 21.25.24    WARN [NotificationRetryWorker] Telegram delivery failed eventId=1c87b095-8843-46ab-928e-27135f339b9b correlationId=14181fc6-b82c-46cf-84b3-801348c70ba4 attempt=3 code=TELEGRAM_503
+[Nest] 29208  - 18/10/2026, 21.25.24    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=1c87b095-8843-46ab-928e-27135f339b9b correlationId=14181fc6-b82c-46cf-84b3-801348c70ba4
+[Nest] 29208  - 18/10/2026, 21.25.24    WARN [NotificationRetryWorker] Telegram delivery failed eventId=1c87b095-8843-46ab-928e-27135f339b9b correlationId=14181fc6-b82c-46cf-84b3-801348c70ba4 attempt=4 code=TELEGRAM_503
+[Nest] 29208  - 18/10/2026, 21.25.24    WARN [EscalationDeadlineWorkerService] Sự kiện 1c87b095-8843-46ab-928e-27135f339b9b (UNKNOWN_PERSON, P3) đã hết thời gian chờ (trễ 1010ms). Tự động chuyển sang ESCALATED
+[Nest] 29208  - 18/10/2026, 21.25.24    WARN [EscalationDeadlineWorkerService] Sự kiện 1c87b095-8843-46ab-928e-27135f339b9b (UNKNOWN_PERSON, P3) đã hết thời gian chờ (trễ 1006ms). Tự động chuyển sang ESCALATED
+PASS test/telegram-db.integration.spec.ts (9.264 s)
+[Nest] 29208  - 18/10/2026, 21.25.32     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32772 (clientId: us08-consumer-493bc330-6d49-4500-b660-aa4866cdfd25)...
+[Nest] 29208  - 18/10/2026, 21.25.32     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events, frigate/camerai/frames, frigate/camerai/pose/frames
+[Nest] 29208  - 18/10/2026, 21.25.32     LOG [MqttConsumerService] Da subscribe cac topic MQTT.
+[Nest] 29208  - 18/10/2026, 21.25.36     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+[Nest] 29208  - 18/10/2026, 21.25.36     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32772 (clientId: us08-consumer-eb7773ea-60ac-4972-81c1-0bfe2536bfaa)...
+[Nest] 29208  - 18/10/2026, 21.25.36     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events, frigate/camerai/frames, frigate/camerai/pose/frames
+[Nest] 29208  - 18/10/2026, 21.25.36     LOG [MqttConsumerService] Da subscribe cac topic MQTT.
+[Nest] 29208  - 18/10/2026, 21.25.39     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+[Nest] 29208  - 18/10/2026, 21.25.39     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32772 (clientId: us08-consumer-6bd9f3bf-12cc-4d2b-846f-e79138dfa987)...
+[Nest] 29208  - 18/10/2026, 21.25.39     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events, frigate/camerai/frames, frigate/camerai/pose/frames
+[Nest] 29208  - 18/10/2026, 21.25.39     LOG [MqttConsumerService] Da subscribe cac topic MQTT.
+[Nest] 29208  - 18/10/2026, 21.25.42     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+FAIL test/mqtt-db.integration.spec.ts (17.984 s)
+  ● US-08 - Integration MQTT đến PostgreSQL › tạo đúng một bản ghi trong vòng 3 giây khi publish message Frigate hợp lệ
+
+    Consumer không subscribe topic frigate/events trong 3000 ms
+
+      160 |   }
+      161 |
+    > 162 |   throw new Error(failureMessage);
+          |         ^
+      163 | }
+      164 |
+      165 | function loggerContains(spy: jest.SpyInstance, expectedMessage: string): boolean {
+
+      at waitUntil (test/mqtt-db.integration.spec.ts:162:9)
+      at waitForSubscription (test/mqtt-db.integration.spec.ts:296:5)
+      at Object.<anonymous> (test/mqtt-db.integration.spec.ts:332:5)
+
+  ● US-08 - Integration MQTT đến PostgreSQL › giữ một bản ghi trong suốt vòng đời new-update-end qua ranh giới 10 giây
+
+    Consumer không subscribe topic frigate/events trong 3000 ms
+
+      160 |   }
+      161 |
+    > 162 |   throw new Error(failureMessage);
+          |         ^
+      163 | }
+      164 |
+      165 | function loggerContains(spy: jest.SpyInstance, expectedMessage: string): boolean {
+
+      at waitUntil (test/mqtt-db.integration.spec.ts:162:9)
+      at waitForSubscription (test/mqtt-db.integration.spec.ts:296:5)
+      at Object.<anonymous> (test/mqtt-db.integration.spec.ts:388:5)
+
+  ● US-08 - Integration MQTT đến PostgreSQL › không ghi message lỗi và consumer vẫn xử lý message hợp lệ tiếp theo
+
+    Consumer không subscribe topic frigate/events trong 3000 ms
+
+      160 |   }
+      161 |
+    > 162 |   throw new Error(failureMessage);
+          |         ^
+      163 | }
+      164 |
+      165 | function loggerContains(spy: jest.SpyInstance, expectedMessage: string): boolean {
+
+      at waitUntil (test/mqtt-db.integration.spec.ts:162:9)
+      at waitForSubscription (test/mqtt-db.integration.spec.ts:296:5)
+      at Object.<anonymous> (test/mqtt-db.integration.spec.ts:450:5)
+
+PASS test/escalation-high-wait-db.integration.spec.ts (6.623 s)
+PASS test/camera-state.repository.integration.spec.ts (6.476 s)
+FAIL test/escalation-rules.repository.integration.spec.ts
+  ● EscalationRulesRepository Integration (US-15) › findAll trả về đúng 6 default rules theo thứ tự priority (P0 -> P3)
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      87 |         er.event_type ASC;
+      88 |     `;
+    > 89 |     const result = await this.pool.query<EscalationRuleRecord>(query);
+         |                    ^
+      90 |     return result.rows;
+      91 |   }
+      92 |
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at EscalationRulesRepository.findAll (src/escalation-rules/escalation-rules.repository.ts:89:20)
+      at Object.<anonymous> (test/escalation-rules.repository.integration.spec.ts:28:19)
+
+  ● EscalationRulesRepository Integration (US-15) › findByEventType trả về chi tiết rule
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      113 |       WHERE er.event_type::text = $1;
+      114 |     `;
+    > 115 |     const result = await this.pool.query<EscalationRuleRecord>(query, [eventType]);
+          |                    ^
+      116 |     return result.rows[0] ?? null;
+      117 |   }
+      118 |
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at EscalationRulesRepository.findByEventType (src/escalation-rules/escalation-rules.repository.ts:115:20)
+      at Object.<anonymous> (test/escalation-rules.repository.integration.spec.ts:44:18)
+
+  ● EscalationRulesRepository Integration (US-15) › updateThresholdsAtomic cập nhật nguyên tử, tăng version và ghi audit log
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      113 |       WHERE er.event_type::text = $1;
+      114 |     `;
+    > 115 |     const result = await this.pool.query<EscalationRuleRecord>(query, [eventType]);
+          |                    ^
+      116 |     return result.rows[0] ?? null;
+      117 |   }
+      118 |
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at EscalationRulesRepository.findByEventType (src/escalation-rules/escalation-rules.repository.ts:115:20)
+      at Object.<anonymous> (test/escalation-rules.repository.integration.spec.ts:54:21)
+
+  ● EscalationRulesRepository Integration (US-15) › updateThresholdsAtomic ném RuleNotFoundError khi event_type không tồn tại
+
+    connect ECONNREFUSED 127.0.0.1:55433
+
+      116 |
+      117 |   it('updateThresholdsAtomic ném RuleNotFoundError khi event_type không tồn tại', async () => {
+    > 118 |     const adminUser = await pool.query<{ id: string }>(
+          |                       ^
+      119 |       `SELECT id FROM users WHERE role = 'ADMIN' LIMIT 1`,
+      120 |     );
+      121 |     const adminId = adminUser.rows[0].id;
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/escalation-rules.repository.integration.spec.ts:118:23)
+
+Test Suites: 3 failed, 4 passed, 7 total
+Tests:       31 failed, 55 passed, 86 total
+Snapshots:   0 total
+Time:        82.379 s
+Ran all test suites.
+Test results written to: ..\..\artifacts-integration-results.json

@@ -1,0 +1,18 @@
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.500 observedAt=123.5 ageMs=0.0 box=[1, 2, 3, 4] action=DROP
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.500 observedAt=123.5 ageMs=0.0 box=[1, 2, 3, 4] action=DROP
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.500 observedAt=123.5 ageMs=0.0 box=None action=DROP
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p_future frameTime=123.500 observedAt=124.0 ageMs=-500.0 box=[10, 20, 100, 200] action=DROP
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p_no_time frameTime=123.500 observedAt=None ageMs=-1.0 box=[10, 20, 100, 200] action=DROP
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p_stale frameTime=123.500 observedAt=123.1 ageMs=400.0 box=[10, 20, 100, 200] action=DROP
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p_fresh frameTime=123.500 observedAt=123.350 ageMs=150.0 box=[30, 40, 150, 250] action=PUBLISH
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.500 observedAt=123.400 ageMs=100.0 box=[10, 20, 100, 200] action=PUBLISH
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.450 observedAt=123.400 ageMs=50.0 box=[10, 20, 100, 200] action=PUBLISH
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.550 observedAt=123.400 ageMs=150.0 box=[10, 20, 100, 200] action=PUBLISH
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.500 observedAt=123.400 ageMs=100.0 box=[10, 20, 100, 200] action=PUBLISH
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.500 observedAt=123.400 ageMs=100.0 box=[10, 20, 100, 200] action=PUBLISH
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.500 observedAt=123.400 ageMs=100.0 box=[10, 20, 100, 200] action=PUBLISH
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.001s
+
+OK
