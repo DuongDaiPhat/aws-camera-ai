@@ -3,6 +3,16 @@
 Mục lục toàn bộ tài liệu. Bắt đầu từ [Hướng dẫn cài đặt](DEV_ONBOARDING.md) nếu bạn là
 người mới vào dự án.
 
+## Sprint 4 AWS — kế hoạch cập nhật 21/10/2026
+
+- [Lộ trình lab AWS 00–10 cho nhóm mới](../aws/labs/README.md) — thao tác nhỏ, quan sát kết quả, thử lỗi rồi mới tích hợp; mỗi bài có dọn tài nguyên.
+- [Bắt đầu với tài liệu AWS](../aws/README.md).
+- [Kế hoạch thực thi song song AWS và model AI](../aws/SPRINT_4_AWS_EXECUTION_PLAN.md) — AWS-01..10, owner, phụ thuộc, hướng dẫn, gate và evidence.
+- [Sequence Cognito, face, escalation và sơ đồ monitoring](../aws/METHOD_1_FEATURE_DIAGRAMS.md).
+- [Kiến trúc draw.io do nhóm cung cấp](../aws/diagrams/CameraAI_Hybrid_EC2_Lambda.drawio).
+
+Các tài liệu này là kế hoạch/thiết kế; trạng thái triển khai phải được chứng minh bằng test và evidence, không bằng việc có diagram.
+
 ## Plan thực thi cho AI Agent
 
 Mỗi tính năng có một plan riêng; các file mô tả công việc cần làm, không xác nhận tính năng đã triển khai.

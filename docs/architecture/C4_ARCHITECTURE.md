@@ -283,65 +283,92 @@ Vi phạm quy tắc này là lý do chính đáng để từ chối PR.
 
 ## 4. Kiến trúc triển khai AWS (Sprint 4)
 
+**Cập nhật 21/10/2026 — kiến trúc mục tiêu Hybrid EC2 + Lambda.** Dựa trên [file draw.io mới](../../aws/diagrams/CameraAI_Hybrid_EC2_Lambda.drawio); [kế hoạch Sprint 4](../../aws/SPRINT_4_AWS_EXECUTION_PLAN.md) hướng dẫn triển khai song song model AI, [sequence/monitoring](../../aws/METHOD_1_FEATURE_DIAGRAMS.md) giải thích luồng. Không xác nhận các dịch vụ cloud đã implement/deploy.
+
 ```mermaid
-graph TB
-    subgraph home["🏠 Tại nhà (edge)"]
-        CAM["Camera IP"]
-        FRG2["Frigate<br/>chạy trên máy tại chỗ"]
+flowchart TB
+    subgraph home["Máy edge: video và AI runtime"]
+        CAM["Camera / MediaMTX / FFmpeg"]
+        FRG2["Frigate / MQTT / fall-fire AI"]
+        CAM --> FRG2
     end
-
-    subgraph aws["☁️ AWS — region ap-southeast-1"]
-        subgraph ec2["EC2 t3.small (free tier)"]
-            ORC2["Orchestrator<br/>NestJS"]
-            AI2["AI Service<br/>FastAPI"]
-            PG2[("PostgreSQL<br/>container")]
+    USER["Browser / Dashboard UI"]
+    subgraph aws["AWS Region: ap-southeast-1"]
+        subgraph vpc["CameraAI VPC"]
+            IGW["Internet Gateway"]
+            subgraph az["Một AZ: ví dụ ap-southeast-1a"]
+                subgraph subnet["Public subnet"]
+                    subgraph ec2["EC2: app containers, size sau khi đo"]
+                        RP["HTTPS Reverse Proxy"]
+                        WEB["Next.js"]
+                        ORC2["NestJS / outbox / result consumer"]
+                        PG2[("PostgreSQL")]
+                        REDIS["Redis: jobs chưa chuyển cloud"]
+                    end
+                    EBS["EBS volumes cùng AZ"]
+                end
+            end
         end
-        S3["Amazon S3<br/>lifecycle 7 ngày"]
-        REK["Amazon Rekognition<br/>Face Collection"]
-        COG["Amazon Cognito<br/>User Pool"]
-        SNS2["Amazon SNS<br/>email + SMS"]
-        CON2["Amazon Connect<br/>outbound call"]
-        CW["CloudWatch<br/>Logs + 1 Alarm"]
+        S3["Private S3 media / retention"]
+        COG["Cognito User Pool"]
+        FQ["SQS face jobs + DLQ"]
+        FL["Face Lambda"]
+        REK["Rekognition collection theo owner"]
+        RQ["Application Results SQS"]
+        SF["Step Functions Standard Wait"]
+        DL["Deadline Lambda"]
+        NQ["SQS notification jobs + DLQ"]
+        NL["Sender Lambda"]
+        SNS2["SNS email / SMS"]
+        CON2["Connect outbound call"]
+        CW["CloudWatch logs / metrics / alarms"]
     end
-
-    USER["🖥️ Trình duyệt<br/>người dùng"]
-
-    CAM --> FRG2
-    FRG2 -->|"MQTT qua VPN/SSH tunnel"| ORC2
+    USER <-->|"Login / tokens"| COG
+    USER -->|"HTTPS"| IGW
+    IGW --> RP
+    RP --> WEB
+    RP --> ORC2
+    FRG2 <-->|"Private software VPN: events / media / control"| ORC2
     ORC2 --> PG2
-    ORC2 --> AI2
-    ORC2 --> S3
-    AI2 --> REK
-    ORC2 --> COG
-    ORC2 --> SNS2
-    ORC2 --> CON2
-    ORC2 --> CW
-    AI2 --> CW
-    USER --> ORC2
-    USER -->|presigned URL| S3
-
-    classDef awsvc fill:#ff9900,stroke:#cc7a00,color:#000
-    classDef compute fill:#438dd5,stroke:#2e6295,color:#fff
-    class S3,REK,COG,SNS2,CON2,CW awsvc
-    class ORC2,AI2,PG2,FRG2 compute
+    ORC2 --> REDIS
+    ec2 --- EBS
+    ORC2 -->|"Upload media"| S3
+    ORC2 --> FQ --> FL --> REK
+    REK -->|"Read image"| S3
+    FL --> RQ
+    RQ -->|"NestJS polls"| ORC2
+    ORC2 --> SF --> DL
+    DL -->|"Service HTTPS command qua proxy"| ORC2
+    ORC2 --> NQ --> NL
+    NL -->|"Claim intent qua HTTPS"| ORC2
+    NL --> SNS2
+    NL --> CON2
+    NL --> RQ
+    ORC2 -.->|"Agent / log driver"| CW
+    FL -.-> CW
+    DL -.-> CW
+    NL -.-> CW
 ```
 
 ### Vì sao Frigate ở lại edge, không lên cloud
 
-Đẩy video liên tục lên cloud là thứ đắt nhất trong toàn hệ thống. Frigate xử lý tại chỗ và
-chỉ gửi lên **metadata + một tấm ảnh** cho mỗi sự kiện — vài KB thay vì vài GB mỗi giờ.
-Đây cũng là lý do **Kinesis Video Streams bị loại** khỏi phạm vi (rủi ro R2, ngân sách NFR-08 < 10 USD).
+Xử lý stream và train/inference fall/fire ở máy riêng giúp tránh đưa video liên tục và tải AI lên EC2 app tier. Chỉ upload media sự kiện theo chính sách; metadata và crop/clip có dung lượng riêng, phải đo egress thật. Kinesis Video Streams không thuộc baseline.
+
+Lambda ban đầu không gắn VPC, không truy cập trực tiếp DB; callback dùng service-authenticated HTTPS API. EC2/DB một AZ là single failure point, không phải HA production. Edge split phải xử lý crop retrieval, MediaMTX auth, source runner và remote WebRTC; VPN không tự chuyển logic chạy FFmpeg ra máy edge. Xem AWS-08.
 
 ### Dịch vụ AWS và user story tương ứng
 
-| Dịch vụ     | US    | Thay thế cho           | Free tier                                   |
-| ----------- | ----- | ---------------------- | ------------------------------------------- |
-| S3          | US-23 | MinIO                  | 5 GB                                        |
-| Rekognition | US-24 | face_recognition local | 5.000 ảnh/tháng (12 tháng đầu)              |
-| Cognito     | US-25 | JWT tự viết            | 50.000 MAU                                  |
-| SNS         | US-26 | — (thêm kênh)          | 1.000 email, 100 SMS                        |
-| Connect     | US-27 | — (thêm kênh)          | Trả theo phút — **chỉ demo 1 số đã verify** |
-| CloudWatch  | US-28 | log ra stdout          | 5 GB log                                    |
+| Dịch vụ                                 | Story/task       | Vai trò                                       |
+| --------------------------------------- | ---------------- | --------------------------------------------- |
+| EC2/EBS/HTTPS/VPN                       | US-29/30, AWS-08 | App tier và edge connectivity                 |
+| S3                                      | US-23, AWS-02    | Private media, presign, lifecycle             |
+| SQS/Lambda/Rekognition                  | US-24, AWS-03/05 | Face jobs, normalized results, retry/DLQ      |
+| Cognito                                 | US-25, AWS-04    | PKCE, verifier và user mapping                |
+| Step Functions Standard/Deadline Lambda | US-13/29, AWS-06 | Durable wait và conditional deadline command  |
+| SQS/Sender Lambda/SNS/Connect           | US-26/27, AWS-07 | Approved intent delivery và provider receipts |
+| CloudWatch/SNS ops                      | US-28, AWS-09    | Logs, metrics, heartbeat và alarms            |
+
+Không cố định quota free-tier trong tài liệu kiến trúc: kiểm tra account/credits/Billing và estimate Region trước deploy. 10 USD là mục tiêu dev/demo giới hạn giờ, không bảo đảm EC2 24/7 và phone costs. Adapter/feature flag chỉ có hiệu lực sau khi code/migration/ownership được implement và kiểm thử.
 
 ---
 
@@ -370,8 +397,9 @@ stateDiagram-v2
 
     note right of NOTIFIED
         escalation_deadline_at được ghi vào DB.
-        Restart giữa chừng → TimerService
-        nạp lại từ DB (FR-ESC-07).
+        Local: worker khôi phục từ DB.
+        Cloud: Standard Wait + Deadline Lambda,
+        đối chiếu DB và reconcile khi lỗi (FR-ESC-07).
         KHÔNG giữ timer chỉ trong RAM.
     end note
 
@@ -423,10 +451,12 @@ constructor(private s3: S3Client) {}
 Đổi provider = đổi một biến môi trường, không sửa business logic. Đây cũng là điều kiện để
 unit test chạy được mà không cần credential AWS.
 
+Đây là mục tiêu tách adapter, không phải khẳng định mọi provider đã có implementation. Cloud mode còn cần contract, IAM/network, migration và owner worker theo kế hoạch Sprint 4.
+
 ### NT-2 · Feature flag cho mọi thứ có thể hỏng lúc demo
 
 `FACE_PROVIDER=local|rekognition` là **bắt buộc**, không phải tùy chọn (rủi ro R7).
-Rekognition trục trặc đúng hôm demo → đổi một biến, restart, 10 giây là xong.
+Rekognition lỗi thì dùng rollback runbook đã kiểm thử: kiểm tra local collection, chuyển owner cloud/local và xử lý pending results bằng stable IDs/revision. Không hứa đổi mode trong 10 giây chưa đo; Lambda không tự gọi được model trên localhost của edge.
 
 ### NT-3 · PostgreSQL là nguồn sự thật duy nhất
 

@@ -128,7 +128,7 @@ Quy ước Story Point: **1 SP ≈ 2.5 giờ hiệu quả** → **velocity mục
 | Sprint 1 | 18 | Ramp-up, dựng môi trường, chưa quen tool |
 | Sprint 2 | 24 | Chạy ổn định |
 | Sprint 3 | 26 | Đỉnh năng suất |
-| Sprint 4 | 20 | Dành 30% cho hardening, tài liệu, tập demo |
+| Sprint 4 | Ước lượng lại theo AWS-01..10 | Kiến trúc Hybrid EC2 + Lambda bổ sung queues/workflow/deployment; chuẩn bị AWS song song AI trước ngày 25, giữ thời gian hardening/demo |
 
 Sau Sprint 1, velocity thực tế thay thế con số giả định. Nếu Sprint 1 chỉ đạt < 12 SP → **cắt ngay Module 3 hoặc 2a** ở buổi retro, không chờ đến tuần 3.
 
@@ -296,32 +296,46 @@ Nếu FAR > 30% ở module nào → dành thời gian Sprint 4 để chỉnh ng�
 
 ---
 
-### SPRINT 4 — Lên AWS, hardening & bàn giao (Ngày 25–30) · 20 SP
+### SPRINT 4 — Hybrid EC2 + Lambda, tích hợp & bàn giao (Ngày 25–30)
 
-> **Sprint Goal:** Hệ thống chạy trên AWS với ≥ 4 dịch vụ thật, tài liệu đầy đủ, demo cuối trơn tru.
+**Cập nhật 21/10/2026:** áp dụng sơ đồ kiến trúc mới. [Kế hoạch thực thi chi tiết](../aws/SPRINT_4_AWS_EXECUTION_PLAN.md) là tài liệu task/owner/gate của Sprint 4; [sequence và monitoring diagrams](../aws/METHOD_1_FEATURE_DIAGRAMS.md) mô tả luồng và lỗi.
 
-| ID | Công việc | Người | SP |
+**Cách triển khai cho nhóm mới:** theo [lab AWS 00–10](../aws/labs/README.md). A/B/C học chung account/S3/Lambda-SQS trước, rồi chia cặp làm Cognito, face, deadline, sender và deployment. Mỗi bài có kết quả nhỏ, lỗi chủ động và cleanup; model AI của D/E vẫn tiếp tục song song. Estimate implementation không bao gồm đầy đủ thời gian học và chờ quyền, nên lịch cuối sprint chỉ dùng sau khi các lab tiên quyết đã đạt hoặc được replan.
+
+> **Sprint Goal:** chứng minh Cognito và luồng S3 → SQS → Lambda → Rekognition → Results Queue → PostgreSQL; dùng Step Functions Standard cho deadline và sender Lambda cho thông báo; deploy app tier lên EC2 có HTTPS, edge connectivity, logs/alarms và runbook. Full E2E phải có model/provider thật tương ứng; fixture/dry-run chỉ chứng minh phần được ghi rõ.
+
+| Story | Phạm vi cập nhật | Owner | Task kỹ thuật |
 |---|---|---|---|
-| US-23 | Chuyển lưu trữ media từ MinIO sang **Amazon S3** (presigned URL, lifecycle 7 ngày) | C | 3 |
-| US-24 | Thay face_recognition local bằng **Amazon Rekognition** (Face Collection + DetectProtectiveEquipment), bật/tắt bằng feature flag | D | 5 |
-| US-25 | Thay JWT tự viết bằng **Amazon Cognito** User Pool | A | 3 |
-| US-26 | Gửi cảnh báo qua **Amazon SNS** (email + SMS) | B | 2 |
-| US-27 | **Amazon Connect**: gọi tự động tới 1 số đã verify khi ESCALATED (demo) | B, C | 3 |
-| US-28 | Đẩy log ứng dụng lên **CloudWatch** + 1 alarm cơ bản | C | 2 |
-| US-29 | Hardening: xử lý lỗi, retry, rate limit, tinh chỉnh ngưỡng giảm báo giả | Cả nhóm | 3 |
-| US-30 | Tài liệu: README, sơ đồ triển khai, hướng dẫn cài đặt, ước tính chi phí AWS | A | 2 |
-| US-31 | Quay video demo 5–7 phút + chuẩn bị kịch bản demo live | A, E | 2 |
+| US-23 | S3 private, presign, lifecycle theo retention và media pointer | C | AWS-02 |
+| US-24 | Face enrollment/search/delete qua Rekognition, face-job SQS/Lambda, results và rollback local | B, C; D review | AWS-03/05 |
+| US-25 | Cognito PKCE, verifier, user mapping, role/ownership, refresh/logout | A, B | AWS-04 |
+| US-26 | Sender Lambda → SNS email/SMS, claim/receipt/daily cap | B, C | AWS-07 |
+| US-27 | Connect call khi ESCALATED, stable token, provider status | B, C | AWS-07 |
+| US-28 | CloudWatch logs, queue/workflow/heartbeat alarms và ops topic | C | AWS-09 |
+| US-13/29 | Standard Wait + Deadline Lambda, transaction/race, outbox, replay | B, C | AWS-01/03/06 |
+| US-29/30 | EC2 production containers, HTTPS/VPN, edge split, backup/restore và estimate | C, B | AWS-08 |
+| US-22/30/31 | Model handoff, UAT/evidence, tài liệu và video demo | A, D, E; cả nhóm hỗ trợ | AWS-10 |
 
-**Feature flag (US-24) là bắt buộc**, không phải tuỳ chọn: nếu Rekognition gặp trục trặc (quota, region, credential) đúng hôm demo, nhóm bật lại model local trong 10 giây thay vì mất điểm.
+**Song song ngay khi model đang build:** A làm auth/UI, B contracts/outbox/consumer, C IaC/queues/worker deploy; D/E tiếp tục train/export/evaluate. D chỉ review semantics face và dữ liệu thay vì vừa train fire vừa ôm toàn bộ AWS-24. AWS dùng fixtures hợp đồng đã chốt, chỉ thay bằng model thật ở gate tích hợp.
 
-**Lịch cứng cuối sprint:**
-- **Ngày 28**: code freeze cho tính năng. Từ đây chỉ sửa bug.
-- **Ngày 29**: UAT — 2 người ngoài nhóm dùng thử theo kịch bản, ghi nhận bug. Chạy thử demo đầy đủ 2 lần.
-- **Ngày 30**: demo + nộp. **Không viết code.**
+**Capacity:** AWS-01..10 khoảng 72 giờ-người trước dự phòng, khoảng 90 giờ có buffer, chưa gồm training. A/B/C có 36 giờ hiệu quả/tuần theo giả định hiện tại nên phải chuẩn bị trước ngày 25 hoặc giãn phạm vi/thời gian. Không tiếp tục coi toàn bộ kiến trúc mới là 20 SP. Task AWS là phân rã story, không cộng lặp SP cũ.
+
+Nhóm mới phải cộng thêm thời gian học/làm lab và đo lại sau lab 00–02; 72/90 giờ không phải cam kết tổng thời gian từ chưa biết AWS tới release. Giữ tiêu chí nghiệm thu, cập nhật phạm vi/lịch theo tốc độ học thực tế.
+
+**Fallback phải có code và test:** chuyển owner cloud/local, collection tương thích và dedup pending results; không hứa đổi provider trong 10 giây. `DetectProtectiveEquipment` vẫn ở US-35, không thuộc face matching.
+
+**Lịch cứng cuối sprint (ngày tương đối của dự án):**
+- **Trước ngày 25:** chốt contract và AWS fixture pipeline trong khi model tiếp tục phát triển.
+- **Ngày 25–27:** tích hợp Cognito/face/workflow/sender; bàn giao model độc lập từng module; SMS/Connect thật sau khi đủ điều kiện tài khoản.
+- **Ngày 28:** freeze tính năng; chỉ sửa lỗi, kiểm thử race/recovery/monitoring.
+- **Ngày 29:** UAT với 2 người ngoài nhóm, tổng duyệt 2 lần và ghi rõ fixture/model/provider mode.
+- **Ngày 30:** demo + nộp, không thêm code tính năng.
+
+Nếu thiếu capacity hoặc quyền provider: giữ Lambda pipeline, auth, logs/DLQ và deadline test; hoãn live-video từ Internet, gọi nhiều liên hệ/DTMF hoặc real channel chưa cấp phép. Không ghi real SMS/Connect Done bằng dry-run; tiêu chí giảng viên bắt buộc thì ghi blocked và trao đổi phạm vi.
 
 ---
 
-## 9. Kiến trúc triển khai (2 môi trường)
+## 9. Kiến trúc triển khai (local, AWS integration, cloud demo)
 
 **Dev (local, dùng suốt Sprint 1–3):**
 ```
@@ -334,18 +348,24 @@ Webcam → ffmpeg → mediamtx (RTSP) → Frigate ─MQTT→ NestJS Orchestrator
                                                         Next.js Dashboard
 ```
 
-**Cloud (Sprint 4):**
+**AWS integration:** app/DB/edge local kết hợp AWS dev stack. NestJS chủ động đọc Results Queue; deadline/sender claim cần dev API HTTPS truy cập được, không gọi localhost từ Lambda.
+
+**Cloud demo (Sprint 4, một AZ):**
 ```
-Frigate (edge/EC2) ─MQTT→ NestJS (EC2/ECS) ─┬→ Amazon RDS hoặc Postgres container
-                                            ├→ Amazon S3          (media)
-                                            ├→ Amazon Rekognition (M1)
-                                            ├→ Amazon Cognito     (auth)
-                                            ├→ Amazon SNS         (email/SMS)
-                                            ├→ Amazon Connect     (gọi khẩn)
-                                            └→ Amazon CloudWatch  (log/alarm)
+Edge: Frigate / MQTT / fall-fire AI ─private VPN→ NestJS trên EC2
+Browser ─Cognito login→ token ─HTTPS reverse proxy→ Next.js / NestJS
+NestJS → PostgreSQL / Redis trên EC2 + EBS
+NestJS → private S3 → input cho Rekognition
+NestJS → SQS face jobs → Face Lambda → Rekognition → result qua Lambda
+Face Lambda / Sender Lambda → Application Results Queue → NestJS polls
+NestJS → Step Functions Standard Wait → Deadline Lambda → HTTPS command về NestJS
+NestJS → notification SQS → Sender Lambda → SNS / Connect
+EC2 + Lambda + queues/workflow → CloudWatch → SNS ops topic riêng
 ```
 
-**Nguyên tắc chống khoá cứng:** mọi dịch vụ AWS được bọc sau một interface trong NestJS (`IStorageService`, `IFaceService`, `INotificationService`). Đổi provider = đổi 1 dòng config, không sửa business logic. Điều này cũng giúp test được bằng mock.
+Không dùng RDS/ECS/ALB/NAT trong baseline tiết kiệm. Lambda không gắn VPC và không truy cập trực tiếp DB. App/DB một EC2/AZ là single failure point, không claim HA production. Training và xử lý stream ở edge; video runner/auth/crop path phải kiểm thử sau khi tách máy.
+
+**Nguyên tắc adapter:** giữ domain logic và contract ổn định, đổi provider qua adapter đã implement/test. Config không thay thế IAM/network, user/face migration hoặc ownership switch. Mục tiêu 10 USD là dev/demo giới hạn giờ; estimate EC2/EBS/IPv4 và SMS/call riêng trước deploy.
 
 ---
 
@@ -372,12 +392,12 @@ Frigate (edge/EC2) ─MQTT→ NestJS (EC2/ECS) ─┬→ Amazon RDS hoặc Postg
 | # | Rủi ro | Xác suất | Tác động | Cách xử lý |
 |---|---|---|---|---|
 | R1 | Ôm quá nhiều module, tuần 4 chưa có gì chạy trọn vẹn | Cao | Nghiêm trọng | Walking skeleton ở Sprint 1; MoSCoW đã cắt M2c; quy tắc "thêm việc phải bỏ việc" |
-| R2 | Chi phí AWS vượt tầm sinh viên | Trung bình | Cao | Budget Alert $10; **bỏ Kinesis Video Streams** (đắt nhất); S3 lifecycle 7 ngày; tắt tài nguyên sau giờ làm; dùng free tier |
+| R2 | Chi phí AWS vượt tầm sinh viên | Trung bình | Cao | Estimate theo account/Region; budget không phải hard cap; cap face/SMS/call, lifecycle, dọn resources; dừng EC2 vẫn có thể tính EBS/IPv4 |
 | R3 | Không có dữ liệu test cho ngã/cháy | Cao | Cao | Dùng dataset công khai (UR Fall, Le2i, D-Fire); thu thập từ Sprint 0 |
 | R4 | Máy không đủ mạnh chạy Frigate + model | Trung bình | Trung bình | Detector CPU/OpenVINO; giảm xuống 5 fps; chỉ 1 camera khi dev |
 | R5 | Báo động giả quá nhiều | Cao | Trung bình | Xác nhận đa khung hình; ngưỡng confidence nhiều mức; đo FAR từ Sprint 3 để còn kịp chỉnh |
 | R6 | Thành viên bận thi/deadline môn khác | Cao | Trung bình | Buffer 20% capacity; mỗi task có người backup; cấm bus factor = 1 |
-| R7 | Rekognition/Connect trục trặc đúng hôm demo | Trung bình | Cao | Feature flag về model local; **quay sẵn video demo dự phòng** |
+| R7 | Rekognition/Connect trục trặc đúng hôm demo | Trung bình | Cao | Rollback owner đã test, preserve queues và receipts; video dự phòng; ghi rõ real/dry-run, không coi mock là provider thật |
 | R8 | Tích hợp muộn, mọi thứ vỡ ở tuần cuối | Trung bình | Nghiêm trọng | Tích hợp liên tục từ Sprint 1; không ai làm module rời rạc quá 3 ngày mà chưa merge |
 
 ---
