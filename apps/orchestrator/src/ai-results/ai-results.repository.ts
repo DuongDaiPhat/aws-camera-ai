@@ -51,7 +51,7 @@ export interface AiResultOutboxRow extends QueryResultRow {
   id: string;
   event_id: string;
   aggregate_version: string;
-  message_type: 'event.updated' | 'evaluate-escalation';
+  message_type: 'event.updated' | 'evaluate-escalation' | 'wellness.identity';
   payload: unknown;
 }
 
@@ -139,6 +139,18 @@ export class AiResultsRepository {
         updatedVersion,
         projection.candidates,
       );
+      if (
+        submission.module === 'M1_FACE' &&
+        submission.personStatus === 'KNOWN' &&
+        !submission.error &&
+        typeof submission.results[0]?.metadata.sourceSessionId === 'string'
+      ) {
+        await client.query(
+          `INSERT INTO outbox_messages(event_id,aggregate_version,message_type,payload)
+          VALUES($1,$2,'wellness.identity',$3::jsonb) ON CONFLICT(event_id,aggregate_version,message_type) DO NOTHING`,
+          [submission.eventId, updatedVersion, JSON.stringify(submission)],
+        );
+      }
       await this.markReceiptProcessed(client, submission.resultId);
 
       return {
@@ -157,7 +169,7 @@ export class AiResultsRepository {
         `WITH next_message AS (
            SELECT candidate.id
            FROM outbox_messages candidate
-           WHERE candidate.message_type IN ('event.updated', 'evaluate-escalation')
+           WHERE candidate.message_type IN ('event.updated', 'evaluate-escalation', 'wellness.identity')
              AND candidate.available_at <= now()
              AND (
                candidate.status = 'PENDING' OR

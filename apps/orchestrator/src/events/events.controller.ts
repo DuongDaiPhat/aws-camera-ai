@@ -46,8 +46,13 @@ export class EventsController {
   })
   @ApiResponse({ status: 200, type: PaginatedEventsResponseDto })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  async listEvents(@Query() query: ListEventsQueryDto): Promise<PaginatedEventsResponseDto> {
-    return await this.eventsService.listEvents(query);
+  async listEvents(
+    @Query() query: ListEventsQueryDto,
+    @Req() req?: AuthenticatedRequest,
+  ): Promise<PaginatedEventsResponseDto> {
+    return req
+      ? this.eventsService.listEvents(query, req.auth)
+      : this.eventsService.listEvents(query);
   }
 
   // Phải khai báo TRƯỚC `:eventId`, nếu không Nest sẽ coi "stats" là một eventId.
@@ -58,8 +63,13 @@ export class EventsController {
   })
   @ApiResponse({ status: 200, type: EventStatsResponseDto })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  async getEventStats(@Query() query: GetEventStatsQueryDto): Promise<EventStatsResponseDto> {
-    return await this.eventsService.getStats(query.windowHours);
+  async getEventStats(
+    @Query() query: GetEventStatsQueryDto,
+    @Req() req?: AuthenticatedRequest,
+  ): Promise<EventStatsResponseDto> {
+    return req
+      ? this.eventsService.getStats(query.windowHours, req.auth)
+      : this.eventsService.getStats(query.windowHours);
   }
 
   @Public()
@@ -82,8 +92,13 @@ export class EventsController {
   @ApiParam({ name: 'eventId', type: 'string', format: 'uuid' })
   @ApiResponse({ status: 200, type: EventDetailDto })
   @ApiResponse({ status: 404, description: 'Không tìm thấy sự kiện' })
-  async getEvent(@Param('eventId', ParseUUIDPipe) eventId: string): Promise<EventDetailDto> {
-    return await this.eventsService.getEvent(eventId);
+  async getEvent(
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Req() req?: AuthenticatedRequest,
+  ): Promise<EventDetailDto> {
+    return req
+      ? this.eventsService.getEvent(eventId, req.auth)
+      : this.eventsService.getEvent(eventId);
   }
 
   @Post(':eventId/confirm')

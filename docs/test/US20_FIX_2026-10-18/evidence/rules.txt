@@ -1,0 +1,13 @@
+PASS test/escalation-rules.repository.integration.spec.ts (8.763 s)
+  EscalationRulesRepository Integration (US-15)
+    √ findAll trả về đúng 6 default rules theo thứ tự priority (P0 -> P3) (51 ms)
+    √ findByEventType trả về chi tiết rule (6 ms)
+    √ updateThresholdsAtomic cập nhật nguyên tử, tăng version và ghi audit log (82 ms)
+    √ updateThresholdsAtomic ném RuleNotFoundError khi event_type không tồn tại (7 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        9.199 s
+Ran all test suites within paths "test/escalation-rules.repository.integration.spec.ts".
+Test results written to: ..\..\artifacts-rules-results.json

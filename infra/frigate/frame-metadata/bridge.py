@@ -5,8 +5,9 @@ import os
 import signal
 import time
 
-
-MAX_OBJECT_AGE_SECONDS = float(os.getenv("FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS", "0.25"))
+MAX_OBJECT_AGE_SECONDS = float(
+    os.getenv("FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS", "0.25")
+)
 
 
 def is_valid_person(obj, frame_time, max_age=MAX_OBJECT_AGE_SECONDS):
@@ -22,9 +23,7 @@ def is_valid_person(obj, frame_time, max_age=MAX_OBJECT_AGE_SECONDS):
     if obj_frame_time is None or not isinstance(obj_frame_time, (int, float)):
         return False
     age = frame_time - obj_frame_time
-    if age < 0 or age > max_age:
-        return False
-    return True
+    return 0 <= age <= max_age
 
 
 def frame_payload(payload, max_age=MAX_OBJECT_AGE_SECONDS):
@@ -40,6 +39,11 @@ def frame_payload(payload, max_age=MAX_OBJECT_AGE_SECONDS):
                     "score": obj["score"],
                     "box": obj["box"],
                     "observedAt": obs_time,
+                    "isMoving": obj.get("motionless_count") == 0
+                    and obj.get("stationary") is False,
+                    "sourceSessionId": f"{camera}:{float(obj['start_time']):.6f}"
+                    if isinstance(obj.get("start_time"), (int, float))
+                    else None,
                 }
             )
             print(
@@ -50,7 +54,11 @@ def frame_payload(payload, max_age=MAX_OBJECT_AGE_SECONDS):
             )
         elif obj.get("label") == "person":
             obj_time = obj.get("frame_time")
-            age_ms = (frame_time - obj_time) * 1000 if isinstance(obj_time, (int, float)) else -1
+            age_ms = (
+                (frame_time - obj_time) * 1000
+                if isinstance(obj_time, (int, float))
+                else -1
+            )
             print(
                 f"[PERSON_DEBUG][BRIDGE] camera={camera} objectId={obj.get('id')} "
                 f"frameTime={frame_time:.3f} observedAt={obj_time} "
@@ -98,7 +106,9 @@ def main():
                     continue
                 client.publish(
                     os.getenv("MQTT_TOPIC_CAMERA_FRAMES", "frigate/camerai/frames"),
-                    json.dumps(result, separators=(",", ":")), qos=0, retain=False,
+                    json.dumps(result, separators=(",", ":")),
+                    qos=0,
+                    retain=False,
                 )
             except (ValueError, TypeError, KeyError):
                 print("Invalid Frigate frame metadata skipped", flush=True)

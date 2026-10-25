@@ -1,3 +1,4 @@
+import { WellnessModule } from '../wellness/wellness.module';
 import { Module } from '@nestjs/common';
 import { EventsModule } from '../events/events.module';
 import { EscalationModule } from '../escalation/escalation.module';
@@ -9,7 +10,7 @@ import { AiResultsService } from './ai-results.service';
 import { InternalTokenGuard } from './internal-token.guard';
 
 @Module({
-  imports: [EventsModule, EscalationModule],
+  imports: [EventsModule, EscalationModule, WellnessModule],
   controllers: [AiResultsController],
   providers: [
     AiResultValidator,

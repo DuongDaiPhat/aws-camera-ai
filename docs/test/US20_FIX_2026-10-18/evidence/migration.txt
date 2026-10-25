@@ -1,0 +1,11 @@
+--> 0016_wellness_source_evidence.sql
+Da chay 1 migration.
+Khong co migration moi.
+{
+  "result": "Passed",
+  "migrations": 18,
+  "upgrade": "0015→0016",
+  "replay": "no new migration",
+  "legacySchedule": "unchanged",
+  "fresh": "also covered by Testcontainers integration suites"
+}

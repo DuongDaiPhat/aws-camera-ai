@@ -1,14 +1,15 @@
 import {
   Inject,
+  ForbiddenException,
   Injectable,
   Logger,
   MessageEvent,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, filter, map } from 'rxjs';
 import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
-import { TOKEN_SERVICE, type TokenService } from '../auth/auth.types';
+import { TOKEN_SERVICE, type TokenService, type TokenClaims } from '../auth/auth.types';
 import { MediaService } from '../media/media.service';
 import { EscalationEngineService } from '../escalation/escalation-engine.service';
 import {
@@ -82,7 +83,7 @@ function toIsoStringOrNull(value: Date | null): string | null {
 @Injectable()
 export class EventsService {
   private readonly logger = new Logger(EventsService.name);
-  private readonly eventSubject = new Subject<MessageEvent>();
+  private readonly eventSubject = new Subject<{ message: MessageEvent; recipients?: string[] }>();
 
   constructor(
     private readonly eventsRepository: EventsRepository,
@@ -95,7 +96,10 @@ export class EventsService {
   /**
    * Lấy danh sách 20 sự kiện gần nhất có lọc và phân trang (US-06, US-21).
    */
-  async listEvents(query: ListEventsQueryDto): Promise<PaginatedEventsResponseDto> {
+  async listEvents(
+    query: ListEventsQueryDto,
+    actor?: TokenClaims,
+  ): Promise<PaginatedEventsResponseDto> {
     const page = query.page || 1;
     const pageSize = query.pageSize || 20;
 
@@ -110,6 +114,7 @@ export class EventsService {
       from: query.from,
       to: query.to,
       isFalseAlarm: query.isFalseAlarm,
+      ...(actor ? { wellnessActorId: actor.sub, wellnessAdmin: actor.role === 'ADMIN' } : {}),
     });
 
     const data = await Promise.all(events.map((e) => this.toEventSummary(e)));
@@ -129,7 +134,7 @@ export class EventsService {
   /**
    * Lấy chi tiết một sự kiện kèm media, kết quả AI và lịch sử trạng thái (US-21).
    */
-  async getEvent(eventId: string): Promise<EventDetailDto> {
+  async getEvent(eventId: string, actor?: TokenClaims): Promise<EventDetailDto> {
     const record = await this.eventsRepository.findEventDetailById(eventId);
     if (!record) {
       throw new NotFoundException({
@@ -137,6 +142,14 @@ export class EventsService {
       });
     }
 
+    if (
+      actor &&
+      record.event_type === 'WELLNESS_TIMEOUT' &&
+      actor.role !== 'ADMIN' &&
+      actor.sub !== record.wellness_owner_user_id &&
+      actor.sub !== record.wellness_resident_user_id
+    )
+      throw new ForbiddenException('Bạn không có quyền xem yêu cầu này');
     const [summary, media, statusHistory] = await Promise.all([
       this.toEventSummary(record),
       this.mediaService.listEventMediaWithUrls(eventId),
@@ -164,7 +177,15 @@ export class EventsService {
     const summary = await this.eventsRepository.findEventSummaryById(eventId);
     if (summary) {
       const summaryDto = await this.toEventSummary(summary);
-      this.emitEvent(summaryDto, 'event.updated');
+      this.emitEvent(
+        summaryDto,
+        'event.updated',
+        summary.event_type === 'WELLNESS_TIMEOUT'
+          ? [summary.wellness_owner_user_id, summary.wellness_resident_user_id].filter(
+              (id): id is string => !!id,
+            )
+          : undefined,
+      );
     }
 
     return result;
@@ -172,7 +193,16 @@ export class EventsService {
 
   async publishCommittedUpdate(eventId: string): Promise<void> {
     const summary = await this.eventsRepository.findEventSummaryById(eventId);
-    if (summary) this.emitEvent(await this.toEventSummary(summary), 'event.updated');
+    if (summary)
+      this.emitEvent(
+        await this.toEventSummary(summary),
+        'event.updated',
+        summary.event_type === 'WELLNESS_TIMEOUT'
+          ? [summary.wellness_owner_user_id, summary.wellness_resident_user_id].filter(
+              (id): id is string => !!id,
+            )
+          : undefined,
+      );
   }
 
   /**
@@ -192,7 +222,15 @@ export class EventsService {
     const summary = await this.eventsRepository.findEventSummaryById(eventId);
     if (summary) {
       const summaryDto = await this.toEventSummary(summary);
-      this.emitEvent(summaryDto, 'event.updated');
+      this.emitEvent(
+        summaryDto,
+        'event.updated',
+        summary.event_type === 'WELLNESS_TIMEOUT'
+          ? [summary.wellness_owner_user_id, summary.wellness_resident_user_id].filter(
+              (id): id is string => !!id,
+            )
+          : undefined,
+      );
     }
 
     return result;
@@ -243,9 +281,15 @@ export class EventsService {
   /**
    * Số liệu tổng hợp cho các thẻ trên đầu dashboard (FR-DSH-01, US-06).
    */
-  async getStats(windowHours: number = DEFAULT_STATS_WINDOW_HOURS): Promise<EventStatsResponseDto> {
+  async getStats(
+    windowHours: number = DEFAULT_STATS_WINDOW_HOURS,
+    actor?: TokenClaims,
+  ): Promise<EventStatsResponseDto> {
     const since = new Date(Date.now() - windowHours * MILLISECONDS_PER_HOUR);
-    const records = await this.eventsRepository.getEventStats(since, STATS_GROUP_LIMIT);
+    const records =
+      actor && actor.role !== 'ADMIN'
+        ? await this.eventsRepository.getEventStats(since, STATS_GROUP_LIMIT, actor.sub)
+        : await this.eventsRepository.getEventStats(since, STATS_GROUP_LIMIT);
     return this.toEventStats(windowHours, records);
   }
 
@@ -301,6 +345,13 @@ export class EventsService {
     }
 
     return {
+      ...(record.event_type === 'WELLNESS_TIMEOUT'
+        ? {
+            wellnessResidentUserId: record.wellness_resident_user_id ?? null,
+            wellnessResidentName: record.wellness_resident_name ?? null,
+            wellnessCheckId: record.wellness_check_id ?? null,
+          }
+        : {}),
       id: record.id,
       eventType: record.event_type,
       status: record.status,
@@ -324,10 +375,14 @@ export class EventsService {
   /**
    * Phát sự kiện mới vào SSE stream khi Frigate/AI ghi nhận sự kiện (FR-DSH-02).
    */
-  emitEvent(event: EventSummaryDto, eventType: string = 'event.created'): void {
+  emitEvent(
+    event: EventSummaryDto,
+    eventType: string = 'event.created',
+    recipients?: string[],
+  ): void {
     this.eventSubject.next({
-      type: eventType,
-      data: JSON.stringify(event),
+      message: { type: eventType, data: JSON.stringify(event) },
+      recipients: event.eventType === 'WELLNESS_TIMEOUT' ? (recipients ?? []) : undefined,
     });
   }
 
@@ -341,8 +396,9 @@ export class EventsService {
       });
     }
 
+    let actor: TokenClaims;
     try {
-      this.tokenService.verifyAccessToken(token);
+      actor = this.tokenService.verifyAccessToken(token);
     } catch {
       throw new UnauthorizedException({
         error: {
@@ -352,6 +408,14 @@ export class EventsService {
       });
     }
 
-    return this.eventSubject.asObservable();
+    return this.eventSubject.asObservable().pipe(
+      filter(
+        (item) =>
+          item.recipients === undefined ||
+          actor?.role === 'ADMIN' ||
+          item.recipients.includes(actor?.sub),
+      ),
+      map((item) => item.message),
+    );
   }
 }

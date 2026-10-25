@@ -1,0 +1,72 @@
+[Nest] 11332  - 18/10/2026, 21.28.05     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32776 (clientId: us08-consumer-57d3a7a6-23bc-4f15-bd41-05110663d226)...
+[Nest] 11332  - 18/10/2026, 21.28.05     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events, frigate/camerai/frames, frigate/camerai/pose/frames
+[Nest] 11332  - 18/10/2026, 21.28.05     LOG [MqttConsumerService] Da subscribe cac topic MQTT.
+[Nest] 11332  - 18/10/2026, 21.28.08     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+[Nest] 11332  - 18/10/2026, 21.28.08     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32776 (clientId: us08-consumer-18c33f7e-7d30-41a5-9d28-3a4956e26f07)...
+[Nest] 11332  - 18/10/2026, 21.28.08     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events, frigate/camerai/frames, frigate/camerai/pose/frames
+[Nest] 11332  - 18/10/2026, 21.28.08     LOG [MqttConsumerService] Da subscribe cac topic MQTT.
+[Nest] 11332  - 18/10/2026, 21.28.11     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+[Nest] 11332  - 18/10/2026, 21.28.11     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32776 (clientId: us08-consumer-8393817d-0b54-4f00-8a7f-79e20bfb97f6)...
+[Nest] 11332  - 18/10/2026, 21.28.11     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events, frigate/camerai/frames, frigate/camerai/pose/frames
+[Nest] 11332  - 18/10/2026, 21.28.11     LOG [MqttConsumerService] Da subscribe cac topic MQTT.
+[Nest] 11332  - 18/10/2026, 21.28.14     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+FAIL test/mqtt-db.integration.spec.ts (28.703 s)
+  US-08 - Integration MQTT đến PostgreSQL
+    × tạo đúng một bản ghi trong vòng 3 giây khi publish message Frigate hợp lệ (3433 ms)
+    × giữ một bản ghi trong suốt vòng đời new-update-end qua ranh giới 10 giây (3274 ms)
+    × không ghi message lỗi và consumer vẫn xử lý message hợp lệ tiếp theo (3259 ms)
+
+  ● US-08 - Integration MQTT đến PostgreSQL › tạo đúng một bản ghi trong vòng 3 giây khi publish message Frigate hợp lệ
+
+    Consumer không subscribe topic frigate/events trong 3000 ms
+
+      160 |   }
+      161 |
+    > 162 |   throw new Error(failureMessage);
+          |         ^
+      163 | }
+      164 |
+      165 | function loggerContains(spy: jest.SpyInstance, expectedMessage: string): boolean {
+
+      at waitUntil (test/mqtt-db.integration.spec.ts:162:9)
+      at waitForSubscription (test/mqtt-db.integration.spec.ts:296:5)
+      at Object.<anonymous> (test/mqtt-db.integration.spec.ts:332:5)
+
+  ● US-08 - Integration MQTT đến PostgreSQL › giữ một bản ghi trong suốt vòng đời new-update-end qua ranh giới 10 giây
+
+    Consumer không subscribe topic frigate/events trong 3000 ms
+
+      160 |   }
+      161 |
+    > 162 |   throw new Error(failureMessage);
+          |         ^
+      163 | }
+      164 |
+      165 | function loggerContains(spy: jest.SpyInstance, expectedMessage: string): boolean {
+
+      at waitUntil (test/mqtt-db.integration.spec.ts:162:9)
+      at waitForSubscription (test/mqtt-db.integration.spec.ts:296:5)
+      at Object.<anonymous> (test/mqtt-db.integration.spec.ts:388:5)
+
+  ● US-08 - Integration MQTT đến PostgreSQL › không ghi message lỗi và consumer vẫn xử lý message hợp lệ tiếp theo
+
+    Consumer không subscribe topic frigate/events trong 3000 ms
+
+      160 |   }
+      161 |
+    > 162 |   throw new Error(failureMessage);
+          |         ^
+      163 | }
+      164 |
+      165 | function loggerContains(spy: jest.SpyInstance, expectedMessage: string): boolean {
+
+      at waitUntil (test/mqtt-db.integration.spec.ts:162:9)
+      at waitForSubscription (test/mqtt-db.integration.spec.ts:296:5)
+      at Object.<anonymous> (test/mqtt-db.integration.spec.ts:450:5)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 3 total
+Snapshots:   0 total
+Time:        29.197 s
+Ran all test suites within paths "test/mqtt-db.integration.spec.ts".
+Test results written to: ..\..\artifacts-mqtt-retry-results.json

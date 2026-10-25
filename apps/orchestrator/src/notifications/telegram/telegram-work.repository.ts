@@ -39,15 +39,27 @@ export class TelegramWorkRepository {
   ): Promise<{
     eventId: string;
     actorUserId: string;
+    wellnessCheckId?: string;
   } | null> {
-    const result = await this.database.query<{ event_id: string; user_id: string }>(
-      `SELECT n.event_id, u.id AS user_id FROM notifications n
+    const result = await this.database.query<{
+      event_id: string;
+      user_id: string;
+      wellness_check_id: string | null;
+    }>(
+      `SELECT n.event_id, u.id AS user_id, r.id AS wellness_check_id FROM notifications n
        JOIN users u ON u.id = n.recipient_user_id
+       LEFT JOIN wellness_check_runs r ON r.event_id=n.event_id AND r.resident_user_id=u.id
        WHERE n.id = $1 AND u.telegram_user_id = $2 LIMIT 1`,
       [notificationId, telegramUserId],
     );
     const row = result.rows[0];
-    return row ? { eventId: row.event_id, actorUserId: row.user_id } : null;
+    return row
+      ? {
+          eventId: row.event_id,
+          actorUserId: row.user_id,
+          wellnessCheckId: row.wellness_check_id ?? undefined,
+        }
+      : null;
   }
 
   async claimInbox(leaseSeconds: number, maxAttempts: number): Promise<TelegramInboxJob | null> {
