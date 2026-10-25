@@ -1,1 +1,363 @@
-{"numFailedTestSuites":1,"numFailedTests":11,"numPassedTestSuites":0,"numPassedTests":0,"numPendingTestSuites":0,"numPendingTests":0,"numRuntimeErrorTestSuites":0,"numTodoTests":0,"numTotalTestSuites":1,"numTotalTests":11,"openHandles":[],"snapshot":{"added":0,"didUpdate":false,"failure":false,"filesAdded":0,"filesRemoved":0,"filesRemovedList":[],"filesUnmatched":0,"filesUpdated":0,"matched":0,"total":0,"unchecked":0,"uncheckedKeysByFile":[],"unmatched":0,"updated":0},"startTime":1792316338633,"success":false,"testResults":[{"assertionResults":[{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":2,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 JWT guard denies an unauthenticated request","invocations":1,"location":null,"numPassingAsserts":1,"retryReasons":[],"status":"failed","title":"US20 JWT guard denies an unauthenticated request"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":1,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 internal guard denies a wrong token","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 internal guard denies a wrong token"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":0,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 create response follows frozen camelCase contract","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 create response follows frozen camelCase contract"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":0,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"lookbackHours\":0}","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 rejects out-of-range {\"lookbackHours\":0}"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":0,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"lookbackHours\":25}","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 rejects out-of-range {\"lookbackHours\":25}"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":0,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"graceSeconds\":59}","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 rejects out-of-range {\"graceSeconds\":59}"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":0,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"graceSeconds\":3601}","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 rejects out-of-range {\"graceSeconds\":3601}"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":0,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects an unknown IANA timezone","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 rejects an unknown IANA timezone"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":1,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects an empty daysOfWeek array","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 rejects an empty daysOfWeek array"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":0,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects DEPARTURE without direction/identity evidence","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 rejects DEPARTURE without direction/identity evidence"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":0,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 accepted observation uses HTTP 202 from frozen contract","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 accepted observation uses HTTP 202 from frozen contract"}],"endTime":1792316357155,"message":"  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 JWT guard denies an unauthenticated request\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 internal guard denies a wrong token\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 create response follows frozen camelCase contract\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {\"lookbackHours\":0}\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {\"lookbackHours\":25}\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {\"graceSeconds\":59}\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {\"graceSeconds\":3601}\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects an unknown IANA timezone\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects an empty daysOfWeek array\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects DEPARTURE without direction/identity evidence\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 accepted observation uses HTTP 202 from frozen contract\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n","name":"C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts","startTime":1792316339131,"status":"failed","summary":""}],"wasInterrupted":false}
+{
+  "numFailedTestSuites": 1,
+  "numFailedTests": 11,
+  "numPassedTestSuites": 0,
+  "numPassedTests": 0,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 1,
+  "numTotalTests": 11,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1792316338633,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 2,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 JWT guard denies an unauthenticated request",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 JWT guard denies an unauthenticated request"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 1,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 internal guard denies a wrong token",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 internal guard denies a wrong token"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 0,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 create response follows frozen camelCase contract",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 create response follows frozen camelCase contract"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 0,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"lookbackHours\":0}",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects out-of-range {\"lookbackHours\":0}"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 0,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"lookbackHours\":25}",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects out-of-range {\"lookbackHours\":25}"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 0,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"graceSeconds\":59}",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects out-of-range {\"graceSeconds\":59}"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 0,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"graceSeconds\":3601}",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects out-of-range {\"graceSeconds\":3601}"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 0,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects an unknown IANA timezone",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects an unknown IANA timezone"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 1,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects an empty daysOfWeek array",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects an empty daysOfWeek array"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 0,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects DEPARTURE without direction/identity evidence",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects DEPARTURE without direction/identity evidence"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 0,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, 4bf88ce1-164c-4c73-83be-a613e7ee213f, QA, qa-ae4f6fa1-1500-47ff-b8a4-7653e8b011f6, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:17.097878+00, 2026-10-18 09:39:17.097878+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:90:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 accepted observation uses HTTP 202 from frozen contract",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 accepted observation uses HTTP 202 from frozen contract"
+        }
+      ],
+      "endTime": 1792316357155,
+      "message": "  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 JWT guard denies an unauthenticated request\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 internal guard denies a wrong token\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 create response follows frozen camelCase contract\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {\"lookbackHours\":0}\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {\"lookbackHours\":25}\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {\"graceSeconds\":59}\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {\"graceSeconds\":3601}\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects an unknown IANA timezone\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects an empty daysOfWeek array\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects DEPARTURE without direction/identity evidence\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 accepted observation uses HTTP 202 from frozen contract\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      88 |       [device, owner],\n      89 |     );\n    > 90 |     await pool.query(\n         |     ^\n      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      92 |       [camera, device, `qa-${camera}`],\n      93 |     );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at Object.<anonymous> (test/qa-system.spec.ts:90:5)\n",
+      "name": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts",
+      "startTime": 1792316339131,
+      "status": "failed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}

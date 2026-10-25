@@ -6,12 +6,12 @@ Ngày thực hiện: **18/10/2026**, Asia/Bangkok. Một AI thực hiện, khôn
 
 ## 1. Đối tượng, baseline và sản phẩm bàn giao
 
-| Đối tượng | Revision đã kiểm thử |
-| --- | --- |
-| `main` / `origin/main` | `0f5c948a27fc82e1e20cfd35bf56781a468750f2` |
+| Đối tượng                                                                                     | Revision đã kiểm thử                       |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `main` / `origin/main`                                                                        | `0f5c948a27fc82e1e20cfd35bf56781a468750f2` |
 | `feat/US-16-US-17-pose-fall`, PR [#28](https://github.com/DuongDaiPhat/aws-camera-ai/pull/28) | `549f9c092a3b274aaa8629c9323365b0c0a2d1e6` |
-| `feat/US-20-wellness-check`, PR [#27](https://github.com/DuongDaiPhat/aws-camera-ai/pull/27) | `872a895cd88ac8303bfe448831873aea562dfba5` |
-| Candidate cục bộ `codex/qa-us16-us17-us20` | `c8f14a31822bc697cc28a69e56893313fe88831c` |
+| `feat/US-20-wellness-check`, PR [#27](https://github.com/DuongDaiPhat/aws-camera-ai/pull/27)  | `872a895cd88ac8303bfe448831873aea562dfba5` |
+| Candidate cục bộ `codex/qa-us16-us17-us20`                                                    | `c8f14a31822bc697cc28a69e56893313fe88831c` |
 
 Hai feature có merge-base đã xác minh là main `0f5c948`. Ghép candidate phát sinh conflict ở hai vị trí import/register trong `apps/orchestrator/src/app.module.ts`; đã giữ cả `FallDetectionModule` và `WellnessModule`, ghi merge commit **chỉ trên candidate cục bộ**. Không sửa business logic hoặc test sản phẩm để làm xanh. Các regression test mới còn riêng trong worktree và được sao lưu trong bộ báo cáo này.
 
@@ -26,44 +26,44 @@ Thư mục ban đầu vẫn ở nhánh `docs/testing`. Giữ nguyên các thay �
 
 ## 2. Kết quả theo năm cấp kiểm thử
 
-| Cấp kiểm thử | Passed | Failed | Blocked | Tổng |
-| --- | ---: | ---: | ---: | ---: |
-| Unit Test | 6 | 11 | 0 | 17 |
-| Module Test | 2 | 9 | 0 | 11 |
-| Integration Test | 4 | 5 | 1 | 10 |
-| System Test | 1 | 0 | 4 | 5 |
-| Acceptance Test | 0 | 1 | 4 | 5 |
-| **Tổng case sheet** | **13** | **26** | **9** | **48** |
+| Cấp kiểm thử        | Passed | Failed | Blocked |   Tổng |
+| ------------------- | -----: | -----: | ------: | -----: |
+| Unit Test           |      6 |     11 |       0 |     17 |
+| Module Test         |      2 |      9 |       0 |     11 |
+| Integration Test    |      4 |      5 |       1 |     10 |
+| System Test         |      1 |      0 |       4 |      5 |
+| Acceptance Test     |      0 |      1 |       4 |      5 |
+| **Tổng case sheet** | **13** | **26** |   **9** | **48** |
 
 Một case sheet có thể gồm ma trận biên được triển khai bằng nhiều assertion. Vì vậy **48 case sheet** khác với **61 assertion bổ sung**. 61 assertion mới có **22 Passed, 39 Failed**; không cộng lại các lần rerun để tăng số lượng. Các attempt lỗi sandbox/fixture được loại khỏi số liệu sản phẩm.
 
-| Bộ kiểm thử bổ sung được dùng kết luận | Passed | Failed | Bằng chứng |
-| --- | ---: | ---: | --- |
-| Python: góc, grace, continuity, replay, prone startup, timer 15s, identity/latch | 9 | 6 | [fall-python-regression.txt](evidence/fall-python-regression.txt) |
-| Backend fall: envelope, freshness, response identity, REST lookup, retry | 0 | 8 | [fall-jest-regression-valid.txt](evidence/fall-jest-regression-valid.txt) |
-| Wellness: timezone/DST, activation/flag, delivery, state, scope/idempotency/as-of | 3 | 15 | [wellness-jest-regression.txt](evidence/wellness-jest-regression.txt) |
-| Production repositories/scheduler/confirmation trên PostgreSQL 16 | 4 | 5 | [candidate-db-complete.txt](evidence/candidate-db-complete.txt) |
-| Local HTTP với production Wellness/Auth/Database, JWT và DTO thật | 6 | 5 | [candidate-http-qualified.txt](evidence/candidate-http-qualified.txt) |
+| Bộ kiểm thử bổ sung được dùng kết luận                                            | Passed | Failed | Bằng chứng                                                                |
+| --------------------------------------------------------------------------------- | -----: | -----: | ------------------------------------------------------------------------- |
+| Python: góc, grace, continuity, replay, prone startup, timer 15s, identity/latch  |      9 |      6 | [fall-python-regression.txt](evidence/fall-python-regression.txt)         |
+| Backend fall: envelope, freshness, response identity, REST lookup, retry          |      0 |      8 | [fall-jest-regression-valid.txt](evidence/fall-jest-regression-valid.txt) |
+| Wellness: timezone/DST, activation/flag, delivery, state, scope/idempotency/as-of |      3 |     15 | [wellness-jest-regression.txt](evidence/wellness-jest-regression.txt)     |
+| Production repositories/scheduler/confirmation trên PostgreSQL 16                 |      4 |      5 | [candidate-db-complete.txt](evidence/candidate-db-complete.txt)           |
+| Local HTTP với production Wellness/Auth/Database, JWT và DTO thật                 |      6 |      5 | [candidate-http-qualified.txt](evidence/candidate-http-qualified.txt)     |
 
 HTTP runtime đã mở server thật trên loopback với production modules, real JWT guard/service/repositories và DB thật. Timer scheduler được điều khiển bằng override để tách test HTTP; đây là bằng chứng subsystem/API, **không phải** full system Telegram/MQTT/UI. Test service với repository/storage double được ghi rõ trong bảng, không dùng để xác nhận tích hợp DB/storage/live delivery.
 
 ## 3. Hồi quy, chất lượng source và môi trường
 
-| Kiểm tra | Kết quả cuối được chấp nhận |
-| --- | --- |
-| Main baseline backend | 325 Passed, 44 suites |
-| Main baseline AI / bridge | 31 Passed, coverage 94.34%; bridge 6 Passed |
-| Riêng nhánh pose/fall backend | 355 Passed, 49 suites |
-| Riêng nhánh wellness backend | 345 Passed, 47 suites |
-| Candidate backend, suite có sẵn | 375 Passed, 52 suites |
-| Candidate web / tools | 191 Passed, 31 files / 109 Passed |
-| AI suite có sẵn trên pose/fall | 49 Passed; coverage 86.17%, vượt ngưỡng 60%; không skip model smoke do đã cấu hình model local |
-| Bridge trên pose/fall | **7 Passed, 1 Failed**; stale-person assertion hồi quy so với main |
-| PostgreSQL migration gate | Fresh + seeded upgrade + replay + constraints/immutability đều đạt; 17 migrations apply vào DB runtime riêng |
-| Model/runtime thật | Python 3.11.13, pinned M1/M2a model checksum/import/load/inference smoke đạt; AI process live HTTP health/token/no-pose đạt |
-| Typecheck / ESLint / Python Ruff | Đạt; ESLint có 63 warnings, không error trong lần chạy, gồm cảnh báo của source/test cũ và QA helpers |
-| OpenAPI / contracts | Hai spec lint đạt, 5 warnings; generate thành công và `git diff --exit-code` generated types sạch |
-| Formatting / diff | Prettier cuối đạt; Ruff format đạt; diff check đạt |
+| Kiểm tra                         | Kết quả cuối được chấp nhận                                                                                                 |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Main baseline backend            | 325 Passed, 44 suites                                                                                                       |
+| Main baseline AI / bridge        | 31 Passed, coverage 94.34%; bridge 6 Passed                                                                                 |
+| Riêng nhánh pose/fall backend    | 355 Passed, 49 suites                                                                                                       |
+| Riêng nhánh wellness backend     | 345 Passed, 47 suites                                                                                                       |
+| Candidate backend, suite có sẵn  | 375 Passed, 52 suites                                                                                                       |
+| Candidate web / tools            | 191 Passed, 31 files / 109 Passed                                                                                           |
+| AI suite có sẵn trên pose/fall   | 49 Passed; coverage 86.17%, vượt ngưỡng 60%; không skip model smoke do đã cấu hình model local                              |
+| Bridge trên pose/fall            | **7 Passed, 1 Failed**; stale-person assertion hồi quy so với main                                                          |
+| PostgreSQL migration gate        | Fresh + seeded upgrade + replay + constraints/immutability đều đạt; 17 migrations apply vào DB runtime riêng                |
+| Model/runtime thật               | Python 3.11.13, pinned M1/M2a model checksum/import/load/inference smoke đạt; AI process live HTTP health/token/no-pose đạt |
+| Typecheck / ESLint / Python Ruff | Đạt; ESLint có 63 warnings, không error trong lần chạy, gồm cảnh báo của source/test cũ và QA helpers                       |
+| OpenAPI / contracts              | Hai spec lint đạt, 5 warnings; generate thành công và `git diff --exit-code` generated types sạch                           |
+| Formatting / diff                | Prettier cuối đạt; Ruff format đạt; diff check đạt                                                                          |
 
 Node thực chạy **22.20.0**, pnpm QA **9.12.0**, dependency JS cài `--frozen-lockfile` vào worktree/store riêng. Python dùng môi trường `artifacts/ai-gate-windows` có sẵn, **3.11.13**, `pip check` đạt; smoke kiểm tra versions thư viện/model cốt lõi. Không tuyên bố đã cài lại sạch toàn bộ Python lock trong đợt này.
 
@@ -83,16 +83,16 @@ Các lỗi ảnh hưởng trực tiếp quyết định merge:
 4. **Wellness sai giờ/quyền/bằng chứng**: local 09:00/18:00 đổi sai UTC; VIEWER không household link vẫn hợp lệ; observation thiếu provenance/direction vẫn cập nhật AWAY; presence tương lai suppress check quá khứ.
 5. **Deadline/state/contract sai**: bắt đầu 300s khi notification PENDING; event terminal vẫn có thể bị resolve qua service; M5_ENABLED không dừng admission; API response/status/validation lệch frozen spec.
 
-| Nguồn nghiệm thu | Đánh giá có bằng chứng |
-| --- | --- |
-| AC16-1: 33 landmarks và geometry | Geometry/model smoke đạt trong phạm vi fixture; video thật, multi-person association và timestamped frame pipeline còn Blocked |
-| AC16-2: `<30°` + hạ thấp so 10 frame | **Failed**: angle=30 vẫn candidate; prone startup và replay cũng vi phạm giả thiết |
-| AC16-3: thiếu pose tối đa 5s | **Failed** đúng grace/continuity; không coi test hiện có qua là đóng AC |
-| AC17-1: bất động liên tục `>15s`, một P1 incident/alert | Strict 15s unit và incident DB đạt; **không đạt toàn AC** vì gap/time/retry và live alert chưa chứng minh |
-| AC17-2: đứng dậy trước 15s | Unit tracker/coordinator đạt; live video acceptance còn Blocked |
-| AC17-3: REST_AREA suppress | Polygon/enabled-zone unit đạt; **Failed** khi lookup lỗi; live REST scenario còn Blocked |
-| US-20 Mục 1: 09:00/18:00, no activity, IM_OK/timeout | **Failed** do timezone, runtime alert/confirmation SQL. Unit boundary 299.999/300/300.001s đạt với double, không thay thế DB/E2E |
-| US-20 Mục 1: skip-away đúng người; unknown/offline không suy AWAY | **Blocked/không nghiệm thu**: thiếu source adapter thật; observation validation/as-of đã có lỗi tái hiện |
+| Nguồn nghiệm thu                                                  | Đánh giá có bằng chứng                                                                                                           |
+| ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| AC16-1: 33 landmarks và geometry                                  | Geometry/model smoke đạt trong phạm vi fixture; video thật, multi-person association và timestamped frame pipeline còn Blocked   |
+| AC16-2: `<30°` + hạ thấp so 10 frame                              | **Failed**: angle=30 vẫn candidate; prone startup và replay cũng vi phạm giả thiết                                               |
+| AC16-3: thiếu pose tối đa 5s                                      | **Failed** đúng grace/continuity; không coi test hiện có qua là đóng AC                                                          |
+| AC17-1: bất động liên tục `>15s`, một P1 incident/alert           | Strict 15s unit và incident DB đạt; **không đạt toàn AC** vì gap/time/retry và live alert chưa chứng minh                        |
+| AC17-2: đứng dậy trước 15s                                        | Unit tracker/coordinator đạt; live video acceptance còn Blocked                                                                  |
+| AC17-3: REST_AREA suppress                                        | Polygon/enabled-zone unit đạt; **Failed** khi lookup lỗi; live REST scenario còn Blocked                                         |
+| US-20 Mục 1: 09:00/18:00, no activity, IM_OK/timeout              | **Failed** do timezone, runtime alert/confirmation SQL. Unit boundary 299.999/300/300.001s đạt với double, không thay thế DB/E2E |
+| US-20 Mục 1: skip-away đúng người; unknown/offline không suy AWAY | **Blocked/không nghiệm thu**: thiếu source adapter thật; observation validation/as-of đã có lỗi tái hiện                         |
 
 ## 5. Phần chưa thể kết luận
 

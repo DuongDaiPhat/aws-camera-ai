@@ -280,11 +280,7 @@
     {
       "label": "runtime-db-migrate",
       "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
-      "command": [
-        "node",
-        "tools/scripts/migrate.mjs",
-        "up"
-      ],
+      "command": ["node", "tools/scripts/migrate.mjs", "up"],
       "revision": "872a895cd88ac8303bfe448831873aea562dfba5",
       "started_utc": "2026-10-18T09:33:49.985695+00:00",
       "duration_seconds": 1.312,
@@ -371,11 +367,7 @@
     {
       "label": "candidate-tools",
       "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
-      "command": [
-        "node",
-        "--test",
-        "tools/scripts/test/*.test.mjs"
-      ],
+      "command": ["node", "--test", "tools/scripts/test/*.test.mjs"],
       "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
       "started_utc": "2026-10-18T09:38:08.133792+00:00",
       "duration_seconds": 0.531,

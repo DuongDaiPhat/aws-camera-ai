@@ -1,1 +1,188 @@
-{"numFailedTestSuites":1,"numFailedTests":4,"numPassedTestSuites":0,"numPassedTests":3,"numPendingTestSuites":0,"numPendingTests":0,"numRuntimeErrorTestSuites":0,"numTodoTests":0,"numTotalTestSuites":1,"numTotalTests":7,"openHandles":[],"snapshot":{"added":0,"didUpdate":false,"failure":false,"filesAdded":0,"filesRemoved":0,"filesRemovedList":[],"filesUnmatched":0,"filesUpdated":0,"matched":0,"total":0,"unchecked":0,"uncheckedKeysByFile":[],"unmatched":0,"updated":0},"startTime":1792316412002,"success":false,"testResults":[{"assertionResults":[{"ancestorTitles":["QA PostgreSQL16 production repositories"],"duration":62,"failureDetails":[],"failureMessages":[],"fullName":"QA PostgreSQL16 production repositories US17 persists independent FALL P1 incident and sequential replay deduplicates","invocations":1,"location":null,"numPassingAsserts":9,"retryReasons":[],"status":"passed","title":"US17 persists independent FALL P1 incident and sequential replay deduplicates"},{"ancestorTitles":["QA PostgreSQL16 production repositories"],"duration":41,"failureDetails":[],"failureMessages":[],"fullName":"QA PostgreSQL16 production repositories US17 concurrent same-episode deliveries both succeed idempotently","invocations":1,"location":null,"numPassingAsserts":2,"retryReasons":[],"status":"passed","title":"US17 concurrent same-episode deliveries both succeed idempotently"},{"ancestorTitles":["QA PostgreSQL16 production repositories"],"duration":44,"failureDetails":[],"failureMessages":[],"fullName":"QA PostgreSQL16 production repositories US20 schedule CRUD preserves history through soft-delete","invocations":1,"location":null,"numPassingAsserts":3,"retryReasons":[],"status":"passed","title":"US20 schedule CRUD preserves history through soft-delete"},{"ancestorTitles":["QA PostgreSQL16 production repositories"],"duration":30,"failureDetails":[{"matcherResult":{"actual":true,"expected":false,"message":"expect(received).resolves.toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true","name":"toBe","pass":false},"message":"expect(received).resolves.toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true"}],"failureMessages":["Error: expect(received).resolves.toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true\n    at Object.toBe (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\expect@29.7.0\\node_modules\\expect\\build\\index.js:174:22)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:165:86)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"],"fullName":"QA PostgreSQL16 production repositories US20 a VIEWER without an active household link cannot be assigned by another caregiver","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 a VIEWER without an active household link cannot be assigned by another caregiver"},{"ancestorTitles":["QA PostgreSQL16 production repositories"],"duration":92,"failureDetails":[{"matcherResult":{"actual":"PROCESSING","expected":"ALERT_CREATED","message":"expect(received).toBe(expected) // Object.is equality\n\nExpected: \"ALERT_CREATED\"\nReceived: \"PROCESSING\"","name":"toBe","pass":false}}],"failureMessages":["Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: \"ALERT_CREATED\"\nReceived: \"PROCESSING\"\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:187:27)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"],"fullName":"QA PostgreSQL16 production repositories US20 claim and no-activity evaluation create atomic P2 resident alert","invocations":1,"location":null,"numPassingAsserts":1,"retryReasons":[],"status":"failed","title":"US20 claim and no-activity evaluation create atomic P2 resident alert"},{"ancestorTitles":["QA PostgreSQL16 production repositories"],"duration":44,"failureDetails":[{"length":149,"name":"error","severity":"ERROR","code":"42P08","detail":"text versus event_status","position":"37","file":"parse_param.c","line":"219","routine":"variable_coerce_param_hook"}],"failureMessages":["error: inconsistent types deduced for parameter $2\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg@8.23.0\\node_modules\\pg\\lib\\client.js:694:17\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at WellnessService.confirmCheck (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\src\\wellness\\wellness.service.ts:275:7)\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:212:22"],"fullName":"QA PostgreSQL16 production repositories US20 IM_OK confirmation commits against real schema","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 IM_OK confirmation commits against real schema"},{"ancestorTitles":["QA PostgreSQL16 production repositories"],"duration":37,"failureDetails":[{"length":149,"name":"error","severity":"ERROR","code":"42P08","detail":"text versus event_status","position":"37","file":"parse_param.c","line":"219","routine":"variable_coerce_param_hook"}],"failureMessages":["error: inconsistent types deduced for parameter $2\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg@8.23.0\\node_modules\\pg\\lib\\client.js:694:17\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at WellnessService.confirmCheck (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\src\\wellness\\wellness.service.ts:275:7)\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:212:22"],"fullName":"QA PostgreSQL16 production repositories US20 NEED_HELP confirmation commits against real schema","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 NEED_HELP confirmation commits against real schema"}],"endTime":1792316425518,"message":"  ● QA PostgreSQL16 production repositories › US20 a VIEWER without an active household link cannot be assigned by another caregiver\n\n    expect(received).resolves.toBe(expected) // Object.is equality\n\n    Expected: false\n    Received: true\n\n      163 |   it('US20 a VIEWER without an active household link cannot be assigned by another caregiver', async () => {\n      164 |     const f = await fixture();\n    > 165 |     await expect(wellness.verifyResidentHouseholdLink(f.owner, f.resident)).resolves.toBe(false);\n          |                                                                                      ^\n      166 |   });\n      167 |   it('US20 claim and no-activity evaluation create atomic P2 resident alert', async () => {\n      168 |     const f = await scheduleFixture();\n\n      at Object.toBe (../../node_modules/.pnpm/expect@29.7.0/node_modules/expect/build/index.js:174:22)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:165:86)\n\n  ● QA PostgreSQL16 production repositories › US20 claim and no-activity evaluation create atomic P2 resident alert\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: \"ALERT_CREATED\"\n    Received: \"PROCESSING\"\n\n      185 |       )\n      186 |     ).rows[0];\n    > 187 |     expect(stored.status).toBe('ALERT_CREATED');\n          |                           ^\n      188 |     const event = (\n      189 |       await pool.query('SELECT priority,event_type FROM events WHERE id=$1', [stored.event_id])\n      190 |     ).rows[0];\n\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:187:27)\n\n  ● QA PostgreSQL16 production repositories › US20 IM_OK confirmation commits against real schema\n\n    error: inconsistent types deduced for parameter $2\n\n      273 |       const targetStatus = dto.response === 'IM_OK' ? 'RESOLVED' : 'ESCALATED';\n      274 |\n    > 275 |       await client.query(\n          |       ^\n      276 |         `UPDATE events\n      277 |          SET status = $2,\n      278 |              resolved_at = CASE WHEN $2 = 'RESOLVED' THEN now() ELSE resolved_at END,\n\n      at ../../node_modules/.pnpm/pg@8.23.0/node_modules/pg/lib/client.js:694:17\n      at WellnessService.confirmCheck (src/wellness/wellness.service.ts:275:7)\n      at test/qa-db.integration.spec.ts:212:22\n\n  ● QA PostgreSQL16 production repositories › US20 NEED_HELP confirmation commits against real schema\n\n    error: inconsistent types deduced for parameter $2\n\n      273 |       const targetStatus = dto.response === 'IM_OK' ? 'RESOLVED' : 'ESCALATED';\n      274 |\n    > 275 |       await client.query(\n          |       ^\n      276 |         `UPDATE events\n      277 |          SET status = $2,\n      278 |              resolved_at = CASE WHEN $2 = 'RESOLVED' THEN now() ELSE resolved_at END,\n\n      at ../../node_modules/.pnpm/pg@8.23.0/node_modules/pg/lib/client.js:694:17\n      at WellnessService.confirmCheck (src/wellness/wellness.service.ts:275:7)\n      at test/qa-db.integration.spec.ts:212:22\n","name":"C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts","startTime":1792316412422,"status":"failed","summary":""}],"wasInterrupted":false}
+{
+  "numFailedTestSuites": 1,
+  "numFailedTests": 4,
+  "numPassedTestSuites": 0,
+  "numPassedTests": 3,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 1,
+  "numTotalTests": 7,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1792316412002,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 62,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "QA PostgreSQL16 production repositories US17 persists independent FALL P1 incident and sequential replay deduplicates",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 9,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "US17 persists independent FALL P1 incident and sequential replay deduplicates"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 41,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "QA PostgreSQL16 production repositories US17 concurrent same-episode deliveries both succeed idempotently",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 2,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "US17 concurrent same-episode deliveries both succeed idempotently"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 44,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "QA PostgreSQL16 production repositories US20 schedule CRUD preserves history through soft-delete",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 3,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "US20 schedule CRUD preserves history through soft-delete"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 30,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": true,
+                "expected": false,
+                "message": "expect(received).resolves.toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true",
+                "name": "toBe",
+                "pass": false
+              },
+              "message": "expect(received).resolves.toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true"
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).resolves.toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true\n    at Object.toBe (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\expect@29.7.0\\node_modules\\expect\\build\\index.js:174:22)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:165:86)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US20 a VIEWER without an active household link cannot be assigned by another caregiver",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 a VIEWER without an active household link cannot be assigned by another caregiver"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 92,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": "PROCESSING",
+                "expected": "ALERT_CREATED",
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: \"ALERT_CREATED\"\nReceived: \"PROCESSING\"",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: \"ALERT_CREATED\"\nReceived: \"PROCESSING\"\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:187:27)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US20 claim and no-activity evaluation create atomic P2 resident alert",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 claim and no-activity evaluation create atomic P2 resident alert"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 44,
+          "failureDetails": [
+            {
+              "length": 149,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "42P08",
+              "detail": "text versus event_status",
+              "position": "37",
+              "file": "parse_param.c",
+              "line": "219",
+              "routine": "variable_coerce_param_hook"
+            }
+          ],
+          "failureMessages": [
+            "error: inconsistent types deduced for parameter $2\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg@8.23.0\\node_modules\\pg\\lib\\client.js:694:17\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at WellnessService.confirmCheck (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\src\\wellness\\wellness.service.ts:275:7)\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:212:22"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US20 IM_OK confirmation commits against real schema",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 IM_OK confirmation commits against real schema"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 37,
+          "failureDetails": [
+            {
+              "length": 149,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "42P08",
+              "detail": "text versus event_status",
+              "position": "37",
+              "file": "parse_param.c",
+              "line": "219",
+              "routine": "variable_coerce_param_hook"
+            }
+          ],
+          "failureMessages": [
+            "error: inconsistent types deduced for parameter $2\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg@8.23.0\\node_modules\\pg\\lib\\client.js:694:17\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at WellnessService.confirmCheck (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\src\\wellness\\wellness.service.ts:275:7)\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:212:22"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US20 NEED_HELP confirmation commits against real schema",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 NEED_HELP confirmation commits against real schema"
+        }
+      ],
+      "endTime": 1792316425518,
+      "message": "  ● QA PostgreSQL16 production repositories › US20 a VIEWER without an active household link cannot be assigned by another caregiver\n\n    expect(received).resolves.toBe(expected) // Object.is equality\n\n    Expected: false\n    Received: true\n\n      163 |   it('US20 a VIEWER without an active household link cannot be assigned by another caregiver', async () => {\n      164 |     const f = await fixture();\n    > 165 |     await expect(wellness.verifyResidentHouseholdLink(f.owner, f.resident)).resolves.toBe(false);\n          |                                                                                      ^\n      166 |   });\n      167 |   it('US20 claim and no-activity evaluation create atomic P2 resident alert', async () => {\n      168 |     const f = await scheduleFixture();\n\n      at Object.toBe (../../node_modules/.pnpm/expect@29.7.0/node_modules/expect/build/index.js:174:22)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:165:86)\n\n  ● QA PostgreSQL16 production repositories › US20 claim and no-activity evaluation create atomic P2 resident alert\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: \"ALERT_CREATED\"\n    Received: \"PROCESSING\"\n\n      185 |       )\n      186 |     ).rows[0];\n    > 187 |     expect(stored.status).toBe('ALERT_CREATED');\n          |                           ^\n      188 |     const event = (\n      189 |       await pool.query('SELECT priority,event_type FROM events WHERE id=$1', [stored.event_id])\n      190 |     ).rows[0];\n\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:187:27)\n\n  ● QA PostgreSQL16 production repositories › US20 IM_OK confirmation commits against real schema\n\n    error: inconsistent types deduced for parameter $2\n\n      273 |       const targetStatus = dto.response === 'IM_OK' ? 'RESOLVED' : 'ESCALATED';\n      274 |\n    > 275 |       await client.query(\n          |       ^\n      276 |         `UPDATE events\n      277 |          SET status = $2,\n      278 |              resolved_at = CASE WHEN $2 = 'RESOLVED' THEN now() ELSE resolved_at END,\n\n      at ../../node_modules/.pnpm/pg@8.23.0/node_modules/pg/lib/client.js:694:17\n      at WellnessService.confirmCheck (src/wellness/wellness.service.ts:275:7)\n      at test/qa-db.integration.spec.ts:212:22\n\n  ● QA PostgreSQL16 production repositories › US20 NEED_HELP confirmation commits against real schema\n\n    error: inconsistent types deduced for parameter $2\n\n      273 |       const targetStatus = dto.response === 'IM_OK' ? 'RESOLVED' : 'ESCALATED';\n      274 |\n    > 275 |       await client.query(\n          |       ^\n      276 |         `UPDATE events\n      277 |          SET status = $2,\n      278 |              resolved_at = CASE WHEN $2 = 'RESOLVED' THEN now() ELSE resolved_at END,\n\n      at ../../node_modules/.pnpm/pg@8.23.0/node_modules/pg/lib/client.js:694:17\n      at WellnessService.confirmCheck (src/wellness/wellness.service.ts:275:7)\n      at test/qa-db.integration.spec.ts:212:22\n",
+      "name": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts",
+      "startTime": 1792316412422,
+      "status": "failed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}

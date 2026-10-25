@@ -15,13 +15,13 @@ Bảng thiết kế `TEST_CASES_DESIGN.md` gồm đúng ba phần theo hướng 
 
 ## 2. Phạm vi và chiến lược
 
-| Cấp | US-16 / US-17 | US-20 | Bằng chứng |
-| --- | --- | --- | --- |
-| Unit Test | Geometry, history 10 frame, góc 30°, continuity, >15s, missing 5s, replay, REST_AREA | Timezone/weekday, window, ownership, confirmation idempotency/deadline | Jest/pytest hiện có và regression assertions bổ sung |
-| Module Test | FastAPI router/token/validation, envelope, consumer, coordinator, media, registry | DTO/controller/guard, scheduler admission/evaluation/delivery/confirm | HTTP in-process và Nest testing module; dependency double được ghi rõ |
-| Integration Test | Postgres 16 thật: incident+event transaction/dedup, AI submit/retry; bridge fixtures | Migrations, repositories/scheduler trên DB thật, 300s logical clock, notification routing | DB disposable và logs; không dùng mock SQL để tuyên bố tích hợp DB đạt |
-| System Test | Runtime wiring, health, MQTT-frame → AI → incident → escalation/media/SSE | Runtime API → schedule → run → resident delivery → confirm/caregiver | Local runtime/HTTP, adapter test; chặn downstream khi prerequisite hỏng |
-| Acceptance Test | AC16-1..3, AC17-1..3; video thật và chất lượng/latency khi có fixture hợp lệ | Mục 1 của plan: 09:00/18:00, no activity, IM_OK trước 300s, timeout đúng/sau 300s, AWAY | Traceability AC tới các test; live UI/Telegram chỉ Passed khi quan sát thực tế |
+| Cấp              | US-16 / US-17                                                                        | US-20                                                                                     | Bằng chứng                                                                     |
+| ---------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Unit Test        | Geometry, history 10 frame, góc 30°, continuity, >15s, missing 5s, replay, REST_AREA | Timezone/weekday, window, ownership, confirmation idempotency/deadline                    | Jest/pytest hiện có và regression assertions bổ sung                           |
+| Module Test      | FastAPI router/token/validation, envelope, consumer, coordinator, media, registry    | DTO/controller/guard, scheduler admission/evaluation/delivery/confirm                     | HTTP in-process và Nest testing module; dependency double được ghi rõ          |
+| Integration Test | Postgres 16 thật: incident+event transaction/dedup, AI submit/retry; bridge fixtures | Migrations, repositories/scheduler trên DB thật, 300s logical clock, notification routing | DB disposable và logs; không dùng mock SQL để tuyên bố tích hợp DB đạt         |
+| System Test      | Runtime wiring, health, MQTT-frame → AI → incident → escalation/media/SSE            | Runtime API → schedule → run → resident delivery → confirm/caregiver                      | Local runtime/HTTP, adapter test; chặn downstream khi prerequisite hỏng        |
+| Acceptance Test  | AC16-1..3, AC17-1..3; video thật và chất lượng/latency khi có fixture hợp lệ         | Mục 1 của plan: 09:00/18:00, no activity, IM_OK trước 300s, timeout đúng/sau 300s, AWAY   | Traceability AC tới các test; live UI/Telegram chỉ Passed khi quan sát thực tế |
 
 Hồi quy: auth, permissions, M1/M4, AI receipts/outbox, escalation/confirmation/deadline, notifications, media, web, bridge/tools, typecheck/lint/API generation. Phân biệt unit assertion, integration có double, DB thật và live end-to-end. Không gán Passed toàn luồng từ mock.
 

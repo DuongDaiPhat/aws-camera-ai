@@ -1,1 +1,44 @@
-{"numFailedTestSuites":1,"numFailedTests":0,"numPassedTestSuites":0,"numPassedTests":0,"numPendingTestSuites":0,"numPendingTests":0,"numRuntimeErrorTestSuites":1,"numTodoTests":0,"numTotalTestSuites":1,"numTotalTests":0,"openHandles":[],"snapshot":{"added":0,"didUpdate":false,"failure":false,"filesAdded":0,"filesRemoved":0,"filesRemovedList":[],"filesUnmatched":0,"filesUpdated":0,"matched":0,"total":0,"unchecked":0,"uncheckedKeysByFile":[],"unmatched":0,"updated":0},"startTime":1792315787053,"success":false,"testResults":[{"assertionResults":[],"coverage":{},"endTime":1792315807252,"message":"  ● Test suite failed to run\n\n    jest: failed to cache transform results in: C:/Users/ADMIN/AppData/Local/Packages/sandbox.{e982e4b8-cf0a-4992-a542-5b82ee222f77}/AC/Temp/jest/jest-transform-cache-68340d2143a17365338e6732f32f9a50-79ef2876fae7ca75eedb2aa53dc48338/5c/qafallspec_5c2326d9892f4965fe0ed99323faa293.map\n    Failure message: EPERM: operation not permitted, rename 'C:\\Users\\ADMIN\\AppData\\Local\\Packages\\sandbox.{e982e4b8-cf0a-4992-a542-5b82ee222f77}\\AC\\Temp\\jest\\jest-transform-cache-68340d2143a17365338e6732f32f9a50-79ef2876fae7ca75eedb2aa53dc48338\\5c\\qafallspec_5c2326d9892f4965fe0ed99323faa293.map.1145488947' -> 'C:\\Users\\ADMIN\\AppData\\Local\\Packages\\sandbox.{e982e4b8-cf0a-4992-a542-5b82ee222f77}\\AC\\Temp\\jest\\jest-transform-cache-68340d2143a17365338e6732f32f9a50-79ef2876fae7ca75eedb2aa53dc48338\\5c\\qafallspec_5c2326d9892f4965fe0ed99323faa293.map'\n\n      at writeFileSync (../../node_modules/.pnpm/write-file-atomic@4.0.2/node_modules/write-file-atomic/lib/index.js:252:8)\n      at writeCacheFile (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:908:33)\n      at ScriptTransformer._buildTransformResult (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:510:7)\n      at ScriptTransformer.transformSource (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:554:17)\n      at ScriptTransformer._transformAndBuildScript (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:674:40)\n      at ScriptTransformer.transform (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:726:19)\n","name":"C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-fall.spec.ts","startTime":1792315807252,"status":"failed","summary":""}],"wasInterrupted":false}
+{
+  "numFailedTestSuites": 1,
+  "numFailedTests": 0,
+  "numPassedTestSuites": 0,
+  "numPassedTests": 0,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 1,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 1,
+  "numTotalTests": 0,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1792315787053,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [],
+      "coverage": {},
+      "endTime": 1792315807252,
+      "message": "  ● Test suite failed to run\n\n    jest: failed to cache transform results in: C:/Users/ADMIN/AppData/Local/Packages/sandbox.{e982e4b8-cf0a-4992-a542-5b82ee222f77}/AC/Temp/jest/jest-transform-cache-68340d2143a17365338e6732f32f9a50-79ef2876fae7ca75eedb2aa53dc48338/5c/qafallspec_5c2326d9892f4965fe0ed99323faa293.map\n    Failure message: EPERM: operation not permitted, rename 'C:\\Users\\ADMIN\\AppData\\Local\\Packages\\sandbox.{e982e4b8-cf0a-4992-a542-5b82ee222f77}\\AC\\Temp\\jest\\jest-transform-cache-68340d2143a17365338e6732f32f9a50-79ef2876fae7ca75eedb2aa53dc48338\\5c\\qafallspec_5c2326d9892f4965fe0ed99323faa293.map.1145488947' -> 'C:\\Users\\ADMIN\\AppData\\Local\\Packages\\sandbox.{e982e4b8-cf0a-4992-a542-5b82ee222f77}\\AC\\Temp\\jest\\jest-transform-cache-68340d2143a17365338e6732f32f9a50-79ef2876fae7ca75eedb2aa53dc48338\\5c\\qafallspec_5c2326d9892f4965fe0ed99323faa293.map'\n\n      at writeFileSync (../../node_modules/.pnpm/write-file-atomic@4.0.2/node_modules/write-file-atomic/lib/index.js:252:8)\n      at writeCacheFile (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:908:33)\n      at ScriptTransformer._buildTransformResult (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:510:7)\n      at ScriptTransformer.transformSource (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:554:17)\n      at ScriptTransformer._transformAndBuildScript (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:674:40)\n      at ScriptTransformer.transform (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:726:19)\n",
+      "name": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-fall.spec.ts",
+      "startTime": 1792315807252,
+      "status": "failed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}

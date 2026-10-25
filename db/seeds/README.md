@@ -43,10 +43,10 @@ Mật khẩu trên chỉ dùng để demo local và được lưu trong database
 
 File `0003_us20_test_users.sql` bổ sung hai tài khoản riêng:
 
-| Email | Quyền | Mật khẩu dev |
-| --- | --- | --- |
+| Email                          | Quyền       | Mật khẩu dev  |
+| ------------------------------ | ----------- | ------------- |
 | `caregiver.us20@camerai.local` | `CAREGIVER` | `Admin@12345` |
-| `viewer.us20@camerai.local` | `VIEWER` | `Admin@12345` |
+| `viewer.us20@camerai.local`    | `VIEWER`    | `Admin@12345` |
 
 Runner `pnpm seed` tự đọc file này. Chạy lại cập nhật hai tài khoản theo email,
 không tạo tài khoản trùng. Seed chưa gán camera, liên kết khuôn mặt hay Telegram.

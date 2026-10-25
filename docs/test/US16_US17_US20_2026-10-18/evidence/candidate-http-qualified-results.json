@@ -1,1 +1,244 @@
-{"numFailedTestSuites":1,"numFailedTests":5,"numPassedTestSuites":0,"numPassedTests":6,"numPendingTestSuites":0,"numPendingTests":0,"numRuntimeErrorTestSuites":0,"numTodoTests":0,"numTotalTestSuites":1,"numTotalTests":11,"openHandles":[],"snapshot":{"added":0,"didUpdate":false,"failure":false,"filesAdded":0,"filesRemoved":0,"filesRemovedList":[],"filesUnmatched":0,"filesUpdated":0,"matched":0,"total":0,"unchecked":0,"uncheckedKeysByFile":[],"unmatched":0,"updated":0},"startTime":1792316483816,"success":false,"testResults":[{"assertionResults":[{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":71,"failureDetails":[],"failureMessages":[],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 JWT guard denies an unauthenticated request","invocations":1,"location":null,"numPassingAsserts":2,"retryReasons":[],"status":"passed","title":"US20 JWT guard denies an unauthenticated request"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":64,"failureDetails":[],"failureMessages":[],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 internal guard denies a wrong token","invocations":1,"location":null,"numPassingAsserts":1,"retryReasons":[],"status":"passed","title":"US20 internal guard denies a wrong token"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":72,"failureDetails":[{"matcherResult":{"message":"expect(received).toMatchObject(expected)\n\n- Expected  -  4\n+ Received  + 28\n\n  Object {\n-   \"checkAt\": \"09:00\",\n-   \"isEnabled\": false,\n-   \"lookbackHours\": 6,\n-   \"residentUserId\": \"9188c0fc-d855-4415-a954-00a04c0c3524\",\n+   \"activation_started_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"camera_ids\": Array [\n+     \"2d220163-4a47-471b-af1b-815803e080ac\",\n+   ],\n+   \"check_at\": \"09:00:00\",\n+   \"created_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"days_of_week\": Array [\n+     1,\n+     2,\n+     3,\n+     4,\n+     5,\n+     6,\n+     7,\n+   ],\n+   \"deleted_at\": null,\n+   \"grace_seconds\": 300,\n+   \"id\": \"eb4fdb5b-190c-483b-897f-2acb690be943\",\n+   \"is_enabled\": false,\n+   \"last_checked_at\": null,\n+   \"last_materialized_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"lookback_hours\": 6,\n+   \"name\": \"QA schedule\",\n+   \"owner_user_id\": \"228b22d9-3a2f-40cf-821d-af2b7dc95706\",\n+   \"resident_user_id\": \"9188c0fc-d855-4415-a954-00a04c0c3524\",\n+   \"timezone\": \"Asia/Ho_Chi_Minh\",\n+   \"updated_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"version\": 1,\n  }","pass":false}}],"failureMessages":["Error: expect(received).toMatchObject(expected)\n\n- Expected  -  4\n+ Received  + 28\n\n  Object {\n-   \"checkAt\": \"09:00\",\n-   \"isEnabled\": false,\n-   \"lookbackHours\": 6,\n-   \"residentUserId\": \"9188c0fc-d855-4415-a954-00a04c0c3524\",\n+   \"activation_started_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"camera_ids\": Array [\n+     \"2d220163-4a47-471b-af1b-815803e080ac\",\n+   ],\n+   \"check_at\": \"09:00:00\",\n+   \"created_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"days_of_week\": Array [\n+     1,\n+     2,\n+     3,\n+     4,\n+     5,\n+     6,\n+     7,\n+   ],\n+   \"deleted_at\": null,\n+   \"grace_seconds\": 300,\n+   \"id\": \"eb4fdb5b-190c-483b-897f-2acb690be943\",\n+   \"is_enabled\": false,\n+   \"last_checked_at\": null,\n+   \"last_materialized_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"lookback_hours\": 6,\n+   \"name\": \"QA schedule\",\n+   \"owner_user_id\": \"228b22d9-3a2f-40cf-821d-af2b7dc95706\",\n+   \"resident_user_id\": \"9188c0fc-d855-4415-a954-00a04c0c3524\",\n+   \"timezone\": \"Asia/Ho_Chi_Minh\",\n+   \"updated_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"version\": 1,\n  }\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:126:35)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 create response follows frozen camelCase contract","invocations":1,"location":null,"numPassingAsserts":1,"retryReasons":[],"status":"failed","title":"US20 create response follows frozen camelCase contract"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":13,"failureDetails":[],"failureMessages":[],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"lookbackHours\":0}","invocations":1,"location":null,"numPassingAsserts":1,"retryReasons":[],"status":"passed","title":"US20 rejects out-of-range {\"lookbackHours\":0}"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":9,"failureDetails":[],"failureMessages":[],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"lookbackHours\":25}","invocations":1,"location":null,"numPassingAsserts":1,"retryReasons":[],"status":"passed","title":"US20 rejects out-of-range {\"lookbackHours\":25}"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":10,"failureDetails":[],"failureMessages":[],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"graceSeconds\":59}","invocations":1,"location":null,"numPassingAsserts":1,"retryReasons":[],"status":"passed","title":"US20 rejects out-of-range {\"graceSeconds\":59}"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":11,"failureDetails":[],"failureMessages":[],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"graceSeconds\":3601}","invocations":1,"location":null,"numPassingAsserts":1,"retryReasons":[],"status":"passed","title":"US20 rejects out-of-range {\"graceSeconds\":3601}"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":29,"failureDetails":[{"matcherResult":{"actual":201,"expected":400,"message":"expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 201","name":"toBe","pass":false}}],"failureMessages":["Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 201\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:160:7)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects an unknown IANA timezone","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 rejects an unknown IANA timezone"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":30,"failureDetails":[{"matcherResult":{"actual":201,"expected":400,"message":"expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 201","name":"toBe","pass":false}}],"failureMessages":["Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 201\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:172:7)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects an empty daysOfWeek array","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 rejects an empty daysOfWeek array"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":33,"failureDetails":[{"matcherResult":{"actual":201,"expected":400,"message":"expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 201","name":"toBe","pass":false}}],"failureMessages":["Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 201\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:190:7)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects DEPARTURE without direction/identity evidence","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 rejects DEPARTURE without direction/identity evidence"},{"ancestorTitles":["QA local HTTP runtime: production Wellness/Auth/Database modules"],"duration":33,"failureDetails":[{"matcherResult":{"actual":201,"expected":202,"message":"expect(received).toBe(expected) // Object.is equality\n\nExpected: 202\nReceived: 201","name":"toBe","pass":false}}],"failureMessages":["Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 202\nReceived: 201\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:210:7)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"],"fullName":"QA local HTTP runtime: production Wellness/Auth/Database modules US20 accepted observation uses HTTP 202 from frozen contract","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 accepted observation uses HTTP 202 from frozen contract"}],"endTime":1792316507173,"message":"  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 create response follows frozen camelCase contract\n\n    expect(received).toMatchObject(expected)\n\n    - Expected  -  4\n    + Received  + 28\n\n      Object {\n    -   \"checkAt\": \"09:00\",\n    -   \"isEnabled\": false,\n    -   \"lookbackHours\": 6,\n    -   \"residentUserId\": \"9188c0fc-d855-4415-a954-00a04c0c3524\",\n    +   \"activation_started_at\": \"2026-10-18T09:41:46.726Z\",\n    +   \"camera_ids\": Array [\n    +     \"2d220163-4a47-471b-af1b-815803e080ac\",\n    +   ],\n    +   \"check_at\": \"09:00:00\",\n    +   \"created_at\": \"2026-10-18T09:41:46.726Z\",\n    +   \"days_of_week\": Array [\n    +     1,\n    +     2,\n    +     3,\n    +     4,\n    +     5,\n    +     6,\n    +     7,\n    +   ],\n    +   \"deleted_at\": null,\n    +   \"grace_seconds\": 300,\n    +   \"id\": \"eb4fdb5b-190c-483b-897f-2acb690be943\",\n    +   \"is_enabled\": false,\n    +   \"last_checked_at\": null,\n    +   \"last_materialized_at\": \"2026-10-18T09:41:46.726Z\",\n    +   \"lookback_hours\": 6,\n    +   \"name\": \"QA schedule\",\n    +   \"owner_user_id\": \"228b22d9-3a2f-40cf-821d-af2b7dc95706\",\n    +   \"resident_user_id\": \"9188c0fc-d855-4415-a954-00a04c0c3524\",\n    +   \"timezone\": \"Asia/Ho_Chi_Minh\",\n    +   \"updated_at\": \"2026-10-18T09:41:46.726Z\",\n    +   \"version\": 1,\n      }\n\n      124 |     });\n      125 |     expect(response.status).toBe(201);\n    > 126 |     expect(await response.json()).toMatchObject({\n          |                                   ^\n      127 |       residentUserId: resident,\n      128 |       checkAt: '09:00',\n      129 |       lookbackHours: 6,\n\n      at Object.<anonymous> (test/qa-system.spec.ts:126:35)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects an unknown IANA timezone\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 400\n    Received: 201\n\n      158 |         )\n      159 |       ).status,\n    > 160 |     ).toBe(400);\n          |       ^\n      161 |   });\n      162 |   it('US20 rejects an empty daysOfWeek array', async () => {\n      163 |     expect(\n\n      at Object.<anonymous> (test/qa-system.spec.ts:160:7)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects an empty daysOfWeek array\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 400\n    Received: 201\n\n      170 |         )\n      171 |       ).status,\n    > 172 |     ).toBe(400);\n          |       ^\n      173 |   });\n      174 |   it('US20 rejects DEPARTURE without direction/identity evidence', async () => {\n      175 |     const observation = {\n\n      at Object.<anonymous> (test/qa-system.spec.ts:172:7)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects DEPARTURE without direction/identity evidence\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 400\n    Received: 201\n\n      188 |         })\n      189 |       ).status,\n    > 190 |     ).toBe(400);\n          |       ^\n      191 |   });\n      192 |   it('US20 accepted observation uses HTTP 202 from frozen contract', async () => {\n      193 |     const observation = {\n\n      at Object.<anonymous> (test/qa-system.spec.ts:190:7)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 accepted observation uses HTTP 202 from frozen contract\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 202\n    Received: 201\n\n      208 |         })\n      209 |       ).status,\n    > 210 |     ).toBe(202);\n          |       ^\n      211 |   });\n      212 | });\n      213 |\n\n      at Object.<anonymous> (test/qa-system.spec.ts:210:7)\n","name":"C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts","startTime":1792316484225,"status":"failed","summary":""}],"wasInterrupted":false}
+{
+  "numFailedTestSuites": 1,
+  "numFailedTests": 5,
+  "numPassedTestSuites": 0,
+  "numPassedTests": 6,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 1,
+  "numTotalTests": 11,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1792316483816,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 71,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 JWT guard denies an unauthenticated request",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 2,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "US20 JWT guard denies an unauthenticated request"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 64,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 internal guard denies a wrong token",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "US20 internal guard denies a wrong token"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 72,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "message": "expect(received).toMatchObject(expected)\n\n- Expected  -  4\n+ Received  + 28\n\n  Object {\n-   \"checkAt\": \"09:00\",\n-   \"isEnabled\": false,\n-   \"lookbackHours\": 6,\n-   \"residentUserId\": \"9188c0fc-d855-4415-a954-00a04c0c3524\",\n+   \"activation_started_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"camera_ids\": Array [\n+     \"2d220163-4a47-471b-af1b-815803e080ac\",\n+   ],\n+   \"check_at\": \"09:00:00\",\n+   \"created_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"days_of_week\": Array [\n+     1,\n+     2,\n+     3,\n+     4,\n+     5,\n+     6,\n+     7,\n+   ],\n+   \"deleted_at\": null,\n+   \"grace_seconds\": 300,\n+   \"id\": \"eb4fdb5b-190c-483b-897f-2acb690be943\",\n+   \"is_enabled\": false,\n+   \"last_checked_at\": null,\n+   \"last_materialized_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"lookback_hours\": 6,\n+   \"name\": \"QA schedule\",\n+   \"owner_user_id\": \"228b22d9-3a2f-40cf-821d-af2b7dc95706\",\n+   \"resident_user_id\": \"9188c0fc-d855-4415-a954-00a04c0c3524\",\n+   \"timezone\": \"Asia/Ho_Chi_Minh\",\n+   \"updated_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"version\": 1,\n  }",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toMatchObject(expected)\n\n- Expected  -  4\n+ Received  + 28\n\n  Object {\n-   \"checkAt\": \"09:00\",\n-   \"isEnabled\": false,\n-   \"lookbackHours\": 6,\n-   \"residentUserId\": \"9188c0fc-d855-4415-a954-00a04c0c3524\",\n+   \"activation_started_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"camera_ids\": Array [\n+     \"2d220163-4a47-471b-af1b-815803e080ac\",\n+   ],\n+   \"check_at\": \"09:00:00\",\n+   \"created_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"days_of_week\": Array [\n+     1,\n+     2,\n+     3,\n+     4,\n+     5,\n+     6,\n+     7,\n+   ],\n+   \"deleted_at\": null,\n+   \"grace_seconds\": 300,\n+   \"id\": \"eb4fdb5b-190c-483b-897f-2acb690be943\",\n+   \"is_enabled\": false,\n+   \"last_checked_at\": null,\n+   \"last_materialized_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"lookback_hours\": 6,\n+   \"name\": \"QA schedule\",\n+   \"owner_user_id\": \"228b22d9-3a2f-40cf-821d-af2b7dc95706\",\n+   \"resident_user_id\": \"9188c0fc-d855-4415-a954-00a04c0c3524\",\n+   \"timezone\": \"Asia/Ho_Chi_Minh\",\n+   \"updated_at\": \"2026-10-18T09:41:46.726Z\",\n+   \"version\": 1,\n  }\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:126:35)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 create response follows frozen camelCase contract",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 create response follows frozen camelCase contract"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 13,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"lookbackHours\":0}",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "US20 rejects out-of-range {\"lookbackHours\":0}"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 9,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"lookbackHours\":25}",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "US20 rejects out-of-range {\"lookbackHours\":25}"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 10,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"graceSeconds\":59}",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "US20 rejects out-of-range {\"graceSeconds\":59}"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 11,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"graceSeconds\":3601}",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "US20 rejects out-of-range {\"graceSeconds\":3601}"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 29,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 201,
+                "expected": 400,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 201",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 201\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:160:7)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects an unknown IANA timezone",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects an unknown IANA timezone"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 30,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 201,
+                "expected": 400,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 201",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 201\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:172:7)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects an empty daysOfWeek array",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects an empty daysOfWeek array"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 33,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 201,
+                "expected": 400,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 201",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 201\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:190:7)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects DEPARTURE without direction/identity evidence",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects DEPARTURE without direction/identity evidence"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 33,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 201,
+                "expected": 202,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 202\nReceived: 201",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 202\nReceived: 201\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:210:7)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 accepted observation uses HTTP 202 from frozen contract",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 accepted observation uses HTTP 202 from frozen contract"
+        }
+      ],
+      "endTime": 1792316507173,
+      "message": "  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 create response follows frozen camelCase contract\n\n    expect(received).toMatchObject(expected)\n\n    - Expected  -  4\n    + Received  + 28\n\n      Object {\n    -   \"checkAt\": \"09:00\",\n    -   \"isEnabled\": false,\n    -   \"lookbackHours\": 6,\n    -   \"residentUserId\": \"9188c0fc-d855-4415-a954-00a04c0c3524\",\n    +   \"activation_started_at\": \"2026-10-18T09:41:46.726Z\",\n    +   \"camera_ids\": Array [\n    +     \"2d220163-4a47-471b-af1b-815803e080ac\",\n    +   ],\n    +   \"check_at\": \"09:00:00\",\n    +   \"created_at\": \"2026-10-18T09:41:46.726Z\",\n    +   \"days_of_week\": Array [\n    +     1,\n    +     2,\n    +     3,\n    +     4,\n    +     5,\n    +     6,\n    +     7,\n    +   ],\n    +   \"deleted_at\": null,\n    +   \"grace_seconds\": 300,\n    +   \"id\": \"eb4fdb5b-190c-483b-897f-2acb690be943\",\n    +   \"is_enabled\": false,\n    +   \"last_checked_at\": null,\n    +   \"last_materialized_at\": \"2026-10-18T09:41:46.726Z\",\n    +   \"lookback_hours\": 6,\n    +   \"name\": \"QA schedule\",\n    +   \"owner_user_id\": \"228b22d9-3a2f-40cf-821d-af2b7dc95706\",\n    +   \"resident_user_id\": \"9188c0fc-d855-4415-a954-00a04c0c3524\",\n    +   \"timezone\": \"Asia/Ho_Chi_Minh\",\n    +   \"updated_at\": \"2026-10-18T09:41:46.726Z\",\n    +   \"version\": 1,\n      }\n\n      124 |     });\n      125 |     expect(response.status).toBe(201);\n    > 126 |     expect(await response.json()).toMatchObject({\n          |                                   ^\n      127 |       residentUserId: resident,\n      128 |       checkAt: '09:00',\n      129 |       lookbackHours: 6,\n\n      at Object.<anonymous> (test/qa-system.spec.ts:126:35)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects an unknown IANA timezone\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 400\n    Received: 201\n\n      158 |         )\n      159 |       ).status,\n    > 160 |     ).toBe(400);\n          |       ^\n      161 |   });\n      162 |   it('US20 rejects an empty daysOfWeek array', async () => {\n      163 |     expect(\n\n      at Object.<anonymous> (test/qa-system.spec.ts:160:7)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects an empty daysOfWeek array\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 400\n    Received: 201\n\n      170 |         )\n      171 |       ).status,\n    > 172 |     ).toBe(400);\n          |       ^\n      173 |   });\n      174 |   it('US20 rejects DEPARTURE without direction/identity evidence', async () => {\n      175 |     const observation = {\n\n      at Object.<anonymous> (test/qa-system.spec.ts:172:7)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects DEPARTURE without direction/identity evidence\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 400\n    Received: 201\n\n      188 |         })\n      189 |       ).status,\n    > 190 |     ).toBe(400);\n          |       ^\n      191 |   });\n      192 |   it('US20 accepted observation uses HTTP 202 from frozen contract', async () => {\n      193 |     const observation = {\n\n      at Object.<anonymous> (test/qa-system.spec.ts:190:7)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 accepted observation uses HTTP 202 from frozen contract\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 202\n    Received: 201\n\n      208 |         })\n      209 |       ).status,\n    > 210 |     ).toBe(202);\n          |       ^\n      211 |   });\n      212 | });\n      213 |\n\n      at Object.<anonymous> (test/qa-system.spec.ts:210:7)\n",
+      "name": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts",
+      "startTime": 1792316484225,
+      "status": "failed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}

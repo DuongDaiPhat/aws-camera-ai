@@ -1,1 +1,247 @@
-{"numFailedTestSuites":1,"numFailedTests":7,"numPassedTestSuites":0,"numPassedTests":0,"numPendingTestSuites":0,"numPendingTests":0,"numRuntimeErrorTestSuites":0,"numTodoTests":0,"numTotalTestSuites":1,"numTotalTests":7,"openHandles":[],"snapshot":{"added":0,"didUpdate":false,"failure":false,"filesAdded":0,"filesRemoved":0,"filesRemovedList":[],"filesUnmatched":0,"filesUpdated":0,"matched":0,"total":0,"unchecked":0,"uncheckedKeysByFile":[],"unmatched":0,"updated":0},"startTime":1792316338366,"success":false,"testResults":[{"assertionResults":[{"ancestorTitles":["QA PostgreSQL16 production repositories"],"duration":23,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (6ec915ca-48f2-4b87-9b18-69fa5a2f7ed8, b140e9f6-5ed6-48cc-b46b-a6190df93b63, QA, qa-6ec915ca-48f2-4b87-9b18-69fa5a2f7ed8, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:13.554194+00, 2026-10-18 09:39:13.554194+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:35:3)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:88:15)"],"fullName":"QA PostgreSQL16 production repositories US17 persists independent FALL P1 incident and sequential replay deduplicates","invocations":1,"location":null,"numPassingAsserts":3,"retryReasons":[],"status":"failed","title":"US17 persists independent FALL P1 incident and sequential replay deduplicates"},{"ancestorTitles":["QA PostgreSQL16 production repositories"],"duration":32,"failureDetails":[{"length":446,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (dc653373-f0cd-4491-95ce-2338ee39b5ed, ffd68997-1b27-42cb-93dc-4ddb9dca978d, QA, qa-dc653373-f0cd-4491-95ce-2338ee39b5ed, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:13.60568+00, 2026-10-18 09:39:13.60568+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:35:3)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:117:15)"],"fullName":"QA PostgreSQL16 production repositories US17 concurrent same-episode deliveries both succeed idempotently","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US17 concurrent same-episode deliveries both succeed idempotently"},{"ancestorTitles":["QA PostgreSQL16 production repositories"],"duration":30,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (de37e45a-d2e1-43a3-8033-d3675890518a, 6f90a09e-14e7-4f8b-a0ae-a4021f0492cb, QA, qa-de37e45a-d2e1-43a3-8033-d3675890518a, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:13.636448+00, 2026-10-18 09:39:13.636448+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:35:3)\n    at scheduleFixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:42:13)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:147:15)"],"fullName":"QA PostgreSQL16 production repositories US20 schedule CRUD preserves history through soft-delete","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 schedule CRUD preserves history through soft-delete"},{"ancestorTitles":["QA PostgreSQL16 production repositories"],"duration":31,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (d6cf4438-62b1-45d5-b8a3-43723467d648, ee6e3e25-3af7-4a3c-9676-026ad6d93780, QA, qa-d6cf4438-62b1-45d5-b8a3-43723467d648, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:13.668251+00, 2026-10-18 09:39:13.668251+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:35:3)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:164:15)"],"fullName":"QA PostgreSQL16 production repositories US20 a VIEWER without an active household link cannot be assigned by another caregiver","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 a VIEWER without an active household link cannot be assigned by another caregiver"},{"ancestorTitles":["QA PostgreSQL16 production repositories"],"duration":30,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (90cd0a05-399b-43c1-9969-5c8b8cbf0b98, 613c890c-1a60-444b-ad4d-7f2c30881821, QA, qa-90cd0a05-399b-43c1-9969-5c8b8cbf0b98, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:13.699003+00, 2026-10-18 09:39:13.699003+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:35:3)\n    at scheduleFixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:42:13)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:168:15)"],"fullName":"QA PostgreSQL16 production repositories US20 claim and no-activity evaluation create atomic P2 resident alert","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 claim and no-activity evaluation create atomic P2 resident alert"},{"ancestorTitles":["QA PostgreSQL16 production repositories"],"duration":29,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (1edbcf8a-d74f-4676-8d29-0108b13f42f0, 9b5b2094-d775-4a24-b163-69a7b97bbc4f, QA, qa-1edbcf8a-d74f-4676-8d29-0108b13f42f0, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:13.729948+00, 2026-10-18 09:39:13.729948+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:35:3)\n    at scheduleFixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:42:13)\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:196:17"],"fullName":"QA PostgreSQL16 production repositories US20 IM_OK confirmation commits against real schema","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 IM_OK confirmation commits against real schema"},{"ancestorTitles":["QA PostgreSQL16 production repositories"],"duration":31,"failureDetails":[{"length":448,"name":"error","severity":"ERROR","code":"23514","detail":"Failing row contains (d476e863-e50f-469a-be2d-9a0604118ca5, e6a057a2-e517-408f-9bb6-9cd8c86206b3, QA, qa-d476e863-e50f-469a-be2d-9a0604118ca5, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:13.761229+00, 2026-10-18 09:39:13.761229+00).","schema":"public","table":"cameras","constraint":"cameras_slug_format","file":"execMain.c","line":"2109","routine":"ExecConstraints"}],"failureMessages":["error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:35:3)\n    at scheduleFixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:42:13)\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:196:17"],"fullName":"QA PostgreSQL16 production repositories US20 NEED_HELP confirmation commits against real schema","invocations":1,"location":null,"numPassingAsserts":0,"retryReasons":[],"status":"failed","title":"US20 NEED_HELP confirmation commits against real schema"}],"endTime":1792316353789,"message":"  ● QA PostgreSQL16 production repositories › US17 persists independent FALL P1 incident and sequential replay deduplicates\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      33 |     [device, owner],\n      34 |   );\n    > 35 |   await pool.query(\n         |   ^\n      36 |     `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      37 |     [camera, device, `qa-${camera}`],\n      38 |   );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:35:3)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:88:15)\n\n  ● QA PostgreSQL16 production repositories › US17 concurrent same-episode deliveries both succeed idempotently\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      33 |     [device, owner],\n      34 |   );\n    > 35 |   await pool.query(\n         |   ^\n      36 |     `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      37 |     [camera, device, `qa-${camera}`],\n      38 |   );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:35:3)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:117:15)\n\n  ● QA PostgreSQL16 production repositories › US20 schedule CRUD preserves history through soft-delete\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      33 |     [device, owner],\n      34 |   );\n    > 35 |   await pool.query(\n         |   ^\n      36 |     `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      37 |     [camera, device, `qa-${camera}`],\n      38 |   );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:35:3)\n      at scheduleFixture (test/qa-db.integration.spec.ts:42:13)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:147:15)\n\n  ● QA PostgreSQL16 production repositories › US20 a VIEWER without an active household link cannot be assigned by another caregiver\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      33 |     [device, owner],\n      34 |   );\n    > 35 |   await pool.query(\n         |   ^\n      36 |     `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      37 |     [camera, device, `qa-${camera}`],\n      38 |   );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:35:3)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:164:15)\n\n  ● QA PostgreSQL16 production repositories › US20 claim and no-activity evaluation create atomic P2 resident alert\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      33 |     [device, owner],\n      34 |   );\n    > 35 |   await pool.query(\n         |   ^\n      36 |     `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      37 |     [camera, device, `qa-${camera}`],\n      38 |   );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:35:3)\n      at scheduleFixture (test/qa-db.integration.spec.ts:42:13)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:168:15)\n\n  ● QA PostgreSQL16 production repositories › US20 IM_OK confirmation commits against real schema\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      33 |     [device, owner],\n      34 |   );\n    > 35 |   await pool.query(\n         |   ^\n      36 |     `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      37 |     [camera, device, `qa-${camera}`],\n      38 |   );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:35:3)\n      at scheduleFixture (test/qa-db.integration.spec.ts:42:13)\n      at test/qa-db.integration.spec.ts:196:17\n\n  ● QA PostgreSQL16 production repositories › US20 NEED_HELP confirmation commits against real schema\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      33 |     [device, owner],\n      34 |   );\n    > 35 |   await pool.query(\n         |   ^\n      36 |     `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      37 |     [camera, device, `qa-${camera}`],\n      38 |   );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:35:3)\n      at scheduleFixture (test/qa-db.integration.spec.ts:42:13)\n      at test/qa-db.integration.spec.ts:196:17\n","name":"C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts","startTime":1792316338826,"status":"failed","summary":""}],"wasInterrupted":false}
+{
+  "numFailedTestSuites": 1,
+  "numFailedTests": 7,
+  "numPassedTestSuites": 0,
+  "numPassedTests": 0,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 1,
+  "numTotalTests": 7,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1792316338366,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 23,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (6ec915ca-48f2-4b87-9b18-69fa5a2f7ed8, b140e9f6-5ed6-48cc-b46b-a6190df93b63, QA, qa-6ec915ca-48f2-4b87-9b18-69fa5a2f7ed8, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:13.554194+00, 2026-10-18 09:39:13.554194+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:35:3)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:88:15)"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US17 persists independent FALL P1 incident and sequential replay deduplicates",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 3,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US17 persists independent FALL P1 incident and sequential replay deduplicates"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 32,
+          "failureDetails": [
+            {
+              "length": 446,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (dc653373-f0cd-4491-95ce-2338ee39b5ed, ffd68997-1b27-42cb-93dc-4ddb9dca978d, QA, qa-dc653373-f0cd-4491-95ce-2338ee39b5ed, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:13.60568+00, 2026-10-18 09:39:13.60568+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:35:3)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:117:15)"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US17 concurrent same-episode deliveries both succeed idempotently",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US17 concurrent same-episode deliveries both succeed idempotently"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 30,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (de37e45a-d2e1-43a3-8033-d3675890518a, 6f90a09e-14e7-4f8b-a0ae-a4021f0492cb, QA, qa-de37e45a-d2e1-43a3-8033-d3675890518a, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:13.636448+00, 2026-10-18 09:39:13.636448+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:35:3)\n    at scheduleFixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:42:13)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:147:15)"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US20 schedule CRUD preserves history through soft-delete",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 schedule CRUD preserves history through soft-delete"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 31,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (d6cf4438-62b1-45d5-b8a3-43723467d648, ee6e3e25-3af7-4a3c-9676-026ad6d93780, QA, qa-d6cf4438-62b1-45d5-b8a3-43723467d648, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:13.668251+00, 2026-10-18 09:39:13.668251+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:35:3)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:164:15)"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US20 a VIEWER without an active household link cannot be assigned by another caregiver",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 a VIEWER without an active household link cannot be assigned by another caregiver"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 30,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (90cd0a05-399b-43c1-9969-5c8b8cbf0b98, 613c890c-1a60-444b-ad4d-7f2c30881821, QA, qa-90cd0a05-399b-43c1-9969-5c8b8cbf0b98, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:13.699003+00, 2026-10-18 09:39:13.699003+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:35:3)\n    at scheduleFixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:42:13)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:168:15)"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US20 claim and no-activity evaluation create atomic P2 resident alert",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 claim and no-activity evaluation create atomic P2 resident alert"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 29,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (1edbcf8a-d74f-4676-8d29-0108b13f42f0, 9b5b2094-d775-4a24-b163-69a7b97bbc4f, QA, qa-1edbcf8a-d74f-4676-8d29-0108b13f42f0, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:13.729948+00, 2026-10-18 09:39:13.729948+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:35:3)\n    at scheduleFixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:42:13)\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:196:17"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US20 IM_OK confirmation commits against real schema",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 IM_OK confirmation commits against real schema"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 31,
+          "failureDetails": [
+            {
+              "length": 448,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (d476e863-e50f-469a-be2d-9a0604118ca5, e6a057a2-e517-408f-9bb6-9cd8c86206b3, QA, qa-d476e863-e50f-469a-be2d-9a0604118ca5, rtsp://127.0.0.1/qa, 1280, 720, 5, Asia/Ho_Chi_Minh, t, t, 7, 2026-10-18 09:39:13.761229+00, 2026-10-18 09:39:13.761229+00).",
+              "schema": "public",
+              "table": "cameras",
+              "constraint": "cameras_slug_format",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:35:3)\n    at scheduleFixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:42:13)\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:196:17"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US20 NEED_HELP confirmation commits against real schema",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 NEED_HELP confirmation commits against real schema"
+        }
+      ],
+      "endTime": 1792316353789,
+      "message": "  ● QA PostgreSQL16 production repositories › US17 persists independent FALL P1 incident and sequential replay deduplicates\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      33 |     [device, owner],\n      34 |   );\n    > 35 |   await pool.query(\n         |   ^\n      36 |     `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      37 |     [camera, device, `qa-${camera}`],\n      38 |   );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:35:3)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:88:15)\n\n  ● QA PostgreSQL16 production repositories › US17 concurrent same-episode deliveries both succeed idempotently\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      33 |     [device, owner],\n      34 |   );\n    > 35 |   await pool.query(\n         |   ^\n      36 |     `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      37 |     [camera, device, `qa-${camera}`],\n      38 |   );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:35:3)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:117:15)\n\n  ● QA PostgreSQL16 production repositories › US20 schedule CRUD preserves history through soft-delete\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      33 |     [device, owner],\n      34 |   );\n    > 35 |   await pool.query(\n         |   ^\n      36 |     `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      37 |     [camera, device, `qa-${camera}`],\n      38 |   );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:35:3)\n      at scheduleFixture (test/qa-db.integration.spec.ts:42:13)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:147:15)\n\n  ● QA PostgreSQL16 production repositories › US20 a VIEWER without an active household link cannot be assigned by another caregiver\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      33 |     [device, owner],\n      34 |   );\n    > 35 |   await pool.query(\n         |   ^\n      36 |     `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      37 |     [camera, device, `qa-${camera}`],\n      38 |   );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:35:3)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:164:15)\n\n  ● QA PostgreSQL16 production repositories › US20 claim and no-activity evaluation create atomic P2 resident alert\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      33 |     [device, owner],\n      34 |   );\n    > 35 |   await pool.query(\n         |   ^\n      36 |     `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      37 |     [camera, device, `qa-${camera}`],\n      38 |   );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:35:3)\n      at scheduleFixture (test/qa-db.integration.spec.ts:42:13)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:168:15)\n\n  ● QA PostgreSQL16 production repositories › US20 IM_OK confirmation commits against real schema\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      33 |     [device, owner],\n      34 |   );\n    > 35 |   await pool.query(\n         |   ^\n      36 |     `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      37 |     [camera, device, `qa-${camera}`],\n      38 |   );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:35:3)\n      at scheduleFixture (test/qa-db.integration.spec.ts:42:13)\n      at test/qa-db.integration.spec.ts:196:17\n\n  ● QA PostgreSQL16 production repositories › US20 NEED_HELP confirmation commits against real schema\n\n    error: new row for relation \"cameras\" violates check constraint \"cameras_slug_format\"\n\n      33 |     [device, owner],\n      34 |   );\n    > 35 |   await pool.query(\n         |   ^\n      36 |     `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,\n      37 |     [camera, device, `qa-${camera}`],\n      38 |   );\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:35:3)\n      at scheduleFixture (test/qa-db.integration.spec.ts:42:13)\n      at test/qa-db.integration.spec.ts:196:17\n",
+      "name": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts",
+      "startTime": 1792316338826,
+      "status": "failed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}
