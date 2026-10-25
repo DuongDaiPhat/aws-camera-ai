@@ -14,6 +14,8 @@ export interface ListEventsFilters {
   from?: string;
   to?: string;
   isFalseAlarm?: boolean;
+  wellnessActorId?: string;
+  wellnessAdmin?: boolean;
 }
 
 /** Cac trang thai con cho nguoi dung xu ly (FR-DSH-01). */
@@ -115,6 +117,10 @@ export interface EventListItemRecord {
   zone_name: string | null;
   matched_person_name: string | null;
   thumbnail_object_key: string | null;
+  wellness_owner_user_id?: string | null;
+  wellness_resident_user_id?: string | null;
+  wellness_resident_name?: string | null;
+  wellness_check_id?: string | null;
 }
 
 /** Cot dung chung cho moi truy van tra ve EventSummary (US-06). */
@@ -132,6 +138,8 @@ const EVENT_SUMMARY_PROJECTION = `
     e.zone_id,
     COALESCE(e.zone_name, z.name) AS zone_name,
     kf.person_name AS matched_person_name,
+    e.wellness_owner_user_id, e.wellness_resident_user_id,
+    wu.full_name AS wellness_resident_name, wr.id AS wellness_check_id,
     em.object_key AS thumbnail_object_key
 `;
 
@@ -141,6 +149,8 @@ const EVENT_SUMMARY_PROJECTION = `
  */
 const EVENT_SUMMARY_SOURCE = `
   FROM events e
+  LEFT JOIN wellness_check_runs wr ON wr.event_id=e.id
+  LEFT JOIN users wu ON wu.id=e.wellness_resident_user_id
   LEFT JOIN cameras c ON c.id = e.camera_id
   LEFT JOIN zones z ON z.id = e.zone_id
   LEFT JOIN known_faces kf ON kf.id = e.matched_known_face_id
@@ -571,19 +581,26 @@ export class EventsRepository {
    * Dem so lieu tong hop cho dashboard trong cua so `since` -> hien tai (FR-DSH-01).
    * Cac truy van doc lap nen chay song song de dashboard tai nhanh.
    */
-  async getEventStats(since: Date, groupLimit: number): Promise<EventStatsRecords> {
+  async getEventStats(
+    since: Date,
+    groupLimit: number,
+    wellnessActorId?: string,
+  ): Promise<EventStatsRecords> {
     const [aggregate, byType, byPriority, cameras, latestPendingEvent] = await Promise.all([
-      this.aggregateEventStats(since),
-      this.countEventsByType(since, groupLimit),
-      this.countEventsByPriority(since, groupLimit),
+      this.aggregateEventStats(since, wellnessActorId),
+      this.countEventsByType(since, groupLimit, wellnessActorId),
+      this.countEventsByPriority(since, groupLimit, wellnessActorId),
       this.countCameraAvailability(),
-      this.findLatestPendingEvent(since),
+      this.findLatestPendingEvent(since, wellnessActorId),
     ]);
 
     return { aggregate, byType, byPriority, cameras, latestPendingEvent };
   }
 
-  private async aggregateEventStats(since: Date): Promise<EventStatsAggregateRecord> {
+  private async aggregateEventStats(
+    since: Date,
+    actor?: string,
+  ): Promise<EventStatsAggregateRecord> {
     const query = `
       SELECT COUNT(*)::int AS total_events,
              COUNT(*) FILTER (WHERE event_type = ANY($2))::int AS person_detected_count,
@@ -592,13 +609,14 @@ export class EventsRepository {
              COUNT(*) FILTER (WHERE is_false_alarm)::int AS false_alarm_count,
              MAX(detected_at) AS latest_event_at
       FROM events
-      WHERE detected_at >= $1;
+      WHERE detected_at >= $1 ${actor ? "AND (event_type <> 'WELLNESS_TIMEOUT' OR wellness_owner_user_id=$5 OR wellness_resident_user_id=$5)" : ''};
     `;
     const res = await this.pool.query<EventStatsAggregateRecord>(query, [
       since,
       PERSON_EVENT_TYPES,
       PENDING_EVENT_STATUSES,
       CLOSED_EVENT_STATUSES,
+      ...(actor ? [actor] : []),
     ]);
 
     return (
@@ -613,32 +631,45 @@ export class EventsRepository {
     );
   }
 
-  private async countEventsByType(since: Date, limit: number): Promise<EventTypeCountRecord[]> {
+  private async countEventsByType(
+    since: Date,
+    limit: number,
+    actor?: string,
+  ): Promise<EventTypeCountRecord[]> {
     const query = `
       SELECT event_type, COUNT(*)::int AS count
       FROM events
-      WHERE detected_at >= $1
+      WHERE detected_at >= $1 ${actor ? "AND (event_type <> 'WELLNESS_TIMEOUT' OR wellness_owner_user_id=$3 OR wellness_resident_user_id=$3)" : ''}
       GROUP BY event_type
       ORDER BY count DESC
       LIMIT $2;
     `;
-    const res = await this.pool.query<EventTypeCountRecord>(query, [since, limit]);
+    const res = await this.pool.query<EventTypeCountRecord>(query, [
+      since,
+      limit,
+      ...(actor ? [actor] : []),
+    ]);
     return res.rows;
   }
 
   private async countEventsByPriority(
     since: Date,
     limit: number,
+    actor?: string,
   ): Promise<EventPriorityCountRecord[]> {
     const query = `
       SELECT priority, COUNT(*)::int AS count
       FROM events
-      WHERE detected_at >= $1
+      WHERE detected_at >= $1 ${actor ? "AND (event_type <> 'WELLNESS_TIMEOUT' OR wellness_owner_user_id=$3 OR wellness_resident_user_id=$3)" : ''}
       GROUP BY priority
       ORDER BY priority ASC
       LIMIT $2;
     `;
-    const res = await this.pool.query<EventPriorityCountRecord>(query, [since, limit]);
+    const res = await this.pool.query<EventPriorityCountRecord>(query, [
+      since,
+      limit,
+      ...(actor ? [actor] : []),
+    ]);
     return res.rows;
   }
 
@@ -653,7 +684,10 @@ export class EventsRepository {
     return res.rows[0] ?? { online_count: 0, total_count: 0 };
   }
 
-  private async findLatestPendingEvent(since: Date): Promise<LatestPendingEventRecord | null> {
+  private async findLatestPendingEvent(
+    since: Date,
+    actor?: string,
+  ): Promise<LatestPendingEventRecord | null> {
     const query = `
       SELECT e.id,
              e.event_type,
@@ -664,13 +698,14 @@ export class EventsRepository {
       FROM events e
       LEFT JOIN cameras c ON c.id = e.camera_id
       LEFT JOIN zones z ON z.id = e.zone_id
-      WHERE e.detected_at >= $1 AND e.status = ANY($2)
+      WHERE e.detected_at >= $1 AND e.status = ANY($2) ${actor ? "AND (e.event_type <> 'WELLNESS_TIMEOUT' OR e.wellness_owner_user_id=$3 OR e.wellness_resident_user_id=$3)" : ''}
       ORDER BY e.priority ASC, e.detected_at DESC
       LIMIT 1;
     `;
     const res = await this.pool.query<LatestPendingEventRecord>(query, [
       since,
       PENDING_EVENT_STATUSES,
+      ...(actor ? [actor] : []),
     ]);
     return res.rows[0] ?? null;
   }
@@ -751,6 +786,13 @@ function buildEventFilterConditions(filters: ListEventsFilters): FilterCondition
     }
   }
 
+  if (filters.wellnessActorId && !filters.wellnessAdmin) {
+    conditions.push(
+      `(e.event_type <> 'WELLNESS_TIMEOUT' OR e.wellness_owner_user_id=$${idx} OR e.wellness_resident_user_id=$${idx})`,
+    );
+    params.push(filters.wellnessActorId);
+    idx++;
+  }
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
   return { whereClause, params, nextIdx: idx };
 }

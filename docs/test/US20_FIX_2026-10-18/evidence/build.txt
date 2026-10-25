@@ -1,0 +1,77 @@
+Scope: 4 of 5 workspace projects
+packages/contracts build$ tsc -p tsconfig.build.json
+packages/contracts build: Done
+apps/orchestrator build$ nest build
+apps/web build$ next build
+apps/web build:    ▲ Next.js 15.5.24
+apps/web build:    Creating an optimized production build ...
+apps/orchestrator build: Done
+apps/web build:  ✓ Compiled successfully in 15.5s
+apps/web build:    Linting and checking validity of types ...
+apps/web build:  ⚠ The Next.js plugin was not detected in your ESLint configuration. See https://nextjs.org/docs/app/api-reference/config/eslint#migrating-existing-config
+apps/web build: ./src/components/cameras/CameraGridTile.tsx
+apps/web build: 58:8  Warning: Function 'CameraGridTile' has too many lines (169). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/cameras/CameraPreview.tsx
+apps/web build: 38:8  Warning: Function 'CameraPreview' has too many lines (128). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/cameras/CameraSettingsPanel.tsx
+apps/web build: 277:8  Warning: Function 'CameraSettingsPanel' has too many lines (154). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/cameras/CameraView.tsx
+apps/web build: 160:8  Warning: Function 'CameraView' has too many lines (169). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/cameras/live/use-live-person-detections.ts
+apps/web build: 18:8  Warning: Function 'useLivePersonDetections' has too many lines (103). Maximum allowed is 60.  max-lines-per-function
+apps/web build: 32:13  Warning: Arrow function has too many lines (62). Maximum allowed is 60.  max-lines-per-function
+apps/web build: ./src/components/cameras/source/webcam-publish.ts
+apps/web build: 28:8  Warning: Async function 'publishWebcam' has too many lines (62). Maximum allowed is 60.  max-lines-per-function
+apps/web build: 28:8  Warning: Async function 'publishWebcam' has a complexity of 15. Maximum allowed is 12.  complexity
+apps/web build: ./src/components/cameras/__tests__/CameraSettingsPanel.spec.tsx
+apps/web build: 63:57  Warning: Arrow function has too many lines (140). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/dashboard/DashboardView.tsx
+apps/web build: 63:8  Warning: Function 'DashboardView' has too many lines (135). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/events/EventDetailModal.tsx
+apps/web build: 223:8  Warning: Function 'EventDetailModal' has too many lines (147). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/known-faces/AddKnownFaceForm.tsx
+apps/web build: 13:8  Warning: Function 'AddKnownFaceForm' has too many lines (149). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/known-faces/KnownFacesView.tsx
+apps/web build: 8:8  Warning: Function 'KnownFacesView' has too many lines (138). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/settings/EscalationRuleCard.spec.tsx
+apps/web build: 6:42  Warning: Arrow function has too many lines (173). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/settings/EscalationRuleCard.tsx
+apps/web build: 28:8  Warning: Function 'EscalationRuleCard' has too many lines (218). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/settings/EscalationRulesSection.tsx
+apps/web build: 12:8  Warning: Function 'EscalationRulesSection' has too many lines (123). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/settings/EscalationWaitControl.tsx
+apps/web build: 47:8  Warning: Function 'EscalationWaitControl' has too many lines (123). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/wellness/WellnessView.tsx
+apps/web build: 51:8  Warning: Function 'WellnessView' has too many lines (389). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/zones/ZoneForm.tsx
+apps/web build: 6:8  Warning: Function 'ZoneForm' has too many lines (126). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/components/zones/ZonesView.tsx
+apps/web build: 52:8  Warning: Function 'ZonesView' has too many lines (305). Maximum allowed is 120.  max-lines-per-function
+apps/web build: ./src/hooks/useEscalationRules.ts
+apps/web build: 27:8  Warning: Function 'useEscalationRules' has too many lines (144). Maximum allowed is 60.  max-lines-per-function
+apps/web build: ./src/hooks/useEvents.ts
+apps/web build: 219:8  Warning: Function 'useEvents' has too many lines (78). Maximum allowed is 60.  max-lines-per-function
+apps/web build: ./src/lib/api-client.ts
+apps/web build: 64:1  Warning: Async function 'request' has a complexity of 15. Maximum allowed is 12.  complexity
+apps/web build: ./src/lib/known-faces-client.ts
+apps/web build: 28:8  Warning: Function 'selectionDetails' has a complexity of 18. Maximum allowed is 12.  complexity
+apps/web build: info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+apps/web build:    Collecting page data ...
+apps/web build:    Generating static pages (0/5) ...
+apps/web build:    Generating static pages (1/5)
+apps/web build:    Generating static pages (2/5)
+apps/web build:    Generating static pages (3/5)
+apps/web build:  ✓ Generating static pages (5/5)
+apps/web build:    Finalizing page optimization ...
+apps/web build:    Collecting build traces ...
+apps/web build: Route (app)                                 Size  First Load JS
+apps/web build: ┌ ○ /                                    52.5 kB         155 kB
+apps/web build: ├ ○ /_not-found                            986 B         103 kB
+apps/web build: └ ○ /login                               3.11 kB         106 kB
+apps/web build: + First Load JS shared by all             102 kB
+apps/web build:   ├ chunks/663-ad8ea1cf1af8951f.js       46.2 kB
+apps/web build:   ├ chunks/9658fe01-7f4602ec73a313e7.js  54.2 kB
+apps/web build:   └ other shared chunks (total)          1.95 kB
+apps/web build: ƒ Middleware                             33.1 kB
+apps/web build: ○  (Static)  prerendered as static content
+apps/web build: Done

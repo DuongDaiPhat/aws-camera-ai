@@ -1,0 +1,379 @@
+[Nest] 28248  - 18/10/2026, 18.34.36     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-us11, eventId=060093ec-b7ff-4a21-a35c-9b00c1815767
+[Nest] 28248  - 18/10/2026, 18.34.36     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "060093ec-b7ff-4a21-a35c-9b00c1815767",
+  "trackId": "track-us11",
+  "requestId": "a7403078-e939-44c5-8e98-b2bc6c27f66c",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.36     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 28248  - 18/10/2026, 18.34.36     LOG [AiResultsService] Object:
+{
+  "correlationId": "068f2dce-3065-4af9-bae9-aefd07209167",
+  "eventId": "060093ec-b7ff-4a21-a35c-9b00c1815767",
+  "resultId": "a7403078-e939-44c5-8e98-b2bc6c27f66c",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.36     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-us11, eventId=43a9d8ce-6a6f-447e-8771-c70455bf64e9
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "43a9d8ce-6a6f-447e-8771-c70455bf64e9",
+  "trackId": "track-us11",
+  "requestId": "bdbe0a75-0fa2-4a42-8e82-13428353c018",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Object:
+{
+  "correlationId": "1797a099-5ac7-4f61-9641-a21f50e0daaf",
+  "eventId": "43a9d8ce-6a6f-447e-8771-c70455bf64e9",
+  "resultId": "bdbe0a75-0fa2-4a42-8e82-13428353c018",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Object:
+{
+  "correlationId": "fbf24212-fe44-49aa-8591-87abca672fe6",
+  "eventId": "4b76ccbf-8512-401f-932d-f2e2dd9be7ff",
+  "resultId": "1e8644e8-443d-45f6-b114-b0821d4c4d84",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Object:
+{
+  "correlationId": "f3d44d4f-fff4-4d7b-b4a0-875cabfae208",
+  "eventId": "fab5ebe5-8e94-4703-a3cc-7f1d7984ad48",
+  "resultId": "41455ff0-bc2e-4d5e-97a5-423023706a78",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "26224fed-98f4-4b18-b282-2f004fb0f0ce",
+  "eventId": "5d05222a-cc50-4114-8712-65461d083fba",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Object:
+{
+  "correlationId": "26224fed-98f4-4b18-b282-2f004fb0f0ce",
+  "eventId": "5d05222a-cc50-4114-8712-65461d083fba",
+  "resultId": "f48b59e4-39c2-5b37-8896-1a9bdac9f99a",
+  "module": "M4_ZONE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "26224fed-98f4-4b18-b282-2f004fb0f0ce",
+  "eventId": "5d05222a-cc50-4114-8712-65461d083fba",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Object:
+{
+  "correlationId": "26224fed-98f4-4b18-b282-2f004fb0f0ce",
+  "eventId": "5d05222a-cc50-4114-8712-65461d083fba",
+  "resultId": "f48b59e4-39c2-5b37-8896-1a9bdac9f99a",
+  "module": "M4_ZONE",
+  "disposition": "DUPLICATE"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "cf4126b4-4e82-44b6-8f62-d67004b60cac",
+  "eventId": "efde4ba5-751d-4f13-807a-c12117b4506d",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Object:
+{
+  "correlationId": "cf4126b4-4e82-44b6-8f62-d67004b60cac",
+  "eventId": "efde4ba5-751d-4f13-807a-c12117b4506d",
+  "resultId": "273fc513-e1d8-50c6-a3da-622a23b8750c",
+  "module": "M4_ZONE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "cf4126b4-4e82-44b6-8f62-d67004b60cac",
+  "eventId": "efde4ba5-751d-4f13-807a-c12117b4506d",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Object:
+{
+  "correlationId": "cf4126b4-4e82-44b6-8f62-d67004b60cac",
+  "eventId": "efde4ba5-751d-4f13-807a-c12117b4506d",
+  "resultId": "273fc513-e1d8-50c6-a3da-622a23b8750c",
+  "module": "M4_ZONE",
+  "disposition": "DUPLICATE"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Object:
+{
+  "correlationId": "4cae2227-1214-4b16-b6e3-ef8bbefc7dc8",
+  "eventId": "055b5825-6395-4c80-b746-6717d8ca9406",
+  "resultId": "087dae3c-8710-545d-9159-344186977d20",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Object:
+{
+  "correlationId": "89990603-32a8-4667-8371-54479e23ab21",
+  "eventId": "b6b310e3-5272-4aea-8210-0abf92e0a2ba",
+  "resultId": "83618de2-37fa-52ad-8814-c8ff6e26495f",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Object:
+{
+  "correlationId": "09023f6c-2fa4-40c6-a5f1-c83db1b0f941",
+  "eventId": "a6e3997c-2651-4725-b8b3-cb58c368b232",
+  "resultId": "e72c1d4d-8479-52f7-b534-df883c54e3ea",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Object:
+{
+  "correlationId": "a2b994b7-6286-47b4-883d-f1617afb2b64",
+  "eventId": "3f5df2c1-3244-4965-9b39-006f5e5b67bd",
+  "resultId": "0689cc10-1c67-5c24-bc85-f5f751498e76",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Object:
+{
+  "correlationId": "d37e6f34-cff0-418b-ba09-3b44bb1f217f",
+  "eventId": "aabaf35e-dd51-45e3-8286-cdb1ce4dfdb5",
+  "resultId": "baa7661f-dbf2-5f85-a56a-bf125324b436",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.37     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+PASS test/ai-results-db.integration.spec.ts (27.01 s)
+[Nest] 28248  - 18/10/2026, 18.34.46    WARN [TelegramWorkWorker] Sửa tin Telegram lỗi notificationId=2affaa17-2cbf-4277-a7b8-cb95c1a8c4c0 code=TELEGRAM_NETWORK
+[Nest] 28248  - 18/10/2026, 18.34.47    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=cad648a7-7472-4ee8-a7fd-b3dac3b5b865 correlationId=e68264e1-0e21-45b1-b70d-7397623cee0c
+[Nest] 28248  - 18/10/2026, 18.34.47    WARN [NotificationRetryWorker] Telegram delivery failed eventId=cad648a7-7472-4ee8-a7fd-b3dac3b5b865 correlationId=e68264e1-0e21-45b1-b70d-7397623cee0c attempt=1 code=TELEGRAM_503
+[Nest] 28248  - 18/10/2026, 18.34.47    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=cad648a7-7472-4ee8-a7fd-b3dac3b5b865 correlationId=e68264e1-0e21-45b1-b70d-7397623cee0c
+[Nest] 28248  - 18/10/2026, 18.34.47    WARN [NotificationRetryWorker] Telegram delivery failed eventId=cad648a7-7472-4ee8-a7fd-b3dac3b5b865 correlationId=e68264e1-0e21-45b1-b70d-7397623cee0c attempt=2 code=TELEGRAM_503
+[Nest] 28248  - 18/10/2026, 18.34.47    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=cad648a7-7472-4ee8-a7fd-b3dac3b5b865 correlationId=e68264e1-0e21-45b1-b70d-7397623cee0c
+[Nest] 28248  - 18/10/2026, 18.34.47    WARN [NotificationRetryWorker] Telegram delivery failed eventId=cad648a7-7472-4ee8-a7fd-b3dac3b5b865 correlationId=e68264e1-0e21-45b1-b70d-7397623cee0c attempt=3 code=TELEGRAM_503
+[Nest] 28248  - 18/10/2026, 18.34.47    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=cad648a7-7472-4ee8-a7fd-b3dac3b5b865 correlationId=e68264e1-0e21-45b1-b70d-7397623cee0c
+[Nest] 28248  - 18/10/2026, 18.34.47    WARN [NotificationRetryWorker] Telegram delivery failed eventId=cad648a7-7472-4ee8-a7fd-b3dac3b5b865 correlationId=e68264e1-0e21-45b1-b70d-7397623cee0c attempt=4 code=TELEGRAM_503
+[Nest] 28248  - 18/10/2026, 18.34.47    WARN [EscalationDeadlineWorkerService] Sự kiện cad648a7-7472-4ee8-a7fd-b3dac3b5b865 (UNKNOWN_PERSON, P3) đã hết thời gian chờ (trễ 1008ms). Tự động chuyển sang ESCALATED
+[Nest] 28248  - 18/10/2026, 18.34.47    WARN [EscalationDeadlineWorkerService] Sự kiện cad648a7-7472-4ee8-a7fd-b3dac3b5b865 (UNKNOWN_PERSON, P3) đã hết thời gian chờ (trễ 1006ms). Tự động chuyển sang ESCALATED
+PASS test/telegram-db.integration.spec.ts (9.031 s)
+[Nest] 28248  - 18/10/2026, 18.34.55     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32771 (clientId: us08-consumer-28a91602-5603-4294-9981-f23cdbd364d7)...
+[Nest] 28248  - 18/10/2026, 18.34.55     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events
+[Nest] 28248  - 18/10/2026, 18.34.55     LOG [MqttConsumerService] Da subscribe topic frigate/events
+[Nest] 28248  - 18/10/2026, 18.34.55     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "13335b11-e6d5-4302-bf0f-ead4c96c63f8",
+  "eventId": "db77752a-bdf1-4c0c-b5ad-7379be360c98",
+  "trackId": "us08-track-f12b8228-695b-46ab-9df6-d148fef96248",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-track-f12b8228-695b-46ab-9df6-d148fef96248"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.55     LOG [MqttConsumerService] Da ghi nhan su kien moi vao bang events
+[Nest] 28248  - 18/10/2026, 18.34.55     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "13335b11-e6d5-4302-bf0f-ead4c96c63f8",
+  "eventId": "db77752a-bdf1-4c0c-b5ad-7379be360c98",
+  "trackId": "us08-track-f12b8228-695b-46ab-9df6-d148fef96248",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-track-f12b8228-695b-46ab-9df6-d148fef96248"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.55     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32771 (clientId: us08-consumer-d57b12b8-44b0-4418-a549-fb91da89eb67)...
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Da subscribe topic frigate/events
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6670ab4b-c5b5-4717-9658-3137f41f5c92",
+  "eventId": "62527423-a65e-4cae-88fb-449015fc1136",
+  "trackId": "us08-lifecycle-1ba383ab-5329-4468-ae85-dff2fe523568",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-lifecycle-1ba383ab-5329-4468-ae85-dff2fe523568"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Da ghi nhan su kien moi vao bang events
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6670ab4b-c5b5-4717-9658-3137f41f5c92",
+  "eventId": "62527423-a65e-4cae-88fb-449015fc1136",
+  "trackId": "us08-lifecycle-1ba383ab-5329-4468-ae85-dff2fe523568",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-lifecycle-1ba383ab-5329-4468-ae85-dff2fe523568"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6670ab4b-c5b5-4717-9658-3137f41f5c92",
+  "eventId": "62527423-a65e-4cae-88fb-449015fc1136",
+  "trackId": "us08-lifecycle-1ba383ab-5329-4468-ae85-dff2fe523568",
+  "messageType": "end",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-lifecycle-1ba383ab-5329-4468-ae85-dff2fe523568"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32771 (clientId: us08-consumer-93bfa337-e72c-4dea-a571-196c86bd7c6f)...
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Da subscribe topic frigate/events
+[Nest] 28248  - 18/10/2026, 18.34.56    WARN [MqttConsumerService] Object:
+{
+  "rawContent": "{\"type\":\"new\",\"after\":",
+  "err": "Unexpected end of JSON input"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.56    WARN [MqttConsumerService] Dead-letter: Message MQTT khong phai la JSON hop le
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f83157f7-73d5-4b17-bd22-26832ec42fab",
+  "eventId": "cc010fb3-4bb7-41de-b61b-500a4b08f4c6",
+  "trackId": "us08-recovery-31f04399-bcab-4184-9c34-4bfa2f2b4d6a",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-recovery-31f04399-bcab-4184-9c34-4bfa2f2b4d6a"
+}
+
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Da ghi nhan su kien moi vao bang events
+[Nest] 28248  - 18/10/2026, 18.34.56     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+PASS test/mqtt-db.integration.spec.ts (9.662 s)
+PASS test/escalation-high-wait-db.integration.spec.ts (8.351 s)
+PASS test/camera-state.repository.integration.spec.ts (7.87 s)
+FAIL test/escalation-rules.repository.integration.spec.ts
+  ● EscalationRulesRepository Integration (US-15) › findAll trả về đúng 6 default rules theo thứ tự priority (P0 -> P3)
+
+    AggregateError:
+
+      87 |         er.event_type ASC;
+      88 |     `;
+    > 89 |     const result = await this.pool.query<EscalationRuleRecord>(query);
+         |                    ^
+      90 |     return result.rows;
+      91 |   }
+      92 |
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at EscalationRulesRepository.findAll (src/escalation-rules/escalation-rules.repository.ts:89:20)
+      at Object.<anonymous> (test/escalation-rules.repository.integration.spec.ts:28:19)
+
+  ● EscalationRulesRepository Integration (US-15) › findByEventType trả về chi tiết rule
+
+    AggregateError:
+
+      113 |       WHERE er.event_type::text = $1;
+      114 |     `;
+    > 115 |     const result = await this.pool.query<EscalationRuleRecord>(query, [eventType]);
+          |                    ^
+      116 |     return result.rows[0] ?? null;
+      117 |   }
+      118 |
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at EscalationRulesRepository.findByEventType (src/escalation-rules/escalation-rules.repository.ts:115:20)
+      at Object.<anonymous> (test/escalation-rules.repository.integration.spec.ts:44:18)
+
+  ● EscalationRulesRepository Integration (US-15) › updateThresholdsAtomic cập nhật nguyên tử, tăng version và ghi audit log
+
+    AggregateError:
+
+      113 |       WHERE er.event_type::text = $1;
+      114 |     `;
+    > 115 |     const result = await this.pool.query<EscalationRuleRecord>(query, [eventType]);
+          |                    ^
+      116 |     return result.rows[0] ?? null;
+      117 |   }
+      118 |
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at EscalationRulesRepository.findByEventType (src/escalation-rules/escalation-rules.repository.ts:115:20)
+      at Object.<anonymous> (test/escalation-rules.repository.integration.spec.ts:54:21)
+
+  ● EscalationRulesRepository Integration (US-15) › updateThresholdsAtomic ném RuleNotFoundError khi event_type không tồn tại
+
+    AggregateError:
+
+      116 |
+      117 |   it('updateThresholdsAtomic ném RuleNotFoundError khi event_type không tồn tại', async () => {
+    > 118 |     const adminUser = await pool.query<{ id: string }>(
+          |                       ^
+      119 |       `SELECT id FROM users WHERE role = 'ADMIN' LIMIT 1`,
+      120 |     );
+      121 |     const adminId = adminUser.rows[0].id;
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/escalation-rules.repository.integration.spec.ts:118:23)
+
+PASS test/wellness-db.integration.spec.ts (24.452 s)
+
+Test Suites: 1 failed, 6 passed, 7 total
+Tests:       4 failed, 80 passed, 84 total
+Snapshots:   0 total
+Time:        87.722 s
+Ran all test suites.
+Test results written to: ..\..\artifacts-integration-all-results.json

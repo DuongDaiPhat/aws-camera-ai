@@ -253,6 +253,12 @@ function SidebarNavLinks({
         />
       </div>
 
+      <NavItem
+        label="Kiểm tra sức khỏe"
+        active={activeNav === 'wellness'}
+        onClick={() => onSelectNav('wellness')}
+        icon={<EventsIcon />}
+      />
       <div className={styles.navDivider} />
 
       <NavItem

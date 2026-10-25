@@ -58,6 +58,12 @@ export type CameraPreview = components['schemas']['CameraPreview'];
 export type CameraFrigateSettings = components['schemas']['CameraFrigateSettings'];
 export type UpdateCameraRequest = components['schemas']['UpdateCameraRequest'];
 export type UpdateCameraStateRequest = components['schemas']['UpdateCameraStateRequest'];
+
+export type WellnessSchedule = components['schemas']['WellnessSchedule'];
+export type CreateWellnessScheduleRequest = components['schemas']['CreateWellnessScheduleRequest'];
+export type UpdateWellnessScheduleRequest = components['schemas']['UpdateWellnessScheduleRequest'];
+export type WellnessCheck = components['schemas']['WellnessCheck'];
+export type WellnessConfirmationRequest = components['schemas']['WellnessConfirmationRequest'];
 export type UpdateCameraSourceRequest = components['schemas']['UpdateCameraSourceRequest'];
 export type RtspConnectionTestRequest = components['schemas']['RtspConnectionTestRequest'];
 export type RtspConnectionTestResult = components['schemas']['RtspConnectionTestResult'];

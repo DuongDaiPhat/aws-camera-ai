@@ -1,3 +1,4 @@
+import { WellnessModule } from '../wellness/wellness.module';
 import { Module } from '@nestjs/common';
 import { EventsModule } from '../events/events.module';
 import { MediaModule } from '../media/media.module';
@@ -11,6 +12,7 @@ import { ZoneResultProducerService } from './zone-result-producer.service';
 @Module({
   imports: [
     EventsModule,
+    WellnessModule,
     MediaModule,
     FrigateModule,
     ZonesModule,

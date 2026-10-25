@@ -113,7 +113,7 @@ export class NotificationRetryWorker implements OnModuleInit, OnModuleDestroy {
       timezone: job.timezone,
     };
     try {
-      const photo = await this.loadSnapshot(job);
+      const photo = job.eventType === 'WELLNESS_TIMEOUT' ? null : await this.loadSnapshot(job);
       if (!(await this.repository.eventAllowsDelivery(job.eventId, job.escalationLevel))) {
         await this.repository.markSkipped(job);
         return;

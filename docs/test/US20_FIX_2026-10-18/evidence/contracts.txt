@@ -1,0 +1,13 @@
+
+> @cam/contracts@0.0.1 generate C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\us20-fixes\packages\contracts
+> openapi-typescript --redocly ../../redocly.yaml && prettier --write src/generated/*.ts
+
+ ⚠  Operation must have at least one `4XX` response. at #/paths/~1health/get/responses
+ ⚠  Component: "FaceSelectionDetails" is never used. at #/components/schemas/FaceSelectionDetails
+ ⚠  Component: "FallResultMetadata" is never used. at #/components/schemas/FallResultMetadata
+ ⚠  Component: "FireResultMetadata" is never used. at #/components/schemas/FireResultMetadata
+🚀 orchestrator → packages/contracts/src/generated/orchestrator.ts [393ms]
+ ⚠  Operation must have at least one `4XX` response. at #/paths/~1health/get/responses
+🚀 ai-service → packages/contracts/src/generated/ai-service.ts [460.1ms]
+src/generated/ai-service.ts 169ms
+src/generated/orchestrator.ts 350ms

@@ -17,6 +17,7 @@ export interface MatchFaceJob {
   cameraSlug: string;
   ownerScopeId: string;
   collectionVersion: number;
+  sourceSessionId?: string;
 }
 
 type MatchResponse = AiComponents['schemas']['MatchResponse'];
@@ -47,6 +48,7 @@ function toSubmitAiResultDto(
   eventId: string,
   trackId: string,
   result: MatchResponse,
+  sourceSessionId?: string,
 ): SubmitAiResultDto {
   const hasTechnicalError = result.error !== null;
 
@@ -72,6 +74,7 @@ function toSubmitAiResultDto(
             confidence: result.labelConfidence,
             boundingBox: result.boundingBox ?? null,
             metadata: definedMetadata({
+              sourceSessionId,
               similarity: result.similarity,
               thresholdUsed: result.thresholdUsed,
               confidencePolicyVersion: result.confidencePolicyVersion,
@@ -99,7 +102,7 @@ export class FaceRecognitionWorker extends WorkerHost {
   }
 
   async process(job: Job<MatchFaceJob, void, string>): Promise<void> {
-    const { eventId, trackId, ownerScopeId, collectionVersion } = job.data;
+    const { eventId, trackId, ownerScopeId, collectionVersion, sourceSessionId } = job.data;
 
     this.logger.log(
       `Đang xử lý job nhận diện khuôn mặt cho trackId=${trackId}, eventId=${eventId}`,
@@ -126,7 +129,7 @@ export class FaceRecognitionWorker extends WorkerHost {
         collectionVersion,
         imageBuffer,
       );
-      return await this.handleAiResult(eventId, result, trackId);
+      return await this.handleAiResult(eventId, result, trackId, sourceSessionId);
     } catch (err) {
       this.logger.error(`Lỗi gọi AI service cho event ${eventId}`, err);
       return this.handleAiResult(
@@ -197,6 +200,7 @@ export class FaceRecognitionWorker extends WorkerHost {
     eventId: string,
     response: MatchResponse,
     trackId: string,
+    sourceSessionId?: string,
   ): Promise<void> {
     const result = normalizeMatchResponse(response);
     this.logger.log(
@@ -209,6 +213,9 @@ export class FaceRecognitionWorker extends WorkerHost {
       },
       'Đã nhận kết quả M1 từ AI service',
     );
-    await this.aiResultsService.submit(eventId, toSubmitAiResultDto(eventId, trackId, result));
+    await this.aiResultsService.submit(
+      eventId,
+      toSubmitAiResultDto(eventId, trackId, result, sourceSessionId),
+    );
   }
 }

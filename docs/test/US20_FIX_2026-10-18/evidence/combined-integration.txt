@@ -1,0 +1,315 @@
+PASS test/wellness-db.integration.spec.ts (37.756 s)
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32779 (clientId: us08-consumer-d94e6a4b-ec26-4dd6-8524-e16362ba4a2c)...
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events, frigate/camerai/frames, frigate/camerai/pose/frames
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Da subscribe cac topic MQTT.
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "cea3155b-2ac4-4e38-aa88-f7fddb546829",
+  "eventId": "4240449f-f5f0-4ca8-9e34-9b2a795803aa",
+  "trackId": "us08-track-3bf5d1d8-56bf-449b-89e3-b2491342bb28",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-track-3bf5d1d8-56bf-449b-89e3-b2491342bb28"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Da ghi nhan su kien moi vao bang events
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "cea3155b-2ac4-4e38-aa88-f7fddb546829",
+  "eventId": "4240449f-f5f0-4ca8-9e34-9b2a795803aa",
+  "trackId": "us08-track-3bf5d1d8-56bf-449b-89e3-b2491342bb28",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-track-3bf5d1d8-56bf-449b-89e3-b2491342bb28"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32779 (clientId: us08-consumer-9e22ae7d-bbf6-40f1-a0f7-ecf6715ecbc3)...
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events, frigate/camerai/frames, frigate/camerai/pose/frames
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Da subscribe cac topic MQTT.
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "2a2f7561-2ca3-4f2e-ace2-afc662105ed4",
+  "eventId": "d8e912de-7fd6-42b3-b720-5903acdd7049",
+  "trackId": "us08-lifecycle-55de62c1-c18c-4b88-a9e1-da7c11612b86",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-lifecycle-55de62c1-c18c-4b88-a9e1-da7c11612b86"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Da ghi nhan su kien moi vao bang events
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "2a2f7561-2ca3-4f2e-ace2-afc662105ed4",
+  "eventId": "d8e912de-7fd6-42b3-b720-5903acdd7049",
+  "trackId": "us08-lifecycle-55de62c1-c18c-4b88-a9e1-da7c11612b86",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-lifecycle-55de62c1-c18c-4b88-a9e1-da7c11612b86"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "2a2f7561-2ca3-4f2e-ace2-afc662105ed4",
+  "eventId": "d8e912de-7fd6-42b3-b720-5903acdd7049",
+  "trackId": "us08-lifecycle-55de62c1-c18c-4b88-a9e1-da7c11612b86",
+  "messageType": "end",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-lifecycle-55de62c1-c18c-4b88-a9e1-da7c11612b86"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 7392  - 18/10/2026, 21.30.07     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+[Nest] 7392  - 18/10/2026, 21.30.08     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32779 (clientId: us08-consumer-1605f435-5bb6-46ad-a6d8-fcf467495d81)...
+[Nest] 7392  - 18/10/2026, 21.30.08     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events, frigate/camerai/frames, frigate/camerai/pose/frames
+[Nest] 7392  - 18/10/2026, 21.30.08     LOG [MqttConsumerService] Da subscribe cac topic MQTT.
+[Nest] 7392  - 18/10/2026, 21.30.08    WARN [MqttConsumerService] Object:
+{
+  "rawContent": "{\"type\":\"new\",\"after\":",
+  "err": "Unexpected end of JSON input"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.08    WARN [MqttConsumerService] Dead-letter: Message MQTT khong phai la JSON hop le
+[Nest] 7392  - 18/10/2026, 21.30.08     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "9524510a-0ae7-4295-9584-7907f55cc10b",
+  "eventId": "172d05b9-9751-41ab-aca9-6a0ec6f5d864",
+  "trackId": "us08-recovery-e1e5e039-c0e7-4fef-8882-217c8ab3b7a8",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-recovery-e1e5e039-c0e7-4fef-8882-217c8ab3b7a8"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.08     LOG [MqttConsumerService] Da ghi nhan su kien moi vao bang events
+[Nest] 7392  - 18/10/2026, 21.30.08     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+PASS test/mqtt-db.integration.spec.ts (11.531 s)
+PASS test/escalation-rules.repository.integration.spec.ts
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-us11, eventId=a30a8d48-33a5-4267-aae5-2fccf52cabed
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "a30a8d48-33a5-4267-aae5-2fccf52cabed",
+  "trackId": "track-us11",
+  "requestId": "e082d075-614d-41cc-99fc-15462fc2295b",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Object:
+{
+  "correlationId": "68b4dd4a-4882-474c-930e-6d83714220f2",
+  "eventId": "a30a8d48-33a5-4267-aae5-2fccf52cabed",
+  "resultId": "e082d075-614d-41cc-99fc-15462fc2295b",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-us11, eventId=176ff70c-5498-4466-8d89-82175eddc8de
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "176ff70c-5498-4466-8d89-82175eddc8de",
+  "trackId": "track-us11",
+  "requestId": "d04991b1-9d65-4285-8ad4-32d22c73d7cc",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Object:
+{
+  "correlationId": "1271bcf7-f48d-4be3-bb03-abe9e4ce40fb",
+  "eventId": "176ff70c-5498-4466-8d89-82175eddc8de",
+  "resultId": "d04991b1-9d65-4285-8ad4-32d22c73d7cc",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Object:
+{
+  "correlationId": "82d22f00-af46-47f5-9396-633d7b447227",
+  "eventId": "1417ec91-a2c1-41fc-997b-10cf8c447d75",
+  "resultId": "ce2bbc74-90fc-48eb-a249-26bdcb8d867a",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Object:
+{
+  "correlationId": "da511895-4f6a-4157-807d-08ad0b651b7b",
+  "eventId": "fdc785af-7ba6-4638-a971-37372da67b79",
+  "resultId": "41d3d31d-92e1-4850-8679-e25f53d79140",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "dc7d2c03-8fda-48bd-8418-f52ace47ff4d",
+  "eventId": "f6535690-994e-4402-b34b-2c9aa4777bd0",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Object:
+{
+  "correlationId": "dc7d2c03-8fda-48bd-8418-f52ace47ff4d",
+  "eventId": "f6535690-994e-4402-b34b-2c9aa4777bd0",
+  "resultId": "6c440abe-7033-5f20-9cf9-ab22fd95e1d9",
+  "module": "M4_ZONE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "dc7d2c03-8fda-48bd-8418-f52ace47ff4d",
+  "eventId": "f6535690-994e-4402-b34b-2c9aa4777bd0",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Object:
+{
+  "correlationId": "dc7d2c03-8fda-48bd-8418-f52ace47ff4d",
+  "eventId": "f6535690-994e-4402-b34b-2c9aa4777bd0",
+  "resultId": "6c440abe-7033-5f20-9cf9-ab22fd95e1d9",
+  "module": "M4_ZONE",
+  "disposition": "DUPLICATE"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "be96f77f-59ab-4b7a-a2e5-569ca467d62d",
+  "eventId": "a7872fa2-a83f-45d0-ad79-13f287987b1a",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Object:
+{
+  "correlationId": "be96f77f-59ab-4b7a-a2e5-569ca467d62d",
+  "eventId": "a7872fa2-a83f-45d0-ad79-13f287987b1a",
+  "resultId": "1e36c3ee-b66f-5cb4-b8d6-b3f6fe64fbef",
+  "module": "M4_ZONE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "be96f77f-59ab-4b7a-a2e5-569ca467d62d",
+  "eventId": "a7872fa2-a83f-45d0-ad79-13f287987b1a",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Object:
+{
+  "correlationId": "be96f77f-59ab-4b7a-a2e5-569ca467d62d",
+  "eventId": "a7872fa2-a83f-45d0-ad79-13f287987b1a",
+  "resultId": "1e36c3ee-b66f-5cb4-b8d6-b3f6fe64fbef",
+  "module": "M4_ZONE",
+  "disposition": "DUPLICATE"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Object:
+{
+  "correlationId": "9b0708e0-ed47-4b3c-9bfc-cd5e3be881ba",
+  "eventId": "0fb943bb-7b1c-42b1-8b82-b78d313b265a",
+  "resultId": "878b25ae-3b9e-5bc7-819f-7ade80772cfe",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Object:
+{
+  "correlationId": "105d1778-3415-416b-b4f5-b0871e5e7e15",
+  "eventId": "ce6e1615-c297-4781-b8c4-ac8d0dfc8aad",
+  "resultId": "6bb9d41c-a97a-5f06-af09-e8fcfc8c7062",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Object:
+{
+  "correlationId": "94b78b4d-b7fd-4637-a6e1-ea01dbe39ad9",
+  "eventId": "221ce9e9-534b-4316-8316-a4f56648a657",
+  "resultId": "49fd0f63-faa5-5692-94f1-d9cce815eb4c",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Object:
+{
+  "correlationId": "c364dd56-e848-4474-89a5-3c985478f881",
+  "eventId": "ba0677ec-8eb3-4748-b06d-ce02c4824e9e",
+  "resultId": "fd8bbfd0-a665-58fb-bec0-119401920e96",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.16     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 7392  - 18/10/2026, 21.30.17     LOG [AiResultsService] Object:
+{
+  "correlationId": "7108791b-43f9-4082-9c17-66baf795a486",
+  "eventId": "79b3af5a-ab99-469f-bf13-f3ea287595d3",
+  "resultId": "c190b85f-cc5a-5d90-b108-d4ec90d01ce8",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 7392  - 18/10/2026, 21.30.17     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+PASS test/ai-results-db.integration.spec.ts (8.223 s)
+[Nest] 7392  - 18/10/2026, 21.30.25    WARN [TelegramWorkWorker] Sửa tin Telegram lỗi notificationId=cea1ae9d-c09e-4683-a5cd-724b4d4c4f1a code=TELEGRAM_NETWORK
+[Nest] 7392  - 18/10/2026, 21.30.25    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=695b9b44-c05c-4d9b-a8e8-eb3ebd681500 correlationId=19357ae6-0e99-4db5-83eb-dfc848b7489d
+[Nest] 7392  - 18/10/2026, 21.30.25    WARN [NotificationRetryWorker] Telegram delivery failed eventId=695b9b44-c05c-4d9b-a8e8-eb3ebd681500 correlationId=19357ae6-0e99-4db5-83eb-dfc848b7489d attempt=1 code=TELEGRAM_503
+[Nest] 7392  - 18/10/2026, 21.30.25    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=695b9b44-c05c-4d9b-a8e8-eb3ebd681500 correlationId=19357ae6-0e99-4db5-83eb-dfc848b7489d
+[Nest] 7392  - 18/10/2026, 21.30.25    WARN [NotificationRetryWorker] Telegram delivery failed eventId=695b9b44-c05c-4d9b-a8e8-eb3ebd681500 correlationId=19357ae6-0e99-4db5-83eb-dfc848b7489d attempt=2 code=TELEGRAM_503
+[Nest] 7392  - 18/10/2026, 21.30.25    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=695b9b44-c05c-4d9b-a8e8-eb3ebd681500 correlationId=19357ae6-0e99-4db5-83eb-dfc848b7489d
+[Nest] 7392  - 18/10/2026, 21.30.25    WARN [NotificationRetryWorker] Telegram delivery failed eventId=695b9b44-c05c-4d9b-a8e8-eb3ebd681500 correlationId=19357ae6-0e99-4db5-83eb-dfc848b7489d attempt=3 code=TELEGRAM_503
+[Nest] 7392  - 18/10/2026, 21.30.25    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=695b9b44-c05c-4d9b-a8e8-eb3ebd681500 correlationId=19357ae6-0e99-4db5-83eb-dfc848b7489d
+[Nest] 7392  - 18/10/2026, 21.30.25    WARN [NotificationRetryWorker] Telegram delivery failed eventId=695b9b44-c05c-4d9b-a8e8-eb3ebd681500 correlationId=19357ae6-0e99-4db5-83eb-dfc848b7489d attempt=4 code=TELEGRAM_503
+[Nest] 7392  - 18/10/2026, 21.30.25    WARN [EscalationDeadlineWorkerService] Sự kiện 695b9b44-c05c-4d9b-a8e8-eb3ebd681500 (UNKNOWN_PERSON, P3) đã hết thời gian chờ (trễ 1007ms). Tự động chuyển sang ESCALATED
+PASS test/telegram-db.integration.spec.ts (8.432 s)
+PASS test/escalation-high-wait-db.integration.spec.ts (6.948 s)
+PASS test/camera-state.repository.integration.spec.ts (6.218 s)
+
+Test Suites: 7 passed, 7 total
+Tests:       87 passed, 87 total
+Snapshots:   0 total
+Time:        80.609 s, estimated 93 s
+Ran all test suites.
+Test results written to: ..\..\artifacts-integration-results.json

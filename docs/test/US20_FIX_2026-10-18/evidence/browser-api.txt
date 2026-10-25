@@ -1,0 +1,26 @@
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [NestFactory] Starting Nest application...
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [InstanceLoader] HarnessConfig dependencies initialized +14ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [InstanceLoader] HarnessModule dependencies initialized +1ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [InstanceLoader] DatabaseModule dependencies initialized +0ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [InstanceLoader] AuthModule dependencies initialized +3ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [InstanceLoader] WellnessModule dependencies initialized +0ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RoutesResolver] FixtureNavigation {/api/v1}: +10ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/known-faces, GET} route +2ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/cameras, GET} route +1ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/events, GET} route +0ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/events/stats, GET} route +1ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RoutesResolver] AuthController {/api/v1/auth}: +0ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/auth/login, POST} route +1ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/auth/refresh, POST} route +0ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/auth/logout, POST} route +0ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/auth/me, GET} route +1ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RoutesResolver] WellnessController {/api/v1}: +0ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/wellness-schedules, GET} route +1ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/wellness-schedules, POST} route +0ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/wellness-schedules/:scheduleId, PATCH} route +1ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/wellness-schedules/:scheduleId, DELETE} route +0ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/wellness-checks, GET} route +0ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/wellness-checks/:checkId/confirm, POST} route +1ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [RouterExplorer] Mapped {/api/v1/internal/wellness-observations, POST} route +0ms
+[Nest] 36456  - 18/10/2026, 18.23.43     LOG [NestApplication] Nest application successfully started +3ms
+US20 browser fixture ready: API 55434; local provider 55435.

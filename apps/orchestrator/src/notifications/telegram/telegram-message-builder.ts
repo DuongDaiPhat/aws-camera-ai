@@ -37,6 +37,12 @@ export function buildTelegramAlert(event: TelegramAlertEvent, withoutPhoto: bool
   }).format(event.detectedAt);
 
   // Telegram receives plain text: camera/zone names never become Markdown or HTML.
+  if (event.eventType === 'WELLNESS_TIMEOUT')
+    return [
+      'Kiểm tra sức khỏe: Chưa ghi nhận hoạt động, vui lòng xác nhận.',
+      'Chọn Tôi ổn hoặc Cần giúp đỡ.',
+      `Thời gian: ${detectedAt} (${event.timezone})`,
+    ].join('\n');
   const lines = [
     `Cảnh báo: ${EVENT_NAMES[event.eventType]}`,
     `Camera: ${displayName(event.cameraName)}`,
