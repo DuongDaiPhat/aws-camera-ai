@@ -1,0 +1,522 @@
+{
+  "created_at_utc": "2026-10-18T09:51:38.155748+00:00",
+  "references": {
+    "main": "0f5c948a27fc82e1e20cfd35bf56781a468750f2",
+    "origin/main": "0f5c948a27fc82e1e20cfd35bf56781a468750f2",
+    "origin/feat/US-16-US-17-pose-fall": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+    "origin/feat/US-20-wellness-check": "872a895cd88ac8303bfe448831873aea562dfba5",
+    "HEAD": "c8f14a31822bc697cc28a69e56893313fe88831c"
+  },
+  "sheet_cases": {
+    "Passed": 13,
+    "Failed": 26,
+    "Blocked": 9
+  },
+  "by_level": {
+    "Unit Test": {
+      "Passed": 6,
+      "Failed": 11
+    },
+    "Module Test": {
+      "Passed": 2,
+      "Failed": 9
+    },
+    "Integration Test": {
+      "Passed": 4,
+      "Failed": 5,
+      "Blocked": 1
+    },
+    "System Test": {
+      "Blocked": 4,
+      "Passed": 1
+    },
+    "Acceptance Test": {
+      "Blocked": 4,
+      "Failed": 1
+    }
+  },
+  "additional_assertions": {
+    "total": 61,
+    "passed": 22,
+    "failed": 39
+  },
+  "jest_summary": {
+    "baseline-jest-results": {
+      "numTotalTests": 325,
+      "numPassedTests": 325,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "fall-jest-existing-valid-results": {
+      "numTotalTests": 355,
+      "numPassedTests": 355,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "wellness-existing-results": {
+      "numTotalTests": 345,
+      "numPassedTests": 345,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "candidate-existing-results": {
+      "numTotalTests": 375,
+      "numPassedTests": 375,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "fall-regression-valid-results": {
+      "numTotalTests": 8,
+      "numPassedTests": 0,
+      "numFailedTests": 8,
+      "numPendingTests": 0
+    },
+    "wellness-regression-results": {
+      "numTotalTests": 18,
+      "numPassedTests": 3,
+      "numFailedTests": 15,
+      "numPendingTests": 0
+    },
+    "candidate-db-complete-results": {
+      "numTotalTests": 9,
+      "numPassedTests": 4,
+      "numFailedTests": 5,
+      "numPendingTests": 0
+    },
+    "candidate-http-qualified-results": {
+      "numTotalTests": 11,
+      "numPassedTests": 6,
+      "numFailedTests": 5,
+      "numPendingTests": 0
+    }
+  },
+  "qualified_commands": [
+    {
+      "label": "baseline-jest",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-main-baseline\\apps\\orchestrator",
+      "command": [
+        "node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--no-cache",
+        "--json",
+        "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\baseline-jest-results.json"
+      ],
+      "revision": "0f5c948a27fc82e1e20cfd35bf56781a468750f2",
+      "started_utc": "2026-10-18T09:31:29.922381+00:00",
+      "duration_seconds": 75.141,
+      "exit_code": 0
+    },
+    {
+      "label": "baseline-python",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-main-baseline\\services\\ai-service",
+      "command": [
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "--basetemp=D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\pytest-qa-baseline"
+      ],
+      "revision": "0f5c948a27fc82e1e20cfd35bf56781a468750f2",
+      "started_utc": "2026-10-18T09:33:49.872723+00:00",
+      "duration_seconds": 5.859,
+      "exit_code": 0
+    },
+    {
+      "label": "baseline-bridge",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-main-baseline\\infra\\frigate\\frame-metadata",
+      "command": [
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "test_bridge",
+        "-v"
+      ],
+      "revision": "0f5c948a27fc82e1e20cfd35bf56781a468750f2",
+      "started_utc": "2026-10-18T09:33:46.531881+00:00",
+      "duration_seconds": 0.344,
+      "exit_code": 0
+    },
+    {
+      "label": "fall-jest-existing-valid",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+      "command": [
+        "node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--no-cache",
+        "--testPathIgnorePatterns=qa-fall.spec.ts",
+        "--json",
+        "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\fall-jest-existing-valid-results.json"
+      ],
+      "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+      "started_utc": "2026-10-18T09:31:28.877752+00:00",
+      "duration_seconds": 77.938,
+      "exit_code": 0
+    },
+    {
+      "label": "fall-jest-regression-valid",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+      "command": [
+        "node",
+        "node_modules/jest/bin/jest.js",
+        "test/qa-fall.spec.ts",
+        "--runInBand",
+        "--no-cache",
+        "--json",
+        "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\fall-regression-valid-results.json"
+      ],
+      "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+      "started_utc": "2026-10-18T09:31:30.763345+00:00",
+      "duration_seconds": 35.172,
+      "exit_code": 1
+    },
+    {
+      "label": "fall-python-final",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\services\\ai-service",
+      "command": [
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "--ignore=tests/test_qa_pose.py",
+        "--basetemp=C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\artifacts\\pytest-fall-final"
+      ],
+      "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+      "started_utc": "2026-10-18T09:31:29.899751+00:00",
+      "duration_seconds": 10.328,
+      "exit_code": 0
+    },
+    {
+      "label": "fall-python-regression",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\services\\ai-service",
+      "command": [
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_qa_pose.py",
+        "-o",
+        "addopts=",
+        "-v"
+      ],
+      "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+      "started_utc": "2026-10-18T09:28:29.889784+00:00",
+      "duration_seconds": 3.406,
+      "exit_code": 1
+    },
+    {
+      "label": "fall-model-smoke",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\services\\ai-service",
+      "command": [
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+        "scripts/dependency_smoke.py",
+        "--models-dir",
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\gate-models"
+      ],
+      "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+      "started_utc": "2026-10-18T09:26:29.609815+00:00",
+      "duration_seconds": 7.468,
+      "exit_code": 0
+    },
+    {
+      "label": "fall-bridge",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\infra\\frigate\\frame-metadata",
+      "command": [
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "test_bridge",
+        "-v"
+      ],
+      "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+      "started_utc": "2026-10-18T09:26:29.602167+00:00",
+      "duration_seconds": 0.359,
+      "exit_code": 1
+    },
+    {
+      "label": "wellness-jest-existing",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+      "command": [
+        "node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--no-cache",
+        "--testPathIgnorePatterns=qa-fall.spec.ts|qa-wellness.spec.ts",
+        "--json",
+        "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\wellness-existing-results.json"
+      ],
+      "revision": "872a895cd88ac8303bfe448831873aea562dfba5",
+      "started_utc": "2026-10-18T09:33:49.699780+00:00",
+      "duration_seconds": 44.593,
+      "exit_code": 0
+    },
+    {
+      "label": "wellness-jest-regression",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+      "command": [
+        "node",
+        "node_modules/jest/bin/jest.js",
+        "test/qa-wellness.spec.ts",
+        "--runInBand",
+        "--no-cache",
+        "--json",
+        "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\wellness-regression-results.json"
+      ],
+      "revision": "872a895cd88ac8303bfe448831873aea562dfba5",
+      "started_utc": "2026-10-18T09:33:48.809325+00:00",
+      "duration_seconds": 16.203,
+      "exit_code": 1
+    },
+    {
+      "label": "db-migration-gate",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+      "command": [
+        "node",
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\tools\\scripts\\sprint3-db-gate.mjs"
+      ],
+      "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+      "started_utc": "2026-10-18T09:26:38.687130+00:00",
+      "duration_seconds": 61.593,
+      "exit_code": 0
+    },
+    {
+      "label": "runtime-db-migrate",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+      "command": [
+        "node",
+        "tools/scripts/migrate.mjs",
+        "up"
+      ],
+      "revision": "872a895cd88ac8303bfe448831873aea562dfba5",
+      "started_utc": "2026-10-18T09:33:49.985695+00:00",
+      "duration_seconds": 1.312,
+      "exit_code": 0
+    },
+    {
+      "label": "candidate-existing-jest",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+      "command": [
+        "node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--no-cache",
+        "--testPathIgnorePatterns=qa-fall.spec.ts|qa-wellness.spec.ts|qa-system.spec.ts",
+        "--json",
+        "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\candidate-existing-results.json"
+      ],
+      "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+      "started_utc": "2026-10-18T09:37:23.277301+00:00",
+      "duration_seconds": 50.344,
+      "exit_code": 0
+    },
+    {
+      "label": "candidate-db-complete",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+      "command": [
+        "node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--no-cache",
+        "--testRegex=qa-db.integration.spec.ts$",
+        "--json",
+        "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\candidate-db-complete-results.json"
+      ],
+      "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+      "started_utc": "2026-10-18T09:44:19.719924+00:00",
+      "duration_seconds": 13.437,
+      "exit_code": 1
+    },
+    {
+      "label": "candidate-http-qualified",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+      "command": [
+        "node",
+        "node_modules/jest/bin/jest.js",
+        "test/qa-system.spec.ts",
+        "--runInBand",
+        "--no-cache",
+        "--json",
+        "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\candidate-http-qualified-results.json"
+      ],
+      "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+      "started_utc": "2026-10-18T09:41:22.465164+00:00",
+      "duration_seconds": 24.86,
+      "exit_code": 1
+    },
+    {
+      "label": "candidate-ai-live-http",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\services\\ai-service",
+      "command": [
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\regression\\ai_http_smoke.py"
+      ],
+      "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+      "started_utc": "2026-10-18T09:43:30.661758+00:00",
+      "duration_seconds": 5.735,
+      "exit_code": 0
+    },
+    {
+      "label": "candidate-web",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\web",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1"
+      ],
+      "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+      "started_utc": "2026-10-18T09:38:07.730274+00:00",
+      "duration_seconds": 37.547,
+      "exit_code": 0
+    },
+    {
+      "label": "candidate-tools",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+      "command": [
+        "node",
+        "--test",
+        "tools/scripts/test/*.test.mjs"
+      ],
+      "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+      "started_utc": "2026-10-18T09:38:08.133792+00:00",
+      "duration_seconds": 0.531,
+      "exit_code": 0
+    },
+    {
+      "label": "candidate-typecheck",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+      "command": [
+        "node",
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\qa-tooling\\node_modules\\pnpm\\bin\\pnpm.cjs",
+        "-r",
+        "typecheck"
+      ],
+      "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+      "started_utc": "2026-10-18T09:37:20.058566+00:00",
+      "duration_seconds": 15.828,
+      "exit_code": 0
+    },
+    {
+      "label": "candidate-lint",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+      "command": [
+        "node",
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\qa-tooling\\node_modules\\pnpm\\bin\\pnpm.cjs",
+        "-r",
+        "lint"
+      ],
+      "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+      "started_utc": "2026-10-18T09:38:57.416339+00:00",
+      "duration_seconds": 33.297,
+      "exit_code": 0
+    },
+    {
+      "label": "candidate-api",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+      "command": [
+        "node",
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\qa-tooling\\node_modules\\pnpm\\bin\\pnpm.cjs",
+        "api:lint"
+      ],
+      "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+      "started_utc": "2026-10-18T09:38:06.624695+00:00",
+      "duration_seconds": 21.656,
+      "exit_code": 0
+    },
+    {
+      "label": "candidate-contracts-generate",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+      "command": [
+        "node",
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\qa-tooling\\node_modules\\pnpm\\bin\\pnpm.cjs",
+        "contracts:generate"
+      ],
+      "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+      "started_utc": "2026-10-18T09:40:10.865331+00:00",
+      "duration_seconds": 8.078,
+      "exit_code": 0
+    },
+    {
+      "label": "candidate-format-final",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+      "command": [
+        "node",
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\qa-tooling\\node_modules\\pnpm\\bin\\pnpm.cjs",
+        "format:check"
+      ],
+      "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+      "started_utc": "2026-10-18T09:41:35.901852+00:00",
+      "duration_seconds": 21.359,
+      "exit_code": 0
+    },
+    {
+      "label": "candidate-python-quality",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\services\\ai-service",
+      "command": [
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "app",
+        "tests",
+        "--exclude",
+        "test_qa_pose.py"
+      ],
+      "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+      "started_utc": "2026-10-18T09:38:04.226601+00:00",
+      "duration_seconds": 1.312,
+      "exit_code": 0
+    },
+    {
+      "label": "candidate-python-format",
+      "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\services\\ai-service",
+      "command": [
+        "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "app",
+        "tests"
+      ],
+      "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+      "started_utc": "2026-10-18T09:40:07.169546+00:00",
+      "duration_seconds": 0.297,
+      "exit_code": 0
+    }
+  ],
+  "diff_checks": {
+    "generated_diff": {
+      "exit_code": 0,
+      "output": ""
+    },
+    "diff_check": {
+      "exit_code": 0,
+      "output": ""
+    }
+  },
+  "excluded_from_product_totals": "Earlier sandbox/cache/temp failures and QA fixture preparation (user login constraint, camera slug, HTTP prefix) are diagnostics only; qualified labels above supersede them. No product defect is inferred from those attempts.",
+  "ci_observation": {
+    "source": "mcp__code_review__pull_requests_checks",
+    "queried_date": "2026-10-18",
+    "pr28": {
+      "head": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+      "CI xanh": "success",
+      "all_checks": 9,
+      "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/39022634533"
+    },
+    "pr27": {
+      "head": "872a895cd88ac8303bfe448831873aea562dfba5",
+      "CI xanh": "success",
+      "all_checks": 9,
+      "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/38933224776"
+    }
+  },
+  "regression_sha256": {
+    "ai_http_smoke.py": "9bf613b091ac4dbd645cb80b47fad5c4a21faf5e022d965b4fe86be057e8e4c7",
+    "qa-db.integration.spec.ts": "74ac73586526e715d515ecda2df3c405c4d6d9365a5376af29c9eadab522c47b",
+    "qa-fall.spec.ts": "177f3dd8770ad407f2874ae721441bd8aa8b4d7efc6d71686bc1d774ccf65302",
+    "qa-system.spec.ts": "9079cb84d13006f77d89cd4afb637aeb83600696a0c3733b58c3fec05d405262",
+    "qa-wellness.spec.ts": "24f94f62ffc21ddb8f7ee843dff0a72856a2b5fe7e9585941f49959adc270a76",
+    "test_qa_pose.py": "b5a28e406349ecddfdc37b15d15740d68da19945b4ce76e770cbc255c932178a"
+  }
+}

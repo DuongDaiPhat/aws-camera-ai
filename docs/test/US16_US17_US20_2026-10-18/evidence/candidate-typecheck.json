@@ -1,0 +1,14 @@
+{
+  "label": "candidate-typecheck",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+  "command": [
+    "node",
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\qa-tooling\\node_modules\\pnpm\\bin\\pnpm.cjs",
+    "-r",
+    "typecheck"
+  ],
+  "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+  "started_utc": "2026-10-18T09:37:20.058566+00:00",
+  "duration_seconds": 15.828,
+  "exit_code": 0
+}

@@ -1,0 +1,15 @@
+{
+  "label": "baseline-bridge",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-main-baseline\\infra\\frigate\\frame-metadata",
+  "command": [
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+    "-m",
+    "unittest",
+    "test_bridge",
+    "-v"
+  ],
+  "revision": "0f5c948a27fc82e1e20cfd35bf56781a468750f2",
+  "started_utc": "2026-10-18T09:33:46.531881+00:00",
+  "duration_seconds": 0.344,
+  "exit_code": 0
+}

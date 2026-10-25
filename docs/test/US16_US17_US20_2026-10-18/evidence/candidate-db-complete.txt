@@ -1,0 +1,127 @@
+{
+  "label": "candidate-db-complete",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "--runInBand",
+    "--no-cache",
+    "--testRegex=qa-db.integration.spec.ts$",
+    "--json",
+    "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\candidate-db-complete-results.json"
+  ],
+  "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+  "started_utc": "2026-10-18T09:44:19.719924+00:00",
+  "duration_seconds": 13.437,
+  "exit_code": 1
+}
+
+[Nest] 27888  - 18/10/2026, 16.44.32     LOG [FallIncidentRepository] Đã tạo incident té ngã (event: 2cd39627-d584-42e3-943a-c663a6f1327e, incident: fc7c8bee-a72d-4e46-a1d1-c987a040f648, episode: b82e154e-a540-4db5-8989-da7c57e4f8b0)
+[Nest] 27888  - 18/10/2026, 16.44.32     LOG [FallIncidentRepository] Đã tạo incident té ngã (event: 5026f8da-01b5-43cc-8c11-0d957b930167, incident: f4fa2366-98e9-43a1-812c-4a06f1ab7dce, episode: d395abe6-590a-442c-8cf0-0371332e9e71)
+[Nest] 27888  - 18/10/2026, 16.44.32    WARN [WellnessSchedulerService] Phát hiện không có hoạt động cho resident=4c949234-7df2-4f84-a103-fa10a34d7600 trong 6h qua. Tạo sự kiện WELLNESS_TIMEOUT (P2).
+
+[Nest] 27888  - 18/10/2026, 16.44.32   ERROR [WellnessSchedulerService] Lỗi khi đánh giá wellness run 2e0898f7-405c-4181-873b-eeaad6ccb1c4
+[Nest] 27888  - 18/10/2026, 16.44.32   ERROR [WellnessSchedulerService] error: could not determine data type of parameter $2
+FAIL test/qa-db.integration.spec.ts (11.519 s)
+  QA PostgreSQL16 production repositories
+    √ US17 persists independent FALL P1 incident and sequential replay deduplicates (60 ms)
+    √ US17 concurrent same-episode deliveries both succeed idempotently (38 ms)
+    √ US20 schedule CRUD preserves history through soft-delete (40 ms)
+    √ US20 ledger activity includes both closed-window boundaries and excludes later motion (45 ms)
+    × US20 real presence ledger must not use a future departure for an earlier check (23 ms)
+    × US20 a VIEWER without an active household link cannot be assigned by another caregiver (16 ms)
+    × US20 claim and no-activity evaluation create atomic P2 resident alert (53 ms)
+    × US20 IM_OK confirmation commits against real schema (41 ms)
+    × US20 NEED_HELP confirmation commits against real schema (38 ms)
+
+  ● QA PostgreSQL16 production repositories › US20 real presence ledger must not use a future departure for an earlier check
+
+    expect(received).resolves.toBe(expected) // Object.is equality
+
+    Expected: "UNKNOWN"
+    Received: "AWAY"
+
+      186 |     await wellness.updatePresence({owner_user_id:f.owner,resident_user_id:f.resident,state:'AWAY',observation_id:observationId,
+      187 |       observed_at:observedAt,valid_until:new Date('2026-10-19T02:01:00Z'),updated_at:new Date()});
+    > 188 |     await expect(wellness.getPresenceState(f.owner,f.resident,asOf)).resolves.toBe('UNKNOWN');
+          |                                                                               ^
+      189 |   });
+      190 |   it('US20 a VIEWER without an active household link cannot be assigned by another caregiver', async () => {
+      191 |     const f = await fixture();
+
+      at Object.toBe (../../node_modules/.pnpm/expect@29.7.0/node_modules/expect/build/index.js:174:22)
+      at Object.<anonymous> (test/qa-db.integration.spec.ts:188:79)
+
+  ● QA PostgreSQL16 production repositories › US20 a VIEWER without an active household link cannot be assigned by another caregiver
+
+    expect(received).resolves.toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      190 |   it('US20 a VIEWER without an active household link cannot be assigned by another caregiver', async () => {
+      191 |     const f = await fixture();
+    > 192 |     await expect(wellness.verifyResidentHouseholdLink(f.owner, f.resident)).resolves.toBe(false);
+          |                                                                                      ^
+      193 |   });
+      194 |   it('US20 claim and no-activity evaluation create atomic P2 resident alert', async () => {
+      195 |     const f = await scheduleFixture();
+
+      at Object.toBe (../../node_modules/.pnpm/expect@29.7.0/node_modules/expect/build/index.js:174:22)
+      at Object.<anonymous> (test/qa-db.integration.spec.ts:192:86)
+
+  ● QA PostgreSQL16 production repositories › US20 claim and no-activity evaluation create atomic P2 resident alert
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "ALERT_CREATED"
+    Received: "PROCESSING"
+
+      212 |       )
+      213 |     ).rows[0];
+    > 214 |     expect(stored.status).toBe('ALERT_CREATED');
+          |                           ^
+      215 |     const event = (
+      216 |       await pool.query('SELECT priority,event_type FROM events WHERE id=$1', [stored.event_id])
+      217 |     ).rows[0];
+
+      at Object.<anonymous> (test/qa-db.integration.spec.ts:214:27)
+
+  ● QA PostgreSQL16 production repositories › US20 IM_OK confirmation commits against real schema
+
+    error: inconsistent types deduced for parameter $2
+
+      273 |       const targetStatus = dto.response === 'IM_OK' ? 'RESOLVED' : 'ESCALATED';
+      274 |
+    > 275 |       await client.query(
+          |       ^
+      276 |         `UPDATE events
+      277 |          SET status = $2,
+      278 |              resolved_at = CASE WHEN $2 = 'RESOLVED' THEN now() ELSE resolved_at END,
+
+      at ../../node_modules/.pnpm/pg@8.23.0/node_modules/pg/lib/client.js:694:17
+      at WellnessService.confirmCheck (src/wellness/wellness.service.ts:275:7)
+      at test/qa-db.integration.spec.ts:239:22
+
+  ● QA PostgreSQL16 production repositories › US20 NEED_HELP confirmation commits against real schema
+
+    error: inconsistent types deduced for parameter $2
+
+      273 |       const targetStatus = dto.response === 'IM_OK' ? 'RESOLVED' : 'ESCALATED';
+      274 |
+    > 275 |       await client.query(
+          |       ^
+      276 |         `UPDATE events
+      277 |          SET status = $2,
+      278 |              resolved_at = CASE WHEN $2 = 'RESOLVED' THEN now() ELSE resolved_at END,
+
+      at ../../node_modules/.pnpm/pg@8.23.0/node_modules/pg/lib/client.js:694:17
+      at WellnessService.confirmCheck (src/wellness/wellness.service.ts:275:7)
+      at test/qa-db.integration.spec.ts:239:22
+
+Test Suites: 1 failed, 1 total
+Tests:       5 failed, 4 passed, 9 total
+Snapshots:   0 total
+Time:        11.921 s
+Ran all test suites.
+Test results written to: D:\hoc tap\project 1\aws-camera-ai\docs\test\US16_US17_US20_2026-10-18\evidence\candidate-db-complete-results.json

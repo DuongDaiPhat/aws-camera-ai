@@ -1,0 +1,18 @@
+{
+  "label": "candidate-python-quality",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\services\\ai-service",
+  "command": [
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+    "-m",
+    "ruff",
+    "check",
+    "app",
+    "tests",
+    "--exclude",
+    "test_qa_pose.py"
+  ],
+  "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+  "started_utc": "2026-10-18T09:38:04.226601+00:00",
+  "duration_seconds": 1.312,
+  "exit_code": 0
+}

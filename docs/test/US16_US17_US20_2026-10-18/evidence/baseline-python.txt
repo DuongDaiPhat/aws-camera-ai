@@ -1,0 +1,43 @@
+{
+  "label": "baseline-python",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-main-baseline\\services\\ai-service",
+  "command": [
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "--basetemp=D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\pytest-qa-baseline"
+  ],
+  "revision": "0f5c948a27fc82e1e20cfd35bf56781a468750f2",
+  "started_utc": "2026-10-18T09:33:49.872723+00:00",
+  "duration_seconds": 5.859,
+  "exit_code": 0
+}
+
+...............................                                          [100%]
+============================== warnings summary ===============================
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\fastapi\testclient.py:1
+  D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============================== tests coverage ================================
+______________ coverage: platform win32, python 3.11.13-final-0 _______________
+
+Name                              Stmts   Miss  Cover   Missing
+---------------------------------------------------------------
+app\__init__.py                       0      0   100%
+app\config.py                        34      0   100%
+app\main.py                           9      0   100%
+app\models\face.py                   54      0   100%
+app\routers\__init__.py               0      0   100%
+app\routers\face.py                  58      7    88%   30, 35, 50-51, 70-71, 89
+app\routers\health.py                16      0   100%
+app\services\embedding_codec.py      21      0   100%
+app\services\face_collection.py      35      0   100%
+app\services\face_embedder.py        90      9    90%   31-37, 44, 55, 63-64, 78-79, 89
+app\services\face_matcher.py         72      6    92%   47, 64-65, 86-87, 96
+---------------------------------------------------------------
+TOTAL                               389     22    94%
+Required test coverage of 60.0% reached. Total coverage: 94.34%
+31 passed, 1 warning in 3.81s
+

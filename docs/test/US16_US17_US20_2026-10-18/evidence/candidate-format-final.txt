@@ -1,0 +1,21 @@
+{
+  "label": "candidate-format-final",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+  "command": [
+    "node",
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\qa-tooling\\node_modules\\pnpm\\bin\\pnpm.cjs",
+    "format:check"
+  ],
+  "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+  "started_utc": "2026-10-18T09:41:35.901852+00:00",
+  "duration_seconds": 21.359,
+  "exit_code": 0
+}
+
+
+> aws-camera-ai@0.0.1 format:check C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20
+> prettier --check "**/*.{ts,tsx,js,json,md,yaml,yml}"
+
+Checking formatting...
+All matched files use Prettier code style!
+

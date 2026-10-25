@@ -1,0 +1,191 @@
+{
+  "label": "fall-jest-regression-valid",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "test/qa-fall.spec.ts",
+    "--runInBand",
+    "--no-cache",
+    "--json",
+    "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\fall-regression-valid-results.json"
+  ],
+  "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+  "started_utc": "2026-10-18T09:31:30.763345+00:00",
+  "duration_seconds": 35.172,
+  "exit_code": 1
+}
+
+[Nest] 4796  - 18/10/2026, 16.32.05    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track qa-track camera qa-camera ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 4796  - 18/10/2026, 16.32.05     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera qa-camera (track: qa-track, event: event)
+[Nest] 4796  - 18/10/2026, 16.32.05    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track qa-track camera qa-camera ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 4796  - 18/10/2026, 16.32.05     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera qa-camera (track: qa-track, event: event)
+[Nest] 4796  - 18/10/2026, 16.32.05    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track qa-track camera qa-camera ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 4796  - 18/10/2026, 16.32.05     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera qa-camera (track: qa-track, event: event)
+[Nest] 4796  - 18/10/2026, 16.32.05    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track qa-track camera qa-camera ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 4796  - 18/10/2026, 16.32.05    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track qa-track camera qa-camera ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 4796  - 18/10/2026, 16.32.05   DEBUG [FallIncidentCoordinator] Incident té ngã episode 22222222-2222-4222-8222-222222222222 đã được xử lý trước đó (deduped)
+
+[Nest] 4796  - 18/10/2026, 16.32.05   ERROR [RestAreaEvaluator] Lỗi khi kiểm tra REST_AREA cho camera 11111111-1111-4111-8111-111111111111: DB unavailable
+[Nest] 4796  - 18/10/2026, 16.32.05   ERROR [FallIncidentCoordinator] Lỗi khi submit kết quả AI té ngã cho event event: temporary submit failure
+FAIL test/qa-fall.spec.ts (32.295 s)
+  QA fall safety regression
+    × US16 envelope rejects unsupported schema version (10 ms)
+    × US16 envelope rejects negative bbox dimensions (1 ms)
+    × US16 rejects stale frame before inference (5 ms)
+    × US16 rejects future frame before inference (1 ms)
+    × US17 does not create fall when REST_AREA lookup is unavailable (7 ms)
+    × US16 does not create incident from response for another track (1 ms)
+    × US16 does not synthesize missing episode evidence (1 ms)
+    × US17 retries the pending submission after a transient AI submit failure (3 ms)
+
+  ● QA fall safety regression › US16 envelope rejects unsupported schema version
+
+    expect(received).toBeNull()
+
+    Received: {"header": {"cameraSlug": "qa-camera", "frameHeight": 480, "frameId": "f", "frameTimestamp": 1792315925.475, "frameWidth": 640, "persons": [{"boundingBox": {"height": 0.4, "width": 0.4, "x": 0.2, "y": 0.2}, "observedAt": 1792315925.464, "trackId": "qa-track"}], "schemaVersion": 2, "sourceSessionId": "s"}, "imageBytes": {"data": [255, 216, 255, 217], "type": "Buffer"}}
+
+      37 | describe('QA fall safety regression', () => {
+      38 |   it('US16 envelope rejects unsupported schema version', () => {
+    > 39 |     expect(unpackPoseFrameEnvelope(envelope({ schemaVersion: 2 }))).toBeNull();
+         |                                                                     ^
+      40 |   });
+      41 |   it('US16 envelope rejects negative bbox dimensions', () => {
+      42 |     expect(unpackPoseFrameEnvelope(envelope({ persons: [{ trackId: 't', observedAt: 1,
+
+      at Object.<anonymous> (test/qa-fall.spec.ts:39:69)
+
+  ● QA fall safety regression › US16 envelope rejects negative bbox dimensions
+
+    expect(received).toBeNull()
+
+    Received: {"header": {"cameraSlug": "qa-camera", "frameHeight": 480, "frameId": "f", "frameTimestamp": 1792315925.5, "frameWidth": 640, "persons": [{"boundingBox": {"height": 0.4, "width": -1, "x": 0.2, "y": 0.2}, "observedAt": 1, "trackId": "t"}], "schemaVersion": 1, "sourceSessionId": "s"}, "imageBytes": {"data": [255, 216, 255, 217], "type": "Buffer"}}
+
+      41 |   it('US16 envelope rejects negative bbox dimensions', () => {
+      42 |     expect(unpackPoseFrameEnvelope(envelope({ persons: [{ trackId: 't', observedAt: 1,
+    > 43 |       boundingBox: { ...box, width: -1 } }] }))).toBeNull();
+         |                                                  ^
+      44 |   });
+      45 |   it.each([['stale', -1.1], ['future', 0.6]])('US16 rejects %s frame before inference', async (_kind, offset) => {
+      46 |     const processor = { processFrame: jest.fn() };
+
+      at Object.<anonymous> (test/qa-fall.spec.ts:43:50)
+
+  ● QA fall safety regression › US16 rejects stale frame before inference
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"cameraId": "cam", "cameraSlug": "qa-camera", "frameId": "f", "frameTimestamp": 2026-10-18T09:32:04.405Z, "imageBytes": {"data": [255, 216, 255, 217], "type": "Buffer"}, "persons": [{"boundingBox": {"height": 0.4, "width": 0.4, "x": 0.2, "y": 0.2}, "observedAt": 1792315925.464, "trackId": "qa-track"}], "sourceSessionId": "s"}
+
+      48 |       { findBySlug: jest.fn().mockResolvedValue({ id: 'cam', is_enabled: true }) } as never, processor as never);
+      49 |     await consumer.handlePoseFrame(envelope({ frameTimestamp: Date.now() / 1000 + Number(offset) }));
+    > 50 |     expect(processor.processFrame).not.toHaveBeenCalled();
+         |                                        ^
+      51 |   });
+      52 |   it('US17 does not create fall when REST_AREA lookup is unavailable', async () => {
+      53 |     const rest = new RestAreaEvaluator({ listByCameraId: jest.fn().mockRejectedValue(new Error('DB unavailable')) } as never);
+
+      at test/qa-fall.spec.ts:50:40
+
+  ● QA fall safety regression › US16 rejects future frame before inference
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"cameraId": "cam", "cameraSlug": "qa-camera", "frameId": "f", "frameTimestamp": 2026-10-18T09:32:06.107Z, "imageBytes": {"data": [255, 216, 255, 217], "type": "Buffer"}, "persons": [{"boundingBox": {"height": 0.4, "width": 0.4, "x": 0.2, "y": 0.2}, "observedAt": 1792315925.464, "trackId": "qa-track"}], "sourceSessionId": "s"}
+
+      48 |       { findBySlug: jest.fn().mockResolvedValue({ id: 'cam', is_enabled: true }) } as never, processor as never);
+      49 |     await consumer.handlePoseFrame(envelope({ frameTimestamp: Date.now() / 1000 + Number(offset) }));
+    > 50 |     expect(processor.processFrame).not.toHaveBeenCalled();
+         |                                        ^
+      51 |   });
+      52 |   it('US17 does not create fall when REST_AREA lookup is unavailable', async () => {
+      53 |     const rest = new RestAreaEvaluator({ listByCameraId: jest.fn().mockRejectedValue(new Error('DB unavailable')) } as never);
+
+      at test/qa-fall.spec.ts:50:40
+
+  ● QA fall safety regression › US17 does not create fall when REST_AREA lookup is unavailable
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"cameraId": "11111111-1111-4111-8111-111111111111", "candidateStartedAt": 2026-10-18T00:00:00.000Z, "confirmedAt": 2026-10-18T00:00:16.000Z, "episodeId": "22222222-2222-4222-8222-222222222222", "modelVersion": "pose-lite-qa", "pendingPayload": {"cameraSlug": "qa-camera", "confidence": 0.98, "episodeId": "22222222-2222-4222-8222-222222222222", "ruleSnapshot": {"centerDropRatio": undefined, "centerHeight": undefined, "immobileSeconds": 16, "motionScore": undefined, "policyVersion": "fall-rule-evidence-v1", "thresholdSeconds": 15, "torsoAngleDeg": 10}, "trackId": "qa-track"}, "resultId": "cfbe71d6-505c-427d-9808-1af337776064", "ruleSnapshot": {"centerDropRatio": undefined, "centerHeight": undefined, "immobileSeconds": 16, "motionScore": undefined, "policyVersion": "fall-rule-evidence-v1", "thresholdSeconds": 15, "torsoAngleDeg": 10}, "sourceSessionId": "qa-session", "trackId": "qa-track"}
+
+      54 |     const { coordinator, repository } = setup(confirmed, rest);
+      55 |     await coordinator.processFrame(context).catch(() => undefined);
+    > 56 |     expect(repository.createConfirmedIncident).not.toHaveBeenCalled();
+         |                                                    ^
+      57 |   });
+      58 |   it('US16 does not create incident from response for another track', async () => {
+      59 |     const { coordinator, repository } = setup({ ...confirmed, trackId: 'other-track' });
+
+      at Object.<anonymous> (test/qa-fall.spec.ts:56:52)
+
+  ● QA fall safety regression › US16 does not create incident from response for another track
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"cameraId": "11111111-1111-4111-8111-111111111111", "candidateStartedAt": 2026-10-18T00:00:00.000Z, "confirmedAt": 2026-10-18T00:00:16.000Z, "episodeId": "22222222-2222-4222-8222-222222222222", "modelVersion": "pose-lite-qa", "pendingPayload": {"cameraSlug": "qa-camera", "confidence": 0.98, "episodeId": "22222222-2222-4222-8222-222222222222", "ruleSnapshot": {"centerDropRatio": undefined, "centerHeight": undefined, "immobileSeconds": 16, "motionScore": undefined, "policyVersion": "fall-rule-evidence-v1", "thresholdSeconds": 15, "torsoAngleDeg": 10}, "trackId": "qa-track"}, "resultId": "f21646d5-f3ed-462e-8a4f-c1e47dc43d0c", "ruleSnapshot": {"centerDropRatio": undefined, "centerHeight": undefined, "immobileSeconds": 16, "motionScore": undefined, "policyVersion": "fall-rule-evidence-v1", "thresholdSeconds": 15, "torsoAngleDeg": 10}, "sourceSessionId": "qa-session", "trackId": "qa-track"}
+
+      59 |     const { coordinator, repository } = setup({ ...confirmed, trackId: 'other-track' });
+      60 |     await coordinator.processFrame(context);
+    > 61 |     expect(repository.createConfirmedIncident).not.toHaveBeenCalled();
+         |                                                    ^
+      62 |   });
+      63 |   it('US16 does not synthesize missing episode evidence', async () => {
+      64 |     const { coordinator, repository } = setup({ ...confirmed, episodeId: undefined } as never);
+
+      at Object.<anonymous> (test/qa-fall.spec.ts:61:52)
+
+  ● QA fall safety regression › US16 does not synthesize missing episode evidence
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"cameraId": "11111111-1111-4111-8111-111111111111", "candidateStartedAt": 2026-10-18T00:00:00.000Z, "confirmedAt": 2026-10-18T00:00:16.000Z, "episodeId": "963bb0aa-95eb-4f10-bae8-c8647a98b0af", "modelVersion": "pose-lite-qa", "pendingPayload": {"cameraSlug": "qa-camera", "confidence": 0.98, "episodeId": "963bb0aa-95eb-4f10-bae8-c8647a98b0af", "ruleSnapshot": {"centerDropRatio": undefined, "centerHeight": undefined, "immobileSeconds": 16, "motionScore": undefined, "policyVersion": "fall-rule-evidence-v1", "thresholdSeconds": 15, "torsoAngleDeg": 10}, "trackId": "qa-track"}, "resultId": "f13b2ce2-4c1f-4ebb-ae2a-3830a117623d", "ruleSnapshot": {"centerDropRatio": undefined, "centerHeight": undefined, "immobileSeconds": 16, "motionScore": undefined, "policyVersion": "fall-rule-evidence-v1", "thresholdSeconds": 15, "torsoAngleDeg": 10}, "sourceSessionId": "qa-session", "trackId": "qa-track"}
+
+      64 |     const { coordinator, repository } = setup({ ...confirmed, episodeId: undefined } as never);
+      65 |     await coordinator.processFrame(context);
+    > 66 |     expect(repository.createConfirmedIncident).not.toHaveBeenCalled();
+         |                                                    ^
+      67 |   });
+      68 |   it('US17 retries the pending submission after a transient AI submit failure', async () => {
+      69 |     const { coordinator, repository, ai } = setup();
+
+      at Object.<anonymous> (test/qa-fall.spec.ts:66:52)
+
+  ● QA fall safety regression › US17 retries the pending submission after a transient AI submit failure
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 2
+    Received number of calls: 1
+
+      74 |     await coordinator.processFrame(context);
+      75 |     await coordinator.processFrame(context);
+    > 76 |     expect(ai.submit).toHaveBeenCalledTimes(2);
+         |                       ^
+      77 |     expect(repository.markApplied).toHaveBeenCalledTimes(1);
+      78 |   });
+      79 | });
+
+      at Object.<anonymous> (test/qa-fall.spec.ts:76:23)
+
+Test Suites: 1 failed, 1 total
+Tests:       8 failed, 8 total
+Snapshots:   0 total
+Time:        32.956 s
+Ran all test suites matching /test\\qa-fall.spec.ts/i.
+Test results written to: D:\hoc tap\project 1\aws-camera-ai\docs\test\US16_US17_US20_2026-10-18\evidence\fall-regression-valid-results.json

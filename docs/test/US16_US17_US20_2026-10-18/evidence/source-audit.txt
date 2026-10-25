@@ -1,0 +1,53 @@
+[
+  {
+    "description": "Frame source and timestamp",
+    "command": [
+      "rg",
+      "-n",
+      "latest.jpg|build_pose_frame_header|urlopen",
+      "infra/frigate/frame-metadata/bridge.py"
+    ],
+    "exit_code": 0,
+    "output": "69:def build_pose_frame_header(\n201:                        header = build_pose_frame_header(camera, frame_time, result[\"objects\"])\n206:                            with urllib.request.urlopen(\n207:                                f\"http://127.0.0.1:5000/api/{camera}/latest.jpg\", timeout=0.5\n",
+    "stderr": ""
+  },
+  {
+    "description": "M1/ingestion source feed wiring",
+    "command": [
+      "rg",
+      "-n",
+      "wellness|Wellness",
+      "apps/orchestrator/src/face-recognition",
+      "apps/orchestrator/src/ingestion"
+    ],
+    "exit_code": 1,
+    "output": "",
+    "stderr": ""
+  },
+  {
+    "description": "Wellness UI source",
+    "command": [
+      "rg",
+      "-n",
+      "-i",
+      "wellness",
+      "apps/web/src"
+    ],
+    "exit_code": 0,
+    "output": "apps/web/src\\types\\index.ts:62:export type WellnessSchedule = components['schemas']['WellnessSchedule'];\napps/web/src\\types\\index.ts:63:export type CreateWellnessScheduleRequest = components['schemas']['CreateWellnessScheduleRequest'];\napps/web/src\\types\\index.ts:64:export type UpdateWellnessScheduleRequest = components['schemas']['UpdateWellnessScheduleRequest'];\napps/web/src\\types\\index.ts:65:export type WellnessCheck = components['schemas']['WellnessCheck'];\napps/web/src\\types\\index.ts:66:export type WellnessConfirmationRequest = components['schemas']['WellnessConfirmationRequest'];\napps/web/src\\lib\\escalation-wait-settings.spec.ts:44:  it('không rút ngắn rule skipLoggedOnly và WELLNESS', () => {\napps/web/src\\lib\\escalation-wait-settings.spec.ts:50:        { ...rule, eventType: 'WELLNESS_TIMEOUT', tLow: null, tHigh: null },\napps/web/src\\lib\\escalation-wait-settings.ts:18:  // US-13: FIRE skipLoggedOnly và WELLNESS không rút ngắn theo confidence.\napps/web/src\\components\\events\\EventCard.tsx:19:  WELLNESS_TIMEOUT: 'Chưa ghi nhận hoạt động',\napps/web/src\\lib\\events-client.ts:49:    case 'WELLNESS_TIMEOUT':\napps/web/src\\lib\\format.ts:82:    case 'WELLNESS_TIMEOUT':\napps/web/src\\components\\settings\\EscalationRuleCard.tsx:41:  const isWellness = rule.eventType === 'WELLNESS_TIMEOUT';\napps/web/src\\components\\settings\\EscalationRuleCard.tsx:45:    !isWellness &&\napps/web/src\\components\\settings\\EscalationRuleCard.tsx:120:        {isWellness ? (\napps/web/src\\lib\\mock-events.ts:129:    eventType: 'WELLNESS_TIMEOUT',\napps/web/src\\lib\\mock-events.ts:209:    source: summary.eventType === 'WELLNESS_TIMEOUT' ? 'SCHEDULER' : 'FRIGATE',\napps/web/src\\components\\settings\\EscalationRuleCard.spec.tsx:23:  const mockWellnessRule: EscalationRule = {\napps/web/src\\components\\settings\\EscalationRuleCard.spec.tsx:24:    eventType: 'WELLNESS_TIMEOUT',\napps/web/src\\components\\settings\\EscalationRuleCard.spec.tsx:145:  it('hiển thị thông báo đặc biệt và ẩn inputs threshold đối với WELLNESS_TIMEOUT', () => {\napps/web/src\\components\\settings\\EscalationRuleCard.spec.tsx:148:        rule={mockWellnessRule}\napps/web/src\\components\\settings\\EscalationRuleCard.spec.tsx:165:    expect(html).toContain('300 giây'); // WELLNESS dùng T_wait, không chia đôi\n",
+    "stderr": ""
+  },
+  {
+    "description": "Fall pending worker/sweeper wiring",
+    "command": [
+      "rg",
+      "-n",
+      "sweep_all|fall_incidents|delivery_status",
+      "apps/orchestrator/src/fall-detection",
+      "services/ai-service/app"
+    ],
+    "exit_code": 0,
+    "output": "services/ai-service/app\\services\\fall_tracker_registry.py:70:    def sweep_all(self) -> int:\napps/orchestrator/src/fall-detection\\repository\\fall-incident.repository.ts:18:  delivery_status: 'PENDING' | 'PROCESSING' | 'APPLIED';\napps/orchestrator/src/fall-detection\\repository\\fall-incident.repository.ts:49:   * Tạo sự kiện FALL_DETECTED P1 và lưu bản ghi fall_incidents trong cùng một transaction.\napps/orchestrator/src/fall-detection\\repository\\fall-incident.repository.ts:59:        `SELECT id, event_id, result_id FROM fall_incidents\napps/orchestrator/src/fall-detection\\repository\\fall-incident.repository.ts:77:      // Đảm bảo confirmed_at > candidate_started_at theo ràng buộc DB fall_incidents_time_order\napps/orchestrator/src/fall-detection\\repository\\fall-incident.repository.ts:102:      // 2. Tạo bản ghi fall_incidents\napps/orchestrator/src/fall-detection\\repository\\fall-incident.repository.ts:104:        `INSERT INTO fall_incidents (\napps/orchestrator/src/fall-detection\\repository\\fall-incident.repository.ts:107:           result_id, pending_payload, delivery_status\napps/orchestrator/src/fall-detection\\repository\\fall-incident.repository.ts:153:      `UPDATE fall_incidents\napps/orchestrator/src/fall-detection\\repository\\fall-incident.repository.ts:154:       SET delivery_status = 'APPLIED', applied_at = now(), updated_at = now()\n",
+    "stderr": ""
+  }
+]

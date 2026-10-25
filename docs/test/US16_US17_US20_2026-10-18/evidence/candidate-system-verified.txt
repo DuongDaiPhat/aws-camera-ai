@@ -1,0 +1,226 @@
+{
+  "label": "candidate-system-verified",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "test/qa-system.spec.ts",
+    "--runInBand",
+    "--no-cache",
+    "--json",
+    "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\candidate-system-verified-results.json"
+  ],
+  "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+  "started_utc": "2026-10-18T09:40:09.883539+00:00",
+  "duration_seconds": 18.547,
+  "exit_code": 1
+}
+
+
+FAIL test/qa-system.spec.ts (16.387 s)
+  QA local HTTP runtime: production Wellness/Auth/Database modules
+    × US20 JWT guard denies an unauthenticated request (24 ms)
+    × US20 internal guard denies a wrong token (227 ms)
+    × US20 create response follows frozen camelCase contract (4 ms)
+    × US20 rejects out-of-range {"lookbackHours":0} (4 ms)
+    × US20 rejects out-of-range {"lookbackHours":25} (5 ms)
+    × US20 rejects out-of-range {"graceSeconds":59} (5 ms)
+    × US20 rejects out-of-range {"graceSeconds":3601} (4 ms)
+    × US20 rejects an unknown IANA timezone (3 ms)
+    × US20 rejects an empty daysOfWeek array (5 ms)
+    × US20 rejects DEPARTURE without direction/identity evidence (5 ms)
+    × US20 accepted observation uses HTTP 202 from frozen contract (3 ms)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 JWT guard denies an unauthenticated request
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 401
+    Received: 404
+
+      111 |   });
+      112 |   it('US20 JWT guard denies an unauthenticated request', async () => {
+    > 113 |     expect((await call('/wellness-schedules')).status).toBe(401);
+          |                                                        ^
+      114 |   });
+      115 |   it('US20 internal guard denies a wrong token', async () => {
+      116 |     expect(
+
+      at Object.<anonymous> (test/qa-system.spec.ts:113:56)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 internal guard denies a wrong token
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 401
+    Received: 404
+
+      117 |       (await call('/internal/wellness-observations', 'POST', {}, { 'X-Internal-Token': 'invalid' }))
+      118 |         .status,
+    > 119 |     ).toBe(401);
+          |       ^
+      120 |   });
+      121 |   it('US20 create response follows frozen camelCase contract', async () => {
+      122 |     const response = await call('/wellness-schedules', 'POST', body, {
+
+      at Object.<anonymous> (test/qa-system.spec.ts:119:7)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 create response follows frozen camelCase contract
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 404
+
+      123 |       Authorization: `Bearer ${token}`,
+      124 |     });
+    > 125 |     expect(response.status).toBe(201);
+          |                             ^
+      126 |     expect(await response.json()).toMatchObject({
+      127 |       residentUserId: resident,
+      128 |       checkAt: '09:00',
+
+      at Object.<anonymous> (test/qa-system.spec.ts:125:29)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {"lookbackHours":0}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 404
+
+      146 |         )
+      147 |       ).status,
+    > 148 |     ).toBe(400);
+          |       ^
+      149 |   });
+      150 |   it('US20 rejects an unknown IANA timezone', async () => {
+      151 |     expect(
+
+      at test/qa-system.spec.ts:148:7
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {"lookbackHours":25}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 404
+
+      146 |         )
+      147 |       ).status,
+    > 148 |     ).toBe(400);
+          |       ^
+      149 |   });
+      150 |   it('US20 rejects an unknown IANA timezone', async () => {
+      151 |     expect(
+
+      at test/qa-system.spec.ts:148:7
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {"graceSeconds":59}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 404
+
+      146 |         )
+      147 |       ).status,
+    > 148 |     ).toBe(400);
+          |       ^
+      149 |   });
+      150 |   it('US20 rejects an unknown IANA timezone', async () => {
+      151 |     expect(
+
+      at test/qa-system.spec.ts:148:7
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {"graceSeconds":3601}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 404
+
+      146 |         )
+      147 |       ).status,
+    > 148 |     ).toBe(400);
+          |       ^
+      149 |   });
+      150 |   it('US20 rejects an unknown IANA timezone', async () => {
+      151 |     expect(
+
+      at test/qa-system.spec.ts:148:7
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects an unknown IANA timezone
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 404
+
+      158 |         )
+      159 |       ).status,
+    > 160 |     ).toBe(400);
+          |       ^
+      161 |   });
+      162 |   it('US20 rejects an empty daysOfWeek array', async () => {
+      163 |     expect(
+
+      at Object.<anonymous> (test/qa-system.spec.ts:160:7)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects an empty daysOfWeek array
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 404
+
+      170 |         )
+      171 |       ).status,
+    > 172 |     ).toBe(400);
+          |       ^
+      173 |   });
+      174 |   it('US20 rejects DEPARTURE without direction/identity evidence', async () => {
+      175 |     const observation = {
+
+      at Object.<anonymous> (test/qa-system.spec.ts:172:7)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects DEPARTURE without direction/identity evidence
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 404
+
+      188 |         })
+      189 |       ).status,
+    > 190 |     ).toBe(400);
+          |       ^
+      191 |   });
+      192 |   it('US20 accepted observation uses HTTP 202 from frozen contract', async () => {
+      193 |     const observation = {
+
+      at Object.<anonymous> (test/qa-system.spec.ts:190:7)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 accepted observation uses HTTP 202 from frozen contract
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 202
+    Received: 404
+
+      208 |         })
+      209 |       ).status,
+    > 210 |     ).toBe(202);
+          |       ^
+      211 |   });
+      212 | });
+      213 |
+
+      at Object.<anonymous> (test/qa-system.spec.ts:210:7)
+
+Test Suites: 1 failed, 1 total
+Tests:       11 failed, 11 total
+Snapshots:   0 total
+Time:        16.812 s
+Ran all test suites matching /test\\qa-system.spec.ts/i.
+Test results written to: D:\hoc tap\project 1\aws-camera-ai\docs\test\US16_US17_US20_2026-10-18\evidence\candidate-system-verified-results.json

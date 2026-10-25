@@ -1,0 +1,26 @@
+{
+  "label": "fall-jest-existing",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "--runInBand",
+    "--testPathIgnorePatterns=qa-",
+    "--json",
+    "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\fall-jest-results.json"
+  ],
+  "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+  "started_utc": "2026-10-18T09:29:30.452262+00:00",
+  "duration_seconds": 16.11,
+  "exit_code": 1
+}
+
+
+No tests found, exiting with code 1
+Run with `--passWithNoTests` to exit with code 0
+In C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator
+  204 files checked.
+  testMatch:  - 0 matches
+  testPathIgnorePatterns: qa- - 0 matches
+  testRegex: ^(?!.*\.integration\.spec\.ts$).*\.spec\.ts$ - 50 matches
+Pattern:  - 0 matches

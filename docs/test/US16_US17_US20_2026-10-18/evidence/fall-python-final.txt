@@ -1,0 +1,58 @@
+{
+  "label": "fall-python-final",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\services\\ai-service",
+  "command": [
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "--ignore=tests/test_qa_pose.py",
+    "--basetemp=C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\artifacts\\pytest-fall-final"
+  ],
+  "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+  "started_utc": "2026-10-18T09:31:29.899751+00:00",
+  "duration_seconds": 10.328,
+  "exit_code": 0
+}
+
+.................................................                        [100%]
+============================== warnings summary ===============================
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\fastapi\testclient.py:1
+  D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_pose_router.py::test_evaluate_fall_timestamp_validation
+  C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\services\ai-service\app\routers\pose.py:110: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    observed_at = _parse_timestamp(frame_timestamp)
+
+tests/test_pose_router.py::test_evaluate_fall_bbox_validation
+  C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\services\ai-service\app\routers\pose.py:111: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    bbox_dict = _parse_bbox(person_bounding_box)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============================== tests coverage ================================
+______________ coverage: platform win32, python 3.11.13-final-0 _______________
+
+Name                                    Stmts   Miss  Cover   Missing
+---------------------------------------------------------------------
+app\__init__.py                             0      0   100%
+app\config.py                              56      0   100%
+app\main.py                                10      0   100%
+app\models\face.py                         54      0   100%
+app\models\pose.py                         42      0   100%
+app\routers\__init__.py                     0      0   100%
+app\routers\face.py                        58      7    88%   30, 35, 50-51, 70-71, 89
+app\routers\health.py                      16      0   100%
+app\routers\pose.py                        76      7    91%   39, 54, 67, 83, 115, 147-148
+app\services\embedding_codec.py            21      0   100%
+app\services\face_collection.py            35      0   100%
+app\services\face_embedder.py              90      9    90%   31-37, 44, 55, 63-64, 78-79, 89
+app\services\face_matcher.py               72      6    92%   47, 64-65, 86-87, 96
+app\services\fall_tracker.py              189     45    76%   120-123, 145-155, 184, 229-232, 290-293, 316-319, 325-332, 476-493, 496-498
+app\services\fall_tracker_registry.py      49      9    82%   35-38, 54-60, 83, 86
+app\services\pose_estimator.py            121     44    64%   40-51, 54, 88-91, 95-99, 110, 128, 153-172, 195, 209-210, 213-250
+app\services\pose_geometry.py             109     11    90%   139-142, 146-149, 189, 219, 228, 242, 247
+---------------------------------------------------------------------
+TOTAL                                     998    138    86%
+Required test coverage of 60.0% reached. Total coverage: 86.17%
+49 passed, 3 warnings in 7.65s
+

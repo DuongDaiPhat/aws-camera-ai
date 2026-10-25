@@ -1,0 +1,13 @@
+{
+  "label": "candidate-tools",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+  "command": [
+    "node",
+    "--test",
+    "tools/scripts/test/*.test.mjs"
+  ],
+  "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+  "started_utc": "2026-10-18T09:38:08.133792+00:00",
+  "duration_seconds": 0.531,
+  "exit_code": 0
+}

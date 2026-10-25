@@ -1,0 +1,14 @@
+{
+  "label": "baseline-python",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-main-baseline\\services\\ai-service",
+  "command": [
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "--basetemp=D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\pytest-qa-baseline"
+  ],
+  "revision": "0f5c948a27fc82e1e20cfd35bf56781a468750f2",
+  "started_utc": "2026-10-18T09:33:49.872723+00:00",
+  "duration_seconds": 5.859,
+  "exit_code": 0
+}

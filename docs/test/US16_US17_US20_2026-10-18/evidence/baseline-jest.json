@@ -1,0 +1,16 @@
+{
+  "label": "baseline-jest",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-main-baseline\\apps\\orchestrator",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "--runInBand",
+    "--no-cache",
+    "--json",
+    "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\baseline-jest-results.json"
+  ],
+  "revision": "0f5c948a27fc82e1e20cfd35bf56781a468750f2",
+  "started_utc": "2026-10-18T09:31:29.922381+00:00",
+  "duration_seconds": 75.141,
+  "exit_code": 0
+}

@@ -1,0 +1,17 @@
+{
+  "label": "wellness-jest-existing",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "--runInBand",
+    "--no-cache",
+    "--testPathIgnorePatterns=qa-fall.spec.ts|qa-wellness.spec.ts",
+    "--json",
+    "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\wellness-existing-results.json"
+  ],
+  "revision": "872a895cd88ac8303bfe448831873aea562dfba5",
+  "started_utc": "2026-10-18T09:33:49.699780+00:00",
+  "duration_seconds": 44.593,
+  "exit_code": 0
+}

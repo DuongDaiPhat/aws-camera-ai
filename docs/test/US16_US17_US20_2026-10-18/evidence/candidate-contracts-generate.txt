@@ -1,0 +1,32 @@
+{
+  "label": "candidate-contracts-generate",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+  "command": [
+    "node",
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\qa-tooling\\node_modules\\pnpm\\bin\\pnpm.cjs",
+    "contracts:generate"
+  ],
+  "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+  "started_utc": "2026-10-18T09:40:10.865331+00:00",
+  "duration_seconds": 8.078,
+  "exit_code": 0
+}
+
+
+> aws-camera-ai@0.0.1 contracts:generate C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20
+> pnpm --filter @cam/contracts generate
+
+
+> @cam/contracts@0.0.1 generate C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\packages\contracts
+> openapi-typescript --redocly ../../redocly.yaml && prettier --write src/generated/*.ts
+
+🚀 orchestrator → packages/contracts/src/generated/orchestrator.ts [463ms]
+🚀 ai-service → packages/contracts/src/generated/ai-service.ts [553.2ms]
+src/generated/ai-service.ts 187ms
+src/generated/orchestrator.ts 492ms
+
+ ⚠  Operation must have at least one `4XX` response. at #/paths/~1health/get/responses
+ ⚠  Component: "FaceSelectionDetails" is never used. at #/components/schemas/FaceSelectionDetails
+ ⚠  Component: "FallResultMetadata" is never used. at #/components/schemas/FallResultMetadata
+ ⚠  Component: "FireResultMetadata" is never used. at #/components/schemas/FireResultMetadata
+ ⚠  Operation must have at least one `4XX` response. at #/paths/~1health/get/responses

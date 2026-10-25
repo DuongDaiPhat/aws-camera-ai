@@ -1,0 +1,19 @@
+{
+  "label": "fall-python-diagnostic",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\services\\ai-service",
+  "command": [
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "--ignore=tests/test_qa_pose.py",
+    "-o",
+    "addopts=",
+    "-o",
+    "faulthandler_timeout=20",
+    "-vv"
+  ],
+  "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+  "started_utc": "2026-10-18T09:29:36.729064+00:00",
+  "duration_seconds": 7.109,
+  "exit_code": 1
+}
