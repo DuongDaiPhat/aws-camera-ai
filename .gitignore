@@ -63,3 +63,8 @@ logs/
 artifacts/
 npm-debug.log*
 pnpm-debug.log*
+
+# ---- Postman ----
+*.postman_collection.json
+.postman/
+postman/
