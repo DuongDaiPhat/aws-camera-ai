@@ -13,6 +13,13 @@ người mới vào dự án.
 
 Các tài liệu này là kế hoạch/thiết kế; trạng thái triển khai phải được chứng minh bằng test và evidence, không bằng việc có diagram.
 
+## Testing guides
+
+- [Manual testing: three approaches per level and recommended instructions](test/MANUAL_TESTING_GUIDE.md)
+- [Automated testing: three approaches per level and implementation instructions](test/AUTOMATED_TESTING_GUIDE.md)
+- [Free testing tools for CameraAI](test/FREE_TESTING_TOOLS.md)
+- [API testing with Postman](test/POSTMAN_API_TESTING_GUIDE.md)
+
 ## Plan thực thi cho AI Agent
 
 Mỗi tính năng có một plan riêng; các file mô tả công việc cần làm, không xác nhận tính năng đã triển khai.
