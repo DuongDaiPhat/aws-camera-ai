@@ -1,0 +1,37 @@
+{
+  "label": "fall-jest-regression",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "test/qa-fall.spec.ts",
+    "--runInBand",
+    "--json",
+    "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\fall-regression-results.json"
+  ],
+  "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+  "started_utc": "2026-10-18T09:29:30.449773+00:00",
+  "duration_seconds": 36.937,
+  "exit_code": 1
+}
+
+
+FAIL test/qa-fall.spec.ts
+  ● Test suite failed to run
+
+    jest: failed to cache transform results in: C:/Users/ADMIN/AppData/Local/Packages/sandbox.{e982e4b8-cf0a-4992-a542-5b82ee222f77}/AC/Temp/jest/jest-transform-cache-68340d2143a17365338e6732f32f9a50-79ef2876fae7ca75eedb2aa53dc48338/5c/qafallspec_5c2326d9892f4965fe0ed99323faa293.map
+    Failure message: EPERM: operation not permitted, rename 'C:\Users\ADMIN\AppData\Local\Packages\sandbox.{e982e4b8-cf0a-4992-a542-5b82ee222f77}\AC\Temp\jest\jest-transform-cache-68340d2143a17365338e6732f32f9a50-79ef2876fae7ca75eedb2aa53dc48338\5c\qafallspec_5c2326d9892f4965fe0ed99323faa293.map.1145488947' -> 'C:\Users\ADMIN\AppData\Local\Packages\sandbox.{e982e4b8-cf0a-4992-a542-5b82ee222f77}\AC\Temp\jest\jest-transform-cache-68340d2143a17365338e6732f32f9a50-79ef2876fae7ca75eedb2aa53dc48338\5c\qafallspec_5c2326d9892f4965fe0ed99323faa293.map'
+
+      at writeFileSync (../../node_modules/.pnpm/write-file-atomic@4.0.2/node_modules/write-file-atomic/lib/index.js:252:8)
+      at writeCacheFile (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:908:33)
+      at ScriptTransformer._buildTransformResult (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:510:7)
+      at ScriptTransformer.transformSource (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:554:17)
+      at ScriptTransformer._transformAndBuildScript (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:674:40)
+      at ScriptTransformer.transform (../../node_modules/.pnpm/@jest+transform@29.7.0/node_modules/@jest/transform/build/ScriptTransformer.js:726:19)
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        20.186 s
+Ran all test suites matching /test\\qa-fall.spec.ts/i.
+Test results written to: D:\hoc tap\project 1\aws-camera-ai\docs\test\US16_US17_US20_2026-10-18\evidence\fall-regression-results.json

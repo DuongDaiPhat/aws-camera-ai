@@ -1,0 +1,204 @@
+{
+  "label": "candidate-system-final",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "test/qa-system.spec.ts",
+    "--runInBand",
+    "--no-cache",
+    "--json",
+    "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\candidate-system-final-results.json"
+  ],
+  "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+  "started_utc": "2026-10-18T09:38:57.100714+00:00",
+  "duration_seconds": 20.187,
+  "exit_code": 1
+}
+
+
+FAIL test/qa-system.spec.ts (18.024 s)
+  QA local HTTP runtime: production Wellness/Auth/Database modules
+    × US20 JWT guard denies an unauthenticated request (2 ms)
+    × US20 internal guard denies a wrong token (1 ms)
+    × US20 create response follows frozen camelCase contract
+    × US20 rejects out-of-range {"lookbackHours":0}
+    × US20 rejects out-of-range {"lookbackHours":25}
+    × US20 rejects out-of-range {"graceSeconds":59}
+    × US20 rejects out-of-range {"graceSeconds":3601}
+    × US20 rejects an unknown IANA timezone
+    × US20 rejects an empty daysOfWeek array (1 ms)
+    × US20 rejects DEPARTURE without direction/identity evidence
+    × US20 accepted observation uses HTTP 202 from frozen contract
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 JWT guard denies an unauthenticated request
+
+    error: new row for relation "cameras" violates check constraint "cameras_slug_format"
+
+      88 |       [device, owner],
+      89 |     );
+    > 90 |     await pool.query(
+         |     ^
+      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,
+      92 |       [camera, device, `qa-${camera}`],
+      93 |     );
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/qa-system.spec.ts:90:5)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 internal guard denies a wrong token
+
+    error: new row for relation "cameras" violates check constraint "cameras_slug_format"
+
+      88 |       [device, owner],
+      89 |     );
+    > 90 |     await pool.query(
+         |     ^
+      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,
+      92 |       [camera, device, `qa-${camera}`],
+      93 |     );
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/qa-system.spec.ts:90:5)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 create response follows frozen camelCase contract
+
+    error: new row for relation "cameras" violates check constraint "cameras_slug_format"
+
+      88 |       [device, owner],
+      89 |     );
+    > 90 |     await pool.query(
+         |     ^
+      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,
+      92 |       [camera, device, `qa-${camera}`],
+      93 |     );
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/qa-system.spec.ts:90:5)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {"lookbackHours":0}
+
+    error: new row for relation "cameras" violates check constraint "cameras_slug_format"
+
+      88 |       [device, owner],
+      89 |     );
+    > 90 |     await pool.query(
+         |     ^
+      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,
+      92 |       [camera, device, `qa-${camera}`],
+      93 |     );
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/qa-system.spec.ts:90:5)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {"lookbackHours":25}
+
+    error: new row for relation "cameras" violates check constraint "cameras_slug_format"
+
+      88 |       [device, owner],
+      89 |     );
+    > 90 |     await pool.query(
+         |     ^
+      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,
+      92 |       [camera, device, `qa-${camera}`],
+      93 |     );
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/qa-system.spec.ts:90:5)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {"graceSeconds":59}
+
+    error: new row for relation "cameras" violates check constraint "cameras_slug_format"
+
+      88 |       [device, owner],
+      89 |     );
+    > 90 |     await pool.query(
+         |     ^
+      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,
+      92 |       [camera, device, `qa-${camera}`],
+      93 |     );
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/qa-system.spec.ts:90:5)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {"graceSeconds":3601}
+
+    error: new row for relation "cameras" violates check constraint "cameras_slug_format"
+
+      88 |       [device, owner],
+      89 |     );
+    > 90 |     await pool.query(
+         |     ^
+      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,
+      92 |       [camera, device, `qa-${camera}`],
+      93 |     );
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/qa-system.spec.ts:90:5)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects an unknown IANA timezone
+
+    error: new row for relation "cameras" violates check constraint "cameras_slug_format"
+
+      88 |       [device, owner],
+      89 |     );
+    > 90 |     await pool.query(
+         |     ^
+      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,
+      92 |       [camera, device, `qa-${camera}`],
+      93 |     );
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/qa-system.spec.ts:90:5)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects an empty daysOfWeek array
+
+    error: new row for relation "cameras" violates check constraint "cameras_slug_format"
+
+      88 |       [device, owner],
+      89 |     );
+    > 90 |     await pool.query(
+         |     ^
+      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,
+      92 |       [camera, device, `qa-${camera}`],
+      93 |     );
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/qa-system.spec.ts:90:5)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects DEPARTURE without direction/identity evidence
+
+    error: new row for relation "cameras" violates check constraint "cameras_slug_format"
+
+      88 |       [device, owner],
+      89 |     );
+    > 90 |     await pool.query(
+         |     ^
+      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,
+      92 |       [camera, device, `qa-${camera}`],
+      93 |     );
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/qa-system.spec.ts:90:5)
+
+  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 accepted observation uses HTTP 202 from frozen contract
+
+    error: new row for relation "cameras" violates check constraint "cameras_slug_format"
+
+      88 |       [device, owner],
+      89 |     );
+    > 90 |     await pool.query(
+         |     ^
+      91 |       `INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`,
+      92 |       [camera, device, `qa-${camera}`],
+      93 |     );
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (test/qa-system.spec.ts:90:5)
+
+Test Suites: 1 failed, 1 total
+Tests:       11 failed, 11 total
+Snapshots:   0 total
+Time:        18.529 s
+Ran all test suites matching /test\\qa-system.spec.ts/i.
+Test results written to: D:\hoc tap\project 1\aws-camera-ai\docs\test\US16_US17_US20_2026-10-18\evidence\candidate-system-final-results.json

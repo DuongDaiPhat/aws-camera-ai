@@ -1,0 +1,150 @@
+{
+  "label": "fall-python-regression",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\services\\ai-service",
+  "command": [
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "tests/test_qa_pose.py",
+    "-o",
+    "addopts=",
+    "-v"
+  ],
+  "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+  "started_utc": "2026-10-18T09:28:29.889784+00:00",
+  "duration_seconds": 3.406,
+  "exit_code": 1
+}
+
+============================= test session starts =============================
+platform win32 -- Python 3.11.13, pytest-9.1.1, pluggy-1.6.0 -- D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\services\ai-service
+configfile: pyproject.toml
+plugins: anyio-4.15.1, cov-7.1.0
+collecting ... collected 15 items
+
+tests/test_qa_pose.py::test_qa_ac17_strict_15_seconds[14.999-CANDIDATE] PASSED [  6%]
+tests/test_qa_pose.py::test_qa_ac17_strict_15_seconds[15.0-CANDIDATE] PASSED [ 13%]
+tests/test_qa_pose.py::test_qa_ac17_strict_15_seconds[15.001-CONFIRMED] PASSED [ 20%]
+tests/test_qa_pose.py::test_qa_ac16_angle_and_drop_boundary[29.999-240.0-CANDIDATE] PASSED [ 26%]
+tests/test_qa_pose.py::test_qa_ac16_angle_and_drop_boundary[30.0-240.0-MONITORING] FAILED [ 33%]
+tests/test_qa_pose.py::test_qa_ac16_angle_and_drop_boundary[29.999-239.8-MONITORING] PASSED [ 40%]
+tests/test_qa_pose.py::test_qa_missing_pose_boundary[4.999-CANDIDATE] PASSED [ 46%]
+tests/test_qa_pose.py::test_qa_missing_pose_boundary[5.0-CANCELLED] FAILED [ 53%]
+tests/test_qa_pose.py::test_qa_gap_does_not_add_blind_time FAILED        [ 60%]
+tests/test_qa_pose.py::test_qa_prone_at_start_is_not_a_fall FAILED       [ 66%]
+tests/test_qa_pose.py::test_qa_duplicate_frame_does_not_fill_history FAILED [ 73%]
+tests/test_qa_pose.py::test_qa_missing_then_return_restarts_interval FAILED [ 80%]
+tests/test_qa_pose.py::test_qa_registry_keeps_session_identity_separate PASSED [ 86%]
+tests/test_qa_pose.py::test_qa_confirmed_episode_latched PASSED          [ 93%]
+tests/test_qa_pose.py::test_qa_restart_has_empty_history PASSED          [100%]
+
+================================== FAILURES ===================================
+_________ test_qa_ac16_angle_and_drop_boundary[30.0-240.0-MONITORING] _________
+
+angle = 30.0, center = 240.0, expected = 'MONITORING'
+
+    @pytest.mark.parametrize('angle,center,expected', [(29.999, 240.0, 'CANDIDATE'), (30.0, 240.0, 'MONITORING'), (29.999, 239.8, 'MONITORING')])
+    def test_qa_ac16_angle_and_drop_boundary(angle, center, expected):
+        tracker = FallTracker('qa-camera', 'qa-session', 'qa-track')
+        for i in range(10):
+            feed(tracker, i * 0.2, 85.0, 200.0)
+>       assert feed(tracker, 2.0, angle, center)['state'] == expected
+E       AssertionError: assert 'CANDIDATE' == 'MONITORING'
+E         
+E         - MONITORING
+E         + CANDIDATE
+
+tests\test_qa_pose.py:47: AssertionError
+________________ test_qa_missing_pose_boundary[5.0-CANCELLED] _________________
+
+gap = 5.0, expected = 'CANCELLED'
+
+    @pytest.mark.parametrize('gap,expected', [(4.999, 'CANDIDATE'), (5.0, 'CANCELLED')])
+    def test_qa_missing_pose_boundary(gap, expected):
+        tracker = candidate()
+        result = tracker.evaluate_frame(observed_at=BASE + timedelta(seconds=2.0 + gap),
+                                        frame_id='missing', keypoints=None, geometry=None,
+                                        pose_available=False, reason='NO_POSE')
+>       assert result['state'] == expected
+E       AssertionError: assert 'CANDIDATE' == 'CANCELLED'
+E         
+E         - CANCELLED
+E         + CANDIDATE
+
+tests\test_qa_pose.py:56: AssertionError
+_____________________ test_qa_gap_does_not_add_blind_time _____________________
+
+    def test_qa_gap_does_not_add_blind_time():
+        tracker = candidate()
+        result = feed(tracker, 18.0)
+>       assert result['state'] != 'CONFIRMED', '16 seconds without observations cannot prove continuous immobility'
+E       AssertionError: 16 seconds without observations cannot prove continuous immobility
+E       assert 'CONFIRMED' != 'CONFIRMED'
+
+tests\test_qa_pose.py:62: AssertionError
+____________________ test_qa_prone_at_start_is_not_a_fall _____________________
+
+    def test_qa_prone_at_start_is_not_a_fall():
+        tracker = FallTracker('qa-camera', 'qa-session', 'qa-track')
+        for i in range(120):
+            result = feed(tracker, i * 0.2, 10.0, 300.0)
+>           assert result['state'] == 'MONITORING', 'No observed lowering transition: do not infer a fall from startup prone posture'
+E           AssertionError: No observed lowering transition: do not infer a fall from startup prone posture
+E           assert 'CANDIDATE' == 'MONITORING'
+E             
+E             - MONITORING
+E             + CANDIDATE
+
+tests\test_qa_pose.py:70: AssertionError
+________________ test_qa_duplicate_frame_does_not_fill_history ________________
+
+    def test_qa_duplicate_frame_does_not_fill_history():
+        tracker = FallTracker('qa-camera', 'qa-session', 'qa-track')
+        for _ in range(10):
+            feed(tracker, 0, 85.0, 200.0, frame='same-frame')
+>       assert feed(tracker, 0.2)['state'] == 'MONITORING'
+E       AssertionError: assert 'CANDIDATE' == 'MONITORING'
+E         
+E         - MONITORING
+E         + CANDIDATE
+
+tests\test_qa_pose.py:77: AssertionError
+________________ test_qa_missing_then_return_restarts_interval ________________
+
+    def test_qa_missing_then_return_restarts_interval():
+        tracker = candidate()
+        for i in range(1, 71):
+            feed(tracker, 2.0 + i * 0.2)
+        tracker.evaluate_frame(observed_at=BASE + timedelta(seconds=16.4), frame_id='missing',
+                               keypoints=None, geometry=None, pose_available=False, reason='NO_POSE')
+        result = feed(tracker, 17.0)
+        assert result['state'] != 'CONFIRMED'
+>       assert result['immobileSeconds'] <= 0.6
+E       assert 15.0 <= 0.6
+
+tests\test_qa_pose.py:88: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_qa_pose.py::test_qa_ac16_angle_and_drop_boundary[30.0-240.0-MONITORING] - AssertionError: assert 'CANDIDATE' == 'MONITORING'
+  
+  - MONITORING
+  + CANDIDATE
+FAILED tests/test_qa_pose.py::test_qa_missing_pose_boundary[5.0-CANCELLED] - AssertionError: assert 'CANDIDATE' == 'CANCELLED'
+  
+  - CANCELLED
+  + CANDIDATE
+FAILED tests/test_qa_pose.py::test_qa_gap_does_not_add_blind_time - AssertionError: 16 seconds without observations cannot prove continuous immobility
+assert 'CONFIRMED' != 'CONFIRMED'
+FAILED tests/test_qa_pose.py::test_qa_prone_at_start_is_not_a_fall - AssertionError: No observed lowering transition: do not infer a fall from startup prone posture
+assert 'CANDIDATE' == 'MONITORING'
+  
+  - MONITORING
+  + CANDIDATE
+FAILED tests/test_qa_pose.py::test_qa_duplicate_frame_does_not_fill_history - AssertionError: assert 'CANDIDATE' == 'MONITORING'
+  
+  - MONITORING
+  + CANDIDATE
+FAILED tests/test_qa_pose.py::test_qa_missing_then_return_restarts_interval - assert 15.0 <= 0.6
+========================= 6 failed, 9 passed in 1.21s =========================
+

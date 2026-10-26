@@ -1,0 +1,167 @@
+{
+  "label": "candidate-lint",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+  "command": [
+    "node",
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\qa-tooling\\node_modules\\pnpm\\bin\\pnpm.cjs",
+    "-r",
+    "lint"
+  ],
+  "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+  "started_utc": "2026-10-18T09:38:57.416339+00:00",
+  "duration_seconds": 33.297,
+  "exit_code": 0
+}
+
+Scope: 4 of 5 workspace projects
+packages/eslint-config lint$ echo "(config package - khong co source de lint)"
+packages/eslint-config lint: "(config package - khong co source de lint)"
+packages/eslint-config lint: Done
+packages/contracts lint$ eslint "src/**/*.ts"
+packages/contracts lint: Done
+apps/orchestrator lint$ eslint "src/**/*.ts" "test/**/*.ts"
+apps/web lint$ eslint "src/**/*.{ts,tsx}"
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\cameras\CameraGridTile.tsx
+apps/web lint:   58:8  warning  Function 'CameraGridTile' has too many lines (169). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\cameras\CameraPreview.tsx
+apps/web lint:   38:8  warning  Function 'CameraPreview' has too many lines (128). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\cameras\CameraSettingsPanel.tsx
+apps/web lint:   277:8  warning  Function 'CameraSettingsPanel' has too many lines (154). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\cameras\CameraView.tsx
+apps/web lint:   160:8  warning  Function 'CameraView' has too many lines (169). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\cameras\__tests__\CameraSettingsPanel.spec.tsx
+apps/web lint:   63:57  warning  Arrow function has too many lines (140). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\cameras\live\use-live-person-detections.ts
+apps/web lint:   18:8   warning  Function 'useLivePersonDetections' has too many lines (103). Maximum allowed is 60  max-lines-per-function
+apps/web lint:   32:13  warning  Arrow function has too many lines (62). Maximum allowed is 60                       max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\cameras\source\webcam-publish.ts
+apps/web lint:   28:8  warning  Async function 'publishWebcam' has too many lines (62). Maximum allowed is 60  max-lines-per-function
+apps/web lint:   28:8  warning  Async function 'publishWebcam' has a complexity of 15. Maximum allowed is 12   complexity
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\dashboard\DashboardView.tsx
+apps/web lint:   62:8  warning  Function 'DashboardView' has too many lines (133). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\events\EventDetailModal.tsx
+apps/web lint:   223:8  warning  Function 'EventDetailModal' has too many lines (147). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\known-faces\AddKnownFaceForm.tsx
+apps/web lint:   13:8  warning  Function 'AddKnownFaceForm' has too many lines (149). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\known-faces\KnownFacesView.tsx
+apps/web lint:   8:8  warning  Function 'KnownFacesView' has too many lines (138). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\settings\EscalationRuleCard.spec.tsx
+apps/web lint:   6:42  warning  Arrow function has too many lines (173). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\settings\EscalationRuleCard.tsx
+apps/web lint:   28:8  warning  Function 'EscalationRuleCard' has too many lines (218). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\settings\EscalationRulesSection.tsx
+apps/web lint:   12:8  warning  Function 'EscalationRulesSection' has too many lines (123). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\settings\EscalationWaitControl.tsx
+apps/web lint:   47:8  warning  Function 'EscalationWaitControl' has too many lines (123). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\zones\ZoneForm.tsx
+apps/web lint:   6:8  warning  Function 'ZoneForm' has too many lines (126). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\components\zones\ZonesView.tsx
+apps/web lint:   52:8  warning  Function 'ZonesView' has too many lines (305). Maximum allowed is 120  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\hooks\useEscalationRules.ts
+apps/web lint:   27:8  warning  Function 'useEscalationRules' has too many lines (144). Maximum allowed is 60  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\hooks\useEvents.ts
+apps/web lint:   219:8  warning  Function 'useEvents' has too many lines (78). Maximum allowed is 60  max-lines-per-function
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\lib\api-client.ts
+apps/web lint:   64:1  warning  Async function 'request' has a complexity of 13. Maximum allowed is 12  complexity
+apps/web lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\web\src\lib\known-faces-client.ts
+apps/web lint:   28:8  warning  Function 'selectionDetails' has a complexity of 18. Maximum allowed is 12  complexity
+apps/web lint: ✖ 23 problems (0 errors, 23 warnings)
+apps/web lint: Done
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\cameras\cameras.service.ts
+apps/orchestrator lint:   226:3  warning  Async method 'updateCameraState' has too many lines (74). Maximum allowed is 60     max-lines-per-function
+apps/orchestrator lint:   226:3  warning  Async method 'updateCameraState' has a complexity of 19. Maximum allowed is 12      complexity
+apps/orchestrator lint:   769:3  warning  Async method 'getCameraDebugStream' has too many lines (88). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   769:3  warning  Async method 'getCameraDebugStream' has a complexity of 15. Maximum allowed is 12   complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\escalation-rules\escalation-rule-policy.ts
+apps/orchestrator lint:   129:1  warning  Function 'validateAlertThresholds' has a complexity of 14. Maximum allowed is 12  complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\escalation-rules\escalation-rules.repository.ts
+apps/orchestrator lint:   119:3  warning  Async method 'updateThresholdsAtomic' has too many lines (136). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   119:3  warning  Async method 'updateThresholdsAtomic' has a complexity of 23. Maximum allowed is 12    complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\escalation-rules\escalation-rules.service.ts
+apps/orchestrator lint:   51:3  warning  Async method 'updateThresholds' has too many lines (62). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\escalation\escalation-deadline-worker.service.ts
+apps/orchestrator lint:   46:3  warning  Async method 'scanAndProcessDueDeadlines' has too many lines (67). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\escalation\escalation-engine.service.ts
+apps/orchestrator lint:   220:3  warning  Async method 'findInitialTelegramReplay' has a complexity of 17. Maximum allowed is 12  complexity
+apps/orchestrator lint:   287:3  warning  Async method 'confirmInitial' has too many lines (139). Maximum allowed is 60           max-lines-per-function
+apps/orchestrator lint:   287:3  warning  Async method 'confirmInitial' has a complexity of 29. Maximum allowed is 12             complexity
+apps/orchestrator lint:   447:3  warning  Async method 'closeEmergency' has too many lines (106). Maximum allowed is 60           max-lines-per-function
+apps/orchestrator lint:   447:3  warning  Async method 'closeEmergency' has a complexity of 15. Maximum allowed is 12             complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\escalation\escalation-policy.ts
+apps/orchestrator lint:   64:8  warning  Function 'isValidStatusTransition' has a complexity of 13. Maximum allowed is 12  complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\events\events.repository.ts
+apps/orchestrator lint:   392:3  warning  Async method 'updateEvent' has too many lines (81). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\fall-detection\coordinator\fall-incident.coordinator.ts
+apps/orchestrator lint:   104:3  warning  Async method 'handleConfirmedFall' has too many lines (112). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   104:3  warning  Async method 'handleConfirmedFall' has a complexity of 24. Maximum allowed is 12    complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\fall-detection\envelope\pose-frame-envelope.ts
+apps/orchestrator lint:   62:1  warning  Function 'isValidPoseFrameHeader' has a complexity of 22. Maximum allowed is 12  complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\fall-detection\repository\fall-incident.repository.ts
+apps/orchestrator lint:   52:3  warning  Async method 'createConfirmedIncident' has too many lines (84). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\frigate\frigate-config.service.ts
+apps/orchestrator lint:   23:3  warning  Method 'generateUpdatedConfig' has too many lines (89). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   23:3  warning  Method 'generateUpdatedConfig' has a complexity of 55. Maximum allowed is 12   complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\frigate\frigate-frame-buffer.ts
+apps/orchestrator lint:   25:3  warning  Method 'accept' has a complexity of 18. Maximum allowed is 12        complexity
+apps/orchestrator lint:   75:3  warning  Method 'parseObject' has too many lines (62). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   75:3  warning  Method 'parseObject' has a complexity of 22. Maximum allowed is 12   complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\frigate\frigate-sync.service.ts
+apps/orchestrator lint:   91:3  warning  Async method 'executeSync' has too many lines (106). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   91:3  warning  Async method 'executeSync' has a complexity of 30. Maximum allowed is 12    complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\ingestion\mqtt-consumer.service.ts
+apps/orchestrator lint:    77:3  warning  Method 'connect' has too many lines (82). Maximum allowed is 60             max-lines-per-function
+apps/orchestrator lint:   416:3  warning  Async method 'handleMessage' has a complexity of 13. Maximum allowed is 12  complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\known-faces\face-response.ts
+apps/orchestrator lint:   7:8  warning  Function 'isEmbeddingResult' has a complexity of 20. Maximum allowed is 12  complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\known-faces\known-faces.controller.ts
+apps/orchestrator lint:   37:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   43:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\notifications\telegram\telegram.adapter.ts
+apps/orchestrator lint:   119:3  warning  Async method 'parseResponse' has a complexity of 13. Maximum allowed is 12  complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\wellness\wellness-scheduler.service.ts
+apps/orchestrator lint:   145:3  warning  Async method 'evaluateSingleRun' has too many lines (171). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   349:3  warning  Async method 'processTimeouts' has too many lines (63). Maximum allowed is 60     max-lines-per-function
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\wellness\wellness.controller.ts
+apps/orchestrator lint:    54:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:    87:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   113:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   133:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   150:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   178:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   227:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\wellness\wellness.repository.ts
+apps/orchestrator lint:   168:3  warning  Async method 'updateSchedule' has a complexity of 13. Maximum allowed is 12  complexity
+apps/orchestrator lint:   738:3  warning  Method 'mapRunRow' has a complexity of 15. Maximum allowed is 12             complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\wellness\wellness.service.ts
+apps/orchestrator lint:   163:3  warning  Async method 'confirmCheck' has too many lines (138). Maximum allowed is 60      max-lines-per-function
+apps/orchestrator lint:   163:3  warning  Async method 'confirmCheck' has a complexity of 17. Maximum allowed is 12        complexity
+apps/orchestrator lint:   332:3  warning  Async method 'submitObservation' has too many lines (67). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   332:3  warning  Async method 'submitObservation' has a complexity of 15. Maximum allowed is 12   complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\src\zones\zone-geometry.validator.ts
+apps/orchestrator lint:   31:8  warning  Function 'getZonePolygonError' has a complexity of 21. Maximum allowed is 12  complexity
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\test\escalation-deadline-worker.service.spec.ts
+apps/orchestrator lint:   125:30  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\test\frigate-frame-buffer.spec.ts
+apps/orchestrator lint:   4:58  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\test\known-faces.spec.ts
+apps/orchestrator lint:   24:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\test\mocks\nestjs-bullmq.ts
+apps/orchestrator lint:    1:37  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:    3:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:    6:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   11:35  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\test\qa-db.integration.spec.ts
+apps/orchestrator lint:   22:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   41:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\test\qa-fall.spec.ts
+apps/orchestrator lint:   33:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   51:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\test\qa-system.spec.ts
+apps/orchestrator lint:   46:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\test\qa-wellness.spec.ts
+apps/orchestrator lint:   43:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\apps\orchestrator\test\wellness.service.spec.ts
+apps/orchestrator lint:   172:94  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: ✖ 63 problems (0 errors, 63 warnings)
+apps/orchestrator lint: Done
+

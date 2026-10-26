@@ -1,0 +1,9 @@
+{
+  "label": "db-migration-gate",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+  "command": ["node", "D:\\hoc tap\\project 1\\aws-camera-ai\\tools\\scripts\\sprint3-db-gate.mjs"],
+  "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+  "started_utc": "2026-10-18T09:26:38.687130+00:00",
+  "duration_seconds": 61.593,
+  "exit_code": 0
+}

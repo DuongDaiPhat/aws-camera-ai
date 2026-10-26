@@ -1,0 +1,17 @@
+{
+  "label": "candidate-system-final",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "test/qa-system.spec.ts",
+    "--runInBand",
+    "--no-cache",
+    "--json",
+    "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\candidate-system-final-results.json"
+  ],
+  "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+  "started_utc": "2026-10-18T09:38:57.100714+00:00",
+  "duration_seconds": 20.187,
+  "exit_code": 1
+}

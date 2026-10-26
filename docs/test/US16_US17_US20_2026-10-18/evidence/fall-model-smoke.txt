@@ -1,0 +1,20 @@
+{
+  "label": "fall-model-smoke",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\services\\ai-service",
+  "command": [
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+    "scripts/dependency_smoke.py",
+    "--models-dir",
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\gate-models"
+  ],
+  "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+  "started_utc": "2026-10-18T09:26:29.609815+00:00",
+  "duration_seconds": 7.468,
+  "exit_code": 0
+}
+
+{"python": "3.11.13", "platform": "Windows-10-10.0.26200-SP0", "imports": "PASS", "model_load_and_inference": "PASS (blank image; no accuracy claim)"}
+
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+W0000 00:00:1792315594.327789   14884 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1792315594.372480   28996 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.

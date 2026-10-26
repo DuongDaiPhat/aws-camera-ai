@@ -1,0 +1,33 @@
+{
+  "label": "runtime-db-migrate",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+  "command": [
+    "node",
+    "tools/scripts/migrate.mjs",
+    "up"
+  ],
+  "revision": "872a895cd88ac8303bfe448831873aea562dfba5",
+  "started_utc": "2026-10-18T09:33:49.985695+00:00",
+  "duration_seconds": 1.312,
+  "exit_code": 0
+}
+
+--> 0001_init.sql
+--> 0002_seed_escalation_rules.sql
+--> 0003_auth_refresh_tokens.sql
+--> 0004_document_frigate_dedup_key.sql
+--> 0005_escalation_rules_version_and_constraints.sql
+--> 0006_camera_sources_and_frigate_settings.sql
+--> 0007_face_collection_sync.sql
+--> 0007_telegram_delivery.sql
+--> 0008_escalation_state_machine.sql
+--> 0009_zone_configuration.sql
+--> 0010_event_ai_result_receipts.sql
+--> 0010_update_unknown_person_thresholds.sql
+--> 0011_telegram_confirmation_delivery.sql
+--> 0012_configurable_high_wait.sql
+--> 0013_fall_incidents.sql
+--> 0014_fire_incidents.sql
+--> 0015_wellness_check_runtime.sql
+Da chay 17 migration.
+

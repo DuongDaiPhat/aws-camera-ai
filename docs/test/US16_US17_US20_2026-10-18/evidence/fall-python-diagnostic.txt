@@ -1,0 +1,219 @@
+{
+  "label": "fall-python-diagnostic",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\services\\ai-service",
+  "command": [
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "--ignore=tests/test_qa_pose.py",
+    "-o",
+    "addopts=",
+    "-o",
+    "faulthandler_timeout=20",
+    "-vv"
+  ],
+  "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+  "started_utc": "2026-10-18T09:29:36.729064+00:00",
+  "duration_seconds": 7.109,
+  "exit_code": 1
+}
+
+============================= test session starts =============================
+platform win32 -- Python 3.11.13, pytest-9.1.1, pluggy-1.6.0 -- D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\services\ai-service
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.15.1, cov-7.1.0
+collecting ... collected 49 items
+
+tests/test_config.py::test_log_level_viet_thuong_van_dung_duoc[debug] PASSED [  2%]
+tests/test_config.py::test_log_level_viet_thuong_van_dung_duoc[DEBUG] PASSED [  4%]
+tests/test_config.py::test_log_level_viet_thuong_van_dung_duoc[Debug] PASSED [  6%]
+tests/test_config.py::test_log_level_viet_thuong_van_dung_duoc[ info ] PASSED [  8%]
+tests/test_config.py::test_log_level_viet_thuong_van_dung_duoc[warning] PASSED [ 10%]
+tests/test_config.py::test_log_level_sai_bi_tu_choi_ngay PASSED          [ 12%]
+tests/test_config.py::test_doc_duoc_cau_hinh_tu_bien_moi_truong PASSED   [ 14%]
+tests/test_config.py::test_gia_tri_mac_dinh_khop_voi_tai_lieu PASSED     [ 16%]
+tests/test_face.py::test_codec_rejects_invalid_vectors PASSED            [ 18%]
+tests/test_face.py::test_collection_atomic_replay_delete_and_scope PASSED [ 20%]
+tests/test_face.py::test_detection_selection[0-None-NO_FACE_DETECTED] PASSED [ 22%]
+tests/test_face.py::test_detection_selection[2-None-MULTIPLE_FACES] PASSED [ 24%]
+tests/test_face.py::test_detection_selection[1-2-INVALID_FACE_SELECTION] PASSED [ 26%]
+tests/test_face.py::test_detection_selection[1--1-INVALID_FACE_SELECTION] PASSED [ 28%]
+tests/test_face.py::test_detection_selection[1-None-None] PASSED         [ 30%]
+tests/test_face.py::test_detection_selection[2-1-None] PASSED            [ 32%]
+tests/test_face.py::test_stable_face_order_and_exif PASSED               [ 34%]
+tests/test_face.py::test_invalid_image_limits_and_missing_model ERROR    [ 36%]
+tests/test_face.py::test_router_auth_embed_and_sync PASSED               [ 38%]
+tests/test_face.py::test_embed_response_never_contains_image PASSED      [ 40%]
+tests/test_face_matcher.py::test_quality_outcome_is_not_technical_failure[kh\xf4ng-th\u1ea5y-m\u1eb7t] PASSED [ 42%]
+tests/test_face_matcher.py::test_quality_outcome_is_not_technical_failure[nhi\u1ec1u-m\u1eb7t] PASSED [ 44%]
+tests/test_face_matcher.py::test_quality_outcome_is_not_technical_failure[thi\u1ebfu-model] PASSED [ 46%]
+tests/test_face_matcher.py::test_quality_outcome_is_not_technical_failure[\u1ea3nh-h\u1ecfng] PASSED [ 48%]
+tests/test_face_matcher.py::test_quality_outcome_is_not_technical_failure[provider-l\u1ed7i] PASSED [ 51%]
+tests/test_face_matcher.py::test_matching_reports_actual_threshold_and_label_score[0.6-KNOWN] PASSED [ 53%]
+tests/test_face_matcher.py::test_matching_reports_actual_threshold_and_label_score[0.9-UNKNOWN] PASSED [ 55%]
+tests/test_face_matcher.py::test_empty_loaded_collection_is_unknown_but_missing_collection_is_error PASSED [ 57%]
+tests/test_face_matcher.py::test_match_api_serializes_quality_result_and_rejects_invalid_threshold PASSED [ 59%]
+tests/test_fall_tracker.py::test_fall_tracker_history_requires_10_frames_ac16_2 PASSED [ 61%]
+tests/test_fall_tracker.py::test_fall_tracker_rest_area_suppression_ac17_3 PASSED [ 63%]
+tests/test_fall_tracker.py::test_fall_tracker_missing_pose_grace_period_ac16_3 PASSED [ 65%]
+tests/test_fall_tracker.py::test_fall_tracker_recovered_when_standing_up_ac17_2 PASSED [ 67%]
+tests/test_fall_tracker.py::test_fall_tracker_registry_and_sweeper PASSED [ 69%]
+tests/test_fall_tracker.py::test_fall_tracker_persistent_prone_and_immobility_confirms PASSED [ 71%]
+tests/test_health.py::test_health_tra_ve_ok PASSED                       [ 73%]
+tests/test_health.py::test_health_bao_cao_face_provider_dang_bat PASSED  [ 75%]
+tests/test_pose_estimator.py::test_pose_estimator_blank_image PASSED     [ 77%]
+tests/test_pose_estimator.py::test_pose_estimator_empty_image PASSED     [ 79%]
+tests/test_pose_geometry.py::test_calculate_torso_angle_vertical_and_horizontal PASSED [ 81%]
+tests/test_pose_geometry.py::test_calculate_pose_geometry_valid_standing PASSED [ 83%]
+tests/test_pose_geometry.py::test_calculate_pose_geometry_rejects_low_visibility PASSED [ 85%]
+tests/test_pose_geometry.py::test_calculate_center_drop_ratio PASSED     [ 87%]
+tests/test_pose_geometry.py::test_calculate_motion_score PASSED          [ 89%]
+tests/test_pose_router.py::test_evaluate_fall_auth_required PASSED       [ 91%]
+tests/test_pose_router.py::test_evaluate_fall_timestamp_validation PASSED [ 93%]
+tests/test_pose_router.py::test_evaluate_fall_bbox_validation PASSED     [ 95%]
+tests/test_pose_router.py::test_evaluate_fall_corrupt_image PASSED       [ 97%]
+tests/test_pose_router.py::test_evaluate_fall_success_flow PASSED        [100%]
+
+=================================== ERRORS ====================================
+________ ERROR at setup of test_invalid_image_limits_and_missing_model ________
+
+cls = <class '_pytest.runner.CallInfo'>
+func = <function call_and_report.<locals>.<lambda> at 0x000002A42927B560>
+when = 'setup'
+reraise = (<class '_pytest.outcomes.Exit'>, <class 'KeyboardInterrupt'>)
+
+    @classmethod
+    def from_call(
+        cls,
+        func: Callable[[], TResult],
+        when: Literal["collect", "setup", "call", "teardown"],
+        reraise: type[BaseException] | tuple[type[BaseException], ...] | None = None,
+    ) -> CallInfo[TResult]:
+        """Call func, wrapping the result in a CallInfo.
+    
+        :param func:
+            The function to call. Called without arguments.
+        :type func: Callable[[], _pytest.runner.TResult]
+        :param when:
+            The phase in which the function is called.
+        :param reraise:
+            Exception or exceptions that shall propagate if raised by the
+            function, instead of being wrapped in the CallInfo.
+        """
+        excinfo = None
+        instant = timing.Instant()
+        try:
+>           result: TResult | None = func()
+                                     ^^^^^^
+
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\runner.py:361: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\runner.py:250: in <lambda>
+    lambda: runtest_hook(item=item, **kwds),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\pluggy\_hooks.py:512: in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\pluggy\_manager.py:120: in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\logging.py:858: in pytest_runtest_setup
+    yield
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\capture.py:895: in pytest_runtest_setup
+    return (yield)
+            ^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\runner.py:170: in pytest_runtest_setup
+    item.session._setupstate.setup(item)
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\runner.py:536: in setup
+    col.setup()
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\python.py:1710: in setup
+    self._request._fillfixtures()
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\fixtures.py:806: in _fillfixtures
+    item.funcargs[argname] = self.getfixturevalue(argname)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\fixtures.py:630: in getfixturevalue
+    fixturedef = self._get_active_fixturedef(argname)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\fixtures.py:726: in _get_active_fixturedef
+    fixturedef.execute(request=subrequest)
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\fixtures.py:1232: in execute
+    result: FixtureValue = ihook.pytest_fixture_setup(
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\pluggy\_hooks.py:512: in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\pluggy\_manager.py:120: in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\pluggy\_callers.py:53: in run_old_style_hookwrapper
+    return result.get_result()
+           ^^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\pluggy\_callers.py:38: in run_old_style_hookwrapper
+    res = yield
+          ^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\setuponly.py:36: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\fixtures.py:1328: in pytest_fixture_setup
+    result = call_fixture_func(fixturefunc, request, kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\fixtures.py:998: in call_fixture_func
+    fixture_result = next(generator)
+                     ^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\tmpdir.py:300: in tmp_path
+    path = _mk_tmp(request, tmp_path_factory)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\tmpdir.py:287: in _mk_tmp
+    return factory.mktemp(name, numbered=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\tmpdir.py:136: in mktemp
+    basename = self._ensure_relative_to_basetemp(basename)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\tmpdir.py:117: in _ensure_relative_to_basetemp
+    if (self.getbasetemp() / basename).resolve().parent != self.getbasetemp():
+        ^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\tmpdir.py:213: in getbasetemp
+    basetemp = make_numbered_dir_with_cleanup(
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\pathlib.py:420: in make_numbered_dir_with_cleanup
+    raise e
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\pathlib.py:401: in make_numbered_dir_with_cleanup
+    p = make_numbered_dir(root, prefix, mode)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\pathlib.py:228: in make_numbered_dir
+    max_existing = max(map(parse_num, find_suffixes(root, prefix)), default=-1)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\pathlib.py:187: in extract_suffixes
+    for entry in iter:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+root = WindowsPath('C:/Users/ADMIN/AppData/Local/Temp/pytest-of-ADMIN')
+prefix = 'pytest-'
+
+    def find_prefixed(root: Path, prefix: str) -> Iterator[os.DirEntry[str]]:
+        """Find all elements in root that begin with the prefix, case-insensitive."""
+        l_prefix = prefix.lower()
+>       for x in os.scandir(root):
+                 ^^^^^^^^^^^^^^^^
+E       PermissionError: [WinError 5] Access is denied: 'C:\\Users\\ADMIN\\AppData\\Local\\Temp\\pytest-of-ADMIN'
+
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\_pytest\pathlib.py:175: PermissionError
+============================== warnings summary ===============================
+D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\fastapi\testclient.py:1
+  D:\hoc tap\project 1\aws-camera-ai\artifacts\ai-gate-windows\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_pose_router.py::test_evaluate_fall_timestamp_validation
+  C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\services\ai-service\app\routers\pose.py:110: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    observed_at = _parse_timestamp(frame_timestamp)
+
+tests/test_pose_router.py::test_evaluate_fall_bbox_validation
+  C:\Users\ADMIN\.codex\visualizations\2026\10\18\01a14e4d-7ffe-7073-9f17-463257072541\qa-us16-us17-us20\services\ai-service\app\routers\pose.py:111: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    bbox_dict = _parse_bbox(person_bounding_box)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+ERROR tests/test_face.py::test_invalid_image_limits_and_missing_model - PermissionError: [WinError 5] Access is denied: 'C:\\Users\\ADMIN\\AppData\\Local\\Temp\\pytest-of-ADMIN'
+=================== 48 passed, 3 warnings, 1 error in 5.02s ===================
+

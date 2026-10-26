@@ -1,0 +1,9 @@
+{
+  "label": "candidate-web",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\web",
+  "command": ["node", "node_modules/vitest/vitest.mjs", "run", "--maxWorkers=1", "--minWorkers=1"],
+  "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+  "started_utc": "2026-10-18T09:38:07.730274+00:00",
+  "duration_seconds": 37.547,
+  "exit_code": 0
+}

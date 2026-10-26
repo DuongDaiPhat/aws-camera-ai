@@ -1,0 +1,107 @@
+{
+  "label": "candidate-db-verified",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "--runInBand",
+    "--no-cache",
+    "--testRegex=qa-db.integration.spec.ts$",
+    "--json",
+    "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\candidate-db-verified-results.json"
+  ],
+  "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+  "started_utc": "2026-10-18T09:40:10.589259+00:00",
+  "duration_seconds": 15.157,
+  "exit_code": 1
+}
+
+[Nest] 32012  - 18/10/2026, 16.40.25     LOG [FallIncidentRepository] Đã tạo incident té ngã (event: 049e4725-30dc-4126-a246-6ad0b8e40dbf, incident: 2f3cbe19-a776-4b33-8bd3-33145ee38f74, episode: 8f066119-11b8-4d08-88d9-c02221f67dff)
+[Nest] 32012  - 18/10/2026, 16.40.25     LOG [FallIncidentRepository] Đã tạo incident té ngã (event: d7ed988d-f5e0-4c96-8adb-28a1620aac38, incident: e81cdb89-fff5-48cd-97db-f24e7cd414c1, episode: 1eb74b9c-d98a-4c7a-adb0-cf0dcd0829f1)
+[Nest] 32012  - 18/10/2026, 16.40.25    WARN [WellnessSchedulerService] Phát hiện không có hoạt động cho resident=351347c6-de31-449e-b7e4-a4f7c224a404 trong 6h qua. Tạo sự kiện WELLNESS_TIMEOUT (P2).
+
+[Nest] 32012  - 18/10/2026, 16.40.25   ERROR [WellnessSchedulerService] Lỗi khi đánh giá wellness run 5d772ce0-695e-484d-a115-8892a4a4f2df
+[Nest] 32012  - 18/10/2026, 16.40.25   ERROR [WellnessSchedulerService] error: could not determine data type of parameter $2
+FAIL test/qa-db.integration.spec.ts (13.096 s)
+  QA PostgreSQL16 production repositories
+    √ US17 persists independent FALL P1 incident and sequential replay deduplicates (62 ms)
+    √ US17 concurrent same-episode deliveries both succeed idempotently (41 ms)
+    √ US20 schedule CRUD preserves history through soft-delete (44 ms)
+    × US20 a VIEWER without an active household link cannot be assigned by another caregiver (30 ms)
+    × US20 claim and no-activity evaluation create atomic P2 resident alert (92 ms)
+    × US20 IM_OK confirmation commits against real schema (44 ms)
+    × US20 NEED_HELP confirmation commits against real schema (37 ms)
+
+  ● QA PostgreSQL16 production repositories › US20 a VIEWER without an active household link cannot be assigned by another caregiver
+
+    expect(received).resolves.toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      163 |   it('US20 a VIEWER without an active household link cannot be assigned by another caregiver', async () => {
+      164 |     const f = await fixture();
+    > 165 |     await expect(wellness.verifyResidentHouseholdLink(f.owner, f.resident)).resolves.toBe(false);
+          |                                                                                      ^
+      166 |   });
+      167 |   it('US20 claim and no-activity evaluation create atomic P2 resident alert', async () => {
+      168 |     const f = await scheduleFixture();
+
+      at Object.toBe (../../node_modules/.pnpm/expect@29.7.0/node_modules/expect/build/index.js:174:22)
+      at Object.<anonymous> (test/qa-db.integration.spec.ts:165:86)
+
+  ● QA PostgreSQL16 production repositories › US20 claim and no-activity evaluation create atomic P2 resident alert
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "ALERT_CREATED"
+    Received: "PROCESSING"
+
+      185 |       )
+      186 |     ).rows[0];
+    > 187 |     expect(stored.status).toBe('ALERT_CREATED');
+          |                           ^
+      188 |     const event = (
+      189 |       await pool.query('SELECT priority,event_type FROM events WHERE id=$1', [stored.event_id])
+      190 |     ).rows[0];
+
+      at Object.<anonymous> (test/qa-db.integration.spec.ts:187:27)
+
+  ● QA PostgreSQL16 production repositories › US20 IM_OK confirmation commits against real schema
+
+    error: inconsistent types deduced for parameter $2
+
+      273 |       const targetStatus = dto.response === 'IM_OK' ? 'RESOLVED' : 'ESCALATED';
+      274 |
+    > 275 |       await client.query(
+          |       ^
+      276 |         `UPDATE events
+      277 |          SET status = $2,
+      278 |              resolved_at = CASE WHEN $2 = 'RESOLVED' THEN now() ELSE resolved_at END,
+
+      at ../../node_modules/.pnpm/pg@8.23.0/node_modules/pg/lib/client.js:694:17
+      at WellnessService.confirmCheck (src/wellness/wellness.service.ts:275:7)
+      at test/qa-db.integration.spec.ts:212:22
+
+  ● QA PostgreSQL16 production repositories › US20 NEED_HELP confirmation commits against real schema
+
+    error: inconsistent types deduced for parameter $2
+
+      273 |       const targetStatus = dto.response === 'IM_OK' ? 'RESOLVED' : 'ESCALATED';
+      274 |
+    > 275 |       await client.query(
+          |       ^
+      276 |         `UPDATE events
+      277 |          SET status = $2,
+      278 |              resolved_at = CASE WHEN $2 = 'RESOLVED' THEN now() ELSE resolved_at END,
+
+      at ../../node_modules/.pnpm/pg@8.23.0/node_modules/pg/lib/client.js:694:17
+      at WellnessService.confirmCheck (src/wellness/wellness.service.ts:275:7)
+      at test/qa-db.integration.spec.ts:212:22
+
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 3 passed, 7 total
+Snapshots:   0 total
+Time:        13.524 s
+Ran all test suites.
+Test results written to: D:\hoc tap\project 1\aws-camera-ai\docs\test\US16_US17_US20_2026-10-18\evidence\candidate-db-verified-results.json

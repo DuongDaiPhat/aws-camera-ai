@@ -1,0 +1,38 @@
+{
+  "label": "baseline-bridge",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-main-baseline\\infra\\frigate\\frame-metadata",
+  "command": [
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+    "-m",
+    "unittest",
+    "test_bridge",
+    "-v"
+  ],
+  "revision": "0f5c948a27fc82e1e20cfd35bf56781a468750f2",
+  "started_utc": "2026-10-18T09:33:46.531881+00:00",
+  "duration_seconds": 0.344,
+  "exit_code": 0
+}
+
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.500 observedAt=123.5 ageMs=0.0 box=[1, 2, 3, 4] action=DROP
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.500 observedAt=123.5 ageMs=0.0 box=[1, 2, 3, 4] action=DROP
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.500 observedAt=123.5 ageMs=0.0 box=None action=DROP
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p_future frameTime=123.500 observedAt=124.0 ageMs=-500.0 box=[10, 20, 100, 200] action=DROP
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p_no_time frameTime=123.500 observedAt=None ageMs=-1.0 box=[10, 20, 100, 200] action=DROP
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p_stale frameTime=123.500 observedAt=123.1 ageMs=400.0 box=[10, 20, 100, 200] action=DROP
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p_fresh frameTime=123.500 observedAt=123.350 ageMs=150.0 box=[30, 40, 150, 250] action=PUBLISH
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.500 observedAt=123.400 ageMs=100.0 box=[10, 20, 100, 200] action=PUBLISH
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.450 observedAt=123.400 ageMs=50.0 box=[10, 20, 100, 200] action=PUBLISH
+[PERSON_DEBUG][BRIDGE] camera=cam_test objectId=p1 frameTime=123.550 observedAt=123.400 ageMs=150.0 box=[10, 20, 100, 200] action=PUBLISH
+
+test_filters_out_false_positive_ended_other_labels_or_null_box (test_bridge.FramePayloadTest.test_filters_out_false_positive_ended_other_labels_or_null_box) ... ok
+test_filters_out_future_timestamp (test_bridge.FramePayloadTest.test_filters_out_future_timestamp) ... ok
+test_filters_out_person_missing_frame_time (test_bridge.FramePayloadTest.test_filters_out_person_missing_frame_time) ... ok
+test_filters_out_stale_person_older_than_max_age (test_bridge.FramePayloadTest.test_filters_out_stale_person_older_than_max_age) ... ok
+test_publishes_current_person_box_within_max_age (test_bridge.FramePayloadTest.test_publishes_current_person_box_within_max_age) ... ok
+test_same_observed_at_retained_across_newer_frames (test_bridge.FramePayloadTest.test_same_observed_at_retained_across_newer_frames) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.000s
+
+OK

@@ -1,0 +1,15 @@
+{
+  "label": "fall-bridge",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\infra\\frigate\\frame-metadata",
+  "command": [
+    "D:\\hoc tap\\project 1\\aws-camera-ai\\artifacts\\ai-gate-windows\\Scripts\\python.exe",
+    "-m",
+    "unittest",
+    "test_bridge",
+    "-v"
+  ],
+  "revision": "549f9c092a3b274aaa8629c9323365b0c0a2d1e6",
+  "started_utc": "2026-10-18T09:26:29.602167+00:00",
+  "duration_seconds": 0.359,
+  "exit_code": 1
+}

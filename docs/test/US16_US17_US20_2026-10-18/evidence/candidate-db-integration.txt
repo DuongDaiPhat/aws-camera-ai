@@ -1,0 +1,151 @@
+{
+  "label": "candidate-db-integration",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "--runInBand",
+    "--no-cache",
+    "--testRegex=qa-db.integration.spec.ts$",
+    "--json",
+    "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\candidate-db-results.json"
+  ],
+  "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+  "started_utc": "2026-10-18T09:37:22.198841+00:00",
+  "duration_seconds": 18.297,
+  "exit_code": 1
+}
+
+
+FAIL test/qa-db.integration.spec.ts (15.658 s)
+  QA PostgreSQL16 production repositories
+    × US17 persists independent FALL P1 incident and sequential replay deduplicates (11 ms)
+    × US17 concurrent same-episode deliveries both succeed idempotently (21 ms)
+    × US20 schedule CRUD preserves history through soft-delete (20 ms)
+    × US20 a VIEWER without an active household link cannot be assigned by another caregiver (20 ms)
+    × US20 claim and no-activity evaluation create atomic P2 resident alert (21 ms)
+    × US20 IM_OK confirmation commits against real schema (19 ms)
+    × US20 NEED_HELP confirmation commits against real schema (19 ms)
+
+  ● QA PostgreSQL16 production repositories › US17 persists independent FALL P1 incident and sequential replay deduplicates
+
+    error: new row for relation "users" violates check constraint "users_co_it_nhat_mot_cach_dang_nhap"
+
+      15 | async function fixture() {
+      16 |   const owner = randomUUID(), resident = randomUUID(), device = randomUUID(), camera = randomUUID();
+    > 17 |   await pool.query(`INSERT INTO users(id,email,full_name,role) VALUES ($1,$2,'QA caregiver','CAREGIVER'),($3,$4,'QA resident','VIEWER')`,
+         |   ^
+      18 |     [owner, `${owner}@example.invalid`, resident, `${resident}@example.invalid`]);
+      19 |   await pool.query(`INSERT INTO devices(id,owner_user_id,name,device_type,status) VALUES($1,$2,'QA','EDGE_GATEWAY','ONLINE')`, [device,owner]);
+      20 |   await pool.query(`INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`, [camera,device,`qa-${camera}`]);
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at fixture (test/qa-db.integration.spec.ts:17:3)
+      at Object.<anonymous> (test/qa-db.integration.spec.ts:42:15)
+
+  ● QA PostgreSQL16 production repositories › US17 concurrent same-episode deliveries both succeed idempotently
+
+    error: new row for relation "users" violates check constraint "users_co_it_nhat_mot_cach_dang_nhap"
+
+      15 | async function fixture() {
+      16 |   const owner = randomUUID(), resident = randomUUID(), device = randomUUID(), camera = randomUUID();
+    > 17 |   await pool.query(`INSERT INTO users(id,email,full_name,role) VALUES ($1,$2,'QA caregiver','CAREGIVER'),($3,$4,'QA resident','VIEWER')`,
+         |   ^
+      18 |     [owner, `${owner}@example.invalid`, resident, `${resident}@example.invalid`]);
+      19 |   await pool.query(`INSERT INTO devices(id,owner_user_id,name,device_type,status) VALUES($1,$2,'QA','EDGE_GATEWAY','ONLINE')`, [device,owner]);
+      20 |   await pool.query(`INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`, [camera,device,`qa-${camera}`]);
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at fixture (test/qa-db.integration.spec.ts:17:3)
+      at Object.<anonymous> (test/qa-db.integration.spec.ts:52:15)
+
+  ● QA PostgreSQL16 production repositories › US20 schedule CRUD preserves history through soft-delete
+
+    error: new row for relation "users" violates check constraint "users_co_it_nhat_mot_cach_dang_nhap"
+
+      15 | async function fixture() {
+      16 |   const owner = randomUUID(), resident = randomUUID(), device = randomUUID(), camera = randomUUID();
+    > 17 |   await pool.query(`INSERT INTO users(id,email,full_name,role) VALUES ($1,$2,'QA caregiver','CAREGIVER'),($3,$4,'QA resident','VIEWER')`,
+         |   ^
+      18 |     [owner, `${owner}@example.invalid`, resident, `${resident}@example.invalid`]);
+      19 |   await pool.query(`INSERT INTO devices(id,owner_user_id,name,device_type,status) VALUES($1,$2,'QA','EDGE_GATEWAY','ONLINE')`, [device,owner]);
+      20 |   await pool.query(`INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`, [camera,device,`qa-${camera}`]);
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at fixture (test/qa-db.integration.spec.ts:17:3)
+      at scheduleFixture (test/qa-db.integration.spec.ts:24:13)
+      at Object.<anonymous> (test/qa-db.integration.spec.ts:60:15)
+
+  ● QA PostgreSQL16 production repositories › US20 a VIEWER without an active household link cannot be assigned by another caregiver
+
+    error: new row for relation "users" violates check constraint "users_co_it_nhat_mot_cach_dang_nhap"
+
+      15 | async function fixture() {
+      16 |   const owner = randomUUID(), resident = randomUUID(), device = randomUUID(), camera = randomUUID();
+    > 17 |   await pool.query(`INSERT INTO users(id,email,full_name,role) VALUES ($1,$2,'QA caregiver','CAREGIVER'),($3,$4,'QA resident','VIEWER')`,
+         |   ^
+      18 |     [owner, `${owner}@example.invalid`, resident, `${resident}@example.invalid`]);
+      19 |   await pool.query(`INSERT INTO devices(id,owner_user_id,name,device_type,status) VALUES($1,$2,'QA','EDGE_GATEWAY','ONLINE')`, [device,owner]);
+      20 |   await pool.query(`INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`, [camera,device,`qa-${camera}`]);
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at fixture (test/qa-db.integration.spec.ts:17:3)
+      at Object.<anonymous> (test/qa-db.integration.spec.ts:66:15)
+
+  ● QA PostgreSQL16 production repositories › US20 claim and no-activity evaluation create atomic P2 resident alert
+
+    error: new row for relation "users" violates check constraint "users_co_it_nhat_mot_cach_dang_nhap"
+
+      15 | async function fixture() {
+      16 |   const owner = randomUUID(), resident = randomUUID(), device = randomUUID(), camera = randomUUID();
+    > 17 |   await pool.query(`INSERT INTO users(id,email,full_name,role) VALUES ($1,$2,'QA caregiver','CAREGIVER'),($3,$4,'QA resident','VIEWER')`,
+         |   ^
+      18 |     [owner, `${owner}@example.invalid`, resident, `${resident}@example.invalid`]);
+      19 |   await pool.query(`INSERT INTO devices(id,owner_user_id,name,device_type,status) VALUES($1,$2,'QA','EDGE_GATEWAY','ONLINE')`, [device,owner]);
+      20 |   await pool.query(`INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`, [camera,device,`qa-${camera}`]);
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at fixture (test/qa-db.integration.spec.ts:17:3)
+      at scheduleFixture (test/qa-db.integration.spec.ts:24:13)
+      at Object.<anonymous> (test/qa-db.integration.spec.ts:70:15)
+
+  ● QA PostgreSQL16 production repositories › US20 IM_OK confirmation commits against real schema
+
+    error: new row for relation "users" violates check constraint "users_co_it_nhat_mot_cach_dang_nhap"
+
+      15 | async function fixture() {
+      16 |   const owner = randomUUID(), resident = randomUUID(), device = randomUUID(), camera = randomUUID();
+    > 17 |   await pool.query(`INSERT INTO users(id,email,full_name,role) VALUES ($1,$2,'QA caregiver','CAREGIVER'),($3,$4,'QA resident','VIEWER')`,
+         |   ^
+      18 |     [owner, `${owner}@example.invalid`, resident, `${resident}@example.invalid`]);
+      19 |   await pool.query(`INSERT INTO devices(id,owner_user_id,name,device_type,status) VALUES($1,$2,'QA','EDGE_GATEWAY','ONLINE')`, [device,owner]);
+      20 |   await pool.query(`INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`, [camera,device,`qa-${camera}`]);
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at fixture (test/qa-db.integration.spec.ts:17:3)
+      at scheduleFixture (test/qa-db.integration.spec.ts:24:13)
+      at test/qa-db.integration.spec.ts:82:15
+
+  ● QA PostgreSQL16 production repositories › US20 NEED_HELP confirmation commits against real schema
+
+    error: new row for relation "users" violates check constraint "users_co_it_nhat_mot_cach_dang_nhap"
+
+      15 | async function fixture() {
+      16 |   const owner = randomUUID(), resident = randomUUID(), device = randomUUID(), camera = randomUUID();
+    > 17 |   await pool.query(`INSERT INTO users(id,email,full_name,role) VALUES ($1,$2,'QA caregiver','CAREGIVER'),($3,$4,'QA resident','VIEWER')`,
+         |   ^
+      18 |     [owner, `${owner}@example.invalid`, resident, `${resident}@example.invalid`]);
+      19 |   await pool.query(`INSERT INTO devices(id,owner_user_id,name,device_type,status) VALUES($1,$2,'QA','EDGE_GATEWAY','ONLINE')`, [device,owner]);
+      20 |   await pool.query(`INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`, [camera,device,`qa-${camera}`]);
+
+      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11
+      at fixture (test/qa-db.integration.spec.ts:17:3)
+      at scheduleFixture (test/qa-db.integration.spec.ts:24:13)
+      at test/qa-db.integration.spec.ts:82:15
+
+Test Suites: 1 failed, 1 total
+Tests:       7 failed, 7 total
+Snapshots:   0 total
+Time:        16.164 s
+Ran all test suites.
+Test results written to: D:\hoc tap\project 1\aws-camera-ai\docs\test\US16_US17_US20_2026-10-18\evidence\candidate-db-results.json

@@ -3,6 +3,8 @@
 
 **Phiên bản:** 1.0 · **Khung thời gian:** 30 ngày · **Nhóm:** 5 sinh viên
 
+**Cập nhật Sprint 4 ngày 21/10/2026:** kiến trúc Hybrid EC2 + Lambda theo [kế hoạch AWS-01..10](../aws/SPRINT_4_AWS_EXECUTION_PLAN.md) và [sequence/monitoring diagrams](../aws/METHOD_1_FEATURE_DIAGRAMS.md). Các SP story bên dưới là baseline lịch sử, không phải estimate đủ cho kiến trúc mới; refine phần việc còn lại theo capacity. Chưa xác nhận AWS đã deploy.
+
 ---
 
 # PHẦN I — PRODUCT ROADMAP
@@ -66,8 +68,8 @@ Roadmap chia thành 4 release nội bộ, mỗi release trùng một sprint và 
 |---|---|
 | **Giá trị giao** | Hệ thống chạy trên hạ tầng AWS thật, gọi điện tự động thật, tài liệu đầy đủ |
 | **Epic liên quan** | EPIC-9, EPIC-6, EPIC-10 |
-| **Năng lực mở khoá** | Có thể triển khai cho hộ gia đình khác mà không cần máy dev của nhóm |
-| **Tiêu chí release** | ≥ 4 dịch vụ AWS thật đang chạy; 3 kịch bản E2E pass; video demo hoàn tất |
+| **Năng lực mở khoá** | App tier lên EC2; camera/AI vẫn cần máy edge và kết nối riêng, không độc lập hoàn toàn với edge |
+| **Tiêu chí release** | Cognito và face S3/SQS/Lambda/Rekognition thật; deadline workflow và monitoring có evidence; 3 E2E ghi rõ model/provider thật hoặc phần chưa đạt; video demo hoàn tất |
 
 ### ┃ Release 1.x+ — "LATER" (Ngoài phạm vi 30 ngày)
 Ghi vào mục *Hướng phát triển* của báo cáo:
@@ -118,10 +120,10 @@ Ghi vào mục *Hướng phát triển* của báo cáo:
 | **EPIC-6** | Kênh thông báo & xác nhận | Telegram → SNS → Connect; nút "Tôi ổn / Cần giúp" | P1, P4 | 8 | 0.2 → 1.0 |
 | **EPIC-7** | Dashboard giám sát & lịch sử | Danh sách, timeline, lọc, xem clip | P1, P3 | 8 | 0.1 → 0.3 |
 | **EPIC-8** | Wellness check | Kiểm tra hiện diện/vắng mặt theo lịch | P2 | 3 | 0.3 |
-| **EPIC-9** | Triển khai cloud AWS | S3, Rekognition, Cognito, SNS, Connect, CloudWatch | P3 | 15 | 1.0 |
+| **EPIC-9** | Triển khai cloud AWS | EC2/HTTPS/VPN, S3, Cognito, SQS/Lambda, Rekognition, Standard workflow, SNS/Connect, CloudWatch | P3 | Refine AWS-01..10 | 1.0 |
 | **EPIC-10** | Chất lượng & đo lường AI | Bộ test có nhãn, precision/recall/FAR, hardening | Nhóm | 9 | 0.3 → 1.0 |
 
-**Tổng SP trong phạm vi 30 ngày: 98 SP** (chưa tính 20 SP của Sprint 0 là công việc thiết kế/khởi tạo).
+**Baseline lịch sử: 98 SP** (chưa tính 20 SP Sprint 0). Không dùng số này để cam kết kiến trúc AWS mới; task AWS-01..10 phân rã scope hiện tại, cần ước lượng phần chưa làm, không cộng lặp SP story.
 
 ## 6. Product Backlog đầy đủ (đã ưu tiên)
 
@@ -152,11 +154,11 @@ Cột **Ưu tiên** dùng MoSCoW. Cột **Sprint** là dự kiến; backlog đư
 | US-21 | E7 | Timeline sự kiện, lọc theo loại/camera/thời gian, xem clip | SHOULD | 5 | S3 | A |
 | US-22 | E10 | Báo cáo precision/recall/FAR từng module | MUST | 3 | S3 | E |
 | US-23 | E9 | Chuyển lưu trữ media sang Amazon S3 | MUST | 3 | S4 | C |
-| US-24 | E9 | Thay face recognition local bằng Amazon Rekognition | MUST | 5 | S4 | D |
-| US-25 | E9 | Thay JWT tự viết bằng Amazon Cognito | MUST | 3 | S4 | A |
+| US-24 | E9 | Face-job SQS/Lambda, Rekognition và result consumer; local fallback có kiểm thử | MUST | 5* | S4 + chuẩn bị song song | B,C; D review |
+| US-25 | E9 | Cognito PKCE, token verifier và ánh xạ quyền user | MUST | 3* | S4 + chuẩn bị song song | A,B |
 | US-26 | E6 | Gửi cảnh báo qua Amazon SNS (email + SMS) | SHOULD | 2 | S4 | B |
 | US-27 | E6 | Amazon Connect gọi tự động khi ESCALATED | SHOULD | 3 | S4 | B,C |
-| US-28 | E9 | Đẩy log lên CloudWatch + 1 alarm cơ bản | SHOULD | 2 | S4 | C |
+| US-28 | E9 | CloudWatch logs, DLQ/workflow/heartbeat alarms và ops topic | MUST cho baseline cloud | 2* | Từ stack đầu tiên | C |
 | US-29 | E10 | Hardening: retry, rate limit, tinh chỉnh giảm báo giả | MUST | 3 | S4 | Nhóm |
 | US-30 | E9 | Tài liệu: README, sơ đồ triển khai, ước tính chi phí | MUST | 2 | S4 | A |
 | US-31 | E10 | Video demo + kịch bản demo live | MUST | 2 | S4 | A,E |
@@ -170,13 +172,13 @@ Cột **Ưu tiên** dùng MoSCoW. Cột **Sprint** là dự kiến; backlog đư
 
 ### Cảnh báo về tải Sprint 4
 
-Tổng SP dự kiến Sprint 4 = **25 SP**, cao hơn velocity mục tiêu 24 và cao hơn con số 20 đã đặt ra trong kế hoạch sprint (vì Sprint 4 phải dành ~30% cho hardening, tài liệu và tập demo). Nếu đến ngày 25 nhóm thấy đuối, **thứ tự cắt bỏ đã chốt trước** để không phải tranh cãi lúc căng thẳng:
+`*` SP story là baseline, phải refine cả story không có dấu sao nếu bị ảnh hưởng kiến trúc. Bảng cũ US-23..31 cộng thành 25 SP, chưa tính đầy đủ SQS/Lambda/Step Functions/EC2 và edge split. Kế hoạch mới dự toán AWS-01..10 khoảng 72 giờ-người trước buffer, khoảng 90 giờ có dự phòng, không gồm training AI.
 
-1. Cắt **US-28** (CloudWatch) — mất 2 SP, ảnh hưởng điểm ít nhất
-2. Cắt **US-27** (Connect) — mất 3 SP, thay bằng gọi giả lập ghi log + giải thích trong báo cáo
-3. Cắt **US-26** (SNS) — giữ Telegram làm kênh chính
+A/B/C bắt đầu AWS bằng fixtures trong lúc D/E train/export/evaluate, không chờ đến ngày 25. Với capacity A/B/C khoảng 36 giờ hiệu quả/tuần, phải tính cả chuẩn bị sớm hoặc giãn thời gian/phạm vi. Không ép D vừa train fire vừa tự làm toàn US-24.
 
-Tuyệt đối **không** cắt US-29, US-30, US-31. Một hệ thống ít tính năng nhưng chạy mượt và có tài liệu tốt được điểm cao hơn một hệ thống nhiều tính năng mà demo lỗi.
+Giữ CloudWatch/logs/DLQ tối thiểu, auth/ownership và reliability. Hoãn live video từ Internet, multi-contact/DTMF hoặc kênh real chưa đủ điều kiện; giữ dry-run test và ghi blocked rõ. Không cắt US-29/30/31. Mọi tính năng model/provider thật phải có evidence tương ứng trước khi Done; mock không thay real AC.
+
+Các task mới không dùng US-32..38 vì những ID đó đã thuộc backlog tương lai. Dùng AWS-01..10 ánh xạ về US-13, US-22..31 trong kế hoạch chi tiết.
 
 ---
 
@@ -317,8 +319,14 @@ Then   Cognito gửi mã xác nhận qua email và cho phép đặt lại
 Given  tài khoản đã tồn tại trong DB cũ
 When   migration chạy
 Then   người dùng được tạo tương ứng trong Cognito và ánh xạ qua
-       trường cognito_sub trong bảng users
+       identity mapping issuer + sub, giữ application user ID và quyền
+
+Given  browser bắt đầu đăng nhập
+When   hoàn tất authorization code + PKCE và gọi API bằng access token
+Then   NestJS kiểm tra JWKS/issuer/expiry/token_use/client_id và ownership
 ```
+
+Demo có thể onboarding lại test users bằng quy trình kiểm soát; không tự ghép quyền theo email hoặc hứa chuyển password hash sang Cognito. A làm UI, B verifier/migration, C pool/IAM. Chi tiết AWS-04.
 
 ---
 ## EPIC-3 — Quản lý camera & vùng giám sát
@@ -600,13 +608,20 @@ Then   retry 3 lần (backoff 2s/4s/8s), sau đó ghi notification với
 ```
 Given  một sự kiện chuyển sang NOTIFIED
 When   kênh SNS được bật
-Then   message được publish lên SNS topic và gửi tới các subscriber
-       đã confirm (email và/hoặc SMS)
+Then   NestJS commit intent/outbox, SQS gọi Sender Lambda, worker claim
+       rồi gửi SNS theo recipient policy; email subscription phải confirm,
+       SMS phải đáp ứng sandbox/destination/quota của tài khoản
 
 Given  số điện thoại chưa được verify (SNS sandbox)
 When   gửi SMS
 Then   ghi log rõ lý do thất bại, không im lặng bỏ qua
+
+Given  provider nhận request hoặc trả lỗi
+When   Sender Lambda publish submission result
+Then   NestJS consume Results Queue, lưu receipt rồi delete message
 ```
+
+Dry-run làm trước khi cấp quyền provider; SNS MessageId không chứng minh người nhận đã đọc. Chi tiết AWS-07.
 
 ---
 ### US-27 · Gọi điện tự động qua Amazon Connect · SHOULD · 3 SP
@@ -631,7 +646,9 @@ Given  cuộc gọi không được nhận sau 3 hồi chuông
 When   timeout
 Then   gọi liên hệ tiếp theo trong danh sách (tối đa 3 liên hệ)
 ```
-**Phạm vi đồ án:** chỉ demo với **1 số điện thoại đã verify**. Nếu Connect không kịp cấu hình, thay bằng gọi giả lập ghi log + giải thích trong báo cáo.
+**Phạm vi đồ án:** một số thử đã đồng ý và được phép gọi theo cấu hình tài khoản. Nếu Connect chưa đủ điều kiện, dùng dry-run để test pipeline và ghi real-call AC chưa đạt trong báo cáo; không tính giả lập là gọi thật đã Done.
+
+**Cập nhật triển khai:** một số thử đã đồng ý và được phép gọi theo account/region/destination, không mặc định verify đủ cho mọi dịch vụ. Standard workflow → Deadline Lambda → NestJS transaction → call outbox → SQS → Sender Lambda → Connect. Gọi bằng stable ClientToken, lưu ContactId qua Results Queue. DTMF/CLOSED và gọi nhiều liên hệ là acceptance mở rộng cần callback thật, không được tick pass bằng ContactId. Real call bị chặn tài khoản phải ghi chưa đạt; giả lập chỉ chứng minh pipeline.
 
 ---
 ## EPIC-7 — Dashboard giám sát & lịch sử
@@ -741,18 +758,19 @@ When   gọi IndexFaces
 Then   FaceId được lưu vào known_faces để so khớp về sau
 
 Given  cần nhận diện
-When   gọi SearchFacesByImage với ảnh crop
-Then   trả về FaceMatches kèm Similarity, ánh xạ về person_status
+When   crop đã upload S3, outbox publish job và Face Lambda gọi SearchFacesByImage
+Then   Lambda publish kết quả về Results Queue; NestJS dedup resultId/revision
+       rồi ghi AI result và escalation outbox trong transaction
 
 Given  Rekognition lỗi (quota, credential, region)
 When   gọi thất bại
-Then   hệ thống tự fallback về model local và ghi cảnh báo, KHÔNG
-       để sự kiện bị mất
+Then   retry hữu hạn, ghi lỗi/DLQ; fallback local chỉ khi policy được bật,
+       adapter/collection local đã sẵn sàng và owner/dedup đã kiểm thử
 ```
-Feature flag ở story này là **bắt buộc**, không phải tuỳ chọn: nếu Rekognition trục trặc đúng hôm demo, nhóm bật lại model local trong 10 giây thay vì mất điểm.
+Feature flag và rollback là bắt buộc nhưng không hứa chuyển trong 10 giây chưa đo. Giữ yêu cầu fallback có kiểm thử ở FR-DET-M1-06: khi chưa implement/test thì AC chưa Done. UNKNOWN khác UNDETERMINED; cần re-enroll ảnh cho Rekognition, không nhập local embeddings. D chỉ review face semantics/dataset; B/C triển khai cloud, song song D/E làm model AI. Chi tiết AWS-03/05.
 
 ---
-### US-28 · CloudWatch logs & alarm · SHOULD · 2 SP
+### US-28 · CloudWatch logs & alarm · MUST cho baseline cloud · cần refine SP
 ```
 Given  ứng dụng đang chạy trên AWS
 When   sinh log
@@ -762,7 +780,13 @@ Then   log được đẩy lên CloudWatch Log Group theo service, có
 Given  tỉ lệ lỗi xử lý sự kiện vượt 10% trong 5 phút
 When   CloudWatch đánh giá metric
 Then   alarm kích hoạt và gửi thông báo tới nhóm
+
+Given  DLQ có message, workflow lỗi hoặc camera mất heartbeat
+When   metric và alarm đã được cấu hình và kích thử
+Then   SNS ops topic riêng gửi tới email nhóm đã confirm, có runbook xử lý
 ```
+
+CloudWatch Agent/log driver gửi application logs từ EC2; EBS không gửi app logs. Retention, missing-data policy và checker độc lập nằm ở AWS-09. Không bỏ toàn bộ monitoring để bù capacity.
 
 ---
 ## EPIC-10 — Chất lượng & đo lường
@@ -866,7 +890,7 @@ Mã hoá: `FR-<NHÓM>-<số>`. Mức độ: **M** = Mandatory, **D** = Desirable
 | FR-DET-M1-03 | Hệ thống phải phân loại person_status thành KNOWN / UNKNOWN / UNDETERMINED | M | US-10 |
 | FR-DET-M1-04 | Hệ thống không được sinh cảnh báo khi trạng thái là UNDETERMINED | M | US-10 |
 | FR-DET-M1-05 | Hệ thống phải hỗ trợ chuyển đổi giữa model local và Amazon Rekognition bằng cấu hình | M | US-24 |
-| FR-DET-M1-06 | Hệ thống phải tự dùng model local khi dịch vụ đám mây lỗi | M | US-24 |
+| FR-DET-M1-06 | Khi policy fallback bật và local collection sẵn sàng, hệ thống chuyển owner sang local có dedup/version, ghi provider/fallback; nếu chưa sẵn sàng thì retry/DLQ và báo lỗi, không tạo kết quả giả | M | US-24 |
 | FR-DET-M1-07 | Hệ thống nên phát hiện dấu hiệu che mặt/khẩu trang bất thường | O | US-35 |
 
 ### Module 2a — Té ngã
@@ -995,7 +1019,7 @@ Mã hoá: `FR-<NHÓM>-<số>`. Mức độ: **M** = Mandatory, **D** = Desirable
 | NFR-05 | Hệ thống phục hồi sau restart mà không mất sự kiện đang chờ | 100% |
 | NFR-06 | Toàn hệ thống khởi động bằng một lệnh `docker compose up` trên máy sạch | Đạt/Không |
 | NFR-07 | Độ phủ unit test cho business logic cốt lõi | ≥ 60% |
-| NFR-08 | Chi phí AWS trong tháng chạy đồ án | < 10 USD |
+| NFR-08 | Mục tiêu chi phí dev/demo giới hạn giờ; full EC2 24/7 cần estimate riêng | Mục tiêu <10 USD nếu workload/credits cho phép; không là hard cap; estimate EC2/EBS/IPv4/SMS/call và xác minh Billing |
 | NFR-09 | Mật khẩu và credential không xuất hiện trong repo hay log | 0 lần |
 | NFR-10 | Giao diện hiển thị đúng trên màn hình từ 360px | Đạt/Không |
 

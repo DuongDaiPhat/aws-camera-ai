@@ -1,0 +1,319 @@
+{
+  "numFailedTestSuites": 1,
+  "numFailedTests": 11,
+  "numPassedTestSuites": 0,
+  "numPassedTests": 0,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 1,
+  "numTotalTests": 11,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1792316411385,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 24,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 404,
+                "expected": 401,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 401\nReceived: 404",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 401\nReceived: 404\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:113:56)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 JWT guard denies an unauthenticated request",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 JWT guard denies an unauthenticated request"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 227,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 404,
+                "expected": 401,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 401\nReceived: 404",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 401\nReceived: 404\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:119:7)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 internal guard denies a wrong token",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 internal guard denies a wrong token"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 4,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 404,
+                "expected": 201,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 201\nReceived: 404",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 201\nReceived: 404\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:125:29)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 create response follows frozen camelCase contract",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 create response follows frozen camelCase contract"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 4,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 404,
+                "expected": 400,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 404",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 404\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:148:7\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"lookbackHours\":0}",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects out-of-range {\"lookbackHours\":0}"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 5,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 404,
+                "expected": 400,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 404",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 404\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:148:7\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"lookbackHours\":25}",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects out-of-range {\"lookbackHours\":25}"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 5,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 404,
+                "expected": 400,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 404",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 404\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:148:7\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"graceSeconds\":59}",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects out-of-range {\"graceSeconds\":59}"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 4,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 404,
+                "expected": 400,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 404",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 404\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:148:7\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects out-of-range {\"graceSeconds\":3601}",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects out-of-range {\"graceSeconds\":3601}"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 3,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 404,
+                "expected": 400,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 404",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 404\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:160:7)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects an unknown IANA timezone",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects an unknown IANA timezone"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 5,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 404,
+                "expected": 400,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 404",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 404\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:172:7)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects an empty daysOfWeek array",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects an empty daysOfWeek array"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 5,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 404,
+                "expected": 400,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 404",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 400\nReceived: 404\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:190:7)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 rejects DEPARTURE without direction/identity evidence",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 rejects DEPARTURE without direction/identity evidence"
+        },
+        {
+          "ancestorTitles": ["QA local HTTP runtime: production Wellness/Auth/Database modules"],
+          "duration": 3,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": 404,
+                "expected": 202,
+                "message": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 202\nReceived: 404",
+                "name": "toBe",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 202\nReceived: 404\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts:210:7)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ],
+          "fullName": "QA local HTTP runtime: production Wellness/Auth/Database modules US20 accepted observation uses HTTP 202 from frozen contract",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 accepted observation uses HTTP 202 from frozen contract"
+        }
+      ],
+      "endTime": 1792316428185,
+      "message": "  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 JWT guard denies an unauthenticated request\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 401\n    Received: 404\n\n      111 |   });\n      112 |   it('US20 JWT guard denies an unauthenticated request', async () => {\n    > 113 |     expect((await call('/wellness-schedules')).status).toBe(401);\n          |                                                        ^\n      114 |   });\n      115 |   it('US20 internal guard denies a wrong token', async () => {\n      116 |     expect(\n\n      at Object.<anonymous> (test/qa-system.spec.ts:113:56)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 internal guard denies a wrong token\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 401\n    Received: 404\n\n      117 |       (await call('/internal/wellness-observations', 'POST', {}, { 'X-Internal-Token': 'invalid' }))\n      118 |         .status,\n    > 119 |     ).toBe(401);\n          |       ^\n      120 |   });\n      121 |   it('US20 create response follows frozen camelCase contract', async () => {\n      122 |     const response = await call('/wellness-schedules', 'POST', body, {\n\n      at Object.<anonymous> (test/qa-system.spec.ts:119:7)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 create response follows frozen camelCase contract\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 201\n    Received: 404\n\n      123 |       Authorization: `Bearer ${token}`,\n      124 |     });\n    > 125 |     expect(response.status).toBe(201);\n          |                             ^\n      126 |     expect(await response.json()).toMatchObject({\n      127 |       residentUserId: resident,\n      128 |       checkAt: '09:00',\n\n      at Object.<anonymous> (test/qa-system.spec.ts:125:29)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {\"lookbackHours\":0}\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 400\n    Received: 404\n\n      146 |         )\n      147 |       ).status,\n    > 148 |     ).toBe(400);\n          |       ^\n      149 |   });\n      150 |   it('US20 rejects an unknown IANA timezone', async () => {\n      151 |     expect(\n\n      at test/qa-system.spec.ts:148:7\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {\"lookbackHours\":25}\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 400\n    Received: 404\n\n      146 |         )\n      147 |       ).status,\n    > 148 |     ).toBe(400);\n          |       ^\n      149 |   });\n      150 |   it('US20 rejects an unknown IANA timezone', async () => {\n      151 |     expect(\n\n      at test/qa-system.spec.ts:148:7\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {\"graceSeconds\":59}\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 400\n    Received: 404\n\n      146 |         )\n      147 |       ).status,\n    > 148 |     ).toBe(400);\n          |       ^\n      149 |   });\n      150 |   it('US20 rejects an unknown IANA timezone', async () => {\n      151 |     expect(\n\n      at test/qa-system.spec.ts:148:7\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects out-of-range {\"graceSeconds\":3601}\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 400\n    Received: 404\n\n      146 |         )\n      147 |       ).status,\n    > 148 |     ).toBe(400);\n          |       ^\n      149 |   });\n      150 |   it('US20 rejects an unknown IANA timezone', async () => {\n      151 |     expect(\n\n      at test/qa-system.spec.ts:148:7\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects an unknown IANA timezone\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 400\n    Received: 404\n\n      158 |         )\n      159 |       ).status,\n    > 160 |     ).toBe(400);\n          |       ^\n      161 |   });\n      162 |   it('US20 rejects an empty daysOfWeek array', async () => {\n      163 |     expect(\n\n      at Object.<anonymous> (test/qa-system.spec.ts:160:7)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects an empty daysOfWeek array\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 400\n    Received: 404\n\n      170 |         )\n      171 |       ).status,\n    > 172 |     ).toBe(400);\n          |       ^\n      173 |   });\n      174 |   it('US20 rejects DEPARTURE without direction/identity evidence', async () => {\n      175 |     const observation = {\n\n      at Object.<anonymous> (test/qa-system.spec.ts:172:7)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 rejects DEPARTURE without direction/identity evidence\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 400\n    Received: 404\n\n      188 |         })\n      189 |       ).status,\n    > 190 |     ).toBe(400);\n          |       ^\n      191 |   });\n      192 |   it('US20 accepted observation uses HTTP 202 from frozen contract', async () => {\n      193 |     const observation = {\n\n      at Object.<anonymous> (test/qa-system.spec.ts:190:7)\n\n  ● QA local HTTP runtime: production Wellness/Auth/Database modules › US20 accepted observation uses HTTP 202 from frozen contract\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 202\n    Received: 404\n\n      208 |         })\n      209 |       ).status,\n    > 210 |     ).toBe(202);\n          |       ^\n      211 |   });\n      212 | });\n      213 |\n\n      at Object.<anonymous> (test/qa-system.spec.ts:210:7)\n",
+      "name": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-system.spec.ts",
+      "startTime": 1792316411798,
+      "status": "failed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}

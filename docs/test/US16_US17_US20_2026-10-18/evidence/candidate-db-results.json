@@ -1,0 +1,247 @@
+{
+  "numFailedTestSuites": 1,
+  "numFailedTests": 7,
+  "numPassedTestSuites": 0,
+  "numPassedTests": 0,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 1,
+  "numTotalTests": 7,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1792316244094,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 11,
+          "failureDetails": [
+            {
+              "length": 464,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (fef42afe-3208-49aa-a527-f63a2a0af689, fef42afe-3208-49aa-a527-f63a2a0af689@example.invalid, null, null, QA caregiver, CAREGIVER, null, null, t, 0, null, null, 2026-10-18 09:37:40.072462+00, 2026-10-18 09:37:40.072462+00, null, null).",
+              "schema": "public",
+              "table": "users",
+              "constraint": "users_co_it_nhat_mot_cach_dang_nhap",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"users\" violates check constraint \"users_co_it_nhat_mot_cach_dang_nhap\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:17:3)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:42:15)"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US17 persists independent FALL P1 incident and sequential replay deduplicates",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 3,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US17 persists independent FALL P1 incident and sequential replay deduplicates"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 21,
+          "failureDetails": [
+            {
+              "length": 464,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (98d485dc-84b7-4fd1-ba95-fab50302c39c, 98d485dc-84b7-4fd1-ba95-fab50302c39c@example.invalid, null, null, QA caregiver, CAREGIVER, null, null, t, 0, null, null, 2026-10-18 09:37:40.112072+00, 2026-10-18 09:37:40.112072+00, null, null).",
+              "schema": "public",
+              "table": "users",
+              "constraint": "users_co_it_nhat_mot_cach_dang_nhap",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"users\" violates check constraint \"users_co_it_nhat_mot_cach_dang_nhap\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:17:3)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:52:15)"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US17 concurrent same-episode deliveries both succeed idempotently",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US17 concurrent same-episode deliveries both succeed idempotently"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 20,
+          "failureDetails": [
+            {
+              "length": 464,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (104d724d-5dd5-41b0-b864-cec05f46deb5, 104d724d-5dd5-41b0-b864-cec05f46deb5@example.invalid, null, null, QA caregiver, CAREGIVER, null, null, t, 0, null, null, 2026-10-18 09:37:40.133568+00, 2026-10-18 09:37:40.133568+00, null, null).",
+              "schema": "public",
+              "table": "users",
+              "constraint": "users_co_it_nhat_mot_cach_dang_nhap",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"users\" violates check constraint \"users_co_it_nhat_mot_cach_dang_nhap\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:17:3)\n    at scheduleFixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:24:13)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:60:15)"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US20 schedule CRUD preserves history through soft-delete",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 schedule CRUD preserves history through soft-delete"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 20,
+          "failureDetails": [
+            {
+              "length": 464,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (95f7bd23-61f7-4bda-aecc-5f8608532b87, 95f7bd23-61f7-4bda-aecc-5f8608532b87@example.invalid, null, null, QA caregiver, CAREGIVER, null, null, t, 0, null, null, 2026-10-18 09:37:40.154427+00, 2026-10-18 09:37:40.154427+00, null, null).",
+              "schema": "public",
+              "table": "users",
+              "constraint": "users_co_it_nhat_mot_cach_dang_nhap",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"users\" violates check constraint \"users_co_it_nhat_mot_cach_dang_nhap\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:17:3)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:66:15)"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US20 a VIEWER without an active household link cannot be assigned by another caregiver",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 a VIEWER without an active household link cannot be assigned by another caregiver"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 21,
+          "failureDetails": [
+            {
+              "length": 464,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (0ff3821b-ba4d-48ff-9a32-8f7db22f3496, 0ff3821b-ba4d-48ff-9a32-8f7db22f3496@example.invalid, null, null, QA caregiver, CAREGIVER, null, null, t, 0, null, null, 2026-10-18 09:37:40.175025+00, 2026-10-18 09:37:40.175025+00, null, null).",
+              "schema": "public",
+              "table": "users",
+              "constraint": "users_co_it_nhat_mot_cach_dang_nhap",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"users\" violates check constraint \"users_co_it_nhat_mot_cach_dang_nhap\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:17:3)\n    at scheduleFixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:24:13)\n    at Object.<anonymous> (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:70:15)"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US20 claim and no-activity evaluation create atomic P2 resident alert",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 claim and no-activity evaluation create atomic P2 resident alert"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 19,
+          "failureDetails": [
+            {
+              "length": 462,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (abe9288b-84a9-4487-a81a-8d7ecbd36f90, abe9288b-84a9-4487-a81a-8d7ecbd36f90@example.invalid, null, null, QA caregiver, CAREGIVER, null, null, t, 0, null, null, 2026-10-18 09:37:40.19605+00, 2026-10-18 09:37:40.19605+00, null, null).",
+              "schema": "public",
+              "table": "users",
+              "constraint": "users_co_it_nhat_mot_cach_dang_nhap",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"users\" violates check constraint \"users_co_it_nhat_mot_cach_dang_nhap\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:17:3)\n    at scheduleFixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:24:13)\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:82:15"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US20 IM_OK confirmation commits against real schema",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 IM_OK confirmation commits against real schema"
+        },
+        {
+          "ancestorTitles": ["QA PostgreSQL16 production repositories"],
+          "duration": 19,
+          "failureDetails": [
+            {
+              "length": 464,
+              "name": "error",
+              "severity": "ERROR",
+              "code": "23514",
+              "detail": "Failing row contains (457a4d71-73e7-4b33-8452-ee26e5f9166c, 457a4d71-73e7-4b33-8452-ee26e5f9166c@example.invalid, null, null, QA caregiver, CAREGIVER, null, null, t, 0, null, null, 2026-10-18 09:37:40.216014+00, 2026-10-18 09:37:40.216014+00, null, null).",
+              "schema": "public",
+              "table": "users",
+              "constraint": "users_co_it_nhat_mot_cach_dang_nhap",
+              "file": "execMain.c",
+              "line": "2109",
+              "routine": "ExecConstraints"
+            }
+          ],
+          "failureMessages": [
+            "error: new row for relation \"users\" violates check constraint \"users_co_it_nhat_mot_cach_dang_nhap\"\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\node_modules\\.pnpm\\pg-pool@3.14.0_pg@8.23.0\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:17:3)\n    at scheduleFixture (C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:24:13)\n    at C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts:82:15"
+          ],
+          "fullName": "QA PostgreSQL16 production repositories US20 NEED_HELP confirmation commits against real schema",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "US20 NEED_HELP confirmation commits against real schema"
+        }
+      ],
+      "endTime": 1792316260249,
+      "message": "  ● QA PostgreSQL16 production repositories › US17 persists independent FALL P1 incident and sequential replay deduplicates\n\n    error: new row for relation \"users\" violates check constraint \"users_co_it_nhat_mot_cach_dang_nhap\"\n\n      15 | async function fixture() {\n      16 |   const owner = randomUUID(), resident = randomUUID(), device = randomUUID(), camera = randomUUID();\n    > 17 |   await pool.query(`INSERT INTO users(id,email,full_name,role) VALUES ($1,$2,'QA caregiver','CAREGIVER'),($3,$4,'QA resident','VIEWER')`,\n         |   ^\n      18 |     [owner, `${owner}@example.invalid`, resident, `${resident}@example.invalid`]);\n      19 |   await pool.query(`INSERT INTO devices(id,owner_user_id,name,device_type,status) VALUES($1,$2,'QA','EDGE_GATEWAY','ONLINE')`, [device,owner]);\n      20 |   await pool.query(`INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`, [camera,device,`qa-${camera}`]);\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:17:3)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:42:15)\n\n  ● QA PostgreSQL16 production repositories › US17 concurrent same-episode deliveries both succeed idempotently\n\n    error: new row for relation \"users\" violates check constraint \"users_co_it_nhat_mot_cach_dang_nhap\"\n\n      15 | async function fixture() {\n      16 |   const owner = randomUUID(), resident = randomUUID(), device = randomUUID(), camera = randomUUID();\n    > 17 |   await pool.query(`INSERT INTO users(id,email,full_name,role) VALUES ($1,$2,'QA caregiver','CAREGIVER'),($3,$4,'QA resident','VIEWER')`,\n         |   ^\n      18 |     [owner, `${owner}@example.invalid`, resident, `${resident}@example.invalid`]);\n      19 |   await pool.query(`INSERT INTO devices(id,owner_user_id,name,device_type,status) VALUES($1,$2,'QA','EDGE_GATEWAY','ONLINE')`, [device,owner]);\n      20 |   await pool.query(`INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`, [camera,device,`qa-${camera}`]);\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:17:3)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:52:15)\n\n  ● QA PostgreSQL16 production repositories › US20 schedule CRUD preserves history through soft-delete\n\n    error: new row for relation \"users\" violates check constraint \"users_co_it_nhat_mot_cach_dang_nhap\"\n\n      15 | async function fixture() {\n      16 |   const owner = randomUUID(), resident = randomUUID(), device = randomUUID(), camera = randomUUID();\n    > 17 |   await pool.query(`INSERT INTO users(id,email,full_name,role) VALUES ($1,$2,'QA caregiver','CAREGIVER'),($3,$4,'QA resident','VIEWER')`,\n         |   ^\n      18 |     [owner, `${owner}@example.invalid`, resident, `${resident}@example.invalid`]);\n      19 |   await pool.query(`INSERT INTO devices(id,owner_user_id,name,device_type,status) VALUES($1,$2,'QA','EDGE_GATEWAY','ONLINE')`, [device,owner]);\n      20 |   await pool.query(`INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`, [camera,device,`qa-${camera}`]);\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:17:3)\n      at scheduleFixture (test/qa-db.integration.spec.ts:24:13)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:60:15)\n\n  ● QA PostgreSQL16 production repositories › US20 a VIEWER without an active household link cannot be assigned by another caregiver\n\n    error: new row for relation \"users\" violates check constraint \"users_co_it_nhat_mot_cach_dang_nhap\"\n\n      15 | async function fixture() {\n      16 |   const owner = randomUUID(), resident = randomUUID(), device = randomUUID(), camera = randomUUID();\n    > 17 |   await pool.query(`INSERT INTO users(id,email,full_name,role) VALUES ($1,$2,'QA caregiver','CAREGIVER'),($3,$4,'QA resident','VIEWER')`,\n         |   ^\n      18 |     [owner, `${owner}@example.invalid`, resident, `${resident}@example.invalid`]);\n      19 |   await pool.query(`INSERT INTO devices(id,owner_user_id,name,device_type,status) VALUES($1,$2,'QA','EDGE_GATEWAY','ONLINE')`, [device,owner]);\n      20 |   await pool.query(`INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`, [camera,device,`qa-${camera}`]);\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:17:3)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:66:15)\n\n  ● QA PostgreSQL16 production repositories › US20 claim and no-activity evaluation create atomic P2 resident alert\n\n    error: new row for relation \"users\" violates check constraint \"users_co_it_nhat_mot_cach_dang_nhap\"\n\n      15 | async function fixture() {\n      16 |   const owner = randomUUID(), resident = randomUUID(), device = randomUUID(), camera = randomUUID();\n    > 17 |   await pool.query(`INSERT INTO users(id,email,full_name,role) VALUES ($1,$2,'QA caregiver','CAREGIVER'),($3,$4,'QA resident','VIEWER')`,\n         |   ^\n      18 |     [owner, `${owner}@example.invalid`, resident, `${resident}@example.invalid`]);\n      19 |   await pool.query(`INSERT INTO devices(id,owner_user_id,name,device_type,status) VALUES($1,$2,'QA','EDGE_GATEWAY','ONLINE')`, [device,owner]);\n      20 |   await pool.query(`INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`, [camera,device,`qa-${camera}`]);\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:17:3)\n      at scheduleFixture (test/qa-db.integration.spec.ts:24:13)\n      at Object.<anonymous> (test/qa-db.integration.spec.ts:70:15)\n\n  ● QA PostgreSQL16 production repositories › US20 IM_OK confirmation commits against real schema\n\n    error: new row for relation \"users\" violates check constraint \"users_co_it_nhat_mot_cach_dang_nhap\"\n\n      15 | async function fixture() {\n      16 |   const owner = randomUUID(), resident = randomUUID(), device = randomUUID(), camera = randomUUID();\n    > 17 |   await pool.query(`INSERT INTO users(id,email,full_name,role) VALUES ($1,$2,'QA caregiver','CAREGIVER'),($3,$4,'QA resident','VIEWER')`,\n         |   ^\n      18 |     [owner, `${owner}@example.invalid`, resident, `${resident}@example.invalid`]);\n      19 |   await pool.query(`INSERT INTO devices(id,owner_user_id,name,device_type,status) VALUES($1,$2,'QA','EDGE_GATEWAY','ONLINE')`, [device,owner]);\n      20 |   await pool.query(`INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`, [camera,device,`qa-${camera}`]);\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:17:3)\n      at scheduleFixture (test/qa-db.integration.spec.ts:24:13)\n      at test/qa-db.integration.spec.ts:82:15\n\n  ● QA PostgreSQL16 production repositories › US20 NEED_HELP confirmation commits against real schema\n\n    error: new row for relation \"users\" violates check constraint \"users_co_it_nhat_mot_cach_dang_nhap\"\n\n      15 | async function fixture() {\n      16 |   const owner = randomUUID(), resident = randomUUID(), device = randomUUID(), camera = randomUUID();\n    > 17 |   await pool.query(`INSERT INTO users(id,email,full_name,role) VALUES ($1,$2,'QA caregiver','CAREGIVER'),($3,$4,'QA resident','VIEWER')`,\n         |   ^\n      18 |     [owner, `${owner}@example.invalid`, resident, `${resident}@example.invalid`]);\n      19 |   await pool.query(`INSERT INTO devices(id,owner_user_id,name,device_type,status) VALUES($1,$2,'QA','EDGE_GATEWAY','ONLINE')`, [device,owner]);\n      20 |   await pool.query(`INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA',$3,'rtsp://127.0.0.1/qa')`, [camera,device,`qa-${camera}`]);\n\n      at ../../node_modules/.pnpm/pg-pool@3.14.0_pg@8.23.0/node_modules/pg-pool/index.js:45:11\n      at fixture (test/qa-db.integration.spec.ts:17:3)\n      at scheduleFixture (test/qa-db.integration.spec.ts:24:13)\n      at test/qa-db.integration.spec.ts:82:15\n",
+      "name": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator\\test\\qa-db.integration.spec.ts",
+      "startTime": 1792316244591,
+      "status": "failed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}

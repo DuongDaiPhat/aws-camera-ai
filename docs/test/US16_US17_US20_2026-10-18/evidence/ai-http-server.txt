@@ -1,0 +1,12 @@
+INFO:     Started server process [27888]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:58001 (Press CTRL+C to quit)
+INFO:     127.0.0.1:58553 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58554 - "POST /pose/fall HTTP/1.1" 401 Unauthorized
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+W0000 00:00:1792316616.269547   34812 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1792316616.284507   17944 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+INFO:app.services.pose_estimator:PoseLandmarker khoi tao thanh cong voi model D:\hoc tap\project 1\aws-camera-ai\artifacts\gate-models\pose_landmarker_lite.task
+INFO:app.routers.pose:[POSE_EVAL] track=qa-track state=MONITORING reason=NORMAL_POSTURE poseAvail=False angle=None immobile=0.0s
+INFO:     127.0.0.1:58555 - "POST /pose/fall HTTP/1.1" 200 OK

@@ -1,0 +1,17 @@
+{
+  "label": "candidate-existing-jest",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20\\apps\\orchestrator",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "--runInBand",
+    "--no-cache",
+    "--testPathIgnorePatterns=qa-fall.spec.ts|qa-wellness.spec.ts|qa-system.spec.ts",
+    "--json",
+    "--outputFile=D:\\hoc tap\\project 1\\aws-camera-ai\\docs\\test\\US16_US17_US20_2026-10-18\\evidence\\candidate-existing-results.json"
+  ],
+  "revision": "c8f14a31822bc697cc28a69e56893313fe88831c",
+  "started_utc": "2026-10-18T09:37:23.277301+00:00",
+  "duration_seconds": 50.344,
+  "exit_code": 0
+}

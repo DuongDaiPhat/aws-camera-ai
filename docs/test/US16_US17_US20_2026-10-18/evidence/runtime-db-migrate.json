@@ -1,0 +1,9 @@
+{
+  "label": "runtime-db-migrate",
+  "cwd": "C:\\Users\\ADMIN\\.codex\\visualizations\\2026\\10\\18\\01a14e4d-7ffe-7073-9f17-463257072541\\qa-us16-us17-us20",
+  "command": ["node", "tools/scripts/migrate.mjs", "up"],
+  "revision": "872a895cd88ac8303bfe448831873aea562dfba5",
+  "started_utc": "2026-10-18T09:33:49.985695+00:00",
+  "duration_seconds": 1.312,
+  "exit_code": 0
+}
