@@ -129,12 +129,33 @@ def test_calculate_center_drop_ratio() -> None:
     assert calculate_center_drop_ratio(100.0, history_centers, 0.0) == 0.0
 
 
-@pytest.mark.parametrize("index", [11, 12, 23, 24])
-@pytest.mark.parametrize("value", [0.59, float("nan")])
-def test_all_four_vital_joints_required(index: int, value: float) -> None:
+@pytest.mark.parametrize("value", [float("nan"), float("inf")])
+def test_all_four_vital_joints_finite_required(value: float) -> None:
+    for index in (11, 12, 23, 24):
+        kps = make_dummy_keypoints()
+        kps[index] = NormalizedKeypoint(x=0.5, y=0.3, visibility=value)
+        assert calculate_pose_geometry(kps, 640, 480, 0.5, 0.8) is None
+
+
+def test_vital_joints_at_least_one_shoulder_and_hip() -> None:
+    # Neu mat ca 2 vai -> None
     kps = make_dummy_keypoints()
-    kps[index] = NormalizedKeypoint(x=0.5, y=0.3, visibility=value)
+    kps[11] = NormalizedKeypoint(x=0.5, y=0.3, visibility=0.1)
+    kps[12] = NormalizedKeypoint(x=0.5, y=0.3, visibility=0.1)
     assert calculate_pose_geometry(kps, 640, 480, 0.5, 0.8) is None
+
+    # Neu mat ca 2 hong -> None
+    kps = make_dummy_keypoints()
+    kps[23] = NormalizedKeypoint(x=0.5, y=0.3, visibility=0.1)
+    kps[24] = NormalizedKeypoint(x=0.5, y=0.3, visibility=0.1)
+    assert calculate_pose_geometry(kps, 640, 480, 0.5, 0.8) is None
+
+    # Neu chi thay 1 ben (1 vai + 1 hong) do nam nghieng/nga doc -> Hop le
+    kps = make_dummy_keypoints()
+    kps[11] = NormalizedKeypoint(x=0.5, y=0.3, visibility=0.1)
+    kps[23] = NormalizedKeypoint(x=0.5, y=0.3, visibility=0.1)
+    geom = calculate_pose_geometry(kps, 640, 480, 0.5, 0.8)
+    assert geom is not None
 
 
 def test_degenerate_geometry_is_not_a_horizontal_torso() -> None:
