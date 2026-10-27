@@ -68,9 +68,9 @@ class PoseEstimator:
             base_options=base_options,
             running_mode=vision.RunningMode.IMAGE,
             num_poses=2,
-            min_pose_detection_confidence=0.5,
-            min_pose_presence_confidence=0.5,
-            min_tracking_confidence=0.5,
+            min_pose_detection_confidence=0.3,
+            min_pose_presence_confidence=0.3,
+            min_tracking_confidence=0.3,
             output_segmentation_masks=False,
         )
         self._landmarker = vision.PoseLandmarker.create_from_options(options)
@@ -188,9 +188,20 @@ class PoseEstimator:
             vital = [landmarks[i] for i in (11, 12, 23, 24)]
             if any(
                 not all(math.isfinite(v) for v in (lm.x, lm.y, lm.visibility))
-                or lm.visibility < self._min_visibility
-                or not (0 <= lm.x <= 1 and 0 <= lm.y <= 1)
                 for lm in vital
+            ):
+                reason = "LOW_VISIBILITY"
+                continue
+
+            has_left_pair = landmarks[11].visibility >= self._min_visibility and landmarks[23].visibility >= self._min_visibility
+            has_right_pair = landmarks[12].visibility >= self._min_visibility and landmarks[24].visibility >= self._min_visibility
+            has_both_shoulders = landmarks[11].visibility >= self._min_visibility and landmarks[12].visibility >= self._min_visibility
+            has_both_hips = landmarks[23].visibility >= self._min_visibility and landmarks[24].visibility >= self._min_visibility
+
+            if not (
+                (has_left_pair or has_right_pair)
+                or (has_both_shoulders and (landmarks[23].visibility >= self._min_visibility or landmarks[24].visibility >= self._min_visibility))
+                or (has_both_hips and (landmarks[11].visibility >= self._min_visibility or landmarks[12].visibility >= self._min_visibility))
             ):
                 reason = "LOW_VISIBILITY"
                 continue

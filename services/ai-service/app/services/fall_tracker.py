@@ -64,8 +64,8 @@ class FallTracker:
         self.state: str = "MONITORING"
         self.reason: str = "NORMAL_POSTURE"
 
-        # History buffer: toi da 10 frame hop le truoc do
-        self.history: deque[PoseObservation] = deque(maxlen=self.settings.fall_history_frame_count)
+        # History buffer: luu cac frame hop le trong khoang thoi gian fall_history_max_seconds
+        self.history: deque[PoseObservation] = deque(maxlen=max(50, self.settings.fall_history_frame_count * 5))
 
         # Baseline dong bang khi tao candidate
         self.baseline_scale_px: float = 0.0
@@ -266,7 +266,8 @@ class FallTracker:
             )
             self.immobile_seconds = 0.0
             self.last_observation = None
-            self.history.clear()
+            if dt_seconds > self.settings.fall_history_max_seconds:
+                self.history.clear()
         if (
             self.state == "CANDIDATE"
             and dt_seconds >= self.settings.fall_missing_pose_grace_seconds
@@ -309,11 +310,17 @@ class FallTracker:
         current_obs: PoseObservation,
         dt_seconds: float,
     ) -> dict:
-        if geometry.torso_angle_deg >= self.settings.fall_recovery_angle_deg:
+        effective_angle = (
+            min(geometry.torso_angle_deg, geometry.torso_angle_3d_deg)
+            if geometry.torso_angle_3d_deg is not None
+            else geometry.torso_angle_deg
+        )
+        if effective_angle >= self.settings.fall_recovery_angle_deg:
             logger.info(
-                "Track %s stood up (angle=%.1f) -> CANCELLED (RECOVERED)",
+                "Track %s stood up (angle=%.1f, angle_3d=%.1f) -> CANCELLED (RECOVERED)",
                 self.track_id,
                 geometry.torso_angle_deg,
+                geometry.torso_angle_3d_deg if geometry.torso_angle_3d_deg is not None else 0.0,
             )
             self.state = "CANCELLED"
             self.reason = "RECOVERED"
