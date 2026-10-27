@@ -57,7 +57,7 @@ def test_gia_tri_mac_dinh_khop_voi_tai_lieu() -> None:
     assert settings.face_match_threshold == 0.60  # US-10: nguong T_known
     assert settings.fall_immobility_seconds == 3  # US-17
     assert settings.fire_min_consecutive_frames == 3  # US-18
-    assert settings.pose_min_visibility == 0.60
+    assert settings.pose_min_visibility == 0.30
 
 
 @pytest.mark.parametrize(

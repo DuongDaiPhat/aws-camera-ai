@@ -22,6 +22,8 @@ from app.services.fall_tracker_registry import FallTrackerRegistry
 
 settings = get_settings()
 logging.basicConfig(level=settings.log_level)
+logger = logging.getLogger(__name__)
+logger.info("AI service khoi dong voi pose_min_visibility=%.2f", settings.pose_min_visibility)
 
 
 async def sweep_pose_tracks() -> None:
