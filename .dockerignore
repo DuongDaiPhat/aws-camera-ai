@@ -17,6 +17,10 @@ node_modules
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+aws-credentials*
+**/secrets/
 
 # Khong can trong image
 docs
