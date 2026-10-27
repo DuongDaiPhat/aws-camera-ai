@@ -6,6 +6,7 @@ logLevel: info
 rtspAddress: :8554
 webrtcAddress: :8889
 webrtcLocalUDPAddress: :8189
+webrtcLocalTCPAddress: :8189
 hlsAddress: :8888
 
 # Each browser WHIP publish must present its short-lived camera-bound token.
