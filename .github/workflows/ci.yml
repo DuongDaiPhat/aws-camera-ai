@@ -28,6 +28,31 @@ env:
 
 jobs:
   # -------------------------------------------------------------------
+  # 0. Secret scan — chan leak AWS credentials va file moi truong
+  # -------------------------------------------------------------------
+  secret-scan:
+    name: Secret scan (AWS keys · .env · credentials)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Cai dependency
+        run: pnpm install --frozen-lockfile
+
+      - name: Quet secrets va file nhay cam
+        run: pnpm check:secrets --ci
+
+  # -------------------------------------------------------------------
   # 1. Node — lint, typecheck, unit test cho orchestrator + web + contracts
   # -------------------------------------------------------------------
   node:
@@ -305,7 +330,7 @@ jobs:
   ci-ok:
     name: CI xanh
     runs-on: ubuntu-latest
-    needs: [node, python, training, openapi, database, docker, commitlint]
+    needs: [secret-scan, node, python, training, openapi, database, docker, commitlint]
     if: always()
     steps:
       - name: Kiem tra khong co job nao that bai

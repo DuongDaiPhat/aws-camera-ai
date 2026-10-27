@@ -1,3 +1,12 @@
 node_modules
 .next
 coverage
+
+# Khong bao gio dua secret vao image
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+aws-credentials*
+**/secrets/
