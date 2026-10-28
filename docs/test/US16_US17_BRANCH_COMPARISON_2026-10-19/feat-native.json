@@ -47,9 +47,7 @@
     "numpy": "1.26.4",
     "mediapipe": "0.10.32"
   },
-  "unlistedVideos": [
-    "fall/Coffe_room_15s_01.mp4"
-  ],
+  "unlistedVideos": ["fall/Coffe_room_15s_01.mp4"],
   "errorPolicy": "Tracker exception is an abstention for that frame; preserve tracker mutations, continue next frame. Clip positive requires a successful positive response. All clips retained in operational metrics; error-free subset reported separately.",
   "supplementaryClips": [
     {
@@ -68,9 +66,7 @@
       "samples": 130,
       "poseSamples": 126,
       "annotatedPersonSamples": 0,
-      "candidates": [
-        2.8
-      ],
+      "candidates": [2.8],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 4,
@@ -185,9 +181,7 @@
       "samples": 45,
       "poseSamples": 33,
       "annotatedPersonSamples": 35,
-      "candidates": [
-        6.833333333333333
-      ],
+      "candidates": [6.833333333333333],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -243,9 +237,7 @@
       "samples": 42,
       "poseSamples": 37,
       "annotatedPersonSamples": 38,
-      "candidates": [
-        5.2
-      ],
+      "candidates": [5.2],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 14,
@@ -394,9 +386,7 @@
       "samples": 241,
       "poseSamples": 224,
       "annotatedPersonSamples": 230,
-      "candidates": [
-        44.0
-      ],
+      "candidates": [44.0],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -424,9 +414,7 @@
       "samples": 61,
       "poseSamples": 55,
       "annotatedPersonSamples": 61,
-      "candidates": [
-        8.6
-      ],
+      "candidates": [8.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -481,9 +469,7 @@
       "samples": 54,
       "poseSamples": 53,
       "annotatedPersonSamples": 53,
-      "candidates": [
-        6.6
-      ],
+      "candidates": [6.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 11,
@@ -538,9 +524,7 @@
       "samples": 44,
       "poseSamples": 27,
       "annotatedPersonSamples": 38,
-      "candidates": [
-        7.416666666666667
-      ],
+      "candidates": [7.416666666666667],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 11,
@@ -569,9 +553,7 @@
       "samples": 59,
       "poseSamples": 45,
       "annotatedPersonSamples": 53,
-      "candidates": [
-        5.625
-      ],
+      "candidates": [5.625],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 37,
@@ -627,9 +609,7 @@
       "samples": 60,
       "poseSamples": 17,
       "annotatedPersonSamples": 44,
-      "candidates": [
-        8.416666666666666
-      ],
+      "candidates": [8.416666666666666],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 32,
@@ -658,10 +638,7 @@
       "samples": 65,
       "poseSamples": 63,
       "annotatedPersonSamples": 65,
-      "candidates": [
-        6.0,
-        9.6
-      ],
+      "candidates": [6.0, 9.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 21,
@@ -700,9 +677,7 @@
       "samples": 37,
       "poseSamples": 37,
       "annotatedPersonSamples": 37,
-      "candidates": [
-        5.6
-      ],
+      "candidates": [5.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -730,9 +705,7 @@
       "samples": 45,
       "poseSamples": 28,
       "annotatedPersonSamples": 33,
-      "candidates": [
-        5.208333333333333
-      ],
+      "candidates": [5.208333333333333],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -762,9 +735,7 @@
       "samples": 45,
       "poseSamples": 27,
       "annotatedPersonSamples": 30,
-      "candidates": [
-        5.625
-      ],
+      "candidates": [5.625],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -793,9 +764,7 @@
       "samples": 35,
       "poseSamples": 34,
       "annotatedPersonSamples": 35,
-      "candidates": [
-        2.8
-      ],
+      "candidates": [2.8],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -850,9 +819,7 @@
       "samples": 50,
       "poseSamples": 32,
       "annotatedPersonSamples": 50,
-      "candidates": [
-        5.625
-      ],
+      "candidates": [5.625],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 17,
@@ -880,9 +847,7 @@
       "samples": 55,
       "poseSamples": 46,
       "annotatedPersonSamples": 55,
-      "candidates": [
-        5.0
-      ],
+      "candidates": [5.0],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 22,
@@ -922,9 +887,7 @@
       "samples": 50,
       "poseSamples": 47,
       "annotatedPersonSamples": 50,
-      "candidates": [
-        5.416666666666667
-      ],
+      "candidates": [5.416666666666667],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 17,
@@ -1061,9 +1024,7 @@
       "samples": 65,
       "poseSamples": 45,
       "annotatedPersonSamples": 65,
-      "candidates": [
-        9.625
-      ],
+      "candidates": [9.625],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1092,10 +1053,7 @@
       "samples": 63,
       "poseSamples": 63,
       "annotatedPersonSamples": 63,
-      "candidates": [
-        7.6,
-        10.4
-      ],
+      "candidates": [7.6, 10.4],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 20,
@@ -1152,9 +1110,7 @@
       "samples": 32,
       "poseSamples": 26,
       "annotatedPersonSamples": 29,
-      "candidates": [
-        3.2
-      ],
+      "candidates": [3.2],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 3,
@@ -1183,9 +1139,7 @@
       "samples": 37,
       "poseSamples": 35,
       "annotatedPersonSamples": 37,
-      "candidates": [
-        2.6
-      ],
+      "candidates": [2.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 11,
@@ -1231,9 +1185,7 @@
       "samples": 40,
       "poseSamples": 22,
       "annotatedPersonSamples": 40,
-      "candidates": [
-        5.625
-      ],
+      "candidates": [5.625],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 6,
@@ -1261,9 +1213,7 @@
       "samples": 27,
       "poseSamples": 26,
       "annotatedPersonSamples": 27,
-      "candidates": [
-        2.8
-      ],
+      "candidates": [2.8],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1307,9 +1257,7 @@
       "samples": 70,
       "poseSamples": 19,
       "annotatedPersonSamples": 40,
-      "candidates": [
-        7.416666666666667
-      ],
+      "candidates": [7.416666666666667],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 27,
@@ -1339,9 +1287,7 @@
       "samples": 89,
       "poseSamples": 89,
       "annotatedPersonSamples": 89,
-      "candidates": [
-        13.6
-      ],
+      "candidates": [13.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1369,9 +1315,7 @@
       "samples": 50,
       "poseSamples": 48,
       "annotatedPersonSamples": 50,
-      "candidates": [
-        5.625
-      ],
+      "candidates": [5.625],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 12,
@@ -1399,9 +1343,7 @@
       "samples": 43,
       "poseSamples": 43,
       "annotatedPersonSamples": 43,
-      "candidates": [
-        6.0
-      ],
+      "candidates": [6.0],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1429,9 +1371,7 @@
       "samples": 99,
       "poseSamples": 97,
       "annotatedPersonSamples": 98,
-      "candidates": [
-        17.6
-      ],
+      "candidates": [17.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 11,
@@ -1459,9 +1399,7 @@
       "samples": 46,
       "poseSamples": 45,
       "annotatedPersonSamples": 46,
-      "candidates": [
-        5.2
-      ],
+      "candidates": [5.2],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1489,9 +1427,7 @@
       "samples": 35,
       "poseSamples": 35,
       "annotatedPersonSamples": 35,
-      "candidates": [
-        4.8
-      ],
+      "candidates": [4.8],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1519,9 +1455,7 @@
       "samples": 48,
       "poseSamples": 43,
       "annotatedPersonSamples": 44,
-      "candidates": [
-        6.2
-      ],
+      "candidates": [6.2],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 19,
@@ -1549,9 +1483,7 @@
       "samples": 53,
       "poseSamples": 53,
       "annotatedPersonSamples": 53,
-      "candidates": [
-        5.8
-      ],
+      "candidates": [5.8],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1713,9 +1645,7 @@
       "samples": 63,
       "poseSamples": 63,
       "annotatedPersonSamples": 63,
-      "candidates": [
-        8.4
-      ],
+      "candidates": [8.4],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1743,10 +1673,7 @@
       "samples": 40,
       "poseSamples": 40,
       "annotatedPersonSamples": 40,
-      "candidates": [
-        5.208333333333333,
-        7.833333333333333
-      ],
+      "candidates": [5.208333333333333, 7.833333333333333],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 20,
@@ -1776,9 +1703,7 @@
       "samples": 86,
       "poseSamples": 86,
       "annotatedPersonSamples": 86,
-      "candidates": [
-        12.4
-      ],
+      "candidates": [12.4],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1806,9 +1731,7 @@
       "samples": 32,
       "poseSamples": 30,
       "annotatedPersonSamples": 31,
-      "candidates": [
-        2.4
-      ],
+      "candidates": [2.4],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 2,
@@ -1836,9 +1759,7 @@
       "samples": 32,
       "poseSamples": 32,
       "annotatedPersonSamples": 32,
-      "candidates": [
-        2.0
-      ],
+      "candidates": [2.0],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1865,9 +1786,7 @@
       "samples": 61,
       "poseSamples": 52,
       "annotatedPersonSamples": 54,
-      "candidates": [
-        9.4
-      ],
+      "candidates": [9.4],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 34,
@@ -1896,10 +1815,7 @@
       "samples": 146,
       "poseSamples": 140,
       "annotatedPersonSamples": 146,
-      "candidates": [
-        14.6,
-        25.2
-      ],
+      "candidates": [14.6, 25.2],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 20,
@@ -1938,9 +1854,7 @@
       "samples": 40,
       "poseSamples": 34,
       "annotatedPersonSamples": 40,
-      "candidates": [
-        5.416666666666667
-      ],
+      "candidates": [5.416666666666667],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 12,
@@ -1970,9 +1884,7 @@
       "samples": 47,
       "poseSamples": 46,
       "annotatedPersonSamples": 46,
-      "candidates": [
-        3.8
-      ],
+      "candidates": [3.8],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 11,
@@ -2009,9 +1921,7 @@
       "samples": 52,
       "poseSamples": 42,
       "annotatedPersonSamples": 52,
-      "candidates": [
-        3.8
-      ],
+      "candidates": [3.8],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 24,
@@ -2077,9 +1987,7 @@
       "samples": 50,
       "poseSamples": 50,
       "annotatedPersonSamples": 50,
-      "candidates": [
-        6.0
-      ],
+      "candidates": [6.0],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 20,
@@ -2108,9 +2016,7 @@
       "samples": 50,
       "poseSamples": 42,
       "annotatedPersonSamples": 50,
-      "candidates": [
-        6.833333333333333
-      ],
+      "candidates": [6.833333333333333],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 18,
@@ -2138,9 +2044,7 @@
       "samples": 43,
       "poseSamples": 43,
       "annotatedPersonSamples": 43,
-      "candidates": [
-        4.4
-      ],
+      "candidates": [4.4],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -2168,9 +2072,7 @@
       "samples": 77,
       "poseSamples": 76,
       "annotatedPersonSamples": 77,
-      "candidates": [
-        11.2
-      ],
+      "candidates": [11.2],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -2198,9 +2100,7 @@
       "samples": 70,
       "poseSamples": 68,
       "annotatedPersonSamples": 70,
-      "candidates": [
-        10.8
-      ],
+      "candidates": [10.8],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -2228,9 +2128,7 @@
       "samples": 54,
       "poseSamples": 54,
       "annotatedPersonSamples": 54,
-      "candidates": [
-        8.6
-      ],
+      "candidates": [8.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -2258,9 +2156,7 @@
       "samples": 42,
       "poseSamples": 40,
       "annotatedPersonSamples": 40,
-      "candidates": [
-        4.4
-      ],
+      "candidates": [4.4],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 12,
@@ -2289,9 +2185,7 @@
       "samples": 49,
       "poseSamples": 48,
       "annotatedPersonSamples": 49,
-      "candidates": [
-        4.0
-      ],
+      "candidates": [4.0],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -2320,9 +2214,7 @@
       "samples": 50,
       "poseSamples": 44,
       "annotatedPersonSamples": 50,
-      "candidates": [
-        5.833333333333333
-      ],
+      "candidates": [5.833333333333333],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -2352,9 +2244,7 @@
       "samples": 41,
       "poseSamples": 33,
       "annotatedPersonSamples": 37,
-      "candidates": [
-        4.4
-      ],
+      "candidates": [4.4],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 12,
@@ -2382,9 +2272,7 @@
       "samples": 40,
       "poseSamples": 11,
       "annotatedPersonSamples": 26,
-      "candidates": [
-        5.625
-      ],
+      "candidates": [5.625],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 17,
@@ -2413,9 +2301,7 @@
       "samples": 144,
       "poseSamples": 144,
       "annotatedPersonSamples": 144,
-      "candidates": [
-        25.6
-      ],
+      "candidates": [25.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -2443,9 +2329,7 @@
       "samples": 43,
       "poseSamples": 43,
       "annotatedPersonSamples": 43,
-      "candidates": [
-        4.2
-      ],
+      "candidates": [4.2],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -2473,9 +2357,7 @@
       "samples": 156,
       "poseSamples": 156,
       "annotatedPersonSamples": 156,
-      "candidates": [
-        26.4
-      ],
+      "candidates": [26.4],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -2503,9 +2385,7 @@
       "samples": 50,
       "poseSamples": 33,
       "annotatedPersonSamples": 50,
-      "candidates": [
-        5.208333333333333
-      ],
+      "candidates": [5.208333333333333],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 16,
@@ -2534,9 +2414,7 @@
       "samples": 50,
       "poseSamples": 30,
       "annotatedPersonSamples": 50,
-      "candidates": [
-        4.833333333333333
-      ],
+      "candidates": [4.833333333333333],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 11,
@@ -2566,9 +2444,7 @@
       "samples": 71,
       "poseSamples": 70,
       "annotatedPersonSamples": 71,
-      "candidates": [
-        10.0
-      ],
+      "candidates": [10.0],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -2596,9 +2472,7 @@
       "samples": 42,
       "poseSamples": 41,
       "annotatedPersonSamples": 42,
-      "candidates": [
-        4.2
-      ],
+      "candidates": [4.2],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -2626,9 +2500,7 @@
       "samples": 263,
       "poseSamples": 255,
       "annotatedPersonSamples": 258,
-      "candidates": [
-        14.6
-      ],
+      "candidates": [14.6],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 240,
@@ -2684,9 +2556,7 @@
       "samples": 143,
       "poseSamples": 142,
       "annotatedPersonSamples": 143,
-      "candidates": [
-        4.6
-      ],
+      "candidates": [4.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 20,
@@ -3265,9 +3135,7 @@
       "samples": 45,
       "poseSamples": 29,
       "annotatedPersonSamples": 45,
-      "candidates": [
-        6.0
-      ],
+      "candidates": [6.0],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 11,

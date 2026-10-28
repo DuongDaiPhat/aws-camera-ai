@@ -335,7 +335,7 @@
         "available": true,
         "history": 10,
         "angle": 8.8835645435,
-        "drop": 1.224130392074585e-05,
+        "drop": 1.224130392074585e-5,
         "motion": null,
         "pairedJoints": 10,
         "immobile": 0.0
@@ -659,7 +659,7 @@
         "available": true,
         "history": 10,
         "angle": 10.1855259019,
-        "drop": 8.23289155960083e-05,
+        "drop": 8.23289155960083e-5,
         "motion": null,
         "pairedJoints": 9,
         "immobile": 0.0
@@ -743,7 +743,7 @@
         "available": true,
         "history": 10,
         "angle": 8.9566683042,
-        "drop": 6.617605686187744e-05,
+        "drop": 6.617605686187744e-5,
         "motion": null,
         "pairedJoints": 10,
         "immobile": 0.0
@@ -1103,7 +1103,7 @@
         "available": true,
         "history": 10,
         "angle": 10.9986345432,
-        "drop": 8.632242679595947e-05,
+        "drop": 8.632242679595947e-5,
         "motion": null,
         "pairedJoints": 9,
         "immobile": 0.0
@@ -1427,7 +1427,7 @@
         "available": true,
         "history": 10,
         "angle": 9.9649963254,
-        "drop": 9.248405694961548e-05,
+        "drop": 9.248405694961548e-5,
         "motion": null,
         "pairedJoints": 9,
         "immobile": 0.0

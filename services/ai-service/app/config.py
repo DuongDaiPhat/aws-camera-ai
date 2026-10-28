@@ -52,6 +52,7 @@ class Settings(BaseSettings):
     @classmethod
     def _cap_pose_min_visibility(cls, v: float) -> float:
         return min(v, 0.30)
+
     pose_min_association_iou: float = Field(0.30, gt=0, le=1, allow_inf_nan=False)
     pose_roi_padding_ratio: float = Field(0.20, ge=0, le=1, allow_inf_nan=False)
     fall_history_frame_count: int = Field(5, ge=2, le=1024)

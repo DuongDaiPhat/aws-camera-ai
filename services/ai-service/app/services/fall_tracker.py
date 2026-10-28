@@ -65,7 +65,9 @@ class FallTracker:
         self.reason: str = "NORMAL_POSTURE"
 
         # History buffer: luu cac frame hop le trong khoang thoi gian fall_history_max_seconds
-        self.history: deque[PoseObservation] = deque(maxlen=max(50, self.settings.fall_history_frame_count * 5))
+        self.history: deque[PoseObservation] = deque(
+            maxlen=max(50, self.settings.fall_history_frame_count * 5)
+        )
 
         # Baseline dong bang khi tao candidate
         self.baseline_scale_px: float = 0.0
@@ -346,14 +348,11 @@ class FallTracker:
             else 1.0
         )
         is_abnormal = (
-            (
-                min(geometry.torso_angle_deg, geometry.torso_angle_3d_deg)
-                < self.settings.fall_torso_angle_threshold_deg
-                or torso_shrink < self.settings.fall_torso_shrink_ratio
-                or geometry.aspect_ratio < self.settings.fall_aspect_ratio_threshold
-            )
-            and frozen_drop >= self.settings.fall_center_drop_ratio
-        )
+            min(geometry.torso_angle_deg, geometry.torso_angle_3d_deg)
+            < self.settings.fall_torso_angle_threshold_deg
+            or torso_shrink < self.settings.fall_torso_shrink_ratio
+            or geometry.aspect_ratio < self.settings.fall_aspect_ratio_threshold
+        ) and frozen_drop >= self.settings.fall_center_drop_ratio
         if is_abnormal and self.last_observation is not None:
             prev_obs = self.last_observation
             prev_shrink = (
@@ -362,16 +361,13 @@ class FallTracker:
                 else 1.0
             )
             prev_abnormal = (
-                (
-                    min(prev_obs.geometry.torso_angle_deg, prev_obs.geometry.torso_angle_3d_deg)
-                    < self.settings.fall_torso_angle_threshold_deg
-                    or prev_shrink < self.settings.fall_torso_shrink_ratio
-                    or prev_obs.geometry.aspect_ratio < self.settings.fall_aspect_ratio_threshold
-                )
-                and (prev_obs.geometry.center_y_px - self.baseline_center_y_px)
-                / self.baseline_scale_px
-                >= self.settings.fall_center_drop_ratio
-            )
+                min(prev_obs.geometry.torso_angle_deg, prev_obs.geometry.torso_angle_3d_deg)
+                < self.settings.fall_torso_angle_threshold_deg
+                or prev_shrink < self.settings.fall_torso_shrink_ratio
+                or prev_obs.geometry.aspect_ratio < self.settings.fall_aspect_ratio_threshold
+            ) and (
+                prev_obs.geometry.center_y_px - self.baseline_center_y_px
+            ) / self.baseline_scale_px >= self.settings.fall_center_drop_ratio
             if prev_abnormal:
                 motion_score = calculate_motion_score(
                     current_keypoints=keypoints,
@@ -466,9 +462,7 @@ class FallTracker:
             )
 
             torso_shrink_ratio = (
-                geometry.torso_length_px / max(10.0, prev_torso_len)
-                if prev_torso_len > 0
-                else 1.0
+                geometry.torso_length_px / max(10.0, prev_torso_len) if prev_torso_len > 0 else 1.0
             )
 
             # Dieu kien A: Nga ngang hoac goc 3D (giu nguyen chuan AC16-2 < 30 do va drop >= 0.20)
@@ -480,12 +474,9 @@ class FallTracker:
 
             # Dieu kien B: Nga doc camera (than co ngan > 45% hoac bbox bep va co roi trong tam)
             is_axial_fall = (
-                (
-                    torso_shrink_ratio < self.settings.fall_torso_shrink_ratio
-                    or geometry.aspect_ratio < self.settings.fall_aspect_ratio_threshold
-                )
-                and center_drop_ratio >= self.settings.fall_center_drop_ratio
-            )
+                torso_shrink_ratio < self.settings.fall_torso_shrink_ratio
+                or geometry.aspect_ratio < self.settings.fall_aspect_ratio_threshold
+            ) and center_drop_ratio >= self.settings.fall_center_drop_ratio
 
             if is_angle_fall or is_axial_fall:
                 self.state = "CANDIDATE"

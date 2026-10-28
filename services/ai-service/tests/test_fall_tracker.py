@@ -188,9 +188,9 @@ def test_fall_tracker_missing_pose_grace_period_ac16_3() -> None:
     assert res_missing_1["immobileSeconds"] == 0.0
     assert res_missing_1["missingPoseSeconds"] == 1.0
 
-    # Mất pose quá 5 giây (ở giây thứ 7.1) -> CANCELLED, MISSING_TIMEOUT
+    # Mất pose quá 10 giây (ở giây thứ 12.1, tính từ 2.0s) -> CANCELLED, MISSING_TIMEOUT
     res_missing_timeout = tracker.evaluate_frame(
-        observed_at=t0 + timedelta(seconds=7.1),
+        observed_at=t0 + timedelta(seconds=12.1),
         frame_id="f_missing_timeout",
         keypoints=None,
         geometry=None,
@@ -273,7 +273,9 @@ def test_fall_tracker_axial_fall_candidate() -> None:
     tracker = FallTracker("cam1", "sess1", "track_axial")
     t0 = datetime(2026, 10, 11, 12, 0, 0, tzinfo=UTC)
     kps = make_kps()
-    geom_standing = make_geom(angle=85.0, center_y=200.0, height=200.0, torso_length=120.0, angle_3d=85.0)
+    geom_standing = make_geom(
+        angle=85.0, center_y=200.0, height=200.0, torso_length=120.0, angle_3d=85.0
+    )
 
     # 10 frame dung thang
     for i in range(10):

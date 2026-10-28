@@ -123,9 +123,7 @@
       "has15SecondsAfterFall": false,
       "samples": 241,
       "poseSamples": 224,
-      "candidates": [
-        44.2
-      ],
+      "candidates": [44.2],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 48,
@@ -192,9 +190,7 @@
       "has15SecondsAfterFall": false,
       "samples": 54,
       "poseSamples": 53,
-      "candidates": [
-        6.6
-      ],
+      "candidates": [6.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 12,
@@ -238,9 +234,7 @@
       "has15SecondsAfterFall": false,
       "samples": 44,
       "poseSamples": 27,
-      "candidates": [
-        7.416666666666667
-      ],
+      "candidates": [7.416666666666667],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 23,
@@ -264,9 +258,7 @@
       "has15SecondsAfterFall": false,
       "samples": 59,
       "poseSamples": 45,
-      "candidates": [
-        5.625
-      ],
+      "candidates": [5.625],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 37,
@@ -356,9 +348,7 @@
       "has15SecondsAfterFall": false,
       "samples": 37,
       "poseSamples": 37,
-      "candidates": [
-        5.8
-      ],
+      "candidates": [5.8],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -381,9 +371,7 @@
       "has15SecondsAfterFall": false,
       "samples": 45,
       "poseSamples": 28,
-      "candidates": [
-        5.208333333333333
-      ],
+      "candidates": [5.208333333333333],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -517,9 +505,7 @@
       "has15SecondsAfterFall": false,
       "samples": 50,
       "poseSamples": 47,
-      "candidates": [
-        6.416666666666667
-      ],
+      "candidates": [6.416666666666667],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 9,
@@ -652,9 +638,7 @@
       "has15SecondsAfterFall": false,
       "samples": 63,
       "poseSamples": 63,
-      "candidates": [
-        7.8
-      ],
+      "candidates": [7.8],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 20,
@@ -722,9 +706,7 @@
       "has15SecondsAfterFall": false,
       "samples": 37,
       "poseSamples": 35,
-      "candidates": [
-        3.6
-      ],
+      "candidates": [3.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 18,
@@ -813,9 +795,7 @@
       "has15SecondsAfterFall": false,
       "samples": 89,
       "poseSamples": 89,
-      "candidates": [
-        13.6
-      ],
+      "candidates": [13.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -838,9 +818,7 @@
       "has15SecondsAfterFall": false,
       "samples": 50,
       "poseSamples": 48,
-      "candidates": [
-        5.625
-      ],
+      "candidates": [5.625],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 18,
@@ -863,9 +841,7 @@
       "has15SecondsAfterFall": false,
       "samples": 43,
       "poseSamples": 43,
-      "candidates": [
-        6.0
-      ],
+      "candidates": [6.0],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -910,9 +886,7 @@
       "has15SecondsAfterFall": false,
       "samples": 46,
       "poseSamples": 45,
-      "candidates": [
-        5.2
-      ],
+      "candidates": [5.2],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 20,
@@ -935,9 +909,7 @@
       "has15SecondsAfterFall": false,
       "samples": 35,
       "poseSamples": 35,
-      "candidates": [
-        5.2
-      ],
+      "candidates": [5.2],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -982,9 +954,7 @@
       "has15SecondsAfterFall": false,
       "samples": 53,
       "poseSamples": 53,
-      "candidates": [
-        5.8
-      ],
+      "candidates": [5.8],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1029,9 +999,7 @@
       "has15SecondsAfterFall": false,
       "samples": 63,
       "poseSamples": 63,
-      "candidates": [
-        8.4
-      ],
+      "candidates": [8.4],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1054,9 +1022,7 @@
       "has15SecondsAfterFall": false,
       "samples": 40,
       "poseSamples": 40,
-      "candidates": [
-        5.833333333333333
-      ],
+      "candidates": [5.833333333333333],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1079,9 +1045,7 @@
       "has15SecondsAfterFall": false,
       "samples": 86,
       "poseSamples": 86,
-      "candidates": [
-        12.4
-      ],
+      "candidates": [12.4],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1104,9 +1068,7 @@
       "has15SecondsAfterFall": false,
       "samples": 32,
       "poseSamples": 30,
-      "candidates": [
-        2.6
-      ],
+      "candidates": [2.6],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 3,
@@ -1129,9 +1091,7 @@
       "has15SecondsAfterFall": false,
       "samples": 32,
       "poseSamples": 32,
-      "candidates": [
-        2.0
-      ],
+      "candidates": [2.0],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1153,9 +1113,7 @@
       "has15SecondsAfterFall": false,
       "samples": 61,
       "poseSamples": 52,
-      "candidates": [
-        9.6
-      ],
+      "candidates": [9.6],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 29,
@@ -1179,9 +1137,7 @@
       "has15SecondsAfterFall": false,
       "samples": 146,
       "poseSamples": 140,
-      "candidates": [
-        25.2
-      ],
+      "candidates": [25.2],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 20,
@@ -1205,9 +1161,7 @@
       "has15SecondsAfterFall": false,
       "samples": 40,
       "poseSamples": 34,
-      "candidates": [
-        5.833333333333333
-      ],
+      "candidates": [5.833333333333333],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 29,
@@ -1296,9 +1250,7 @@
       "has15SecondsAfterFall": false,
       "samples": 50,
       "poseSamples": 50,
-      "candidates": [
-        6.0
-      ],
+      "candidates": [6.0],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 20,
@@ -1344,9 +1296,7 @@
       "has15SecondsAfterFall": false,
       "samples": 43,
       "poseSamples": 43,
-      "candidates": [
-        4.4
-      ],
+      "candidates": [4.4],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1391,9 +1341,7 @@
       "has15SecondsAfterFall": false,
       "samples": 70,
       "poseSamples": 68,
-      "candidates": [
-        10.8
-      ],
+      "candidates": [10.8],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 22,
@@ -1416,9 +1364,7 @@
       "has15SecondsAfterFall": false,
       "samples": 54,
       "poseSamples": 54,
-      "candidates": [
-        8.6
-      ],
+      "candidates": [8.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1463,9 +1409,7 @@
       "has15SecondsAfterFall": false,
       "samples": 49,
       "poseSamples": 48,
-      "candidates": [
-        4.0
-      ],
+      "candidates": [4.0],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1555,9 +1499,7 @@
       "has15SecondsAfterFall": false,
       "samples": 144,
       "poseSamples": 144,
-      "candidates": [
-        25.6
-      ],
+      "candidates": [25.6],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1580,9 +1522,7 @@
       "has15SecondsAfterFall": false,
       "samples": 43,
       "poseSamples": 43,
-      "candidates": [
-        4.2
-      ],
+      "candidates": [4.2],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1605,9 +1545,7 @@
       "has15SecondsAfterFall": false,
       "samples": 156,
       "poseSamples": 156,
-      "candidates": [
-        26.4
-      ],
+      "candidates": [26.4],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 10,
@@ -1630,9 +1568,7 @@
       "has15SecondsAfterFall": false,
       "samples": 50,
       "poseSamples": 33,
-      "candidates": [
-        5.208333333333333
-      ],
+      "candidates": [5.208333333333333],
       "confirmed": [],
       "reasons": {
         "NORMAL_POSTURE": 16,
@@ -1678,9 +1614,7 @@
       "has15SecondsAfterFall": false,
       "samples": 71,
       "poseSamples": 70,
-      "candidates": [
-        10.0
-      ],
+      "candidates": [10.0],
       "confirmed": [],
       "reasons": {
         "HISTORY_INSUFFICIENT": 20,

@@ -46,9 +46,7 @@
     "numpy": "1.26.4",
     "mediapipe": "0.10.32"
   },
-  "unlistedVideos": [
-    "fall/Coffe_room_15s_01.mp4"
-  ],
+  "unlistedVideos": ["fall/Coffe_room_15s_01.mp4"],
   "supplementaryClips": [
     {
       "file": "fall/Coffe_room_15s_01.mp4",

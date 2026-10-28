@@ -141,8 +141,20 @@ def calculate_pose_geometry(
 
     if not (
         (has_left_pair or has_right_pair)
-        or (has_both_shoulders and (keypoints[LEFT_HIP].visibility >= min_visibility or keypoints[RIGHT_HIP].visibility >= min_visibility))
-        or (has_both_hips and (keypoints[LEFT_SHOULDER].visibility >= min_visibility or keypoints[RIGHT_SHOULDER].visibility >= min_visibility))
+        or (
+            has_both_shoulders
+            and (
+                keypoints[LEFT_HIP].visibility >= min_visibility
+                or keypoints[RIGHT_HIP].visibility >= min_visibility
+            )
+        )
+        or (
+            has_both_hips
+            and (
+                keypoints[LEFT_SHOULDER].visibility >= min_visibility
+                or keypoints[RIGHT_SHOULDER].visibility >= min_visibility
+            )
+        )
     ):
         return None
 
@@ -168,14 +180,20 @@ def calculate_pose_geometry(
     )
 
     # Uu tien trung diem neu ca 2 ben deu ro, hoac fallback ve ben nhin ro nhat khi nga doc bi che
-    if keypoints[LEFT_SHOULDER].visibility >= min_visibility and keypoints[RIGHT_SHOULDER].visibility >= min_visibility:
+    if (
+        keypoints[LEFT_SHOULDER].visibility >= min_visibility
+        and keypoints[RIGHT_SHOULDER].visibility >= min_visibility
+    ):
         s_mid = PixelPoint((s_left.x + s_right.x) / 2.0, (s_left.y + s_right.y) / 2.0)
     elif keypoints[LEFT_SHOULDER].visibility >= min_visibility:
         s_mid = s_left
     else:
         s_mid = s_right
 
-    if keypoints[LEFT_HIP].visibility >= min_visibility and keypoints[RIGHT_HIP].visibility >= min_visibility:
+    if (
+        keypoints[LEFT_HIP].visibility >= min_visibility
+        and keypoints[RIGHT_HIP].visibility >= min_visibility
+    ):
         h_mid = PixelPoint((h_left.x + h_right.x) / 2.0, (h_left.y + h_right.y) / 2.0)
     elif keypoints[LEFT_HIP].visibility >= min_visibility:
         h_mid = h_left
