@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -47,8 +47,35 @@ class Settings(BaseSettings):
     fall_torso_angle_threshold_deg: int = 30
 
     # Module 3 — chay/khoi
-    fire_min_consecutive_frames: int = 3
-    fire_confidence_threshold: float = 0.50
+    m3_enabled: bool = False
+    fire_model_path: str = "models/fire-smoke-yolo26n-checkpoint-nms.onnx"
+    fire_model_version: str = "fire-smoke-yolo26n-checkpoint-nms-v1"
+    fire_model_sha256: str = ""
+    fire_min_consecutive_frames: int = Field(default=3, ge=3, le=60)
+    fire_confidence_threshold: float = Field(default=0.50, gt=0, le=1)
+    fire_output_confidence_floor: float = Field(default=0.10, ge=0, le=1)
+    fire_confirmation_window_seconds: float = Field(default=5, gt=0)
+    fire_max_frame_gap_seconds: float = Field(default=1, gt=0)
+    fire_clear_seconds: float = Field(default=10, gt=0)
+    fire_max_concurrent_requests: int = Field(default=1, ge=1, le=16)
+    fire_max_cameras: int = Field(default=16, ge=1, le=1024)
+    fire_max_image_bytes: int = Field(default=1_048_576, ge=1)
+    fire_max_image_pixels: int = Field(default=2_073_600, ge=1)
+    fire_request_timeout_ms: int = Field(default=2000, ge=1)
+    fire_frame_max_age_seconds: float = Field(default=1, gt=0)
+    fire_frame_future_tolerance_seconds: float = Field(default=0.5, ge=0)
+    fire_cpu_threads: int = Field(default=2, ge=1, le=64)
+    fire_state_sweep_interval_ms: int = Field(default=250, ge=1)
+
+    @model_validator(mode="after")
+    def validate_fire_settings(self) -> "Settings":
+        if self.fire_output_confidence_floor > self.fire_confidence_threshold:
+            raise ValueError(
+                "FIRE_OUTPUT_CONFIDENCE_FLOOR must not exceed FIRE_CONFIDENCE_THRESHOLD"
+            )
+        if self.fire_max_frame_gap_seconds > self.fire_confirmation_window_seconds:
+            raise ValueError("FIRE_MAX_FRAME_GAP_SECONDS must not exceed the confirmation window")
+        return self
 
 
 @lru_cache

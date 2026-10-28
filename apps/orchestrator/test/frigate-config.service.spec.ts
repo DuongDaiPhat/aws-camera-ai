@@ -1,4 +1,5 @@
 import YAML from 'yaml';
+import { ConfigService } from '@nestjs/config';
 import { FrigateConfigService } from '../src/frigate/frigate-config.service';
 import type { CameraAggregateRecord } from '../src/cameras/cameras.types';
 
@@ -39,7 +40,28 @@ describe('FrigateConfigService', () => {
   };
 
   beforeEach(() => {
-    service = new FrigateConfigService();
+    service = new FrigateConfigService(new ConfigService());
+  });
+
+  it('keeps recording before a fire even without a person or motion trigger when M3 is enabled', () => {
+    const fireService = new FrigateConfigService(new ConfigService({ M3_ENABLED: 'true' }));
+    const config = YAML.parse(fireService.generateUpdatedConfig('', { camera: mockCamera }));
+    expect(config.cameras[mockCamera.slug].record.continuous.days).toBe(1);
+  });
+
+  it('honors an explicit recording disable and preserves longer existing continuous retention', () => {
+    const fireService = new FrigateConfigService(new ConfigService({ M3_ENABLED: 'true' }));
+    const prior = `cameras:\n  ${mockCamera.slug}:\n    record:\n      continuous:\n        days: 3\n`;
+    const config = YAML.parse(fireService.generateUpdatedConfig(prior, { camera: mockCamera }));
+    expect(config.cameras[mockCamera.slug].record.continuous.days).toBe(3);
+    const disabled = YAML.parse(
+      fireService.generateUpdatedConfig('', {
+        camera: mockCamera,
+        settings: { recording_enabled: false },
+      }),
+    );
+    expect(disabled.cameras[mockCamera.slug].record.enabled).toBe(false);
+    expect(disabled.cameras[mockCamera.slug].record.continuous).toBeUndefined();
   });
 
   it('sinh cau hinh Frigate YAML hop le tu chuoi rong', () => {

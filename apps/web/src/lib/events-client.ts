@@ -1,18 +1,18 @@
 import { apiFetch, getAccessToken, API_BASE_URL } from './api-client';
 import { formatRelativeTime } from './format';
-import type { EventSummary, UIEventItem, EventDetail, EventStats, Confirmation } from '@/types';
+import type {
+  EventSummary,
+  UIEventItem,
+  EventDetail,
+  EventStats,
+  Confirmation,
+  operations,
+} from '@/types';
 
 /** Số sự kiện tải về mỗi lần mở dashboard (tối đa openapi cho phép là 100). */
 export const DEFAULT_EVENTS_PAGE_SIZE = 50;
 
-interface ListEventsResponse {
-  data: EventSummary[];
-  meta?: {
-    page: number;
-    pageSize: number;
-    total: number;
-  };
-}
+type ListEventsResponse = operations['listEvents']['responses'][200]['content']['application/json'];
 
 /** Loại sự kiện được dán nhãn theo phần trăm tin cậy của mô hình AI. */
 function formatConfidencePercent(confidence: number | null | undefined): string | null {
@@ -34,7 +34,7 @@ function getAiTagInfo(event: EventSummary): AiTagInfo {
 
   switch (event.eventType) {
     case 'FIRE_SMOKE_DETECTED':
-      return { aiTag: percent ? `${percent} khói` : 'Khói / Lửa', aiTagColor: 'danger' };
+      return { aiTag: percent ? `${percent} lửa / khói` : 'Lửa / Khói', aiTagColor: 'danger' };
     case 'FALL_DETECTED':
       return { aiTag: percent ? `Pose AI ${percent}` : 'Té ngã', aiTagColor: 'warning' };
     case 'UNKNOWN_PERSON':
@@ -87,15 +87,23 @@ export function toUIEventItem(event: EventSummary): UIEventItem {
  * Lỗi được ném ra để dashboard hiển thị trạng thái lỗi kèm nút thử lại,
  * thay vì âm thầm thay bằng dữ liệu giả khiến không ai biết backend đang hỏng.
  */
-export async function fetchEvents(pageSize: number = DEFAULT_EVENTS_PAGE_SIZE): Promise<{
+export async function fetchEvents(
+  pageSize: number = DEFAULT_EVENTS_PAGE_SIZE,
+  includePendingFire = false,
+): Promise<{
   events: UIEventItem[];
   total: number;
 }> {
   const response = await apiFetch<ListEventsResponse>(`/events?pageSize=${pageSize}`);
   const data = Array.isArray(response.data) ? response.data : [];
 
+  const recent = data.map(toUIEventItem);
+  const pending = includePendingFire ? await fetchPendingFireEvents() : [];
+  const merged = Array.from(
+    new Map([...recent, ...pending].map((event) => [event.id, event])).values(),
+  );
   return {
-    events: data.map(toUIEventItem),
+    events: merged,
     total: response.meta?.total ?? data.length,
   };
 }
@@ -104,7 +112,28 @@ export async function fetchEvents(pageSize: number = DEFAULT_EVENTS_PAGE_SIZE): 
  * Chi tiết một sự kiện kèm media (ảnh snapshot đầy đủ), kết quả AI và lịch sử trạng thái.
  */
 export function fetchEventDetail(eventId: string): Promise<EventDetail> {
-  return apiFetch<EventDetail>(`/events/${eventId}`);
+  return apiFetch<EventDetail>(`/events/${eventId}`, { cache: 'no-store' });
+}
+
+/** Query pending fire alerts independently of recent-event filters and pagination. */
+export async function fetchPendingFireEvents(): Promise<UIEventItem[]> {
+  const events: UIEventItem[] = [];
+  let page = 1;
+  for (;;) {
+    const query = new URLSearchParams({
+      eventType: 'FIRE_SMOKE_DETECTED',
+      pageSize: '100',
+      page: String(page),
+    });
+    for (const status of ['DETECTED', 'NOTIFIED', 'ESCALATED']) query.append('status', status);
+    const result = await apiFetch<ListEventsResponse>(`/events?${query}`, { cache: 'no-store' });
+    events.push(...result.data.map(toUIEventItem));
+    const pages = Math.ceil(
+      (result.meta?.total ?? result.data.length) / (result.meta?.pageSize ?? 100),
+    );
+    if (!result.data.length || page >= pages) return events;
+    page += 1;
+  }
 }
 
 /**

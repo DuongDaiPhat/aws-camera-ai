@@ -11,6 +11,7 @@ import {
 import { TELEGRAM_CHANNEL } from '../src/notifications/notification-channel.interface';
 import { STORAGE_SERVICE } from '../src/storage/storage.interface';
 import { TelegramApiError } from '../src/notifications/telegram/telegram.adapter';
+import { ALERT_IMAGE_RENDERER } from '../src/notifications/alert-image-renderer.interface';
 
 const JOB: TelegramNotificationJob = {
   id: '6cc3d21f-efe4-4bb4-b32d-ce067494d70a',
@@ -37,6 +38,7 @@ describe('NotificationRetryWorker', () => {
   const repository = {
     claimTelegramBatch: jest.fn(),
     findSnapshot: jest.fn(),
+    findFireSnapshotMetadata: jest.fn(),
     eventAllowsDelivery: jest.fn(),
     markSent: jest.fn(),
     markSkipped: jest.fn(),
@@ -47,6 +49,7 @@ describe('NotificationRetryWorker', () => {
     sendMessage: jest.fn(),
   };
   const storage = { download: jest.fn() };
+  const renderer = { render: jest.fn() };
   let worker: NotificationRetryWorker;
 
   beforeEach(async () => {
@@ -65,6 +68,7 @@ describe('NotificationRetryWorker', () => {
         { provide: NotificationsRepository, useValue: repository },
         { provide: TELEGRAM_CHANNEL, useValue: telegram },
         { provide: STORAGE_SERVICE, useValue: storage },
+        { provide: ALERT_IMAGE_RENDERER, useValue: renderer },
       ],
     }).compile();
     worker = module.get(NotificationRetryWorker);
@@ -91,6 +95,61 @@ describe('NotificationRetryWorker', () => {
       expect.stringContaining('Cảnh báo:'),
     );
     expect(telegram.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it('sends wellness alerts as text without loading or annotating a snapshot', async () => {
+    const job = { ...JOB, eventType: 'WELLNESS_TIMEOUT' as const };
+    repository.claimTelegramBatch.mockReset().mockResolvedValueOnce([job]).mockResolvedValue([]);
+    telegram.sendMessage.mockResolvedValue({ chatId: '12345', messageId: '43' });
+
+    await worker.runOnce();
+
+    expect(telegram.sendPhoto).not.toHaveBeenCalled();
+    expect(storage.download).not.toHaveBeenCalled();
+    expect(repository.findSnapshot).not.toHaveBeenCalled();
+    expect(renderer.render).not.toHaveBeenCalled();
+    expect(telegram.sendMessage).toHaveBeenCalledTimes(1);
+    expect(repository.markSent).toHaveBeenCalledWith(
+      job,
+      '12345',
+      '43',
+      'TEXT',
+      expect.stringContaining('Chưa ghi nhận hoạt động'),
+    );
+  });
+
+  it('annotates a fire delivery copy with matching stored snapshot evidence', async () => {
+    repository.claimTelegramBatch
+      .mockReset()
+      .mockResolvedValueOnce([{ ...JOB, eventType: 'FIRE_SMOKE_DETECTED' }])
+      .mockResolvedValue([]);
+    repository.findFireSnapshotMetadata.mockResolvedValue({ frameId: 'frame', detections: [] });
+    renderer.render.mockResolvedValue(Buffer.from('annotated'));
+    await worker.runOnce();
+    expect(repository.findFireSnapshotMetadata).toHaveBeenCalledWith(JOB.eventId, JOB.snapshotKey);
+    expect(telegram.sendPhoto).toHaveBeenCalledWith(
+      JOB.chatId,
+      Buffer.from('annotated'),
+      expect.stringContaining('khoanh đỏ'),
+      expect.any(Object),
+    );
+    expect(storage.download).toHaveBeenCalledTimes(1);
+  });
+
+  it('still delivers the original alert with an explicit notice if annotation fails', async () => {
+    repository.claimTelegramBatch
+      .mockReset()
+      .mockResolvedValueOnce([{ ...JOB, eventType: 'FIRE_SMOKE_DETECTED' }])
+      .mockResolvedValue([]);
+    renderer.render.mockRejectedValue(new Error('Renderer unavailable'));
+    await worker.runOnce();
+    expect(telegram.sendPhoto).toHaveBeenCalledWith(
+      JOB.chatId,
+      Buffer.from('jpeg'),
+      expect.stringContaining('chưa có khung'),
+      expect.any(Object),
+    );
+    expect(repository.markSent).toHaveBeenCalled();
   });
 
   it('bỏ qua cảnh báo khi event đã được xử lý trước lúc gửi', async () => {

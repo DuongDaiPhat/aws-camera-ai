@@ -8,6 +8,7 @@ import {
   toUIEventItem,
   confirmEvent,
   closeEvent,
+  fetchPendingFireEvents,
 } from './events-client';
 import type { EventStats, EventSummary } from '@/types';
 
@@ -37,7 +38,7 @@ describe('toUIEventItem', () => {
     };
 
     const uiItem = toUIEventItem(summary);
-    expect(uiItem.aiTag).toBe('92% khói');
+    expect(uiItem.aiTag).toBe('92% lửa / khói');
     expect(uiItem.aiTagColor).toBe('danger');
     expect(uiItem.cameraCode).toBe('CAM 02');
   });
@@ -103,6 +104,37 @@ describe('toUIEventItem', () => {
     const uiItem = toUIEventItem(summary);
     expect(uiItem.aiTag).toBe('An toàn');
     expect(uiItem.aiTagColor).toBe('success');
+  });
+});
+
+describe('pending fire alerts', () => {
+  it('queries active fire independently and follows server pagination', async () => {
+    const event: EventSummary = {
+      id: 'older-fire',
+      eventType: 'FIRE_SMOKE_DETECTED',
+      priority: 'P0',
+      status: 'ESCALATED',
+      detectedAt: '2026-10-27T09:06:43Z',
+    };
+    const request = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        jsonResponse({ data: [event], meta: { page: 1, pageSize: 1, total: 2 } }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          data: [{ ...event, id: 'other-fire' }],
+          meta: { page: 2, pageSize: 1, total: 2 },
+        }),
+      );
+    expect((await fetchPendingFireEvents()).map((item) => item.id)).toEqual([
+      'older-fire',
+      'other-fire',
+    ]);
+    const query = new URL(String(request.mock.calls[0][0])).searchParams;
+    expect(query.getAll('status')).toEqual(['DETECTED', 'NOTIFIED', 'ESCALATED']);
+    expect(query.get('eventType')).toBe('FIRE_SMOKE_DETECTED');
+    expect(String(request.mock.calls[1][0])).toContain('page=2');
   });
 });
 

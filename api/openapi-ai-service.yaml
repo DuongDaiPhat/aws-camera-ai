@@ -75,6 +75,21 @@ paths:
         "503":
           description: Service dang khoi dong, model chua nap xong
 
+  /fire/health:
+    get:
+      tags: [fire]
+      summary: Inspect M3 model readiness and process-local inference counters
+      description: Does not load the model or run inference. Counters reset on process restart. Liveness remains available at /health.
+      operationId: fireRuntimeHealth
+      responses:
+        "200":
+          description: Authenticated runtime diagnostics; DEGRADED is not an inference result.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FireRuntimeHealth" }
+        "401":
+          description: Missing or invalid internal token
+
   /face/embed:
     post:
       tags: [face]
@@ -770,6 +785,40 @@ components:
       name: X-Internal-Token
 
   schemas:
+    FireRuntimeHealth:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          status,
+          instanceId,
+          modelVersion,
+          modelLoaded,
+          requestCount,
+          errorCount,
+          staleFrameCount,
+          capacityRejectedCount,
+          inFlight,
+          lastRequestAt,
+          lastSuccessAt,
+          lastErrorCode,
+          lastDurationMs,
+        ]
+      properties:
+        status: { type: string, enum: [DISABLED, STARTING, READY, DEGRADED] }
+        instanceId: { type: string, format: uuid }
+        modelVersion: { type: string }
+        modelLoaded: { type: boolean }
+        requestCount: { type: integer, minimum: 0 }
+        errorCount: { type: integer, minimum: 0 }
+        staleFrameCount: { type: integer, minimum: 0 }
+        capacityRejectedCount: { type: integer, minimum: 0 }
+        inFlight: { type: integer, minimum: 0 }
+        lastRequestAt: { type: [string, "null"], format: date-time }
+        lastSuccessAt: { type: [string, "null"], format: date-time }
+        lastErrorCode: { type: [string, "null"], maxLength: 100 }
+        lastDurationMs: { type: [number, "null"], minimum: 0 }
+
     BoundingBox:
       type: object
       description: Toa do chuan hoa 0..1.

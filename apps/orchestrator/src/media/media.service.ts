@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { createHash } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
 import { EventMediaRecord, EventMediaRepository } from './event-media.repository';
@@ -62,6 +63,41 @@ export class MediaService {
     const mm = String(eventDate.getUTCMonth() + 1).padStart(2, '0');
     const dd = String(eventDate.getUTCDate()).padStart(2, '0');
     return `events/${yyyy}/${mm}/${dd}/${eventId}/${filename}`;
+  }
+
+  /** Store the exact full-camera confirmation frame without a person track. */
+  async storeCameraSnapshot(
+    eventId: string,
+    observedAt: Date,
+    image: Buffer,
+    width: number,
+    height: number,
+  ): Promise<EventMediaRecord | null> {
+    const objectKey = this.buildObjectKey(observedAt, eventId, 'snapshot.jpg');
+    try {
+      await this.storageService.upload(objectKey, image, 'image/jpeg');
+      return await this.eventMediaRepository.createEventMedia({
+        eventId,
+        mediaType: 'SNAPSHOT',
+        storageProvider: this.storageProvider,
+        bucket: this.storageBucket,
+        objectKey,
+        contentType: 'image/jpeg',
+        sizeBytes: image.length,
+        checksumSha256: createHash('sha256').update(image).digest('hex'),
+        width,
+        height,
+      });
+    } catch (error) {
+      this.logger.error(
+        {
+          eventId,
+          error: error instanceof Error ? error.message : 'Unknown snapshot storage error',
+        },
+        'Camera snapshot storage failed; incident remains persisted',
+      );
+      return null;
+    }
   }
 
   /**

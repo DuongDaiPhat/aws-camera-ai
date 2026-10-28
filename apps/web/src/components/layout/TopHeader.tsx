@@ -8,6 +8,7 @@ interface TopHeaderProps {
   selectedZone: string;
   onSelectZone: (zone: string) => void;
   onSimulateNewEvent: () => void;
+  pendingCount?: number | null;
 }
 
 const ZONE_OPTIONS = [
@@ -49,11 +50,30 @@ function ZoneDropdownMenu({
   );
 }
 
+function AlertStatus({ pendingCount }: { pendingCount: number | null }) {
+  return (
+    <div
+      className={`${styles.statusPill} ${pendingCount === null ? styles.statusUnknown : pendingCount > 0 ? styles.statusWarning : ''}`}
+      role="status"
+    >
+      <span className={styles.greenDot} aria-hidden="true" />
+      <span>
+        {pendingCount === null
+          ? 'Đang đồng bộ trạng thái cảnh báo.'
+          : pendingCount > 0
+            ? `${pendingCount} cảnh báo đang chờ xử lý.`
+            : 'Không có cảnh báo đang chờ xử lý.'}
+      </span>
+    </div>
+  );
+}
+
 export function TopHeader({
   userName = 'Đức Anh',
   selectedZone,
   onSelectZone,
   onSimulateNewEvent,
+  pendingCount = null,
 }: TopHeaderProps) {
   const [timeText, setTimeText] = useState('12:32');
   const [greeting, setGreeting] = useState('Chào buổi tối');
@@ -95,10 +115,7 @@ export function TopHeader({
         <span className={styles.divider} aria-hidden="true">
           /
         </span>
-        <div className={styles.statusPill}>
-          <span className={styles.greenDot} aria-hidden="true" />
-          <span>Mọi thứ trong nhà đang an toàn và được theo dõi bình thường.</span>
-        </div>
+        <AlertStatus pendingCount={pendingCount} />
       </div>
 
       <div className={styles.rightSection}>

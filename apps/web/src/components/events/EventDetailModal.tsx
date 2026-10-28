@@ -1,10 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import type { EventDetail, EventMedia, UIEventItem } from '@/types';
-import { fetchEventDetail } from '@/lib/events-client';
+import { useState } from 'react';
+import type { EventDetail, UIEventItem } from '@/types';
+import { useEventDetail } from '@/hooks/useEventDetail';
+import { useDialogFocus } from '@/hooks/useDialogFocus';
 import { formatExactTime, getEventTypeLabel, getPriorityInfo } from '@/lib/format';
 import styles from './event-detail-modal.module.css';
+import { FireEvidenceSection } from './FireEvidenceSection';
+import { EventEvidenceViewer } from './EventEvidenceViewer';
+import { EventDetailFooter } from './EventDetailFooter';
+import { FireEventSummary } from './FireEventSummary';
 
 interface EventDetailModalProps {
   event: UIEventItem | null;
@@ -13,6 +18,8 @@ interface EventDetailModalProps {
   onConfirmHelp?: (eventId: string, note?: string) => Promise<void> | void;
   onCloseEmergency?: (eventId: string, note?: string) => Promise<void> | void;
   onToggleFalseAlarm?: (eventId: string) => void;
+  requireReview?: boolean;
+  onReview?: () => void;
 }
 
 const PERSON_STATUS_LABELS: Record<string, string> = {
@@ -30,67 +37,6 @@ const EVENT_STATUS_LABELS: Record<string, string> = {
   CLOSED: 'Đã đóng sự kiện',
   AI_FAILED: 'AI không phân tích được',
 };
-
-function findMediaByType(media: EventMedia[] | undefined, mediaType: EventMedia['mediaType']) {
-  return media?.find((item) => item.mediaType === mediaType) ?? null;
-}
-
-/**
- * Khung ảnh/video của sự kiện. Ưu tiên ảnh snapshot đầy đủ lấy từ
- * `/events/{id}/media`, nếu chưa có thì dùng thumbnail đã tải ở danh sách.
- */
-function SnapshotPreview({ event, detail }: { event: UIEventItem; detail: EventDetail | null }) {
-  const [hasImageError, setImageError] = useState(false);
-  const snapshot = findMediaByType(detail?.media, 'SNAPSHOT');
-  const snapshotUrl = snapshot?.url ?? event.thumbnailUrl ?? null;
-
-  useEffect(() => {
-    setImageError(false);
-  }, [snapshotUrl]);
-
-  return (
-    <div className={styles.snapshotContainer}>
-      {snapshotUrl && !hasImageError ? (
-        <img
-          className={styles.snapshotImage}
-          src={snapshotUrl}
-          alt={`Ảnh chụp sự kiện tại ${event.camera?.name ?? 'camera'}`}
-          onError={() => setImageError(true)}
-        />
-      ) : (
-        <>
-          <div className={styles.snapshotGrid} aria-hidden="true" />
-          <p className={styles.snapshotMissing}>
-            {hasImageError
-              ? 'Không tải được ảnh snapshot (liên kết có thể đã hết hạn).'
-              : 'Sự kiện này chưa có ảnh snapshot từ camera.'}
-          </p>
-        </>
-      )}
-
-      <div className={styles.camWatermark}>
-        <span className={styles.liveRecDot} aria-hidden="true" />
-        <span>
-          {event.camera?.name || 'Camera'} • {event.cameraCode}
-        </span>
-      </div>
-      <div className={styles.timeWatermark}>{formatExactTime(event.detectedAt)}</div>
-    </div>
-  );
-}
-
-function ClipPlayer({ detail }: { detail: EventDetail | null }) {
-  const clip = findMediaByType(detail?.media, 'CLIP');
-  if (!clip) return null;
-
-  return (
-    <div className={styles.aiSection}>
-      <h3 className={styles.sectionTitle}>Video clip của sự kiện</h3>
-      {/* Clip ghi tu camera nen khong co phu de di kem */}
-      <video className={styles.clipPlayer} src={clip.url} controls preload="metadata" />
-    </div>
-  );
-}
 
 function DetailItem({ label, value }: { label: string; value: string }) {
   return (
@@ -184,40 +130,37 @@ function StatusHistorySection({ detail }: { detail: EventDetail | null }) {
   );
 }
 
-function useEventDetail(event: UIEventItem | null) {
-  const [detail, setDetail] = useState<EventDetail | null>(null);
-  const [isLoading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!event) {
-      setDetail(null);
-      setError(null);
-      return;
-    }
-
-    let isMounted = true;
-    setLoading(true);
-    setError(null);
-
-    fetchEventDetail(event.id)
-      .then((data) => {
-        if (isMounted) setDetail(data);
-      })
-      .catch(() => {
-        // Vẫn hiển thị được các thông số đã có ở danh sách, chỉ thiếu phần chi tiết.
-        if (isMounted) setError('Không tải được chi tiết đầy đủ của sự kiện này.');
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [event]);
-
-  return { detail, isLoading, error };
+function FireDetailContent({
+  event,
+  detail,
+  reload,
+}: {
+  event: UIEventItem;
+  detail: EventDetail | null;
+  reload: () => void;
+}) {
+  return (
+    <>
+      <div className={styles.fireLayout}>
+        <EventEvidenceViewer event={event} detail={detail} onReload={reload} />
+        <aside className={styles.fireInfo}>
+          <FireEventSummary
+            event={event}
+            detail={detail}
+            statusLabel={EVENT_STATUS_LABELS[event.status] ?? event.status}
+          />
+          <FireEvidenceSection detail={detail} />
+        </aside>
+      </div>
+      <details className={styles.technicalDetails}>
+        <summary>Thông tin phân tích và lịch sử xử lý</summary>
+        <p className={styles.mediaHint}>Mã sự kiện: {event.id}</p>
+        <p className={styles.mediaHint}>Độ tin cậy AI không biểu thị kích thước đám cháy.</p>
+        <AiResultSection detail={detail} />
+        <StatusHistorySection detail={detail} />
+      </details>
+    </>
+  );
 }
 
 export function EventDetailModal({
@@ -227,15 +170,18 @@ export function EventDetailModal({
   onConfirmHelp,
   onCloseEmergency,
   onToggleFalseAlarm,
+  requireReview = false,
+  onReview,
 }: EventDetailModalProps) {
-  const { detail, isLoading, error } = useEventDetail(event);
+  const { detail, isLoading, error, reload } = useEventDetail(event);
+  const ref = useDialogFocus(Boolean(event), requireReview ? undefined : onClose);
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
   if (!event) return null;
 
-  const currentStatus = event.status;
+  const isFire = event.eventType === 'FIRE_SMOKE_DETECTED';
 
   const handleAction = async (action: 'OK' | 'HELP' | 'CLOSE') => {
     if (isSubmitting) return;
@@ -265,23 +211,38 @@ export function EventDetailModal({
 
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div className={styles.modal}>
+      <div ref={ref} tabIndex={-1} className={`${styles.modal} ${isFire ? styles.fireModal : ''}`}>
         <div className={styles.modalHeader}>
           <div className={styles.headerInfo}>
             <h2 id="modal-title" className={styles.modalTitle}>
-              Chi tiết sự kiện
+              {isFire ? 'Chi tiết sự kiện lửa / khói' : 'Chi tiết sự kiện'}
             </h2>
+            {isFire && (
+              <time className={styles.headerTime} dateTime={event.detectedAt}>
+                Phát hiện: {formatExactTime(event.detectedAt)}
+              </time>
+            )}
           </div>
-          <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Đóng">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="18" x2="18" y2="6" />
-            </svg>
-          </button>
+          {!requireReview && (
+            <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Đóng">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
         </div>
 
         <div className={styles.modalBody}>
-          {isLoading && (
+          {isLoading && !detail && (
             <p className={styles.inlineNotice} role="status">
               Đang tải chi tiết sự kiện…
             </p>
@@ -292,11 +253,22 @@ export function EventDetailModal({
             </p>
           )}
 
-          <SnapshotPreview event={event} detail={detail} />
-          <EventPropertyGrid event={event} detail={detail} />
-          <ClipPlayer detail={detail} />
-          <AiResultSection detail={detail} />
-          <StatusHistorySection detail={detail} />
+          {error && (
+            <button className={styles.retryEvidence} type="button" onClick={reload}>
+              Thử tải lại bằng chứng
+            </button>
+          )}
+
+          {isFire ? (
+            <FireDetailContent event={event} detail={detail} reload={reload} />
+          ) : (
+            <>
+              <EventEvidenceViewer event={event} detail={detail} onReload={reload} />
+              <EventPropertyGrid event={event} detail={detail} />
+              <AiResultSection detail={detail} />
+              <StatusHistorySection detail={detail} />
+            </>
+          )}
         </div>
 
         {actionError && (
@@ -305,78 +277,17 @@ export function EventDetailModal({
           </div>
         )}
 
-        <div className={styles.modalFooter}>
-          <div className={styles.footerActionsWrapper}>
-            {(currentStatus === 'NOTIFIED' || currentStatus === 'ESCALATED') && (
-              <input
-                type="text"
-                className={styles.noteInput}
-                placeholder={
-                  currentStatus === 'NOTIFIED'
-                    ? 'Ghi chú xác nhận (không bắt buộc)...'
-                    : 'Ghi chú kết quả xử lý khẩn cấp...'
-                }
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                disabled={isSubmitting}
-                maxLength={500}
-              />
-            )}
-
-            <div className={styles.footerRow}>
-              <button
-                type="button"
-                className={styles.btnFalseAlarm}
-                onClick={() => onToggleFalseAlarm?.(event.id)}
-                disabled={isSubmitting}
-              >
-                {event.isFalseAlarm ? 'Bỏ đánh dấu báo động giả' : 'Đánh dấu báo động giả'}
-              </button>
-
-              <div className={styles.actionButtonGroup}>
-                {currentStatus === 'NOTIFIED' && (
-                  <>
-                    <button
-                      type="button"
-                      className={styles.btnOk}
-                      onClick={() => handleAction('OK')}
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? 'Đang gửi…' : '✅ Tôi ổn (An toàn)'}
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.btnEscalate}
-                      onClick={() => handleAction('HELP')}
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? 'Đang gửi…' : '🆘 Cần giúp đỡ (Leo thang)'}
-                    </button>
-                  </>
-                )}
-
-                {currentStatus === 'ESCALATED' && (
-                  <button
-                    type="button"
-                    className={styles.btnCloseEmergency}
-                    onClick={() => handleAction('CLOSE')}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? 'Đang đóng…' : '🏁 Đóng sự kiện khẩn cấp'}
-                  </button>
-                )}
-
-                {currentStatus === 'RESOLVED' && (
-                  <span className={styles.statusDoneBadge}>✅ Đã xác nhận an toàn</span>
-                )}
-
-                {currentStatus === 'CLOSED' && (
-                  <span className={styles.statusDoneBadge}>🏁 Sự kiện khẩn cấp đã được đóng</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <EventDetailFooter
+          event={event}
+          note={note}
+          onNote={setNote}
+          submitting={isSubmitting}
+          onAction={handleAction}
+          onToggleFalseAlarm={onToggleFalseAlarm}
+          requireReview={requireReview}
+          canReview={Boolean(detail || error)}
+          onReview={onReview}
+        />
       </div>
     </div>
   );

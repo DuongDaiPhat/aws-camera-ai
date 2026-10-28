@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { UIEventItem } from '@/types';
 import { formatExactTime } from '@/lib/format';
+import { canInterruptFire } from '@/lib/fire-alerts';
 import styles from './event-card.module.css';
 
 interface EventCardProps {
@@ -166,6 +167,7 @@ function EventStatusBadges({ event }: { event: UIEventItem }) {
 }
 
 export function EventCard({ event, onViewDetail }: EventCardProps) {
+  const fireActive = canInterruptFire(event);
   const isFinished = event.status === 'RESOLVED' || event.status === 'CLOSED';
   const isEscalated = event.status === 'ESCALATED';
   const isP0 = event.priority === 'P0';
@@ -200,7 +202,14 @@ export function EventCard({ event, onViewDetail }: EventCardProps) {
     typeof event.confidence === 'number' ? `${Math.round(event.confidence * 100)}%` : null;
 
   return (
-    <article className={`${styles.card} ${accentClass}`}>
+    <article
+      className={`${styles.card} ${accentClass} ${fireActive ? styles.fireActive : ''} ${event.eventType === 'FIRE_SMOKE_DETECTED' && !fireActive ? styles.fireHistory : ''}`}
+    >
+      {fireActive && (
+        <svg className={styles.fireBorder} aria-hidden="true" focusable="false">
+          <rect x="1" y="1" rx="11" />
+        </svg>
+      )}
       <div className={styles.leftGroup}>
         <EventThumbnail event={event} />
 
@@ -217,12 +226,17 @@ export function EventCard({ event, onViewDetail }: EventCardProps) {
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
-              <span>Phát hiện: {event.relativeTimeText}</span>
+              {event.eventType === 'FIRE_SMOKE_DETECTED' ? (
+                <time dateTime={event.detectedAt}>
+                  Phát hiện: {formatExactTime(event.detectedAt)}
+                </time>
+              ) : (
+                <span>Phát hiện: {event.relativeTimeText}</span>
+              )}
             </span>
           </div>
 
           <h3 className={styles.eventTitle}>{title}</h3>
-
           <p className={styles.locationLine}>
             <span className={styles.locationCam}>{event.camera?.name || 'Camera'}</span>
             {event.zone?.name && (

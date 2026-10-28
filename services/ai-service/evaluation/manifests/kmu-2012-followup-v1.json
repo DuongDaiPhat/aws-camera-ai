@@ -1,0 +1,270 @@
+{
+  "datasetId": "kmu-2012-followup-v1",
+  "datasetRoot": "datasets/m3/evaluation/kmu-2012",
+  "source": "https://cvpr.kmu.ac.kr/Dataset/Dataset.htm",
+  "license": "KMU CVPR Lab copyright; free download for academic research only; video binaries are not redistributed in Git",
+  "policy": {
+    "baseline": 0.5,
+    "candidate": 0.65,
+    "sampleFps": 5,
+    "jpegQuality": 85,
+    "requiredFrames": 3,
+    "windowSeconds": 5,
+    "maxGapSeconds": 1,
+    "clearSeconds": 10,
+    "outputFloor": 0.1,
+    "cpuThreads": 2
+  },
+  "clips": [
+    {
+      "path": "pos/kmu-pos-00.avi",
+      "sha256": "155ea8e17fde97b3cfc75ad263e8fde89f56d54085b6be233444799a3f6b3753",
+      "expectedFire": true,
+      "sourceEntry": "flame1.avi",
+      "sceneGroup": "orchard"
+    },
+    {
+      "path": "pos/kmu-pos-02.avi",
+      "sha256": "1e74f24d332740129328f8c9f14df2aeb2f594b7b4ab4e9e1166a71867240d39",
+      "expectedFire": true,
+      "sourceEntry": "flame3.avi",
+      "sceneGroup": "laboratory-bench"
+    },
+    {
+      "path": "pos/kmu-pos-03.avi",
+      "sha256": "0f33cc76c9352e17edd08199ca0a06bf4b070cf627afcee365643bbe05718077",
+      "expectedFire": true,
+      "sourceEntry": "flame4.avi",
+      "sceneGroup": "laboratory-bench"
+    },
+    {
+      "path": "pos/kmu-pos-04.avi",
+      "sha256": "0f31214a35e559f88b75b7079772238b81a88e9ec05bcede8aec490b5084a98a",
+      "expectedFire": true,
+      "sourceEntry": "flame5.avi",
+      "sceneGroup": "laboratory-bench"
+    },
+    {
+      "path": "pos/kmu-pos-07.avi",
+      "sha256": "450476fd83f1fc5f661ce73cde9c36b057bbfc9dd1f908b0f571365261de33ff",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_daytime_10m_gasoline_CCD_001.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "pos/kmu-pos-08.avi",
+      "sha256": "ab37319f0d15048f5aced2ed0fd8468454ccceba7cc54b69b197d3c46d355d68",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_daytime_10m_heptane_CCD_001.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "pos/kmu-pos-09.avi",
+      "sha256": "23d6ca31c12b1e420a0df62a1282f645295c3acbe64089bc61ac91263046f307",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_daytime_20m_gasoline_CCD_001.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "pos/kmu-pos-10.avi",
+      "sha256": "f03f69ad227e4aa70b20fbadcd6e9119e72fb6200b594370e31032ab49e8937e",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_daytime_20m_heptane_CCD_001.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "pos/kmu-pos-11.avi",
+      "sha256": "6843883bfb94da43459383068ccf53e436393b9878dddfe734d80683088107ee",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_daytime_30m_gasoline_CCD_001.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "pos/kmu-pos-12.avi",
+      "sha256": "05fc3e6fbf4bb15eec6bbcd78b7397ae93b53ed509e021b350c874e5de8f3a08",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_daytime_30m_heptane_CCD_001.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "pos/kmu-pos-13.avi",
+      "sha256": "7acc8ad2c72588d1b39e7d649e22ea2e3b4bc42c382cb57bea74447dccf81edb",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_night_10m_gasoline_CCD_001.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "pos/kmu-pos-14.avi",
+      "sha256": "4b142f2b64346984d95a8e3c63af086c83c3009c3fd54e3b6a370da84911aac2",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_night_10m_gasoline_CCD_002.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "pos/kmu-pos-15.avi",
+      "sha256": "5b6a64f970d4435603c03d66d0555982170cf1874b476d21bcc7de0ca5ba994b",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_night_10m_heptane_CCD_001.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "pos/kmu-pos-16.avi",
+      "sha256": "ef96e447ba7fca0d2d7c7a21c6dc6ef049af9e4a08fb75c6ec32923d3b8a5314",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_night_10m_heptane_CCD_002.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "pos/kmu-pos-17.avi",
+      "sha256": "a3107cd4f85d505d3ffcc480cf293cffde37d6799e90381ed9fb5bf89f457280",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_night_20m_gasoline_CCD_001.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "pos/kmu-pos-18.avi",
+      "sha256": "a55acfd18d0acc2ed178d7d93d41a925dd21ccaa8171c54897a2b4a47ef5398f",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_night_20m_heptane_CCD_001.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "pos/kmu-pos-19.avi",
+      "sha256": "619358db548fbca099585a716b3f33f328fcaac3eb217134551f4c4b2690448b",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_night_20m_heptane_CCD_002.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "pos/kmu-pos-20.avi",
+      "sha256": "4d0d32c0de275af1fba75fdde5cb33fd2fc0d8e6ff29c780b3909c0b7db14b50",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_night_30m_gasoline_CCD_001.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "pos/kmu-pos-21.avi",
+      "sha256": "fe279f5ed73dfe42d3c2ca820277aa62ac70b71ad9439a3ef5bce5f22dd1bbc7",
+      "expectedFire": true,
+      "sourceEntry": "outdoor_night_30m_heptane_CCD_001.avi",
+      "sceneGroup": "industrial-yard"
+    },
+    {
+      "path": "neg/kmu-neg-00.avi",
+      "sha256": "0a463939f7665880c764f260e9b72309f5ca7b600b8a06b29ad817bc0ad09d7d",
+      "expectedFire": false,
+      "sourceEntry": "smoke_or_flame_like_object_1.avi",
+      "sceneGroup": "hard-negative-kmu-neg-00.avi"
+    },
+    {
+      "path": "neg/kmu-neg-01.avi",
+      "sha256": "c748a2cb452e35f4f6a444716e71b333298724043fcb1c372ad0127d7ef670f8",
+      "expectedFire": false,
+      "sourceEntry": "smoke_or_flame_like_object_10.avi",
+      "sceneGroup": "hard-negative-kmu-neg-01.avi"
+    },
+    {
+      "path": "neg/kmu-neg-02.avi",
+      "sha256": "7657e63b43c51f28c67dc8b8e2f75305c9995726593d809ed8d016d0211272b9",
+      "expectedFire": false,
+      "sourceEntry": "smoke_or_flame_like_object_2.avi",
+      "sceneGroup": "hard-negative-kmu-neg-02.avi"
+    },
+    {
+      "path": "neg/kmu-neg-03.avi",
+      "sha256": "26a8524f1e85220c28b92d60a3db34def810e7cb17533b36291413afd3e31a2e",
+      "expectedFire": false,
+      "sourceEntry": "smoke_or_flame_like_object_3.avi",
+      "sceneGroup": "hard-negative-kmu-neg-03.avi"
+    },
+    {
+      "path": "neg/kmu-neg-04.avi",
+      "sha256": "c8ce9de19f1fa5952d083de6067a80b5d93a9e4ab74434c8776f5c3ce4354efb",
+      "expectedFire": false,
+      "sourceEntry": "smoke_or_flame_like_object_4.avi",
+      "sceneGroup": "hard-negative-kmu-neg-04.avi"
+    },
+    {
+      "path": "neg/kmu-neg-05.avi",
+      "sha256": "25d0b02085747b151986419280a4931a69a8f280cdc5a808c93d55b8480f8a02",
+      "expectedFire": false,
+      "sourceEntry": "smoke_or_flame_like_object_5.avi",
+      "sceneGroup": "hard-negative-kmu-neg-05.avi"
+    },
+    {
+      "path": "neg/kmu-neg-06.avi",
+      "sha256": "6a3f56ed97777cd3e4a208d5ae6e7ba27cc7acff5a19df21b3511f3868b63004",
+      "expectedFire": false,
+      "sourceEntry": "smoke_or_flame_like_object_6.avi",
+      "sceneGroup": "hard-negative-kmu-neg-06.avi"
+    },
+    {
+      "path": "neg/kmu-neg-07.avi",
+      "sha256": "3abd3625f1a9f08132283a467fefb2dc2c58d9499eaf89847e80bb205a3683b1",
+      "expectedFire": false,
+      "sourceEntry": "smoke_or_flame_like_object_7.avi",
+      "sceneGroup": "hard-negative-kmu-neg-07.avi"
+    },
+    {
+      "path": "neg/kmu-neg-08.avi",
+      "sha256": "5505d67dff1f5c49b07e858548dd1fc1700265b9c102cc18c5c60b69b9b570f8",
+      "expectedFire": false,
+      "sourceEntry": "smoke_or_flame_like_object_8.avi",
+      "sceneGroup": "hard-negative-kmu-neg-08.avi"
+    },
+    {
+      "path": "neg/kmu-neg-09.avi",
+      "sha256": "8ec5ad37d6c8d4b110c928fa8448525feed95cf22c42d2f43480fb455a31f838",
+      "expectedFire": false,
+      "sourceEntry": "smoke_or_flame_like_object_9.avi",
+      "sceneGroup": "hard-negative-kmu-neg-09.avi"
+    }
+  ],
+  "excludedClips": [
+    {
+      "path": "pos/kmu-pos-01.avi",
+      "sha256": "722d8b51510ec06d6d3ba489354202f6c8201c740435a79530a7ef13f2c092c5",
+      "expectedFire": true,
+      "sourceEntry": "flame2.avi",
+      "sceneGroup": "paper-table",
+      "reason": "Matching source sequence confirmed visually in available local training/validation images before inference"
+    },
+    {
+      "path": "pos/kmu-pos-05.avi",
+      "sha256": "86f73c9a2b74a07772898bf014df2c641bb58be958d3f9573ffb48b0c373835e",
+      "expectedFire": true,
+      "sourceEntry": "indoor_night_20m_heptane_CCD_001.avi",
+      "sceneGroup": "warehouse-night",
+      "reason": "Matching source sequence confirmed visually in available local training/validation images before inference"
+    },
+    {
+      "path": "pos/kmu-pos-06.avi",
+      "sha256": "5c5501455379f2d2ea27e84f08a9ac79caa022777691b8cf02f6c510b4fb8e98",
+      "expectedFire": true,
+      "sourceEntry": "indoor_night_20m_heptane_CCD_002.avi",
+      "sceneGroup": "warehouse-night",
+      "reason": "Matching source sequence confirmed visually in available local training/validation images before inference"
+    }
+  ],
+  "provenance": {
+    "sourcePageSha256": "ac651651cabfb6a73d04973c72b0ef83fc04ec8358de0dcd61e2e3c00add4c35",
+    "flameArchiveSha256": "e20caeb21b8e5a194313e0957c677083a8fc8ebe6066d84213a5c188499625c0",
+    "negativeArchiveSha256": "c9c7b951faa2c40a7a7b1edb171df6d58721250191ed948f56bcbd9e52ccac18",
+    "priorVideoAuditSha256": "2858aeb1b698019649f7d3c6fc2a8603e44d6cae1f75e3aa5753c33e62133247",
+    "trainingImageAuditSha256": "f15ab13fd1c6d1059be8972e610c09a0136019d98eb89d0b82f421f9194f12af",
+    "manualReviewSha256": "153a2b7be638acb362033d898ac37a17b7ca144b4137745fad3cfadccb1978bf",
+    "frozenOnClientDate": "2026-10-27",
+    "candidateChosenFrom": "Earlier FIRESENSE screening only; no KMU predictions observed before freezing this manifest",
+    "priorVideoAudit": "40 source frames per video compared with 27 FIRESENSE clips and bucket11; no sampled pHash Hamming <=6 matches",
+    "trainingImageAudit": "9450 available training/validation images; six source frames per KMU video; three confirmed overlapping clips excluded"
+  },
+  "limitations": [
+    "Additional diagnostic videos, not a certified train-independent release holdout; complete training provenance is unavailable",
+    "Video-level flame labels and sampled visual review only; no bbox or event-onset ground truth",
+    "Several positives share a scene/experimental location; video counts are not independent scene counts",
+    "No sampled near duplicate does not prove absence of source-scene or training overlap",
+    "Offline source-frame timestamps; no live freshness, CPU/RAM soak or notification-delivery measurement",
+    "Negative exposure is short; observed false episodes are not a certified deployment FAR",
+    "Flame-negative clips have no independently verified smoke labels; combined-policy false-positive fields are flame-label proxies"
+  ]
+}

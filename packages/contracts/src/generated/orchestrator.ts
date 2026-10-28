@@ -970,6 +970,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/internal/fire/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Inspect M3 frame freshness, queue drops, MQTT and model readiness
+     * @description Read-only diagnostics protected by the internal service token. Counters reset on backend restart. Does not create an event or change detector state.
+     */
+    get: operations['getFireHealth'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/internal/events/{eventId}/ai-result': {
     parameters: {
       query?: never;
@@ -1958,6 +1978,37 @@ export interface components {
       email?: string;
       priorityOrder: number;
     };
+    FireHealth: {
+      /** @enum {string} */
+      status: 'DISABLED' | 'READY' | 'DEGRADED';
+      /** Format: uuid */
+      instanceId: string;
+      /** Format: date-time */
+      checkedAt: string;
+      mqttConnected: boolean;
+      databaseAvailable: boolean;
+      camerasTruncated: boolean;
+      staleAfterSeconds: number;
+      /** @description Process-lifetime receivedFrames, invalidFrames, staleFrames, queueDroppedFrames, capacityDroppedFrames, processedFrames and processingErrors. */
+      counters: {
+        [key: string]: number;
+      };
+      cameras: components['schemas']['FireCameraHealth'][];
+      ai: components['schemas']['FireRuntimeHealth'] | null;
+    };
+    FireCameraHealth: {
+      slug: string;
+      /** @enum {string} */
+      status: 'NO_FRAMES' | 'STARTING' | 'STALE' | 'READY' | 'ERROR';
+      /** Format: date-time */
+      lastFrameAt: string | null;
+      /** Format: date-time */
+      lastProcessedAt: string | null;
+      lastErrorCode: string | null;
+      receivedFrames: number;
+      processedFrames: number;
+      processingErrors: number;
+    };
     AiResultRequest:
       | components['schemas']['FaceResultSubmission']
       | components['schemas']['ZoneResultSubmission']
@@ -2317,6 +2368,25 @@ export interface components {
           height: number;
         };
       }[];
+    };
+    FireRuntimeHealth: {
+      /** @enum {string} */
+      status: 'DISABLED' | 'STARTING' | 'READY' | 'DEGRADED';
+      /** Format: uuid */
+      instanceId: string;
+      modelVersion: string;
+      modelLoaded: boolean;
+      requestCount: number;
+      errorCount: number;
+      staleFrameCount: number;
+      capacityRejectedCount: number;
+      inFlight: number;
+      /** Format: date-time */
+      lastRequestAt: string | null;
+      /** Format: date-time */
+      lastSuccessAt: string | null;
+      lastErrorCode: string | null;
+      lastDurationMs: number | null;
     };
   };
   responses: {
@@ -4247,6 +4317,27 @@ export interface operations {
         content?: never;
       };
       404: components['responses']['NotFound'];
+    };
+  };
+  getFireHealth: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Runtime diagnostics; READY requires fresh successful observations for every listed enabled camera. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FireHealth'];
+        };
+      };
+      401: components['responses']['Unauthorized'];
     };
   };
   submitAiResult: {

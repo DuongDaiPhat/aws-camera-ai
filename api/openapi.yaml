@@ -1544,6 +1544,22 @@ paths:
   # ===================================================================
   # INTERNAL — AI service callback & webhook
   # ===================================================================
+  /internal/fire/health:
+    get:
+      tags: [internal]
+      summary: Inspect M3 frame freshness, queue drops, MQTT and model readiness
+      description: Read-only diagnostics protected by the internal service token. Counters reset on backend restart. Does not create an event or change detector state.
+      operationId: getFireHealth
+      security:
+        - internalToken: []
+      responses:
+        "200":
+          description: Runtime diagnostics; READY requires fresh successful observations for every listed enabled camera.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FireHealth" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
   /internal/events/{eventId}/ai-result:
     parameters:
       - $ref: "#/components/parameters/EventId"
@@ -3061,6 +3077,65 @@ components:
         phoneE164: { type: string, pattern: '^\+[1-9][0-9]{7,14}$' }
         email: { type: string, format: email }
         priorityOrder: { type: integer, minimum: 1, maximum: 3 }
+
+    FireHealth:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          status,
+          instanceId,
+          checkedAt,
+          mqttConnected,
+          databaseAvailable,
+          camerasTruncated,
+          staleAfterSeconds,
+          counters,
+          cameras,
+          ai,
+        ]
+      properties:
+        status: { type: string, enum: [DISABLED, READY, DEGRADED] }
+        instanceId: { type: string, format: uuid }
+        checkedAt: { type: string, format: date-time }
+        mqttConnected: { type: boolean }
+        databaseAvailable: { type: boolean }
+        camerasTruncated: { type: boolean }
+        staleAfterSeconds: { type: number, exclusiveMinimum: 0 }
+        counters:
+          type: object
+          additionalProperties: { type: integer, minimum: 0 }
+          description: Process-lifetime receivedFrames, invalidFrames, staleFrames, queueDroppedFrames, capacityDroppedFrames, processedFrames and processingErrors.
+        cameras:
+          type: array
+          items: { $ref: "#/components/schemas/FireCameraHealth" }
+        ai:
+          anyOf:
+            - $ref: "./openapi-ai-service.yaml#/components/schemas/FireRuntimeHealth"
+            - { type: "null" }
+    FireCameraHealth:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          slug,
+          status,
+          lastFrameAt,
+          lastProcessedAt,
+          lastErrorCode,
+          receivedFrames,
+          processedFrames,
+          processingErrors,
+        ]
+      properties:
+        slug: { type: string, minLength: 1, maxLength: 128 }
+        status: { type: string, enum: [NO_FRAMES, STARTING, STALE, READY, ERROR] }
+        lastFrameAt: { type: [string, "null"], format: date-time }
+        lastProcessedAt: { type: [string, "null"], format: date-time }
+        lastErrorCode: { type: [string, "null"], maxLength: 100 }
+        receivedFrames: { type: integer, minimum: 0 }
+        processedFrames: { type: integer, minimum: 0 }
+        processingErrors: { type: integer, minimum: 0 }
 
     # ---------------- Internal ----------------
     AiResultRequest:

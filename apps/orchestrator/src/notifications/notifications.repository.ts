@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import type { EventType } from '../contracts/vertical-slice.ports';
+import type { TelegramDeliveryScope } from './telegram-delivery-scope';
 
 export interface TelegramNotificationJob {
   id: string;
@@ -46,10 +47,23 @@ interface ClaimedRow {
   storage_provider: string | null;
 }
 
-const CLAIM_TELEGRAM_SQL = `
+const DELIVERY_SCOPE_SQL = `
+  AND n.recipient_user_id = $4::uuid AND n.created_at >= $6::timestamptz
+  AND now() < $7::timestamptz
+  AND EXISTS (SELECT 1 FROM events scoped WHERE scoped.id=n.event_id
+    AND scoped.camera_id=$5::uuid AND scoped.event_type='FIRE_SMOKE_DETECTED'
+    AND scoped.detected_at >= $6::timestamptz)
+  AND (SELECT COALESCE(sum(budget.attempt_count),0) FROM notifications budget
+    JOIN events be ON be.id=budget.event_id WHERE budget.channel='TELEGRAM'
+    AND budget.recipient_user_id=$4::uuid AND be.camera_id=$5::uuid
+    AND be.event_type='FIRE_SMOKE_DETECTED' AND be.detected_at >= $6::timestamptz
+    AND budget.created_at >= $6::timestamptz) < $8::int
+`;
+const claimTelegramSql = (scoped: boolean): string => `
   WITH ready AS (
     SELECT n.id FROM notifications n
     WHERE n.channel = 'TELEGRAM'
+      ${scoped ? DELIVERY_SCOPE_SQL : ''}
       AND n.status IN ('PENDING', 'FAILED')
       AND n.attempt_count < CASE WHEN n.attempt_count = 0 THEN $3 ELSE n.max_attempts END
       AND (n.status = 'PENDING' OR (n.next_retry_at IS NOT NULL AND n.next_retry_at <= now()))
@@ -117,8 +131,13 @@ export class NotificationsRepository {
     limit: number,
     leaseSeconds: number,
     maxAttempts = 4,
+    scope?: TelegramDeliveryScope,
   ): Promise<TelegramNotificationJob[]> {
     return this.database.transaction(async (client) => {
+      if (scope)
+        await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
+          `telegram-scope:${scope.cameraId}:${scope.recipientUserId}:${scope.createdAfter}`,
+        ]);
       await client.query(`
         UPDATE notifications
         SET status = 'FAILED', failed_at = now(), next_retry_at = NULL,
@@ -126,10 +145,19 @@ export class NotificationsRepository {
         WHERE channel = 'TELEGRAM' AND status IN ('PENDING', 'FAILED')
           AND attempt_count >= max_attempts AND lease_until IS NOT NULL AND lease_until <= now()
       `);
-      const claimed = await client.query<ClaimedRow>(CLAIM_TELEGRAM_SQL, [
+      const claimed = await client.query<ClaimedRow>(claimTelegramSql(Boolean(scope)), [
         limit,
         leaseSeconds,
         maxAttempts,
+        ...(scope
+          ? [
+              scope.recipientUserId,
+              scope.cameraId,
+              scope.createdAfter,
+              scope.until,
+              scope.maxAttempts,
+            ]
+          : []),
       ]);
       return claimed.rows.map(toTelegramJob);
     });
@@ -146,6 +174,16 @@ export class NotificationsRepository {
     );
     const row = result.rows[0];
     return row ? { key: row.object_key, provider: row.storage_provider } : null;
+  }
+
+  async findFireSnapshotMetadata(eventId: string, snapshotKey: string): Promise<unknown> {
+    const result = await this.database.query<{ metadata: unknown }>(
+      `SELECT f.pending_payload->'results'->0->'metadata' AS metadata
+       FROM fire_incidents f JOIN event_media m ON m.event_id=f.event_id
+       WHERE f.event_id=$1 AND m.media_type='SNAPSHOT' AND m.object_key=$2 LIMIT 1`,
+      [eventId, snapshotKey],
+    );
+    return result.rows[0]?.metadata ?? null;
   }
 
   async eventAllowsDelivery(eventId: string, escalationLevel: number): Promise<boolean> {

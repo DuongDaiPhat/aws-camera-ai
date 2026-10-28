@@ -72,15 +72,25 @@ def main():
     import paho.mqtt.client as mqtt
     import yaml
     import zmq
+    from fire_publisher import FireFramePublisher, FirePublisherSettings
 
     with open("/config/config.yml", encoding="utf-8") as config_file:
-        config = yaml.safe_load(os.path.expandvars(config_file.read()))["mqtt"]
+        full_config = yaml.safe_load(os.path.expandvars(config_file.read()))
+        config = full_config["mqtt"]
     client = mqtt.Client(client_id="camerai-frame-metadata")
     if config.get("user"):
         client.username_pw_set(config["user"], config.get("password"))
     client.max_queued_messages_set(2)
     client.connect(config["host"], config.get("port", 1883))
     client.loop_start()
+    fire_settings = FirePublisherSettings.from_env()
+    if fire_settings.enabled:
+        from frigate.util.image import SharedMemoryFrameManager
+
+        fire_manager = SharedMemoryFrameManager()
+    else:
+        fire_manager = None
+    fire_publisher = FireFramePublisher(fire_settings, full_config.get("cameras", {}), fire_manager, client)
     context = zmq.Context()
     socket = context.socket(zmq.SUB)
     socket.setsockopt(zmq.RCVHWM, 32)
@@ -101,7 +111,8 @@ def main():
                 continue
             try:
                 message = socket.recv_string().split(" ", 1)[1]
-                result = frame_payload(json.loads(message))
+                payload = json.loads(message)
+                result = frame_payload(payload)
                 if time.time() - result["frameTime"] > 1:
                     continue
                 client.publish(
@@ -110,9 +121,11 @@ def main():
                     qos=0,
                     retain=False,
                 )
+                fire_publisher.enqueue(payload)
             except (ValueError, TypeError, KeyError):
                 print("Invalid Frigate frame metadata skipped", flush=True)
     finally:
+        fire_publisher.close()
         socket.close(linger=0)
         context.term()
         client.loop_stop()

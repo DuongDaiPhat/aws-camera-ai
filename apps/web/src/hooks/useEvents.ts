@@ -1,7 +1,15 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { fetchEvents, subscribeEventsStream, confirmEvent, closeEvent } from '@/lib/events-client';
+import {
+  fetchEvents,
+  subscribeEventsStream,
+  confirmEvent,
+  closeEvent,
+  DEFAULT_EVENTS_PAGE_SIZE,
+} from '@/lib/events-client';
+import { EVENTS_REFRESH_MS } from '@/lib/fire-ui-config';
+import { isActiveFire } from '@/lib/fire-alerts';
 import { generateSimulatedLiveEvent } from '@/lib/mock-events';
 import type { UIEventItem, FilterTabKey, FilterTabCounts } from '@/types';
 
@@ -15,12 +23,16 @@ const ZONE_KEYWORDS: Record<string, string[]> = {
   'phong-ngu': ['phòng ngủ'],
 };
 
-function calculateCounts(events: UIEventItem[]): FilterTabCounts {
+function isFinishedEvent(event: UIEventItem): boolean {
+  return event.status === 'RESOLVED' || event.status === 'CLOSED';
+}
+
+export function calculateCounts(events: UIEventItem[]): FilterTabCounts {
   let urgent = 0;
   let safe = 0;
   let info = 0;
   for (const e of events) {
-    if (e.status === 'RESOLVED') {
+    if (isFinishedEvent(e)) {
       safe++;
     } else if (e.priority === 'P0' || e.priority === 'P1' || e.priority === 'P2') {
       urgent++;
@@ -35,24 +47,39 @@ function matchZone(event: UIEventItem, zone: string): boolean {
   if (zone === 'ALL') return true;
   const keywords = ZONE_KEYWORDS[zone];
   if (!keywords) return true;
-  const target = `${event.zone?.name ?? ''} ${event.camera?.name ?? ''}`.toLowerCase();
-  return keywords.some((kw) => target.includes(kw));
+  const normalize = (value: string): string =>
+    value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replaceAll('đ', 'd');
+  const target = normalize(`${event.zone?.name ?? ''} ${event.camera?.name ?? ''}`);
+  return keywords.some((kw) => target.includes(normalize(kw)));
 }
 
-function filterEvents(events: UIEventItem[], tab: FilterTabKey, zone: string): UIEventItem[] {
-  return events.filter((e) => {
-    if (
-      tab === 'URGENT' &&
-      (e.status === 'RESOLVED' ||
-        (e.priority !== 'P0' && e.priority !== 'P1' && e.priority !== 'P2'))
-    ) {
-      return false;
-    }
-    if (tab === 'SAFE' && e.status !== 'RESOLVED') return false;
-    if (tab === 'INFO' && e.priority !== 'P3' && e.status !== 'LOGGED_ONLY') return false;
+export function filterEvents(
+  events: UIEventItem[],
+  tab: FilterTabKey,
+  zone: string,
+): UIEventItem[] {
+  return events
+    .filter((e) => {
+      if (
+        tab === 'URGENT' &&
+        (isFinishedEvent(e) || (e.priority !== 'P0' && e.priority !== 'P1' && e.priority !== 'P2'))
+      ) {
+        return false;
+      }
+      if (tab === 'SAFE' && !isFinishedEvent(e)) return false;
+      if (tab === 'INFO' && e.priority !== 'P3' && e.status !== 'LOGGED_ONLY') return false;
 
-    return matchZone(e, zone);
-  });
+      return matchZone(e, zone);
+    })
+    .sort(
+      (a, b) =>
+        Number(isActiveFire(b)) - Number(isActiveFire(a)) ||
+        Date.parse(b.detectedAt) - Date.parse(a.detectedAt),
+    );
 }
 
 function updateItem(
@@ -182,26 +209,31 @@ function useEventsSource(): EventsSource {
     let isMounted = true;
     setLoading(true);
 
-    fetchEvents()
-      .then(({ events: loadedEvents }) => {
-        if (!isMounted) return;
-        setEvents(loadedEvents);
-        setError(null);
-      })
-      .catch((err: unknown) => {
-        if (!isMounted) return;
-        setError(
-          err instanceof Error
-            ? `Không tải được danh sách sự kiện: ${err.message}`
-            : 'Không tải được danh sách sự kiện.',
-        );
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
+    function load(): void {
+      void fetchEvents(DEFAULT_EVENTS_PAGE_SIZE, true)
+        .then(({ events: loadedEvents }) => {
+          if (!isMounted) return;
+          setEvents(loadedEvents);
+          setError(null);
+        })
+        .catch((err: unknown) => {
+          if (!isMounted) return;
+          setError(
+            err instanceof Error
+              ? `Không tải được danh sách sự kiện: ${err.message}`
+              : 'Không tải được danh sách sự kiện.',
+          );
+        })
+        .finally(() => {
+          if (isMounted) setLoading(false);
+        });
+    }
+    load();
+    const timer = setInterval(load, EVENTS_REFRESH_MS);
 
     return () => {
       isMounted = false;
+      clearInterval(timer);
     };
   }, [reloadToken]);
 

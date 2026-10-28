@@ -37,6 +37,11 @@
     "frigate:check": "node tools/scripts/frigate-check.mjs",
     "frigate:validate": "node tools/scripts/frigate-validate.mjs",
     "test:tools": "node --test \"tools/scripts/test/*.test.mjs\"",
+    "test:fire:db": "node tools/scripts/fire-db-gate.mjs",
+    "test:fire:video": "node tools/scripts/fire-video-gate.mjs",
+    "test:fire:clock": "node tools/scripts/fire-clock-check.mjs",
+    "test:fire:browser": "node tools/scripts/fire-browser-review.mjs",
+    "fire:health": "node --env-file=.env tools/scripts/fire-health.mjs",
     "prepare": "husky || true"
   },
   "devDependencies": {

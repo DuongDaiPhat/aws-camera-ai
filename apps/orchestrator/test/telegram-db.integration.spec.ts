@@ -223,6 +223,73 @@ describe('Telegram delivery PostgreSQL integration', () => {
     expect(await inbox.isProcessed(5678)).toBe(true);
   });
 
+  it('bounds a live session across concurrent claims/restarts/retries and excludes old or unrelated alerts', async () => {
+    const clock = (
+      await pool.query<{ start: Date; end: Date }>(
+        "SELECT now()-interval '1 second' AS start, now()+interval '15 minutes' AS end",
+      )
+    ).rows[0];
+    const camera = (
+      await pool.query<{ camera_id: string }>('SELECT camera_id FROM events WHERE id=$1', [eventId])
+    ).rows[0];
+    const scope = {
+      cameraId: camera.camera_id,
+      recipientUserId: userId,
+      createdAfter: clock.start.toISOString(),
+      until: clock.end.toISOString(),
+      maxAttempts: 3,
+    };
+    const fresh: string[] = [];
+    for (let i = 0; i < 5; i++) {
+      const fire = (
+        await pool.query<{ id: string }>(
+          "INSERT INTO events(camera_id,event_type,status,detected_at) VALUES($1,'FIRE_SMOKE_DETECTED','NOTIFIED',now()-($2*interval '1 hour')) RETURNING id",
+          [camera.camera_id, i === 4 ? 1 : 0],
+        )
+      ).rows[0];
+      const row = (
+        await pool.query<{ id: string }>(
+          "INSERT INTO notifications(event_id,recipient_user_id,channel,status) VALUES($1,$2,'TELEGRAM','PENDING') RETURNING id",
+          [fire.id, userId],
+        )
+      ).rows[0];
+      fresh.push(row.id);
+    }
+    const unrelated = (
+      await pool.query<{ id: string }>(
+        "INSERT INTO notifications(event_id,recipient_user_id,channel,status) VALUES($1,$2,'TELEGRAM','PENDING') RETURNING id",
+        [eventId, userId],
+      )
+    ).rows[0];
+    const pair = await Promise.all([
+      notifications.claimTelegramBatch(1, 30, 4, scope),
+      notifications.claimTelegramBatch(1, 30, 4, scope),
+    ]);
+    expect(pair.flat()).toHaveLength(2);
+    expect(new Set(pair.flat().map((job) => job.id)).size).toBe(2);
+    expect(await notifications.claimTelegramBatch(1, 30, 4, scope)).toHaveLength(1);
+    const restarted = new NotificationsRepository(new DatabaseService(pool));
+    expect(await restarted.claimTelegramBatch(1, 30, 4, scope)).toEqual([]);
+    const first = pair[0][0];
+    await notifications.markFailed(first, 'TELEGRAM_500', new Date());
+    await pool.query('UPDATE notifications SET next_retry_at=now() WHERE id=$1', [first.id]);
+    expect(await restarted.claimTelegramBatch(1, 30, 4, scope)).toEqual([]);
+    expect(
+      await restarted.claimTelegramBatch(1, 30, 4, {
+        ...scope,
+        maxAttempts: 10,
+        until: clock.start.toISOString(),
+      }),
+    ).toEqual([]);
+    const untouched = (
+      await pool.query<{ attempt_count: number }>(
+        'SELECT attempt_count FROM notifications WHERE id=ANY($1::uuid[])',
+        [[fresh[4], unrelated.id]],
+      )
+    ).rows;
+    expect(untouched.map((row) => row.attempt_count)).toEqual([0, 0]);
+  });
+
   it('mã liên kết chỉ tiêu thụ một lần và replay của cùng actor là idempotent', async () => {
     const tokenHash = hashTelegramLinkToken('x'.repeat(43));
     await links.create(userId, tokenHash);
@@ -424,7 +491,9 @@ describe('Telegram delivery PostgreSQL integration', () => {
     const storage = { upload: jest.fn(), download: jest.fn(), getPresignedUrl: jest.fn() };
     for (let attempt = 1; attempt <= 4; attempt += 1) {
       const started = Date.now();
-      await new NotificationRetryWorker(senderConfig, notifications, telegram, storage).runOnce();
+      await new NotificationRetryWorker(senderConfig, notifications, telegram, storage, {
+        render: async () => null,
+      }).runOnce();
       const result = await pool.query(
         `SELECT status, attempt_count, max_attempts, next_retry_at, failed_at
         FROM notifications WHERE event_id = $1 AND channel = 'TELEGRAM'`,
