@@ -586,7 +586,11 @@ class FallTracker:
             "confirmedAt": self.confirmed_at.isoformat() if self.confirmed_at else None,
             "confidence": confidence_val,
             "confidencePolicyVersion": "fall-rule-evidence-v1",
-            "torsoAngleDeg": geometry.torso_angle_deg if geometry else None,
+            "torsoAngleDeg": (
+                min(geometry.torso_angle_deg, geometry.torso_angle_3d_deg)
+                if geometry and geometry.torso_angle_3d_deg is not None
+                else (geometry.torso_angle_deg if geometry else None)
+            ),
             "aspectRatio": geometry.aspect_ratio if geometry else None,
             "centerHeight": geometry.center_height if geometry else None,
             "centerDropRatio": drop_val,
