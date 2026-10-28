@@ -58,5 +58,6 @@ def test_assignment_rejects_neighbor_and_ambiguity_without_model() -> None:
         selected, reason = estimator._select_pose([pose, pose], box, 640, 480, 640, 480, 0, 0)
         assert selected is None and reason == "AMBIGUOUS_POSE"
     pose[11].visibility = 0
+    pose[12].visibility = 0
     selected, reason = estimator._select_pose([pose], bbox, 640, 480, 640, 480, 0, 0)
     assert selected is None and reason == "LOW_VISIBILITY"

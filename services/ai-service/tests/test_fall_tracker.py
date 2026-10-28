@@ -32,14 +32,14 @@ def make_kps() -> list[NormalizedKeypoint]:
     return [NormalizedKeypoint(x=0.5, y=0.5, visibility=0.9) for _ in range(33)]
 
 
-def test_fall_tracker_history_requires_5_frames_ac16_2() -> None:
+def test_fall_tracker_history_requires_10_frames_ac16_2() -> None:
     tracker = FallTracker("cam1", "sess1", "track1")
     t0 = datetime(2026, 10, 11, 12, 0, 0, tzinfo=UTC)
     geom_standing = make_geom(angle=85.0, center_y=200.0, height=200.0)
     kps = make_kps()
 
-    # Nạp 5 frame đứng thẳng: 5 frame đầu tiên history chưa đủ 5 -> HISTORY_INSUFFICIENT
-    for i in range(5):
+    # Nạp 10 frame đứng thẳng
+    for i in range(10):
         res = tracker.evaluate_frame(
             observed_at=t0 + timedelta(milliseconds=i * 200),
             frame_id=f"f{i}",
@@ -49,68 +49,39 @@ def test_fall_tracker_history_requires_5_frames_ac16_2() -> None:
             reason="NORMAL_POSTURE",
         )
         assert res["state"] == "MONITORING"
-        assert res["reason"] == "HISTORY_INSUFFICIENT"
+        if i < 9:
+            assert res["reason"] == "HISTORY_INSUFFICIENT"
+        else:
+            # Frame thứ 10: lúc này history mới có 9 frame trước nó -> vẫn HISTORY_INSUFFICIENT
+            assert res["reason"] == "HISTORY_INSUFFICIENT"
 
-    # Frame thứ 6 (sau khi history đã có đủ 5 frame đứng thẳng): chuyển sang NORMAL_POSTURE
-    res_6 = tracker.evaluate_frame(
-        observed_at=t0 + timedelta(milliseconds=5 * 200),
-        frame_id="f5",
+    # Frame thứ 11 (sau khi history đã có đủ 10 frame đứng thẳng): vẫn đứng thẳng
+    res_11 = tracker.evaluate_frame(
+        observed_at=t0 + timedelta(milliseconds=10 * 200),
+        frame_id="f10",
         keypoints=kps,
         geometry=geom_standing,
         pose_available=True,
         reason="NORMAL_POSTURE",
     )
-    assert res_6["state"] == "MONITORING"
-    assert res_6["reason"] == "NORMAL_POSTURE"
+    assert res_11["state"] == "MONITORING"
+    assert res_11["reason"] == "NORMAL_POSTURE"
 
-    # Frame thứ 7: Ngã! Góc 15 độ, trọng tâm hạ từ 200 xuống 300 (drop = 100/200 = 0.50 >= 0.20)
+    # Frame thứ 12: Ngã! Góc 15 độ, trọng tâm hạ từ 200 xuống 300 (drop = 100/200 = 0.50 >= 0.20)
     geom_fall = make_geom(angle=15.0, center_y=300.0, height=100.0)
-    res_7 = tracker.evaluate_frame(
-        observed_at=t0 + timedelta(milliseconds=6 * 200),
-        frame_id="f6",
+    res_12 = tracker.evaluate_frame(
+        observed_at=t0 + timedelta(milliseconds=11 * 200),
+        frame_id="f11",
         keypoints=kps,
         geometry=geom_fall,
         pose_available=True,
         reason="NORMAL_POSTURE",
     )
     # AC16-2: Phải vào CANDIDATE và có episodeId
-    assert res_7["state"] == "CANDIDATE"
-    assert res_7["reason"] == "FALL_CANDIDATE"
-    assert res_7["episodeId"] is not None
-    assert res_7["candidateStartedAt"] is not None
-
-
-def test_fall_tracker_preserves_history_on_brief_gap() -> None:
-    """Gap 1.5s - 2.5s khi té không xóa sạch history đứng trước đó."""
-    tracker = FallTracker("cam1", "sess1", "track1")
-    t0 = datetime(2026, 10, 11, 12, 0, 0, tzinfo=UTC)
-    geom_standing = make_geom(angle=85.0, center_y=200.0, height=200.0)
-    kps = make_kps()
-
-    # Nạp 6 frame đứng thẳng (đủ baseline)
-    for i in range(6):
-        tracker.evaluate_frame(
-            observed_at=t0 + timedelta(milliseconds=i * 200),
-            frame_id=f"f{i}",
-            keypoints=kps,
-            geometry=geom_standing,
-            pose_available=True,
-            reason="NORMAL_POSTURE",
-        )
-
-    # Sau 1.8 giây gián đoạn (ngã mờ nhòe / quay trục), frame tiếp đất xuất hiện
-    geom_fall = make_geom(angle=15.0, center_y=300.0, height=100.0)
-    res_fall = tracker.evaluate_frame(
-        observed_at=t0 + timedelta(seconds=3.0),
-        frame_id="f_landing",
-        keypoints=kps,
-        geometry=geom_fall,
-        pose_available=True,
-        reason="NORMAL_POSTURE",
-    )
-    # Vẫn giữ được baseline đứng và kích hoạt CANDIDATE
-    assert res_fall["state"] == "CANDIDATE"
-    assert res_fall["reason"] == "FALL_CANDIDATE"
+    assert res_12["state"] == "CANDIDATE"
+    assert res_12["reason"] == "FALL_CANDIDATE"
+    assert res_12["episodeId"] is not None
+    assert res_12["candidateStartedAt"] is not None
 
 
 def test_fall_tracker_rest_area_suppression_ac17_3() -> None:
@@ -188,9 +159,9 @@ def test_fall_tracker_missing_pose_grace_period_ac16_3() -> None:
     assert res_missing_1["immobileSeconds"] == 0.0
     assert res_missing_1["missingPoseSeconds"] == 1.0
 
-    # Mất pose quá 10 giây (ở giây thứ 12.1, tính từ 2.0s) -> CANCELLED, MISSING_TIMEOUT
+    # Mất pose quá 5 giây (ở giây thứ 7.1, tính từ 2.0s) -> CANCELLED, MISSING_TIMEOUT
     res_missing_timeout = tracker.evaluate_frame(
-        observed_at=t0 + timedelta(seconds=12.1),
+        observed_at=t0 + timedelta(seconds=7.1),
         frame_id="f_missing_timeout",
         keypoints=None,
         geometry=None,

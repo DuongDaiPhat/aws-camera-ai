@@ -268,7 +268,7 @@ class FallTracker:
             )
             self.immobile_seconds = 0.0
             self.last_observation = None
-            if dt_seconds > self.settings.fall_history_max_seconds:
+            if self.state == "MONITORING" or dt_seconds > self.settings.fall_history_max_seconds:
                 self.history.clear()
         if (
             self.state == "CANDIDATE"
