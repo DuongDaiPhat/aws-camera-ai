@@ -12,7 +12,7 @@ import uuid
 from contextlib import suppress
 
 MAX_OBJECT_AGE_SECONDS = float(
-    os.getenv("FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS", "30.0")
+    os.getenv("FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS", "0.25")
 )
 FRIGATE_POSE_FRAMES_ENABLED = os.getenv("FRIGATE_POSE_FRAMES_ENABLED", "false").lower() in (
     "true",
