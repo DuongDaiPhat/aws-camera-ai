@@ -289,4 +289,86 @@ describe('MediaService (US-04)', () => {
       );
     });
   });
+
+  describe('storeBufferSnapshot', () => {
+    it('upload buffer anh len storage va luu ban ghi event_media thanh cong', async () => {
+      const fakeBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0]);
+      storageService.upload.mockResolvedValueOnce({
+        bucket: 'camerai-media',
+        key: 'events/2026/10/17/evt-fall-1/snapshot.jpg',
+        sizeBytes: 4,
+        contentType: 'image/jpeg',
+      });
+
+      eventMediaRepository.createEventMedia.mockResolvedValueOnce({
+        id: 'media-fall-1',
+        event_id: 'evt-fall-1',
+        media_type: 'SNAPSHOT',
+        storage_provider: 'MINIO',
+        bucket: 'camerai-media',
+        object_key: 'events/2026/10/17/evt-fall-1/snapshot.jpg',
+        content_type: 'image/jpeg',
+        size_bytes: 4,
+        width: null,
+        height: null,
+        duration_ms: null,
+        checksum_sha256: null,
+        expires_at: null,
+        created_at: new Date('2026-10-17T15:00:00Z'),
+      });
+
+      const result = await service.storeBufferSnapshot(
+        'evt-fall-1',
+        fakeBuffer,
+        new Date('2026-10-17T15:00:00Z'),
+      );
+
+      expect(storageService.upload).toHaveBeenCalledWith(
+        'events/2026/10/17/evt-fall-1/snapshot.jpg',
+        fakeBuffer,
+        'image/jpeg',
+      );
+      expect(eventMediaRepository.createEventMedia).toHaveBeenCalledWith({
+        eventId: 'evt-fall-1',
+        mediaType: 'SNAPSHOT',
+        storageProvider: 'MINIO',
+        bucket: 'camerai-media',
+        objectKey: 'events/2026/10/17/evt-fall-1/snapshot.jpg',
+        contentType: 'image/jpeg',
+        sizeBytes: 4,
+      });
+      expect(result).not.toBeNull();
+      expect(result?.id).toBe('media-fall-1');
+    });
+
+    it('tra ve ban ghi da ton tai neu snapshot da co san (idempotent)', async () => {
+      const existingRecord = {
+        id: 'existing-media-id',
+        event_id: 'evt-fall-1',
+        media_type: 'SNAPSHOT' as const,
+        storage_provider: 'MINIO',
+        bucket: 'camerai-media',
+        object_key: 'events/2026/10/17/evt-fall-1/snapshot.jpg',
+        content_type: 'image/jpeg',
+        size_bytes: 4,
+        width: null,
+        height: null,
+        duration_ms: null,
+        checksum_sha256: null,
+        expires_at: null,
+        created_at: new Date(),
+      };
+      eventMediaRepository.findMediaByEventIdAndType.mockResolvedValueOnce(existingRecord);
+
+      const fakeBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0]);
+      const result = await service.storeBufferSnapshot(
+        'evt-fall-1',
+        fakeBuffer,
+        new Date('2026-10-17T15:00:00Z'),
+      );
+
+      expect(result).toBe(existingRecord);
+      expect(storageService.upload).not.toHaveBeenCalled();
+    });
+  });
 });

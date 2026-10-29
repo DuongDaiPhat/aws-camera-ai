@@ -55,5 +55,24 @@ def test_gia_tri_mac_dinh_khop_voi_tai_lieu() -> None:
 
     assert settings.face_provider == "local"
     assert settings.face_match_threshold == 0.60  # US-10: nguong T_known
-    assert settings.fall_immobility_seconds == 15  # US-17
+    assert settings.fall_immobility_seconds == 3  # US-17
     assert settings.fire_min_consecutive_frames == 3  # US-18
+    assert settings.pose_min_visibility == 0.30
+
+
+@pytest.mark.parametrize(
+    "override",
+    [
+        {"pose_min_visibility": 1.01},
+        {"pose_min_association_iou": 0},
+        {"fall_motion_speed_threshold": float("nan")},
+        {"pose_max_tracks": 0},
+        {"fall_immobility_seconds": 60},
+        {"fall_recovery_angle_deg": 20},
+        {"fall_max_valid_frame_gap_seconds": 5},
+        {"pose_track_ttl_seconds": 4},
+    ],
+)
+def test_invalid_pose_configuration_rejected(override: dict) -> None:
+    with pytest.raises(ValueError):
+        Settings(_env_file=None, **override)

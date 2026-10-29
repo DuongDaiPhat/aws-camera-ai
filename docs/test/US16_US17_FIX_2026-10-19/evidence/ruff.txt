@@ -1,0 +1,209 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> services\ai-service\app\services\face_collection.py:3:1
+   |
+ 1 |   """Snapshot bất biến theo owner/model; swap sau khi validate toàn bộ."""
+ 2 |
+ 3 | / import hashlib
+ 4 | | import threading
+ 5 | | from dataclasses import dataclass
+ 6 | | from uuid import UUID
+ 7 | |
+ 8 | | import numpy as np
+ 9 | | from numpy.typing import NDArray
+10 | |
+11 | | from app.models.face import SyncRequest, SyncResponse
+12 | | from app.services.embedding_codec import decode
+   | |_______________________________________________^
+help: Organize imports
+   |
+8  | import numpy as np
+   - from numpy.typing import NDArray
+   -
+9  | from app.models.face import SyncRequest, SyncResponse
+10 | from app.services.embedding_codec import decode
+11 + from numpy.typing import NDArray
+12 |
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> services\ai-service\app\services\face_embedder.py:3:1
+   |
+ 1 |   """YuNet/SFace: chỉ xử lý ảnh trong RAM, không tải model trong request."""
+ 2 |
+ 3 | / import io
+ 4 | | import threading
+ 5 | | from pathlib import Path
+ 6 | |
+ 7 | | import cv2
+ 8 | | import numpy as np
+ 9 | | from PIL import Image, ImageOps, UnidentifiedImageError
+10 | |
+11 | | from app.config import Settings
+12 | | from app.models.face import BoundingBox, EmbedResponse, InferenceError
+13 | | from app.services.embedding_codec import encode
+   | |_______________________________________________^
+help: Organize imports
+   |
+8  | import numpy as np
+   - from PIL import Image, ImageOps, UnidentifiedImageError
+   -
+9  | from app.config import Settings
+10 | from app.models.face import BoundingBox, EmbedResponse, InferenceError
+11 | from app.services.embedding_codec import encode
+12 + from PIL import Image, ImageOps, UnidentifiedImageError
+13 |
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> services\ai-service\app\services\face_matcher.py:3:1
+   |
+ 1 |   """Thực hiện matching giữa ảnh crop và face collection (US-10)."""
+ 2 |
+ 3 | / import math
+ 4 | | from datetime import UTC, datetime
+ 5 | | from uuid import UUID
+ 6 | |
+ 7 | | import numpy as np
+ 8 | |
+ 9 | | from app.config import get_settings
+10 | | from app.models.face import InferenceError, MatchResponse
+11 | | from app.services.embedding_codec import decode
+12 | | from app.services.face_collection import FaceCollection
+13 | | from app.services.face_embedder import FaceEmbedder
+   | |___________________________________________________^
+help: Organize imports
+  |
+7 | import numpy as np
+  -
+8 | from app.config import get_settings
+  |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> services\ai-service\app\services\pose_estimator.py:7:1
+   |
+ 5 |   """
+ 6 |
+ 7 | / from __future__ import annotations
+ 8 | |
+ 9 | | import logging
+10 | | import threading
+11 | | from pathlib import Path
+12 | |
+13 | | import cv2
+14 | | import mediapipe as mp
+15 | | import numpy as np
+16 | | from mediapipe.tasks import python as mp_python
+17 | | from mediapipe.tasks.python import vision
+18 | |
+19 | | from app.config import get_settings
+20 | | from app.services.pose_geometry import (
+21 | |     NormalizedKeypoint,
+22 | |     PoseGeometry,
+23 | |     calculate_pose_geometry,
+24 | | )
+   | |_^
+25 |
+26 |   logger = logging.getLogger(__name__)
+   |
+help: Organize imports
+   |
+15 | import numpy as np
+   - from mediapipe.tasks import python as mp_python
+   - from mediapipe.tasks.python import vision
+   -
+16 | from app.config import get_settings
+--------------------------------------------------------------------------------
+21 | )
+22 + from mediapipe.tasks import python as mp_python
+23 + from mediapipe.tasks.python import vision
+24 |
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> services\ai-service\scripts\evaluate_fall_dataset.py:7:1
+   |
+ 5 |   """
+ 6 |
+ 7 | / from __future__ import annotations
+ 8 | |
+ 9 | | import argparse
+10 | | import csv
+11 | | import hashlib
+12 | | import json
+13 | | import logging
+14 | | import time
+15 | | from collections import Counter
+16 | | from datetime import UTC, datetime, timedelta
+17 | | from pathlib import Path
+18 | |
+19 | | import cv2
+20 | | import numpy as np
+21 | |
+22 | | from app.config import get_settings
+23 | | from app.services.fall_tracker import FallTracker
+24 | | from app.services.pose_estimator import PoseEstimator
+   | |_____________________________________________________^
+help: Organize imports
+   |
+20 | import numpy as np
+   -
+21 | from app.config import get_settings
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> services\ai-service\tests\test_pose_router.py:3:1
+   |
+ 1 |   """Unit tests cho router POST /pose/fall (US-16 / US-17 contract)."""
+ 2 |
+ 3 | / import io
+ 4 | | from collections.abc import Generator
+ 5 | | from unittest.mock import Mock
+ 6 | |
+ 7 | | import pytest
+ 8 | | from fastapi.testclient import TestClient
+ 9 | | from PIL import Image
+10 | |
+11 | | from app.config import Settings, get_settings
+12 | | from app.main import app
+13 | | from app.routers import pose
+14 | | from app.services.pose_estimator import PoseEstimator
+15 | | from app.services.pose_geometry import PoseGeometry
+   | |___________________________________________________^
+help: Organize imports
+   |
+7  | import pytest
+   - from fastapi.testclient import TestClient
+   - from PIL import Image
+   -
+8  | from app.config import Settings, get_settings
+--------------------------------------------------------------------------------
+12 | from app.services.pose_geometry import PoseGeometry
+13 + from fastapi.testclient import TestClient
+14 + from PIL import Image
+15 |
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> services\ai-service\tests\test_qa_pose.py:3:1
+   |
+ 1 |   """Additional AC tests: do not change settings to match implementation drift."""
+ 2 |
+ 3 | / from datetime import UTC, datetime, timedelta
+ 4 | |
+ 5 | | import pytest
+ 6 | |
+ 7 | | from app.services.fall_tracker import FallTracker
+ 8 | | from app.services.pose_geometry import NormalizedKeypoint, PoseGeometry
+   | |_______________________________________________________________________^
+ 9 |
+10 |   BASE = datetime(2026, 10, 18, 0, 0, tzinfo=UTC)
+   |
+help: Organize imports
+  |
+5 | import pytest
+  -
+6 | from app.services.fall_tracker import FallTracker
+  |
+
+Found 7 errors.
+[*] 7 fixable with `--fix`.

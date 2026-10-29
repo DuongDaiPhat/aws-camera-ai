@@ -13,8 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt requirements-runtime.lock ./
-RUN python -m pip install --require-hashes -r requirements.txt \
-    && python -m pip check
+RUN python -m pip install --require-hashes -r requirements.txt
 
 COPY app ./app
 

@@ -41,9 +41,7 @@ class FirePublisherSettings:
             max_cameras=int(os.getenv("FIRE_MAX_CAMERAS", "16")),
             jpeg_quality=int(os.getenv("FIRE_JPEG_QUALITY", "85")),
             max_age_seconds=float(os.getenv("FIRE_FRAME_MAX_AGE_SECONDS", "1")),
-            future_tolerance_seconds=float(
-                os.getenv("FIRE_FRAME_FUTURE_TOLERANCE_SECONDS", "0.5")
-            ),
+            future_tolerance_seconds=float(os.getenv("FIRE_FRAME_FUTURE_TOLERANCE_SECONDS", "0.5")),
         )
         if (
             not 0 < settings.sample_fps <= 5
@@ -92,10 +90,7 @@ class FireFramePublisher:
         camera_config = self.cameras.get(camera)
         if not camera_config or not camera_config.get("enabled", True):
             return
-        if (
-            camera not in self.last_frame
-            and len(self.last_frame) >= self.settings.max_cameras
-        ):
+        if camera not in self.last_frame and len(self.last_frame) >= self.settings.max_cameras:
             return
         if (
             time.time() - timestamp > self.settings.max_age_seconds
@@ -151,9 +146,7 @@ class FireFramePublisher:
             return None
 
     def _publish(self, header: dict[str, Any], yuv: Any) -> None:
-        at = datetime.fromisoformat(
-            header["frameTimestamp"].replace("Z", "+00:00")
-        ).timestamp()
+        at = datetime.fromisoformat(header["frameTimestamp"].replace("Z", "+00:00")).timestamp()
         if time.time() - at > self.settings.max_age_seconds:
             return
         image = cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR_I420)
@@ -165,17 +158,13 @@ class FireFramePublisher:
         encoded_header = json.dumps(header, separators=(",", ":")).encode("utf-8")
         if len(encoded_header) > MAX_HEADER_BYTES:
             return
-        envelope = (
-            struct.pack(">I", len(encoded_header)) + encoded_header + jpeg.tobytes()
-        )
+        envelope = struct.pack(">I", len(encoded_header)) + encoded_header + jpeg.tobytes()
         self.client.publish(self.settings.topic, envelope, qos=0, retain=False)
 
     def _run(self) -> None:
         while True:
             with self.condition:
-                self.condition.wait_for(
-                    lambda: self.stopped or any(self.pending.values())
-                )
+                self.condition.wait_for(lambda: self.stopped or any(self.pending.values()))
                 if self.stopped:
                     return
                 camera = next(key for key, queue in self.pending.items() if queue)

@@ -1,0 +1,4 @@
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+W0000 00:00:1792347721.616150   10196 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1792347721.634575    8560 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+{"python": "3.11.13", "platform": "Windows-10-10.0.26200-SP0", "imports": "PASS", "model_load_and_inference": "PASS (blank image; no accuracy claim)"}

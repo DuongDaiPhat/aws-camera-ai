@@ -128,8 +128,8 @@ export interface paths {
      *     torso angle strictly below 30 degrees and a sudden center drop.
      *     The baseline is frozen at candidate creation. CONFIRMED requires a
      *     currently valid abnormal pose and continuous observed immobility
-     *     strictly longer than FALL_IMMOBILITY_SECONDS (default 15 seconds).
-     *     Exactly 15 seconds is not sufficient; motion or an invalid frame gap
+     *     strictly longer than FALL_IMMOBILITY_SECONDS (default 3 seconds).
+     *     Exactly 3 seconds is not sufficient; motion or an invalid frame gap
      *     resets the immobility interval. Standing up cancels the candidate.
      *
      *     Missing/low-quality/ambiguous pose is poseAvailable=false, error=null.
@@ -323,7 +323,7 @@ export interface components {
       motionScore?: number | null;
       /** @description Continuously observed abnormal and immobile interval; resets on movement, missing pose or invalid gap. Confirmation requires strictly greater than thresholdSeconds, never wall-clock time through a blind interval. */
       immobileSeconds?: number;
-      /** @default 15 */
+      /** @default 3 */
       thresholdSeconds: number;
       /** @description Seconds since the last valid pose, including transport silence. Candidate identity is cancelled at the configured 5-second grace limit; no confirmation is triggered by the cleanup timer. */
       missingPoseSeconds?: number;

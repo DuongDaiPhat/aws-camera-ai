@@ -1,0 +1,26 @@
+[
+  {
+    "service": "camerai-frigate",
+    "environment": [
+      "FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS=0.25",
+      "MQTT_TOPIC_POSE_FRAMES=frigate/camerai/pose/frames",
+      "FRIGATE_POSE_FRAMES_ENABLED=true",
+      "FRIGATE_POSE_MAX_FPS=5"
+    ],
+    "state": "running",
+    "health": "healthy"
+  },
+  {
+    "service": "camerai-orchestrator",
+    "environment": [
+      "FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS=0.25",
+      "FALL_IMMOBILITY_SECONDS=3",
+      "M2A_ENABLED=true",
+      "FRIGATE_POSE_FRAMES_ENABLED=true",
+      "POSE_MAX_STALE_FRAME_SECONDS=1",
+      "POSE_REQUEST_TIMEOUT_MS=2000"
+    ],
+    "state": "running",
+    "health": "healthy"
+  }
+]

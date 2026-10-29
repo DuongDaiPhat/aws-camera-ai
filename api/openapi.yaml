@@ -1572,7 +1572,7 @@ paths:
         docker network), KHONG dung JWT nguoi dung.
 
         US-16/US-17: M2A_FALL submits exactly one FALL_DETECTED result only
-        after continuously observed immobility strictly exceeds 15 seconds,
+        after continuously observed immobility strictly exceeds 3 seconds,
         valid pose/evidence and REST_AREA checks succeed. Candidate/cancelled/
         missing-pose observations produce internal logs only, not callbacks
         with a success label or empty successful results.
@@ -1607,7 +1607,7 @@ paths:
                   revision: 1
                   module: M2A_FALL
                   modelVersion: pose-landmarker-lite-v1
-                  processedAt: 2026-10-09T05:00:17.450Z
+                  processedAt: 2026-10-09T05:00:05.250Z
                   results:
                     - module: M2A_FALL
                       label: FALL_DETECTED
@@ -1622,11 +1622,11 @@ paths:
                         trackId: person-001
                         sourceSessionId: source-001
                         episodeId: 79b7e17a-6343-5ccf-94bb-f98fce7ba8e4
-                        frameId: frame-088
+                        frameId: frame-027
                         candidateStartedAt: 2026-10-09T05:00:02.000Z
-                        confirmedAt: 2026-10-09T05:00:17.400Z
-                        immobileSeconds: 15.2
-                        thresholdSeconds: 15
+                        confirmedAt: 2026-10-09T05:00:05.200Z
+                        immobileSeconds: 3.2
+                        thresholdSeconds: 3
                         torsoAngleDeg: 10
                         aspectRatio: 0.8
                         centerHeight: 0.2
@@ -3258,8 +3258,8 @@ components:
         immobileSeconds:
           type: number
           minimum: 0
-          description: Validated continuously observed immobility, strictly greater than thresholdSeconds; default requires >15 seconds. Movement, missing pose or invalid gaps reset this interval.
-        thresholdSeconds: { type: integer, minimum: 1, default: 15 }
+          description: Validated continuously observed immobility, strictly greater than thresholdSeconds; default requires >3 seconds. Movement, missing pose or invalid gaps reset this interval.
+        thresholdSeconds: { type: integer, minimum: 1, default: 3 }
         torsoAngleDeg:
           type: number
           minimum: 0

@@ -1,0 +1,13 @@
+{
+  "sourceSHA256": {
+    "infra/frigate/frame-metadata/bridge.py": "a9e24b64dceae8cdb4bbde32c353a841f5c5db8dc8cfc36367ee24e829240133",
+    "infra/frigate/frame-metadata/test_bridge.py": "1335992f96c708c4a96060cdeadad9fe815477dda828630e51ed0fc9a20cedd2",
+    "services/ai-service/app/services/fall_tracker.py": "87e7875195376aa6795dc8123056fa9b56320838a54837293734ce89fe3d82f7",
+    "services/ai-service/tests/test_qa_pose.py": "0ea5eaa038413b1bb4b0d0e6734637cd7abb7e50ef63d0121d19b92c5d4a9313"
+  },
+  "aiPassed": 73,
+  "bridgePassed": 13,
+  "thresholdSeconds": 3,
+  "livePostFixVideoAcceptance": "NOT VERIFIED",
+  "offlineVideoCandidateCount": 0
+}

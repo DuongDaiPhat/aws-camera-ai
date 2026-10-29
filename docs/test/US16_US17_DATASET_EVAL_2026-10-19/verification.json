@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "checks": [
+    "103 unique manifest clips, 72 fall / 31 non-fall, full video SHA-256 rechecked",
+    "CSV row count matches JSON; supplementary evaluation excluded from main metrics",
+    "Model matches pinned manifest; source hashes match archived/current evaluators and production source",
+    "Manifest and supplementary configurations match final deployed runtime"
+  ]
+}

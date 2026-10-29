@@ -43,8 +43,49 @@ class Settings(BaseSettings):
     rekognition_collection_id: str = "camerai-known-faces"
 
     # Module 2a — te nga
-    fall_immobility_seconds: int = 15
-    fall_torso_angle_threshold_deg: int = 30
+    m2a_enabled: bool = False
+    pose_model_path: str = "artifacts/models/pose_landmarker_lite.task"
+    pose_model_version: str = "pose-landmarker-lite-v1"
+    pose_min_visibility: float = Field(0.30, ge=0, le=1, allow_inf_nan=False)
+
+    @field_validator("pose_min_visibility", mode="after")
+    @classmethod
+    def _cap_pose_min_visibility(cls, v: float) -> float:
+        return min(v, 0.30)
+
+    pose_min_association_iou: float = Field(0.30, gt=0, le=1, allow_inf_nan=False)
+    pose_roi_padding_ratio: float = Field(0.10, ge=0, le=1, allow_inf_nan=False)
+    fall_history_frame_count: int = Field(10, ge=2, le=1024)
+    fall_history_max_seconds: float = Field(3.0, gt=0, allow_inf_nan=False)
+    fall_torso_angle_threshold_deg: float = Field(30.0, gt=0, lt=90, allow_inf_nan=False)
+    fall_center_drop_ratio: float = Field(0.20, gt=0, le=1, allow_inf_nan=False)
+    fall_immobility_seconds: float = Field(3.0, gt=0, allow_inf_nan=False)
+    fall_motion_speed_threshold: float = Field(0.05, gt=0, allow_inf_nan=False)
+    fall_max_valid_frame_gap_seconds: float = Field(0.60, gt=0, allow_inf_nan=False)
+    fall_missing_pose_grace_seconds: float = Field(5.0, gt=0, allow_inf_nan=False)
+    fall_recovery_angle_deg: float = Field(60.0, gt=0, le=90, allow_inf_nan=False)
+    fall_candidate_max_seconds: float = Field(60.0, gt=0, allow_inf_nan=False)
+    fall_torso_shrink_ratio: float = Field(0.55, gt=0, le=1, allow_inf_nan=False)
+    fall_aspect_ratio_threshold: float = Field(0.90, gt=0, le=5, allow_inf_nan=False)
+    pose_track_ttl_seconds: float = Field(60.0, gt=0, allow_inf_nan=False)
+    pose_max_concurrent_requests: int = Field(2, ge=1)
+    pose_max_tracks: int = Field(128, ge=1)
+    pose_max_image_bytes: int = Field(1048576, ge=1)
+    pose_max_image_pixels: int = Field(2073600, ge=1)
+    pose_request_timeout_ms: int = Field(2000, ge=1)
+    pose_track_sweep_interval_ms: int = Field(250, ge=1)
+
+    @model_validator(mode="after")
+    def _validate_pose_relations(self) -> "Settings":
+        if self.fall_recovery_angle_deg <= self.fall_torso_angle_threshold_deg:
+            raise ValueError("FALL_RECOVERY_ANGLE_DEG must exceed the candidate angle")
+        if self.fall_candidate_max_seconds <= self.fall_immobility_seconds:
+            raise ValueError("FALL_CANDIDATE_MAX_SECONDS must exceed the immobility interval")
+        if self.fall_missing_pose_grace_seconds <= self.fall_max_valid_frame_gap_seconds:
+            raise ValueError("Missing-pose grace must exceed the valid-frame gap")
+        if self.pose_track_ttl_seconds < self.fall_missing_pose_grace_seconds:
+            raise ValueError("Track TTL must cover the missing-pose grace")
+        return self
 
     # Module 3 — fire-only detection using the existing verified checkpoint.
     m3_enabled: bool = False

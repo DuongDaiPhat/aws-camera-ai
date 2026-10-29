@@ -1,0 +1,18 @@
+﻿run,file,label,thresholdSeconds,responseTimerExceedsThreshold,candidateStartedAt,confirmedAt,immobileSeconds,immobileSinceSeconds
+feat-matched,fall/Coffee_room_01_video (18).mp4,fall,3.0,False,2026-10-19T00:00:06.600000+00:00,2026-10-19T00:00:10.400000+00:00,3.0,7.4
+feat-matched,fall/Home_01_video (3).mp4,fall,3.0,True,2026-10-19T00:00:05.625000+00:00,2026-10-19T00:00:09.625000+00:00,3.21,6.415
+feat-matched,fall/Coffee_room_01_video (1).mp4,fall,3.0,False,2026-10-19T00:00:03.200000+00:00,2026-10-19T00:00:06.200000+00:00,3.0,3.2
+feat-matched,fall/Home_02_video (37).mp4,fall,3.0,False,2026-10-19T00:00:05.625000+00:00,2026-10-19T00:00:09.833333+00:00,3.0,6.833333333333334
+feat-matched,fall/Coffee_room_02_video (56).mp4,fall,3.0,False,2026-10-19T00:00:12.400000+00:00,2026-10-19T00:00:16.400000+00:00,3.0,13.399999999999999
+feat-matched,fall/Coffee_room_01_video (17).mp4,fall,3.0,False,2026-10-19T00:00:02+00:00,2026-10-19T00:00:05.600000+00:00,3.0,2.5999999999999996
+feat-matched,fall/Coffee_room_01_video (41).mp4,fall,3.0,False,2026-10-19T00:00:11.200000+00:00,2026-10-19T00:00:14.400000+00:00,3.0,11.4
+feat-matched,fall/Coffee_room_01_video (13).mp4,fall,3.0,False,2026-10-19T00:00:04+00:00,2026-10-19T00:00:07.600000+00:00,3.0,4.6
+feat-matched,fall/Coffee_room_01_video (45).mp4,fall,3.0,False,2026-10-19T00:00:04.200000+00:00,2026-10-19T00:00:08.200000+00:00,3.0,5.199999999999999
+feat-matched,fall/Coffee_room_01_video (48).mp4,fall,3.0,False,2026-10-19T00:00:26.400000+00:00,2026-10-19T00:00:30.400000+00:00,3.0,27.4
+feat-matched,fall/Coffee_room_01_video (38).mp4,fall,3.0,False,2026-10-19T00:00:10+00:00,2026-10-19T00:00:13.400000+00:00,3.0,10.4
+fix-reference,fall/Coffee_room_02_video (58).mp4,fall,3.0,True,2026-10-19T00:00:07.800000+00:00,2026-10-19T00:00:12.400000+00:00,3.2,9.2
+fix-reference,fall/Coffee_room_02_video (56).mp4,fall,3.0,True,2026-10-19T00:00:12.600000+00:00,2026-10-19T00:00:16.600000+00:00,3.2,13.400000000000002
+fix-reference,fall/Coffee_room_01_video (17).mp4,fall,3.0,True,2026-10-19T00:00:02+00:00,2026-10-19T00:00:05.800000+00:00,3.2,2.5999999999999996
+fix-reference,fall/Coffee_room_01_video (41).mp4,fall,3.0,True,2026-10-19T00:00:11.200000+00:00,2026-10-19T00:00:15+00:00,3.2,11.8
+fix-reference,fall/Coffee_room_01_video (48).mp4,fall,3.0,True,2026-10-19T00:00:26.400000+00:00,2026-10-19T00:00:30.800000+00:00,3.2,27.6
+fix-reference,fall/Coffee_room_01_video (38).mp4,fall,3.0,True,2026-10-19T00:00:10+00:00,2026-10-19T00:00:14+00:00,3.2,10.8

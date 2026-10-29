@@ -1,0 +1,821 @@
+{
+  "scope": "passive MQTT headers only",
+  "rows": [
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame14:1792403650.488347",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403650.488347,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3102, "y": 0.5653, "width": 0.257, "height": 0.2806 },
+          "observedAt": 1792403650.488347
+        }
+      ],
+      "receivedAt": 1792403650.7113912
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame16:1792403650.88368",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403650.88368,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3094, "y": 0.5653, "width": 0.2555, "height": 0.2736 },
+          "observedAt": 1792403650.88368
+        }
+      ],
+      "receivedAt": 1792403651.1100197
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame18:1792403651.284353",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403651.284353,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3109, "y": 0.5597, "width": 0.2633, "height": 0.2806 },
+          "observedAt": 1792403651.284353
+        }
+      ],
+      "receivedAt": 1792403651.5472968
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame19:1792403651.486723",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403651.486723,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3125, "y": 0.5611, "width": 0.2625, "height": 0.2778 },
+          "observedAt": 1792403651.486723
+        }
+      ],
+      "receivedAt": 1792403651.7099156
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame21:1792403651.884479",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403651.884479,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3125, "y": 0.5597, "width": 0.2633, "height": 0.2847 },
+          "observedAt": 1792403651.884479
+        }
+      ],
+      "receivedAt": 1792403652.062664
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame28:1792403653.286042",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403653.286042,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.7211, "y": 0.2583, "width": 0.1375, "height": 0.7403 },
+          "observedAt": 1792403653.286042
+        }
+      ],
+      "receivedAt": 1792403653.555163
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame30:1792403653.684595",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403653.684595,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.6602, "y": 0.2458, "width": 0.1656, "height": 0.7444 },
+          "observedAt": 1792403653.684595
+        }
+      ],
+      "receivedAt": 1792403653.9436047
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame32:1792403654.084073",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403654.084073,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.5867, "y": 0.2153, "width": 0.1484, "height": 0.7153 },
+          "observedAt": 1792403654.084073
+        }
+      ],
+      "receivedAt": 1792403654.3316483
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame33:1792403654.286675",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403654.286675,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.5445, "y": 0.2236, "width": 0.1547, "height": 0.7083 },
+          "observedAt": 1792403654.286675
+        }
+      ],
+      "receivedAt": 1792403654.5764132
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame35:1792403654.689903",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403654.689903,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.4383, "y": 0.4056, "width": 0.2344, "height": 0.5014 },
+          "observedAt": 1792403654.689903
+        }
+      ],
+      "receivedAt": 1792403655.0359619
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame36:1792403654.890792",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403654.890792,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3594, "y": 0.4861, "width": 0.2984, "height": 0.4014 },
+          "observedAt": 1792403654.890792
+        }
+      ],
+      "receivedAt": 1792403655.1899977
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame37:1792403655.092113",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403655.092113,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3594, "y": 0.4861, "width": 0.2984, "height": 0.4014 },
+          "observedAt": 1792403654.890792
+        }
+      ],
+      "receivedAt": 1792403655.3630128
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame40:1792403655.685933",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403655.685933,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.318, "y": 0.5556, "width": 0.2711, "height": 0.2847 },
+          "observedAt": 1792403655.685933
+        }
+      ],
+      "receivedAt": 1792403655.9187443
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame0:1792403656.084362",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403656.084362,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3156, "y": 0.5625, "width": 0.2492, "height": 0.2819 },
+          "observedAt": 1792403656.084362
+        }
+      ],
+      "receivedAt": 1792403656.3134248
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame1:1792403656.286252",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403656.286252,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3055, "y": 0.5597, "width": 0.2687, "height": 0.2667 },
+          "observedAt": 1792403656.286252
+        }
+      ],
+      "receivedAt": 1792403656.509523
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame3:1792403656.682527",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403656.682527,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3063, "y": 0.5597, "width": 0.2687, "height": 0.2708 },
+          "observedAt": 1792403656.682527
+        }
+      ],
+      "receivedAt": 1792403656.9153583
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame4:1792403656.885144",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403656.885144,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3109, "y": 0.5569, "width": 0.2641, "height": 0.2764 },
+          "observedAt": 1792403656.885144
+        }
+      ],
+      "receivedAt": 1792403657.1095955
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame6:1792403657.284162",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403657.284162,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3133, "y": 0.5569, "width": 0.2617, "height": 0.2819 },
+          "observedAt": 1792403657.284162
+        }
+      ],
+      "receivedAt": 1792403657.5102906
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame8:1792403657.683384",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403657.683384,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3125, "y": 0.5611, "width": 0.2617, "height": 0.2819 },
+          "observedAt": 1792403657.683384
+        }
+      ],
+      "receivedAt": 1792403657.911281
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame10:1792403658.084219",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403658.084219,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3117, "y": 0.5569, "width": 0.2594, "height": 0.2889 },
+          "observedAt": 1792403658.084219
+        }
+      ],
+      "receivedAt": 1792403658.3361762
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame11:1792403658.285868",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403658.285868,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3117, "y": 0.5569, "width": 0.2602, "height": 0.2889 },
+          "observedAt": 1792403658.285868
+        }
+      ],
+      "receivedAt": 1792403658.3621867
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame14:1792403658.882977",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403658.882977,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3094, "y": 0.5625, "width": 0.2641, "height": 0.2792 },
+          "observedAt": 1792403658.882977
+        }
+      ],
+      "receivedAt": 1792403659.1086588
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame15:1792403659.083914",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403659.083914,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3094, "y": 0.5625, "width": 0.2641, "height": 0.2792 },
+          "observedAt": 1792403658.882977
+        }
+      ],
+      "receivedAt": 1792403659.307173
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame18:1792403659.685794",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403659.685794,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.675, "y": 0.2889, "width": 0.1805, "height": 0.7056 },
+          "observedAt": 1792403659.685794
+        }
+      ],
+      "receivedAt": 1792403659.943953
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame20:1792403660.083308",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403660.083308,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.657, "y": 0.2528, "width": 0.1305, "height": 0.7417 },
+          "observedAt": 1792403660.083308
+        }
+      ],
+      "receivedAt": 1792403660.3364403
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame22:1792403660.48541",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403660.48541,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.5398, "y": 0.2042, "width": 0.1766, "height": 0.7208 },
+          "observedAt": 1792403660.48541
+        }
+      ],
+      "receivedAt": 1792403660.7254062
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame24:1792403660.88492",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403660.88492,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.4492, "y": 0.3486, "width": 0.2313, "height": 0.5681 },
+          "observedAt": 1792403660.88492
+        }
+      ],
+      "receivedAt": 1792403661.1347477
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame26:1792403661.285005",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403661.285005,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3734, "y": 0.5194, "width": 0.2602, "height": 0.3403 },
+          "observedAt": 1792403661.285005
+        }
+      ],
+      "receivedAt": 1792403661.6309376
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame27:1792403661.487742",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403661.487742,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3734, "y": 0.5194, "width": 0.2602, "height": 0.3403 },
+          "observedAt": 1792403661.285005
+        }
+      ],
+      "receivedAt": 1792403661.7772036
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame28:1792403661.690723",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403661.690723,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3312, "y": 0.5639, "width": 0.2219, "height": 0.1986 },
+          "observedAt": 1792403661.690723
+        }
+      ],
+      "receivedAt": 1792403661.9938667
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame30:1792403662.08216",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403662.08216,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3203, "y": 0.5611, "width": 0.2742, "height": 0.2681 },
+          "observedAt": 1792403661.885876
+        }
+      ],
+      "receivedAt": 1792403662.3113353
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame31:1792403662.287027",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403662.287027,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3164, "y": 0.5778, "width": 0.2469, "height": 0.2792 },
+          "observedAt": 1792403662.287027
+        }
+      ],
+      "receivedAt": 1792403662.5220969
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame33:1792403662.683674",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403662.683674,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3133, "y": 0.5583, "width": 0.2602, "height": 0.2833 },
+          "observedAt": 1792403662.683674
+        }
+      ],
+      "receivedAt": 1792403662.9096978
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame35:1792403663.083493",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403663.083493,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3094, "y": 0.5639, "width": 0.2664, "height": 0.2764 },
+          "observedAt": 1792403663.083493
+        }
+      ],
+      "receivedAt": 1792403663.3128922
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame36:1792403663.286232",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403663.286232,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3102, "y": 0.5597, "width": 0.2664, "height": 0.2792 },
+          "observedAt": 1792403663.286232
+        }
+      ],
+      "receivedAt": 1792403663.508473
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame38:1792403663.682281",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403663.682281,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3125, "y": 0.5569, "width": 0.2648, "height": 0.2819 },
+          "observedAt": 1792403663.682281
+        }
+      ],
+      "receivedAt": 1792403663.907883
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame39:1792403663.883051",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403663.883051,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3133, "y": 0.5625, "width": 0.2625, "height": 0.2792 },
+          "observedAt": 1792403663.883051
+        }
+      ],
+      "receivedAt": 1792403664.1125145
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame40:1792403664.083677",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403664.083677,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3109, "y": 0.5597, "width": 0.2641, "height": 0.2833 },
+          "observedAt": 1792403664.083677
+        }
+      ],
+      "receivedAt": 1792403664.3076937
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame0:1792403664.486911",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403664.486911,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3117, "y": 0.5556, "width": 0.2625, "height": 0.2819 },
+          "observedAt": 1792403664.486911
+        }
+      ],
+      "receivedAt": 1792403664.7043643
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame7:1792403665.884917",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403665.884917,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.7016, "y": 0.2778, "width": 0.1555, "height": 0.7181 },
+          "observedAt": 1792403665.884917
+        }
+      ],
+      "receivedAt": 1792403666.1573598
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame9:1792403666.286079",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403666.286079,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.6523, "y": 0.2611, "width": 0.1648, "height": 0.7264 },
+          "observedAt": 1792403666.286079
+        }
+      ],
+      "receivedAt": 1792403666.5226383
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame11:1792403666.683877",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403666.683877,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.5813, "y": 0.2056, "width": 0.1516, "height": 0.7306 },
+          "observedAt": 1792403666.683877
+        }
+      ],
+      "receivedAt": 1792403666.9404144
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame13:1792403667.089452",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403667.089452,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.4656, "y": 0.3069, "width": 0.2148, "height": 0.5986 },
+          "observedAt": 1792403667.089452
+        }
+      ],
+      "receivedAt": 1792403667.3337595
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame15:1792403667.48317",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403667.48317,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3563, "y": 0.4958, "width": 0.2977, "height": 0.375 },
+          "observedAt": 1792403667.48317
+        }
+      ],
+      "receivedAt": 1792403667.7324555
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame16:1792403667.684037",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403667.684037,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3563, "y": 0.4958, "width": 0.2977, "height": 0.375 },
+          "observedAt": 1792403667.48317
+        }
+      ],
+      "receivedAt": 1792403667.9311092
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame19:1792403668.286347",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403668.286347,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3164, "y": 0.5569, "width": 0.2664, "height": 0.2847 },
+          "observedAt": 1792403668.286347
+        }
+      ],
+      "receivedAt": 1792403668.5201342
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame21:1792403668.684088",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403668.684088,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3109, "y": 0.5597, "width": 0.2633, "height": 0.2681 },
+          "observedAt": 1792403668.684088
+        }
+      ],
+      "receivedAt": 1792403668.906992
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame23:1792403669.082497",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403669.082497,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3133, "y": 0.5764, "width": 0.2539, "height": 0.2653 },
+          "observedAt": 1792403669.082497
+        }
+      ],
+      "receivedAt": 1792403669.3102856
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame24:1792403669.284121",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403669.284121,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3094, "y": 0.5583, "width": 0.2664, "height": 0.2806 },
+          "observedAt": 1792403669.284121
+        }
+      ],
+      "receivedAt": 1792403669.511299
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame26:1792403669.683759",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403669.683759,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3094, "y": 0.5569, "width": 0.2562, "height": 0.2847 },
+          "observedAt": 1792403669.683759
+        }
+      ],
+      "receivedAt": 1792403669.909887
+    },
+    {
+      "sourceSessionId": "8387dfb6-8e51-4c8a-b8da-37f29d660fba",
+      "frameId": "cam_living_room_frame27:1792403669.88393",
+      "cameraSlug": "cam_living_room",
+      "frameTimestamp": 1792403669.88393,
+      "frameWidth": 1280,
+      "frameHeight": 720,
+      "persons": [
+        {
+          "trackId": "1792403518.897033-3pnz89",
+          "boundingBox": { "x": 0.3141, "y": 0.5583, "width": 0.2602, "height": 0.2833 },
+          "observedAt": 1792403669.88393
+        }
+      ],
+      "receivedAt": 1792403670.1097662
+    }
+  ]
+}

@@ -17,6 +17,7 @@ class HealthResponse(BaseModel):
     service: str
     version: str
     face_provider: str
+    pose_min_visibility: float = 0.30
     uptime_seconds: int
 
 
@@ -29,5 +30,6 @@ def health() -> HealthResponse:
         service="ai-service",
         version="0.0.1",
         face_provider=settings.face_provider,
+        pose_min_visibility=settings.pose_min_visibility,
         uptime_seconds=int(time.time() - _STARTED_AT),
     )
