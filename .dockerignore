@@ -12,6 +12,9 @@ node_modules
 **/__pycache__
 **/.pytest_cache
 **/.ruff_cache
+**/.mypy_cache
+.pnpm-store
+.coverage
 
 # Khong bao gio dua secret vao image
 .env
@@ -25,6 +28,10 @@ aws-credentials*
 # Khong can trong image
 docs
 datasets
+artifacts
+.agents
+.codex
+.aws
 infra/**/data
 *.md
 !README.md

@@ -1,11 +1,104 @@
 # Plan E2E US-18 — Train YOLO và phát hiện lửa/khói (M3)
 
+> Fire-only scope update, 29/10/2026: per lead direction, US-18 now detects and alerts on fire only. Class 1 smoke from the existing verified two-class checkpoint is discarded before scoring, temporal confirmation, evidence rendering and notification. Three consecutive fire frames are still required; smoke-only input is negative and cannot bridge fire frames. New evidence uses `fire-only-temporal-min-v1`. The model artifact name/checksum and legacy `FIRE_SMOKE_DETECTED` storage identifier remain for compatibility; all current web/Telegram labels say fire. Historical smoke metrics and mixed-class acceptance below are superseded for the active feature. Existing records are retained, not relabeled as newly verified fire.
+
+> Hướng dẫn test tay với lead (28/10/2026): [Các bước chạy và nghiệm thu US-18](US-18_HUONG_DAN_NGHIEM_THU.md), gồm webcam, ảnh/video, Telegram và biên bản kết quả.
+
 > Sprint 3 · Một người phụ trách E2E (D theo backlog) · Một AI Agent duy nhất.
 > Ngày lập: 09/10/2026 · Baseline khảo sát: commit `865dc6e` cùng contract M2a đang được cập nhật trong working tree.
 > US-18: 5 SP theo backlog; không tự tạo số issue hoặc coi việc train là đã hoàn thành.
 > Đây là kế hoạch triển khai. Phải train, đánh giá và khóa model trước khi triển khai tính năng E2E.
 
+> Cập nhật 26/10/2026: đã dựng môi trường Windows CPU riêng và export checkpoint YOLO26n do người dùng cung cấp, kiểm tra parity trên 6 ảnh cục bộ. Xem [kết quả kiểm chứng và các khác biệt so với plan](US-18_YOLO26_EXPORT_STATUS.md). Đây là candidate export; G2 chất lượng model và G5 E2E chưa đạt, đặc biệt còn thiếu kiểm chứng phát hiện smoke.
+
+> Bổ sung bằng chứng cùng ngày: người dùng đã cung cấp bộ kết quả test Indoor Fire Smoke (AP@0.5 fire 0,885, smoke 0,838) và video kết quả `bucket11.avi` có box dự đoán. Đã ghi nhận train và đánh giá offline; xem phần cập nhật trong báo cáo trên. Phần còn lại là tích hợp/kiểm chứng runtime và nghiệm thu release/E2E, không yêu cầu train lại từ hai ảnh smoke thử ban đầu.
+
+> Implementation update, 26/10/2026: full-camera transport, YOLO26 ONNX endpoint,
+> temporal confirmation, durable P0 incidents/results, media recovery and dashboard
+> evidence are implemented with admission disabled by default. An isolated real
+> Frigate/MQTT/ONNX/PostgreSQL/MinIO run passed using the user's raw `bucket11.mp4`,
+> including a notification intent and user confirmation. This does not close the
+> independent quality, source/holdout, deployment load and external-delivery gates.
+> See [runtime runbook](US-18_RUNTIME_RUNBOOK.md) and the updated export/status report.
+
+> Validation update, 27/10/2026: fire is the user's main quality priority. Clock
+> diagnosis, Docker-aligned Node 22 integration, 27-video screening and real RTSP
+> replay with browser confirmation are complete. Fire misses/false confirmations
+> still prevent quality acceptance; 0.65 is only an exploratory threshold, with
+> 0.50 defaults unchanged. Telegram awaits the user's intended chat. See the
+> [current validation report and ordered remaining work](US-18_YOLO26_EXPORT_STATUS.md#model-quality-and-known-limitations).
+
+> Runtime recovery follow-up, 27/10/2026: five actual local RTSP/MQTT/service
+> interruption cases passed with fresh confirmations, durable incident/result
+> deduplication and downloaded-media checksum verification. Authenticated M3
+> readiness/freshness/error/drop diagnostics are implemented and verified.
+> Long CPU/RAM soak, physical deployment, combined M2 load and release acceptance
+> remain distinct pending checks; G2/G5 are not marked fully closed.
+
+> Additional quality follow-up, 27/10/2026: the user deferred the local CPU/RAM
+> soak. A frozen comparison on 29 eligible KMU videos confirmed fire in 18/19
+> positive clips at 0.50 versus 16/19 at 0.65, with zero fire-only false-confirmed
+> negatives out of ten at either threshold. Retain 0.50; do not promote the earlier
+> exploratory 0.65 candidate. See the [follow-up report](US-18_YOLO26_EXPORT_STATUS.md#model-quality-and-known-limitations)
+> for the three pre-inference training-overlap exclusions and quality limitations.
+
+> Error-analysis follow-up, 27/10/2026: confidence timelines and source/box reviews
+> explain the missed sequences without relaxing the three-consecutive-frame rule.
+> A 16-clip tiling probe increased false confirmations and was rejected. The
+> checkpoint defaults to a different prediction mode from the registered NMS-free
+> export; the exporter now preserves checkpoint mode by default. A separate
+> eight-image parity pass and fixed-threshold video comparison are recorded in
+> the [error analysis](US-18_YOLO26_EXPORT_STATUS.md#model-quality-and-known-limitations). No new training or automatic
+> runtime promotion is implied by this correction.
+> The completed 56-video comparison confirms 29/30 fire-positive videos versus
+> 27/30, but false-confirmed negatives increase from 5/26 to 7/26. The candidate
+> remains separate; the registered model and G2/G5 acceptance are unchanged.
+
+> Indoor-integration update, 27/10/2026: the user accepted the recorded
+> limitations as non-blocking for this step. The checkpoint-preserving ONNX is
+> now the registered/staged integration candidate, with synchronized AI/backend
+> identity and a checksum-bound graph-floor contract. Its own RTSP/Frigate/P0/
+> media/browser gate passed in `camerai-us18-video-25468`, including actual user
+> confirmation to `RESOLVED`. See [the current evidence](US-18_YOLO26_EXPORT_STATUS.md#checkpoint-model-integration).
+> Telegram awaits the intended chat, CPU/RAM soak remains deferred and G2/G5
+> release acceptance is not inferred from the local pass.
+
+> Telegram follow-up, 27/10/2026: the user authorized one photo to the existing
+> linked private chat of `@camerai_test_bot`. The provider accepted the alert for
+> **US18 TEST bucket11**. The real user's `Tôi ổn` callback recorded
+> `TELEGRAM` / `IM_OK`, reached `RESOLVED` and updated the caption successfully.
+> See [live Telegram verification](US-18_YOLO26_EXPORT_STATUS.md#main-webcam-and-telegram-acceptance). This
+> disposable-database test does not enable deployment flags or resume the deferred soak.
+
 ## 1. Mục tiêu, phạm vi và điều kiện nghiệm thu
+
+> Operator acceptance correction, 27/10/2026: use the existing application and
+> room-camera/WHIP workflow, as required by section 9. The isolated video and
+> Telegram fixtures contain different events and are not a single shared user
+> session. Main-app physical webcam fire detection and same-event Telegram/web
+> confirmation subsequently passed on event `fa0c194a-c5b4-4a91-a2bc-8a4b8fd2e826`:
+> real `TELEGRAM` / `IM_OK`, final `RESOLVED` and operator-observed web update.
+> One earlier expired test event still requires manual closure. See
+> [main webcam acceptance](US-18_YOLO26_EXPORT_STATUS.md#main-webcam-and-telegram-acceptance).
+
+> Fire UX follow-up, 27/10/2026: the existing dashboard now prioritizes fire
+> evidence, recovers transient detail/media failures, plays the stored clip,
+> highlights unresolved P0 cards and requires local evidence review before
+> navigation. Fire dialogs include a large manual 114 link. New clips include
+> pre-roll before the first qualifying frame, backed by continuous recording when
+> enabled. A separate boxed Telegram delivery JPEG is locally verified; old chat
+> photos are unchanged and no new message was sent. See
+> [implementation and verification](US-18_YOLO26_EXPORT_STATUS.md#fire-alert-ux-and-evidence). This does not close
+> independent model quality or release gates.
+
+> UX refinement and Telegram follow-up, 27/10/2026: attention now fits without a
+> scrollbar, with moderate same-row inspect/call actions. Details expose absolute
+> detection time and essential context, with only one optional body scroll region.
+> A strict three-hour interruption window and persistent per-account/browser
+> episode receipts prevent old/repeated popups. A separately approved bounded
+> real webcam test delivered a painted photo at 20:28:44; the operator confirmed
+> receiving the new photo and its red flame box. See the
+> [updated UX and delivery evidence](US-18_YOLO26_EXPORT_STATUS.md#fire-alert-ux-and-evidence).
 
 **Là** người được giám sát (P2), **tôi muốn** hệ thống phát hiện cháy sớm, **để** thoát ra kịp.
 

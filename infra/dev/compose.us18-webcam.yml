@@ -1,0 +1,23 @@
+# Local US-18 acceptance on the existing application and its persistent data.
+# docker compose -f docker-compose.yml -f infra/dev/compose.us18-webcam.yml --profile cv up -d --build
+# Telegram delivery stays disabled until the operator authorizes a new live test.
+services:
+  web:
+    environment:
+      WATCHPACK_POLLING: "true"
+  ai-service:
+    environment:
+      M3_ENABLED: "true"
+      FIRE_MODEL_PATH: /app/models/fire-smoke-yolo26n-checkpoint-nms.onnx
+      FIRE_MODEL_VERSION: fire-smoke-yolo26n-checkpoint-nms-v1
+      FIRE_MODEL_SHA256: 773e23d1896d82787819f665694bfbc33825081f7f7a0f5fa5b1c6a22cb54650
+  orchestrator:
+    environment:
+      M3_ENABLED: "true"
+      TELEGRAM_ENABLED: "false"
+      FIRE_MODEL_VERSION: fire-smoke-yolo26n-checkpoint-nms-v1
+      AI_SERVICE_URL: http://ai-service:8000
+      MINIO_PUBLIC_ENDPOINT: http://localhost:${PORT_MINIO_API:-9000}
+  frigate:
+    environment:
+      FRIGATE_FIRE_FRAMES_ENABLED: "true"

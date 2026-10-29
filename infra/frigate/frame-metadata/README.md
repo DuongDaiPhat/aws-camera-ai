@@ -3,7 +3,7 @@
 The live player continues to use the original MediaMTX WebRTC stream. This
 service subscribes to Frigate's internal `detection/video` messages and publishes
 only confirmed person coordinates and their frame timestamps to MQTT. It does
-not decode, resize, re-encode, or delay video.
+not decode, resize, re-encode, or delay video on the person metadata path.
 
 Flow: Frigate frame processing → ZeroMQ → `frigate/camerai/frames` → the
 orchestrator's bounded memory buffer → authenticated camera debug API → SVG box.
@@ -39,4 +39,29 @@ them before upgrading the pinned Frigate image. Run its payload tests with:
 
 ```powershell
 python -m unittest discover -s infra/frigate/frame-metadata -p test_bridge.py
+```
+
+## Independent fire/smoke full frames (US-18)
+
+`FRIGATE_FIRE_FRAMES_ENABLED=true` enables a separate publisher at up to
+`FIRE_SAMPLE_FPS=5`, including frames with **no person objects**. It copies the
+pinned Frigate 0.18 shared YUV frame, closes its own reference, and never deletes
+or unlinks the owner's segment. A bounded worker queue converts the full image
+to JPEG; live video and person coordinates continue along their existing paths.
+The s6 service adds `/opt/frigate` to `PYTHONPATH` for the pinned frame manager.
+
+The MQTT payload on `MQTT_TOPIC_FIRE_FRAMES` is binary: a four-byte unsigned
+big-endian JSON header length, that many UTF-8 header bytes, then JPEG bytes.
+Header fields are `schemaVersion=1`, `cameraSlug`, `sourceSessionId`, `frameId`,
+`frameTimestamp` (UTC ISO-8601), `frameWidth`, and `frameHeight`. Publish uses QoS 0,
+without retention. Limits default to 1 MiB, 2,073,600 pixels, 16 cameras, two queued
+frames per camera and one-second freshness. Orchestrator runs a separate MQTT
+consumer with bounded concurrency, so M3 does not depend on person track events.
+
+Keep this flag and `M3_ENABLED` off until deployment acceptance. See the
+[US-18 runbook](../../../docs/sprint-3/US-18_RUNTIME_RUNBOOK.md) for model staging,
+isolated video verification and rollback. Run all bridge regressions with:
+
+```powershell
+python -m unittest discover -s infra/frigate/frame-metadata -p "test_*.py"
 ```

@@ -1,5 +1,7 @@
 # API change register — Sprint 3
 
+> US-18 scope change, 29/10/2026: the lead requested fire-only detection. `FireDetection.label` and new `FireResultMetadata.labels/detections` accept only `fire`; new temporal evidence uses `fire-only-temporal-min-v1`. Smoke cannot qualify or render on web/Telegram. The existing model artifact identity and `FIRE_SMOKE_DETECTED` event identifier remain unchanged for stored-data compatibility. Both OpenAPI specs were changed before their generated contracts and callers. This working-tree change still requires normal review; no merge or release approval is implied.
+
 > Source of truth: [`api/openapi.yaml`](../../api/openapi.yaml), [`api/openapi-ai-service.yaml`](../../api/openapi-ai-service.yaml). Repo dùng **openapi.yaml**, không tạo thêm openapi.yml. Mỗi story có một owner E2E/một AI Agent; phần shared có một người tích hợp tuần tự.
 
 ## Trạng thái chốt ngày 10/10/2026

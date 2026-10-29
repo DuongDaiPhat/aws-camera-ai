@@ -13,8 +13,8 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r lint:fix",
-    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yaml,yml}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md,yaml,yml}\"",
+    "format": "node tools/scripts/format.mjs --write",
+    "format:check": "node tools/scripts/format.mjs --check",
     "test": "pnpm -r test",
     "test:cov": "pnpm -r test:cov",
     "setup:ai": "node tools/scripts/py.mjs --setup",
@@ -37,6 +37,11 @@
     "frigate:check": "node tools/scripts/frigate-check.mjs",
     "frigate:validate": "node tools/scripts/frigate-validate.mjs",
     "test:tools": "node --test \"tools/scripts/test/*.test.mjs\"",
+    "test:fire:db": "node tools/scripts/fire-db-gate.mjs",
+    "test:fire:video": "node tools/scripts/fire-video-gate.mjs",
+    "test:fire:clock": "node tools/scripts/fire-clock-check.mjs",
+    "test:fire:browser": "node tools/scripts/fire-browser-review.mjs",
+    "fire:health": "node --env-file=.env tools/scripts/fire-health.mjs",
     "prepare": "husky || true"
   },
   "devDependencies": {
@@ -49,16 +54,24 @@
     "yaml": "^2.9.1"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
+    "apps/orchestrator/**/*.{ts,tsx}": [
+      "pnpm --filter @cam/orchestrator exec eslint --fix",
+      "prettier --write"
+    ],
+    "apps/web/**/*.{ts,tsx}": [
+      "pnpm --filter @cam/web exec eslint --fix",
+      "prettier --write"
+    ],
+    "packages/contracts/**/*.ts": [
+      "pnpm --filter @cam/contracts exec eslint --fix",
       "prettier --write"
     ],
     "*.{json,md,yaml,yml}": [
       "prettier --write"
     ],
     "*.py": [
-      "ruff check --fix",
-      "ruff format"
+      "node tools/scripts/py.mjs ruff check --fix",
+      "node tools/scripts/py.mjs ruff format"
     ]
   },
   "dependencies": {

@@ -168,6 +168,9 @@ jobs:
       - name: Unit test (pytest + coverage)
         run: pytest
 
+      - name: Full-camera bridge regression
+        run: python -m unittest discover -s ../../infra/frigate/frame-metadata -p "test_*.py"
+
   training:
     name: YOLO CPU (isolated lock · export smoke)
     runs-on: ubuntu-latest
@@ -245,6 +248,9 @@ jobs:
 
       - name: Sprint 3 fresh, seeded upgrade, replay and constraint gate
         run: node tools/scripts/sprint3-db-gate.mjs
+
+      - name: US-18 durable incident and result-delivery integration
+        run: node tools/scripts/fire-db-gate.mjs
 
       - name: Cai psql client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client

@@ -8,7 +8,7 @@ export type PriorityLevel = components['schemas']['PriorityLevel'];
 
 export interface UIEventItem extends EventSummary {
   cameraCode: string; // e.g. "CAM 01", "CAM 02"
-  aiTag: string; // e.g. "98% khói", "Pose AI 91%", "Nhận diện", "An toàn", "Chuyển động"
+  aiTag: string; // e.g. "98% lửa", "Pose AI 91%", "Nhận diện", "An toàn", "Chuyển động"
   aiTagColor?: 'danger' | 'warning' | 'info' | 'success' | 'neutral';
   note?: string; // Ghi chú bổ sung (vd: "Bà nội vào chuẩn bị bữa trà chiều")
   relativeTimeText: string;
@@ -32,7 +32,7 @@ export const INITIAL_MOCK_EVENTS: UIEventItem[] = [
       name: 'Khu vực bếp nấu',
     },
     cameraCode: 'CAM 02',
-    aiTag: '98% khói',
+    aiTag: '98% lửa',
     aiTagColor: 'danger',
     relativeTimeText: 'Vừa xong',
   },
@@ -269,11 +269,11 @@ const SIMULATED_TEMPLATES: SimulatedTemplate[] = [
   {
     type: 'FIRE_SMOKE_DETECTED',
     priority: 'P0',
-    title: 'Phát hiện dấu hiệu khói bất thường',
+    title: 'Phát hiện lửa',
     cam: 'Camera phòng khách',
     camCode: 'CAM 01',
     zone: 'Khu vực bàn ăn',
-    tag: '92% khói',
+    tag: '92% lửa',
     tagColor: 'danger',
   },
 ];

@@ -1,3 +1,21 @@
+.technicalDetails {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 14px;
+}
+.technicalDetails summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 14px;
+}
+.technicalDetails .aiSection {
+  margin-top: 14px;
+}
+.detailValue,
+.aiPill {
+  overflow-wrap: anywhere;
+}
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -34,6 +52,148 @@
   animation: slideUp 0.15s ease-out;
 }
 
+.fireModal {
+  max-width: 960px;
+  max-height: calc(100dvh - 32px);
+  border: 1px solid #ef4444;
+}
+
+.snapshotContainer.fireSnapshot {
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+.fireModal .modalHeader {
+  background: #fff1f2;
+  border-bottom-color: #fecaca;
+}
+.fireModal .modalTitle {
+  color: #991b1b;
+}
+.fireModal .snapshotContainer {
+  height: min(34dvh, 300px);
+  aspect-ratio: auto;
+  min-height: 120px;
+}
+.fireModal .modalBody {
+  min-height: 0;
+}
+.fireModal .modalFooter {
+  padding: 12px 16px;
+}
+.mediaHint {
+  font-size: 13px;
+}
+.recordingSection {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 18px;
+  border-radius: 12px;
+}
+
+.mediaSwitch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.mediaSwitch button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #334155;
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-height: 36px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.mediaSwitch .reloadButton {
+  width: 36px;
+  padding: 0;
+  flex-shrink: 0;
+}
+.mediaSwitch button:hover:not([aria-pressed='true']) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+.mediaSwitch button:focus-visible,
+.closeBtn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+.mediaSwitch button[aria-pressed='true'] {
+  background: #991b1b;
+  color: #fff;
+  border-color: #991b1b;
+}
+.mediaHint {
+  color: #475569;
+  margin: 8px 0 12px;
+  line-height: 1.5;
+}
+.retryEvidence {
+  background: #fff;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.reviewHint {
+  font-size: 12px;
+  color: #475569;
+  margin: 0;
+}
+.reviewButton {
+  background: #0f172a;
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 12px;
+  min-height: 40px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.reviewButton:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+@media (max-width: 600px) {
+  .overlay {
+    padding: 8px;
+  }
+  .modalBody,
+  .modalHeader,
+  .modalFooter {
+    padding: 14px;
+  }
+  .fireModal .snapshotContainer {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+  .footerRow,
+  .actionButtonGroup {
+    flex-wrap: wrap;
+  }
+  .actionButtonGroup {
+    gap: 8px;
+  }
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+  .recordingSection {
+    padding: 12px;
+  }
+}
+
 @keyframes slideUp {
   from {
     transform: translateY(12px) scale(0.98);
@@ -44,6 +204,7 @@
 }
 
 .modalHeader {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -66,11 +227,12 @@
 }
 
 .closeBtn {
-  background: transparent;
-  border: none;
-  color: #94a3b8;
-  width: 32px;
-  height: 32px;
+  background: #ffffff99;
+  border: 1px solid transparent;
+  color: #64748b;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -90,6 +252,8 @@
 }
 
 .modalBody {
+  flex: 1;
+  min-height: 0;
   padding: 24px;
   overflow-y: auto;
   display: flex;
@@ -122,6 +286,14 @@
   height: 100%;
   object-fit: contain;
   background-color: #0b1329;
+}
+
+.fireBoxes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .snapshotMissing {
@@ -186,7 +358,8 @@
 .snapshotGrid {
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 24px 24px;
 }
@@ -318,6 +491,7 @@
 
 /* Modal Actions */
 .modalFooter {
+  flex-shrink: 0;
   padding: 16px 24px;
   border-top: 1px solid #eef2f6;
   display: flex;
@@ -330,6 +504,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .btnOk {
@@ -440,7 +616,7 @@
 .footerActionsWrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
 }
 
@@ -448,5 +624,170 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.snapshotContainer.compactSnapshot {
+  height: min(30dvh, 220px);
+  min-height: 60px;
+  aspect-ratio: auto;
+  flex-shrink: 1;
+}
+.fireModal .modalHeader {
+  padding: 12px 16px;
+}
+.fireModal .modalBody {
+  padding: 16px;
   gap: 12px;
+}
+.fireModal .headerInfo {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.headerTime {
+  color: #64748b;
+  font-size: 12px;
+}
+.fireLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(240px, 1fr);
+  gap: 16px;
+}
+.fireLayout > * {
+  min-width: 0;
+}
+.fireInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fireInfo .aiSection p,
+.fireInfo .aiSection ul {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.fireInfo .aiSection ul {
+  padding-left: 16px;
+}
+.fireModal .recordingSection {
+  padding: 10px;
+}
+.fireModal .clipPlayer {
+  max-height: min(34dvh, 300px);
+  display: block;
+}
+.fireModal .mediaHint {
+  font-size: 12px;
+}
+.fireSummary {
+  color: #334155;
+}
+.summaryFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  gap: 10px;
+}
+.summaryFields > div {
+  min-width: 0;
+}
+.summaryFields dt {
+  color: #64748b;
+  font-size: 11px;
+  margin-bottom: 3px;
+}
+.summaryFields dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.summaryFields .detectedTime {
+  grid-column: 1 / -1;
+  padding: 9px 10px;
+  background: #fff1f2;
+  border-radius: 6px;
+}
+.detectedTime dd {
+  color: #991b1b;
+  font-size: 14px;
+}
+.lastUpdate {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 10px 0 0;
+}
+.noteRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.noteRow:empty {
+  display: none;
+}
+.confirmationActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
+.noteInput {
+  min-width: 0;
+  width: 100%;
+}
+.technicalDetails {
+  padding-top: 10px;
+}
+.technicalDetails summary {
+  margin: 0;
+  font-size: 13px;
+}
+@media (max-width: 700px) {
+  .fireModal {
+    max-height: calc(100dvh - 16px);
+  }
+  .fireLayout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .fireModal .modalHeader,
+  .fireModal .modalBody,
+  .fireModal .modalFooter {
+    padding: 10px 12px;
+  }
+  .fireModal .snapshotContainer {
+    height: min(27dvh, 220px);
+    min-height: 100px;
+    aspect-ratio: auto;
+  }
+  .fireModal .clipPlayer {
+    max-height: min(27dvh, 220px);
+  }
+  .actionButtonGroup {
+    gap: 6px;
+  }
+  .reviewButton {
+    white-space: normal;
+  }
+  .confirmationActions {
+    flex-basis: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .confirmationActions > :only-child {
+    grid-column: 1 / -1;
+  }
+  .confirmationActions button {
+    padding: 8px;
+    font-size: 12px;
+  }
+  .noteRow {
+    flex-wrap: wrap;
+  }
 }

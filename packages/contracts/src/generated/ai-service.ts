@@ -21,6 +21,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/fire/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Inspect M3 model readiness and process-local inference counters
+     * @description Does not load the model or run inference. Counters reset on process restart. Liveness remains available at /health.
+     */
+    get: operations['fireRuntimeHealth'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/face/embed': {
     parameters: {
       query?: never;
@@ -152,14 +172,14 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * Phat hien lua/khoi va xac nhan chuoi frame toan camera
+     * Phat hien lua va xac nhan chuoi frame toan camera
      * @description US-18. Stateful per (cameraSlug, sourceSessionId); image is the full camera frame at frameTimestamp, even without a person. New producers send frameId/sourceSessionId. Each unique, ordered, fresh frame counts once, regardless of bounding-box count.
      *
-     *     A qualifying frame has at least one fire/smoke detection with confidence >= thresholdUsed (default T_fire=0.50). Confirm at >= requiredFrames (default 3) consecutive qualifying frames whose first-to-last interval is <= windowSeconds (default 5), with no adjacent gap > maxFrameGapSeconds (default 1). Mixed fire/smoke labels qualify. Confirmation happens on the third frame; there is no mandatory five-second wait.
+     *     A qualifying frame has at least one fire detection with confidence >= thresholdUsed (default T_fire=0.50). Smoke predictions from the existing two-class checkpoint are discarded before temporal processing and never qualify. Confirm at >= requiredFrames (default 3) consecutive qualifying frames whose first-to-last interval is <= windowSeconds (default 5), with no adjacent gap > maxFrameGapSeconds (default 1). Confirmation happens on the third frame; there is no mandatory five-second wait.
      *
      *     Negative/below-threshold frames and technical errors reset unconfirmed evidence; a gap/out-of-window starts a new eligible suffix. Duplicate, out-of-order and stale frames do not advance the counter or create new confirmation. Silence never confirms. Confirmed episode evidence is frozen for replay. The orchestrator persists one active episode per camera across source sessions and restarts, clearing only after 10 seconds of valid continuous negative observations; resolving an event does not clear it.
      *
-     *     Episode UUIDv5 uses URL namespace 6ba7b811-9dad-11d1-80b4-00c04fd430c8 and compact UTF-8 JSON [cameraSlug,sourceSessionId,firstQualifiedAt], timestamp canonical UTC milliseconds. incidentConfidence is the minimum of each qualifying frame's maximum qualifying score (fire-temporal-min-v1), not the latest frame maximum. This service does not persist events or send notifications.
+     *     Episode UUIDv5 uses URL namespace 6ba7b811-9dad-11d1-80b4-00c04fd430c8 and compact UTF-8 JSON [cameraSlug,sourceSessionId,firstQualifiedAt], timestamp canonical UTC milliseconds. incidentConfidence is the minimum of each qualifying frame's maximum qualifying score (fire-only-temporal-min-v1), not the latest frame maximum. This service does not persist events or send notifications.
      */
     post: operations['detectFire'];
     delete?: never;
@@ -172,6 +192,25 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    FireRuntimeHealth: {
+      /** @enum {string} */
+      status: 'DISABLED' | 'STARTING' | 'READY' | 'DEGRADED';
+      /** Format: uuid */
+      instanceId: string;
+      modelVersion: string;
+      modelLoaded: boolean;
+      requestCount: number;
+      errorCount: number;
+      staleFrameCount: number;
+      capacityRejectedCount: number;
+      inFlight: number;
+      /** Format: date-time */
+      lastRequestAt: string | null;
+      /** Format: date-time */
+      lastSuccessAt: string | null;
+      lastErrorCode: string | null;
+      lastDurationMs: number | null;
+    };
     /** @description Toa do chuan hoa 0..1. */
     BoundingBox: {
       x: number;
@@ -341,7 +380,7 @@ export interface components {
       qualifyingFrameTimestamps?: string[];
       incidentConfidence?: number | null;
       /** @enum {string} */
-      confidencePolicyVersion?: 'fire-temporal-min-v1';
+      confidencePolicyVersion?: 'fire-only-temporal-min-v1';
       /** @enum {string} */
       reason?:
         | 'NEGATIVE'
@@ -359,7 +398,7 @@ export interface components {
     };
     FireDetection: {
       /** @enum {string} */
-      label: 'fire' | 'smoke';
+      label: 'fire';
       confidence: number;
       boundingBox: components['schemas']['BoundingBox'];
     };
@@ -413,6 +452,33 @@ export interface operations {
       };
       /** @description Service dang khoi dong, model chua nap xong */
       503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  fireRuntimeHealth: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Authenticated runtime diagnostics; DEGRADED is not an inference result. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FireRuntimeHealth'];
+        };
+      };
+      /** @description Missing or invalid internal token */
+      401: {
         headers: {
           [name: string]: unknown;
         };

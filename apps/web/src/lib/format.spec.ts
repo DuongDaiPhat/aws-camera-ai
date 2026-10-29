@@ -47,7 +47,7 @@ describe('getPriorityInfo', () => {
 
 describe('getEventTypeLabel', () => {
   it('chuyen doi eventType sang tieng Viet chinh xac', () => {
-    expect(getEventTypeLabel('FIRE_SMOKE_DETECTED')).toBe('Phát hiện khói / lửa');
+    expect(getEventTypeLabel('FIRE_SMOKE_DETECTED')).toBe('Phát hiện lửa');
     expect(getEventTypeLabel('FALL_DETECTED')).toBe('Cảnh báo té ngã');
     expect(getEventTypeLabel('UNKNOWN_PERSON')).toBe('Phát hiện người lạ');
   });

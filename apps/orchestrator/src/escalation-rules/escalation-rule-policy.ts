@@ -18,7 +18,7 @@ export const ALL_ESCALATION_EVENT_TYPES: readonly EventType[] = [
 ] as const;
 
 export const EVENT_TYPE_DISPLAY_NAMES: Record<EventType, string> = {
-  FIRE_SMOKE_DETECTED: 'Phát hiện cháy / khói',
+  FIRE_SMOKE_DETECTED: 'Phát hiện lửa',
   FALL_DETECTED: 'Phát hiện té ngã',
   RESTRICTED_ZONE: 'Xâm nhập vùng cấm',
   UNKNOWN_PERSON: 'Người lạ mặt',

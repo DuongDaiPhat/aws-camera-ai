@@ -6,7 +6,7 @@ import type { EscalationRule } from '@/lib/escalation-rules-client';
 describe('EscalationRuleCard component', () => {
   const mockAlertRule: EscalationRule = {
     eventType: 'FIRE_SMOKE_DETECTED',
-    displayName: 'Phát hiện cháy / khói',
+    displayName: 'Phát hiện lửa',
     priority: 'P0',
     tLow: 0.5,
     tHigh: 0.7,
@@ -131,7 +131,7 @@ describe('EscalationRuleCard component', () => {
       />,
     );
 
-    expect(html).toContain('Phát hiện cháy / khói');
+    expect(html).toContain('Phát hiện lửa');
     expect(html).toContain('FIRE_SMOKE_DETECTED');
     expect(html).toContain('Ưu tiên P0');
     expect(html).toContain('v1');

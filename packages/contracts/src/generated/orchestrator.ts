@@ -970,6 +970,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/internal/fire/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Inspect M3 frame freshness, queue drops, MQTT and model readiness
+     * @description Read-only diagnostics protected by the internal service token. Counters reset on backend restart. Does not create an event or change detector state.
+     */
+    get: operations['getFireHealth'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/internal/events/{eventId}/ai-result': {
     parameters: {
       query?: never;
@@ -1000,7 +1020,7 @@ export interface paths {
      *     OtherAiResultSubmission remains shared with other AI modules.
      *
      *
-     *     US-18: M3_FIRE submits one confirmed FIRE_SMOKE_DETECTED result, priority P0, on a separately persisted camera incident; detectedAt=confirmedAt. One active detector episode per camera survives source/AI restarts and event resolution. Use FireResultMetadata; never submit single-frame candidates as success.
+     *     US-18: M3_FIRE submits one confirmed fire-only result, priority P0, on a separately persisted camera incident; detectedAt=confirmedAt. FIRE_SMOKE_DETECTED is the retained storage identifier, not permission to submit smoke. One active detector episode per camera survives source/AI restarts and event resolution. Use FireResultMetadata; never submit smoke or single-frame candidates as success.
      *     US-20: M5 wellness runs in the orchestrator without inference or this callback. Its resident request, deadline and caregiver routing use a scoped scheduler policy; the shared generic callback wire format remains unchanged.
      */
     post: operations['submitAiResult'];
@@ -1821,7 +1841,7 @@ export interface components {
       tHigh?: number | null;
       /** @description Het thoi gian nay khong co phan hoi -> ESCALATED (FR-ESC-02). */
       tWaitSeconds: number;
-      /** @description US-19 — chay/khoi vao thang NOTIFIED bat ke confidence. */
+      /** @description US-19 — canh bao lua vao thang NOTIFIED bat ke confidence. */
       skipLoggedOnly?: boolean;
       notifyChannels?: components['schemas']['NotificationChannel'][];
       escalateChannels?: components['schemas']['NotificationChannel'][];
@@ -1957,6 +1977,37 @@ export interface components {
       /** Format: email */
       email?: string;
       priorityOrder: number;
+    };
+    FireHealth: {
+      /** @enum {string} */
+      status: 'DISABLED' | 'READY' | 'DEGRADED';
+      /** Format: uuid */
+      instanceId: string;
+      /** Format: date-time */
+      checkedAt: string;
+      mqttConnected: boolean;
+      databaseAvailable: boolean;
+      camerasTruncated: boolean;
+      staleAfterSeconds: number;
+      /** @description Process-lifetime receivedFrames, invalidFrames, staleFrames, queueDroppedFrames, capacityDroppedFrames, processedFrames and processingErrors. */
+      counters: {
+        [key: string]: number;
+      };
+      cameras: components['schemas']['FireCameraHealth'][];
+      ai: components['schemas']['FireRuntimeHealth'] | null;
+    };
+    FireCameraHealth: {
+      slug: string;
+      /** @enum {string} */
+      status: 'NO_FRAMES' | 'STARTING' | 'STALE' | 'READY' | 'ERROR';
+      /** Format: date-time */
+      lastFrameAt: string | null;
+      /** Format: date-time */
+      lastProcessedAt: string | null;
+      lastErrorCode: string | null;
+      receivedFrames: number;
+      processedFrames: number;
+      processingErrors: number;
     };
     AiResultRequest:
       | components['schemas']['FaceResultSubmission']
@@ -2284,7 +2335,7 @@ export interface components {
       /** @description False for duplicate or out-of-order observations. Such evidence cannot overwrite newer presence. */
       presenceUpdated: boolean;
     };
-    /** @description US-18 documentation-only evidence schema for new M3_FIRE producers. OtherAiResultItem.metadata stays generic. Validate aligned unique frame IDs/timestamps, ordered span <= windowSeconds, every gap <= maxFrameGapSeconds, scores >= thresholdUsed and incident score fire-temporal-min-v1 before submission. No raw image, credentials or RTSP URL. */
+    /** @description US-18 documentation-only evidence schema for new M3_FIRE producers. OtherAiResultItem.metadata stays generic. Validate aligned unique frame IDs/timestamps, ordered span <= windowSeconds, every gap <= maxFrameGapSeconds, scores >= thresholdUsed and incident score fire-only-temporal-min-v1 before submission. No raw image, credentials or RTSP URL. */
     FireResultMetadata: {
       /** Format: uuid */
       cameraId: string;
@@ -2304,11 +2355,11 @@ export interface components {
       maxFrameGapSeconds: number;
       thresholdUsed: number;
       /** @enum {string} */
-      incidentConfidencePolicyVersion: 'fire-temporal-min-v1';
-      labels: ('fire' | 'smoke')[];
+      incidentConfidencePolicyVersion: 'fire-only-temporal-min-v1';
+      labels: 'fire'[];
       detections: {
         /** @enum {string} */
-        label: 'fire' | 'smoke';
+        label: 'fire';
         confidence: number;
         boundingBox: {
           x: number;
@@ -2317,6 +2368,25 @@ export interface components {
           height: number;
         };
       }[];
+    };
+    FireRuntimeHealth: {
+      /** @enum {string} */
+      status: 'DISABLED' | 'STARTING' | 'READY' | 'DEGRADED';
+      /** Format: uuid */
+      instanceId: string;
+      modelVersion: string;
+      modelLoaded: boolean;
+      requestCount: number;
+      errorCount: number;
+      staleFrameCount: number;
+      capacityRejectedCount: number;
+      inFlight: number;
+      /** Format: date-time */
+      lastRequestAt: string | null;
+      /** Format: date-time */
+      lastSuccessAt: string | null;
+      lastErrorCode: string | null;
+      lastDurationMs: number | null;
     };
   };
   responses: {
@@ -4247,6 +4317,27 @@ export interface operations {
         content?: never;
       };
       404: components['responses']['NotFound'];
+    };
+  };
+  getFireHealth: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Runtime diagnostics; READY requires fresh successful observations for every listed enabled camera. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FireHealth'];
+        };
+      };
+      401: components['responses']['Unauthorized'];
     };
   };
   submitAiResult: {
