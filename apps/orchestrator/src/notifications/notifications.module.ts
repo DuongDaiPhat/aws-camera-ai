@@ -17,6 +17,8 @@ import { TelegramWebhookController } from './telegram/telegram-webhook.controlle
 import { TelegramWebhookGuard } from './telegram/telegram-webhook.guard';
 import { TelegramWebhookRepository } from './telegram/telegram-webhook.repository';
 import { TelegramWebhookService } from './telegram/telegram-webhook.service';
+import { ALERT_IMAGE_RENDERER } from './alert-image-renderer.interface';
+import { FfmpegAlertImageRenderer } from './ffmpeg-alert-image.renderer';
 
 @Module({
   imports: [EscalationModule, EventsModule, WellnessModule],
@@ -29,6 +31,7 @@ import { TelegramWebhookService } from './telegram/telegram-webhook.service';
     NotificationsRepository,
     NotificationRetryWorker,
     TelegramAdapter,
+    { provide: ALERT_IMAGE_RENDERER, useClass: FfmpegAlertImageRenderer },
     TelegramLinkRepository,
     TelegramLinkService,
     TelegramWebhookGuard,

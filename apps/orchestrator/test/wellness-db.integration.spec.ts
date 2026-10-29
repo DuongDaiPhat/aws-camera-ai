@@ -154,11 +154,17 @@ describe('US20 real PostgreSQL + HTTP delivery + API acceptance', () => {
     const database = new DatabaseService(pool);
     notifications = new NotificationsRepository(database);
     const telegram = new TelegramAdapter(config);
-    worker = new NotificationRetryWorker(config, notifications, telegram, {
-      download: () => {
-        throw new Error('M5 must not request an image');
-      },
-    } as unknown as IStorageService);
+    worker = new NotificationRetryWorker(
+      config,
+      notifications,
+      telegram,
+      {
+        download: () => {
+          throw new Error('M5 must not request an image');
+        },
+      } as unknown as IStorageService,
+      { render: async (): Promise<null> => null },
+    );
     callbacks = new TelegramCallbackService(
       new TelegramWorkRepository(database),
       new EscalationEngineService(

@@ -11,9 +11,9 @@ import time
 import uuid
 from contextlib import suppress
 
-MAX_OBJECT_AGE_SECONDS = float(
-    os.getenv("FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS", "0.25")
-)
+LOGGER = logging.getLogger(__name__)
+
+MAX_OBJECT_AGE_SECONDS = float(os.getenv("FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS", "0.25"))
 FRIGATE_POSE_FRAMES_ENABLED = os.getenv("FRIGATE_POSE_FRAMES_ENABLED", "false").lower() in (
     "true",
     "1",
@@ -47,7 +47,12 @@ def normalize_box(box: list[float], frame_w: int = 1280, frame_h: int = 720) -> 
     y = max(0.0, min(1.0, y))
     w = max(0.0, min(1.0 - x, w))
     h = max(0.0, min(1.0 - y, h))
-    return {"x": round(x, 4), "y": round(y, 4), "width": round(w, 4), "height": round(h, 4)}
+    return {
+        "x": round(x, 4),
+        "y": round(y, 4),
+        "width": round(w, 4),
+        "height": round(h, 4),
+    }
 
 
 def pack_pose_frame_envelope(header: dict, jpeg_bytes: bytes) -> bytes:
@@ -136,8 +141,7 @@ def frame_payload(payload, max_age=MAX_OBJECT_AGE_SECONDS):
                     "score": obj["score"],
                     "box": obj["box"],
                     "observedAt": obs_time,
-                    "isMoving": obj.get("motionless_count") == 0
-                    and obj.get("stationary") is False,
+                    "isMoving": obj.get("motionless_count") == 0 and obj.get("stationary") is False,
                     "sourceSessionId": f"{camera}:{float(obj['start_time']):.6f}"
                     if isinstance(obj.get("start_time"), (int, float))
                     else None,
@@ -151,11 +155,7 @@ def frame_payload(payload, max_age=MAX_OBJECT_AGE_SECONDS):
             )
         elif obj.get("label") == "person":
             obj_time = obj.get("frame_time")
-            age_ms = (
-                (frame_time - obj_time) * 1000
-                if isinstance(obj_time, (int, float))
-                else -1
-            )
+            age_ms = (frame_time - obj_time) * 1000 if isinstance(obj_time, (int, float)) else -1
             print(
                 f"[PERSON_DEBUG][BRIDGE] camera={camera} objectId={obj.get('id')} "
                 f"frameTime={frame_time:.3f} observedAt={obj_time} "
@@ -203,7 +203,7 @@ class PoseFramePublisher:
             try:
                 self.queue.put_nowait(packet)
             except queue.Full:
-                logging.debug("Pose queue full; frame dropped")
+                LOGGER.debug("Pose queue full; frame dropped")
 
     def close(self):
         self.stopped.set()
@@ -239,7 +239,7 @@ class PoseFramePublisher:
                 header["frameId"] = f"{frame_name}:{metadata['frameTime']}"
                 ok, jpeg = cv2.imencode(".jpg", image)
                 if not ok:
-                    logging.warning("Pose JPEG encode failed")
+                    LOGGER.warning("Pose JPEG encode failed")
                     continue
                 if time.time() - metadata["frameTime"] > 1.0:
                     continue
@@ -250,7 +250,7 @@ class PoseFramePublisher:
                     retain=False,
                 )
             except (ValueError, KeyError, OSError, cv2.error):
-                logging.exception("Pose encode/publish failed")
+                LOGGER.exception("Pose encode/publish failed")
 
 
 def offer_pose_capture(publisher, frame_manager, config, metadata, frame_name, next_pose_time):
@@ -271,7 +271,7 @@ def offer_pose_capture(publisher, frame_manager, config, metadata, frame_name, n
     }
     width, height = detect.get("width"), detect.get("height")
     if not isinstance(width, int) or not isinstance(height, int):
-        logging.warning("Pose frame skipped: unknown detect shape for %s", camera)
+        LOGGER.warning("Pose frame skipped: unknown detect shape for %s", camera)
         return
     frame = read_timestamped_frame(frame_manager, frame_name, width, height)
     if frame is not None:
@@ -284,6 +284,7 @@ def main():
     import paho.mqtt.client as mqtt
     import yaml
     import zmq
+    from fire_publisher import FireFramePublisher, FirePublisherSettings
 
     with open("/config/config.yml", encoding="utf-8") as config_file:
         full_config = yaml.safe_load(os.path.expandvars(config_file.read()))
@@ -302,6 +303,16 @@ def main():
         frame_manager = SharedMemoryFrameManager()
         pose_publisher = PoseFramePublisher(client)
         pose_publisher.start()
+    fire_settings = FirePublisherSettings.from_env()
+    if fire_settings.enabled:
+        from frigate.util.image import SharedMemoryFrameManager
+
+        fire_manager = SharedMemoryFrameManager()
+    else:
+        fire_manager = None
+    fire_publisher = FireFramePublisher(
+        fire_settings, full_config.get("cameras", {}), fire_manager, client
+    )
     context = zmq.Context()
     socket = context.socket(zmq.SUB)
     socket.setsockopt(zmq.RCVHWM, 32)
@@ -344,11 +355,13 @@ def main():
                         raw_payload[1],
                         next_pose_time,
                     )
+                fire_publisher.enqueue(raw_payload)
             except (ValueError, TypeError, KeyError):
                 print("Invalid Frigate frame metadata skipped", flush=True)
     finally:
         if pose_publisher:
             pose_publisher.close()
+        fire_publisher.close()
         socket.close(linger=0)
         context.term()
         client.loop_stop()

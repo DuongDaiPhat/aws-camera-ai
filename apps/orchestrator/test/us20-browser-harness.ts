@@ -161,6 +161,7 @@ async function main(): Promise<void> {
     new NotificationsRepository(new DatabaseService(pool)),
     new TelegramAdapter(config),
     {} as IStorageService,
+    { render: async (): Promise<null> => null },
   ).runOnce();
   process.stdout.write('US20 browser fixture ready: API 55434; local provider 55435.\n');
   const stop = async () => {

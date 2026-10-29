@@ -18,7 +18,7 @@ export interface UseEventStatsResult {
  * Số liệu tổng hợp cho các thẻ trên đầu dashboard.
  * `refreshToken` cho phép màn hình ép tải lại ngay khi có sự kiện mới qua SSE.
  */
-export function useEventStats(refreshToken: number = 0): UseEventStatsResult {
+export function useEventStats(refreshToken: number | string = 0): UseEventStatsResult {
   const [stats, setStats] = useState<EventStats | null>(null);
   const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

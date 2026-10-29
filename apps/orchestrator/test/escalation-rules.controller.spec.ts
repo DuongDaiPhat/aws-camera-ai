@@ -15,7 +15,7 @@ describe('EscalationRulesController & RolesGuard (US-15)', () => {
     effectiveHighWaitSeconds: 30,
     highWaitSeconds: null,
     eventType: 'FIRE_SMOKE_DETECTED',
-    displayName: 'Phát hiện cháy / khói',
+    displayName: 'Phát hiện lửa',
     priority: 'P0',
     tLow: 0.5,
     tHigh: 0.7,

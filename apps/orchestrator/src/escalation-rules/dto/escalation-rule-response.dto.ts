@@ -23,7 +23,7 @@ export class EscalationRuleDto {
   })
   eventType!: EventType;
 
-  @ApiProperty({ example: 'Phát hiện cháy / khói' })
+  @ApiProperty({ example: 'Phát hiện lửa' })
   displayName!: string;
 
   @ApiProperty({ example: 'P0', enum: ['P0', 'P1', 'P2', 'P3'] })

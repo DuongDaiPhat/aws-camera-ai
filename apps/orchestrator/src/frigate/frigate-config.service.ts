@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import YAML from 'yaml';
 import type { CameraAggregateRecord } from '../cameras/cameras.types';
 import type { CameraFrigateSettingsRecord } from '../cameras/cameras.types';
@@ -19,6 +20,23 @@ export interface CameraFrigateData {
 @Injectable()
 export class FrigateConfigService {
   private readonly logger = new Logger(FrigateConfigService.name);
+  constructor(private readonly config: ConfigService) {}
+
+  private fireRecording(
+    record: Record<string, unknown>,
+    enabled: boolean,
+  ): Record<string, unknown> {
+    if (!enabled || this.config.get<string>('M3_ENABLED') !== 'true') return record;
+    const days = Number(this.config.get<string | number>('FIRE_CONTINUOUS_RECORDING_DAYS', 1));
+    if (!Number.isSafeInteger(days) || days < 1 || days > 30)
+      throw new Error('Invalid FIRE_CONTINUOUS_RECORDING_DAYS');
+    const existing = record.continuous;
+    const continuous =
+      existing && typeof existing === 'object' && !Array.isArray(existing) ? existing : {};
+    const priorDays =
+      'days' in continuous && typeof continuous.days === 'number' ? continuous.days : 0;
+    return { ...record, continuous: { ...continuous, days: Math.max(days, priorDays) } };
+  }
 
   generateUpdatedConfig(rawYaml: string, data: CameraFrigateData): string {
     const { camera, settings, zones = [], mediamtxRtspBaseUrl = 'rtsp://mediamtx:8554' } = data;
@@ -98,7 +116,10 @@ export class FrigateConfigService {
         bounding_box: settings?.snapshot_bounding_box ?? snapshots.bounding_box ?? true,
       },
       record: {
-        ...recordOptions,
+        ...this.fireRecording(
+          recordOptions,
+          settings?.recording_enabled ?? record.enabled !== false,
+        ),
         enabled: settings?.recording_enabled ?? record.enabled ?? true,
         detections: {
           ...detections,
@@ -154,6 +175,7 @@ export class FrigateConfigService {
       'snapshots.enabled',
       'snapshots.bounding_box',
       'record.enabled',
+      'record.continuous.days',
       'record.detections.retain.days',
       'record.alerts.retain.days',
     ].every((path) => {

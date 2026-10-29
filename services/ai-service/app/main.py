@@ -13,11 +13,12 @@ import asyncio
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager, suppress
+from datetime import UTC, datetime
 
 from fastapi import FastAPI
 
 from app.config import get_settings
-from app.routers import face, health, pose
+from app.routers import face, fire, health, pose
 from app.services.fall_tracker_registry import FallTrackerRegistry
 
 settings = get_settings()
@@ -32,15 +33,25 @@ async def sweep_pose_tracks() -> None:
         await asyncio.to_thread(FallTrackerRegistry.get_instance().sweep_all)
 
 
+async def sweep_fire_states() -> None:
+    while True:
+        await asyncio.sleep(get_settings().fire_state_sweep_interval_ms / 1000)
+        fire.get_fire_service().tracker.sweep(datetime.now(UTC))
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    task = asyncio.create_task(sweep_pose_tracks())
+    tasks = [asyncio.create_task(sweep_pose_tracks())]
+    if settings.m3_enabled:
+        tasks.append(asyncio.create_task(sweep_fire_states()))
     try:
         yield
     finally:
-        task.cancel()
-        with suppress(asyncio.CancelledError):
-            await task
+        for task in tasks:
+            task.cancel()
+        for task in tasks:
+            with suppress(asyncio.CancelledError):
+                await task
 
 
 app = FastAPI(
@@ -55,3 +66,4 @@ app = FastAPI(
 app.include_router(health.router)
 app.include_router(face.router)
 app.include_router(pose.router)
+app.include_router(fire.router)

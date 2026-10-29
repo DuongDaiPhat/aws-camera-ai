@@ -10,7 +10,9 @@ import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
 import { TELEGRAM_CHANNEL, type TelegramChannel } from './notification-channel.interface';
 import { NotificationsRepository, type TelegramNotificationJob } from './notifications.repository';
 import { TelegramApiError } from './telegram/telegram-api.error';
+import { ALERT_IMAGE_RENDERER, type IAlertImageRenderer } from './alert-image-renderer.interface';
 import { buildTelegramAlert, buildTelegramButtons } from './telegram/telegram-message-builder';
+import { telegramDeliveryScope, type TelegramDeliveryScope } from './telegram-delivery-scope';
 
 const RETRY_DELAYS_SECONDS = [2, 4, 8];
 const MAX_TELEGRAM_PHOTO_BYTES = 10_000_000;
@@ -38,14 +40,17 @@ export class NotificationRetryWorker implements OnModuleInit, OnModuleDestroy {
   private readonly retryDelays: number[];
   private interval: ReturnType<typeof setInterval> | null = null;
   private running = false;
+  private readonly deliveryScope: TelegramDeliveryScope | null;
 
   constructor(
     config: ConfigService,
     private readonly repository: NotificationsRepository,
     @Inject(TELEGRAM_CHANNEL) private readonly telegram: TelegramChannel,
     @Inject(STORAGE_SERVICE) private readonly storage: IStorageService,
+    @Inject(ALERT_IMAGE_RENDERER) private readonly imageRenderer: IAlertImageRenderer,
   ) {
     this.enabled = config.get<string>('TELEGRAM_ENABLED') === 'true';
+    this.deliveryScope = telegramDeliveryScope(config);
     this.pollMs = this.positiveInteger(config, 'TELEGRAM_POLL_MS', 3000);
     this.leaseSeconds = this.positiveInteger(config, 'TELEGRAM_LEASE_SECONDS', 30);
     this.batchSize = this.positiveInteger(config, 'TELEGRAM_BATCH_SIZE', 20);
@@ -77,16 +82,20 @@ export class NotificationRetryWorker implements OnModuleInit, OnModuleDestroy {
   }
 
   async runOnce(): Promise<void> {
-    if (!this.enabled || this.running) return;
+    if (
+      !this.enabled ||
+      this.running ||
+      (this.deliveryScope && Date.now() >= Date.parse(this.deliveryScope.until))
+    )
+      return;
     this.running = true;
     try {
       // Claim ngay trước HTTP để job không mất lease trong lúc còn chờ ở bộ nhớ.
       for (let index = 0; index < this.batchSize; index += 1) {
-        const [job] = await this.repository.claimTelegramBatch(
-          1,
-          this.leaseSeconds,
-          this.retryDelays.length + 1,
-        );
+        const args: [number, number, number] = [1, this.leaseSeconds, this.retryDelays.length + 1];
+        const [job] = this.deliveryScope
+          ? await this.repository.claimTelegramBatch(...args, this.deliveryScope)
+          : await this.repository.claimTelegramBatch(...args);
         if (!job) break;
         await this.deliver(job);
       }
@@ -113,13 +122,14 @@ export class NotificationRetryWorker implements OnModuleInit, OnModuleDestroy {
       timezone: job.timezone,
     };
     try {
-      const photo = job.eventType === 'WELLNESS_TIMEOUT' ? null : await this.loadSnapshot(job);
+      const snapshot = job.eventType === 'WELLNESS_TIMEOUT' ? null : await this.loadSnapshot(job);
+      const photo = snapshot?.bytes ?? null;
       if (!(await this.repository.eventAllowsDelivery(job.eventId, job.escalationLevel))) {
         await this.repository.markSkipped(job);
         return;
       }
       const buttons = buildTelegramButtons(job.id);
-      const text = buildTelegramAlert(event, !photo);
+      const text = buildTelegramAlert({ ...event, snapshotAnnotated: snapshot?.annotated }, !photo);
       const message = photo
         ? await this.telegram.sendPhoto(job.chatId, photo, text, buttons)
         : await this.telegram.sendMessage(job.chatId, text, buttons);
@@ -168,7 +178,9 @@ export class NotificationRetryWorker implements OnModuleInit, OnModuleDestroy {
     );
   }
 
-  private async loadSnapshot(job: TelegramNotificationJob): Promise<Buffer | null> {
+  private async loadSnapshot(
+    job: TelegramNotificationJob,
+  ): Promise<{ bytes: Buffer; annotated?: boolean } | null> {
     for (let attempt = 0; attempt < 2; attempt += 1) {
       const snapshot =
         attempt === 0 && job.snapshotKey && job.snapshotProvider
@@ -177,7 +189,8 @@ export class NotificationRetryWorker implements OnModuleInit, OnModuleDestroy {
       if (snapshot?.provider === this.storageProvider) {
         try {
           const photo = await this.downloadWithinBudget(snapshot.key);
-          if (photo.length <= MAX_TELEGRAM_PHOTO_BYTES) return photo;
+          if (photo.length <= MAX_TELEGRAM_PHOTO_BYTES)
+            return this.prepareSnapshot(job, snapshot.key, photo);
         } catch {
           // The object may not be available immediately after its metadata is committed.
         }
@@ -188,6 +201,24 @@ export class NotificationRetryWorker implements OnModuleInit, OnModuleDestroy {
       `Gửi cảnh báo không có ảnh eventId=${job.eventId} correlationId=${job.correlationId}`,
     );
     return null;
+  }
+
+  private async prepareSnapshot(
+    job: TelegramNotificationJob,
+    key: string,
+    bytes: Buffer,
+  ): Promise<{ bytes: Buffer; annotated?: boolean }> {
+    if (job.eventType !== 'FIRE_SMOKE_DETECTED') return { bytes };
+    try {
+      const metadata = await this.repository.findFireSnapshotMetadata(job.eventId, key);
+      const annotated = await this.imageRenderer.render(bytes, metadata);
+      if (annotated) return { bytes: annotated, annotated: true };
+    } catch {
+      this.logger.warn(
+        `Fire image annotation unavailable eventId=${job.eventId} correlationId=${job.correlationId}`,
+      );
+    }
+    return { bytes, annotated: false };
   }
 
   private positiveInteger(config: ConfigService, key: string, fallback: number): number {

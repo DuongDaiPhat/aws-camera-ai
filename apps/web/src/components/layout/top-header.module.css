@@ -51,6 +51,28 @@
   box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
 }
 
+.statusWarning {
+  color: #991b1b;
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
+.statusWarning .greenDot {
+  background-color: #ef4444;
+  box-shadow: none;
+}
+
+.statusUnknown {
+  color: #475569;
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.statusUnknown .greenDot {
+  background-color: #94a3b8;
+  box-shadow: none;
+}
+
 .rightSection {
   display: flex;
   align-items: center;

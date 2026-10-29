@@ -20,6 +20,7 @@ import { FaceRecognitionModule } from './face-recognition/face-recognition.modul
 import { WellnessModule } from './wellness/wellness.module';
 import { FallDetectionModule } from './fall-detection/fall-detection.module';
 import { BullModule } from '@nestjs/bullmq';
+import { FireModule } from './fire/fire.module';
 
 /**
  * Module goc.
@@ -62,6 +63,7 @@ import { BullModule } from '@nestjs/bullmq';
     FaceRecognitionModule,
     WellnessModule,
     FallDetectionModule,
+    FireModule,
   ],
 })
 export class AppModule {}

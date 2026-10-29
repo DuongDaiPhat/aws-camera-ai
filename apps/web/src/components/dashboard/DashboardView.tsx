@@ -1,6 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useFireAttention } from '@/hooks/useFireAttention';
+import { FireAttention } from '@/components/events/FireAttention';
+import { fireReviewKey } from '@/lib/fire-alerts';
 import { KnownFacesView } from '@/components/known-faces/KnownFacesView';
 import type { UIEventItem } from '@/types';
 import { useAuth, useEvents, useEventStats } from '@/hooks';
@@ -60,24 +63,114 @@ function EventsListSection({
   );
 }
 
-export function DashboardView() {
-  const { user, handleLogout } = useAuth();
+function EventHistory({
+  state,
+  metrics,
+  onViewDetail,
+}: {
+  state: ReturnType<typeof useEvents>;
+  metrics: ReturnType<typeof useEventStats>;
+  onViewDetail: (event: UIEventItem) => void;
+}) {
   const {
-    events,
-    filteredEvents,
-    paginatedEvents,
-    currentPage,
-    setCurrentPage,
-    pageSize,
-    setPageSize,
-    totalPages,
-    totalFilteredItems,
+    activeFilterTab,
+    setActiveFilterTab,
     counts,
     isLoading,
     error,
+    paginatedEvents,
+    resetFilters,
     reload,
-    activeFilterTab,
-    setActiveFilterTab,
+    filteredEvents,
+    currentPage,
+    totalPages,
+    totalFilteredItems,
+    pageSize,
+    setCurrentPage,
+    setPageSize,
+  } = state;
+  const { stats, isLoading: isStatsLoading, error: statsError } = metrics;
+  return (
+    <>
+      <MetricCards stats={stats} isLoading={isStatsLoading} error={statsError} />
+
+      <section className={styles.eventsSection} aria-labelledby="events-title">
+        <div className={styles.sectionHeader}>
+          <div className={styles.sectionTitles}>
+            <h2 id="events-title" className={styles.sectionTitle}>
+              Sự kiện gần đây
+            </h2>
+            <p className={styles.sectionSubtitle}>
+              Những hoạt động mới nhất được camera và cảm biến ghi nhận trong thời gian thực.
+            </p>
+          </div>
+
+          <EventFilter
+            activeTab={activeFilterTab}
+            onSelectTab={setActiveFilterTab}
+            counts={counts}
+          />
+        </div>
+
+        <EventsListSection
+          isLoading={isLoading}
+          error={error}
+          events={paginatedEvents}
+          onViewDetail={onViewDetail}
+          onResetFilter={resetFilters}
+          onRetry={reload}
+        />
+
+        {!isLoading && !error && filteredEvents.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalFilteredItems}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+          />
+        )}
+      </section>
+    </>
+  );
+}
+
+function DashboardEventDetails({
+  event,
+  actions,
+  onClose,
+}: {
+  event: UIEventItem | null;
+  actions: ReturnType<typeof useEvents>;
+  onClose: () => void;
+}) {
+  const after =
+    (action: (id: string, note?: string) => Promise<void>) => async (id: string, note?: string) => {
+      await action(id, note);
+      onClose();
+    };
+  return (
+    <EventDetailModal
+      event={event}
+      onClose={onClose}
+      onConfirmOk={after(actions.confirmOk)}
+      onConfirmHelp={after(actions.confirmHelp)}
+      onCloseEmergency={after(actions.closeEmergency)}
+      onToggleFalseAlarm={(id) => {
+        actions.toggleFalseAlarm(id);
+        onClose();
+      }}
+    />
+  );
+}
+
+export function DashboardView() {
+  const { user, handleLogout } = useAuth();
+  const eventState = useEvents();
+  const {
+    events,
+    counts,
     selectedZone,
     setSelectedZone,
     liveNoticeText,
@@ -85,126 +178,109 @@ export function DashboardView() {
     confirmOk,
     confirmHelp,
     closeEmergency,
-    toggleFalseAlarm,
-    resetFilters,
-  } = useEvents();
+  } = eventState;
+  const attention = useFireAttention(events, user?.id);
 
-  // Sự kiện mới tới qua SSE làm số liệu cũ đi ngay, nên dùng số sự kiện đang giữ
-  // làm mốc để tải lại các thẻ tổng hợp.
-  const { stats, isLoading: isStatsLoading, error: statsError } = useEventStats(events.length);
+  // Telegram confirmations update an existing event without changing the list length.
+  const statsRefreshToken = events.map((event) => `${event.id}:${event.status}`).join('|');
+  const metrics = useEventStats(statsRefreshToken);
+  const { stats, isLoading: isStatsLoading, error: statsError } = metrics;
 
   const [activeNav, setActiveNav] = useState('dashboard');
   const [selectedEventForModal, setSelectedEventForModal] = useState<UIEventItem | null>(null);
+  const attentionId = attention.event?.id;
+  useEffect(() => {
+    if (attentionId) setSelectedEventForModal(null);
+  }, [attentionId]);
+  const selectedEvent = selectedEventForModal
+    ? (events.find((event) => event.id === selectedEventForModal.id) ?? selectedEventForModal)
+    : null;
 
   return (
-    <div className={styles.layoutWrapper}>
-      <Sidebar
-        user={user}
-        activeNav={activeNav}
-        onSelectNav={setActiveNav}
-        onLogout={handleLogout}
-        unresolvedEventCount={stats?.pendingCount ?? counts.urgent}
-        onlineCameraCount={stats?.cameraOnlineCount ?? 0}
-      />
+    <>
+      <div
+        className={styles.layoutWrapper}
+        ref={(node) => {
+          if (node) node.inert = Boolean(attention.event);
+        }}
+        aria-hidden={attention.event ? true : undefined}
+      >
+        <Sidebar
+          user={user}
+          activeNav={activeNav}
+          onSelectNav={setActiveNav}
+          onLogout={handleLogout}
+          unresolvedEventCount={stats?.pendingCount ?? counts.urgent}
+          onlineCameraCount={stats?.cameraOnlineCount ?? 0}
+        />
 
-      <div className={styles.mainContent}>
-        {(activeNav === 'dashboard' || activeNav === 'events') && (
-          <TopHeader
-            userName={user?.fullName || 'Đức Anh'}
-            selectedZone={selectedZone}
-            onSelectZone={setSelectedZone}
-            onSimulateNewEvent={simulateNewEvent}
-          />
-        )}
-
-        <main className={styles.workspace}>
-          {activeNav === 'wellness' ? (
-            <WellnessView user={user} />
-          ) : activeNav === 'cameras' ? (
-            <CameraView user={user} />
-          ) : activeNav === 'settings' ? (
-            <SettingsView user={user} />
-          ) : activeNav === 'known-faces' ? (
-            <KnownFacesView isAdmin={user?.role === 'ADMIN'} />
-          ) : activeNav === 'zones' ? (
-            <ZonesView user={user} />
-          ) : (
-            <>
-              {liveNoticeText && (
-                <div className={styles.newEventNotice} role="status">
-                  <span>{liveNoticeText}</span>
-                  <small>Vừa chèn lên đầu danh sách</small>
-                </div>
-              )}
-
-              <MetricCards stats={stats} isLoading={isStatsLoading} error={statsError} />
-
-              <section className={styles.eventsSection} aria-labelledby="events-title">
-                <div className={styles.sectionHeader}>
-                  <div className={styles.sectionTitles}>
-                    <h2 id="events-title" className={styles.sectionTitle}>
-                      Sự kiện gần đây
-                    </h2>
-                    <p className={styles.sectionSubtitle}>
-                      Những hoạt động mới nhất được camera và cảm biến ghi nhận trong thời gian
-                      thực.
-                    </p>
-                  </div>
-
-                  <EventFilter
-                    activeTab={activeFilterTab}
-                    onSelectTab={setActiveFilterTab}
-                    counts={counts}
-                  />
-                </div>
-
-                <EventsListSection
-                  isLoading={isLoading}
-                  error={error}
-                  events={paginatedEvents}
-                  onViewDetail={setSelectedEventForModal}
-                  onResetFilter={resetFilters}
-                  onRetry={reload}
-                />
-
-                {!isLoading && !error && filteredEvents.length > 0 && (
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalItems={totalFilteredItems}
-                    pageSize={pageSize}
-                    onPageChange={setCurrentPage}
-                    onPageSizeChange={setPageSize}
-                  />
-                )}
-              </section>
-            </>
+        <div className={styles.mainContent}>
+          {(activeNav === 'dashboard' || activeNav === 'events') && (
+            <TopHeader
+              userName={user?.fullName || 'Đức Anh'}
+              selectedZone={selectedZone}
+              onSelectZone={setSelectedZone}
+              onSimulateNewEvent={simulateNewEvent}
+              pendingCount={isStatsLoading || statsError ? null : (stats?.pendingCount ?? null)}
+            />
           )}
-        </main>
-      </div>
 
-      {selectedEventForModal && (
-        <EventDetailModal
-          event={selectedEventForModal}
+          <main className={styles.workspace}>
+            {activeNav === 'wellness' ? (
+              <WellnessView user={user} />
+            ) : activeNav === 'cameras' ? (
+              <CameraView user={user} />
+            ) : activeNav === 'settings' ? (
+              <SettingsView user={user} />
+            ) : activeNav === 'known-faces' ? (
+              <KnownFacesView isAdmin={user?.role === 'ADMIN'} />
+            ) : activeNav === 'zones' ? (
+              <ZonesView user={user} />
+            ) : (
+              <>
+                {liveNoticeText && (
+                  <div className={styles.newEventNotice} role="status">
+                    <span>{liveNoticeText}</span>
+                    <small>Vừa chèn lên đầu danh sách</small>
+                  </div>
+                )}
+                {attention.error && (
+                  <div className={styles.newEventNotice} role="alert">
+                    {attention.error}{' '}
+                    <button type="button" onClick={attention.retry}>
+                      Thử lại
+                    </button>
+                  </div>
+                )}
+
+                <EventHistory
+                  state={eventState}
+                  metrics={metrics}
+                  onViewDetail={setSelectedEventForModal}
+                />
+              </>
+            )}
+          </main>
+        </div>
+
+        <DashboardEventDetails
+          event={attention.event ? null : selectedEvent}
+          actions={eventState}
           onClose={() => setSelectedEventForModal(null)}
-          onConfirmOk={async (id, note) => {
-            await confirmOk(id, note);
-            setSelectedEventForModal(null);
+        />
+      </div>
+      {attention.event && (
+        <FireAttention
+          key={fireReviewKey(attention.event)}
+          event={attention.event}
+          onReviewed={() => {
+            if (attention.event) attention.review(attention.event.id);
           }}
-          onConfirmHelp={async (id, note) => {
-            await confirmHelp(id, note);
-            setSelectedEventForModal(null);
-          }}
-          onCloseEmergency={async (id, note) => {
-            await closeEmergency(id, note);
-            setSelectedEventForModal(null);
-          }}
-          onToggleFalseAlarm={(id) => {
-            toggleFalseAlarm(id);
-            setSelectedEventForModal(null);
-          }}
+          onConfirmOk={confirmOk}
+          onConfirmHelp={confirmHelp}
+          onCloseEmergency={closeEmergency}
         />
       )}
-    </div>
+    </>
   );
 }
