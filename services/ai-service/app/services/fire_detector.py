@@ -20,6 +20,7 @@ LOGGER = logging.getLogger(__name__)
 INPUT_SIZE = 640
 MAX_DETECTIONS = 100
 CLASS_LABELS = {0: "fire", 1: "smoke"}
+FIRE_CLASS_ID = 0
 
 
 class FireDetectorError(Exception):
@@ -66,9 +67,7 @@ class FireDetector:
                 self._validate_session(session)
             except Exception as error:
                 LOGGER.error("Fire model unavailable: %s", type(error).__name__)
-                raise FireDetectorError(
-                    "MODEL_NOT_LOADED", "Fire/smoke model is unavailable."
-                ) from error
+                raise FireDetectorError("MODEL_NOT_LOADED", "Fire model is unavailable.") from error
             self._session = session
             return session
 
@@ -157,9 +156,7 @@ class FireDetector:
             rows = session.run(None, {session.get_inputs()[0].name: tensor})[0]
             return self._postprocess(rows, image.shape[1], image.shape[0], gain, left, top)
         except Exception as error:
-            raise FireDetectorError(
-                "FIRE_INFERENCE_FAILED", "Fire/smoke inference failed."
-            ) from error
+            raise FireDetectorError("FIRE_INFERENCE_FAILED", "Fire inference failed.") from error
 
     def _postprocess(
         self, rows: np.ndarray, width: int, height: int, gain: float, left: int, top: int
@@ -173,13 +170,17 @@ class FireDetector:
                 continue
             if not 0 <= score <= 1 or class_id not in CLASS_LABELS:
                 raise ValueError("Invalid inference score or class")
+            # Preserve the checkpoint's verified class map, but expose only fire.
+            # Discard other classes before the detection limit and temporal scoring.
+            if class_id != FIRE_CLASS_ID:
+                continue
             x1, x2 = np.clip([(x1 - left) / gain, (x2 - left) / gain], 0, width)
             y1, y2 = np.clip([(y1 - top) / gain, (y2 - top) / gain], 0, height)
             if x2 <= x1 or y2 <= y1:
                 continue
             detections.append(
                 FireDetection(
-                    label="fire" if class_id == 0 else "smoke",
+                    label="fire",
                     confidence=score,
                     bounding_box=FireBoundingBox(
                         x=x1 / width,

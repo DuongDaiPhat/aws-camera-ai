@@ -215,7 +215,7 @@ export function EventDetailModal({
         <div className={styles.modalHeader}>
           <div className={styles.headerInfo}>
             <h2 id="modal-title" className={styles.modalTitle}>
-              {isFire ? 'Chi tiết sự kiện lửa / khói' : 'Chi tiết sự kiện'}
+              {isFire ? 'Chi tiết sự kiện lửa' : 'Chi tiết sự kiện'}
             </h2>
             {isFire && (
               <time className={styles.headerTime} dateTime={event.detectedAt}>

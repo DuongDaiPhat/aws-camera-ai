@@ -28,7 +28,7 @@ function boundingBox(box: unknown): box is FireDetection['boundingBox'] {
 function detection(value: unknown): value is FireDetection {
   return (
     record(value) &&
-    (value.label === 'fire' || value.label === 'smoke') &&
+    value.label === 'fire' &&
     unit(value.confidence) &&
     boundingBox(value.boundingBox)
   );
@@ -47,10 +47,12 @@ export function fireEvidence(detail: EventDetail | null) {
     (item) => item.module === 'M3_FIRE' && item.label === 'FIRE_SMOKE_DETECTED',
   );
   const metadata = result?.metadata;
-  if (!record(metadata)) return null;
+  if (!record(metadata) || metadata.incidentConfidencePolicyVersion !== 'fire-only-temporal-min-v1')
+    return null;
   const detections: unknown = metadata.detections;
   const count = metadata.consecutiveFrames;
   const window = metadata.windowSeconds;
   if (!Array.isArray(detections) || !frameCount(count) || !windowSeconds(window)) return null;
-  return { detections: detections.filter(detection).slice(0, 100), count, window };
+  const fireDetections = detections.filter(detection).slice(0, 100);
+  return fireDetections.length ? { detections: fireDetections, count, window } : null;
 }

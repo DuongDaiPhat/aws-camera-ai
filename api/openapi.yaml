@@ -1585,7 +1585,7 @@ paths:
         OtherAiResultSubmission remains shared with other AI modules.
 
 
-        US-18: M3_FIRE submits one confirmed FIRE_SMOKE_DETECTED result, priority P0, on a separately persisted camera incident; detectedAt=confirmedAt. One active detector episode per camera survives source/AI restarts and event resolution. Use FireResultMetadata; never submit single-frame candidates as success.
+        US-18: M3_FIRE submits one confirmed fire-only result, priority P0, on a separately persisted camera incident; detectedAt=confirmedAt. FIRE_SMOKE_DETECTED is the retained storage identifier, not permission to submit smoke. One active detector episode per camera survives source/AI restarts and event resolution. Use FireResultMetadata; never submit smoke or single-frame candidates as success.
         US-20: M5 wellness runs in the orchestrator without inference or this callback. Its resident request, deadline and caregiver routing use a scoped scheduler policy; the shared generic callback wire format remains unchanged.
       operationId: submitAiResult
       security:
@@ -1676,11 +1676,11 @@ paths:
                         windowSeconds: 5
                         maxFrameGapSeconds: 1
                         thresholdUsed: 0.5
-                        incidentConfidencePolicyVersion: fire-temporal-min-v1
+                        incidentConfidencePolicyVersion: fire-only-temporal-min-v1
                         labels:
-                          - smoke
+                          - fire
                         detections:
-                          - label: smoke
+                          - label: fire
                             confidence: 0.9
                             boundingBox: *a1
                   error: null
@@ -2846,7 +2846,7 @@ components:
           description: Het thoi gian nay khong co phan hoi -> ESCALATED (FR-ESC-02).
         skipLoggedOnly:
           type: boolean
-          description: US-19 — chay/khoi vao thang NOTIFIED bat ke confidence.
+          description: US-19 — canh bao lua vao thang NOTIFIED bat ke confidence.
         notifyChannels:
           type: array
           items: { $ref: "#/components/schemas/NotificationChannel" }
@@ -3752,7 +3752,7 @@ components:
     FireResultMetadata:
       type: object
       additionalProperties: false
-      description: US-18 documentation-only evidence schema for new M3_FIRE producers. OtherAiResultItem.metadata stays generic. Validate aligned unique frame IDs/timestamps, ordered span <= windowSeconds, every gap <= maxFrameGapSeconds, scores >= thresholdUsed and incident score fire-temporal-min-v1 before submission. No raw image, credentials or RTSP URL.
+      description: US-18 documentation-only evidence schema for new M3_FIRE producers. OtherAiResultItem.metadata stays generic. Validate aligned unique frame IDs/timestamps, ordered span <= windowSeconds, every gap <= maxFrameGapSeconds, scores >= thresholdUsed and incident score fire-only-temporal-min-v1 before submission. No raw image, credentials or RTSP URL.
       required:
         - cameraId
         - sourceSessionId
@@ -3829,17 +3829,16 @@ components:
         incidentConfidencePolicyVersion:
           type: string
           enum:
-            - fire-temporal-min-v1
+            - fire-only-temporal-min-v1
         labels:
           type: array
           minItems: 1
-          maxItems: 2
+          maxItems: 1
           uniqueItems: true
           items:
             type: string
             enum:
               - fire
-              - smoke
         detections:
           type: array
           minItems: 1
@@ -3856,7 +3855,6 @@ components:
                 type: string
                 enum:
                   - fire
-                  - smoke
               confidence:
                 type: number
                 minimum: 0

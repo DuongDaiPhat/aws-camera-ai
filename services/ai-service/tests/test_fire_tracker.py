@@ -39,10 +39,10 @@ def observe(tracker: FireTracker, seconds: float, score: float | None = 0.9, **i
     return tracker.evaluate(item, [] if score is None else signal(score), item.observed_at)
 
 
-def test_confirm_three_unique_mixed_class_frames_once() -> None:
+def test_confirm_three_unique_fire_frames_once() -> None:
     tracker = FireTracker(Settings(_env_file=None))
     first = observe(tracker, 0, 0.8)
-    second = tracker.evaluate(frame(0.5), signal(0.9, "smoke"), frame(0.5).observed_at)
+    second = tracker.evaluate(frame(0.5), signal(0.9), frame(0.5).observed_at)
     third = observe(tracker, 1, 0.85)
     assert not first.confirmed and not second.confirmed
     assert third.confirmed and third.reason == "CONFIRMED"
@@ -51,6 +51,25 @@ def test_confirm_three_unique_mixed_class_frames_once() -> None:
     active = observe(tracker, 1.5)
     assert active.reason == "ACTIVE_EPISODE" and active.episode_id == third.episode_id
     assert active.confirmed_at == third.confirmed_at
+
+
+def test_smoke_never_qualifies_or_bridges_fire_confirmation() -> None:
+    tracker = FireTracker(Settings(_env_file=None))
+    smoke = FireDetection.model_construct(
+        label="smoke",
+        confidence=0.99,
+        bounding_box=FireBoundingBox(x=0.1, y=0.2, width=0.3, height=0.4),
+    )
+    for seconds in [0, 0.5, 1]:
+        result = tracker.evaluate(frame(seconds), [smoke], frame(seconds).observed_at)
+        assert not result.confirmed
+        assert result.detections == [] and result.max_confidence is None
+    observe(tracker, 1.5)
+    interrupted = tracker.evaluate(frame(2), [smoke], frame(2).observed_at)
+    assert interrupted.consecutive_frames == 0
+    assert not observe(tracker, 2.5).confirmed
+    assert not observe(tracker, 3).confirmed
+    assert observe(tracker, 3.5).confirmed
 
 
 @pytest.mark.parametrize("negative", [None, 0.49])

@@ -46,7 +46,7 @@ tags:
   - name: pose
     description: Module 2a — phat hien te nga (US-16, US-17)
   - name: fire
-    description: Module 3 — phat hien lua/khoi (US-18)
+    description: Module 3 — phat hien lua (US-18)
 
 paths:
   /health:
@@ -508,15 +508,15 @@ paths:
     post:
       tags:
         - fire
-      summary: Phat hien lua/khoi va xac nhan chuoi frame toan camera
+      summary: Phat hien lua va xac nhan chuoi frame toan camera
       description: |-
         US-18. Stateful per (cameraSlug, sourceSessionId); image is the full camera frame at frameTimestamp, even without a person. New producers send frameId/sourceSessionId. Each unique, ordered, fresh frame counts once, regardless of bounding-box count.
 
-        A qualifying frame has at least one fire/smoke detection with confidence >= thresholdUsed (default T_fire=0.50). Confirm at >= requiredFrames (default 3) consecutive qualifying frames whose first-to-last interval is <= windowSeconds (default 5), with no adjacent gap > maxFrameGapSeconds (default 1). Mixed fire/smoke labels qualify. Confirmation happens on the third frame; there is no mandatory five-second wait.
+        A qualifying frame has at least one fire detection with confidence >= thresholdUsed (default T_fire=0.50). Smoke predictions from the existing two-class checkpoint are discarded before temporal processing and never qualify. Confirm at >= requiredFrames (default 3) consecutive qualifying frames whose first-to-last interval is <= windowSeconds (default 5), with no adjacent gap > maxFrameGapSeconds (default 1). Confirmation happens on the third frame; there is no mandatory five-second wait.
 
         Negative/below-threshold frames and technical errors reset unconfirmed evidence; a gap/out-of-window starts a new eligible suffix. Duplicate, out-of-order and stale frames do not advance the counter or create new confirmation. Silence never confirms. Confirmed episode evidence is frozen for replay. The orchestrator persists one active episode per camera across source sessions and restarts, clearing only after 10 seconds of valid continuous negative observations; resolving an event does not clear it.
 
-        Episode UUIDv5 uses URL namespace 6ba7b811-9dad-11d1-80b4-00c04fd430c8 and compact UTF-8 JSON [cameraSlug,sourceSessionId,firstQualifiedAt], timestamp canonical UTC milliseconds. incidentConfidence is the minimum of each qualifying frame's maximum qualifying score (fire-temporal-min-v1), not the latest frame maximum. This service does not persist events or send notifications.
+        Episode UUIDv5 uses URL namespace 6ba7b811-9dad-11d1-80b4-00c04fd430c8 and compact UTF-8 JSON [cameraSlug,sourceSessionId,firstQualifiedAt], timestamp canonical UTC milliseconds. incidentConfidence is the minimum of each qualifying frame's maximum qualifying score (fire-only-temporal-min-v1), not the latest frame maximum. This service does not persist events or send notifications.
       operationId: detectFire
       requestBody:
         required: true
@@ -586,14 +586,14 @@ paths:
                     qualifyingFrameIds: &a5 []
                     qualifyingFrameTimestamps: &a6 []
                     incidentConfidence: null
-                    confidencePolicyVersion: fire-temporal-min-v1
+                    confidencePolicyVersion: fire-only-temporal-min-v1
                     reason: NEGATIVE
                     error: null
                 candidate:
                   value:
                     confirmed: false
                     detections: &a7
-                      - label: smoke
+                      - label: fire
                         confidence: 0.88
                         boundingBox: &a1
                           x: 0.2
@@ -621,14 +621,14 @@ paths:
                     qualifyingFrameTimestamps:
                       - 2026-10-09T05:00:00.000Z
                     incidentConfidence: null
-                    confidencePolicyVersion: fire-temporal-min-v1
+                    confidencePolicyVersion: fire-only-temporal-min-v1
                     reason: INSUFFICIENT_FRAMES
                     error: null
                 confirmed:
                   value:
                     confirmed: true
                     detections: &a2
-                      - label: smoke
+                      - label: fire
                         confidence: 0.9
                         boundingBox: *a1
                     modelVersion: fire-smoke-yolo11n-v1
@@ -656,7 +656,7 @@ paths:
                       - 2026-10-09T05:00:00.500Z
                       - 2026-10-09T05:00:01.000Z
                     incidentConfidence: 0.88
-                    confidencePolicyVersion: fire-temporal-min-v1
+                    confidencePolicyVersion: fire-only-temporal-min-v1
                     reason: CONFIRMED
                     error: null
                 replay:
@@ -682,14 +682,14 @@ paths:
                     qualifyingFrameIds: *a3
                     qualifyingFrameTimestamps: *a4
                     incidentConfidence: 0.88
-                    confidencePolicyVersion: fire-temporal-min-v1
+                    confidencePolicyVersion: fire-only-temporal-min-v1
                     reason: REPLAY
                     error: null
                 belowThreshold:
                   value:
                     confirmed: false
                     detections:
-                      - label: smoke
+                      - label: fire
                         confidence: 0.4
                         boundingBox: *a1
                     modelVersion: fire-smoke-yolo11n-v1
@@ -711,7 +711,7 @@ paths:
                     qualifyingFrameIds: *a5
                     qualifyingFrameTimestamps: *a6
                     incidentConfidence: null
-                    confidencePolicyVersion: fire-temporal-min-v1
+                    confidencePolicyVersion: fire-only-temporal-min-v1
                     reason: BELOW_THRESHOLD
                     error: null
                 gapReset:
@@ -739,7 +739,7 @@ paths:
                     qualifyingFrameTimestamps:
                       - 2026-10-09T05:00:03.000Z
                     incidentConfidence: null
-                    confidencePolicyVersion: fire-temporal-min-v1
+                    confidencePolicyVersion: fire-only-temporal-min-v1
                     reason: FRAME_GAP
                     error: null
                 modelError:
@@ -765,11 +765,11 @@ paths:
                     qualifyingFrameIds: *a5
                     qualifyingFrameTimestamps: *a6
                     incidentConfidence: null
-                    confidencePolicyVersion: fire-temporal-min-v1
+                    confidencePolicyVersion: fire-only-temporal-min-v1
                     reason: INFERENCE_ERROR
                     error:
                       code: MODEL_NOT_LOADED
-                      message: Fire/smoke model is unavailable.
+                      message: Fire model is unavailable.
         "401":
           description: Thieu hoac sai X-Internal-Token
         "413":
@@ -1121,7 +1121,7 @@ components:
         confidencePolicyVersion:
           type: string
           enum:
-            - fire-temporal-min-v1
+            - fire-only-temporal-min-v1
         reason:
           type: string
           enum:
@@ -1151,7 +1151,6 @@ components:
           type: string
           enum:
             - fire
-            - smoke
         confidence:
           type: number
           minimum: 0

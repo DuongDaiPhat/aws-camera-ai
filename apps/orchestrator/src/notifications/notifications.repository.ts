@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import type { EventType } from '../contracts/vertical-slice.ports';
 import type { TelegramDeliveryScope } from './telegram-delivery-scope';
+import { hasFireOnlyNotificationEvidence } from './fire-image-evidence';
 
 export interface TelegramNotificationJob {
   id: string;
@@ -187,11 +188,18 @@ export class NotificationsRepository {
   }
 
   async eventAllowsDelivery(eventId: string, escalationLevel: number): Promise<boolean> {
-    const result = await this.database.query<{ status: string }>(
-      'SELECT status FROM events WHERE id = $1 LIMIT 1',
-      [eventId],
-    );
-    const status = result.rows[0]?.status;
+    const result = await this.database.query<{
+      status: string;
+      event_type: EventType;
+      ai_results: unknown;
+    }>('SELECT status, event_type, ai_results FROM events WHERE id = $1 LIMIT 1', [eventId]);
+    const event = result.rows[0];
+    if (
+      event?.event_type === 'FIRE_SMOKE_DETECTED' &&
+      !hasFireOnlyNotificationEvidence(event.ai_results)
+    )
+      return false;
+    const status = event?.status;
     return status === 'NOTIFIED' || (status === 'ESCALATED' && escalationLevel > 0);
   }
 

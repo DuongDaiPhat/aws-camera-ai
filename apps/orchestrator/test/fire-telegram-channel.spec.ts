@@ -12,7 +12,7 @@ function delegate(): TelegramChannel {
   };
 }
 const buttons = { inline_keyboard: [[{ text: 'Tôi ổn', callback_data: 'cf:fixture:ok' }]] };
-const caption = 'Cảnh báo: Phát hiện khói hoặc lửa\nCamera: US18 TEST bucket11';
+const caption = 'Cảnh báo: Phát hiện lửa\nCamera: US18 TEST bucket11';
 
 describe('explicit one-photo live Telegram scope', () => {
   it('does not call the provider before explicit approval', async () => {

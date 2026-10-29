@@ -9,16 +9,15 @@ export function FireEvidenceSection({ detail }: { detail: EventDetail | null }) 
   const evidence = fireEvidence(detail);
   if (!evidence) return null;
   return (
-    <section className={styles.aiSection} aria-label="Bằng chứng lửa và khói">
-      <h3 className={styles.sectionTitle}>Dấu hiệu lửa / khói</h3>
+    <section className={styles.aiSection} aria-label="Bằng chứng lửa">
+      <h3 className={styles.sectionTitle}>Dấu hiệu lửa</h3>
       <p>
         Đã xác nhận từ {evidence.count} khung hình liên tiếp trong tối đa {evidence.window} giây.
       </p>
       <ul>
         {evidence.detections.map((item, index) => (
           <li key={`${item.label}-${index}`}>
-            {item.label === 'fire' ? 'Lửa' : 'Khói'} — độ tin cậy{' '}
-            {Math.round(item.confidence * 100)}%
+            Lửa — độ tin cậy {Math.round(item.confidence * 100)}%
           </li>
         ))}
       </ul>
@@ -60,14 +59,14 @@ export function FireBoxes({
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="xMidYMid meet"
       role="img"
-      aria-label="Vị trí lửa và khói trên ảnh bằng chứng"
+      aria-label="Vị trí lửa trên ảnh bằng chứng"
     >
       {evidence.detections.map((item, index) => {
         const box = item.boundingBox;
         const x = box.x * width;
         const y = box.y * height;
         return (
-          <g key={`${item.label}-${index}`} stroke={item.label === 'fire' ? '#ff654f' : '#fbd46d'}>
+          <g key={`${item.label}-${index}`} stroke="#ff654f">
             <rect
               x={x}
               y={y}
@@ -87,7 +86,7 @@ export function FireBoxes({
               vectorEffect="non-scaling-stroke"
               paintOrder="stroke"
             >
-              {item.label === 'fire' ? 'Lửa' : 'Khói'} {Math.round(item.confidence * 100)}%
+              Lửa {Math.round(item.confidence * 100)}%
             </text>
           </g>
         );

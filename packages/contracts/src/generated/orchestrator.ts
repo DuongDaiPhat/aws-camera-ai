@@ -1020,7 +1020,7 @@ export interface paths {
      *     OtherAiResultSubmission remains shared with other AI modules.
      *
      *
-     *     US-18: M3_FIRE submits one confirmed FIRE_SMOKE_DETECTED result, priority P0, on a separately persisted camera incident; detectedAt=confirmedAt. One active detector episode per camera survives source/AI restarts and event resolution. Use FireResultMetadata; never submit single-frame candidates as success.
+     *     US-18: M3_FIRE submits one confirmed fire-only result, priority P0, on a separately persisted camera incident; detectedAt=confirmedAt. FIRE_SMOKE_DETECTED is the retained storage identifier, not permission to submit smoke. One active detector episode per camera survives source/AI restarts and event resolution. Use FireResultMetadata; never submit smoke or single-frame candidates as success.
      *     US-20: M5 wellness runs in the orchestrator without inference or this callback. Its resident request, deadline and caregiver routing use a scoped scheduler policy; the shared generic callback wire format remains unchanged.
      */
     post: operations['submitAiResult'];
@@ -1841,7 +1841,7 @@ export interface components {
       tHigh?: number | null;
       /** @description Het thoi gian nay khong co phan hoi -> ESCALATED (FR-ESC-02). */
       tWaitSeconds: number;
-      /** @description US-19 — chay/khoi vao thang NOTIFIED bat ke confidence. */
+      /** @description US-19 — canh bao lua vao thang NOTIFIED bat ke confidence. */
       skipLoggedOnly?: boolean;
       notifyChannels?: components['schemas']['NotificationChannel'][];
       escalateChannels?: components['schemas']['NotificationChannel'][];
@@ -2335,7 +2335,7 @@ export interface components {
       /** @description False for duplicate or out-of-order observations. Such evidence cannot overwrite newer presence. */
       presenceUpdated: boolean;
     };
-    /** @description US-18 documentation-only evidence schema for new M3_FIRE producers. OtherAiResultItem.metadata stays generic. Validate aligned unique frame IDs/timestamps, ordered span <= windowSeconds, every gap <= maxFrameGapSeconds, scores >= thresholdUsed and incident score fire-temporal-min-v1 before submission. No raw image, credentials or RTSP URL. */
+    /** @description US-18 documentation-only evidence schema for new M3_FIRE producers. OtherAiResultItem.metadata stays generic. Validate aligned unique frame IDs/timestamps, ordered span <= windowSeconds, every gap <= maxFrameGapSeconds, scores >= thresholdUsed and incident score fire-only-temporal-min-v1 before submission. No raw image, credentials or RTSP URL. */
     FireResultMetadata: {
       /** Format: uuid */
       cameraId: string;
@@ -2355,11 +2355,11 @@ export interface components {
       maxFrameGapSeconds: number;
       thresholdUsed: number;
       /** @enum {string} */
-      incidentConfidencePolicyVersion: 'fire-temporal-min-v1';
-      labels: ('fire' | 'smoke')[];
+      incidentConfidencePolicyVersion: 'fire-only-temporal-min-v1';
+      labels: 'fire'[];
       detections: {
         /** @enum {string} */
-        label: 'fire' | 'smoke';
+        label: 'fire';
         confidence: number;
         boundingBox: {
           x: number;

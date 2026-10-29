@@ -126,6 +126,8 @@ class FireTracker:
     def evaluate(
         self, frame: FireFrame, detections: list[FireDetection], now: datetime
     ) -> FireResponse:
+        # Ignore legacy/non-fire predictions even when an adapter bypasses model validation.
+        detections = [item for item in detections if item.label == "fire"]
         with self.lock:
             if early := self.preflight(frame, now):
                 return early

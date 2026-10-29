@@ -12,7 +12,7 @@ interface EventCardProps {
 }
 
 const EVENT_TITLES: Record<string, string> = {
-  FIRE_SMOKE_DETECTED: 'Phát hiện dấu hiệu cháy hoặc khói',
+  FIRE_SMOKE_DETECTED: 'Phát hiện lửa',
   FALL_DETECTED: 'Phát hiện dấu hiệu té ngã',
   UNKNOWN_PERSON: 'Phát hiện người chưa xác định',
   RESTRICTED_ZONE: 'Có người vào khu vực giới hạn',

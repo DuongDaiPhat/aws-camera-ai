@@ -39,7 +39,7 @@ export class FireBoxDto {
 
 type FireDetection = AiComponents['schemas']['FireDetection'];
 export class FireDetectionDto implements FireDetection {
-  @IsIn(['fire', 'smoke']) label!: 'fire' | 'smoke';
+  @IsIn(['fire']) label!: 'fire';
   @IsNumber() @Min(0) @Max(1) confidence!: number;
   @ValidateNested() @IsDefined() @Type(() => FireBoxDto) boundingBox!: FireBoxDto;
 }
@@ -100,7 +100,7 @@ export class FireResponseDto {
   @Min(0)
   @Max(1)
   incidentConfidence!: number | null;
-  @IsIn(['fire-temporal-min-v1']) confidencePolicyVersion!: 'fire-temporal-min-v1';
+  @IsIn(['fire-only-temporal-min-v1']) confidencePolicyVersion!: 'fire-only-temporal-min-v1';
   @IsIn([
     'NEGATIVE',
     'INSUFFICIENT_FRAMES',

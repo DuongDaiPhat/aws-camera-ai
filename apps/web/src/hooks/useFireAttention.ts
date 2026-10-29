@@ -33,7 +33,7 @@ function usePendingFireEvents(userId: string | undefined, token: string) {
           setError(null);
         }
       } catch {
-        if (mounted) setError('Chưa đồng bộ được danh sách cảnh báo lửa / khói.');
+        if (mounted) setError('Chưa đồng bộ được danh sách cảnh báo lửa.');
       } finally {
         if (mounted) timer = setTimeout(() => void load(), FIRE_ATTENTION_POLL_MS);
       }

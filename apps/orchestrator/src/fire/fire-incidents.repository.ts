@@ -130,7 +130,7 @@ export class FireIncidentsRepository {
     );
     await client.query(
       `INSERT INTO event_status_history (event_id, from_status, to_status, actor_type, reason)
-        VALUES ($1, NULL, 'DETECTED', 'SYSTEM', 'Confirmed camera fire/smoke episode')`,
+        VALUES ($1, NULL, 'DETECTED', 'SYSTEM', 'Confirmed camera fire episode')`,
       [payload.eventId],
     );
     return { id, eventId: payload.eventId, cameraId, created: true };

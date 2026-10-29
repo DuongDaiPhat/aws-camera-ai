@@ -31,13 +31,30 @@ def test_yolo26_rows_are_xyxy_score_class_without_objectness(
     )
     monkeypatch.setattr(detector, "_load", lambda: session)
     detections = detector.detect(encoded())
-    assert [item.label for item in detections] == ["fire", "smoke"]
+    assert [item.label for item in detections] == ["fire"]
     box = detections[0].bounding_box
     assert box.x == pytest.approx(0.1)
     assert box.y == pytest.approx(64 / 360)
     assert box.width == pytest.approx(0.2)
     assert box.height == pytest.approx(0.2)
     assert detections[0].confidence == pytest.approx(0.9)
+
+
+def test_smoke_predictions_do_not_consume_the_fire_detection_limit() -> None:
+    detector = FireDetector(Settings(_env_file=None))
+    rows = np.zeros((1, 300, 6), dtype=np.float32)
+    rows[0, :200] = [10, 10, 100, 100, 0.99, 1]
+    rows[0, 200] = [20, 20, 120, 120, 0.6, 0]
+    detections = detector._postprocess(rows, 640, 640, 1, 0, 0)
+    assert len(detections) == 1
+    assert detections[0].label == "fire"
+    assert detections[0].confidence == pytest.approx(0.6)
+
+
+def test_smoke_only_output_is_a_negative_fire_observation() -> None:
+    rows = np.zeros((1, 300, 6), dtype=np.float32)
+    rows[0, 0] = [10, 10, 100, 100, 0.99, 1]
+    assert FireDetector(Settings(_env_file=None))._postprocess(rows, 640, 640, 1, 0, 0) == []
 
 
 def test_preprocessing_rgb_letterbox_handles_portrait() -> None:

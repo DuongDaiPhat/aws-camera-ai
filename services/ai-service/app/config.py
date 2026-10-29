@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     fall_immobility_seconds: int = 15
     fall_torso_angle_threshold_deg: int = 30
 
-    # Module 3 — chay/khoi
+    # Module 3 — fire-only detection using the existing verified checkpoint.
     m3_enabled: bool = False
     fire_model_path: str = "models/fire-smoke-yolo26n-checkpoint-nms.onnx"
     fire_model_version: str = "fire-smoke-yolo26n-checkpoint-nms-v1"

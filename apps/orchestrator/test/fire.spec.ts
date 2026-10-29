@@ -14,6 +14,22 @@ import { EventsService } from '../src/events/events.service';
 import { confirmedFire, fireConfig, fireFrame, fireResponse } from './fire-fixtures';
 
 describe('US-18 fire evidence and ingestion', () => {
+  it('rejects smoke and the former mixed-class policy at the inference boundary', () => {
+    const frame = fireFrame(Date.now());
+    const result = fireResponse(frame);
+    const smoke: unknown = { ...result.detections[0], label: 'smoke' };
+    const legacy = Object.assign({}, result, { detections: [smoke] });
+    expect(() => validateFireObservation(frame, legacy, fireConfig())).toThrow('Fire-only');
+    expect(() =>
+      validateFireObservation(
+        frame,
+        Object.assign({}, result, {
+          confidencePolicyVersion: 'fire-temporal-min-v1',
+        }),
+        fireConfig(),
+      ),
+    ).toThrow('Fire-only');
+  });
   it('validates each qualifying frame instead of trusting confirmed=true', () => {
     const at = Date.now();
     const confirmed = confirmedFire(at);

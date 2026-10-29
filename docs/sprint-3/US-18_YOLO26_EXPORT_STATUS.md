@@ -1,5 +1,7 @@
 # US-18: model, integration and acceptance status
 
+> Fire-only scope update, 29/10/2026: per lead direction, US-18 now detects and alerts on fire only. Class 1 smoke from the existing verified two-class checkpoint is discarded before scoring, temporal confirmation, evidence rendering and notification. Three consecutive fire frames are still required; smoke-only input is negative and cannot bridge fire frames. New evidence uses `fire-only-temporal-min-v1`. The model artifact name/checksum and legacy `FIRE_SMOKE_DETECTED` storage identifier remain for compatibility; all current web/Telegram labels say fire. Historical smoke metrics and mixed-class acceptance below are superseded for the active feature. Existing records are retained, not relabeled as newly verified fire.
+
 Consolidated on **28/10/2026**. Historical export measurements are retained below;
 the current model, quality limits, webcam/Telegram results and UI verification are
 summarized in the final sections. Operator steps are in the

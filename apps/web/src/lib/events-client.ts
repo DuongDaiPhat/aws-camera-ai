@@ -34,7 +34,7 @@ function getAiTagInfo(event: EventSummary): AiTagInfo {
 
   switch (event.eventType) {
     case 'FIRE_SMOKE_DETECTED':
-      return { aiTag: percent ? `${percent} lửa / khói` : 'Lửa / Khói', aiTagColor: 'danger' };
+      return { aiTag: percent ? `${percent} lửa` : 'Lửa', aiTagColor: 'danger' };
     case 'FALL_DETECTED':
       return { aiTag: percent ? `Pose AI ${percent}` : 'Té ngã', aiTagColor: 'warning' };
     case 'UNKNOWN_PERSON':

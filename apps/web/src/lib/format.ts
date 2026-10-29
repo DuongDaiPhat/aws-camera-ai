@@ -72,7 +72,7 @@ export function getPriorityInfo(priority: PriorityLevel): PriorityInfo {
 export function getEventTypeLabel(eventType: EventType): string {
   switch (eventType) {
     case 'FIRE_SMOKE_DETECTED':
-      return 'Phát hiện khói / lửa';
+      return 'Phát hiện lửa';
     case 'FALL_DETECTED':
       return 'Cảnh báo té ngã';
     case 'UNKNOWN_PERSON':

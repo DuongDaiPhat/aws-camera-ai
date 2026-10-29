@@ -1,5 +1,7 @@
 # US-18 fire/smoke runtime
 
+> Fire-only scope update, 29/10/2026: per lead direction, US-18 now detects and alerts on fire only. Class 1 smoke from the existing verified two-class checkpoint is discarded before scoring, temporal confirmation, evidence rendering and notification. Three consecutive fire frames are still required; smoke-only input is negative and cannot bridge fire frames. New evidence uses `fire-only-temporal-min-v1`. The model artifact name/checksum and legacy `FIRE_SMOKE_DETECTED` storage identifier remain for compatibility; all current web/Telegram labels say fire. Historical smoke metrics and mixed-class acceptance below are superseded for the active feature. Existing records are retained, not relabeled as newly verified fire.
+
 The supplied trained YOLO26n model is an integration candidate. Training and the
 user's offline evaluation already exist; this workflow integrates their artifact.
 It does not retrain at startup. The original plan's YOLO11 decoder assumptions are

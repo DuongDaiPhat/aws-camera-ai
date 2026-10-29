@@ -50,7 +50,7 @@ export function fireResponse(
     qualifyingFrameIds: [],
     qualifyingFrameTimestamps: [],
     incidentConfidence: null,
-    confidencePolicyVersion: 'fire-temporal-min-v1',
+    confidencePolicyVersion: 'fire-only-temporal-min-v1',
     reason: 'NEGATIVE',
     error: null,
   };
@@ -61,7 +61,7 @@ export function fireResponse(
     confirmed,
     detections: [
       {
-        label: 'smoke',
+        label: 'fire',
         confidence: score,
         boundingBox: { x: 0.1, y: 0.2, width: 0.3, height: 0.4 },
       },

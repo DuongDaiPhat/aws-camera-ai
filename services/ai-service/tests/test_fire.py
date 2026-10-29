@@ -71,7 +71,7 @@ def test_three_real_http_observations_confirm_and_duplicate_replays(
         "detect",
         lambda _data: [
             FireDetection(
-                label="smoke",
+                label="fire",
                 confidence=0.9,
                 bounding_box=FireBoundingBox(x=0.1, y=0.2, width=0.3, height=0.4),
             )
@@ -86,3 +86,22 @@ def test_three_real_http_observations_confirm_and_duplicate_replays(
     assert result["incidentConfidence"] == 0.9
     replay = request(client, jpeg(), frameId="frame-2", frameTimestamp=result["observedAt"])
     assert replay.json()["isReplay"]
+
+
+def test_smoke_only_frames_never_confirm_through_http(fire_client, monkeypatch) -> None:
+    client, service = fire_client
+    smoke = FireDetection.model_construct(
+        label="smoke",
+        confidence=0.99,
+        bounding_box=FireBoundingBox(x=0.1, y=0.2, width=0.3, height=0.4),
+    )
+    monkeypatch.setattr(service.detector, "detect", lambda _data: [smoke])
+    for index in range(4):
+        response = request(client, jpeg(), frameId=f"smoke-{index}")
+        assert response.status_code == 200
+        result = response.json()
+        assert not result["confirmed"]
+        assert result["consecutiveFrames"] == 0
+        assert result["detections"] == []
+        assert result["maxConfidence"] is None
+        assert result["confidencePolicyVersion"] == "fire-only-temporal-min-v1"

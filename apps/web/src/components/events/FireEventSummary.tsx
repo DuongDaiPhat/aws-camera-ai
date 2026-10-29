@@ -13,9 +13,7 @@ export function FireEventSummary({
   statusLabel: string;
 }) {
   const evidence = fireEvidence(detail);
-  const labels = [
-    ...new Set(evidence?.detections.map((item) => (item.label === 'fire' ? 'Lửa' : 'Khói')) ?? []),
-  ];
+  const labels = [...new Set(evidence?.detections.map(() => 'Lửa') ?? [])];
   const lastUpdate = detail?.statusHistory
     ?.filter((item) => item.toStatus === event.status)
     .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))[0];
@@ -24,7 +22,7 @@ export function FireEventSummary({
     { label: 'Khu vực', value: event.zone?.name ?? 'Chưa gán khu vực' },
     { label: 'Trạng thái', value: statusLabel },
     { label: 'Ưu tiên', value: getPriorityInfo(event.priority).label },
-    { label: 'Dấu hiệu', value: labels.join(', ') || 'Lửa / khói' },
+    { label: 'Dấu hiệu', value: labels.join(', ') || 'Chưa có bằng chứng lửa' },
     {
       label: 'Độ tin cậy sự kiện',
       value:

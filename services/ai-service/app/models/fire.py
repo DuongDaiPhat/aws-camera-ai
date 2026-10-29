@@ -49,7 +49,7 @@ class FireBoundingBox(FireModel):
 
 
 class FireDetection(FireModel):
-    label: Literal["fire", "smoke"]
+    label: Literal["fire"]
     confidence: float = Field(ge=0, le=1)
     bounding_box: FireBoundingBox = Field(alias="boundingBox")
 
@@ -83,8 +83,8 @@ class FireResponse(FireModel):
         default_factory=list, alias="qualifyingFrameTimestamps"
     )
     incident_confidence: float | None = Field(default=None, alias="incidentConfidence")
-    confidence_policy_version: Literal["fire-temporal-min-v1"] = Field(
-        default="fire-temporal-min-v1", alias="confidencePolicyVersion"
+    confidence_policy_version: Literal["fire-only-temporal-min-v1"] = Field(
+        default="fire-only-temporal-min-v1", alias="confidencePolicyVersion"
     )
     reason: FireReason
     error: FireInferenceError | None = None

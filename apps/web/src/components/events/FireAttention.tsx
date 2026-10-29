@@ -43,7 +43,7 @@ export function FireAttention(props: FireAttentionProps) {
         <div className={styles.alarmLabel}>
           <span aria-hidden="true">🔥</span> CẢNH BÁO KHẨN CẤP · P0
         </div>
-        <h2 id="fire-attention-title">Phát hiện lửa / khói</h2>
+        <h2 id="fire-attention-title">Phát hiện lửa</h2>
         <div className={styles.location}>
           <strong>
             {event.camera?.name ?? 'Camera'}

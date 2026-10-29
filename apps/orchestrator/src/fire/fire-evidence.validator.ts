@@ -50,6 +50,11 @@ export function validateFireObservation(
 }
 
 function validateFrameScoreAndBoxes(result: FireResponseDto): void {
+  if (
+    result.confidencePolicyVersion !== 'fire-only-temporal-min-v1' ||
+    result.detections.some((item) => item.label !== 'fire')
+  )
+    throw new Error('Fire-only evidence is required');
   const maximum = result.detections.length
     ? Math.max(...result.detections.map((item) => item.confidence))
     : null;

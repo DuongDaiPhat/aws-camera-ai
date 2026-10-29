@@ -172,14 +172,14 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * Phat hien lua/khoi va xac nhan chuoi frame toan camera
+     * Phat hien lua va xac nhan chuoi frame toan camera
      * @description US-18. Stateful per (cameraSlug, sourceSessionId); image is the full camera frame at frameTimestamp, even without a person. New producers send frameId/sourceSessionId. Each unique, ordered, fresh frame counts once, regardless of bounding-box count.
      *
-     *     A qualifying frame has at least one fire/smoke detection with confidence >= thresholdUsed (default T_fire=0.50). Confirm at >= requiredFrames (default 3) consecutive qualifying frames whose first-to-last interval is <= windowSeconds (default 5), with no adjacent gap > maxFrameGapSeconds (default 1). Mixed fire/smoke labels qualify. Confirmation happens on the third frame; there is no mandatory five-second wait.
+     *     A qualifying frame has at least one fire detection with confidence >= thresholdUsed (default T_fire=0.50). Smoke predictions from the existing two-class checkpoint are discarded before temporal processing and never qualify. Confirm at >= requiredFrames (default 3) consecutive qualifying frames whose first-to-last interval is <= windowSeconds (default 5), with no adjacent gap > maxFrameGapSeconds (default 1). Confirmation happens on the third frame; there is no mandatory five-second wait.
      *
      *     Negative/below-threshold frames and technical errors reset unconfirmed evidence; a gap/out-of-window starts a new eligible suffix. Duplicate, out-of-order and stale frames do not advance the counter or create new confirmation. Silence never confirms. Confirmed episode evidence is frozen for replay. The orchestrator persists one active episode per camera across source sessions and restarts, clearing only after 10 seconds of valid continuous negative observations; resolving an event does not clear it.
      *
-     *     Episode UUIDv5 uses URL namespace 6ba7b811-9dad-11d1-80b4-00c04fd430c8 and compact UTF-8 JSON [cameraSlug,sourceSessionId,firstQualifiedAt], timestamp canonical UTC milliseconds. incidentConfidence is the minimum of each qualifying frame's maximum qualifying score (fire-temporal-min-v1), not the latest frame maximum. This service does not persist events or send notifications.
+     *     Episode UUIDv5 uses URL namespace 6ba7b811-9dad-11d1-80b4-00c04fd430c8 and compact UTF-8 JSON [cameraSlug,sourceSessionId,firstQualifiedAt], timestamp canonical UTC milliseconds. incidentConfidence is the minimum of each qualifying frame's maximum qualifying score (fire-only-temporal-min-v1), not the latest frame maximum. This service does not persist events or send notifications.
      */
     post: operations['detectFire'];
     delete?: never;
@@ -380,7 +380,7 @@ export interface components {
       qualifyingFrameTimestamps?: string[];
       incidentConfidence?: number | null;
       /** @enum {string} */
-      confidencePolicyVersion?: 'fire-temporal-min-v1';
+      confidencePolicyVersion?: 'fire-only-temporal-min-v1';
       /** @enum {string} */
       reason?:
         | 'NEGATIVE'
@@ -398,7 +398,7 @@ export interface components {
     };
     FireDetection: {
       /** @enum {string} */
-      label: 'fire' | 'smoke';
+      label: 'fire';
       confidence: number;
       boundingBox: components['schemas']['BoundingBox'];
     };

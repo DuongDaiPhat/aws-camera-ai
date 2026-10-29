@@ -14,7 +14,7 @@ const EVENT_NAMES: Record<EventType, string> = {
   UNKNOWN_PERSON: 'Người không quen',
   RESTRICTED_ZONE: 'Vào khu vực hạn chế',
   FALL_DETECTED: 'Phát hiện té ngã',
-  FIRE_SMOKE_DETECTED: 'Phát hiện khói hoặc lửa',
+  FIRE_SMOKE_DETECTED: 'Phát hiện lửa',
   WELLNESS_TIMEOUT: 'Không thấy hoạt động thường lệ',
 };
 
@@ -54,7 +54,7 @@ export function buildTelegramAlert(event: TelegramAlertEvent, withoutPhoto: bool
   if (event.eventType === 'FIRE_SMOKE_DETECTED' && !withoutPhoto) {
     lines.push(
       event.snapshotAnnotated
-        ? 'Vùng lửa khoanh đỏ; vùng khói khoanh vàng.'
+        ? 'Vùng lửa được khoanh đỏ.'
         : 'Ảnh chưa có khung đánh dấu. Mở web để xem bằng chứng.',
     );
   }

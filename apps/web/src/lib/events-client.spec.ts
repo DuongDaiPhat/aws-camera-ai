@@ -26,7 +26,7 @@ function jsonResponse(body: unknown, status = 200): Response {
 }
 
 describe('toUIEventItem', () => {
-  it('chuyển đổi sự kiện khói/lửa chính xác với aiTag và nhãn nguy hiểm', () => {
+  it('chuyển đổi sự kiện lửa chính xác với aiTag và nhãn nguy hiểm', () => {
     const summary: EventSummary = {
       id: 'ev-1',
       eventType: 'FIRE_SMOKE_DETECTED',
@@ -38,7 +38,7 @@ describe('toUIEventItem', () => {
     };
 
     const uiItem = toUIEventItem(summary);
-    expect(uiItem.aiTag).toBe('92% lửa / khói');
+    expect(uiItem.aiTag).toBe('92% lửa');
     expect(uiItem.aiTagColor).toBe('danger');
     expect(uiItem.cameraCode).toBe('CAM 02');
   });

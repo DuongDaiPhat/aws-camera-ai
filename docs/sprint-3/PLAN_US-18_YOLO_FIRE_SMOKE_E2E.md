@@ -1,5 +1,7 @@
 # Plan E2E US-18 — Train YOLO và phát hiện lửa/khói (M3)
 
+> Fire-only scope update, 29/10/2026: per lead direction, US-18 now detects and alerts on fire only. Class 1 smoke from the existing verified two-class checkpoint is discarded before scoring, temporal confirmation, evidence rendering and notification. Three consecutive fire frames are still required; smoke-only input is negative and cannot bridge fire frames. New evidence uses `fire-only-temporal-min-v1`. The model artifact name/checksum and legacy `FIRE_SMOKE_DETECTED` storage identifier remain for compatibility; all current web/Telegram labels say fire. Historical smoke metrics and mixed-class acceptance below are superseded for the active feature. Existing records are retained, not relabeled as newly verified fire.
+
 > Hướng dẫn test tay với lead (28/10/2026): [Các bước chạy và nghiệm thu US-18](US-18_HUONG_DAN_NGHIEM_THU.md), gồm webcam, ảnh/video, Telegram và biên bản kết quả.
 
 > Sprint 3 · Một người phụ trách E2E (D theo backlog) · Một AI Agent duy nhất.

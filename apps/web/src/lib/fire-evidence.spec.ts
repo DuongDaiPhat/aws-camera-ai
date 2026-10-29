@@ -16,9 +16,9 @@ describe('fire evidence', () => {
     expect(fireEvidence(detail)).toBeNull();
   });
 
-  it('preserves fire/smoke confidence and filters boxes outside the source image', () => {
+  it('preserves fire confidence and rejects smoke and out-of-frame boxes', () => {
     const valid = {
-      label: 'smoke',
+      label: 'fire',
       confidence: 0.83,
       boundingBox: { x: 0.1, y: 0.2, width: 0.3, height: 0.4 },
     };
@@ -40,10 +40,12 @@ describe('fire evidence', () => {
           confidence: 0.81,
           status: 'SUCCESS',
           metadata: {
+            incidentConfidencePolicyVersion: 'fire-only-temporal-min-v1',
             consecutiveFrames: 3,
             windowSeconds: 5,
             detections: [
               valid,
+              { ...valid, label: 'smoke', confidence: 0.99 },
               { ...valid, boundingBox: { x: 0.9, y: 0, width: 0.3, height: 0.4 } },
               { ...valid, label: 'person' },
               { ...valid, confidence: Number.NaN },
@@ -53,5 +55,12 @@ describe('fire evidence', () => {
       ],
     };
     expect(fireEvidence(detail)).toEqual({ count: 3, window: 5, detections: [valid] });
+    const metadata = detail.aiResults?.[0]?.metadata;
+    if (!metadata) throw new Error('Missing test fire metadata');
+    metadata.detections = [{ ...valid, label: 'smoke' }];
+    expect(fireEvidence(detail)).toBeNull();
+    metadata.detections = [valid];
+    metadata.incidentConfidencePolicyVersion = 'fire-temporal-min-v1';
+    expect(fireEvidence(detail)).toBeNull();
   });
 });

@@ -4,6 +4,22 @@ import {
 } from '../src/notifications/telegram/telegram-message-builder';
 
 describe('Telegram message builder', () => {
+  it('describes fire and its red box without advertising smoke detection', () => {
+    const message = buildTelegramAlert(
+      {
+        eventType: 'FIRE_SMOKE_DETECTED',
+        cameraName: 'Bếp',
+        zoneName: null,
+        detectedAt: new Date('2026-10-29T07:32:10Z'),
+        timezone: 'Asia/Ho_Chi_Minh',
+        snapshotAnnotated: true,
+      },
+      false,
+    );
+    expect(message).toContain('Cảnh báo: Phát hiện lửa');
+    expect(message).toContain('Vùng lửa được khoanh đỏ.');
+    expect(message).not.toMatch(/khói|smoke|vàng/i);
+  });
   it('hiển thị khu vực chưa xác định và giữ tên chứa markup dưới dạng văn bản thường', () => {
     const message = buildTelegramAlert(
       {

@@ -54,16 +54,24 @@
     "yaml": "^2.9.1"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
+    "apps/orchestrator/**/*.{ts,tsx}": [
+      "pnpm --filter @cam/orchestrator exec eslint --fix",
+      "prettier --write"
+    ],
+    "apps/web/**/*.{ts,tsx}": [
+      "pnpm --filter @cam/web exec eslint --fix",
+      "prettier --write"
+    ],
+    "packages/contracts/**/*.ts": [
+      "pnpm --filter @cam/contracts exec eslint --fix",
       "prettier --write"
     ],
     "*.{json,md,yaml,yml}": [
       "prettier --write"
     ],
     "*.py": [
-      "ruff check --fix",
-      "ruff format"
+      "node tools/scripts/py.mjs ruff check --fix",
+      "node tools/scripts/py.mjs ruff format"
     ]
   },
   "dependencies": {
