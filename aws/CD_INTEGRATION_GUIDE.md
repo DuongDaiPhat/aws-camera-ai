@@ -1,5 +1,7 @@
 # CameraAI — Hướng dẫn tích hợp CD từ Dev đến Production
 
+**Nếu nhóm ba người đang bắt đầu toàn Sprint 4:** đi từ [bộ hướng dẫn AWS cho người mới](sprint4/README.md). Tài liệu CD này là phần triển khai/phát hành do C phụ trách sau khi các bước ứng dụng và hạ tầng tiên quyết đã đạt.
+
 **Cập nhật:** 03/11/2026. **Đối tượng:** thành viên chưa có kinh nghiệm CD.
 
 Tài liệu hướng dẫn bổ sung **GitHub Actions → ECR → EC2 qua Systems Manager → Staging → duyệt → Production**. Các đoạn mã dưới đây là mẫu tích hợp để bạn tạo thành file trong repository. Việc có tài liệu này không có nghĩa pipeline đã được cài đặt hoặc chạy thành công trên AWS.
