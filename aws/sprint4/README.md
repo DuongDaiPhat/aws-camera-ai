@@ -11,7 +11,7 @@ Bạn không cần biết AWS trước khi bắt đầu. Cần biết chạy d�
 1. Cả ba đọc [chuẩn bị chung](01_CHUAN_BI_CHUNG.md), làm mốc G0 trong một phiên ngắn.
 2. Mở ba tài liệu A/B/C và bắt đầu **cùng lúc**. Không yêu cầu A học xong toàn bộ rồi B mới làm.
 3. Ghi tài nguyên và kết quả vào [mẫu bàn giao](06_MAU_BAN_GIAO.md).
-4. Gặp nhau tại các mốc trong [ghép hệ thống và nghiệm thu](05_GHEP_HE_THONG.md).
+4. Làm [runbook ghép hệ thống R0–R7](09_RUNBOOK_GHEP_HE_THONG.md): nối cấu hình, deploy stack, auth, pipeline face/results, deadline, sender, cloud/edge và vận hành/CD. Dùng [bảng nghiệm thu](05_GHEP_HE_THONG.md) để duyệt kết quả.
 5. C triển khai CD theo [hướng dẫn CD hiện có](../CD_INTEGRATION_GUIDE.md) sau khi bản deploy thủ công đã hoạt động.
 
 ## Phân công mới cho đúng ba người
@@ -83,5 +83,6 @@ Mỗi phiên có thể cần nhiều buổi. Plan cũ 72 giờ-người + dự p
 - `E2E_PASS`: video/model thật → incident → thông báo thật hoặc phạm vi dry-run được ghi rõ.
 - `BLOCKED_ACCOUNT`: thiếu quyền, quota, phương thức thanh toán hoặc kênh liên lạc chưa được duyệt.
 - `NEEDS_FIX`: mã hoặc cấu hình còn lỗi. Screenshot trang Console xanh không đủ để đổi thành PASS.
+- `NEEDS_IMPLEMENTATION`: runbook yêu cầu file/API/worker chưa có trong commit code; hoàn thành PR tương ứng trước khi chạy chặng phụ thuộc.
 
 Mọi `AWS-01..10` trong [kế hoạch gốc](../SPRINT_4_AWS_EXECUTION_PLAN.md) được ánh xạ trong [bảng nghiệm thu](05_GHEP_HE_THONG.md). [Lab 00–10](../labs/README.md) vẫn là bài thực hành bổ trợ có code mẫu; bộ này bổ sung thứ tự bấm Console, tổ chức ba người và quy trình ghép.

@@ -2,6 +2,8 @@
 
 Copy mẫu vào ghi chép nhóm được kiểm soát hoặc `docs/test/sprint-4-aws/` khi không có dữ liệu nhạy cảm. Đây là template chưa chạy. Không ghi password, AWS key, token, signed URL, số điện thoại đầy đủ hoặc ảnh mặt vào Git.
 
+Khi ghép, điền thêm [bảng nối config và phiếu R0–R7](09_RUNBOOK_GHEP_HE_THONG.md). Ghi tên biến thực, file đọc biến và commit PR triển khai; không chỉ ghi ARN/URL mà thiếu service nào nhận giá trị đó.
+
 ## 1. Chốt phạm vi
 
 | Mục                                               | Nhóm điền      |
