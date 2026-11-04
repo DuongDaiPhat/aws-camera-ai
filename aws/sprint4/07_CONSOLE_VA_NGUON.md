@@ -2,6 +2,8 @@
 
 Đối chiếu **04/11/2026**. Đã xem trực tiếp các biểu mẫu Cognito, S3, SQS, Lambda, EC2, SNS, SMS, Step Functions, CloudWatch và IAM; xem [chi tiết và giới hạn kiểm chứng](08_THUC_HANH_CONSOLE.md). Các màn hình khác vẫn dựa trên tài liệu chính thức. English là baseline. AWS đang dùng nhãn Lambda **Event Functions** và **Connect Customer** trên một số tài liệu; tài khoản có thể còn tên Lambda/Amazon Connect. Không chuyển sang sản phẩm khác chỉ vì nhãn đổi.
 
+08 là nguồn đối chiếu **nhãn Console đã quan sát**; [09](09_RUNBOOK_GHEP_HE_THONG.md) là nguồn đối chiếu **config và thứ tự ghép R0–R7**. Bảng dưới là đường tìm nhanh, không mở rộng phạm vi đã kiểm chứng. Đã tạo/xóa thử SNS topic; chưa gửi email/SMS/call hoặc chạy workflow/alarm E2E trong khảo sát. Connect chỉ thấy tên Amazon Connect Customer trong Search, chưa xem trang instance.
+
 ## 1. Bản đồ màn hình
 
 | Việc               | Đường chính                                                                                         | Nếu không thấy                                   |
@@ -24,6 +26,22 @@
 | Stack output       | CloudFormation → Stacks → stack → Outputs                                                           | Events để đọc deployment failure                 |
 
 Không thấy nút: kiểm tra account/Region/permission. Ghi tên màn hình/nhãn thực tế vào evidence, cập nhật tài liệu qua PR khi xác minh khác biệt; không chụp secret.
+
+### Nhãn cần đối chiếu chính xác với 08
+
+| Việc                    | Trình tự hiện đã quan sát                                                                                          | Giới hạn                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| Kết thúc Cognito wizard | Set up resources for your application → Create user directory                                                      | Chưa tạo pool; application name là tên app client                                         |
+| Lambda mới              | Event Functions → Create Event Function → Additional settings → Custom execution role                              | Chưa tạo/deploy/invoke; role mặc định chỉ Logs cơ bản                                     |
+| S3 namespace            | General purpose → Global namespace cho bài này                                                                     | Account Regional namespace là lựa chọn khác cần điều chỉnh template                       |
+| DLQ queue nguồn         | Dead-letter queue - Optional → Enabled → Choose queue → Maximum receives = 5                                       | Mặc định quan sát 10; Redrive allow policy có ý nghĩa khác                                |
+| Workflow mới            | State machines → Create state machine → Create from blank/name/Standard → Continue → Design/Code/Config → Create   | Chưa lưu/execute; chọn JSONPath cho mẫu lab                                               |
+| SNS trang giới thiệu    | Topic name → Next step → Details Standard/Name → Create topic                                                      | Đã tạo/xóa topic; subscription/publish mới xem form                                       |
+| SMS                     | Mobile → Text messaging (SMS) → Account information                                                                | Có lỗi không xác định sandbox; không kết luận đã ra sandbox                               |
+| IAM EC2 role            | Select trusted entity (AWS service/EC2/EC2) → Add permissions (Use existing policy) → Name, review, and create     | Chưa Create role; IAM Region Global là bình thường                                        |
+| Alarm SQS               | Alarms → Create alarm → Metrics/Classic → Select metric → Browse SQS/Queue Metrics → chọn một hàng → Select metric | Đã xem điều kiện/Additional configuration/Configure actions; chưa hai bước cuối/tạo alarm |
+
+Upload/presign/lifecycle S3, Lambda Code/trigger/logs, VPC/SSM và CloudFormation vẫn phải đối chiếu nguồn AWS và ghi evidence khi người học thực hiện; không gọi các màn hình này là đã xác minh trực tiếp từ khảo sát 08.
 
 ## 2. Nguồn hiện hành
 
@@ -65,3 +83,17 @@ Không thấy nút: kiểm tra account/Region/permission. Ghi tên màn hình/nh
 | Không xem live                  | Media path/ICE/TURN                                     | Gate live riêng, Lab 08                           |
 
 Sau khi sửa một tầng, chạy lại test tầng đó rồi test tích hợp liên quan. Một response 200 chưa đủ đánh dấu cả sprint pass.
+
+### Lỗi ghép hệ thống — dùng cùng bảng chẩn đoán của 09
+
+| Triệu chứng                                          | Điểm đối chiếu trước                                                                                     | Kết luận cần tránh                                               |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Có log khởi tạo S3 nhưng object không tới bucket dev | STORAGE_PROVIDER=s3, S3_BUCKET, service dùng STORAGE_SERVICE và key thực                                 | Log constructor không chứng minh adapter được chọn               |
+| FACE_PROVIDER đổi nhưng Lambda không có job          | Worker baseline dùng BullMQ; PR transport/outbox/dispatcher SQS của R3                                   | FACE_PROVIDER không tự chuyển queue transport                    |
+| CLI được nhưng Docker AccessDenied/credentials lỗi   | Profile không tự vào container; instance role/IMDS và cặp key env ghi đè; xem credential chain §2 của 09 | Không nhúng key vào image để chữa                                |
+| AI result 400/401/404/409                            | DTO UUID/schema; X-Internal-Token từ INTERNAL_SERVICE_TOKEN; event tồn tại; resultId/payload conflict    | Không gửi sender outcome vào AI result DTO hoặc đổi ID mỗi retry |
+| /health 200 nhưng pipeline hỏng                      | R0/R6: test riêng DB, S3 và job/result                                                                   | HealthService baseline không probe dependencies                  |
+| Không có template/worker/command API                 | PR/owner/commit thực và điểm dừng R1/R3/R4/R5                                                            | Ghi NEEDS_IMPLEMENTATION; không cấu hình URL/env giả             |
+| Chỉ logger/echo lab thành công                       | Receipt/incident/claim/outcome và evidence chặng thật                                                    | LAB_PASS không tự thành INTEGRATION_PASS/E2E_PASS                |
+
+Ghi trạng thái theo 05/06: PASS kèm phạm vi/chặng, hoặc NEEDS_IMPLEMENTATION/NEEDS_FIX/BLOCKED_ACCOUNT/BLOCKED_AI. Đi theo thứ tự R của 09 khi tìm tầng lỗi, rồi cập nhật mốc G tương ứng trong 05; không chạy lại toàn bộ lab khi chỉ một tầng thay đổi.
