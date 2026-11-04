@@ -16,6 +16,8 @@ VPC/subnet chưa có người review thì làm IAM/SAM/ops topic trước. Khôn
 
 ## C2. Chuẩn bị EC2 instance role
 
+Xem [ba bước IAM wizard đã kiểm tra](08_THUC_HANH_CONSOLE.md#c--iam-tạo-ec2-role-bằng-ba-bước-rõ-ràng), từ trusted entity tới review policy.
+
 1. **IAM → Roles → Create role → AWS service → EC2**; role riêng `camerai-s4-dev-ec2`.
 2. Attach `AmazonSSMManagedInstanceCore` cho Session Manager. Quyền deploy ECR, đọc cấu hình và ghi CloudWatch được thêm theo tài nguyên thực, không gắn AdministratorAccess.
 3. Quyền app cần: S3 upload/read/presign đúng bucket/prefix, SendMessage jobs, Receive/Delete/GetQueueAttributes results, StartExecution đúng workflow; quyền có thể chia role/cơ chế cấp credentials rõ ràng khi tách service.
@@ -87,8 +89,10 @@ Với Next.js, biến `NEXT_PUBLIC_*` thường được đóng vào bundle lúc
 
 ## C8. Tạo ops email và alarm đầu tiên
 
+Xem [chi tiết CloudWatch đã kiểm tra tới Configure actions](08_THUC_HANH_CONSOLE.md#c--cloudwatch-chọn-đúng-metric-và-cấu-hình-actions).
+
 1. Tạo SNS Standard topic `camerai-s4-dev-ops-alerts` và email subscription như A4; confirm. Topic này độc lập incident notification để sender hỏng vẫn báo được.
-2. Mở **CloudWatch → Alarms → All alarms → Create alarm → Select metric**.
+2. Mở **CloudWatch → Alarms → Create alarm → Data source: Metrics → Type: Classic → Select metric**.
 3. Namespace SQS → Queue metrics → chọn `ApproximateNumberOfMessagesVisible` của **DLQ** B bàn giao. Kiểm tra dimension QueueName, không chọn queue chính.
 4. Statistic Maximum, period 1 phút, static threshold **Greater than 0**, 1/1 datapoint cho bài thử. Missing data chọn notBreaching cho bài DLQ, ghi quyết định; không áp dụng lựa chọn này cho heartbeat.
 5. **Next → Notification → In alarm → Select existing SNS topic** ops → Next → đặt tên → Preview/Create alarm.
