@@ -57,6 +57,8 @@ Thực hiện trên nhánh code tích hợp, không trên nhánh tài liệu. [A
 
 ## A4. SNS email độc lập với B/C
 
+Xem [chi tiết các trường SNS và cách dọn topic đã thử trên Console](08_THUC_HANH_CONSOLE.md#a--sns-tạo-topic-mở-subscription-và-publish).
+
 1. Search **Simple Notification Service**, chọn **Topics → Create topic**.
 2. Type **Standard**, Name `camerai-s4-dev-incident-email`; giữ access private, Create topic. Copy ARN.
 3. Trong topic, **Create subscription**; Protocol Email, Endpoint email thật của bạn; Create subscription.
@@ -67,6 +69,8 @@ Thực hiện trên nhánh code tích hợp, không trên nhánh tài liệu. [A
 [Tạo topic](https://docs.aws.amazon.com/sns/latest/dg/sns-create-topic.html), [subscription](https://docs.aws.amazon.com/sns/latest/dg/sns-create-subscribe-endpoint-to-topic.html), [publish](https://docs.aws.amazon.com/sns/latest/dg/sns-publishing.html).
 
 ## A5. Kiểm tra SMS/Connect ngay phiên đầu
+
+Đã kiểm tra [màn hình SMS và lỗi đọc sandbox](08_THUC_HANH_CONSOLE.md#a--sms-nhận-biết-màn-hình-và-lỗi-sandbox). Trang instance của Connect chưa được kiểm chứng trực tiếp.
 
 Không đợi ngày demo để phát hiện tài khoản chưa được gửi. Ghi hai dòng trạng thái riêng `SMS_REAL` và `CALL_REAL` vào sổ, kể cả khi chọn dry-run trước.
 

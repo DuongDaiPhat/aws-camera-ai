@@ -106,6 +106,8 @@ Trong adapter sản phẩm: phân biệt KNOWN, UNKNOWN và lỗi/no-face không
 
 ## B8. Tạo workflow chờ nhìn thấy được
 
+Xem [wizard và các trường Design/Code/Config đã kiểm tra](08_THUC_HANH_CONSOLE.md#b--step-functions-từ-wizard-tới-code-và-config). Chọn Standard ngay trong hộp thoại đầu; Continue mở editor, Create mới lưu workflow.
+
 1. Tạo deadline Lambda học tập bằng code hoàn chỉnh ở [Lab 06 phần A](../labs/06_STEP_FUNCTIONS.md); Deploy. Code chỉ log, chưa gửi thông báo.
 2. Search **Step Functions → State machines → Create state machine → Create from blank**. Name `camerai-s4-lab-b-deadline` → Continue.
 3. **Code**: dùng định nghĩa JSON trong Lab 06. Bài đó dùng JSONPath (`SecondsPath`, `Payload.$`); không đổi sang JSONata trong wizard rồi dán code JSONPath. Nếu có Query language, chọn JSONPath hoặc giữ định nghĩa JSONPath hợp lệ ở cấp workflow.

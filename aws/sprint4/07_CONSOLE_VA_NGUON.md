@@ -1,27 +1,27 @@
 # Tìm màn hình Console và xử lý lỗi
 
-Đối chiếu **04/11/2026**. Đã xem trực tiếp các biểu mẫu Cognito, S3, SQS, Lambda và EC2; xem [chi tiết và giới hạn kiểm chứng](08_THUC_HANH_CONSOLE.md). Các màn hình khác vẫn dựa trên tài liệu chính thức. English là baseline. AWS đang dùng nhãn Lambda **Event Functions** và **Connect Customer** trên một số tài liệu; tài khoản có thể còn tên Lambda/Amazon Connect. Không chuyển sang sản phẩm khác chỉ vì nhãn đổi.
+Đối chiếu **04/11/2026**. Đã xem trực tiếp các biểu mẫu Cognito, S3, SQS, Lambda, EC2, SNS, SMS, Step Functions, CloudWatch và IAM; xem [chi tiết và giới hạn kiểm chứng](08_THUC_HANH_CONSOLE.md). Các màn hình khác vẫn dựa trên tài liệu chính thức. English là baseline. AWS đang dùng nhãn Lambda **Event Functions** và **Connect Customer** trên một số tài liệu; tài khoản có thể còn tên Lambda/Amazon Connect. Không chuyển sang sản phẩm khác chỉ vì nhãn đổi.
 
 ## 1. Bản đồ màn hình
 
-| Việc               | Đường chính                                                             | Nếu không thấy                                   |
-| ------------------ | ----------------------------------------------------------------------- | ------------------------------------------------ |
-| User Pool          | Cognito → User pools → Create user pool                                 | Get started/Define your application              |
-| Callback/scopes    | Pool → Applications → App clients → client → Login pages/Edit           | App integration/Login pages, giữ đúng client ID  |
-| Domain             | Pool → Branding → Domain                                                | Domain trong menu pool                           |
-| Bucket             | S3 → General purpose buckets → Create bucket                            | Buckets, không chọn directory bucket             |
-| Queue              | SQS → Queues → Create queue                                             | Kiểm tra Region/quyền ListQueues                 |
-| SQS mapping        | Lambda Function overview → Add trigger → SQS                            | Configuration → Triggers                         |
-| Timeout/env Lambda | Configuration → General configuration/Environment variables → Edit      | Không phải env laptop                            |
-| Log Lambda         | Monitor → View CloudWatch logs                                          | Logs/Log groups; invoke trước để có stream       |
-| Workflow           | Step Functions → Create state machine → Create from blank → Code/Config | Wizard template; kiểm tra Standard/JSONPath      |
-| SNS email          | Topics → topic → Create subscription                                    | Subscriptions → Create subscription              |
-| SMS                | SNS SMS/AWS End User Messaging SMS                                      | Kiểm tra sandbox, Region, quyền                  |
-| Connect outbound   | Instance → Channels and communications → Telephony                      | Telephony settings trên UI cũ                    |
-| Server             | EC2 → Instances → Launch instances                                      | Search service EC2                               |
-| Quản trị server    | Instance → Connect → Session Manager                                    | Agent/role/managed node/network                  |
-| Alarm              | CloudWatch → Alarms → All alarms → Create alarm                         | Classic metric/alarm; chưa chuyển sang Space mới |
-| Stack output       | CloudFormation → Stacks → stack → Outputs                               | Events để đọc deployment failure                 |
+| Việc               | Đường chính                                                                                         | Nếu không thấy                                   |
+| ------------------ | --------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| User Pool          | Cognito → User pools → Create user pool                                                             | Get started/Define your application              |
+| Callback/scopes    | Pool → Applications → App clients → client → Login pages → Managed login pages configuration → Edit | App integration/Login pages, giữ đúng client ID  |
+| Domain             | Pool → Branding → Domain                                                                            | Domain trong menu pool                           |
+| Bucket             | S3 → General purpose buckets → Create bucket                                                        | Buckets, không chọn directory bucket             |
+| Queue              | SQS → Queues → Create queue                                                                         | Kiểm tra Region/quyền ListQueues                 |
+| SQS mapping        | Lambda Function overview → Add trigger → SQS                                                        | Configuration → Triggers                         |
+| Timeout/env Lambda | Configuration → General configuration/Environment variables → Edit                                  | Không phải env laptop                            |
+| Log Lambda         | Monitor → View CloudWatch logs                                                                      | Logs/Log groups; invoke trước để có stream       |
+| Workflow           | Step Functions → Create state machine → Create from blank → Code/Config                             | Wizard template; kiểm tra Standard/JSONPath      |
+| SNS email          | Topics → topic → Create subscription                                                                | Subscriptions → Create subscription              |
+| SMS                | SNS SMS/AWS End User Messaging SMS                                                                  | Kiểm tra sandbox, Region, quyền                  |
+| Connect outbound   | Instance → Channels and communications → Telephony                                                  | Telephony settings trên UI cũ                    |
+| Server             | EC2 → Instances → Launch instances                                                                  | Search service EC2                               |
+| Quản trị server    | Instance → Connect → Session Manager                                                                | Agent/role/managed node/network                  |
+| Alarm              | CloudWatch → Alarms → Create alarm → Metrics → Classic                                              | Classic metric/alarm; chưa chuyển sang Space mới |
+| Stack output       | CloudFormation → Stacks → stack → Outputs                                                           | Events để đọc deployment failure                 |
 
 Không thấy nút: kiểm tra account/Region/permission. Ghi tên màn hình/nhãn thực tế vào evidence, cập nhật tài liệu qua PR khi xác minh khác biệt; không chụp secret.
 
