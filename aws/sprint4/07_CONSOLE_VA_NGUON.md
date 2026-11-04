@@ -1,6 +1,6 @@
 # Tìm màn hình Console và xử lý lỗi
 
-Đối chiếu **04/11/2026** từ tài liệu chính thức, chưa phải ảnh chụp tài khoản nhóm. English là baseline. AWS đang dùng nhãn Lambda **Event Functions** và **Connect Customer** trên một số tài liệu; tài khoản có thể còn tên Lambda/Amazon Connect. Không chuyển sang sản phẩm khác chỉ vì nhãn đổi.
+Đối chiếu **04/11/2026**. Đã xem trực tiếp các biểu mẫu Cognito, S3, SQS, Lambda và EC2; xem [chi tiết và giới hạn kiểm chứng](08_THUC_HANH_CONSOLE.md). Các màn hình khác vẫn dựa trên tài liệu chính thức. English là baseline. AWS đang dùng nhãn Lambda **Event Functions** và **Connect Customer** trên một số tài liệu; tài khoản có thể còn tên Lambda/Amazon Connect. Không chuyển sang sản phẩm khác chỉ vì nhãn đổi.
 
 ## 1. Bản đồ màn hình
 

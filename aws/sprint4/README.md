@@ -4,7 +4,7 @@ Ngày đối chiếu tài liệu AWS: **04/11/2026**. Ngôn ngữ Console dùng 
 
 Bạn không cần biết AWS trước khi bắt đầu. Cần biết chạy dự án local, sửa cấu hình và đọc kết quả kiểm thử. Các bước tạo tài nguyên dùng Console; các bước tích hợp ứng dụng vẫn cần lập trình. Không có thao tác bấm nút nào tự viết adapter NestJS hoặc sender an toàn cho bạn.
 
-Tên màn hình được đối chiếu hướng dẫn AWS chính thức tại ngày trên, chưa được kiểm tra trực tiếp trong Console của tài khoản nhóm. AWS có thể triển khai giao diện khác nhau theo tài khoản, Region, quyền và ngôn ngữ. Khi không khớp, dùng [bảng tìm màn hình](07_CONSOLE_VA_NGUON.md), không chọn cấu hình gần giống một cách phỏng đoán.
+Đã mở trực tiếp Console trên trình duyệt của bạn để kiểm tra Cognito, S3, SQS, Lambda và EC2 ngày 04/11/2026. Xem [các bước chi tiết và phạm vi kiểm chứng](08_THUC_HANH_CONSOLE.md). Việc kiểm tra dừng trước nút tạo/lưu tài nguyên; chưa phải kiểm thử triển khai thành công. Các dịch vụ còn lại tiếp tục dựa trên tài liệu AWS chính thức.
 
 ## Bắt đầu ở đâu?
 
