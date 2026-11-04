@@ -4,6 +4,8 @@
 
 ## B1. Tạo kho ảnh private
 
+Làm theo [biểu mẫu S3/SQS/Lambda chi tiết đã kiểm tra](08_THUC_HANH_CONSOLE.md) cùng các bước dưới đây.
+
 1. Search **S3 → General purpose buckets/Buckets → Create bucket**.
 2. Region Singapore; bucket type General purpose nếu có lựa chọn. Name `camerai-s4-lab-b-media-<suffix-duy-nhat>`.
 3. Giữ Object Ownership: ACLs disabled; **Block all public access** bật. Default encryption chọn SSE-S3 cho lab. Không bật public ACL để sửa AccessDenied.
@@ -42,9 +44,9 @@ Với mỗi luồng tạo DLQ trước, queue chính sau. Các queue đều **St
 
 ## B3. Tạo Lambda và thử queue → log
 
-1. Search **Lambda → Functions → Create function → Author from scratch**. Name `camerai-s4-lab-b-echo`.
+1. Search **Lambda → Event Functions → Create Event Function → Author from scratch**. Name `camerai-s4-lab-b-echo`.
 2. Chọn Python 3.12 để khớp code lab có sẵn, x86_64. Đây là runtime chủ động chọn, không phải tuyên bố runtime mới nhất. Kiểm tra còn được AWS hỗ trợ; nếu nhóm chọn runtime khác thì cập nhật code/build/test đồng bộ.
-3. Permissions: dùng role lab có Logs; tạo function. Vào **Code**, dán handler học tập từ [Lab 02](../labs/02_LAMBDA_SQS.md), giữ file/handler đúng (`lambda_function.lambda_handler` nếu dùng file `lambda_function.py`), bấm **Deploy**.
+3. Mở Additional settings → Custom execution role để dùng role C chuẩn bị; role mặc định chỉ có Logs cơ bản. Tạo function. Vào **Code**, dán handler học tập từ [Lab 02](../labs/02_LAMBDA_SQS.md), giữ file/handler đúng (`lambda_function.lambda_handler` nếu dùng file `lambda_function.py`), bấm **Deploy**.
 4. **Configuration → General configuration → Edit**: Timeout 10 giây, Memory 128 MB cho echo; Save. Face thực đo lại memory/timeout.
 5. **Configuration → Permissions → Execution role**, mở IAM role. C cấp quyền `ReceiveMessage`, `DeleteMessage`, `GetQueueAttributes` cho đúng queue nguồn, Logs cho log group của function. Role sender còn cần `SendMessage` đúng results ARN.
 6. Quay **Function overview → Add trigger → SQS**, chọn queue học riêng dùng cho echo, batch size 1, batching window 0, Enable trigger → Add. Không để echo và face cùng consume face-jobs.

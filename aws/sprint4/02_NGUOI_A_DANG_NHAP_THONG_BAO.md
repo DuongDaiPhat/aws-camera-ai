@@ -4,6 +4,8 @@ Bạn làm song song với B/C sau G0. Đầu ra đầu tiên là login Cognito 
 
 ## A1. Tạo Cognito User Pool cho browser
 
+Đọc [hướng dẫn từng trường đã kiểm tra trên Console](08_THUC_HANH_CONSOLE.md#a--tạo-cognito-và-sửa-callback-đúng-chỗ) trước khi thực hiện. Nút cuối wizard hiện tại là **Create user directory**.
+
 1. Mở Search → **Cognito**, kiểm tra Singapore → **User pools → Create user pool**; tài khoản mới có thể hiện **Get started**.
 2. Trong **Define your application**, chọn **Single-page application (SPA)** vì flow dự án chạy ở browser. Đặt application `camerai-s4-dev-web`.
 3. Trong options, chọn Email làm định danh và email là thuộc tính bắt buộc; chưa thêm phone cho bài cơ bản.
@@ -12,7 +14,7 @@ Bạn làm song song với B/C sau G0. Đầu ra đầu tiên là login Cognito 
 [AWS wizard tạo ứng dụng](https://docs.aws.amazon.com/cognito/latest/developerguide/getting-started-user-pools-application.html).
 
 5. Vào **Applications → App clients**, mở client vừa tạo; xác nhận không có client secret.
-6. Mở **Login pages → Edit** nếu có tab này. Chọn Cognito provider, Authorization code grant; scopes `openid`, `email`, `profile`. Tắt implicit grant.
+6. Mở tab **Login pages → Managed login pages configuration → Edit**; tránh nút Edit trong App client information. Chọn Cognito provider, Authorization code grant; scopes `openid`, `email`, `profile`. Tắt implicit grant.
 7. Callback local phải đúng như bước 4; Allowed sign-out URL là `http://localhost:3000`.
 8. Trong **Branding → Domain**, dùng domain có sẵn hoặc tạo Amazon Cognito domain prefix duy nhất. Copy origin HTTPS thực tế, không thêm `/oauth2/authorize` vào biến domain.
 9. Kiểm tra plan: Essentials cho managed login; không tự bật Plus. Nếu dùng Lite, classic hosted UI có thể khác hình trong tài liệu. App client cần branding nếu Console yêu cầu.

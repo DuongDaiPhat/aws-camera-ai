@@ -25,6 +25,8 @@ Instance profile đưa role cho EC2; user role của người bấm Launch là d
 
 ## C3. Launch một EC2 dev bằng Console
 
+Đối chiếu [hướng dẫn từng khung EC2 đã kiểm tra](08_THUC_HANH_CONSOLE.md#c--ec2-đọc-từng-khung-trước-khi-launch), đặc biệt SSH Anywhere, encryption và Advanced details.
+
 1. Search **EC2 → Instances → Launch instances**.
 2. Name `camerai-s4-dev-app`; thêm tags Project/Environment/Owner/Sprint.
 3. **Application and OS Images**: chọn Ubuntu Server 24.04 LTS, publisher Canonical, x86_64. Bản LTS này là baseline được chọn, không phải lời khuyên bấm AMI mới nhất mà chưa kiểm thử.
