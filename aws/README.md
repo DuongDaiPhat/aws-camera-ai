@@ -11,6 +11,7 @@ Cập nhật theo kiến trúc Hybrid EC2 + AWS Lambda ngày **21/10/2026**. Đ�
 
 Tài liệu tra cứu khi đã bắt đầu thực hành:
 
+- [Hướng dẫn tích hợp CD: Dev → Staging → Production](CD_INTEGRATION_GUIDE.md) — giải thích luồng phát hành, cấu hình AWS/GitHub, mẫu workflow, deploy qua SSM, kiểm thử và rollback.
 - [Kế hoạch Sprint 4: task, owner, phụ thuộc và nghiệm thu](SPRINT_4_AWS_EXECUTION_PLAN.md).
 - [Sequence Cognito, face, escalation và sơ đồ CloudWatch](METHOD_1_FEATURE_DIAGRAMS.md).
 - [Draw.io nguồn: tổng quan và EC2 contents](diagrams/CameraAI_Hybrid_EC2_Lambda.drawio).
