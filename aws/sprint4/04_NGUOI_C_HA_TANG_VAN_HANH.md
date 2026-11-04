@@ -2,6 +2,8 @@
 
 Bạn bắt đầu cùng A/B sau G0: kiểm tra quyền/kênh báo lỗi, dựng EC2 và production Compose bằng app local đã review. Chưa cần chờ face model hoặc Cognito. Dùng [mẫu inventory](06_MAU_BAN_GIAO.md) để không tạo trùng tài nguyên.
 
+**Khi ghép:** C là người deploy stack chung duy nhất ở R1, hỗ trợ config/credentials R0–R5, triển khai cloud/edge R6 và vận hành/CD R7 trong [runbook 09](09_RUNBOOK_GHEP_HE_THONG.md). Không dùng Compose dev hoặc SAM echo như bộ triển khai tích hợp đã hoàn chỉnh. VPC/SSM/Docker/agent và các bước sau launch chưa được kiểm tra trực tiếp trong 08; wizard EC2/IAM mới được xem tới trước nút tạo.
+
 ## C1. Chốt mạng và nơi lưu dữ liệu trước khi bấm Launch
 
 Mục tiêu demo: public reverse proxy HTTPS; app/DB/Redis trong mạng Docker private; edge qua VPN. Lambda ban đầu không gắn VPC, gọi AWS SDK và HTTPS API. Không cần dựng NAT Gateway chỉ để Lambda đọc S3/SQS.
@@ -18,8 +20,8 @@ VPC/subnet chưa có người review thì làm IAM/SAM/ops topic trước. Khôn
 
 Xem [ba bước IAM wizard đã kiểm tra](08_THUC_HANH_CONSOLE.md#c--iam-tạo-ec2-role-bằng-ba-bước-rõ-ràng), từ trusted entity tới review policy.
 
-1. **IAM → Roles → Create role → AWS service → EC2**; role riêng `camerai-s4-dev-ec2`.
-2. Attach `AmazonSSMManagedInstanceCore` cho Session Manager. Quyền deploy ECR, đọc cấu hình và ghi CloudWatch được thêm theo tài nguyên thực, không gắn AdministratorAccess.
+1. **IAM → Roles → Create role → Select trusted entity → AWS service**. Trong **Service or use case** chọn EC2, rồi radio **EC2** thông thường; Next. IAM hiển thị Global; không mở IAM Identity Center hoặc Roles Anywhere.
+2. **Add permissions → Use existing policy**, tìm `AmazonSSMManagedInstanceCore` và chọn checkbox. Next → **Name, review, and create**, đặt role riêng `camerai-s4-dev-ec2`, kiểm tra trust/policy/tags rồi Create role. Quyền ECR, đọc cấu hình và ghi CloudWatch được thêm theo tài nguyên thực, không gắn AdministratorAccess.
 3. Quyền app cần: S3 upload/read/presign đúng bucket/prefix, SendMessage jobs, Receive/Delete/GetQueueAttributes results, StartExecution đúng workflow; quyền có thể chia role/cơ chế cấp credentials rõ ràng khi tách service.
 4. CloudWatch agent cần quyền ghi metrics/logs tương ứng. Customer-managed KMS key còn cần key permissions; policy IAM không thay thế key policy.
 
@@ -35,8 +37,8 @@ Instance profile đưa role cho EC2; user role của người bấm Launch là d
 4. **Instance type**: chọn cấu hình có khoảng 4 GiB RAM làm điểm đo ban đầu của app tier, xem giá đúng Region trước khi duyệt; không chạy model training trên máy này. Đo RAM/CPU sau deploy để điều chỉnh.
 5. **Key pair**: nếu đã xác nhận đủ điều kiện SSM, có thể chọn proceed without key pair. Nếu chưa, tạo key pair riêng và giữ file private; chỉ dùng SSH giới hạn /32 làm phương án quản trị đã duyệt.
 6. **Network settings → Edit**: chọn VPC/subnet C1, public IPv4 cho phương án public dev, security group C1. Không chấp nhận rule SSH Anywhere mặc định.
-7. **Configure storage**: đặt root EBS encrypted, ví dụ 30 GiB là số khởi đầu cần duyệt, không phải sizing đảm bảo. Ghi Delete on termination và vị trí DB backup.
-8. **Advanced details → IAM instance profile**: chọn role C2. Metadata: require IMDSv2. Với SDK chạy trong Docker bridge, hop limit thường cần 2; kiểm tra credential retrieval từ chính container, không tắt IMDSv2 để chữa lỗi.
+7. **Configure storage → Advanced**: đặt root EBS encrypted; mặc định quan sát trong 08 ghi Not encrypted. Ví dụ 30 GiB là số khởi đầu cần duyệt, không phải sizing đảm bảo. Ghi Delete on termination và vị trí DB backup. File systems giữ None cho bài Compose.
+8. **Advanced details → IAM instance profile**: chọn profile C2, refresh nếu vừa tạo. **Metadata accessible = Enabled**, **Metadata version = V2 only (token required)**; với SDK trong Docker bridge kiểm tra **Metadata response hop limit = 2** và thử credentials từ chính container. Không tắt IMDSv2 để chữa lỗi.
 9. Review summary/chi phí → **Launch instance**. Đợi Running và status checks passed; mở instance Details để ghi instance ID, AZ, IP, role và volumes.
 
 [Launch wizard](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-launch-instance-wizard.html), [IMDSv2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html).
@@ -68,6 +70,8 @@ Không dùng nguyên Compose development. C tạo `infra/deploy/` qua PR; B ki�
 
 Ghi digest/commit của hai image và xác minh Dockerfile production tìm được entrypoint, workspace contracts và runtime dependencies. Nếu chưa có ECR, có thể thử build/pull có kiểm soát trong dev; trước CD phải có registry và image digest ổn định.
 
+Trước deploy điền bảng §2 của 09: **STORAGE_PROVIDER=s3**, **S3_BUCKET** đúng Name của bucket dev, auth config của provider đã chọn, queue URLs/ARNs và tên biến thực trong PR. API AI result dùng X-Internal-Token từ INTERNAL_SERVICE_TOKEN; command deadline/claim phải có contract/auth riêng đã review. Không tự dùng token Cognito làm service token. Trên EC2 bỏ cặp key tĩnh để dùng instance role; S3 adapter baseline chưa truyền session token trong nhánh credentials thủ công.
+
 ## C6. HTTPS và smoke test trên hai máy
 
 1. Người quản lý DNS tạo bản ghi app domain tới public IP đã chốt. Không cần chuyển DNS sang Route 53 nếu nhóm đã có DNS khác.
@@ -76,6 +80,8 @@ Ghi digest/commit của hai image và xác minh Dockerfile production tìm đư�
 4. A thêm callback `https://<domain>/auth/callback` và sign-out URL `https://<domain>` ở Cognito app client. Đặt `WEB_ORIGIN` và frontend API base URL cùng phương án proxy.
 5. A/B kiểm tra login, `/auth/me`, quyền camera, media signed URL và SSE. Không sửa CORS thành `*` kèm credentials để vượt lỗi.
 6. Gửi HTTPS base URL cho A/B để nối claim/deadline. Service API phải có authentication riêng; không dùng một public endpoint bỏ guard.
+
+Theo R0/R6, health hiện trả `status=ok`/`service=orchestrator` nhưng không probe dependencies. Sau health, thử auth/ownership, một thao tác DB, upload S3 và job/result qua app; health 200 chưa đủ smoke hệ thống.
 
 Với Next.js, biến `NEXT_PUBLIC_*` thường được đóng vào bundle lúc build. Auth provider có thể đổi runtime qua `/auth/config` trong code lab, nhưng điều đó không làm API base URL tự đổi theo environment. Chọn URL gateway ổn định hoặc build riêng với URL đã chốt và ghi rõ release semantics. [Next.js environment variables](https://nextjs.org/docs/app/guides/environment-variables).
 
@@ -93,9 +99,9 @@ Xem [chi tiết CloudWatch đã kiểm tra tới Configure actions](08_THUC_HANH
 
 1. Tạo SNS Standard topic `camerai-s4-dev-ops-alerts` và email subscription như A4; confirm. Topic này độc lập incident notification để sender hỏng vẫn báo được.
 2. Mở **CloudWatch → Alarms → Create alarm → Data source: Metrics → Type: Classic → Select metric**.
-3. Namespace SQS → Queue metrics → chọn `ApproximateNumberOfMessagesVisible` của **DLQ** B bàn giao. Kiểm tra dimension QueueName, không chọn queue chính.
-4. Statistic Maximum, period 1 phút, static threshold **Greater than 0**, 1/1 datapoint cho bài thử. Missing data chọn notBreaching cho bài DLQ, ghi quyết định; không áp dụng lựa chọn này cho heartbeat.
-5. **Next → Notification → In alarm → Select existing SNS topic** ops → Next → đặt tên → Preview/Create alarm.
+3. Trong Browse chọn **SQS → Queue Metrics**; có thể lọc SQS rồi nhấn Enter. Lọc `ApproximateNumberOfMessagesVisible`, kiểm tra đúng tên nguyên vẹn (không phải InQuietGroups) và QueueName của **DLQ** B bàn giao. Chọn checkbox đúng một hàng → **Select metric**.
+4. Đổi mặc định Average/5 minutes sang **Maximum/1 minute**, Conditions Static → Greater → ô **than… = 0**. Mở **Additional configuration**: Datapoints to alarm 1 out of 1, Missing data treatment chọn không vi phạm (notBreaching). Giữ Evaluation window Default (Sliding window), warm-up tắt cho bài cơ bản; không áp dụng missing policy này cho heartbeat.
+5. **Next → Configure actions → Notification → In alarm → Select an existing SNS topic → Send a notification to…**, chọn ops topic. Next → Add alarm details → Preview and create. 08 mới kiểm tra tới Configure actions; hai trang cuối/tạo alarm chưa được mở thực tế trong khảo sát.
 6. B gửi một message trực tiếp vào DLQ lab riêng để test alarm; đợi metric, xem chuyển ALARM và email nhận được. Xóa đúng message test khi được phép; không Purge queue chung.
 
 [CloudWatch static alarm](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ConsoleAlarms.html), [SNS alarm notification](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Notify_Users_Alarm_Changes.html).
@@ -123,6 +129,8 @@ Dashboard nối eventId → jobId → Lambda requestId → resultId → executio
 4. Làm [CD guide](../CD_INTEGRATION_GUIDE.md) theo chặng: ECR/release bundle → SSM staging → smoke → người review duyệt → cùng release production → kiểm tra/rollback. Chưa có budget production thì chỉ staging và ghi rõ phạm vi.
 5. Kiểm tra GitHub environment protections theo plan tài khoản. Manual trigger không tự tương đương review hai người. Chưa merge thì dùng branch/commit thử được nhóm chấp thuận; không push trực tiếp main.
 6. Thử một release lỗi có kiểm soát, rollback app về digest trước; schema migration phải tương thích ngược. Không tự rollback DB để sửa healthcheck.
+
+Đối chiếu **R7 của 09** và 05 trước phát hành: cùng release digest, config provider giữ nhất quán, migration runner có thật, smoke không chỉ health, recovery có receipt/reconcile. Thiếu file deploy/runner là NEEDS_IMPLEMENTATION; ghi PR/owner và tiếp tục phần độc lập, chưa đánh dấu deploy pass.
 
 ## C11. Dọn hoặc bàn giao
 

@@ -19,6 +19,21 @@ Mỗi mốc cần owner, reviewer và bằng chứng. Những việc chưa có s
 
 G1a/G1b chạy song song. Sender dry-run không cần SMS/Connect thật. Deadline lab chạy trước khi có EC2; deadline command cloud cần HTTPS của C. C dựng monitoring/release scripts trước business E2E.
 
+### Ghép mốc G với chặng R của runbook
+
+| Mốc nghiệm thu | Chặng 09 cần chạy                         | Bằng chứng cần mang tới                                               |
+| -------------- | ----------------------------------------- | --------------------------------------------------------------------- |
+| G0             | Phiên ghép đầu tiên, bảng config §2 và R0 | Commit code, baseline local, schema, config consumers, PR còn thiếu   |
+| G1a            | R2; kiểm tra lại sau deploy R6            | Provider thực, issuer/sub mapping, auth/ownership local và HTTPS      |
+| G1b            | R1 + R3                                   | Stack Outputs, S3/job/result/receipt, duplicate/stale/crash tests     |
+| G2a            | R4; cần HTTPS từ C/R6                     | Command thật, deadlineVersion, transaction/no-op và execution history |
+| G2b            | R5                                        | Claim/ledger/outcome, dry-run và phạm vi kênh thật                    |
+| G3             | Phần cloud R6 + R7                        | HTTPS/VPN, dependencies smoke, alarm, restore/restart/rollback        |
+| G4             | Phần edge/model và E2E của R6             | Artifact/checksum/report, trace video thật và số đo                   |
+| G5             | R7 và quyết định cuối sprint              | Staging/UAT/release, reviewer, blockers, inventory                    |
+
+R0–R7 là thứ tự ghép theo phụ thuộc, không phải yêu cầu ba người làm nối đuôi. C chuẩn bị HTTPS của R6 song song để B/A chạy R4/R5; chưa bật event/model thật trước khi các chặng dữ liệu/nghiệp vụ đạt. G và R là hai cách xem cùng công việc, không phải hai bộ task phải làm lại.
+
 ## 2. Ánh xạ đầy đủ backlog
 
 | Task plan gốc                 | Owner nhóm ba người    | Hướng dẫn       | Bằng chứng                                    |
@@ -35,6 +50,8 @@ G1a/G1b chạy song song. Sender dry-run không cần SMS/Connect thật. Deadli
 | AWS-10 AI/UAT/demo            | Cả ba                  | G4–G5           | Model report, E2E, rollback, video, bàn giao  |
 
 ## 3. Chạy một ca end-to-end
+
+Điều kiện trước test: R1–R5 đã có implementation/reviewer và các cấu hình R6 đã nối. Thiếu API/worker/template dừng ở NEEDS_IMPLEMENTATION theo 09; các handler lab echo/log không thay thế. Health 200 hoặc resource tồn tại chưa đáp ứng điều kiện này.
 
 1. C công bố HTTPS URL, commit/release digest, queue/workflow ARNs và giờ test. A giữ sender dry-run, chưa bật số nhận thật.
 2. B tạo users/cameras theo quy trình app; A xác minh mapping/ownership. Fixture dùng application IDs/UUID hợp lệ.
@@ -90,9 +107,12 @@ Rollback app dùng release/digest trước; migration phải tương thích ngư
 
 Chỉ đánh dấu hoàn tất khi acceptance criteria bắt buộc đã pass. Giảm scope cần người phụ trách duyệt và ghi rõ. Điền:
 
+Trạng thái **PASS** luôn kèm phạm vi **LAB_PASS / INTEGRATION_PASS / E2E_PASS** và case ID. **NEEDS_IMPLEMENTATION** là chưa có code/file/API; **NEEDS_FIX** là đã có nhưng kiểm tra lỗi; **BLOCKED_ACCOUNT/BLOCKED_AI** là phụ thuộc chưa đạt. Việc tác giả đã xem biểu mẫu trong 08 không phải evidence nghiệm thu của người thực hiện.
+
 ```text
 Release/commit/ngày kiểm tra/A-B-C:
-AWS-01..10: PASS / NEEDS_FIX / BLOCKED_ACCOUNT / BLOCKED_AI
+AWS-01..10: PASS / NEEDS_IMPLEMENTATION / NEEDS_FIX / BLOCKED_ACCOUNT / BLOCKED_AI
+Phạm vi PASS: LAB_PASS / INTEGRATION_PASS / E2E_PASS; chặng R0–R7 tương ứng:
 Case AUTH/FACE/DATA/FLOW/SEND/OPS/REL/E2E và evidence:
 Fixture hay model thật:
 Email / SMS / call thật hay dry-run:

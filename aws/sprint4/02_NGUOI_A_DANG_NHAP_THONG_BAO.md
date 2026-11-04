@@ -2,20 +2,22 @@
 
 Bạn làm song song với B/C sau G0. Đầu ra đầu tiên là login Cognito và một email SNS; chưa cần server cloud hoặc model. Khi chờ HTTPS/claim API, làm tiếp test quyền, email, kịch bản sender và evidence.
 
+**Khi ghép:** làm R0/R2 cho auth, R5 cho sender, cùng B/C nghiệm thu R6/R7 trong [runbook 09](09_RUNBOOK_GHEP_HE_THONG.md). A bàn giao config bằng mẫu 06; không coi SNS gửi tay thành công là sender ứng dụng đã hoạt động. Form tạo user/login và Connect chưa được kiểm tra trực tiếp; phạm vi đã xem nằm trong bảng cuối 08.
+
 ## A1. Tạo Cognito User Pool cho browser
 
 Đọc [hướng dẫn từng trường đã kiểm tra trên Console](08_THUC_HANH_CONSOLE.md#a--tạo-cognito-và-sửa-callback-đúng-chỗ) trước khi thực hiện. Nút cuối wizard hiện tại là **Create user directory**.
 
 1. Mở Search → **Cognito**, kiểm tra Singapore → **User pools → Create user pool**; tài khoản mới có thể hiện **Get started**.
 2. Trong **Define your application**, chọn **Single-page application (SPA)** vì flow dự án chạy ở browser. Đặt application `camerai-s4-dev-web`.
-3. Trong options, chọn Email làm định danh và email là thuộc tính bắt buộc; chưa thêm phone cho bài cơ bản.
-4. **Add a return URL**: `http://localhost:3000/auth/callback`. Review rồi tạo. Ghi pool name/ID thực từ trang chi tiết; đặt tên hiển thị `camerai-s4-dev-users` nếu UI cho sửa.
+3. Trong **Configure options**, chọn Email làm định danh và email là thuộc tính bắt buộc; bỏ **Enable self-registration** cho nhóm user lab do quản trị viên tạo. Chưa thêm phone cho bài cơ bản; sign-in identifiers/required attributes cần chốt trước khi tạo.
+4. **Add a return URL → Return URL**: thay toàn bộ `https://` có sẵn bằng `http://localhost:3000/auth/callback`. Review → **Create user directory**. Ghi pool name/ID từ Overview; dùng **Rename** để đặt tên hiển thị `camerai-s4-dev-users` nếu cần. Application name trong wizard là tên app client.
 
 [AWS wizard tạo ứng dụng](https://docs.aws.amazon.com/cognito/latest/developerguide/getting-started-user-pools-application.html).
 
 5. Vào **Applications → App clients**, mở client vừa tạo; xác nhận không có client secret.
-6. Mở tab **Login pages → Managed login pages configuration → Edit**; tránh nút Edit trong App client information. Chọn Cognito provider, Authorization code grant; scopes `openid`, `email`, `profile`. Tắt implicit grant.
-7. Callback local phải đúng như bước 4; Allowed sign-out URL là `http://localhost:3000`.
+6. Mở tab **Login pages → Managed login pages configuration → Edit**; tránh nút Edit trong App client information. Chọn Cognito user pool, Authorization code grant; nhãn scopes **Email, OpenID, Profile** tương ứng `email openid profile`. Tắt implicit grant.
+7. Callback local phải đúng như bước 4; Allowed sign-out URL là `http://localhost:3000`. **Save changes**, đọc lại URL đã lưu trên tab Login pages. Khi C có HTTPS, dùng Add another URL để thêm cloud, giữ local nếu nhóm còn dùng.
 8. Trong **Branding → Domain**, dùng domain có sẵn hoặc tạo Amazon Cognito domain prefix duy nhất. Copy origin HTTPS thực tế, không thêm `/oauth2/authorize` vào biến domain.
 9. Kiểm tra plan: Essentials cho managed login; không tự bật Plus. Nếu dùng Lite, classic hosted UI có thể khác hình trong tài liệu. App client cần branding nếu Console yêu cầu.
 
@@ -35,6 +37,8 @@ Mật khẩu Cognito và mật khẩu local trong DB độc lập. Nếu đã b�
 ## A3. Nối code đã có và kiểm tra local
 
 Thực hiện trên nhánh code tích hợp, không trên nhánh tài liệu. [AUTH_PROVIDERS](../../docs/architecture/AUTH_PROVIDERS.md) chứa cách chạy migration, mapping DB và rollback chi tiết.
+
+Theo R0/R2 của 09: xác nhận commit auth, backup trước migration, dùng migration runner đã review trên cloud. Thiếu file/endpoint auth là NEEDS_IMPLEMENTATION; không chữa bằng cách comment env hoặc bật fallback provider.
 
 1. Kiểm tra branch code có `auth.config.ts`, `cognito-token.service.ts`, frontend `auth-config.ts` và `/auth/config`. Nếu thiếu, review/đưa commit từ `lab-test` qua PR, không chỉ thêm biến môi trường.
 2. Trong `.env` root, giữ đúng một khai báo cho mỗi biến:
@@ -59,7 +63,7 @@ Thực hiện trên nhánh code tích hợp, không trên nhánh tài liệu. [A
 
 Xem [chi tiết các trường SNS và cách dọn topic đã thử trên Console](08_THUC_HANH_CONSOLE.md#a--sns-tạo-topic-mở-subscription-và-publish).
 
-1. Search **Simple Notification Service**, chọn **Topics → Create topic**.
+1. Search **Simple Notification Service**, chọn **Topics → Create topic**. Nếu đang ở trang giới thiệu, nhập Topic name → Next step rồi điền cùng form theo 08.
 2. Type **Standard**, Name `camerai-s4-dev-incident-email`; giữ access private, Create topic. Copy ARN.
 3. Trong topic, **Create subscription**; Protocol Email, Endpoint email thật của bạn; Create subscription.
 4. Mở hộp thư và bấm Confirm subscription. Quay lại Console, refresh; subscription phải hết PendingConfirmation.
@@ -76,6 +80,8 @@ Không đợi ngày demo để phát hiện tài khoản chưa được gửi. G
 
 **SMS:** mở phần SMS của SNS/AWS End User Messaging tùy UI; kiểm tra sandbox, destination country, số nhận đã xác minh, origination identity và mức chi. Trong sandbox chỉ gửi tới số đã xác minh. Thêm số của người thử đồng ý, hoàn thành mã OTP theo UI; kiểm tra điều kiện gửi của quốc gia trước khi gửi một tin. Lưu provider MessageId và xác nhận trên điện thoại. Nếu bị chặn, ghi `BLOCKED_ACCOUNT`, tiếp tục sender dry-run. [SMS sandbox](https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox.html).
 
+Đường đã xem là **SNS → Mobile → Text messaging (SMS) → Account information**. Nếu báo AWS không xác định được tài khoản có trong sandbox hay không như 08, ghi BLOCKED_ACCOUNT và nhờ người quản lý kiểm tra; không coi đó là đã ra sandbox. Origination IDs dẫn sang AWS End User Messaging. Phiên khảo sát chưa gửi OTP/SMS.
+
 **Connect:** tìm Amazon Connect; tài liệu AWS hiện hành có thể gọi **Connect Customer**. Mở **Add an instance/Create instance** nếu có, đi qua identity management → admin → telephony → storage → review. Chỉ tạo sau khi chủ tài khoản duyệt chi phí và tính khả dụng tại Region. Trong instance, tài liệu mới dùng **Channels and communications → Telephony → Make outbound calls with Connect Customer → Save**; UI cũ có thể ghi Telephony settings/Outbound calling. Không bật outbound campaigns cho bài gọi thông báo thông thường.
 
 [Tạo instance](https://docs.aws.amazon.com/connect/latest/adminguide/amazon-connect-instances.html), [bật outbound](https://docs.aws.amazon.com/connect/latest/adminguide/enable-outbound-calls.html).
@@ -85,6 +91,8 @@ Không đợi ngày demo để phát hiện tài khoản chưa được gửi. G
 ## A6. Từ sender lab sang sender ứng dụng
 
 Làm [Lab 07 phần A](../labs/07_THONG_BAO.md) bằng notification queue lab riêng: log phải có `providerCalled=false`. Sau đó A viết sender thật ở `services/aws-workers/sender/` (đích cần tạo), B review backend contract, C review role/template.
+
+Trước khi nối dev, qua điểm dừng R5: claim/outcome contract và config phải có PR đã merge; producer chỉ một nguồn, Results consumer có nhánh notification outcome riêng. Không gửi outcome vào AI result DTO. Dry-run tích hợp vẫn phải claim và lưu outcome/receipt vào app; handler lab chỉ log chưa đủ INTEGRATION_PASS.
 
 1. B commit incident state, notification intent và outbox cùng transaction; B cung cấp fixture + claim/outcome contract đã review.
 2. A parse/validate job, gọi claim API HTTPS từ C. Claim phải kiểm tra trạng thái hiện tại, allowlist, lease, cooldown và daily cap. Chưa có API thì test với mock có nhãn, chưa bật provider thật.
