@@ -1,5 +1,7 @@
 # Sprint 4 AWS — Vừa học qua lab, vừa tích hợp với CameraAI
 
+**Bổ sung 04/11/2026:** nếu Sprint 4 giao đúng **ba người**, dùng [bộ hướng dẫn người mới A/B/C](sprint4/README.md) và [bảng ánh xạ AWS-01..10](sprint4/05_GHEP_HE_THONG.md). Đó là phương án thực thi ba người; bảng A/B/C/D/E bên dưới giữ làm baseline lịch sử, không yêu cầu thêm hai thành viên AI. Trạng thái implementation phải đối chiếu commit thực tế.
+
 **Cập nhật:** 21/10/2026. **Trạng thái:** kế hoạch triển khai, không phải báo cáo đã chạy AWS.
 
 ## 1. Mục tiêu và cách đọc
