@@ -2,6 +2,8 @@
 
 Mỗi mốc cần owner, reviewer và bằng chứng. Những việc chưa có service API hoặc chưa có quyền phải ghi rõ; không dùng callback giả trả 200 để làm graph xanh.
 
+**Cách thực hiện từng chặng:** mở [runbook R0–R7](09_RUNBOOK_GHEP_HE_THONG.md). Runbook có bảng cấu hình từ AWS tới từng service, lệnh kiểm tra đã đối chiếu code, thứ tự PR cần hoàn thành và cách lần theo lỗi. File này giữ vai trò bảng mốc/tiêu chí nghiệm thu; các đầu ra code chưa có phải qua điểm dừng NEEDS_IMPLEMENTATION trong runbook.
+
 ## 1. Các điểm gặp nhau của ba người
 
 | Mốc | Người thực hiện | Thao tác                                                     | Điều kiện qua                                      |
