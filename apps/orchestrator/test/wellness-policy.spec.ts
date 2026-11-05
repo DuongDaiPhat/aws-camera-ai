@@ -89,7 +89,7 @@ describe('US20 policy regression', () => {
       await validate(plainToInstance(UpdateWellnessScheduleDto, { daysOfWeek: [] })),
     ).not.toHaveLength(0);
   });
-  it('M5 SSE reaches only owner/resident/admin; generic events retain their previous stream', () => {
+  it('M5 SSE reaches only owner/resident/admin; generic events retain their previous stream', async () => {
     const tokens = {
       verifyAccessToken: (token: string) =>
         ({ sub: token, role: token === 'admin' ? 'ADMIN' : 'VIEWER' }) as TokenClaims,
@@ -102,8 +102,12 @@ describe('US20 policy regression', () => {
       tokens,
     );
     const received: Record<string, string[]> = { owner: [], resident: [], other: [], admin: [] };
-    const subscriptions = Object.keys(received).map((id) =>
-      events.streamEvents(id).subscribe((message) => received[id].push(String(message.data))),
+    const subscriptions = await Promise.all(
+      Object.keys(received).map(async (id) =>
+        (await events.streamEvents(id)).subscribe((message) =>
+          received[id].push(String(message.data)),
+        ),
+      ),
     );
     events.emitEvent(
       { id: 'wellness', eventType: 'WELLNESS_TIMEOUT' } as EventSummaryDto,

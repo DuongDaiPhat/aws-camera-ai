@@ -1,5 +1,11 @@
 import { createHash } from 'node:crypto';
-import { HttpException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import {
   AUTH_CLOCK,
   AUTH_POLICY,
@@ -31,11 +37,12 @@ export class AuthService {
     @Inject(AUTH_REPOSITORY) private readonly repository: AuthRepository,
     @Inject(PASSWORD_HASHER) private readonly passwordHasher: PasswordHasher,
     @Inject(TOKEN_SERVICE) private readonly tokenService: TokenService,
-    @Inject(AUTH_POLICY) private readonly policy: AuthPolicy,
+    @Inject(AUTH_POLICY) private readonly policy: AuthPolicy | null,
     @Inject(AUTH_CLOCK) private readonly clock: AuthClock,
   ) {}
 
   async login(credentials: LoginCredentials, context: ClientContext): Promise<AuthResult> {
+    this.assertLocalAuth();
     const email = credentials.email.trim().toLowerCase();
     const user = await this.repository.findUserByEmail(email);
 
@@ -64,6 +71,7 @@ export class AuthService {
   }
 
   async refresh(refreshToken: string): Promise<AuthResult> {
+    this.assertLocalAuth();
     const claims = this.verifyRefreshToken(refreshToken);
     const currentToken = await this.repository.findActiveRefreshToken(this.hashToken(refreshToken));
 
@@ -86,6 +94,7 @@ export class AuthService {
   }
 
   async logout(refreshToken: string): Promise<void> {
+    this.assertLocalAuth();
     await this.repository.revokeRefreshToken(this.hashToken(refreshToken));
   }
 
@@ -108,13 +117,14 @@ export class AuthService {
     user: AuthUser,
     context: ClientContext,
   ): Promise<void> {
+    const policy = this.assertLocalAuth();
     const now = this.clock();
     if (user.lockedUntil && user.lockedUntil.getTime() > now.getTime()) {
       throw this.accountLockedError(user.lockedUntil);
     }
 
-    if (user.failedLoginCount >= this.policy.maxLoginAttempts) {
-      const lockedUntil = new Date(now.getTime() + this.policy.lockDurationMinutes * 60_000);
+    if (user.failedLoginCount >= policy.maxLoginAttempts) {
+      const lockedUntil = new Date(now.getTime() + policy.lockDurationMinutes * 60_000);
       await this.repository.lockUser(user.id, lockedUntil, context);
       throw this.accountLockedError(lockedUntil);
     }
@@ -152,6 +162,18 @@ export class AuthService {
 
   private hashToken(token: string): string {
     return createHash('sha256').update(token).digest('hex');
+  }
+
+  private assertLocalAuth(): AuthPolicy {
+    if (!this.policy) {
+      throw new ConflictException({
+        error: {
+          code: 'AUTH_PROVIDER_MISMATCH',
+          message: 'Ứng dụng đang dùng Cognito. Hãy đăng nhập hoặc refresh qua Cognito.',
+        },
+      });
+    }
+    return this.policy;
   }
 
   private invalidCredentialsError(): UnauthorizedException {

@@ -142,10 +142,9 @@ suite('US-18 real raw-video integration (isolated Docker stack)', () => {
       createdAt: new Date(),
     };
     token = app.get<TokenService>(TOKEN_SERVICE).issueTokenPair(owner).accessToken;
-    const subscription = app
-      .get(EventsService)
-      .streamEvents(token)
-      .subscribe((value) => updates.push(value));
+    const subscription = (await app.get(EventsService).streamEvents(token)).subscribe((value) =>
+      updates.push(value),
+    );
     unsubscribe = (): void => subscription.unsubscribe();
     await pool.query(
       "INSERT INTO users(id,email,password_hash,full_name,role) VALUES($1,$2,$3,$4,'ADMIN')",

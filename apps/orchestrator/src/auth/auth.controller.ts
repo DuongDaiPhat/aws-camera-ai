@@ -1,5 +1,16 @@
 import type { Request, Response } from 'express';
-import { Body, Controller, Get, HttpCode, Inject, Post, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  ConflictException,
+  Controller,
+  Get,
+  Header,
+  HttpCode,
+  Inject,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -14,6 +25,7 @@ import {
 } from './auth.types';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { AUTH_SETTINGS, type AuthSettings } from './auth.config';
 
 const REFRESH_TOKEN_COOKIE = 'camerai_refresh';
 
@@ -23,8 +35,19 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
-    @Inject(JWT_CONFIG) private readonly jwtConfig: JwtConfig,
+    @Inject(JWT_CONFIG) private readonly jwtConfig: JwtConfig | null,
+    @Inject(AUTH_SETTINGS) private readonly settings: AuthSettings,
   ) {}
+
+  @Public()
+  @Get('config')
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'Cấu hình đăng nhập công khai tại thời điểm chạy' })
+  getAuthConfig() {
+    if (this.settings.provider === 'jwt') return { provider: 'jwt' as const };
+    const { authority, clientId, domain, scope } = this.settings.cognito;
+    return { provider: 'cognito' as const, cognito: { authority, clientId, domain, scope } };
+  }
 
   @Public()
   @Post('login')
@@ -82,7 +105,8 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
     const refreshToken = this.cookieValue(request, REFRESH_TOKEN_COOKIE);
-    if (refreshToken) await this.authService.logout(refreshToken);
+    if (refreshToken && this.settings.provider === 'jwt')
+      await this.authService.logout(refreshToken);
     response.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/api/v1/auth' });
   }
 
@@ -109,6 +133,7 @@ export class AuthController {
   }
 
   private setRefreshCookie(response: Response, refreshToken: string): void {
+    if (!this.jwtConfig) throw new ConflictException('Refresh qua Cognito.');
     response.cookie(REFRESH_TOKEN_COOKIE, refreshToken, {
       httpOnly: true,
       secure: this.configService.get<string>('NODE_ENV') === 'production',

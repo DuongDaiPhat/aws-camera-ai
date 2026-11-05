@@ -1058,8 +1058,8 @@ describe('US20 real PostgreSQL + HTTP delivery + API acceptance', () => {
     });
     const own: unknown[] = [],
       foreign: unknown[] = [];
-    const a = scopedEvents.streamEvents(resident).subscribe((m) => own.push(m)),
-      b = scopedEvents.streamEvents(other).subscribe((m) => foreign.push(m));
+    const a = (await scopedEvents.streamEvents(resident)).subscribe((m) => own.push(m)),
+      b = (await scopedEvents.streamEvents(other)).subscribe((m) => foreign.push(m));
     await scopedEvents.publishCommittedUpdate(check.event_id!);
     expect(own).toHaveLength(1);
     expect(foreign).toHaveLength(0);

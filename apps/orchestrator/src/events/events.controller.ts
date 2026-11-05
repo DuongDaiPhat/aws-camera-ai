@@ -81,7 +81,7 @@ export class EventsController {
   })
   @ApiResponse({ status: 200, description: 'Luồng SSE' })
   @ApiResponse({ status: 401, description: 'Token không hợp lệ hoặc thiếu' })
-  streamEvents(@Query('token') token?: string): Observable<MessageEvent> {
+  streamEvents(@Query('token') token?: string): Promise<Observable<MessageEvent>> {
     return this.eventsService.streamEvents(token);
   }
 
