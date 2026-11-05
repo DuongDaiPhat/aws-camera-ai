@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "type": "notification.outcome",
+  "messageId": "00000000-0000-4000-8000-000000000009",
+  "correlationId": "00000000-0000-4000-8000-000000000003",
+  "occurredAt": "2026-11-05T03:00:00Z",
+  "payload": {
+    "outcomeId": "00000000-0000-4000-8000-000000000009",
+    "notificationId": "00000000-0000-4000-8000-000000000007",
+    "eventId": "00000000-0000-4000-8000-000000000003",
+    "ownerScopeId": "00000000-0000-4000-8000-000000000001",
+    "attemptId": "00000000-0000-4000-8000-000000000008",
+    "status": "DRY_RUN",
+    "providerCalled": false,
+    "providerId": null,
+    "reason": "LAB_DRY_RUN"
+  }
+}
