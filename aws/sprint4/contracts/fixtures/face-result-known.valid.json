@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "type": "face.result",
+  "messageId": "00000000-0000-4000-8000-000000000005",
+  "correlationId": "00000000-0000-4000-8000-000000000003",
+  "occurredAt": "2026-11-05T03:00:00Z",
+  "payload": {
+    "jobId": "00000000-0000-4000-8000-000000000004",
+    "ownerScopeId": "00000000-0000-4000-8000-000000000001",
+    "cameraId": "00000000-0000-4000-8000-000000000002",
+    "body": {
+      "schemaVersion": 1,
+      "resultId": "00000000-0000-4000-8000-000000000005",
+      "requestId": "00000000-0000-4000-8000-000000000004",
+      "eventId": "00000000-0000-4000-8000-000000000003",
+      "observationId": "track:lab-track-01:face",
+      "revision": 1,
+      "module": "M1_FACE",
+      "modelVersion": "rekognition-adapter-v1",
+      "processedAt": "2026-11-05T03:00:00Z",
+      "personStatus": "KNOWN",
+      "matchedKnownFaceId": "00000000-0000-4000-8000-000000000006",
+      "collectionVersion": 1,
+      "results": [
+        {
+          "module": "M1_FACE",
+          "label": "KNOWN",
+          "confidence": 0.95,
+          "boundingBox": null,
+          "metadata": {
+            "sourceSessionId": "lab-session-01",
+            "similarity": 0.95,
+            "confidencePolicyVersion": "rekognition-normalized-v1",
+            "provider": "rekognition",
+            "collectionVersion": 1,
+            "fellBackToLocal": false,
+            "thresholdUsed": 0.9
+          }
+        }
+      ],
+      "error": null
+    }
+  }
+}

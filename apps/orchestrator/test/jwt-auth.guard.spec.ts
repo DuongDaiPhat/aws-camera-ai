@@ -41,19 +41,19 @@ function createTokenService(): TokenService {
 }
 
 describe('JwtAuthGuard', () => {
-  it('cho phép route public không cần token', () => {
+  it('cho phép route public không cần token', async () => {
     const guard = new JwtAuthGuard(createReflector(true), createTokenService());
     const request = { headers: {} } as AuthenticatedRequest;
 
-    expect(guard.canActivate(createContext(request))).toBe(true);
+    await expect(guard.canActivate(createContext(request))).resolves.toBe(true);
   });
 
-  it('từ chối route được bảo vệ khi thiếu access token', () => {
+  it('từ chối route được bảo vệ khi thiếu access token', async () => {
     const guard = new JwtAuthGuard(createReflector(false), createTokenService());
     const request = { headers: {} } as AuthenticatedRequest;
 
     try {
-      guard.canActivate(createContext(request));
+      await guard.canActivate(createContext(request));
       throw new Error('Lẽ ra guard phải từ chối yêu cầu');
     } catch (error: unknown) {
       expect(error).toBeInstanceOf(UnauthorizedException);
@@ -63,13 +63,13 @@ describe('JwtAuthGuard', () => {
     }
   });
 
-  it('xác thực bearer token và gắn người dùng vào request', () => {
+  it('xác thực bearer token và gắn người dùng vào request', async () => {
     const guard = new JwtAuthGuard(createReflector(false), createTokenService());
     const request = {
       headers: { authorization: 'Bearer valid-access' },
     } as AuthenticatedRequest;
 
-    expect(guard.canActivate(createContext(request))).toBe(true);
+    await expect(guard.canActivate(createContext(request))).resolves.toBe(true);
     expect(request.auth).toEqual(CLAIMS);
   });
 });

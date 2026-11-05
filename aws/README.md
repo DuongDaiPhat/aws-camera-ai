@@ -1,5 +1,7 @@
 # Tài liệu AWS — CameraAI
 
+**Nhóm ba người mới học AWS:** bắt đầu với [hướng dẫn Sprint 4 làm song song](sprint4/README.md), đối chiếu tài liệu AWS ngày 04/11/2026. Có bài riêng A/B/C, đường đi Console, bàn giao và nghiệm thu toàn sprint.
+
 Cập nhật theo kiến trúc Hybrid EC2 + AWS Lambda ngày **21/10/2026**. Đây là kế hoạch và thiết kế, chưa phải xác nhận đã tạo tài nguyên AWS.
 
 **Nhóm mới với AWS: bắt đầu bằng [lộ trình lab 00–10](labs/README.md), không bắt đầu bằng cách deploy toàn bộ sơ đồ.** Mỗi bài có mục tiêu học, điều kiện, bước thực hành, kết quả cần thấy, lỗi thường gặp và dọn tài nguyên.
@@ -11,6 +13,7 @@ Cập nhật theo kiến trúc Hybrid EC2 + AWS Lambda ngày **21/10/2026**. Đ�
 
 Tài liệu tra cứu khi đã bắt đầu thực hành:
 
+- [Hướng dẫn tích hợp CD: Dev → Staging → Production](CD_INTEGRATION_GUIDE.md) — giải thích luồng phát hành, cấu hình AWS/GitHub, mẫu workflow, deploy qua SSM, kiểm thử và rollback.
 - [Kế hoạch Sprint 4: task, owner, phụ thuộc và nghiệm thu](SPRINT_4_AWS_EXECUTION_PLAN.md).
 - [Sequence Cognito, face, escalation và sơ đồ CloudWatch](METHOD_1_FEATURE_DIAGRAMS.md).
 - [Draw.io nguồn: tổng quan và EC2 contents](diagrams/CameraAI_Hybrid_EC2_Lambda.drawio).

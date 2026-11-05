@@ -1,9 +1,13 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { ApiError } from '@/lib/api-client';
 import { login } from '@/lib/auth-client';
+import { getAuthConfig, type AuthConfig } from '@/lib/auth-config';
+import { startCognitoLogin } from '@/lib/cognito-login';
+import { clearBrowserSession } from '@/lib/auth-session';
+import { setAccessToken } from '@/lib/api-client';
 import styles from './login.module.css';
 
 export function LoginForm() {
@@ -13,6 +17,35 @@ export function LoginForm() {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [authConfig, setAuthConfig] = useState<AuthConfig | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    // A new sign-in must not reuse the previous provider's browser token.
+    setAccessToken(null);
+    clearBrowserSession();
+    getAuthConfig()
+      .then((config) => {
+        if (active) setAuthConfig(config);
+      })
+      .catch(() => {
+        if (active) setErrorMessage('Không tải được cấu hình đăng nhập. Hãy tải lại trang.');
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function handleCognitoLogin(): Promise<void> {
+    setSubmitting(true);
+    setErrorMessage(null);
+    try {
+      await startCognitoLogin();
+    } catch {
+      setErrorMessage('Không mở được trang đăng nhập. Hãy thử lại.');
+      setSubmitting(false);
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -28,6 +61,24 @@ export function LoginForm() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (!authConfig) return <p role="status">{errorMessage ?? 'Đang tải…'}</p>;
+
+  if (authConfig.provider === 'cognito') {
+    return (
+      <div className={styles.form}>
+        {errorMessage && <p role="alert">{errorMessage}</p>}
+        <button
+          className={styles.submitButton}
+          type="button"
+          disabled={isSubmitting}
+          onClick={handleCognitoLogin}
+        >
+          {isSubmitting ? 'Đang chuyển đến trang đăng nhập…' : 'Đăng nhập'}
+        </button>
+      </div>
+    );
   }
 
   return (

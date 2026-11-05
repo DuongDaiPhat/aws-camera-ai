@@ -1,6 +1,7 @@
 import type { Request } from 'express';
 import {
   Inject,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
   type CanActivate,
@@ -21,7 +22,7 @@ export class JwtAuthGuard implements CanActivate {
     @Inject(TOKEN_SERVICE) private readonly tokenService: TokenService,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_ROUTE, [
       context.getHandler(),
       context.getClass(),
@@ -33,9 +34,10 @@ export class JwtAuthGuard implements CanActivate {
     if (!token) throw this.unauthorized('Bạn cần đăng nhập để tiếp tục.');
 
     try {
-      request.auth = this.tokenService.verifyAccessToken(token);
+      request.auth = await this.tokenService.verifyAccessToken(token);
       return true;
     } catch (error: unknown) {
+      if (error instanceof ForbiddenException) throw error;
       const code = this.isExpiredTokenError(error) ? 'TOKEN_EXPIRED' : 'INVALID_TOKEN';
       const message =
         code === 'TOKEN_EXPIRED' ? 'Access token đã hết hạn.' : 'Access token không hợp lệ.';

@@ -310,7 +310,7 @@ async function verify(context: GateContext): Promise<void> {
   const token = app.get<TokenService>(TOKEN_SERVICE).issueTokenPair(owner).accessToken;
   const events = app.get(EventsService);
   let updates = 0;
-  const subscription = events.streamEvents(token).subscribe(() => {
+  const subscription = (await events.streamEvents(token)).subscribe(() => {
     updates += 1;
   });
   try {
