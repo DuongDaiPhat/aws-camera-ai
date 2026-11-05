@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { SESSION_COOKIE } from './lib/auth-session';
 
 export function getAuthRedirect(pathname: string, hasSession: boolean): string | null {
+  if (pathname === '/auth/callback') return null;
   if (!hasSession && pathname !== '/login') return '/login';
   if (hasSession && pathname === '/login') return '/';
   return null;

@@ -30,13 +30,12 @@ export function useAuth() {
 
   const handleLogout = useCallback(async () => {
     try {
-      await logout();
+      if ((await logout()) === 'redirect') return;
     } catch {
       // bỏ qua lỗi thu hồi token
-    } finally {
-      router.replace('/login');
-      router.refresh();
     }
+    router.replace('/login');
+    router.refresh();
   }, [router]);
 
   return {
