@@ -21,6 +21,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/auth/config': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Cau hinh dang nhap cong khai tai thoi diem chay */
+    get: operations['getAuthConfig'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/auth/login': {
     parameters: {
       query?: never;
@@ -1171,6 +1188,23 @@ export interface components {
       /** Format: date-time */
       timestamp?: string;
     };
+    AuthConfig:
+      | {
+          /** @enum {string} */
+          provider: 'jwt';
+        }
+      | {
+          /** @enum {string} */
+          provider: 'cognito';
+          cognito: {
+            /** Format: uri */
+            authority: string;
+            clientId: string;
+            /** Format: uri */
+            domain: string;
+            scope: string;
+          };
+        };
     LoginRequest: {
       /** Format: email */
       email: string;
@@ -2480,6 +2514,27 @@ export interface operations {
       };
     };
   };
+  getAuthConfig: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Chi chua provider va cau hinh Cognito cong khai, khong chua secret */
+      200: {
+        headers: {
+          'Cache-Control'?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AuthConfig'];
+        };
+      };
+    };
+  };
   login: {
     parameters: {
       query?: never;
@@ -2505,6 +2560,15 @@ export interface operations {
       400: components['responses']['BadRequest'];
       /** @description Sai email hoac mat khau */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Login local khong hoat dong khi AUTH_PROVIDER=cognito */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -2548,6 +2612,15 @@ export interface operations {
         };
       };
       401: components['responses']['Unauthorized'];
+      /** @description Refresh local khong hoat dong khi AUTH_PROVIDER=cognito */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
     };
   };
   logout: {

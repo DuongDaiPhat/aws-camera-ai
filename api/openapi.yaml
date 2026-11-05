@@ -98,6 +98,22 @@ paths:
   # ===================================================================
   # AUTH — US-05, US-25
   # ===================================================================
+  /auth/config:
+    get:
+      tags: [auth]
+      summary: Cau hinh dang nhap cong khai tai thoi diem chay
+      operationId: getAuthConfig
+      security: []
+      responses:
+        "200":
+          description: Chi chua provider va cau hinh Cognito cong khai, khong chua secret
+          headers:
+            Cache-Control:
+              schema: { type: string, example: no-store }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthConfig" }
+
   /auth/login:
     post:
       tags: [auth]
@@ -119,6 +135,11 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/AuthTokens" }
         "400": { $ref: "#/components/responses/BadRequest" }
+        "409":
+          description: Login local khong hoat dong khi AUTH_PROVIDER=cognito
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
         "401":
           description: Sai email hoac mat khau
           content:
@@ -154,6 +175,12 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/AuthTokens" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+
+        "409":
+          description: Refresh local khong hoat dong khi AUTH_PROVIDER=cognito
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
 
   /auth/logout:
     post:
@@ -1956,6 +1983,25 @@ components:
         timestamp: { type: string, format: date-time }
 
     # ---------------- Auth ----------------
+    AuthConfig:
+      oneOf:
+        - type: object
+          required: [provider]
+          properties:
+            provider: { type: string, enum: [jwt] }
+        - type: object
+          required: [provider, cognito]
+          properties:
+            provider: { type: string, enum: [cognito] }
+            cognito:
+              type: object
+              required: [authority, clientId, domain, scope]
+              properties:
+                authority: { type: string, format: uri }
+                clientId: { type: string }
+                domain: { type: string, format: uri }
+                scope: { type: string }
+
     LoginRequest:
       type: object
       required: [email, password]
