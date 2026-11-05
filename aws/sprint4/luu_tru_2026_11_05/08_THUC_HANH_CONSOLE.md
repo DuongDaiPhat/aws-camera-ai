@@ -1,5 +1,7 @@
 # Thao tác Console đã kiểm tra trên trình duyệt
 
+> BẢN CŨ ĐƯỢC LƯU NGÀY 05/11/2026. Không dùng làm hướng dẫn hiện hành. Mở file theo vai trò A/B/C ở thư mục cha.
+
 Kiểm tra ngày **04/11/2026**, Console English, Singapore; riêng IAM hiển thị Global. Đọc phần tương ứng cùng tài liệu A/B/C. Đã tạo và xóa thử một SNS Standard topic; các dịch vụ khác mới kiểm tra biểu mẫu. Giá trị dưới đây là lựa chọn cho bài lab, không phải mọi giá trị mặc định của AWS. Bảng cuối tài liệu ghi giới hạn kiểm chứng của từng phần.
 
 ## A — Tạo Cognito và sửa callback đúng chỗ
@@ -168,7 +170,7 @@ Kiểm tra ngày **04/11/2026**, Console English, Singapore; riêng IAM hiển t
 
 ## B — Step Functions: từ wizard tới Code và Config
 
-Áp dụng cho B8. Chuẩn bị ARN deadline Lambda và toàn bộ JSON của [Lab 06](../labs/06_STEP_FUNCTIONS.md) trước khi tạo workflow thật.
+Áp dụng cho B8. Chuẩn bị ARN deadline Lambda và toàn bộ JSON của [Lab 06](../../labs/06_STEP_FUNCTIONS.md) trước khi tạo workflow thật.
 
 1. Search **Step Functions**, mở dịch vụ. Nếu gặp trang giới thiệu, mở menu trái → **State machines**. Không cần bấm Copy agent prompt hoặc cài công cụ được giới thiệu trên trang.
 2. Trong **State machines**, bấm **Create state machine**. Đợi hộp thoại **Create state machine** xuất hiện trên Workflow Studio.

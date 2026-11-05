@@ -1,5 +1,11 @@
 # Phiên 0 — Cả ba chuẩn bị, rồi tách luồng
 
+> BẢN CŨ ĐƯỢC LƯU NGÀY 05/11/2026. Không dùng làm hướng dẫn hiện hành. Mở file theo vai trò A/B/C ở thư mục cha.
+
+**G0 đã chốt contract v1 ngày 05/11/2026:** dùng [hợp đồng chung](00_HOP_DONG_G0.md) và [schema/fixtures](../contracts/README.md) làm nguồn thống nhất cho type/field/API/config/owner. Account, quyền, resource IDs và release thực tế vẫn cần xác minh; không ghi G0 access hoặc E2E PASS chỉ vì contract đã chốt.
+
+**Đầu ra sau phiên chuẩn bị:** cả ba mở [10 — hoàn thiện tính năng và demo](10_HOAN_THIEN_TINH_NANG_VA_DEMO.md), nhận owner F1–F6 và ghi phạm vi đồ án vào 06. Các bài dịch vụ độc lập là bước học để thực hiện các gói tính năng; chưa thay thế phần lập trình và tích hợp.
+
 Đọc [trang bắt đầu](README.md) trước. Mục tiêu phiên này: mỗi người biết mình đang ở tài khoản nào, được làm gì, và có thể bắt đầu bài riêng mà không làm đè tài nguyên của nhau.
 
 **Cách dùng bộ tài liệu:** 01–04 chia việc học/lập trình cho ba người; [08](08_THUC_HANH_CONSOLE.md) là chi tiết màn hình và giới hạn đã kiểm chứng; [09](09_RUNBOOK_GHEP_HE_THONG.md) là thứ tự ghép R0–R7. Dùng 05 để nghiệm thu, 06 để bàn giao và 07 để tìm màn hình/lỗi. Một biểu mẫu đã xem trong 08 không đồng nghĩa bài của người học đã PASS.
@@ -64,7 +70,7 @@ aws sso login --profile camerai-lab
 aws sts get-caller-identity --profile camerai-lab --region ap-southeast-1
 ```
 
-Trong `configure sso`, nhập start URL/SSO Region/role do người quản lý cấp. SSO Region có thể khác Singapore. Nếu tổ chức không dùng SSO, thực hiện đúng phương thức credential mà quản trị viên cấp theo [Lab 00](../labs/00_CHUAN_BI.md); không tự tạo root access key.
+Trong `configure sso`, nhập start URL/SSO Region/role do người quản lý cấp. SSO Region có thể khác Singapore. Nếu tổ chức không dùng SSO, thực hiện đúng phương thức credential mà quản trị viên cấp theo [Lab 00](../../labs/00_CHUAN_BI.md); không tự tạo root access key.
 
 **Đạt:** lệnh STS trả đúng Account và Arn. CLI error không được sửa bằng cách dán keys vào `.env` rồi commit. Mỗi lệnh tiếp theo giữ `--profile` và `--region` như ví dụ.
 
@@ -76,17 +82,17 @@ Tên lab riêng: `camerai-s4-lab-a-*`, `camerai-s4-lab-b-*`, `camerai-s4-lab-c-*
 
 Tag các resource hỗ trợ tag: `Project=CameraAI`, `Environment=lab|dev|staging|production`, `Owner=A|B|C`, `Sprint=4`. Ghi tên, ARN/URL, Region, owner, stack và ngày dự kiến dọn vào mẫu bàn giao. Resource do SAM quản lý được sửa bằng template; bài Console riêng không dùng trùng tên stack.
 
-## 7. Chốt hợp đồng G0 trong 30–60 phút
+## 7. Áp dụng contract G0 đã chốt và xác minh access trong 30–60 phút
 
 1. Cả ba chốt commit code để làm việc, không chạy nhánh docs. Review các commit `lab-test` trước khi tích hợp; hướng dẫn không tự merge chúng vào main.
 2. B lập schema job/result và fixture hợp lệ, lỗi, trùng. Dùng UUID thực cho field mà API yêu cầu UUID; chuỗi `lab-event-01` chỉ dùng handler lab riêng.
 3. A chốt user A/B, role và camera nào thuộc ai; email test phải nhận được thư.
 4. C chốt tên tài nguyên dev, người deploy stack duy nhất, tên miền và giờ sử dụng tài nguyên.
-5. Ghi trước vị trí service API deadline và claim sender trong OpenAPI. Nếu chưa có endpoint, ghi **NEEDS_IMPLEMENTATION** cùng owner/PR; dừng chặng tích hợp phụ thuộc theo 09, không cho Lambda gọi URL giả.
+5. Đưa API deadline và claim/outcome đã chốt ở G0 §4/5 vào OpenAPI và triển khai theo 10; không tự chọn lại đường dẫn. Ghi trạng thái endpoint thực tế. Nếu chưa có endpoint, ghi **NEEDS_IMPLEMENTATION** cùng owner/PR; dừng chặng tích hợp phụ thuộc theo 09, không cho Lambda gọi URL giả.
 6. Chọn một producer cho từng incident, một deadline owner. Local và cloud không cùng xử lý một sự kiện để demo.
 7. Chốt output bàn giao: A pool/client/domain/topic; B queues/schema/workflow; C HTTPS URL, role và stack outputs.
 8. Điền bảng config của 09: tên biến thực, file đọc biến, service nhận và nguồn giá trị. Chốt S3_BUCKET khác STORAGE_BUCKET, queue URL khác ARN, AI result khác notification outcome; không tự đặt tên env SQS khi code chưa đọc.
 
-**G0 đạt:** STS cả ba đúng; quyền/account blockers có owner; bảng tài nguyên và schema v1 có người review. Sau đó mở đồng thời tài liệu A/B/C.
+**G0 contract đã chốt v1; G0 đầy đủ chỉ đạt khi:** STS cả ba đúng; quyền/account blockers có owner; bảng tài nguyên và schema v1 có người review. Sau đó mở đồng thời tài liệu A/B/C.
 
 Trạng thái dùng thống nhất: **LAB_PASS** cho bài dịch vụ riêng, **INTEGRATION_PASS** cho chặng ghép, **E2E_PASS** cho chuỗi thật đúng phạm vi; **NEEDS_IMPLEMENTATION**, **NEEDS_FIX**, **BLOCKED_ACCOUNT**, **BLOCKED_AI** cho việc chưa đạt. Phiếu từng ca có thể ghi PASS nhưng phải kèm chặng/phạm vi; xem [mẫu 06](06_MAU_BAN_GIAO.md).

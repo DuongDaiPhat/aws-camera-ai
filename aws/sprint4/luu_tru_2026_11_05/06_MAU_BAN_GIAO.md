@@ -1,5 +1,24 @@
 # Mẫu bàn giao cho ba người
 
+> BẢN CŨ ĐƯỢC LƯU NGÀY 05/11/2026. Không dùng làm hướng dẫn hiện hành. Mở file theo vai trò A/B/C ở thư mục cha.
+
+**G0 đã chốt contract v1 ngày 05/11/2026:** dùng [hợp đồng chung](00_HOP_DONG_G0.md) và [schema/fixtures](../contracts/README.md) làm nguồn thống nhất cho type/field/API/config/owner. Account, quyền, resource IDs và release thực tế vẫn cần xác minh; không ghi G0 access hoặc E2E PASS chỉ vì contract đã chốt.
+
+**Bàn giao tính năng:** mỗi owner điền thêm phiếu dưới đây cho từng [gói F1–F6](10_HOAN_THIEN_TINH_NANG_VA_DEMO.md). Chỉ inventory tài nguyên chưa đủ để nhận bàn giao tính năng.
+
+```text
+Gói F / tính năng và phạm vi đồ án:
+Owner / reviewer / commit chung / release digest:
+File code, migration, config, template đã hoàn thiện:
+Lệnh build/test/deploy và kết quả thực:
+Các bước thành viên khác chạy lại từ đầu:
+URL ứng dụng / user test tham chiếu (không ghi mật khẩu):
+Ca trong 05 và D1–D6 đã chạy / expected / actual / evidence:
+Kênh/model chạy thật; phần dry-run/fixture hoặc bị chặn:
+Reviewer đã chạy lại / kết quả / việc còn mở và người xử lý:
+Kết luận: hoàn thành tính năng / còn việc cần hoàn thiện:
+```
+
 Copy mẫu vào ghi chép nhóm được kiểm soát hoặc `docs/test/sprint-4-aws/` khi không có dữ liệu nhạy cảm. Đây là template chưa chạy. Không ghi password, AWS key, token, signed URL, số điện thoại đầy đủ hoặc ảnh mặt vào Git.
 
 Khi ghép, điền thêm [bảng nối config và phiếu R0–R7](09_RUNBOOK_GHEP_HE_THONG.md). Ghi tên biến thực, file đọc biến và commit PR triển khai; không chỉ ghi ARN/URL mà thiếu service nào nhận giá trị đó.
