@@ -1,0 +1,585 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CameraAI Sprint 4 G0 queue contract v1",
+  "$defs": {
+    "faceJob": {
+      "type": "object",
+      "properties": {
+        "jobId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "eventId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "cameraId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "ownerScopeId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "trackId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceSessionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "collectionVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "collectionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "bucket": {
+              "type": "string",
+              "minLength": 1
+            },
+            "key": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["bucket", "key"],
+          "additionalProperties": false
+        },
+        "resultId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "jobId",
+        "eventId",
+        "cameraId",
+        "ownerScopeId",
+        "trackId",
+        "sourceSessionId",
+        "observationId",
+        "revision",
+        "collectionVersion",
+        "collectionId",
+        "image",
+        "resultId"
+      ],
+      "additionalProperties": false
+    },
+    "faceResult": {
+      "type": "object",
+      "properties": {
+        "jobId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "ownerScopeId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "cameraId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "schemaVersion": {
+              "const": 1
+            },
+            "resultId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "requestId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "eventId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "observationId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "module": {
+              "const": "M1_FACE"
+            },
+            "modelVersion": {
+              "type": "string",
+              "minLength": 1
+            },
+            "processedAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "matchedKnownFaceId": {
+              "type": ["string", "null"],
+              "format": "uuid"
+            },
+            "personStatus": {
+              "enum": ["KNOWN", "UNKNOWN", "UNDETERMINED"]
+            },
+            "collectionVersion": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "results": {
+              "type": "array",
+              "maxItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "module": {
+                    "const": "M1_FACE"
+                  },
+                  "label": {
+                    "enum": ["KNOWN", "UNKNOWN", "UNDETERMINED"]
+                  },
+                  "confidence": {
+                    "type": ["number", "null"],
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "boundingBox": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "x": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "y": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "width": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "height": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          }
+                        },
+                        "required": ["x", "y", "width", "height"],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "properties": {
+                      "sourceSessionId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "similarity": {
+                        "type": ["number", "null"],
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "confidencePolicyVersion": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "provider": {
+                        "const": "rekognition"
+                      },
+                      "collectionVersion": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "fellBackToLocal": {
+                        "const": false
+                      },
+                      "qualityReason": {
+                        "type": ["string", "null"]
+                      },
+                      "thresholdUsed": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      }
+                    },
+                    "required": [
+                      "sourceSessionId",
+                      "similarity",
+                      "confidencePolicyVersion",
+                      "provider",
+                      "collectionVersion",
+                      "fellBackToLocal"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["module", "label", "confidence", "boundingBox", "metadata"],
+                "additionalProperties": false
+              }
+            },
+            "error": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    }
+                  },
+                  "required": ["code", "message"],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "required": [
+            "schemaVersion",
+            "resultId",
+            "eventId",
+            "observationId",
+            "revision",
+            "module",
+            "modelVersion",
+            "processedAt",
+            "collectionVersion",
+            "results",
+            "error"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": ["jobId", "ownerScopeId", "cameraId", "body"],
+      "additionalProperties": false
+    },
+    "notificationJob": {
+      "type": "object",
+      "properties": {
+        "notificationId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "eventId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "ownerScopeId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expectedEventVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "channel": {
+          "enum": ["SNS_EMAIL", "SNS_SMS", "CONNECT_CALL"]
+        }
+      },
+      "required": ["notificationId", "eventId", "ownerScopeId", "expectedEventVersion", "channel"],
+      "additionalProperties": false
+    },
+    "notificationOutcome": {
+      "type": "object",
+      "properties": {
+        "outcomeId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "notificationId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "eventId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "ownerScopeId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "attemptId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "enum": ["DRY_RUN", "PROVIDER_ACCEPTED", "FAILED", "UNCERTAIN"]
+        },
+        "providerCalled": {
+          "type": "boolean"
+        },
+        "providerId": {
+          "type": ["string", "null"]
+        },
+        "reason": {
+          "type": ["string", "null"]
+        }
+      },
+      "required": [
+        "outcomeId",
+        "notificationId",
+        "eventId",
+        "ownerScopeId",
+        "attemptId",
+        "status",
+        "providerCalled",
+        "providerId",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "DRY_RUN"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "providerCalled": {
+                "const": false
+              },
+              "providerId": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "PROVIDER_ACCEPTED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "providerCalled": {
+                "const": true
+              },
+              "providerId": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "deadlineCommand": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "eventId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "deadlineVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expectedDeadlineAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "commandId",
+        "eventId",
+        "deadlineVersion",
+        "expectedDeadlineAt"
+      ],
+      "additionalProperties": false
+    },
+    "notificationClaim": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "claimId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "eventId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expectedEventVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": ["schemaVersion", "claimId", "eventId", "expectedEventVersion"],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "type": {
+          "const": "face.job"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "correlationId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "payload": {
+          "$ref": "#/$defs/faceJob"
+        }
+      },
+      "required": ["schemaVersion", "type", "messageId", "correlationId", "occurredAt", "payload"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "type": {
+          "const": "face.result"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "correlationId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "payload": {
+          "$ref": "#/$defs/faceResult"
+        }
+      },
+      "required": ["schemaVersion", "type", "messageId", "correlationId", "occurredAt", "payload"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "type": {
+          "const": "notification.job"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "correlationId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "payload": {
+          "$ref": "#/$defs/notificationJob"
+        }
+      },
+      "required": ["schemaVersion", "type", "messageId", "correlationId", "occurredAt", "payload"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "type": {
+          "const": "notification.outcome"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "correlationId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "payload": {
+          "$ref": "#/$defs/notificationOutcome"
+        }
+      },
+      "required": ["schemaVersion", "type", "messageId", "correlationId", "occurredAt", "payload"],
+      "additionalProperties": false
+    }
+  ]
+}

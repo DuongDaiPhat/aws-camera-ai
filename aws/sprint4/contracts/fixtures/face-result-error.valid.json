@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "type": "face.result",
+  "messageId": "00000000-0000-4000-8000-000000000005",
+  "correlationId": "00000000-0000-4000-8000-000000000003",
+  "occurredAt": "2026-11-05T03:00:00Z",
+  "payload": {
+    "jobId": "00000000-0000-4000-8000-000000000004",
+    "ownerScopeId": "00000000-0000-4000-8000-000000000001",
+    "cameraId": "00000000-0000-4000-8000-000000000002",
+    "body": {
+      "schemaVersion": 1,
+      "resultId": "00000000-0000-4000-8000-000000000005",
+      "requestId": "00000000-0000-4000-8000-000000000004",
+      "eventId": "00000000-0000-4000-8000-000000000003",
+      "observationId": "track:lab-track-01:face",
+      "revision": 1,
+      "module": "M1_FACE",
+      "modelVersion": "rekognition-adapter-v1",
+      "processedAt": "2026-11-05T03:00:00Z",
+      "matchedKnownFaceId": null,
+      "collectionVersion": 1,
+      "results": [],
+      "error": {
+        "code": "PROVIDER_FAILURE",
+        "message": "Fixture terminal error; not a recognition result"
+      }
+    }
+  }
+}
