@@ -1,9 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, apiFetch, apiUpload, setAccessToken } from './api-client';
+import { getAuthConfig } from './auth-config';
+import { refreshCognitoToken } from './cognito-session';
+
+vi.mock('./auth-config', () => ({ getAuthConfig: vi.fn(async () => ({ provider: 'jwt' })) }));
+vi.mock('./cognito-session', () => ({ refreshCognitoToken: vi.fn() }));
 
 afterEach(() => {
   setAccessToken(null);
   vi.unstubAllGlobals();
+  vi.mocked(getAuthConfig).mockResolvedValue({ provider: 'jwt' });
+  vi.mocked(refreshCognitoToken).mockReset();
 });
 
 describe('ApiError', () => {
@@ -18,6 +25,31 @@ describe('ApiError', () => {
 });
 
 describe('apiFetch', () => {
+  it('refresh Cognito không gọi endpoint refresh local', async () => {
+    vi.mocked(getAuthConfig).mockResolvedValue({
+      provider: 'cognito',
+      cognito: {
+        authority: 'https://issuer.invalid/pool',
+        clientId: 'client',
+        domain: 'https://login.invalid',
+        scope: 'openid email profile',
+      },
+    });
+    vi.mocked(refreshCognitoToken).mockResolvedValue('new-cognito-access');
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response('{}', { status: 401 }))
+      .mockResolvedValueOnce(new Response('{"ok":true}', { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(apiFetch('/auth/me')).resolves.toEqual({ ok: true });
+    expect(refreshCognitoToken).toHaveBeenCalledOnce();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[1]?.[1]?.headers).toMatchObject({
+      Authorization: 'Bearer new-cognito-access',
+    });
+    expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith('/auth/refresh'))).toBe(false);
+  });
+
   it('tự refresh đúng một lần khi access token hết hạn rồi gọi lại API', async () => {
     const fetchMock = vi
       .fn<typeof fetch>()

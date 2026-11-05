@@ -5,6 +5,9 @@
  * duoc sinh ra tu api/openapi.yaml (`pnpm contracts:generate`).
  * Xem docs/api/API_GUIDE.md.
  */
+import { getAuthConfig } from './auth-config';
+import { refreshCognitoToken } from './cognito-session';
+
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3001/api/v1';
 
 interface RefreshResponse {
@@ -202,15 +205,18 @@ function buildHeaders(headers?: HeadersInit, multipart = false): HeadersInit {
 }
 
 async function refreshAccessToken(): Promise<string> {
-  refreshRequest ??= request<RefreshResponse>(
-    '/auth/refresh',
-    { method: 'POST', body: JSON.stringify({}) },
-    false,
-  )
-    .then((response) => response.accessToken)
-    .finally(() => {
-      refreshRequest = null;
-    });
+  refreshRequest ??= (async () => {
+    const config = await getAuthConfig();
+    if (config.provider === 'cognito') return refreshCognitoToken(config);
+    const response = await request<RefreshResponse>(
+      '/auth/refresh',
+      { method: 'POST', body: JSON.stringify({}) },
+      false,
+    );
+    return response.accessToken;
+  })().finally(() => {
+    refreshRequest = null;
+  });
 
   return refreshRequest;
 }
