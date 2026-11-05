@@ -1,5 +1,7 @@
 # Tìm màn hình Console và xử lý lỗi
 
+> BẢN CŨ ĐƯỢC LƯU NGÀY 05/11/2026. Không dùng làm hướng dẫn hiện hành. Mở file theo vai trò A/B/C ở thư mục cha.
+
 Đối chiếu **04/11/2026**. Đã xem trực tiếp các biểu mẫu Cognito, S3, SQS, Lambda, EC2, SNS, SMS, Step Functions, CloudWatch và IAM; xem [chi tiết và giới hạn kiểm chứng](08_THUC_HANH_CONSOLE.md). Các màn hình khác vẫn dựa trên tài liệu chính thức. English là baseline. AWS đang dùng nhãn Lambda **Event Functions** và **Connect Customer** trên một số tài liệu; tài khoản có thể còn tên Lambda/Amazon Connect. Không chuyển sang sản phẩm khác chỉ vì nhãn đổi.
 
 08 là nguồn đối chiếu **nhãn Console đã quan sát**; [09](09_RUNBOOK_GHEP_HE_THONG.md) là nguồn đối chiếu **config và thứ tự ghép R0–R7**. Bảng dưới là đường tìm nhanh, không mở rộng phạm vi đã kiểm chứng. Đã tạo/xóa thử SNS topic; chưa gửi email/SMS/call hoặc chạy workflow/alarm E2E trong khảo sát. Connect chỉ thấy tên Amazon Connect Customer trong Search, chưa xem trang instance.

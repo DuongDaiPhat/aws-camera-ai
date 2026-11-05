@@ -1,5 +1,9 @@
 # Ghép hệ thống và nghiệm thu Sprint 4
 
+> BẢN CŨ ĐƯỢC LƯU NGÀY 05/11/2026. Không dùng làm hướng dẫn hiện hành. Mở file theo vai trò A/B/C ở thư mục cha.
+
+**Tiêu chí chức năng:** dùng thêm [F1–F6 và ca demo D1–D6](10_HOAN_THIEN_TINH_NANG_VA_DEMO.md). Một tính năng chỉ đóng khi có code tích hợp, config/deploy, test và thao tác được qua ứng dụng trên bản chung. Các gói F cụ thể hóa việc triển khai; không thay thế các acceptance criteria và bảng test bên dưới.
+
 Mỗi mốc cần owner, reviewer và bằng chứng. Những việc chưa có service API hoặc chưa có quyền phải ghi rõ; không dùng callback giả trả 200 để làm graph xanh.
 
 **Cách thực hiện từng chặng:** mở [runbook R0–R7](09_RUNBOOK_GHEP_HE_THONG.md). Runbook có bảng cấu hình từ AWS tới từng service, lệnh kiểm tra đã đối chiếu code, thứ tự PR cần hoàn thành và cách lần theo lỗi. File này giữ vai trò bảng mốc/tiêu chí nghiệm thu; các đầu ra code chưa có phải qua điểm dừng NEEDS_IMPLEMENTATION trong runbook.
@@ -97,9 +101,9 @@ Model chưa có report thì `E2E-01=BLOCKED_AI`; giữ riêng kết quả fixtur
 
 ## 6. Git và rollback
 
-Code ở nhánh feat/fix/ci theo [GIT_WORKFLOW](../../docs/conventions/GIT_WORKFLOW.md); docs ở `docs/sprint4-beginners-parallel-guide`. PR có người khác review, API/contract cần A và B review theo quy định dự án; không push trực tiếp main.
+Code ở nhánh feat/fix/ci theo [GIT_WORKFLOW](../../../docs/conventions/GIT_WORKFLOW.md); docs ở `docs/sprint4-beginners-parallel-guide`. PR có người khác review, API/contract cần A và B review theo quy định dự án; không push trực tiếp main.
 
-Giữ hai nhóm cấu hình trong secret store của môi trường. AUTH_PROVIDER chọn đúng một provider, không fallback khi token sai. Đổi provider cần recreate/redeploy backend và đăng nhập lại; giữ user local dự phòng, vì Cognito-only user không tự có mật khẩu local. Xem [AUTH_PROVIDERS](../../docs/architecture/AUTH_PROVIDERS.md).
+Giữ hai nhóm cấu hình trong secret store của môi trường. AUTH_PROVIDER chọn đúng một provider, không fallback khi token sai. Đổi provider cần recreate/redeploy backend và đăng nhập lại; giữ user local dự phòng, vì Cognito-only user không tự có mật khẩu local. Xem [AUTH_PROVIDERS](../../../docs/architecture/AUTH_PROVIDERS.md).
 
 Rollback app dùng release/digest trước; migration phải tương thích ngược. Restore DB là thao tác phục hồi riêng có người phụ trách và điểm khôi phục, không tự chạy chỉ vì image mới fail healthcheck.
 

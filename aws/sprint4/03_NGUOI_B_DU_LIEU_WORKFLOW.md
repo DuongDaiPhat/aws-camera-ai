@@ -1,143 +1,318 @@
-# Người B — S3, hàng đợi, face và deadline
+# Người B — Làm lưu ảnh, nhận diện, hẹn giờ và dữ liệu thông báo
 
-Đầu vào: G0 và profile CLI đúng tài khoản. A/C chưa hoàn thành vẫn làm được B1–B5 với ảnh lab và worker riêng. B sở hữu `api/`, contracts và DB migrations; A/C gửi thay đổi qua PR để B review, tránh ba người cùng sửa một schema.
+Bạn chỉ cần làm theo file này. Nhiệm vụ của bạn là làm cho kết quả xử lý thật sự quay về ứng dụng: có ảnh để xem, có kết quả nhận diện, xác nhận thì dừng nâng mức cảnh báo, không xác nhận thì xử lý đúng hạn. Bạn cũng làm phần backend cho A gửi thông báo.
 
-**Khi ghép:** C deploy stack ở R1, B làm R3 face/results, R4 deadline và phối hợp A ở R5 theo [runbook 09](09_RUNBOOK_GHEP_HE_THONG.md). Các file/endpoint chưa có dừng ở NEEDS_IMPLEMENTATION. B1–B5/B8 là bài lab riêng, không tự chứng minh các chặng dev đã pass.
+Tài liệu này tập trung hoàn thiện tính năng trên môi trường dev dùng chung để demo đồ án, không có bài tạo tài nguyên riêng để học dịch vụ. Các bảng dữ liệu và chương trình mới dưới đây là phần cần lập trình; tạo tài nguyên AWS xong chưa có nghĩa tính năng đã xong. Từ E2E trong tài liệu cũ chỉ có nghĩa là thử trọn đường từ thao tác đầu vào đến kết quả người dùng nhìn thấy.
 
-## B1. Tạo kho ảnh private
+**Đi tới phần đang làm (vẫn trong file này):** [Thứ tự làm và những chỗ cần chờ](#1-thứ-tự-làm-và-những-chỗ-cần-chờ) · [Chuẩn bị và thống nhất dữ liệu](#2-chuẩn-bị-và-thống-nhất-dữ-liệu) · [Làm kho ảnh riêng tư](#3-làm-kho-ảnh-riêng-tư) · [Hoàn thiện đường gửi việc và nhận kết quả](#4-hoàn-thiện-đường-gửi-việc-và-nhận-kết-quả) · [Hoàn thiện nhận diện khuôn mặt](#5-hoàn-thiện-nhận-diện-khuôn-mặt) · [Làm hẹn giờ xử lý khi người dùng không xác nhận](#6-làm-hẹn-giờ-xử-lý-khi-người-dùng-không-xác-nhận) · [Làm backend để A gửi thông báo](#7-làm-backend-để-a-gửi-thông-báo) · [Điền cấu hình và ghép trên bản cloud](#8-điền-cấu-hình-và-ghép-trên-bản-cloud) · [Kiểm tra đầy đủ trước demo](#9-kiểm-tra-đầy-đủ-trước-demo) · [Bàn giao và chẩn đoán](#10-bàn-giao-và-chẩn-đoán)
 
-Làm theo [biểu mẫu S3/SQS/Lambda chi tiết đã kiểm tra](08_THUC_HANH_CONSOLE.md) cùng các bước dưới đây.
+## 1. Thứ tự làm và những chỗ cần chờ
 
-1. Search **S3 → General purpose buckets/Buckets → Create bucket**.
-2. Region Singapore; **Bucket type = General purpose**, **Bucket namespace = Global namespace** để khớp mẫu. Name `camerai-s4-lab-b-media-<suffix-duy-nhat>`; thay placeholder, đổi suffix nếu tên trùng.
-3. Giữ Object Ownership: ACLs disabled; **Block all public access** bật. Default encryption chọn SSE-S3 cho lab. Không bật public ACL để sửa AccessDenied.
-4. Create bucket. Trên máy đặt tên bốn ảnh như bước 5. Mở bucket → **Objects → Create folder**, nhập `lab`, Create folder; mở folder đó → **Upload → Add files**, chọn ảnh đã được đồng ý và Upload. Như vậy object key có prefix `lab/`, không nằm nhầm ở root bucket.
-5. Chuẩn bị bốn object dưới `lab/`: `known.jpg`, `query.jpg` (hai ảnh cùng người), `unknown.jpg` (người khác), `no-face.jpg` (không có người). Dùng ảnh crop một mặt rõ. Không đưa ảnh vào Git.
+| Thứ tự | Bạn hoàn thiện                                   | Phụ thuộc                                                       |
+| ------ | ------------------------------------------------ | --------------------------------------------------------------- |
+| 1      | Quy tắc dữ liệu, ảnh thử, liên kết user cho A    | Có thể làm ngay với DB thử                                      |
+| 2      | Viết lưu ảnh, gửi job, nhận kết quả và nhận diện | Làm code/test ngay; đợi C cấp bucket/queue/role để nối AWS thật |
+| 3      | Gửi việc từ app, nhận kết quả và chống lặp       | Đợi C đưa tài nguyên dùng chung để ghép cloud                   |
+| 4      | API hẹn giờ và API xin quyền gửi thông báo       | Viết và kiểm thử local ngay                                     |
+| 5      | Hẹn giờ trên AWS và sender của A                 | Đợi C có HTTPS; đợi A có sender để thử nhận thư                 |
+| 6      | Video/model thật và demo                         | Đợi đường kết nối edge của C và bản model được kiểm chứng       |
 
-[AWS S3 getting started](https://docs.aws.amazon.com/AmazonS3/latest/userguide/GetStartedWithS3.html).
+**Đưa API claim/outcome cho A sớm**, không chờ hoàn thành mọi ca nhận diện mới bàn giao. C chuẩn bị máy chủ và HTTPS song song với bạn.
 
-6. Mở object, thử Object URL trong browser chưa đăng nhập: không được tải public. Trong Console chọn object → **Object actions → Share with a presigned URL** nếu có; thời gian 5 phút → Create/Copy. Browser tải bằng URL này được. Không ghi đầy đủ signed URL vào evidence.
-7. Trong **Management → Lifecycle rules → Create lifecycle rule**, chỉ áp dụng prefix `lab/`, đặt expire phù hợp vòng đời ảnh thử được đồng ý. Nếu bật versioning, phải cân nhắc cả noncurrent versions; không coi expiry current version là xóa mọi bản.
+## 2. Chuẩn bị và thống nhất dữ liệu
 
-[Presigned URL](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html), [lifecycle rules](https://docs.aws.amazon.com/AmazonS3/latest/userguide/intro-lifecycle-rules.html).
+1. Nhóm dùng **một tài khoản AWS do C quản lý, bên trong có ba IAM User A/B/C**. Bạn dùng IAM User B và bộ access key riêng; C cấp quyền cần cho nhiệm vụ. Region là `ap-southeast-1`, profile CLI là `camerai-lab`. Không chia sẻ root, access key hay `.env`.
+2. PowerShell tại thư mục gốc repo:
 
-**Bàn giao:** bucket name, Region, prefix, chính sách retention; chưa gửi signed URL dài hạn. C dùng các giá trị này tạo bucket dev trong SAM ở bước tích hợp, không nhận quyền sở hữu bucket lab bằng cách đổi tên.
+   ```powershell
+   aws --version
+   aws configure --profile camerai-lab
+   aws sts get-caller-identity --profile camerai-lab --region ap-southeast-1
+   git rev-parse HEAD
+   docker compose version
+   pnpm --version
+   ```
 
-Biểu mẫu Create bucket đã xem trực tiếp; upload/presign/lifecycle ở trên dựa trên tài liệu AWS, chưa được thao tác trong khảo sát 08. Khi nối backend theo R3, đặt **STORAGE_PROVIDER=s3 và S3_BUCKET=<bucket-dev>**; chỉ STORAGE_BUCKET chưa đủ. Log khởi tạo S3 adapter không chứng minh app đang dùng S3 vì StorageModule hiện tạo cả hai adapters.
+   Khi được hỏi, nhập **Access Key ID và Secret Access Key của chính IAM User mình**, Region `ap-southeast-1`, output `json`. Nếu đã có profile này, chỉ cấu hình lại khi cần thay key. Không nhập key vào lệnh để tránh lưu trong lịch sử terminal.
 
-## B2. Tạo SQS và DLQ theo thứ tự
+   Ba người kiểm tra kết quả STS: `Account` phải giống nhau, `Arn` phải khác nhau và đúng tên IAM User của từng người. Tên profile `camerai-lab` giống nhau trên ba máy vẫn được; nó chỉ là tên cấu hình local, không phải tài khoản hay key dùng chung. Gửi C Account/Arn để đối chiếu, không gửi key.
 
-Với mỗi luồng tạo DLQ trước, queue chính sau. Các queue đều **Standard**:
+   `aws configure` chỉ khai báo danh tính cho CLI, **không cấp quyền**. C cấp quyền cho IAM User trước. Không dùng `aws configure sso` hoặc `aws sso login` trong cách làm hiện tại của nhóm. Nguồn tra cứu: [AWS cấu hình CLI bằng IAM User](https://docs.aws.amazon.com/cli/latest/userguide/cli-authentication-user.html).
 
-| Queue chính lab                      | DLQ riêng                           | Consumer cuối cùng                            |
-| ------------------------------------ | ----------------------------------- | --------------------------------------------- |
-| `camerai-s4-lab-b-echo-jobs`         | `camerai-s4-lab-b-echo-dlq`         | Echo Lambda học tập, không dùng cho face thật |
-| `camerai-s4-lab-b-face-jobs`         | `camerai-s4-lab-b-face-dlq`         | Face Lambda                                   |
-| `camerai-s4-lab-b-results`           | `camerai-s4-lab-b-results-dlq`      | NestJS result worker                          |
-| `camerai-s4-lab-a-notification-jobs` | `camerai-s4-lab-a-notification-dlq` | A tạo, Sender Lambda                          |
+3. Chọn commit code chung, viết trên nhánh riêng và gộp qua PR có người khác kiểm tra. Giữ DB hiện có; backup trước migration. Không dùng `db:reset` hay xóa volume để sửa lỗi.
+4. Bạn quản lý thay đổi `api/`, mã hợp đồng dùng chung và migration. A/C gửi thay đổi liên quan cho bạn kiểm tra để không xung đột.
+5. Chuẩn bị hai user/camera thử không có quyền quản trị toàn hệ thống. **Đợi A đưa pool ID, issuer và hai Cognito sub để liên kết đúng user ứng dụng.** Không ghép người dùng theo email tự động.
+6. Nếu thiếu cột issuer, thêm migration phù hợp nhánh hiện tại; code auth cũ từng có migration `0017_cognito_issuer.sql` nhưng phải kiểm tra file thật trước. Giữ nguyên users.id/role/ownership. Sau khi xác minh đúng ID, có thể cập nhật trong DB thử:
 
-1. Search **SQS → Queues → Create queue**; Type Standard; nhập tên DLQ face, retention **4 Days**; Encryption Enabled → **Amazon SQS key (SSE-SQS)**; Access policy Basic giữ Only the queue owner. Giữ **Dead-letter queue - Optional = Disabled** trên chính DLQ rồi Create queue.
-2. Create queue face-jobs; Configuration: visibility 60 giây, retention 1 ngày, receive wait 20 giây.
-3. Trong queue chính, tìm **Dead-letter queue - Optional → Enabled → Choose queue**, chọn ARN DLQ face. Đổi **Maximum receives** từ mặc định quan sát `10` thành `5`. Không nhầm **Redrive allow policy** là nơi chọn đích message lỗi. Create queue.
-4. Tạo cặp echo-jobs/echo-dlq và results/results-dlq tương tự; lab chưa có consumer nên không gắn Lambda vào results.
-5. Mở mỗi queue → Details: ghi **URL và ARN riêng**; URL dùng SDK, ARN dùng IAM/trigger.
+   ```sql
+   UPDATE users
+   SET cognito_sub = '<sub-da-xac-minh>',
+       cognito_issuer = 'https://cognito-idp.ap-southeast-1.amazonaws.com/<pool-id>'
+   WHERE id = '<application-user-id>' AND cognito_sub IS NULL;
+   ```
 
-[AWS tạo Standard queue](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/creating-sqs-standard-queues.html), [DLQ](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html).
+   Phải đúng một dòng; đã có liên kết thì kiểm tra riêng, không ghi đè ngầm.
 
-**Tránh tranh consumer:** chỉ poll results thủ công khi application consumer đang tắt. Poll queue làm message tạm ẩn; Delete message là thao tác xóa thật. Không poll job queue trong lúc kiểm tra Lambda nếu muốn quan sát delivery tự nhiên.
+**Đưa kết quả cho A:** hai application user IDs đã liên kết, camera thuộc từng user, migration/PR và cách kiểm tra. A dùng để hoàn thiện đăng nhập và thử truy cập chéo.
 
-## B3. Tạo Lambda và thử queue → log
+### Những quy tắc dữ liệu phải giữ nguyên
 
-1. Search **Lambda → Event Functions → Create Event Function → Author from scratch**. Name `camerai-s4-lab-b-echo`.
-2. Mở Runtime để chọn Python tương thích code lab (mẫu dùng Python 3.12); mặc định quan sát là Node.js 24.x. Danh sách Python 3.12 chưa được kiểm tra trong 08; nếu không có/không được hỗ trợ, chọn runtime còn hỗ trợ và cập nhật build/test đồng bộ. Trong **Custom settings**, giữ Durable execution/EC2 capacity provider tắt. **Additional settings → ARM64 architecture** để tắt cho x86_64.
-3. Mở Additional settings → Custom execution role để dùng role C chuẩn bị; role mặc định chỉ có Logs cơ bản. Tạo function. Vào **Code**, dán handler học tập từ [Lab 02](../labs/02_LAMBDA_SQS.md), giữ file/handler đúng (`lambda_function.lambda_handler` nếu dùng file `lambda_function.py`), bấm **Deploy**.
-4. **Configuration → General configuration → Edit**: Timeout 10 giây, Memory 128 MB cho echo; Save. Face thực đo lại memory/timeout.
-5. **Configuration → Permissions → Execution role**, mở IAM role. C cấp quyền `ReceiveMessage`, `DeleteMessage`, `GetQueueAttributes` cho đúng queue nguồn, Logs cho log group của function. Role sender còn cần `SendMessage` đúng results ARN.
-6. Quay **Function overview → Add trigger → SQS**, chọn queue học riêng dùng cho echo, batch size 1, batching window 0, Enable trigger → Add. Không để echo và face cùng consume face-jobs.
-7. SQS queue nguồn → **Send and receive messages → Message body**, gửi payload đúng handler lab 02; Send message.
-8. Lambda → **Monitor → View CloudWatch logs**, mở stream mới nhất. Phải thấy ID vừa gửi. Log group thường chỉ xuất hiện sau lần invoke đầu tiên.
+- `eventId`, `cameraId`, `ownerScopeId`, `jobId`, `resultId`, `notificationId`, `commandId`, `attemptId`, `outcomeId` dùng UUID. ownerScopeId của camera là users.id sở hữu camera, không phải Cognito sub. Wellness không có camera tiếp tục dùng đường xử lý riêng đang có.
+- `observationId` của face là `track:<trackId>:face`, tối đa 200 ký tự. Ghi sourceSessionId để phân biệt các phiên nguồn video. revision, collectionVersion và deadlineVersion là số nguyên từ 1.
+- Mốc thời gian dùng UTC ISO-8601 kết thúc bằng `Z`. Mã công việc tạo một lần và lưu trong DB; thử lại giữ nguyên ID và nội dung, kể cả processedAt của kết quả đã tạo. Không đổi ID để né lỗi trùng.
+- Một hàng đợi kết quả dùng chung, **chỉ một chương trình nhận kết quả** phân loại theo type. Không để hai chương trình face/thông báo tranh nhau lấy cùng queue.
+- Backend kiểm tra chủ sở hữu và quan hệ event/camera/job theo DB. Message ghi owner đúng định dạng chưa có nghĩa người gửi có quyền.
 
-[Tạo Lambda](https://docs.aws.amazon.com/lambda/latest/dg/getting-started.html), [SQS event source mapping](https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html).
+**Khi ghép hệ thống:** A/B/C dùng key khác nhau vẫn làm việc với cùng tài nguyên nếu đúng tài khoản, Region và được cấp quyền. Bàn giao tên bucket, queue URL/ARN, API và cấu hình; không bàn giao key cá nhân. Backend trên EC2 dùng role của EC2; Lambda dùng execution role riêng. C cấu hình các role này, nên bản cloud không phụ thuộc key laptop của ai. Việc cấu hình CLI trên laptop cũng không tự truyền quyền vào Docker local; nếu cần chạy SDK trong container local, phải cấu hình riêng mà không đưa key vào image/Git.
 
-08 chỉ kiểm tra wizard tạo function, chưa thao tác Code/Deploy/timeout/trigger/logs phía sau. Các bước 3–8 sau tạo cần đối chiếu Console thực tế và nguồn AWS; không ghi là đã invoke thành công từ khảo sát tài liệu.
+## 3. Làm kho ảnh riêng tư
 
-Visibility 60 giây cho timeout 10 giây khớp hướng dẫn ít nhất 6×; tăng timeout phải tăng visibility, cộng batching window khi có. Nếu handler trả partial failures, mapping cần bật **Report batch item failures/FunctionResponseTypes**. Nếu Console không có mục này, cấu hình bằng SAM ở Lab 04; không chỉ sửa return value.
+### 3.1. Gửi yêu cầu hạ tầng cho C
 
-## B4. Chứng minh retry và DLQ
+**Đưa yêu cầu cho C:** bucket dev private, chặn public access, mã hóa, prefix object theo mẫu bên dưới, thời gian giữ ảnh theo quy định đồ án, quyền EC2 upload/read và Face Lambda đọc ảnh. Nếu cần lưu kết quả worker bền vững để retry, ghi rõ nơi lưu/prefix và quyền cần thêm trong PR; không để worker có quyền rộng ngoài dữ liệu cần dùng.
 
-1. Dùng input controlled failure của handler lab 02, ID mới. Ghi MessageId và mốc gửi.
-2. Đợi đủ các lần retry theo visibility; maxReceiveCount 5 không có nghĩa chờ đúng 5 giây.
-3. Theo dõi DLQ có message, log có lỗi tương ứng; kiểm tra message chưa bị mất.
-4. Ghi nguyên nhân trước khi redrive. Sau khi sửa, redrive đúng message lab; không Purge queue để dashboard hết cảnh báo.
-5. Nếu muốn thử alarm ngay, gửi message trực tiếp vào DLQ lab riêng và nói rõ đó là **alarm test**, không thay thế bằng chứng retry/redrive.
+Không tạo bucket lab riêng, không upload ảnh bằng Console để thay cho chức năng upload của app. Chuẩn bị ảnh được đồng ý sử dụng để kiểm thử qua luồng ứng dụng: người quen, người lạ, không có mặt và ảnh lỗi. Ảnh không đưa vào Git. Bạn có thể viết storage adapter, kiểm tra quyền API và test lỗi trước khi C cấp tài nguyên.
 
-**Bàn giao C:** queue ARN, MessageId lỗi và thời điểm để C dựng DLQ alarm. Bàn giao A schema notification/results để A tạo queue riêng đúng contract.
+### 3.2. Nối vào ứng dụng
 
-## B5. Rekognition thật, không suy ra từ Console demo
+**Đợi C đưa tên bucket dùng chung và quyền EC2/Lambda.** Trong lúc chờ, làm phần gọi storage và kiểm tra quyền trên máy cá nhân.
 
-Face matching của dự án dùng collection API. Không tìm nút trong demo Face analysis rồi coi đã enrollment/search đúng collection.
+1. Đọc `apps/orchestrator/src/storage/` và API media hiện có. Khi bật cloud, đặt `STORAGE_PROVIDER=s3`, `S3_BUCKET=<ten-bucket-dev>`. STORAGE_BUCKET là biến cũ, một mình nó chưa đủ cho S3 adapter.
+2. Ảnh được backend ghi bằng đường dẫn:
 
-1. Làm [Lab 03 phần A](../labs/03_REKOGNITION.md): tại PowerShell nhập bucket bằng Read-Host, tạo collection lab riêng bằng CLI `create-collection` với đúng profile/Region.
-2. Dùng block PowerShell tạo `index.json` trong Lab 03, index `lab/known.jpg` một lần. Lưu FaceId và ExternalImageId vào ghi chép được bảo vệ.
-3. Dùng `search.json` search `lab/query.jpg`; lặp với unknown và no-face. Sửa request file thay vì dán JSON nhiều lớp escape vào PowerShell.
-4. Ghi similarity và false match nếu có; ngưỡng 90 của lab là minh họa, không phải giá trị đã đánh giá cho CameraAI.
-5. Tạo Face Lambda riêng theo Lab 03 phần B; dùng face-jobs/results. Role phải có GetObject đúng prefix, SearchFacesByImage đúng collection, consume face queue và SendMessage results.
-6. Test known/unknown/no-face → results hoặc controlled DLQ như handler lab mô tả. Handler lab chưa có owner isolation và phân loại production; không gắn camera thật vào handler này.
+   ```text
+   owners/<ownerUuid>/cameras/<cameraUuid>/events/<eventUuid>/face/<jobUuid>.jpg
+   ```
 
-[CreateCollection](https://docs.aws.amazon.com/rekognition/latest/dg/create-collection-procedure.html), [SearchFacesByImage](https://docs.aws.amazon.com/rekognition/latest/dg/search-face-with-image-procedure.html).
+3. API xem ảnh kiểm tra quyền camera trước khi cấp URL có hạn. Không tin object key từ client. Thử user khác phải bị chặn cả metadata và ảnh.
+4. Upload xong mới phát việc nhận diện. Nếu upload hoặc ghi DB lỗi, phải giữ được trạng thái để thử lại/dọn ảnh thừa; không chấp nhận công việc rồi làm mất ảnh đầu vào.
+5. Trên EC2 dùng instance role. CLI laptop truy cập S3 được không chứng minh container đã có quyền; thử upload từ app thật. S3 adapter cũ có nhánh credentials thủ công chưa truyền session token, không nhét cặp khóa tạm thiếu token vào env.
 
-Trong adapter sản phẩm: phân biệt KNOWN, UNKNOWN và lỗi/no-face không đủ kết luận; cô lập collection/mapping theo owner; enrollment/delete và xóa S3/vector có vòng đời riêng. SearchFacesByImage chọn mặt lớn nhất, nên crop một người trước. Không nhập local embedding vào Rekognition rồi mong tương thích.
+## 4. Hoàn thiện đường gửi việc và nhận kết quả
 
-## B6. Chuyển từ Console lab sang stack dev tái tạo được
+1. Xác định điểm đang tạo face job trong `apps/orchestrator/src/face-recognition/` và chỗ nhận AI result trong `src/ai-results/`. Bổ sung bộ gửi job SQS và **một** consumer Results phân loại face/thông báo. Chi tiết message và cách apply ở §5.
+2. Thêm migration cho công việc cần gửi, dữ liệu kết quả đã xử lý, mapping và nhật ký còn thiếu. Kiểm tra constraint bảng hiện có trước khi tái dùng; số migration theo nhánh tích hợp, không tự ghi đè file người khác.
+3. Thêm config validator/reader, `.env.example` và truyền biến qua Compose. Local dùng BullMQ khi được chọn; cloud dùng SQS. Chặn việc cả hai cùng tạo/xử lý một face job. Không có config cloud thì báo thiếu cấu hình, không tự chuyển về local.
+4. **Đưa yêu cầu cho C:** face jobs, notification jobs, Results và DLQ riêng; worker paths/runtime/handler/build/test/timeout; quyền cần cho từng luồng. C tạo và gắn trigger theo chương trình đã hoàn thiện, không nối handler chỉ in log.
+5. **Đợi C đưa queue URL/ARN, role và Lambda đã deploy code của bạn.** Bật từng luồng trong bản dev, tạo sự kiện bằng ứng dụng, theo dõi jobId → log Lambda → resultId → receipt DB → màn hình. Lambda return thành công chưa đủ nếu kết quả chưa vào DB.
+6. Kiểm thử lỗi từ luồng ứng dụng trong phiên dev đã hẹn: chương trình thử lại đúng ID; việc lỗi nhiều lần tới DLQ; sau sửa có thể chạy lại đúng việc mà không nhân kết quả. Ghi nguyên nhân trước khi chạy lại, không Purge queue để che lỗi.
+7. Khi cần đọc Results trên Console để chẩn đoán, dừng consumer trước. Poll làm việc tạm ẩn; Delete xóa việc thật. Không để công cụ kiểm tra tranh lấy job của Lambda đang chạy.
 
-1. B và C cùng làm [Lab 04 phần A](../labs/04_TICH_HOP_NESTJS_SAM.md) để deploy SAM stack echo riêng. Dán **toàn bộ template của bài**, không deploy một nửa resource.
-2. Console **CloudFormation → Stacks → stack → Events**: đợi CREATE_COMPLETE; lỗi thì đọc resource FAILED đầu tiên. Tab Outputs phải có queue URL và function name.
-3. C sở hữu `infra/aws/template.yaml` cho dev; B cung cấp handler paths, timeout, queue mapping và quyền tối thiểu. A cung cấp sender config. Tên lab không trùng tài nguyên stack dev.
-4. Validate/build/change set/review trước deploy. Sau khi resource thuộc stack, mọi thay đổi lâu dài quay về template. Không tạo lại thủ công resource bị drift rồi báo stack tái tạo được.
+**Đưa kết quả cho A:** type/job/outcome, cách tạo notification từ app, cách tìm trạng thái trong DB/API và ca lỗi đã kiểm tra. A dùng để nối sender, không phải tạo queue khác.
 
-Để ghép dev, chuyển sang **R1 của 09**, không đổi tên echo stack rồi coi thành face stack. Outputs cần bucket name, từng queue URL/ARN, worker names và workflow/deadline ARN. C/B điền tên config thực và file đọc biến trong bảng §2 của 09 trước R3; không suy đoán env queue chưa được code hỗ trợ.
+## 5. Hoàn thiện nhận diện khuôn mặt
 
-## B7. Các PR ứng dụng cần viết, theo thứ tự
+### 5.1. Nhận hạ tầng và chuẩn bị phần nhận diện
 
-| PR                  | Vị trí cần làm                                         | Điều kiện kiểm tra trước khi chuyển PR tiếp                                              |
-| ------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Contract            | `api/*.yaml`, generated contracts; job/result fixtures | Version, loại message, stable ID, owner/camera/observation/revision, các lỗi được review |
-| Durable dispatch    | Migration + orchestration service                      | DB transaction ghi outbox; upload S3 trước publish; dispatcher retry không mất job       |
-| Result consumer     | Worker long-poll results + AI result service           | Validate schema/owner; commit receipt và kết quả rồi delete SQS                          |
-| Face adapter        | `services/aws-workers/face/` và mapping app            | Known/unknown/no-face, owner isolation, partial failure, enrollment/delete               |
-| Deadline command    | Service/controller/contract cần tạo nếu chưa có        | Lock/check state/version; stale/resolved no-op; duplicate command không nhân intent      |
-| Workflow dispatcher | Workflow-start outbox + execution mapping              | Retry/restart không tạo workflow hoặc escalation trùng                                   |
+**Đợi C đưa bucket, quyền Rekognition theo phạm vi owner, face queue và Lambda có code của bạn để chạy AWS thật.** Không cần tạo collection hay index/search tay để học lại dịch vụ.
 
-Đây là việc lập trình cần thực hiện, không phải file đã có chỉ vì tên xuất hiện ở bảng. Điểm nhận AI result đã thấy trong snapshot main là controller `internal/events` với POST `:eventId/ai-result`; base API là `/api/v1`. B đọc DTO/service/OpenAPI của commit code thực tế trước khi dùng, không bypass service bằng SQL. Deadline/claim chưa được xác nhận có sẵn ở snapshot tài liệu; B tạo hoặc đối chiếu trong branch code rồi công bố đúng path/auth/schema tại G1.
+Bạn viết phần tạo collection theo owner như một chức năng backend có kiểm soát: tên `camerai-s4-dev-owner-<ownerUuid>`, lưu registry trong DB, thao tác được phép bởi role C cấp. C quản lý quyền và quy tắc đặt tên; backend B quản lý dữ liệu khuôn mặt phát sinh khi người dùng đăng ký/xóa. Đây là dữ liệu của tính năng, không phải một bộ hạ tầng lab riêng.
 
-Theo baseline đã đối chiếu trong 09: API là **POST /api/v1/internal/events/{eventId}/ai-result**, header **X-Internal-Token** đọc từ **INTERNAL_SERVICE_TOKEN**, expected **202** và disposition ACCEPTED/DUPLICATE/STALE. resultId/eventId phải là UUID. Worker face hiện dùng BullMQ; đổi FACE_PROVIDER không tự chuyển transport sang SQS. Results consumer phải phân loại face result và notification outcome; không đưa message lab hoặc sender outcome vào AI result DTO.
+Công việc trước khi ghép: viết adapter IndexFaces/SearchFacesByImage/DeleteFaces, chuẩn hóa kết quả theo §5.3, test bằng nhà cung cấp giả có nhãn rõ. Sau đó chạy cùng các ca qua app với AWS thật; chỉ kết quả đó mới dùng nghiệm thu tích hợp.
 
-**Test bắt buộc:** gửi cùng result ID 10 lần; stale revision đến sau mới; dừng sau commit trước delete rồi restart; invalid owner; payload sai schema; mất mạng giữa publish và ack. Invalid result phải vào quarantine/DLQ có log, không xóa im lặng hoặc retry vô hạn thiếu phân loại.
+### 5.2. Đăng ký/xóa từ ứng dụng
 
-## B8. Tạo workflow chờ nhìn thấy được
+1. Đọc `apps/orchestrator/src/known-faces/` và `face-recognition/face-recognition.worker.ts`. Worker hiện dùng BullMQ; đổi FACE_PROVIDER không tự chuyển sang SQS.
+2. Mỗi chủ camera có collection `camerai-s4-dev-owner-<ownerUuid>`. Lưu bảng owner → collection/version và FaceId → knownFaceId trong DB. Không dùng REKOGNITION_COLLECTION_ID chung làm nguồn phân quyền.
+3. Nối thao tác đăng ký người quen trên app với IndexFaces; lưu mapping, tăng collectionVersion khi tập khuôn mặt đổi, ghi trạng thái lỗi để đồng bộ lại. Không nhập embedding của model local thẳng vào Rekognition.
+4. Nối thao tác xóa đúng owner với xóa vector/mapping; dọn ảnh theo quy định giữ ảnh. Không xóa dữ liệu người khác. FaceId không có mapping hợp lệ phải báo lỗi, không tự gán người quen.
+5. Thử đăng ký → tìm thấy → xóa → không còn nhận nhầm thành người đã xóa. Dùng crop một người; ảnh nhiều mặt không đủ cơ sở kết luận danh tính của cả sự kiện.
 
-Xem [wizard và các trường Design/Code/Config đã kiểm tra](08_THUC_HANH_CONSOLE.md#b--step-functions-từ-wizard-tới-code-và-config). Chọn Standard ngay trong hộp thoại đầu; Continue mở editor, Create mới lưu workflow.
+### 5.3. Tạo job từ app và xử lý kết quả
 
-1. Tạo deadline Lambda học tập bằng code hoàn chỉnh ở [Lab 06 phần A](../labs/06_STEP_FUNCTIONS.md); Deploy. Code chỉ log, chưa gửi thông báo.
-2. Search **Step Functions → State machines → Create state machine**. Trong hộp thoại chọn **Create from blank**, Name `camerai-s4-lab-b-deadline`, **Standard → Continue**.
-3. **Code**: dùng định nghĩa JSON trong Lab 06. Bài đó dùng JSONPath (`SecondsPath`, `Payload.$`); không đổi sang JSONata trong wizard rồi dán code JSONPath. Nếu có Query language, chọn JSONPath hoặc giữ định nghĩa JSONPath hợp lệ ở cấp workflow.
-4. Thay FunctionName bằng ARN function thật. **Config → State machine configuration**: kiểm tra Standard, **Permissions → Execution role → Review auto-generated permissions**, quyền InvokeFunction đúng ARN. **Logging → Log level** quan sát đang OFF; nếu bật phải cấu hình log group/quyền. Create sau review.
-5. **Start execution** với `{"eventId":"lab-deadline-01","waitSeconds":10,"forceError":false}`. Graph đi Wait → Task → Succeeded. Xem input/output từng state.
-6. Execution mới với forceError true: phải quan sát retry rồi Failed. Lambda không sleep trong suốt thời gian Wait.
+Bạn cần bổ sung: bộ gửi việc từ DB ra SQS, `services/aws-workers/face/`, và bộ nhận Results trong orchestrator. Kèm migration/config/test và cách build từng worker.
 
-[Workflow Studio hiện hành](https://docs.aws.amazon.com/step-functions/latest/dg/workflow-studio-create.html), [Wait state](https://docs.aws.amazon.com/step-functions/latest/dg/state-wait.html).
+Để không mất việc khi ứng dụng tắt giữa chừng, ghi việc cần gửi vào DB cùng giao dịch cập nhật sự kiện. Bản ghi này thường gọi là outbox. Chương trình riêng đọc nó để gửi SQS; lỗi thì gửi lại cùng ID. Kết quả nhận về có bản ghi đã xử lý, thường gọi là receipt, để chống lặp.
 
-08 đã xem Create from blank/Continue và Design/Code/Config, chưa lưu workflow, validate JSON hoặc Start execution. Kết quả bước 5–6 phải do người học chạy và ghi evidence. Dùng JSONPath rõ ràng vì editor đang đề xuất JSONata.
+Mọi message có `schemaVersion=1`, `type`, `messageId` là UUID, `correlationId=eventId`, `occurredAt` UTC và `payload`.
 
-## B9. Nối deadline thật sau khi C có HTTPS
+| type                 | messageId      | Nội dung payload                                                                                                                              |
+| -------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| face.job             | jobId          | jobId,eventId,cameraId,ownerScopeId,trackId,sourceSessionId,observationId,revision,collectionVersion,collectionId,image:{bucket,key},resultId |
+| face.result          | resultId       | jobId,ownerScopeId,cameraId,body                                                                                                              |
+| notification.job     | notificationId | notificationId,eventId,ownerScopeId,expectedEventVersion,channel                                                                              |
+| notification.outcome | outcomeId      | outcomeId,notificationId,eventId,ownerScopeId,attemptId,status,providerCalled,providerId,reason                                               |
 
-Đi theo **R4 của 09**: hoàn thành command contract/service và test transaction trước khi nối workflow. Thiếu endpoint hoặc dispatcher là NEEDS_IMPLEMENTATION; Lambda lab echo không thay command. B công bố method/path/auth/request/response thật cho C/A.
+`channel` là SNS_EMAIL/SNS_SMS/CONNECT_CALL. Job thông báo không chứa số/email/nội dung riêng; backend trả những thông tin ấy khi A xin quyền gửi.
 
-1. Transaction chuyển NOTIFIED ghi deadline timestamp/version và workflow-start outbox. Dispatcher gọi StartExecution với tên ổn định theo event/version, lưu execution ARN để đối soát.
-2. Workflow dev dùng **TimestampPath** tới deadline UTC đã lưu, không luôn đợi thêm N giây từ lúc nhận message.
-3. Deadline Lambda gọi service command HTTPS do B công bố; không gọi localhost của laptop và không truy cập DB trực tiếp.
-4. Service xác minh command, lock incident, đối chiếu version/trạng thái và thời gian DB; resolved/stale no-op, due mới commit ESCALATED + intent.
-5. Disable deadline owner cũ hoặc biến thành reconciler qua cùng operation. A nhận notification intent sau bước này.
-6. Test ack đến trước deadline, ack cạnh tranh deadline, command lặp, API down rồi phục hồi, workflow failed rồi reconcile. Standard workflow không thay thế business idempotency.
+1. Tạo jobId và resultId một lần trong DB trước khi phát việc. Face Lambda kiểm tra bucket/key/collection/owner, gọi Rekognition, dùng đúng resultId đó. Kết quả hoàn chỉnh cần lưu bền vững để thử gửi lại nguyên nội dung; không đổi processedAt mỗi lần phát lại.
+2. `face.result.payload.body` phải đúng `SubmitAiResultDto` hiện có: schemaVersion=1,resultId,requestId (nếu có),eventId,observationId,revision,module=M1_FACE,modelVersion,processedAt,collectionVersion,results,error; personStatus/matchedKnownFaceId theo bảng dưới. Không đưa cả envelope vào DTO.
+3. Bộ nhận Results kiểm tra schema/owner/job/version, rồi gọi `AiResultsService.submit(body.eventId, body)`. Nếu khác tiến trình, dùng `POST /api/v1/internal/events/{eventId}/ai-result`, header X-Internal-Token từ INTERNAL_SERVICE_TOKEN; kết quả 202 với ACCEPTED/DUPLICATE/STALE.
+4. **Lưu xong DB mới xóa SQS message.** Chết sau commit nhưng trước delete thì lần chạy lại phải nhận ra đã xử lý. Cùng ID khác nội dung trả conflict; dữ liệu revision cũ không ghi đè mới. Lỗi không sửa được lưu lý do vào vùng lỗi/DLQ; lỗi tạm thử lại có giới hạn.
+5. Nếu xử lý từng phần trong một lô, cả code và cấu hình Lambda phải hỗ trợ ReportBatchItemFailures. Đừng chỉ return thành công mà quên gửi kết quả về Results Queue.
 
-**B hoàn thành:** G1 pipeline thật; G2 deadline và sender hợp tác; receipt/outbox/race/recovery có test. Chưa có HTTPS thì giữ B8 pass và B9 chờ C, không tự ghi deadline E2E pass.
+| Trường hợp                                   | body kết quả face                                                                                      |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Có mapping và similarity đạt ngưỡng          | personStatus=KNOWN, matchedKnownFaceId là UUID trong app, một item label=KNOWN, confidence=similarity  |
+| Có similarity tốt nhất nhưng dưới ngưỡng     | UNKNOWN, matchedKnownFaceId=null, một item UNKNOWN, confidence=1-similarity                            |
+| Collection rỗng được xác nhận                | UNKNOWN, confidence=1, similarity=null, confidencePolicyVersion=empty-collection-v1                    |
+| Không mặt/nhiều mặt/không xác định được điểm | UNDETERMINED, matchedKnownFaceId=null, confidence=null, similarity=null, error=null; ghi qualityReason |
+| Lỗi kỹ thuật cuối cùng                       | Bỏ personStatus, matchedKnownFaceId=null, results=[], error:{code,message}                             |
+
+Điểm dùng thang 0..1; ngưỡng kiểm thử ban đầu `REKOGNITION_MATCH_THRESHOLD=0.90`, không đổi FACE_MATCH_THRESHOLD local sang thang 0..100. Với known/unknown có điểm, policy=`rekognition-normalized-v1`. Mỗi item có module=M1_FACE, label trùng personStatus, boundingBox=null hoặc chuẩn hóa 0..1; metadata có similarity, confidencePolicyVersion, provider=rekognition, sourceSessionId, collectionVersion, fellBackToLocal=false. Không tự chuyển qua model local khi AWS lỗi.
+
+File `aws/sprint4/contracts/queue-v1.schema.json` và các JSON trong `contracts/fixtures/` là dữ liệu máy đọc đã có, có thể dùng trực tiếp trong test; không cần đọc thêm một hướng dẫn khác. UUID/timestamp/bucket trong mẫu là giả lập, phải ánh xạ sang dữ liệu thử thật. Mỗi mẫu kết quả là ca độc lập, không phát tất cả với cùng resultId lên cùng một DB. Schema chưa kiểm tra được quyền/quan hệ DB hoặc quy tắc điểm; service vẫn phải làm các kiểm tra đó.
+
+**Đưa kết quả cho C:** code face, cách build, handler/runtime/timeout, queue mapping, bucket/prefix/collection và quyền cần dùng. **Đưa kết quả cho A:** cách tạo sự kiện thử, nơi xem ảnh/kết quả và các ca known/unknown/no-face để A kiểm UI.
+
+## 6. Làm hẹn giờ xử lý khi người dùng không xác nhận
+
+Hệ thống lưu hạn xử lý trong DB. Step Functions chỉ giúp chờ tới hạn; backend vẫn quyết định có được nâng mức cảnh báo hay không.
+
+### 6.1. Viết API và nghiệp vụ trước
+
+1. Đọc `src/escalation/` trong orchestrator. Tách một hàm xử lý deadline dùng chung, không viết một nhánh SQL riêng cho Lambda.
+2. Thêm `POST /api/v1/internal/events/{eventId}/deadline`, header `X-Internal-Token` từ INTERNAL_SERVICE_TOKEN, body:
+
+   ```json
+   {
+     "schemaVersion": 1,
+     "commandId": "<UUID>",
+     "eventId": "<UUID>",
+     "deadlineVersion": 1,
+     "expectedDeadlineAt": "<UTC-ket-thuc-Z>"
+   }
+   ```
+
+3. Trong một giao dịch DB: khóa sự kiện → kiểm tra command đã làm chưa → trạng thái/phiên bản hạn/mốc hạn → cập nhật trạng thái, lịch sử, yêu cầu gửi và bản ghi command. Dùng giờ DB. eventId body phải khớp URL.
+4. Tạo deadlineVersion riêng; thay đổi khác của sự kiện không có nghĩa deadline mới. Ack đã lưu trước khi command lấy lock thì không nâng mức. Command đã lưu trước ack thì giữ lịch sử, sender kiểm tra lại trạng thái trước gửi.
+
+   | API trả                                    | Ý nghĩa                                                                    |
+   | ------------------------------------------ | -------------------------------------------------------------------------- |
+   | 200, disposition=APPLIED, reason=ESCALATED | Đã nâng mức một lần                                                        |
+   | 200, disposition=NO_OP                     | Không cần đổi; reason ACKNOWLEDGED/RESOLVED/STALE_DEADLINE/ALREADY_APPLIED |
+   | 409, code=NOT_DUE, retryAt                 | Chưa đến hạn, cần hẹn lại; không kết thúc việc vĩnh viễn                   |
+   | 409, code=COMMAND_CONFLICT                 | Cùng commandId nhưng nội dung khác                                         |
+   | 400/401/404                                | Sai dữ liệu/token/không có sự kiện                                         |
+   | 429/timeout/5xx                            | Có thể thử lại có giới hạn                                                 |
+
+   Response 200 gồm commandId,disposition,reason,aggregateVersion. Command lặp cùng nội dung trả quyết định đã lưu, không tạo thêm yêu cầu gửi.
+
+5. Khi ghi deadline vào DB, ghi luôn việc cần tạo workflow. Tên lần chạy `deadline-<commandId>`, input giữ nguyên body trên, lưu execution ARN để tìm lại. Timeout khi StartExecution không được tạo business deadline mới.
+6. Sửa worker quét deadline local để không chạy cùng đường cloud cho cùng sự kiện. Bộ quét phục hồi nếu giữ lại phải gọi cùng hàm nghiệp vụ chống lặp.
+
+### 6.2. Viết Lambda và nối workflow
+
+1. Tạo `services/aws-workers/deadline/`: gọi API trên qua HTTPS, có timeout, map response thành lỗi có thể thử lại hoặc lỗi cuối cùng. Không sleep để đợi hạn trong Lambda.
+2. Đưa cho C input mẫu, handler, quyền và định nghĩa workflow dưới `infra/aws/`. Dùng Standard, JSONPath, Wait có `TimestampPath: "$.expectedDeadlineAt"`, sau đó gọi Lambda. C cấu hình quyền gọi đúng function.
+3. NOT_DUE phải được đợi rồi thử lại; timeout/429/5xx thử lại có giới hạn; sai dữ liệu/auth thì báo lỗi và giữ việc để kiểm tra. Có cách tìm lại workflow lỗi và deadline DB chưa xử lý sau khi app phục hồi.
+4. **Đưa định nghĩa workflow cho C** để C ghép vào template dùng chung và triển khai. Bạn dùng execution ARN để mở lịch sử lần chạy, đối chiếu input/output với trạng thái trong DB; không tạo workflow riêng bằng Console.
+
+**Đợi C hoàn thiện HTTPS và đưa INTERNAL_API_BASE_URL cùng secret ref để Lambda gọi API thật.** Trong lúc chờ, chạy test transaction/ack/race ở local. Sau đó tạo incident mới trong app, quan sát execution, kiểm tra DB và màn hình. Workflow xanh mà DB chưa đổi chưa phải đã xong. Nguồn: [AWS Wait state](https://docs.aws.amazon.com/step-functions/latest/dg/state-wait.html).
+
+**Đưa kết quả cho A:** cách tạo sự kiện có hạn chờ, cách xác nhận, hạn đã cấu hình thực tế và notificationId sinh ra khi hết hạn. A dùng để thử sender. **Đưa cho C:** API/path/auth, input workflow và cách phát hiện việc còn tồn sau khởi động lại.
+
+## 7. Làm backend để A gửi thông báo
+
+### 7.1. Tạo yêu cầu gửi và API xin quyền
+
+1. Khi nghiệp vụ quyết định cần gửi, ghi notification và việc phát ra SQS cùng transaction. Chỉ một chương trình gửi các kênh cloud; không để worker local gửi cùng notification.
+2. Tạo `POST /api/v1/internal/notifications/{notificationId}/claim`, cùng X-Internal-Token. Body `{schemaVersion:1,claimId:UUID,eventId:UUID,expectedEventVersion:int}`. Chốt `claimId=notificationId`; A dùng lại mã này khi thử lại, backend lưu quyết định bền vững theo mã đó.
+3. Backend kiểm tra owner từ DB, event/version/state, người nhận được phép, giới hạn gửi, thời gian giữa hai lần và quyền giữ lượt gửi. Mặc định lab: tối đa 5 lần/ngày/người nhận/kênh; chờ 60 giây giữa hai lần; lease 120 giây. Kiểm tra/giữ lượt trong transaction để hai sender không cùng lấy quyền.
+4. Response 200 CLAIMED có notificationId,disposition=CLAIMED,attemptId,leaseUntil,mode=DRY_RUN|REAL,delivery:{channel,recipientRef,topicArn?,destination?,message,subject?}. Cấu hình SENDER_DRY_RUN ở backend quyết định mode. Sender được giảm REAL thành DRY_RUN, không được làm ngược.
+5. Response 200 NO_OP có notificationId,disposition=NO_OP,reason=ALREADY_SENT/RESOLVED/STALE_VERSION/EXPIRED/CAP_EXCEEDED/CANCELLED. Ghi lý do vào DB; sender không tạo attempt mới. Đang bị giữ lượt hoặc còn cooldown trả 409 BUSY và retryAt để chờ, không bỏ công việc.
+6. Một claim REAL đã cấp quyền mà chưa biết kết quả không được cấp quyền gửi lại. Claim lặp giữ cùng attempt; khi chưa rõ đã gửi hay chưa thì ghi UNCERTAIN và đối soát. Hết lease không tự cho phép một lượt gửi thật mới.
+7. Email topic chỉ chứa người được phép nhận dữ liệu thử đó. Không tin địa chỉ người nhận từ queue. Thông tin người nhận chỉ trả cho service đã xác thực, không log nguyên response.
+
+### 7.2. Nhận kết quả và hiển thị
+
+1. Nhánh notification.outcome trong Results consumer gọi service riêng, không đưa vào AI result DTO.
+2. Payload theo bảng §5.3. Chỉ chấp nhận attempt/owner/notification đã tồn tại và đúng quan hệ; lưu receipt theo outcomeId và ràng buộc kết quả của attempt. Cùng ID khác nội dung là conflict, không cập nhật đè.
+3. Lưu nhật ký gửi riêng; không insert status mới thẳng vào enum cũ của notifications:
+
+   | Kết quả sender    | Cách lưu/trình bày                                                         |
+   | ----------------- | -------------------------------------------------------------------------- |
+   | DRY_RUN           | Chạy thử, không gọi nhà cung cấp; mapping notifications=SKIPPED với reason |
+   | PROVIDER_ACCEPTED | Có providerId; mapping SENT, chưa có nghĩa người dùng đã nhận/xác nhận     |
+   | FAILED            | Có lý do rõ; mapping FAILED                                                |
+   | UNCERTAIN         | Giữ pending nhưng chặn tự gửi lại bằng nhật ký; cần đối soát               |
+
+4. Commit xong nhật ký và receipt mới DeleteMessage. Nếu cần API vì khác process, thêm `POST /api/v1/internal/notifications/{notificationId}/outcome`, body=payload outcome, cùng auth; trả 202 với outcomeId và ACCEPTED/DUPLICATE, conflict 409.
+5. Thêm API/hiển thị có quyền để A thấy được đang chờ, chạy thử, AWS đã nhận, lỗi hoặc chưa rõ. Không tự ghi CONFIRMED chỉ vì AWS trả MessageId/ContactId.
+6. Test tình huống nhà cung cấp nhận nhưng chưa lưu kết quả bằng mock: chỉ thử publish lại kết quả đã giữ được, không gửi tin thật lại. Mất kết quả phải đối soát, không reset notification để thử vận may.
+
+**Đưa kết quả cho A:** PR backend, API claim/outcome, ví dụ request/response, job/outcome, cách tạo notification thử và các lý do không gửi. **Đợi A hoàn thiện sender để chạy việc thật → email thật → trạng thái trong app.** Bạn vẫn làm test bằng sender giả trong lúc chờ.
+
+## 8. Điền cấu hình và ghép trên bản cloud
+
+**Đợi C đưa bucket, queue URLs, workflow ARN, HTTPS và bản code đã triển khai.** Điền giá trị thật, không chép placeholder. Các biến mới cần có code đọc/kiểm tra và Compose truyền vào; để trống chưa bật tính năng được.
+
+| Biến                                                          | Bản cloud                                                   |
+| ------------------------------------------------------------- | ----------------------------------------------------------- |
+| AWS_REGION                                                    | ap-southeast-1                                              |
+| STORAGE_PROVIDER / S3_BUCKET                                  | s3 / tên bucket dev                                         |
+| FACE_PROVIDER / FACE_JOB_TRANSPORT                            | rekognition / sqs                                           |
+| FACE_JOBS_QUEUE_URL                                           | FaceJobsQueueUrl                                            |
+| APPLICATION_RESULTS_QUEUE_URL                                 | ApplicationResultsQueueUrl                                  |
+| APPLICATION_RESULTS_CONSUMER_ENABLED                          | true                                                        |
+| REKOGNITION_MATCH_THRESHOLD                                   | 0.90 cho lượt kiểm thử ban đầu                              |
+| DEADLINE_DRIVER / DEADLINE_STATE_MACHINE_ARN                  | stepfunctions / ARN workflow                                |
+| INTERNAL_API_BASE_URL                                         | HTTPS origin + /api/v1, không có slash cuối                 |
+| INTERNAL_SERVICE_TOKEN                                        | Secret chung với API/Lambda, ít nhất 32 ký tự               |
+| NOTIFICATION_DRIVER / NOTIFICATION_JOBS_QUEUE_URL             | sqs / NotificationJobsQueueUrl                              |
+| SENDER_DRY_RUN                                                | true trước, chỉ false sau kiểm tra gửi thử đạt              |
+| SNS_TOPIC_ARN / CONNECT_INSTANCE_ID / CONNECT_CONTACT_FLOW_ID | C cấp, A xác minh người nhận/kênh; dùng đúng kênh được phép |
+
+Giữ FACE_MATCH_THRESHOLD local riêng. Biến cũ AWS_SQS_JOBS_QUEUE_URL không tự thay thế FACE_JOBS_QUEUE_URL. Không tự bật fallback local khi thiếu biến cloud; báo thiếu cấu hình ngay lúc khởi động.
+
+Kiểm tra trước khi đưa mã cho C:
+
+```powershell
+pnpm contracts:generate
+pnpm api:lint
+pnpm --filter @cam/orchestrator typecheck
+pnpm --filter @cam/orchestrator test -- --runInBand
+pnpm --filter @cam/orchestrator build
+```
+
+Chạy contracts:generate khi có sửa API. Với test tích hợp, dùng DB test riêng có migration đúng phiên bản. Worker mới phải có lệnh build/test trong manifest và hướng dẫn ngay tại phần bàn giao; không dùng một lệnh giả chưa có trong repo.
+
+## 9. Kiểm tra đầy đủ trước demo
+
+| Thử trên ứng dụng/bản thử có kiểm soát              | Kết quả cần thấy                                             |
+| --------------------------------------------------- | ------------------------------------------------------------ |
+| Người quen/người lạ/không mặt/ảnh hỏng              | Đúng bảng §5; lỗi không trở thành KNOWN                      |
+| User/collection khác chủ                            | Không đọc ảnh hoặc nhận diện nhầm sang người khác            |
+| Cùng resultId và payload 10 lần                     | Một hiệu ứng nghiệp vụ                                       |
+| Cùng resultId, đổi nội dung                         | Conflict, không ghi đè                                       |
+| Revision mới trước, cũ tới sau                      | Bản cũ bị bỏ qua, không ghi đè mới                           |
+| Tắt consumer sau DB commit trước delete rồi bật lại | Nhận lại an toàn, không mất/nhân kết quả                     |
+| Ack trước hạn                                       | Không nâng mức, không tạo yêu cầu gửi nâng mức               |
+| Không ack                                           | Hết hạn tạo đúng một quyết định nâng mức và intent           |
+| Ack chạy gần như đồng thời command                  | Quyết định theo transaction, không sinh hai quyết định       |
+| Command lặp/cũ/chưa đến hạn                         | Trả đã làm/không cần làm/hẹn lại đúng ý nghĩa                |
+| API tạm ngừng rồi khôi phục                         | Workflow/việc còn chờ được tìm lại, không báo thành công giả |
+| Sender trùng/hết lease/cap/cooldown                 | Không gửi vượt quy tắc; phối hợp A kiểm tra                  |
+| AWS nhận tin nhưng mất outcome                      | Ghi chưa rõ, không tự gửi lại thật                           |
+
+Sau khi các ca dữ liệu mẫu đạt, **đợi C nối edge và người giữ model cung cấp model/báo cáo**. Kiểm tra tên file, phiên bản, checksum, cách tiền xử lý, thư viện và kết quả đo trên thiết bị thật. Dùng một đường sự kiện từ Frigate/MQTT, không bật hai producer cho cùng video.
+
+Chạy video đã biết kết quả: sự kiện trong app → ảnh trên S3 → job → Lambda → result → DB/UI → thông báo → xác nhận hoặc hết hạn. Ghi eventId/jobId/resultId/executionArn/notificationId và mốc thời gian. Đo thời gian xử lý cloud riêng với độ chính xác model. Chưa có model/report thì nói rõ mới thử dữ liệu mẫu, chưa ghi model thật đã đạt.
+
+## 10. Bàn giao và chẩn đoán
+
+| Lỗi nhìn thấy                      | Kiểm tra                                                                    |
+| ---------------------------------- | --------------------------------------------------------------------------- |
+| Có env nhưng vẫn ghi MinIO         | STORAGE_PROVIDER → S3_BUCKET → code thực chọn adapter → container nhận biến |
+| Outbox có nhưng Lambda không chạy  | Bộ gửi DB → queue URL → quyền SendMessage → trigger/role/Region             |
+| Lambda báo xong nhưng DB không đổi | Có SendMessage Results chưa → schema → consumer → receipt/service           |
+| Mất ảnh/AccessDenied               | Key đúng bucket/prefix/owner → role trong container → quyền/KMS             |
+| Wait hết nhưng không nâng mức      | API/auth → deadlineVersion → giờ DB → trạng thái và command receipt         |
+| Có hai lần nâng mức                | Hai nơi đang xử lý hạn cùng lúc → commandId giữ cố định → khóa/giao dịch DB |
+
+Ghi ngay trong ghi chép nhóm:
+
+```text
+Phần của B / ngày / người làm / người kiểm tra:
+Commit/PR, migration đã chạy và cách chạy lại:
+User/camera IDs thử, collection/version (không ghi ảnh hoặc token):
+Worker face/deadline: runtime, handler, build/test, timeout:
+Bucket/queue/workflow đã nhận từ C:
+API claim/outcome/deadline đã đưa cho A/C:
+Bản cloud/URL, video hoặc dữ liệu mẫu:
+Ca đã thử / mong đợi / thực tế / nơi lưu bằng chứng:
+EventId / jobId / resultId / executionArn / notificationId mẫu:
+Đang chờ ai / cần kết quả gì:
+```
+
+Bạn xong khi người khác làm lại được lưu ảnh → nhận diện → kết quả trong app, và hai nhánh xác nhận/không xác nhận → deadline → yêu cầu gửi đúng. Phần thông báo phải cùng A thấy thư thật và nhật ký trong app. C cùng bạn thử restart/restore vào DB test riêng; không restore đè DB demo. Ghi trạng thái **Đã chạy đạt / Cần sửa / Đang chờ A hoặc C / Bị chặn quyền AWS**, kèm phạm vi thật đã thử.
