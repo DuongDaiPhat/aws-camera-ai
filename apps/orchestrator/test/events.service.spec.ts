@@ -152,18 +152,18 @@ describe('EventsService (US-06)', () => {
   });
 
   describe('streamEvents & emitEvent', () => {
-    it('nem UnauthorizedException khi khong truyen token', () => {
-      expect(() => service.streamEvents(undefined)).toThrow(UnauthorizedException);
+    it('nem UnauthorizedException khi khong truyen token', async () => {
+      await expect(service.streamEvents(undefined)).rejects.toThrow(UnauthorizedException);
     });
 
-    it('nem UnauthorizedException khi token khong hop le', () => {
+    it('nem UnauthorizedException khi token khong hop le', async () => {
       tokenService.verifyAccessToken.mockImplementationOnce(() => {
         throw new Error('Invalid token');
       });
-      expect(() => service.streamEvents('invalid-token')).toThrow(UnauthorizedException);
+      await expect(service.streamEvents('invalid-token')).rejects.toThrow(UnauthorizedException);
     });
 
-    it('tra ve Observable va nhan duoc su kien khi emitEvent', (done) => {
+    it('tra ve Observable va nhan duoc su kien khi emitEvent', async () => {
       tokenService.verifyAccessToken.mockReturnValueOnce({
         sub: 'u-1',
         email: 'admin@test.vn',
@@ -172,17 +172,17 @@ describe('EventsService (US-06)', () => {
         jti: 'token-jti-1',
       });
 
-      const stream$ = service.streamEvents('valid-token');
+      const stream$ = await service.streamEvents('valid-token');
+      const received: unknown[] = [];
       const subscription = stream$.subscribe((event) => {
         expect(event.type).toBe('event.created');
         expect(JSON.parse(String(event.data))).toMatchObject({ id: mockRecord.id });
         subscription.unsubscribe();
-        done();
+        received.push(event);
       });
 
-      void service.toEventSummary(mockRecord).then((dto) => {
-        service.emitEvent(dto);
-      });
+      service.emitEvent(await service.toEventSummary(mockRecord));
+      expect(received).toHaveLength(1);
     });
   });
 

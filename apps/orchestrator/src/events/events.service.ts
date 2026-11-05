@@ -389,7 +389,7 @@ export class EventsService {
   /**
    * Mở luồng SSE cho dashboard sau khi kiểm tra token (US-06).
    */
-  streamEvents(token?: string): Observable<MessageEvent> {
+  async streamEvents(token?: string): Promise<Observable<MessageEvent>> {
     if (!token) {
       throw new UnauthorizedException({
         error: { code: 'UNAUTHORIZED', message: 'Thiếu token xác thực cho SSE stream.' },
@@ -398,8 +398,9 @@ export class EventsService {
 
     let actor: TokenClaims;
     try {
-      actor = this.tokenService.verifyAccessToken(token);
-    } catch {
+      actor = await this.tokenService.verifyAccessToken(token);
+    } catch (error: unknown) {
+      if (error instanceof ForbiddenException) throw error;
       throw new UnauthorizedException({
         error: {
           code: 'INVALID_TOKEN',

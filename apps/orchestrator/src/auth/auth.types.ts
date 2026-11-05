@@ -103,7 +103,7 @@ export interface PasswordHasher {
 
 export interface TokenService {
   issueTokenPair(user: AuthUser): TokenPair;
-  verifyAccessToken(token: string): TokenClaims;
+  verifyAccessToken(token: string): TokenClaims | Promise<TokenClaims>;
   verifyRefreshToken(token: string): TokenClaims;
 }
 

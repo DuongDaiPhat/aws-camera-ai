@@ -40,16 +40,15 @@ describe('EventsController (US-06)', () => {
     expect(result).toBe(mockResponse);
   });
 
-  it('streamEvents goi service streamEvents va tra ve observable', (done) => {
+  it('streamEvents goi service streamEvents va tra ve observable', async () => {
     const mockObservable = of({ type: 'event.created', data: '{}' });
-    service.streamEvents.mockReturnValueOnce(mockObservable);
+    service.streamEvents.mockResolvedValueOnce(mockObservable);
 
-    const result$ = controller.streamEvents('token-xyz');
+    const result$ = await controller.streamEvents('token-xyz');
     expect(service.streamEvents).toHaveBeenCalledWith('token-xyz');
 
     result$.subscribe((val) => {
       expect(val.type).toBe('event.created');
-      done();
     });
   });
 
