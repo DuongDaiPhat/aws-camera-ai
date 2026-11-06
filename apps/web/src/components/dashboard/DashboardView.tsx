@@ -13,6 +13,7 @@ import { EventCard, EventDetailModal, EventFilter } from '@/components/events';
 import { CameraView } from '@/components/cameras';
 import { EmptyState, ErrorState, Pagination } from '@/components/ui';
 import { SettingsView } from '@/components/settings';
+import { UsersView } from '@/components/users/UsersView';
 import { ZonesView } from '@/components/zones';
 import { WellnessView } from '@/components/wellness/WellnessView';
 import styles from './dashboard-view.module.css';
@@ -230,6 +231,8 @@ export function DashboardView() {
               <CameraView user={user} />
             ) : activeNav === 'settings' ? (
               <SettingsView user={user} />
+            ) : activeNav === 'users' && user?.role === 'ADMIN' ? (
+              <UsersView currentUserId={user.id} />
             ) : activeNav === 'known-faces' ? (
               <KnownFacesView isAdmin={user?.role === 'ADMIN'} />
             ) : activeNav === 'zones' ? (
