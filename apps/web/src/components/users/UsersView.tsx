@@ -37,11 +37,24 @@ function AccountRow({
   onSave,
   onCancel,
 }: AccountRowProps) {
+  const loginEmail = user.cognitoEmail ?? user.email;
+  const hasDifferentEmails = loginEmail !== user.email;
   return (
     <tr className={draftRole ? styles.editingRow : undefined}>
       <th scope="row">
         <span className={styles.fullName}>{user.fullName}</span>
-        <small>{user.email}</small>
+        {hasDifferentEmails ? (
+          <>
+            <small>
+              <strong>Cognito</strong> {loginEmail}
+            </small>
+            <small>
+              <strong>CameraAI</strong> {user.email}
+            </small>
+          </>
+        ) : (
+          <small>{loginEmail}</small>
+        )}
       </th>
       <td className={styles.statusCell}>
         <span className={user.isActive ? styles.active : styles.inactive}>
@@ -52,7 +65,7 @@ function AccountRow({
       <td>
         {draftRole ? (
           <select
-            aria-label={`Vai trò của ${user.email}`}
+            aria-label={`Vai trò của ${loginEmail}`}
             value={draftRole}
             disabled={saving}
             autoFocus
@@ -91,7 +104,7 @@ function AccountRow({
           <button
             type="button"
             disabled={saving}
-            aria-label={`Đổi quyền của ${user.email}`}
+            aria-label={`Đổi quyền của ${loginEmail}`}
             onClick={() => onEdit(user.role)}
           >
             Đổi quyền

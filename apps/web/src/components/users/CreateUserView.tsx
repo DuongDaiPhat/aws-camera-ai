@@ -55,7 +55,7 @@ export function CreateUserView({ onCreated }: { onCreated?: () => void }) {
             <input name="fullName" autoComplete="off" required maxLength={120} />
           </label>
           <label>
-            Email
+            Email đăng nhập Cognito
             <input name="email" type="email" autoComplete="off" required maxLength={254} />
           </label>
           <label>

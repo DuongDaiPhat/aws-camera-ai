@@ -17,6 +17,8 @@ describe('account management', () => {
     const admin = {
       id: 'admin',
       email: 'admin@example.org',
+      cognitoEmail: 'admin@example.org',
+      isCognitoLinked: true,
       fullName: 'Admin',
       role: 'ADMIN',
       isActive: true,
@@ -24,6 +26,8 @@ describe('account management', () => {
     const viewer = {
       id: 'viewer',
       email: 'viewer@example.org',
+      cognitoEmail: 'viewer-login@example.org',
+      isCognitoLinked: true,
       fullName: 'Người dùng',
       role: 'VIEWER',
       isActive: true,
@@ -40,6 +44,9 @@ describe('account management', () => {
       const [adminRow, viewerRow] = host.querySelectorAll('tbody tr');
       expect(adminRow.textContent).toContain('Tài khoản của bạn');
       expect(adminRow.querySelector('button')).toBeNull();
+      expect(adminRow.textContent?.match(/admin@example\.org/g)).toHaveLength(1);
+      expect(viewerRow.textContent).toContain('Cognito viewer-login@example.org');
+      expect(viewerRow.textContent).toContain('CameraAI viewer@example.org');
 
       act(() => viewerRow.querySelector('button')!.click());
       const role = viewerRow.querySelector('select')!;

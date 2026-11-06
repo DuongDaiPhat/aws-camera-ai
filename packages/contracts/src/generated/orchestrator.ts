@@ -1258,13 +1258,21 @@ export interface components {
       isActive: boolean;
       /** @description Da lien ket voi User Pool dang cau hinh */
       isCognitoLinked?: boolean;
+      /**
+       * Format: email
+       * @description Email dang nhap Cognito da luu khi lien ket, chi co trong danh sach cua ADMIN.
+       */
+      cognitoEmail?: string | null;
       /** Format: date-time */
       lastLoginAt?: string | null;
       /** Format: date-time */
       createdAt: string;
     };
     CreateUserRequest: {
-      /** Format: email */
+      /**
+       * Format: email
+       * @description Email dang nhap Cognito
+       */
       email: string;
       fullName: string;
       role: components['schemas']['UserRole'];

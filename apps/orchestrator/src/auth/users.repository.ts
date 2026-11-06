@@ -24,13 +24,16 @@ export class UsersRepository {
     const { rows } = await this.database.query<{ data: User[]; total: number }>(
       `WITH filtered AS (
          SELECT ${USER_COLUMNS},
-                COALESCE(cognito_issuer = $2, FALSE) AND cognito_sub IS NOT NULL AS "isCognitoLinked"
+                COALESCE(cognito_issuer = $2, FALSE) AND cognito_sub IS NOT NULL AS "isCognitoLinked",
+                CASE WHEN cognito_issuer = $2 AND cognito_sub IS NOT NULL
+                     THEN cognito_email END AS "cognitoEmail"
          FROM users
          WHERE $1::user_role IS NULL OR role = $1
        )
        SELECT (SELECT count(*)::int FROM filtered) AS total,
               COALESCE((SELECT json_agg(page_user ORDER BY email, id) FROM (
-                SELECT ${USER_FIELDS}, "isCognitoLinked" FROM filtered ORDER BY email, id LIMIT $3 OFFSET $4
+                SELECT ${USER_FIELDS}, "isCognitoLinked", "cognitoEmail"
+                FROM filtered ORDER BY email, id LIMIT $3 OFFSET $4
               ) page_user), '[]'::json) AS data`,
       [role ?? null, issuer, pageSize, offset],
     );
@@ -76,8 +79,8 @@ export class UsersRepository {
   ): Promise<User | undefined> {
     const { rows } = await this.database.query<User>(
       `WITH created_user AS (
-         INSERT INTO users (email, full_name, role, cognito_issuer, cognito_sub)
-         VALUES ($1, $2, $3, $4, $5)
+         INSERT INTO users (email, full_name, role, cognito_issuer, cognito_sub, cognito_email)
+         VALUES ($1::text, $2, $3, $4, $5, $1::text)
          ON CONFLICT DO NOTHING
          RETURNING ${USER_COLUMNS}
        ), recorded_action AS (

@@ -117,6 +117,7 @@ describe('Cognito account management over HTTP', () => {
     isActive: true,
     createdAt: '2026-11-06T00:00:00.000Z',
     isCognitoLinked: true,
+    cognitoEmail: 'member-login@example.org',
   };
   const actor = { ...target, id: actorId, role: 'ADMIN' };
   const input = {
