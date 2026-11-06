@@ -95,7 +95,7 @@ describe('US20 policy regression', () => {
         ({ sub: token, role: token === 'admin' ? 'ADMIN' : 'VIEWER' }) as TokenClaims,
     } as TokenService;
     const events = new EventsService(
-      {} as EventsRepository,
+      { isActiveAdmin: async () => true } as unknown as EventsRepository,
       {} as MediaService,
       {} as EscalationEngineService,
       {} as IStorageService,
@@ -114,6 +114,7 @@ describe('US20 policy regression', () => {
       'event.updated',
       ['owner', 'resident'],
     );
+    await new Promise<void>((resolve) => setImmediate(resolve));
     expect(received.other).toHaveLength(0);
     expect(received.owner).toHaveLength(1);
     expect(received.resident).toHaveLength(1);
@@ -123,6 +124,7 @@ describe('US20 policy regression', () => {
       'event.created',
       ['owner'],
     );
+    await new Promise<void>((resolve) => setImmediate(resolve));
     expect(received.other).toHaveLength(0);
     expect(received.resident).toHaveLength(1);
     expect(received.owner).toHaveLength(2);

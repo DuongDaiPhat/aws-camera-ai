@@ -52,13 +52,14 @@ describe('camera ownership', () => {
   });
 
   it('sends camera events to their owner and administrators only', async () => {
+    let isAdmin = true;
     const verifyAccessToken = (sub: string) =>
       ({
         sub,
         role: sub === 'admin' ? 'ADMIN' : 'VIEWER',
       }) as TokenClaims;
     const events = new EventsService(
-      {} as EventsRepository,
+      { isActiveAdmin: async () => isAdmin } as unknown as EventsRepository,
       {} as MediaService,
       {} as EscalationEngineService,
       {} as IStorageService,
@@ -81,9 +82,16 @@ describe('camera ownership', () => {
     try {
       events.emitEvent(event, 'event.created', [owner]);
       events.emitEvent(event, 'event.created');
+      await new Promise<void>((resolve) => setImmediate(resolve));
 
       expect(receiveOwner).toHaveBeenCalledTimes(1);
       expect(receiveOther).not.toHaveBeenCalled();
+      expect(receiveAdmin).toHaveBeenCalledTimes(2);
+
+      isAdmin = false;
+      events.emitEvent(event, 'event.created', [owner]);
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      expect(receiveOwner).toHaveBeenCalledTimes(2);
       expect(receiveAdmin).toHaveBeenCalledTimes(2);
     } finally {
       subscriptions.forEach((subscription) => subscription.unsubscribe());

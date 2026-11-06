@@ -181,7 +181,7 @@ describe('EventsService (US-06)', () => {
         received.push(event);
       });
 
-      service.emitEvent(await service.toEventSummary(mockRecord));
+      service.emitEvent(await service.toEventSummary(mockRecord), 'event.created', ['u-1']);
       expect(received).toHaveLength(1);
     });
   });

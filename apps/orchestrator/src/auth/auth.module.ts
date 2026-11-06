@@ -3,6 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { Argon2PasswordHasher } from './argon2-password-hasher';
 import { AuthController } from './auth.controller';
+import { UsersController } from './users.controller';
+import { UsersRepository } from './users.repository';
+import { UsersService } from './users.service';
 import { PostgresAuthRepository } from './auth.repository';
 import { AuthService } from './auth.service';
 import {
@@ -26,8 +29,10 @@ import { CognitoVerifierService } from './cognito-verifier.service';
 import { DatabaseService } from '../database/database.service';
 
 @Module({
-  controllers: [AuthController],
+  controllers: [AuthController, UsersController],
   providers: [
+    UsersRepository,
+    UsersService,
     AuthService,
     PostgresAuthRepository,
     Argon2PasswordHasher,

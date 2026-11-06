@@ -280,6 +280,14 @@ export class EventsRepository {
 
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
+  async isActiveAdmin(userId: string): Promise<boolean> {
+    const { rowCount } = await this.pool.query(
+      "SELECT 1 FROM users WHERE id = $1 AND is_active AND role = 'ADMIN'",
+      [userId],
+    );
+    return rowCount === 1;
+  }
+
   /**
    * Tra cứu camera theo slug (do Frigate gửi `after.camera` dạng slug).
    */

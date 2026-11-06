@@ -7,7 +7,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Subject, Observable, filter, map } from 'rxjs';
+import { Subject, Observable, concatMap, defer, filter, of } from 'rxjs';
 import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
 import { TOKEN_SERVICE, type TokenService, type TokenClaims } from '../auth/auth.types';
 import { MediaService } from '../media/media.service';
@@ -395,7 +395,18 @@ export class EventsService {
 
     return this.eventSubject.asObservable().pipe(
       filter((item) => actor.role === 'ADMIN' || item.recipients.includes(actor.sub)),
-      map((item) => item.message),
+      concatMap((item) =>
+        item.recipients.includes(actor.sub)
+          ? of(item.message)
+          : defer(async () => {
+              // An open dashboard can outlive a role change.
+              const isAdmin = await this.eventsRepository
+                .isActiveAdmin(actor.sub)
+                .catch(() => false);
+              return isAdmin ? item.message : undefined;
+            }),
+      ),
+      filter((message): message is MessageEvent => message !== undefined),
     );
   }
 }
