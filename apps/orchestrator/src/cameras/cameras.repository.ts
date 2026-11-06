@@ -21,6 +21,7 @@ export class CamerasRepository {
   async findAll(filter?: {
     deviceId?: string;
     isEnabled?: boolean;
+    ownerUserId?: string;
   }): Promise<CameraAggregateRecord[]> {
     const conditions: string[] = [];
     const values: unknown[] = [];
@@ -33,6 +34,13 @@ export class CamerasRepository {
     if (filter?.isEnabled !== undefined) {
       values.push(filter.isEnabled);
       conditions.push(`c.is_enabled = $${values.length}`);
+    }
+
+    if (filter?.ownerUserId) {
+      values.push(filter.ownerUserId);
+      conditions.push(
+        `EXISTS (SELECT 1 FROM devices d WHERE d.id = c.device_id AND d.owner_user_id = $${values.length})`,
+      );
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';

@@ -223,7 +223,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Danh sach camera */
+    /**
+     * Danh sach camera
+     * @description ADMIN xem tat ca. Tai khoan thuong chi xem camera thuoc thiet bi cua minh.
+     */
     get: operations['listCameras'];
     put?: never;
     /**
@@ -3013,6 +3016,7 @@ export interface operations {
           'application/json': components['schemas']['Camera'];
         };
       };
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };
@@ -3084,6 +3088,7 @@ export interface operations {
           'application/json': components['schemas']['CameraPreview'];
         };
       };
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
       /** @description Camera dang offline, khong lay duoc frame */
       503: {
@@ -3146,6 +3151,7 @@ export interface operations {
           'application/json': components['schemas']['CameraRuntimeStatusResponse'];
         };
       };
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };
@@ -3169,6 +3175,7 @@ export interface operations {
           'application/json': components['schemas']['CameraSourceDetail'];
         };
       };
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };
@@ -3424,6 +3431,7 @@ export interface operations {
           'application/json': components['schemas']['CameraDebugStream'];
         };
       };
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };
@@ -3450,6 +3458,7 @@ export interface operations {
         };
       };
       401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };
@@ -3808,6 +3817,7 @@ export interface operations {
           'application/json': components['schemas']['EventDetail'];
         };
       };
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };
@@ -3941,6 +3951,7 @@ export interface operations {
           };
         };
       };
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };

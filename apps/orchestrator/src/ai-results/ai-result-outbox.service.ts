@@ -6,7 +6,7 @@ import { EVENT_TYPES, type EventType } from '@cam/contracts';
 import { EscalationEngineService } from '../escalation/escalation-engine.service';
 import type { AiCandidateResult } from '../escalation/escalation-policy';
 import { EventsRepository } from '../events/events.repository';
-import { EventsService } from '../events/events.service';
+import { eventRecipients, EventsService } from '../events/events.service';
 import {
   AiResultsRepository,
   type AiEscalationSnapshot,
@@ -208,15 +208,7 @@ export class AiResultOutboxService implements OnModuleInit, OnModuleDestroy {
       throw new Error(`Không tìm thấy event ${eventId} của outbox message ${messageId}`);
     }
     const summary = await this.eventsService.toEventSummary(record);
-    if (record.event_type === 'WELLNESS_TIMEOUT')
-      this.eventsService.emitEvent(
-        summary,
-        'event.updated',
-        [record.wellness_owner_user_id, record.wellness_resident_user_id].filter(
-          (id): id is string => !!id,
-        ),
-      );
-    else this.eventsService.emitEvent(summary, 'event.updated');
+    this.eventsService.emitEvent(summary, 'event.updated', eventRecipients(record));
     await this.aiResultsRepository.markOutboxProcessed(messageId);
   }
 }

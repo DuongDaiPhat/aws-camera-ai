@@ -19,6 +19,7 @@ import {
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { JwtTokenService } from './jwt-token.service';
 import { RolesGuard } from './roles.guard';
+import { ResourceAccessGuard } from './resource-access.guard';
 import { AUTH_SETTINGS, readAuthSettings, type AuthSettings } from './auth.config';
 import { CognitoTokenService } from './cognito-token.service';
 import { CognitoVerifierService } from './cognito-verifier.service';
@@ -75,6 +76,7 @@ import { DatabaseService } from '../database/database.service';
     },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: ResourceAccessGuard },
   ],
   exports: [AuthService, TOKEN_SERVICE],
 })

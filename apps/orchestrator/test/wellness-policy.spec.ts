@@ -89,7 +89,7 @@ describe('US20 policy regression', () => {
       await validate(plainToInstance(UpdateWellnessScheduleDto, { daysOfWeek: [] })),
     ).not.toHaveLength(0);
   });
-  it('M5 SSE reaches only owner/resident/admin; generic events retain their previous stream', async () => {
+  it('M5 SSE reaches owner, resident and admin; camera events reach their owner and admin', async () => {
     const tokens = {
       verifyAccessToken: (token: string) =>
         ({ sub: token, role: token === 'admin' ? 'ADMIN' : 'VIEWER' }) as TokenClaims,
@@ -118,8 +118,15 @@ describe('US20 policy regression', () => {
     expect(received.owner).toHaveLength(1);
     expect(received.resident).toHaveLength(1);
     expect(received.admin).toHaveLength(1);
-    events.emitEvent({ id: 'generic', eventType: 'PERSON_DETECTED' } as EventSummaryDto);
-    expect(received.other).toHaveLength(1);
+    events.emitEvent(
+      { id: 'camera-event', eventType: 'PERSON_DETECTED' } as EventSummaryDto,
+      'event.created',
+      ['owner'],
+    );
+    expect(received.other).toHaveLength(0);
+    expect(received.resident).toHaveLength(1);
+    expect(received.owner).toHaveLength(2);
+    expect(received.admin).toHaveLength(2);
     subscriptions.forEach((s) => s.unsubscribe());
   });
   it('never sends a Telegram token to a configurable remote endpoint', () => {

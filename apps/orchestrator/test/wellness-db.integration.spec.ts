@@ -36,6 +36,7 @@ import type { IStorageService } from '../src/storage/storage.interface';
 import { AiResultsRepository } from '../src/ai-results/ai-results.repository';
 import { AiResultValidator } from '../src/ai-results/ai-result.validator';
 import { AiResultOutboxService } from '../src/ai-results/ai-result-outbox.service';
+import { CamerasRepository } from '../src/cameras/cameras.repository';
 import { EventsRepository } from '../src/events/events.repository';
 import { EventsService } from '../src/events/events.service';
 import { MediaService } from '../src/media/media.service';
@@ -1021,6 +1022,37 @@ describe('US20 real PostgreSQL + HTTP delivery + API acceptance', () => {
     await scheduler.evaluatePendingRuns();
     expect((await repository.getCheckById(superseded.run.id))?.status).toBe('SKIPPED_SUPERSEDED');
   });
+  it('scopes camera and event queries to the owner, including counts and events with no camera', async () => {
+    const cameraRepository = new CamerasRepository(pool);
+    const eventRepository = new EventsRepository(pool);
+    const foreignEvent = await row(
+      "INSERT INTO events(camera_id,event_type,detected_at) VALUES($1,'PERSON_DETECTED',now()) RETURNING id",
+      [foreignCamera],
+    );
+    await pool.query("INSERT INTO events(event_type,detected_at) VALUES('PERSON_DETECTED',now())");
+
+    expect((await cameraRepository.findAll({ ownerUserId: owner })).map((c) => c.id)).toEqual([
+      camera,
+    ]);
+    expect((await cameraRepository.findAll({ ownerUserId: other })).map((c) => c.id)).toEqual([
+      foreignCamera,
+    ]);
+
+    for (const [actorId, expectedId] of [
+      [owner, identityEvent],
+      [other, foreignEvent.id],
+    ]) {
+      const result = await eventRepository.listEvents({ page: 1, pageSize: 1, actorId });
+      expect(result.total).toBe(1);
+      expect(result.events.map((event) => event.id)).toEqual([expectedId]);
+      const stats = await eventRepository.getEventStats(new Date(Date.now() - 60000), 20, actorId);
+      expect(stats.aggregate.total_events).toBe(1);
+      expect(stats.cameras.total_count).toBe(1);
+    }
+
+    expect((await eventRepository.listEvents({ page: 1, pageSize: 20 })).total).toBe(3);
+  });
+
   it('TC005/007: M5 event lists, details, stats and SSE expose resident context only to its household', async () => {
     const check = await alert();
     const eventRepository = new EventsRepository(pool);
@@ -1030,7 +1062,7 @@ describe('US20 real PostgreSQL + HTTP delivery + API acceptance', () => {
           page: 1,
           pageSize: 20,
           eventType: ['WELLNESS_TIMEOUT'],
-          wellnessActorId: other,
+          actorId: other,
         })
       ).total,
     ).toBe(0);
@@ -1040,7 +1072,7 @@ describe('US20 real PostgreSQL + HTTP delivery + API acceptance', () => {
           page: 1,
           pageSize: 20,
           eventType: ['WELLNESS_TIMEOUT'],
-          wellnessActorId: resident,
+          actorId: resident,
         })
       ).total,
     ).toBe(1);

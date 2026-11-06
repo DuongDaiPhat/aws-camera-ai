@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_POOL } from '../database/database.module';
+import { eventVisibilityPredicate } from '../auth/resource-access.guard';
 import { EventType, EventStatus, PriorityLevel, PersonStatus } from '@cam/contracts';
 
 export interface ListEventsFilters {
@@ -14,8 +15,7 @@ export interface ListEventsFilters {
   from?: string;
   to?: string;
   isFalseAlarm?: boolean;
-  wellnessActorId?: string;
-  wellnessAdmin?: boolean;
+  actorId?: string;
 }
 
 /** Cac trang thai con cho nguoi dung xu ly (FR-DSH-01). */
@@ -113,6 +113,7 @@ export interface EventListItemRecord {
   detected_at: Date;
   camera_id: string | null;
   camera_name: string | null;
+  camera_owner_user_id?: string | null;
   zone_id: string | null;
   zone_name: string | null;
   matched_person_name: string | null;
@@ -135,6 +136,7 @@ const EVENT_SUMMARY_PROJECTION = `
     e.detected_at,
     c.id AS camera_id,
     c.name AS camera_name,
+    cd.owner_user_id AS camera_owner_user_id,
     e.zone_id,
     COALESCE(e.zone_name, z.name) AS zone_name,
     kf.person_name AS matched_person_name,
@@ -152,6 +154,7 @@ const EVENT_SUMMARY_SOURCE = `
   LEFT JOIN wellness_check_runs wr ON wr.event_id=e.id
   LEFT JOIN users wu ON wu.id=e.wellness_resident_user_id
   LEFT JOIN cameras c ON c.id = e.camera_id
+  LEFT JOIN devices cd ON cd.id = c.device_id
   LEFT JOIN zones z ON z.id = e.zone_id
   LEFT JOIN known_faces kf ON kf.id = e.matched_known_face_id
   LEFT JOIN LATERAL (
@@ -584,14 +587,14 @@ export class EventsRepository {
   async getEventStats(
     since: Date,
     groupLimit: number,
-    wellnessActorId?: string,
+    actorId?: string,
   ): Promise<EventStatsRecords> {
     const [aggregate, byType, byPriority, cameras, latestPendingEvent] = await Promise.all([
-      this.aggregateEventStats(since, wellnessActorId),
-      this.countEventsByType(since, groupLimit, wellnessActorId),
-      this.countEventsByPriority(since, groupLimit, wellnessActorId),
-      this.countCameraAvailability(),
-      this.findLatestPendingEvent(since, wellnessActorId),
+      this.aggregateEventStats(since, actorId),
+      this.countEventsByType(since, groupLimit, actorId),
+      this.countEventsByPriority(since, groupLimit, actorId),
+      this.countCameraAvailability(actorId),
+      this.findLatestPendingEvent(since, actorId),
     ]);
 
     return { aggregate, byType, byPriority, cameras, latestPendingEvent };
@@ -608,8 +611,8 @@ export class EventsRepository {
              COUNT(*) FILTER (WHERE status = ANY($4))::int AS resolved_count,
              COUNT(*) FILTER (WHERE is_false_alarm)::int AS false_alarm_count,
              MAX(detected_at) AS latest_event_at
-      FROM events
-      WHERE detected_at >= $1 ${actor ? "AND (event_type <> 'WELLNESS_TIMEOUT' OR wellness_owner_user_id=$5 OR wellness_resident_user_id=$5)" : ''};
+      FROM events e
+      WHERE e.detected_at >= $1 ${actor ? `AND ${eventVisibilityPredicate('$5')}` : ''};
     `;
     const res = await this.pool.query<EventStatsAggregateRecord>(query, [
       since,
@@ -638,8 +641,8 @@ export class EventsRepository {
   ): Promise<EventTypeCountRecord[]> {
     const query = `
       SELECT event_type, COUNT(*)::int AS count
-      FROM events
-      WHERE detected_at >= $1 ${actor ? "AND (event_type <> 'WELLNESS_TIMEOUT' OR wellness_owner_user_id=$3 OR wellness_resident_user_id=$3)" : ''}
+      FROM events e
+      WHERE e.detected_at >= $1 ${actor ? `AND ${eventVisibilityPredicate('$3')}` : ''}
       GROUP BY event_type
       ORDER BY count DESC
       LIMIT $2;
@@ -659,8 +662,8 @@ export class EventsRepository {
   ): Promise<EventPriorityCountRecord[]> {
     const query = `
       SELECT priority, COUNT(*)::int AS count
-      FROM events
-      WHERE detected_at >= $1 ${actor ? "AND (event_type <> 'WELLNESS_TIMEOUT' OR wellness_owner_user_id=$3 OR wellness_resident_user_id=$3)" : ''}
+      FROM events e
+      WHERE e.detected_at >= $1 ${actor ? `AND ${eventVisibilityPredicate('$3')}` : ''}
       GROUP BY priority
       ORDER BY priority ASC
       LIMIT $2;
@@ -673,14 +676,15 @@ export class EventsRepository {
     return res.rows;
   }
 
-  private async countCameraAvailability(): Promise<CameraAvailabilityRecord> {
+  private async countCameraAvailability(actor?: string): Promise<CameraAvailabilityRecord> {
     const query = `
       SELECT COUNT(*)::int AS total_count,
              COUNT(*) FILTER (WHERE c.is_enabled AND d.status = 'ONLINE')::int AS online_count
       FROM cameras c
-      JOIN devices d ON d.id = c.device_id;
+      JOIN devices d ON d.id = c.device_id
+      ${actor ? 'WHERE d.owner_user_id = $1' : ''};
     `;
-    const res = await this.pool.query<CameraAvailabilityRecord>(query);
+    const res = await this.pool.query<CameraAvailabilityRecord>(query, actor ? [actor] : []);
     return res.rows[0] ?? { online_count: 0, total_count: 0 };
   }
 
@@ -698,7 +702,7 @@ export class EventsRepository {
       FROM events e
       LEFT JOIN cameras c ON c.id = e.camera_id
       LEFT JOIN zones z ON z.id = e.zone_id
-      WHERE e.detected_at >= $1 AND e.status = ANY($2) ${actor ? "AND (e.event_type <> 'WELLNESS_TIMEOUT' OR e.wellness_owner_user_id=$3 OR e.wellness_resident_user_id=$3)" : ''}
+      WHERE e.detected_at >= $1 AND e.status = ANY($2) ${actor ? `AND ${eventVisibilityPredicate('$3')}` : ''}
       ORDER BY e.priority ASC, e.detected_at DESC
       LIMIT 1;
     `;
@@ -786,11 +790,9 @@ function buildEventFilterConditions(filters: ListEventsFilters): FilterCondition
     }
   }
 
-  if (filters.wellnessActorId && !filters.wellnessAdmin) {
-    conditions.push(
-      `(e.event_type <> 'WELLNESS_TIMEOUT' OR e.wellness_owner_user_id=$${idx} OR e.wellness_resident_user_id=$${idx})`,
-    );
-    params.push(filters.wellnessActorId);
+  if (filters.actorId) {
+    conditions.push(eventVisibilityPredicate(`$${idx}`));
+    params.push(filters.actorId);
     idx++;
   }
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';

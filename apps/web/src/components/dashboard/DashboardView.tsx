@@ -174,7 +174,6 @@ export function DashboardView() {
     selectedZone,
     setSelectedZone,
     liveNoticeText,
-    simulateNewEvent,
     confirmOk,
     confirmHelp,
     closeEmergency,
@@ -220,7 +219,6 @@ export function DashboardView() {
               userName={user?.fullName || 'Đức Anh'}
               selectedZone={selectedZone}
               onSelectZone={setSelectedZone}
-              onSimulateNewEvent={simulateNewEvent}
               pendingCount={isStatsLoading || statsError ? null : (stats?.pendingCount ?? null)}
             />
           )}

@@ -10,7 +10,6 @@ import {
 } from '@/lib/events-client';
 import { EVENTS_REFRESH_MS } from '@/lib/fire-ui-config';
 import { isActiveFire } from '@/lib/fire-alerts';
-import { generateSimulatedLiveEvent } from '@/lib/mock-events';
 import type { UIEventItem, FilterTabKey, FilterTabCounts } from '@/types';
 
 const LIVE_NOTICE_DURATION_MS = 4000;
@@ -258,10 +257,6 @@ export function useEvents() {
     filterState.selectedZone,
   );
 
-  const simulateNewEvent = useCallback(() => {
-    prependEvent(generateSimulatedLiveEvent(), setEvents, setLiveNoticeText);
-  }, [setEvents, setLiveNoticeText]);
-
   const confirmOk = useCallback(
     async (id: string, note?: string) => {
       try {
@@ -323,7 +318,6 @@ export function useEvents() {
     error,
     reload,
     liveNoticeText,
-    simulateNewEvent,
     confirmOk,
     confirmHelp,
     closeEmergency,
