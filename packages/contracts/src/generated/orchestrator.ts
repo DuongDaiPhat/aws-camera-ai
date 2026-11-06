@@ -148,7 +148,10 @@ export interface paths {
      */
     get: operations['listUsers'];
     put?: never;
-    /** Tao nguoi dung moi */
+    /**
+     * Tao tai khoan ung dung tu nguoi dung Cognito
+     * @description Chi ADMIN duoc tao. Nguoi dung Cognito da ton tai trong User Pool dang cau hinh.
+     */
     post: operations['createUser'];
     delete?: never;
     options?: never;
@@ -175,6 +178,28 @@ export interface paths {
     head?: never;
     /** Cap nhat nguoi dung */
     patch: operations['updateUser'];
+    trace?: never;
+  };
+  '/users/{userId}/role': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        userId: components['parameters']['UserId'];
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Doi vai tro CameraAI cua nguoi dung
+     * @description Chi ADMIN trong che do Cognito duoc doi vai tro cua tai khoan khac.
+     */
+    patch: operations['changeUserRole'];
     trace?: never;
   };
   '/devices': {
@@ -1231,6 +1256,8 @@ export interface components {
       phoneE164?: string | null;
       telegramChatId?: string | null;
       isActive: boolean;
+      /** @description Da lien ket voi User Pool dang cau hinh */
+      isCognitoLinked?: boolean;
       /** Format: date-time */
       lastLoginAt?: string | null;
       /** Format: date-time */
@@ -1239,11 +1266,9 @@ export interface components {
     CreateUserRequest: {
       /** Format: email */
       email: string;
-      password?: string;
       fullName: string;
       role: components['schemas']['UserRole'];
-      phoneE164?: string;
-      telegramChatId?: string;
+      cognitoSub: string;
     };
     UpdateUserRequest: {
       fullName?: string;
@@ -2717,11 +2742,14 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['PaginatedResponse'] & {
-            data?: components['schemas']['User'][];
+          'application/json': {
+            data: components['schemas']['User'][];
+            meta: components['schemas']['PaginatedResponse']['meta'];
           };
         };
       };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
       403: components['responses']['Forbidden'];
     };
   };
@@ -2748,6 +2776,8 @@ export interface operations {
         };
       };
       400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
       409: components['responses']['Conflict'];
     };
   };
@@ -2820,6 +2850,39 @@ export interface operations {
         };
       };
       404: components['responses']['NotFound'];
+    };
+  };
+  changeUserRole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        userId: components['parameters']['UserId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          role: components['schemas']['UserRole'];
+        };
+      };
+    };
+    responses: {
+      /** @description Vai tro da duoc luu */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['User'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+      409: components['responses']['Conflict'];
     };
   };
   listDevices: {
