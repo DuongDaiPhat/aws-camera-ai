@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import { createHash } from 'node:crypto';
 import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { AiResultValidator } from './ai-result.validator';
@@ -48,7 +49,11 @@ export class AiResultsService {
     private readonly outboxService: AiResultOutboxService,
   ) {}
 
-  async submit(eventId: string, dto: SubmitAiResultDto): Promise<AiResultAcceptedDto> {
+  async submit(
+    eventId: string,
+    dto: SubmitAiResultDto,
+    client?: PoolClient,
+  ): Promise<AiResultAcceptedDto> {
     const submission = this.validator.validate(eventId, dto);
     const payload = toPayload(dto);
     const payloadHash = createHash('sha256')
@@ -56,7 +61,7 @@ export class AiResultsService {
       .digest('hex');
 
     try {
-      const result = await this.repository.applyResult(submission, payloadHash, payload);
+      const result = await this.repository.applyResult(submission, payloadHash, payload, client);
       this.logger.log(
         {
           correlationId: result.correlationId,
@@ -67,7 +72,7 @@ export class AiResultsService {
         },
         'Đã tiếp nhận kết quả AI',
       );
-      if (result.disposition === 'ACCEPTED') void this.outboxService.dispatchAvailable();
+      if (!client && result.disposition === 'ACCEPTED') void this.outboxService.dispatchAvailable();
       return {
         resultId: result.resultId,
         disposition: result.disposition,

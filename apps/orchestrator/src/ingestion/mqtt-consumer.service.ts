@@ -436,6 +436,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       if (isCreated) {
         await this.emitEventToStream(event.id, 'event.created');
         if (
+          this.configService.get<string>('FACE_JOB_TRANSPORT', 'bullmq') === 'bullmq' &&
           this.faceQueue &&
           (event.event_type === 'PERSON_DETECTED' || event.event_type === 'RESTRICTED_ZONE')
         ) {
