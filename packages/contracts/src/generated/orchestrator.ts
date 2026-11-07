@@ -1120,6 +1120,47 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/internal/cloud/face-jobs/{jobId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    /** Read an authorized durable SQS face job and active owner mappings */
+    get: operations['getCloudFaceJobContext'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/internal/cloud/face-jobs/{jobId}/result': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Persist the first complete face result before publishing to Results SQS
+     * @description Concurrent writes return the first persisted result, including its unchanged processedAt.
+     */
+    put: operations['cacheCloudFaceJobResult'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2438,6 +2479,27 @@ export interface components {
           height: number;
         };
       }[];
+    };
+    CloudFaceResultEnvelope: {
+      /** @enum {integer} */
+      schemaVersion: 1;
+      /** @enum {string} */
+      type: 'face.result';
+      /** Format: uuid */
+      messageId: string;
+      /** Format: uuid */
+      correlationId: string;
+      /** Format: date-time */
+      occurredAt: string;
+      payload: {
+        /** Format: uuid */
+        jobId: string;
+        /** Format: uuid */
+        ownerScopeId: string;
+        /** Format: uuid */
+        cameraId: string;
+        body: components['schemas']['FaceResultSubmission'];
+      };
     };
     FireRuntimeHealth: {
       /** @enum {string} */
@@ -4595,6 +4657,99 @@ export interface operations {
       };
       401: components['responses']['Unauthorized'];
       /** @description Khong tim thay notification khop voi contactId */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getCloudFaceJobContext: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current job, durable cached result and active owner mappings */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @description Canonical face.job envelope in aws/sprint4/contracts/queue-v1.schema.json */
+            envelope: {
+              [key: string]: unknown;
+            };
+            cached_result: components['schemas']['CloudFaceResultEnvelope'] | null;
+            /** @description Rekognition FaceId to active application knownFaceId for this owner */
+            mappings: {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+      /** @description Invalid internal service token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Job missing, ownership changed or collection version stale */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  cacheCloudFaceJobResult: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CloudFaceResultEnvelope'];
+      };
+    };
+    responses: {
+      /** @description Durable result to publish unchanged to the shared Results queue */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CloudFaceResultEnvelope'];
+        };
+      };
+      /** @description Invalid queue contract or job identity */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid internal service token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Job missing or stale */
       404: {
         headers: {
           [name: string]: unknown;

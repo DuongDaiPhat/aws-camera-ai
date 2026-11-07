@@ -1828,7 +1828,83 @@ paths:
         "404":
           description: Khong tim thay notification khop voi contactId
 
-# =====================================================================
+  # =====================================================================
+  /internal/cloud/face-jobs/{jobId}:
+    parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [internal]
+      summary: Read an authorized durable SQS face job and active owner mappings
+      operationId: getCloudFaceJobContext
+      security:
+        - internalToken: []
+      responses:
+        "200":
+          description: Current job, durable cached result and active owner mappings
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [envelope, cached_result, mappings]
+                properties:
+                  envelope:
+                    type: object
+                    description: Canonical face.job envelope in aws/sprint4/contracts/queue-v1.schema.json
+                    additionalProperties: true
+                  cached_result:
+                    anyOf:
+                      - $ref: "#/components/schemas/CloudFaceResultEnvelope"
+                      - type: "null"
+                  mappings:
+                    type: object
+                    description: Rekognition FaceId to active application knownFaceId for this owner
+                    additionalProperties:
+                      type: string
+                      format: uuid
+        "401":
+          description: Invalid internal service token
+        "404":
+          description: Job missing, ownership changed or collection version stale
+  /internal/cloud/face-jobs/{jobId}/result:
+    parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags: [internal]
+      summary: Persist the first complete face result before publishing to Results SQS
+      description: Concurrent writes return the first persisted result, including its unchanged processedAt.
+      operationId: cacheCloudFaceJobResult
+      security:
+        - internalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CloudFaceResultEnvelope"
+      responses:
+        "200":
+          description: Durable result to publish unchanged to the shared Results queue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudFaceResultEnvelope"
+        "400":
+          description: Invalid queue contract or job identity
+        "401":
+          description: Invalid internal service token
+        "404":
+          description: Job missing or stale
+
 components:
   securitySchemes:
     bearerAuth:
@@ -3978,3 +4054,40 @@ components:
                     type: number
                     minimum: 0
                     maximum: 1
+
+    CloudFaceResultEnvelope:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, type, messageId, correlationId, occurredAt, payload]
+      properties:
+        schemaVersion:
+          type: integer
+          enum: [1]
+        type:
+          type: string
+          enum: [face.result]
+        messageId:
+          type: string
+          format: uuid
+        correlationId:
+          type: string
+          format: uuid
+        occurredAt:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          additionalProperties: false
+          required: [jobId, ownerScopeId, cameraId, body]
+          properties:
+            jobId:
+              type: string
+              format: uuid
+            ownerScopeId:
+              type: string
+              format: uuid
+            cameraId:
+              type: string
+              format: uuid
+            body:
+              $ref: "#/components/schemas/FaceResultSubmission"
