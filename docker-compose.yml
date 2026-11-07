@@ -117,11 +117,14 @@ services:
   # 4. mediamtx - gia lap camera RTSP tu webcam / file mp4 (task 0.6)
   # ------------------------------------------------------------------
   mediamtx:
-    image: bluenviron/mediamtx:latest
+    build:
+      context: ./infra/mediamtx
+    image: camerai-mediamtx
     container_name: camerai-mediamtx
     restart: unless-stopped
     environment:
       MTX_WEBRTCADDITIONALHOSTS: ${MEDIAMTX_WEBRTC_ADDITIONAL_HOSTS:-localhost}
+      MTX_AUTHHTTPADDRESS: ${MEDIAMTX_AUTH_HTTP_ADDRESS:-http://orchestrator:3001/api/v1/mediamtx/authorize}
     ports:
       - "${PORT_RTSP:-8554}:8554"
       - "${PORT_WEBRTC_HTTP:-8889}:8889"
