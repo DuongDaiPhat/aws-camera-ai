@@ -248,8 +248,7 @@ function useEventsSource(): EventsSource {
 }
 
 export function useEvents() {
-  const { events, setEvents, isLoading, error, reload, liveNoticeText, setLiveNoticeText } =
-    useEventsSource();
+  const { events, setEvents, isLoading, error, reload, liveNoticeText } = useEventsSource();
   const filterState = useEventFilters(events);
   const paginationState = useEventPagination(
     filterState.filteredEvents,
