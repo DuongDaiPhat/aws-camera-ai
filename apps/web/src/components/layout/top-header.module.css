@@ -249,29 +249,3 @@
   color: #2563eb;
   font-weight: 600;
 }
-
-.simulateBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background-color: #f1f5f9;
-  color: #2563eb;
-  border: 1px dashed #bfdbfe;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.simulateBtn:hover {
-  background-color: #dbeafe;
-  border-color: #93c5fd;
-  color: #1d4ed8;
-}
-
-.simulateBtn svg {
-  width: 14px;
-  height: 14px;
-}

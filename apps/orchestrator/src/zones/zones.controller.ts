@@ -12,6 +12,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { components } from '@cam/contracts';
 import { Roles } from '../auth/roles.decorator';
+import { CheckResourceAccess } from '../auth/resource-access.guard';
 import { CreateZoneDto } from './dto/create-zone.dto';
 import { UpdateZoneDto } from './dto/update-zone.dto';
 import { ZonesService } from './zones.service';
@@ -25,6 +26,7 @@ export class ZonesController {
   constructor(private readonly zonesService: ZonesService) {}
 
   @Get('cameras/:cameraId/zones')
+  @CheckResourceAccess('cameraId')
   @ApiOperation({ summary: 'Danh sách vùng của camera' })
   async list(@Param('cameraId', ParseUUIDPipe) cameraId: string): Promise<{ data: ZoneDto[] }> {
     return await this.zonesService.list(cameraId);

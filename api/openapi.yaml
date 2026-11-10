@@ -247,17 +247,20 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/PaginatedResponse"
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items: { $ref: "#/components/schemas/User" }
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/User" }
+                  meta: { $ref: "#/components/schemas/PaginatedResponse/properties/meta" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
     post:
       tags: [users]
-      summary: Tao nguoi dung moi
+      summary: Tao tai khoan ung dung tu nguoi dung Cognito
+      description: Chi ADMIN duoc tao. Nguoi dung Cognito da ton tai trong User Pool dang cau hinh.
       operationId: createUser
       requestBody:
         required: true
@@ -271,6 +274,8 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/User" }
         "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "409": { $ref: "#/components/responses/Conflict" }
 
   /users/{userId}:
@@ -310,6 +315,36 @@ paths:
       responses:
         "204": { description: Da vo hieu hoa }
         "404": { $ref: "#/components/responses/NotFound" }
+
+  /users/{userId}/role:
+    parameters:
+      - $ref: "#/components/parameters/UserId"
+    patch:
+      tags: [users]
+      summary: Doi vai tro CameraAI cua nguoi dung
+      description: Chi ADMIN trong che do Cognito duoc doi vai tro cua tai khoan khac.
+      operationId: changeUserRole
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [role]
+              properties:
+                role: { $ref: "#/components/schemas/UserRole" }
+      responses:
+        "200":
+          description: Vai tro da duoc luu
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
 
   # ===================================================================
   # DEVICES
@@ -398,6 +433,7 @@ paths:
     get:
       tags: [cameras]
       summary: Danh sach camera
+      description: ADMIN xem tat ca. Tai khoan thuong chi xem camera thuoc thiet bi cua minh.
       operationId: listCameras
       parameters:
         - name: deviceId
@@ -452,6 +488,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Camera" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
     patch:
       tags: [cameras]
@@ -491,6 +528,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/CameraPreview" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
         "503":
           description: Camera dang offline, khong lay duoc frame
@@ -534,6 +572,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/CameraRuntimeStatusResponse" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /cameras/{cameraId}/source:
@@ -549,6 +588,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
     put:
       tags: [cameras]
@@ -715,6 +755,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/CameraDebugStream" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   # ===================================================================
@@ -739,6 +780,7 @@ paths:
                     type: array
                     items: { $ref: "#/components/schemas/Zone" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
     post:
       tags: [zones]
@@ -1048,6 +1090,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/EventDetail" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
     patch:
       tags: [events]
@@ -1155,6 +1198,7 @@ paths:
                   data:
                     type: array
                     items: { $ref: "#/components/schemas/EventMedia" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /events/{eventId}/history:
@@ -2032,19 +2076,23 @@ components:
         phoneE164: { type: ["string", "null"], pattern: '^\+[1-9][0-9]{7,14}$' }
         telegramChatId: { type: ["string", "null"] }
         isActive: { type: boolean }
+        isCognitoLinked: { type: boolean, description: Da lien ket voi User Pool dang cau hinh }
+        cognitoEmail:
+          type: ["string", "null"]
+          format: email
+          description: Email dang nhap Cognito da luu khi lien ket, chi co trong danh sach cua ADMIN.
         lastLoginAt: { type: ["string", "null"], format: date-time }
         createdAt: { type: string, format: date-time }
 
     CreateUserRequest:
       type: object
-      required: [email, fullName, role]
+      additionalProperties: false
+      required: [email, fullName, role, cognitoSub]
       properties:
-        email: { type: string, format: email }
-        password: { type: string, minLength: 8 }
-        fullName: { type: string, maxLength: 120 }
+        email: { type: string, format: email, maxLength: 254, description: Email dang nhap Cognito }
+        fullName: { type: string, minLength: 1, maxLength: 120 }
         role: { $ref: "#/components/schemas/UserRole" }
-        phoneE164: { type: string }
-        telegramChatId: { type: string }
+        cognitoSub: { type: string, minLength: 1, maxLength: 128, pattern: '^\S+$' }
 
     UpdateUserRequest:
       type: object

@@ -11,6 +11,7 @@ import {
   Put,
   Query,
   Req,
+  UnauthorizedException,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -24,6 +25,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import type { AuthenticatedRequest } from '../auth/jwt-auth.guard';
+import { CheckResourceAccess } from '../auth/resource-access.guard';
 import type { UserRole } from '../auth/auth.types';
 import { CamerasService } from './cameras.service';
 import { ListCamerasQueryDto } from './dto/list-cameras-query.dto';
@@ -44,6 +46,7 @@ import type { CameraPreviewV1 } from '../contracts/vertical-slice.ports';
 
 @ApiTags('cameras')
 @ApiBearerAuth('bearer')
+@CheckResourceAccess('cameraId')
 @Controller('cameras')
 export class CamerasController {
   constructor(private readonly camerasService: CamerasService) {}
@@ -59,8 +62,13 @@ export class CamerasController {
     @Query() query: ListCamerasQueryDto,
     @Req() request: AuthenticatedRequest,
   ): Promise<{ data: CameraDto[] }> {
-    const role = this.extractRole(request);
-    return await this.camerasService.listCameras(query, role);
+    const actor = request.auth;
+    if (!actor) throw new UnauthorizedException();
+    return await this.camerasService.listCameras(
+      query,
+      actor.role,
+      actor.role === 'ADMIN' ? undefined : actor.sub,
+    );
   }
 
   @Get(':cameraId')
