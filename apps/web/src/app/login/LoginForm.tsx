@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { ApiError } from '@/lib/api-client';
 import { login } from '@/lib/auth-client';
@@ -8,6 +8,8 @@ import styles from './login.module.css';
 
 export function LoginForm() {
   const router = useRouter();
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setPasswordVisible] = useState(false);
@@ -31,7 +33,7 @@ export function LoginForm() {
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} noValidate>
+    <form className={styles.form} onSubmit={handleSubmit} method="post" noValidate>
       <div className={styles.field}>
         <label htmlFor="email">Email</label>
         <input
@@ -82,7 +84,7 @@ export function LoginForm() {
         </div>
       ) : null}
 
-      <button className={styles.submitButton} type="submit" disabled={isSubmitting}>
+      <button className={styles.submitButton} type="submit" disabled={!ready || isSubmitting}>
         {isSubmitting ? 'Đang đăng nhập…' : 'Đăng nhập'}
       </button>
 
