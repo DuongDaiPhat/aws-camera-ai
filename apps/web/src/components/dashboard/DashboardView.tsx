@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
+import { OverviewPanel, SystemOverview } from './OverviewPanel';
 import { useFireAttention } from '@/hooks/useFireAttention';
 import { FireAttention } from '@/components/events/FireAttention';
 import { fireReviewKey } from '@/lib/fire-alerts';
@@ -16,6 +18,16 @@ import { SettingsView } from '@/components/settings';
 import { ZonesView } from '@/components/zones';
 import { WellnessView } from '@/components/wellness/WellnessView';
 import styles from './dashboard-view.module.css';
+
+const PAGE_TITLES: Record<string, string> = {
+  dashboard: 'Tổng quan',
+  cameras: 'Camera trực tiếp',
+  events: 'Lịch sử sự kiện',
+  'known-faces': 'Người quen',
+  zones: 'Khu vực giám sát',
+  wellness: 'Kiểm tra sức khỏe',
+  settings: 'Cài đặt cảnh báo',
+};
 
 function EventsListSection({
   isLoading,
@@ -43,10 +55,7 @@ function EventsListSection({
 
   if (error) {
     return (
-      <ErrorState
-        message={`${error} Kiểm tra xem Orchestrator đã chạy chưa, sau đó bấm thử lại.`}
-        onRetry={onRetry}
-      />
+      <ErrorState message={`${error} Vui lòng kiểm tra kết nối và thử lại.`} onRetry={onRetry} />
     );
   }
 
@@ -67,7 +76,9 @@ function EventHistory({
   state,
   metrics,
   onViewDetail,
+  showMetrics = true,
 }: {
+  showMetrics?: boolean;
   state: ReturnType<typeof useEvents>;
   metrics: ReturnType<typeof useEventStats>;
   onViewDetail: (event: UIEventItem) => void;
@@ -92,7 +103,7 @@ function EventHistory({
   const { stats, isLoading: isStatsLoading, error: statsError } = metrics;
   return (
     <>
-      <MetricCards stats={stats} isLoading={isStatsLoading} error={statsError} />
+      {showMetrics && <MetricCards stats={stats} isLoading={isStatsLoading} error={statsError} />}
 
       <section className={styles.eventsSection} aria-labelledby="events-title">
         <div className={styles.sectionHeader}>
@@ -165,6 +176,57 @@ function DashboardEventDetails({
   );
 }
 
+function eventZoneOptions(events: UIEventItem[]) {
+  return Array.from(
+    new Map(
+      events.flatMap((event) =>
+        event.zone
+          ? [
+              [
+                event.zone.id,
+                {
+                  id: `zone:${event.zone.id}`,
+                  name: [event.camera?.name, event.zone.name].filter(Boolean).join(' · '),
+                },
+              ] as const,
+            ]
+          : [],
+      ),
+    ).values(),
+  ).sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+}
+
+function HistoryContent({
+  overview,
+  state,
+  metrics,
+  onNavigate,
+  onViewDetail,
+}: {
+  overview: boolean;
+  state: ReturnType<typeof useEvents>;
+  metrics: ReturnType<typeof useEventStats>;
+  onNavigate: (page: string) => void;
+  onViewDetail: (event: UIEventItem) => void;
+}) {
+  if (!overview)
+    return <EventHistory state={state} metrics={metrics} onViewDetail={onViewDetail} />;
+  return (
+    <>
+      <OverviewPanel metrics={metrics} onNavigate={onNavigate} />
+      <div className={styles.lowerGrid}>
+        <EventHistory
+          state={state}
+          metrics={metrics}
+          onViewDetail={onViewDetail}
+          showMetrics={false}
+        />
+        <SystemOverview events={state.events} onNavigate={onNavigate} />
+      </div>
+    </>
+  );
+}
+
 export function DashboardView() {
   const { user, handleLogout } = useAuth();
   const eventState = useEvents();
@@ -174,7 +236,6 @@ export function DashboardView() {
     selectedZone,
     setSelectedZone,
     liveNoticeText,
-    simulateNewEvent,
     confirmOk,
     confirmHelp,
     closeEmergency,
@@ -184,7 +245,6 @@ export function DashboardView() {
   // Telegram confirmations update an existing event without changing the list length.
   const statsRefreshToken = events.map((event) => `${event.id}:${event.status}`).join('|');
   const metrics = useEventStats(statsRefreshToken);
-  const { stats, isLoading: isStatsLoading, error: statsError } = metrics;
 
   const [activeNav, setActiveNav] = useState('dashboard');
   const [selectedEventForModal, setSelectedEventForModal] = useState<UIEventItem | null>(null);
@@ -210,22 +270,31 @@ export function DashboardView() {
           activeNav={activeNav}
           onSelectNav={setActiveNav}
           onLogout={handleLogout}
-          unresolvedEventCount={stats?.pendingCount ?? counts.urgent}
-          onlineCameraCount={stats?.cameraOnlineCount ?? 0}
+          unresolvedEventCount={metrics.stats?.pendingCount ?? counts.urgent}
+          onlineCameraCount={metrics.stats?.cameraOnlineCount}
         />
 
         <div className={styles.mainContent}>
-          {(activeNav === 'dashboard' || activeNav === 'events') && (
-            <TopHeader
-              userName={user?.fullName || 'Đức Anh'}
-              selectedZone={selectedZone}
-              onSelectZone={setSelectedZone}
-              onSimulateNewEvent={simulateNewEvent}
-              pendingCount={isStatsLoading || statsError ? null : (stats?.pendingCount ?? null)}
-            />
-          )}
+          <TopHeader
+            userName={user?.fullName || 'bạn'}
+            zones={eventZoneOptions(events)}
+            selectedZone={selectedZone}
+            onSelectZone={setSelectedZone}
+            pendingCount={
+              metrics.isLoading || metrics.error ? null : (metrics.stats?.pendingCount ?? null)
+            }
+            pageTitle={PAGE_TITLES[activeNav] ?? PAGE_TITLES.dashboard}
+            showZoneFilter={activeNav === 'dashboard' || activeNav === 'events'}
+            onViewEvents={() => setActiveNav('events')}
+          />
 
-          <main className={styles.workspace}>
+          <motion.main
+            key={activeNav}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.24, ease: [0.2, 0.75, 0.25, 1] }}
+            className={styles.workspace}
+          >
             {activeNav === 'wellness' ? (
               <WellnessView user={user} />
             ) : activeNav === 'cameras' ? (
@@ -253,14 +322,16 @@ export function DashboardView() {
                   </div>
                 )}
 
-                <EventHistory
+                <HistoryContent
+                  overview={activeNav === 'dashboard'}
                   state={eventState}
                   metrics={metrics}
+                  onNavigate={setActiveNav}
                   onViewDetail={setSelectedEventForModal}
                 />
               </>
             )}
-          </main>
+          </motion.main>
         </div>
 
         <DashboardEventDetails

@@ -165,7 +165,7 @@ export function ZonesView({ user }: { user: CurrentUser | null }) {
     <section className={styles.container} aria-labelledby="zones-title">
       <header className={styles.header}>
         <div>
-          <h1 id="zones-title">Cấu hình khu vực</h1>
+          <h2 id="zones-title">Cấu hình khu vực</h2>
           <p>Vẽ polygon trực tiếp trên ảnh camera và đặt điều kiện cảnh báo.</p>
         </div>
         {isAdmin && camera && (

@@ -1,0 +1,134 @@
+.root {
+  display: flex;
+  align-items: center;
+  position: relative;
+  isolation: isolate;
+  gap: 3px;
+  padding: 5px;
+  border: 1px solid #e4dcef;
+  border-radius: 16px;
+  background: #fff;
+  overflow-x: auto;
+  scrollbar-width: none;
+  max-width: 100%;
+  box-shadow: 0 2px 7px #30204504;
+}
+.root::-webkit-scrollbar {
+  display: none;
+}
+.pill {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 0;
+  background: linear-gradient(115deg, #9160ed, #7645d7);
+  border: 1px solid #a277ef;
+  border-radius: 11px;
+  box-shadow: 0 4px 12px #8052ce24;
+  pointer-events: none;
+  z-index: -1;
+}
+.button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: none;
+  min-height: 42px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: #655c75;
+  font-size: 13px;
+  font-weight: 550;
+  white-space: nowrap;
+  transition:
+    color 0.18s,
+    background-color 0.18s,
+    border-color 0.18s;
+}
+.button[aria-current='page'],
+.button[aria-selected='true'] {
+  color: #743cc9;
+  border-color: #ae8ae4;
+  background: #8f5be412;
+  font-weight: 650;
+}
+.button.highlighted {
+  color: white;
+}
+.button.highlighted[aria-current='page'],
+.button.highlighted[aria-selected='true'] {
+  border-color: #d9c6ff80;
+  background: #ffffff04;
+}
+.count {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  padding: 1px 5px;
+  min-width: 18px;
+  border-radius: 5px;
+  background: #ece7f3;
+  color: inherit;
+}
+.highlighted .count {
+  background: #ffffff26;
+}
+.filter {
+  background: #f5f2f9;
+  border-color: #e9e2f1;
+  border-radius: 12px;
+  padding: 4px;
+  gap: 1px;
+}
+.filter .pill {
+  top: 4px;
+  bottom: 4px;
+  border-radius: 8px;
+  background: #fff;
+  border-color: #dcd1ef;
+  box-shadow: 0 2px 6px #30204509;
+}
+.filter .button {
+  min-height: 36px;
+  font-size: 12px;
+  padding: 7px 11px;
+  gap: 6px;
+}
+.filter .button.highlighted {
+  color: #7943ce;
+}
+.filter .button[aria-selected='true'] {
+  background: #fff9;
+  border-color: #ba9de8;
+}
+.filter .count {
+  background: none;
+  padding: 0;
+  min-width: 0;
+  color: inherit;
+}
+@media (max-width: 600px) {
+  .root {
+    border-radius: 13px;
+  }
+  .button {
+    min-height: 44px;
+    padding-inline: 11px;
+    font-size: 12px;
+  }
+  .filter {
+    width: 100%;
+  }
+  .filter .button {
+    flex: 1;
+    min-height: 40px;
+    padding-inline: 6px;
+    font-size: 11px;
+  }
+  .filter .count {
+    font-size: 11px;
+  }
+}

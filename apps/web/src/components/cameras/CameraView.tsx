@@ -33,11 +33,11 @@ function CameraSummaryBanner({
         <span className={styles.summaryValue}>{total}</span>
       </div>
       <div className={styles.summaryCard}>
-        <span className={styles.summaryLabel}>Đang kích hoạt (Config)</span>
+        <span className={styles.summaryLabel}>Đã bật</span>
         <span className={styles.summaryValue}>{active}</span>
       </div>
       <div className={styles.summaryCard}>
-        <span className={styles.summaryLabel}>Đang online (Runtime)</span>
+        <span className={styles.summaryLabel}>Đang trực tuyến</span>
         <span className={`${styles.summaryValue} ${styles.summaryValueOnline}`}>{online}</span>
       </div>
       <div className={styles.summaryCard}>
@@ -109,7 +109,7 @@ function CameraDetailPanel({
           className={`${styles.tabBtn} ${activeTab === 'preview' ? styles.tabBtnActive : ''}`}
           onClick={() => setActiveTab('preview')}
         >
-          Luồng xem trực tiếp & Debug View
+          Xem trực tiếp và chẩn đoán
         </button>
         <button
           type="button"
@@ -203,10 +203,10 @@ export function CameraView({ user }: CameraViewProps) {
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.titles}>
-          <h1 className={styles.title}>Quản lý Camera & Nguồn phát</h1>
+          <h2 className={styles.title}>Quản lý Camera & Nguồn phát</h2>
           <p className={styles.subtitle}>
-            Giám sát trạng thái hoạt động, cấu hình nguồn cấp (RTSP, Webcam, Video) và kiểm thử
-            Debug View.
+            Theo dõi trạng thái, xem trực tiếp và quản lý nguồn hình ảnh từ camera, webcam hoặc
+            video.
           </p>
         </div>
 

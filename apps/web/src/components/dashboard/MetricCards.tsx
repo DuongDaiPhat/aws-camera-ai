@@ -2,42 +2,17 @@
 
 import type { EventStats } from '@/types';
 import { formatRelativeTime } from '@/lib/format';
+import { Icon } from '@/components/ui/Icon';
 import styles from './metric-cards.module.css';
 
 interface MetricCardsProps {
   stats: EventStats | null;
+  compact?: boolean;
   isLoading?: boolean;
   error?: string | null;
 }
 
 const PLACEHOLDER = '—';
-
-function CheckIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-
-function ClockIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
-  );
-}
-
-function AlertIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="8" x2="12" y2="12" />
-      <line x1="12" y1="16" x2="12.01" y2="16" />
-    </svg>
-  );
-}
 
 /** Mô tả tình trạng camera — không dùng riêng màu để truyền đạt thông tin. */
 function getCameraNote(stats: EventStats | null): string {
@@ -64,11 +39,16 @@ function getPendingNote(stats: EventStats | null): string {
   return `${location || 'Camera chưa đặt tên'} • ${timeText}`;
 }
 
-export function MetricCards({ stats, isLoading = false, error = null }: MetricCardsProps) {
+export function MetricCards({
+  stats,
+  isLoading = false,
+  error = null,
+  compact = false,
+}: MetricCardsProps) {
   const cameraValue = stats ? `${stats.cameraOnlineCount}/${stats.cameraTotalCount}` : PLACEHOLDER;
   const totalValue = stats ? stats.totalEvents : PLACEHOLDER;
   const pendingValue = stats ? stats.pendingCount : PLACEHOLDER;
-  const windowLabel = stats ? `GHI NHẬN ${stats.windowHours} GIỜ QUA` : 'GHI NHẬN 24 GIỜ QUA';
+  const windowLabel = stats ? `Ghi nhận ${stats.windowHours} giờ qua` : 'Ghi nhận 24 giờ qua';
   const personNote = stats
     ? `${stats.personDetectedCount} lần phát hiện người`
     : isLoading
@@ -83,13 +63,13 @@ export function MetricCards({ stats, isLoading = false, error = null }: MetricCa
         </p>
       )}
 
-      <div className={styles.grid}>
+      <div className={`${styles.grid} ${compact ? styles.compact : ''}`}>
         {/* Card 1: Thiết bị bảo vệ */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>THIẾT BỊ BẢO VỆ</h2>
+            <h2 className={styles.cardTitle}>Camera đang hoạt động</h2>
             <div className={`${styles.iconPill} ${styles.iconPillSuccess}`} aria-hidden="true">
-              <CheckIcon />
+              <Icon name="camera" size={18} />
             </div>
           </div>
           <div>
@@ -109,7 +89,7 @@ export function MetricCards({ stats, isLoading = false, error = null }: MetricCa
           <div className={styles.cardHeader}>
             <h2 className={styles.cardTitle}>{windowLabel}</h2>
             <div className={`${styles.iconPill} ${styles.iconPillInfo}`} aria-hidden="true">
-              <ClockIcon />
+              <Icon name="activity" size={18} />
             </div>
           </div>
           <div>
@@ -127,9 +107,9 @@ export function MetricCards({ stats, isLoading = false, error = null }: MetricCa
         {/* Card 3: Cần chú ý ngay */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
-            <h2 className={`${styles.cardTitle} ${styles.cardTitleAlert}`}>CẦN CHÚ Ý NGAY</h2>
+            <h2 className={`${styles.cardTitle} ${styles.cardTitleAlert}`}>Sự kiện cần chú ý</h2>
             <div className={`${styles.iconPill} ${styles.iconPillDanger}`} aria-hidden="true">
-              <AlertIcon />
+              <Icon name="bell" size={18} />
             </div>
           </div>
           <div>

@@ -1,7 +1,7 @@
 'use client';
 
 import type { FilterTabKey, FilterTabCounts } from '@/types';
-import styles from './event-filter.module.css';
+import { SlidingTabs } from '@/components/ui/SlidingTabs';
 
 export interface EventFilterProps {
   activeTab: FilterTabKey;
@@ -18,22 +18,12 @@ const TABS: Array<{ key: FilterTabKey; label: string; countKey: keyof FilterTabC
 
 export function EventFilter({ activeTab, onSelectTab, counts }: EventFilterProps) {
   return (
-    <div className={styles.filterTabs} role="tablist" aria-label="Bộ lọc sự kiện">
-      {TABS.map((tab) => {
-        const isActive = activeTab === tab.key;
-        return (
-          <button
-            key={tab.key}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            className={`${styles.tabButton} ${isActive ? styles.tabButtonActive : ''}`}
-            onClick={() => onSelectTab(tab.key)}
-          >
-            {tab.label} ({counts[tab.countKey]})
-          </button>
-        );
-      })}
-    </div>
+    <SlidingTabs
+      variant="filter"
+      value={activeTab}
+      onChange={(value) => onSelectTab(value as FilterTabKey)}
+      label="Bộ lọc sự kiện"
+      items={TABS.map((tab) => ({ id: tab.key, label: tab.label, count: counts[tab.countKey] }))}
+    />
   );
 }

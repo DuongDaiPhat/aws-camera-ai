@@ -167,7 +167,7 @@ export function WellnessView({ user }: { user: CurrentUser | null }) {
   return (
     <section className={styles.root} aria-label="Kiểm tra sức khỏe">
       <header>
-        <h1>Kiểm tra sức khỏe</h1>
+        <h2 className={styles.pageTitle}>Kiểm tra sức khỏe</h2>
         <p>Lịch theo dõi hoạt động và yêu cầu xác nhận của người được giám sát.</p>
       </header>
       {error && (

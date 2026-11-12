@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from 'next/server';
+﻿import { NextResponse, type NextRequest } from 'next/server';
 import { SESSION_COOKIE } from './lib/auth-session';
 
 export function getAuthRedirect(pathname: string, hasSession: boolean): string | null {
@@ -18,5 +18,5 @@ export function middleware(request: NextRequest): NextResponse {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|fonts/).*)'],
 };

@@ -128,7 +128,7 @@ export function EscalationRuleCard({
               <label htmlFor={`tLow-${rule.eventType}`} className={styles.fieldLabel}>
                 <span>Ngưỡng tối thiểu (T_low)</span>
                 {draft.tLow !== null && !Number.isNaN(draft.tLow) && (
-                  <span style={{ color: '#2563eb', fontWeight: 600, fontSize: 12 }}>
+                  <span style={{ color: '#a5b7ff', fontWeight: 600, fontSize: 12 }}>
                     (~{Math.round(draft.tLow * 100)}% chắc chắn)
                   </span>
                 )}
@@ -159,7 +159,7 @@ export function EscalationRuleCard({
               <label htmlFor={`tHigh-${rule.eventType}`} className={styles.fieldLabel}>
                 <span>Ngưỡng tin cậy cao (T_high)</span>
                 {draft.tHigh !== null && !Number.isNaN(draft.tHigh) && (
-                  <span style={{ color: '#c2410c', fontWeight: 600, fontSize: 12 }}>
+                  <span style={{ color: '#f5ac82', fontWeight: 600, fontSize: 12 }}>
                     (~{Math.round(draft.tHigh * 100)}% chắc chắn)
                   </span>
                 )}

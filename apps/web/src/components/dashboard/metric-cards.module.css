@@ -1,142 +1,223 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin-bottom: 28px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  font-family: var(--font);
 }
-
-@media (max-width: 960px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
+.compact {
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  height: 100%;
+  margin: 0;
+  gap: 13px;
 }
-
 .card {
-  background-color: #ffffff;
-  border: 1px solid #eef0f4;
-  border-radius: 14px;
-  padding: 20px 24px;
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  gap: 14px;
+  min-width: 0;
+  background: #ffffff;
+  border: 1px solid #e8e4f5;
+  border-radius: 18px;
+  padding: 20px 22px;
+  box-shadow:
+    0 2px 8px rgba(33, 26, 53, 0.04),
+    0 1px 2px rgba(33, 26, 53, 0.02);
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.25s,
+    box-shadow 0.25s;
 }
-
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.07);
+  transform: translateY(-3px);
+  border-color: #d1c7f7;
+  box-shadow:
+    0 10px 24px rgba(136, 85, 237, 0.08),
+    0 3px 6px rgba(33, 26, 53, 0.04);
 }
-
 .cardHeader {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  align-items: center;
+  gap: 12px;
 }
-
 .cardTitle {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: #64748b;
   margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #605778;
+  line-height: 1.5;
 }
-
 .cardTitleAlert {
   color: #dc2626;
+  font-weight: 650;
 }
-
 .iconPill {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 10px;
 }
-
-.iconPillSuccess {
-  background-color: #ecfdf5;
-  color: #10b981;
-}
-
-.iconPillInfo {
-  background-color: #eff6ff;
-  color: #3b82f6;
-}
-
-.iconPillDanger {
-  background-color: #fef2f2;
-  color: #ef4444;
-}
-
 .iconPill svg {
   width: 18px;
   height: 18px;
 }
-
+.iconPillSuccess {
+  color: #0284c7;
+  background: #e8f4fd;
+  border: 1px solid #cce5fd;
+  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.08);
+}
+.iconPillInfo {
+  color: #7c3aed;
+  background: #f3effe;
+  border: 1px solid #e2d7fc;
+  box-shadow: 0 1px 3px rgba(124, 58, 237, 0.08);
+}
+.iconPillDanger {
+  color: #dc2626;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.08);
+}
 .valueRow {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 9px;
+  flex-wrap: wrap;
 }
-
 .mainValue {
-  font-size: 28px;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: 36px;
+  font-weight: 750;
+  letter-spacing: -1.3px;
+  color: #211a35;
   line-height: 1.1;
-  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
 }
-
 .mainValueAlert {
   color: #dc2626;
 }
-
 .valueSuffix {
-  font-size: 14px;
-  color: #475569;
+  font-size: 11px;
+  color: #787195;
   font-weight: 500;
 }
-
 .footerSubtext {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  color: #64748b;
-  margin: 0;
+  font-size: 11px;
+  color: #787195;
+  margin: 10px 0 0;
+  min-width: 0;
 }
-
+.footerSubtext > span:last-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  flex-shrink: 0;
+  flex: none;
 }
-
 .dotGreen {
-  background-color: #22c55e;
+  background: #0284c7;
 }
-
 .dotBlue {
-  background-color: #3b82f6;
+  background: #8855ed;
 }
-
 .dotRed {
-  background-color: #ef4444;
+  background: #dc2626;
 }
-
-/* Bao loi khi khong doc duoc so lieu tong hop tu API */
 .errorNotice {
-  margin: 0 0 16px;
   font-size: 13px;
-  color: #b91c1c;
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 10px;
-  padding: 10px 14px;
+  color: #dc2626;
+  margin: 0 0 12px;
+}
+.compact .card {
+  padding: 18px 21px;
+  gap: 6px;
+}
+.compact .cardHeader {
+  margin-bottom: 2px;
+}
+.compact .mainValue {
+  font-size: 34px;
+}
+.compact .footerSubtext {
+  margin-top: 9px;
+  font-size: 11px;
+}
+.compact .cardTitle {
+  font-size: 12px;
+}
+.compact .iconPill {
+  width: 32px;
+  height: 32px;
+}
+@media (max-width: 900px) {
+  .compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: auto;
+    height: auto;
+    gap: 12px;
+  }
+  .compact .card {
+    padding: 17px 15px;
+    gap: 12px;
+  }
+  .compact .cardHeader {
+    align-items: flex-start;
+  }
+  .compact .cardTitle {
+    font-size: 11px;
+  }
+  .compact .iconPill {
+    width: 28px;
+    height: 28px;
+  }
+  .compact .mainValue {
+    font-size: 28px;
+  }
+  .compact .valueSuffix {
+    font-size: 11px;
+  }
+}
+@media (max-width: 600px) {
+  .grid,
+  .compact {
+    grid-template-columns: 1fr;
+    gap: 11px;
+  }
+  .card,
+  .compact .card {
+    padding: 18px 20px;
+    gap: 10px;
+  }
+  .cardHeader,
+  .compact .cardHeader {
+    align-items: center;
+  }
+  .compact .cardTitle,
+  .cardTitle {
+    font-size: 13px;
+  }
+  .compact .mainValue,
+  .mainValue {
+    font-size: 32px;
+  }
+  .compact .valueSuffix,
+  .valueSuffix {
+    font-size: 11px;
+  }
+  .footerSubtext {
+    font-size: 11px;
+  }
 }

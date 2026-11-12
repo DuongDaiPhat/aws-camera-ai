@@ -1,239 +1,188 @@
-.sidebar {
-  width: 256px;
-  min-width: 256px;
-  background-color: #ffffff;
-  border-right: 1px solid #eef0f4;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 24px 16px;
-  min-height: 100vh;
-  position: sticky;
-  top: 0;
+.topbar {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 30px;
+  max-width: 1640px;
+  margin: 0 auto;
+  padding: 18px 32px;
+  width: 100%;
+  border-bottom: 1px solid #202a426e;
   z-index: 20;
 }
-
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 8px 24px;
+  gap: 11px;
+  text-align: left;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #302640;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.7px;
 }
-
-.brandIconWrapper {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-}
-
-.brandIconWrapper svg {
-  width: 22px;
-  height: 22px;
-}
-
-.brandTitles {
-  display: flex;
-  flex-direction: column;
-}
-
-.brandHeaderRow {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.brandName {
-  font-size: 17px;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.3px;
-}
-
-.proBadge {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #2563eb;
-  background-color: #eff6ff;
-  padding: 2px 6px;
-  border-radius: 6px;
-  border: 1px solid #dbeafe;
-}
-
-.brandSubtitle {
-  font-size: 12px;
-  color: #64748b;
+.brand small {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  color: #8f9cb7;
   margin-top: 1px;
 }
-
-.nav {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
+.brandAi {
+  color: #a498ff;
 }
-
-.navGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.brandMark {
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  border-radius: 14px;
+  background: linear-gradient(140deg, #6678ff, #8051e4);
+  box-shadow:
+    inset 0 1px #ffffff50,
+    0 4px 25px #6746df35;
+  color: white;
 }
-
-.navItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  border-radius: 10px;
-  color: #475569;
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  width: 100%;
-  text-align: left;
+.navigation {
+  min-width: 0;
+  justify-self: center;
+  max-width: 100%;
 }
-
-.navItem:hover {
-  background-color: #f8fafc;
-  color: #0f172a;
-}
-
-.navItemActive {
-  background-color: #eff6ff;
-  color: #2563eb;
-  font-weight: 600;
-}
-
-.navItemActive:hover {
-  background-color: #e0edff;
-  color: #1d4ed8;
-}
-
-.navItemContent {
+.account {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 9px;
+  min-width: 0;
 }
-
-.navIcon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-
-.badge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 10px;
-  line-height: 1.2;
-}
-
-.badgeRed {
-  background-color: #fee2e2;
-  color: #dc2626;
-}
-
-.badgeNeutral {
-  background-color: #f1f5f9;
-  color: #64748b;
-}
-
-.navDivider {
-  height: 1px;
-  background-color: #f1f5f9;
-  margin: 16px 8px;
-}
-
-.userFooter {
-  border-top: 1px solid #f1f5f9;
-  padding-top: 16px;
-  margin-top: 12px;
-}
-
-.userCard {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background-color: #f8fafc;
-  border: 1px solid #f1f5f9;
-}
-
-.userMain {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  overflow: hidden;
-}
-
 .avatar {
-  width: 36px;
-  height: 36px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 35px;
+  height: 35px;
   border-radius: 50%;
-  background: #0f172a;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-  flex-shrink: 0;
+  background: linear-gradient(135deg, #aea6e4, #625ca0);
+  border: 2px solid #6a62934d;
+  color: #302243;
+  font-size: 12px;
+  font-weight: 800;
 }
-
-.userInfo {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.userName {
-  font-size: 13px;
-  font-weight: 600;
-  color: #0f172a;
-  white-space: nowrap;
+.account strong {
+  display: block;
+  font-size: 12px;
+  max-width: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 650;
 }
-
-.userRole {
+.account small {
+  display: block;
   font-size: 11px;
-  color: #64748b;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: #8896b2;
+  margin-top: 2px;
+}
+.logout {
+  display: grid;
+  place-items: center;
+  color: #8c99b6;
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  width: 36px;
+  height: 44px;
+}
+.logout:hover {
+  background: #eb526418;
+  color: #ffacb9;
+}
+@media (max-width: 1400px) {
+  .topbar {
+    gap: 20px;
+    padding-inline: 24px;
+  }
+  .account > div {
+    display: none;
+  }
+  .account {
+    gap: 4px;
+  }
+  .brand {
+    font-size: 21px;
+  }
+}
+@media (max-width: 1150px) {
+  .topbar {
+    grid-template-columns: 1fr auto;
+    padding-block: 18px;
+    gap: 16px;
+  }
+  .navigation {
+    grid-column: 1/-1;
+    grid-row: 2;
+    justify-self: stretch;
+  }
+  .account > div {
+    display: block;
+  }
+}
+@media (max-width: 600px) {
+  .topbar {
+    padding: 17px 16px 13px;
+    gap: 15px;
+  }
+  .brandMark {
+    width: 37px;
+    height: 37px;
+    border-radius: 12px;
+  }
+  .brand {
+    font-size: 20px;
+    gap: 9px;
+  }
+  .brand small {
+    font-size: 10px;
+  }
+  .account > div {
+    display: none;
+  }
+  .avatar {
+    width: 32px;
+    height: 32px;
+  }
+  .logout {
+    width: 34px;
+  }
+  .navigation {
+    margin-inline: -2px;
+  }
 }
 
-.logoutBtn {
-  background: transparent;
-  border: none;
-  color: #94a3b8;
-  padding: 6px;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
+.topbar {
+  border-bottom-color: #e9e3f1;
 }
-
-.logoutBtn:hover {
-  background-color: #fee2e2;
-  color: #ef4444;
+.brand {
+  color: #302340;
+  font-weight: 700;
 }
-
-.logoutBtn svg {
-  width: 16px;
-  height: 16px;
+.brandAi {
+  color: #8a50d8;
+}
+.brand small,
+.account small {
+  color: #8b7d98;
+}
+.account strong {
+  color: #4f3a65;
+}
+.logout {
+  color: #8c7a9d;
+}
+.logout:hover {
+  color: #b73955;
+  background: #fff0f3;
 }

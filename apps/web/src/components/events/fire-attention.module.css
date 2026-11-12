@@ -15,12 +15,12 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: #fff;
+  background: var(--surface);
   border: 2px solid #ef4444;
   border-radius: 14px;
   padding: 18px;
   box-shadow: 0 12px 48px #0004;
-  color: #450a0a;
+  color: #fff0f4;
 }
 .alert h2 {
   margin: 0;
@@ -28,7 +28,7 @@
   line-height: 1.25;
 }
 .alarmLabel {
-  color: #b91c1c;
+  color: #b52a4d;
   font-size: 12px;
   font-weight: 750;
   letter-spacing: 0.03em;
@@ -36,7 +36,7 @@
 .location {
   display: grid;
   gap: 3px;
-  color: #7f1d1d;
+  color: #ae3451;
   font-size: 13px;
 }
 .location strong {
@@ -78,9 +78,9 @@
   background: #991b1b;
 }
 .emergencyCall {
-  background: #fff;
-  border: 1px solid #fecaca;
-  color: #b91c1c;
+  background: var(--surface);
+  border: 1px solid #6b3449;
+  color: #b52a4d;
   font-size: 14px;
   font-weight: 600;
   transition:
@@ -91,7 +91,7 @@
   flex-shrink: 0;
 }
 .emergencyCall:hover {
-  background: #fff1f2;
+  background: var(--surface-muted);
   border-color: #f87171;
 }
 .emergencyCall:focus-visible,
@@ -110,4 +110,23 @@
   .inspect {
     font-size: 13px;
   }
+}
+
+.alert {
+  background: #fff;
+  color: #592234;
+}
+.location {
+  color: #8c4254;
+}
+.alarmLabel {
+  color: #c8334a;
+}
+.emergencyCall {
+  color: #a92c49;
+  background: #fff;
+  border-color: #efcbd4;
+}
+.inspect {
+  color: #fff;
 }

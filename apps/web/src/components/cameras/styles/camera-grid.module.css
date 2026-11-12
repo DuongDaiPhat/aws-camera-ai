@@ -4,8 +4,8 @@
   flex-direction: column;
   gap: 16px;
   width: 100%;
-  background: var(--surface, #ffffff);
-  border: 1px solid var(--border, #e2e8f0);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius-panel, 12px);
   padding: 20px;
   box-shadow: var(--shadow-panel, 0 1px 3px rgba(0, 0, 0, 0.05));
@@ -18,7 +18,7 @@
   flex-wrap: wrap;
   gap: 12px;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--border, #e2e8f0);
+  border-bottom: 1px solid var(--border);
 }
 
 .toolbarLeft {
@@ -30,7 +30,7 @@
 .wallTitle {
   font-size: 16px;
   font-weight: 700;
-  color: var(--ink, #0f172a);
+  color: var(--ink);
   letter-spacing: -0.01em;
   display: flex;
   align-items: center;
@@ -60,13 +60,13 @@
 }
 
 .cameraCountBadge {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--surface-muted);
+  color: var(--ink-secondary);
   font-size: 12px;
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 9999px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
 }
 
 .toolbarRight {
@@ -78,8 +78,8 @@
 
 .segmentedGroup {
   display: inline-flex;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 2px;
   gap: 2px;
@@ -88,7 +88,7 @@
 .segBtn {
   background: transparent;
   border: none;
-  color: #64748b;
+  color: var(--ink-muted);
   padding: 5px 12px;
   font-size: 12px;
   font-weight: 500;
@@ -98,24 +98,24 @@
 }
 
 .segBtn:hover {
-  color: #0f172a;
+  color: var(--ink);
 }
 
 .segBtnActive {
-  background: #ffffff;
-  color: #2563eb;
+  background: var(--surface);
+  color: var(--accent);
   font-weight: 600;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-  border: 1px solid #cbd5e1;
+  border: 1px solid #e6deef;
 }
 
 .actionBtn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #ffffff;
-  color: #475569;
-  border: 1px solid #cbd5e1;
+  background: var(--surface);
+  color: var(--ink-secondary);
+  border: 1px solid #e6deef;
   border-radius: 6px;
   padding: 5px 12px;
   font-size: 12px;
@@ -125,14 +125,14 @@
 }
 
 .actionBtn:hover {
-  background: #f8fafc;
-  color: #0f172a;
-  border-color: #94a3b8;
+  background: var(--bg);
+  color: var(--ink);
+  border-color: var(--ink-muted);
 }
 
 .actionBtnActive {
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--accent-soft);
+  color: var(--accent);
   border-color: #93c5fd;
   font-weight: 600;
 }
@@ -141,8 +141,8 @@
 .matrixGrid {
   display: grid;
   gap: 16px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 16px;
   width: 100%;
@@ -169,14 +169,16 @@
 
 /* Thẻ camera từng ô (Card nền trắng, màn hình video bên trong) */
 .tileCard {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .tileCard:hover {
@@ -195,8 +197,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 12px;
-  background: #ffffff;
-  border-bottom: 1px solid #f1f5f9;
+  background: var(--surface);
+  border-bottom: 1px solid var(--surface-muted);
 }
 
 .tileHeaderLeft {
@@ -208,13 +210,13 @@
 .tileName {
   font-size: 14px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ink);
   margin: 0;
 }
 
 .tileSlug {
   font-size: 11px;
-  color: #64748b;
+  color: var(--ink-muted);
   font-family: monospace;
 }
 
@@ -251,24 +253,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: repeating-linear-gradient(
-    0deg,
-    #050811,
-    #050811 2px,
-    #0b1021 2px,
-    #0b1021 4px
-  );
-  color: #64748b;
+  background: repeating-linear-gradient(0deg, #050811, #050811 2px, #0b1021 2px, #0b1021 4px);
+  color: var(--ink-muted);
   gap: 6px;
   position: relative;
 }
 
 .noSignalText {
-  font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+  font-family: Consolas, Menlo, Monaco, 'Courier New', monospace;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: #94a3b8;
+  color: var(--ink-muted);
   text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
 }
 
@@ -289,10 +285,10 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+  font-family: Consolas, Menlo, Monaco, 'Courier New', monospace;
   font-size: 11px;
   font-weight: 600;
-  color: #ffffff;
+  color: #2c223f;
   text-shadow:
     1px 1px 2px #000,
     -1px -1px 2px #000,
@@ -312,7 +308,7 @@
 .osdCameraTitle {
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: #f8fafc;
+  color: var(--bg);
   background: rgba(0, 0, 0, 0.5);
   padding: 2px 6px;
   border-radius: 3px;
@@ -345,7 +341,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #ffffff;
+  color: #2c223f;
   background: rgba(0, 0, 0, 0.6);
   padding: 2px 8px;
   border-radius: 3px;
@@ -368,13 +364,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  background: #ffffff;
-  border-top: 1px solid #f1f5f9;
+  background: var(--surface);
+  border-top: 1px solid var(--surface-muted);
 }
 
 .tileFooterMeta {
   font-size: 11px;
-  color: #64748b;
+  color: var(--ink-muted);
   display: flex;
   gap: 8px;
 }
@@ -385,9 +381,9 @@
 }
 
 .tileBtn {
-  background: #f1f5f9;
-  color: #334155;
-  border: 1px solid #e2e8f0;
+  background: var(--surface-muted);
+  color: var(--ink-secondary);
+  border: 1px solid var(--border);
   border-radius: 4px;
   padding: 4px 10px;
   font-size: 11px;
@@ -397,36 +393,36 @@
 }
 
 .tileBtn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: var(--border);
+  color: var(--ink);
 }
 
 .tileBtnPrimary {
-  background: #eff6ff;
-  color: #2563eb;
-  border-color: #bfdbfe;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: #3e5178;
 }
 
 .tileBtnPrimary:hover {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #e6edfa;
+  color: var(--accent-hover);
 }
 
 /* Trạng thái danh sách rỗng */
 .emptyState {
   padding: 48px 24px;
   text-align: center;
-  color: #64748b;
+  color: var(--ink-muted);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  background: #ffffff;
+  background: var(--surface);
   border-radius: 8px;
 }
 
 .emptyStateTitle {
   font-size: 16px;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--ink);
 }
