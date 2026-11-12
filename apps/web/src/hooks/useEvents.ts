@@ -45,6 +45,7 @@ export function calculateCounts(events: UIEventItem[]): FilterTabCounts {
 
 function matchZone(event: UIEventItem, zone: string): boolean {
   if (zone === 'ALL') return true;
+  if (zone.startsWith('zone:')) return event.zone?.id === zone.slice(5);
   const keywords = ZONE_KEYWORDS[zone];
   if (!keywords) return true;
   const normalize = (value: string): string =>
