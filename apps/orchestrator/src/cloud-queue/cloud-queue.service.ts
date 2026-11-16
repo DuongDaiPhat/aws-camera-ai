@@ -61,11 +61,19 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
   }
   private async loop() {
     while (!this.stopped) {
+      let operation = 'dispatch';
       try {
         await this.dispatchOne();
+        operation = 'receive-results';
         await this.consumeOnce();
-      } catch {
-        this.logger.error('Cloud queue iteration failed; retrying without acknowledging input');
+      } catch (error) {
+        const code =
+          error instanceof Error ? ('code' in error ? error.code : error.name) : undefined;
+        const safeCode =
+          typeof code === 'string' && /^[A-Za-z0-9_.-]{1,80}$/.test(code) ? code : 'unknown';
+        this.logger.error(
+          `Cloud queue iteration failed (${operation}, ${safeCode}); retrying without acknowledging input`,
+        );
       }
       if (!this.stopped)
         await new Promise<void>((resolve) => {
