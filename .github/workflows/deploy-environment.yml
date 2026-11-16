@@ -1,0 +1,55 @@
+name: Deploy environment
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      release_id:
+        type: string
+        required: true
+      source_sha:
+        type: string
+        required: true
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ vars.APP_URL }}
+    concurrency:
+      group: camerai-deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
+      AWS_PAGER: ""
+      RELEASE_ID: ${{ inputs.release_id }}
+      EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+      APP_URL: ${{ vars.APP_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Deploy and wait for SSM result
+        run: bash tools/cd/request-deploy.sh
+      - name: Check HTTPS and release version
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 6 --retry-all-errors --retry-delay 5 \
+            "$APP_URL/api/v1/health" | jq -e --arg release "$RELEASE_ID" '.status == "ok" and .version == $release'
+          curl --fail --silent --show-error "$APP_URL/login" > /dev/null
+          curl --fail --silent --show-error "$APP_URL/api/v1/auth/config" | \
+            jq -e '.provider == "jwt" or .provider == "cognito"'
+      - name: Write release summary
+        run: |
+          printf 'Release: `%s`\n\nURL: %s\n' "$RELEASE_ID" "$APP_URL" >> "$GITHUB_STEP_SUMMARY"
