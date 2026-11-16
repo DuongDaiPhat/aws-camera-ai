@@ -31,6 +31,9 @@ jobs:
       RELEASE_ID: ${{ inputs.release_id }}
       EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
       APP_URL: ${{ vars.APP_URL }}
+      RELEASE_BUCKET: ${{ vars.RELEASE_BUCKET }}
+      FACE_FUNCTION_NAME: ${{ vars.FACE_FUNCTION_NAME }}
+      FACE_FUNCTION_ALIAS: ${{ vars.FACE_FUNCTION_ALIAS }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -50,6 +53,34 @@ jobs:
           curl --fail --silent --show-error "$APP_URL/login" > /dev/null
           curl --fail --silent --show-error "$APP_URL/api/v1/auth/config" | \
             jq -e '.provider == "jwt" or .provider == "cognito"'
+      - name: Update face Lambda and alias
+        if: env.FACE_FUNCTION_NAME != ''
+        run: |
+          set -euo pipefail
+          alias_name="${FACE_FUNCTION_ALIAS:-live}"
+          aws s3 cp "s3://$RELEASE_BUCKET/releases/$RELEASE_ID/face.zip" face.zip
+          aws s3 cp "s3://$RELEASE_BUCKET/releases/$RELEASE_ID/face.zip.sha256" face.zip.sha256
+          sha256sum -c face.zip.sha256
+          expected_b64=$(openssl dgst -sha256 -binary face.zip | base64 -w0)
+          prev_version=$(aws lambda get-alias --function-name "$FACE_FUNCTION_NAME" --name "$alias_name" --query FunctionVersion --output text 2>/dev/null || echo "none")
+          echo "Previous alias $alias_name version: $prev_version"
+          aws lambda update-function-code \
+            --function-name "$FACE_FUNCTION_NAME" \
+            --s3-bucket "$RELEASE_BUCKET" \
+            --s3-key "releases/$RELEASE_ID/face.zip" \
+            --query '{Function:FunctionName,CodeSha256:CodeSha256}'
+          aws lambda wait function-updated-v2 --function-name "$FACE_FUNCTION_NAME"
+          actual_b64=$(aws lambda get-function-configuration --function-name "$FACE_FUNCTION_NAME" --query CodeSha256 --output text)
+          test "$actual_b64" = "$expected_b64"
+          version=$(aws lambda publish-version --function-name "$FACE_FUNCTION_NAME" --code-sha256 "$expected_b64" --query Version --output text)
+          if aws lambda get-alias --function-name "$FACE_FUNCTION_NAME" --name "$alias_name" >/dev/null 2>&1; then
+            aws lambda update-alias --function-name "$FACE_FUNCTION_NAME" --name "$alias_name" --function-version "$version" >/dev/null
+          else
+            aws lambda create-alias --function-name "$FACE_FUNCTION_NAME" --name "$alias_name" --function-version "$version" >/dev/null
+          fi
+          verified_version=$(aws lambda get-alias --function-name "$FACE_FUNCTION_NAME" --name "$alias_name" --query FunctionVersion --output text)
+          test "$verified_version" = "$version"
+          printf 'Face Lambda: `%s:%s` -> version `%s` (previous: `%s`)\n' "$FACE_FUNCTION_NAME" "$alias_name" "$version" "$prev_version" >> "$GITHUB_STEP_SUMMARY"
       - name: Write release summary
         run: |
           printf 'Release: `%s`\n\nURL: %s\n' "$RELEASE_ID" "$APP_URL" >> "$GITHUB_STEP_SUMMARY"
