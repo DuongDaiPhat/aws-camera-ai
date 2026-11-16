@@ -1,0 +1,13 @@
+{$APP_DOMAIN} {
+    request_body {
+        max_size 550MB
+    }
+    handle /api/* {
+        reverse_proxy orchestrator:3001 {
+            flush_interval -1
+        }
+    }
+    handle {
+        reverse_proxy web:3000
+    }
+}

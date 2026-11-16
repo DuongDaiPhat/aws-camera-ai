@@ -1,0 +1,95 @@
+name: CD
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: camerai-release-main
+  cancel-in-progress: false
+jobs:
+  package:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      release_id: ${{ steps.release.outputs.id }}
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      RELEASE_BUCKET: ${{ vars.RELEASE_BUCKET }}
+      ECR_REGISTRY: ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com
+      SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - name: Identify release
+        id: release
+        run: |
+          id="$SOURCE_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+          echo "RELEASE_ID=$id" >> "$GITHUB_ENV"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_BUILD_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Login ECR
+        run: |
+          aws ecr get-login-password --region "$AWS_REGION" | \
+            docker login --username AWS --password-stdin "$ECR_REGISTRY"
+      - uses: docker/setup-buildx-action@v3
+      - name: Build and publish web
+        id: web
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          target: production
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.ECR_REGISTRY }}/camerai/web:${{ env.RELEASE_ID }}
+          build-args: NEXT_PUBLIC_API_BASE_URL=/api/v1
+      - name: Build and publish orchestrator
+        id: orchestrator
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/orchestrator/Dockerfile
+          target: production
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.ECR_REGISTRY }}/camerai/orchestrator:${{ env.RELEASE_ID }}
+      - name: Create release bundle
+        env:
+          WEB_DIGEST: ${{ steps.web.outputs.digest }}
+          ORCHESTRATOR_DIGEST: ${{ steps.orchestrator.outputs.digest }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/cd
+          printf 'RELEASE_ID=%s\nWEB_IMAGE=%s/camerai/web@%s\nORCHESTRATOR_IMAGE=%s/camerai/orchestrator@%s\n' \
+            "$RELEASE_ID" "$ECR_REGISTRY" "$WEB_DIGEST" "$ECR_REGISTRY" "$ORCHESTRATOR_DIGEST" > release.env
+          tar -czf artifacts/cd/bundle.tgz release.env deploy/compose.yml deploy/Caddyfile
+          (cd artifacts/cd && sha256sum bundle.tgz > bundle.sha256)
+          aws s3 cp artifacts/cd/bundle.tgz "s3://$RELEASE_BUCKET/releases/$RELEASE_ID/bundle.tgz"
+          aws s3 cp artifacts/cd/bundle.sha256 "s3://$RELEASE_BUCKET/releases/$RELEASE_ID/bundle.sha256"
+          printf 'Release ready: `%s`\n' "$RELEASE_ID" >> "$GITHUB_STEP_SUMMARY"
+  staging:
+    needs: package
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/deploy-environment.yml
+    with:
+      environment: staging
+      release_id: ${{ needs.package.outputs.release_id }}
+      source_sha: ${{ github.event.workflow_run.head_sha }}
