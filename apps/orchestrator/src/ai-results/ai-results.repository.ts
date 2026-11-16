@@ -92,8 +92,9 @@ export class AiResultsRepository {
     submission: ValidatedAiResultSubmission,
     payloadHash: string,
     payload: Record<string, unknown>,
+    transactionClient?: PoolClient,
   ): Promise<ApplyAiResultResult> {
-    return await this.database.transaction(async (client) => {
+    const apply = async (client: PoolClient): Promise<ApplyAiResultResult> => {
       const event = await this.lockEvent(client, submission.eventId);
       if (!event) throw new AiResultEventNotFoundError(submission.eventId);
 
@@ -160,7 +161,8 @@ export class AiResultsRepository {
         eventId: submission.eventId,
         correlationId: event.correlation_id,
       };
-    });
+    };
+    return transactionClient ? apply(transactionClient) : this.database.transaction(apply);
   }
 
   async claimOutboxMessage(leaseSeconds: number): Promise<AiResultOutboxRow | null> {

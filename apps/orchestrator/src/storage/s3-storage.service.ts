@@ -13,19 +13,8 @@ export class S3StorageService implements IStorageService {
   constructor(private readonly configService: ConfigService) {
     this.bucket = this.configService.get<string>('S3_BUCKET', 'camerai-media-prod');
     const region = this.configService.get<string>('AWS_REGION', 'ap-southeast-1');
-    const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
-    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
-
-    this.s3Client = new S3Client({
-      region,
-      credentials:
-        accessKeyId && secretAccessKey
-          ? {
-              accessKeyId,
-              secretAccessKey,
-            }
-          : undefined,
-    });
+    // Default AWS credential chain supports instance roles and temporary session tokens.
+    this.s3Client = new S3Client({ region });
 
     this.logger.log(`Khoi tao AWS S3 Storage Adapter (region: ${region}, bucket: ${this.bucket})`);
   }

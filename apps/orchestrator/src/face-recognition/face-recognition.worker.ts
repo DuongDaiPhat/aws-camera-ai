@@ -102,6 +102,9 @@ export class FaceRecognitionWorker extends WorkerHost {
   }
 
   async process(job: Job<MatchFaceJob, void, string>): Promise<void> {
+    if (this.config.get<string>('FACE_JOB_TRANSPORT', 'bullmq') !== 'bullmq') {
+      throw new Error('BullMQ face processing disabled in SQS mode');
+    }
     const { eventId, trackId, ownerScopeId, collectionVersion, sourceSessionId } = job.data;
 
     this.logger.log(
