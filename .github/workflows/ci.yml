@@ -299,6 +299,29 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Build image orchestrator (production)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/orchestrator/Dockerfile
+          target: production
+          platforms: linux/amd64
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build image web (production)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          target: production
+          platforms: linux/amd64
+          push: false
+          build-args: NEXT_PUBLIC_API_BASE_URL=/api/v1
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   # -------------------------------------------------------------------
   # 6. Quy uoc commit — chi chay tren PR
   # -------------------------------------------------------------------
