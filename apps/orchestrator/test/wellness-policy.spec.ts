@@ -95,7 +95,10 @@ describe('US20 policy regression', () => {
         ({ sub: token, role: token === 'admin' ? 'ADMIN' : 'VIEWER' }) as TokenClaims,
     } as TokenService;
     const events = new EventsService(
-      { isActiveAdmin: async () => true } as unknown as EventsRepository,
+      {
+        canReceiveEvent: async (id: string, recipients: string[]) =>
+          id === 'admin' || recipients.includes(id),
+      } as unknown as EventsRepository,
       {} as MediaService,
       {} as EscalationEngineService,
       {} as IStorageService,

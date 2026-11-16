@@ -184,6 +184,18 @@ export class WellnessRepository {
   // SCHEDULES
   // -------------------------------------------------------------
 
+  async canAccessHousehold(
+    actorId: string,
+    ownerId: string,
+    client?: PoolClient,
+  ): Promise<boolean> {
+    const { rows } = await (client ?? this.pool).query<{ allowed: boolean }>(
+      'SELECT shares_camera_household($1, $2) AS allowed',
+      [actorId, ownerId],
+    );
+    return rows[0]?.allowed === true;
+  }
+
   async listSchedules(
     actorUserId: string,
     actorRole: UserRole,
@@ -201,7 +213,7 @@ export class WellnessRepository {
       }
     } else if (actorRole === 'CAREGIVER') {
       params.push(actorUserId);
-      conditions.push(`owner_user_id = $${params.length}`);
+      conditions.push(`shares_camera_household($${params.length}, owner_user_id)`);
       if (residentUserIdFilter) {
         params.push(residentUserIdFilter);
         conditions.push(`resident_user_id = $${params.length}`);
@@ -577,7 +589,7 @@ export class WellnessRepository {
 
     if (actorRole === 'CAREGIVER') {
       params.push(actorUserId);
-      conditions.push(`r.owner_user_id = $${params.length}`);
+      conditions.push(`shares_camera_household($${params.length}, r.owner_user_id)`);
     } else if (actorRole === 'VIEWER') {
       params.push(actorUserId);
       conditions.push(`r.resident_user_id = $${params.length}`);

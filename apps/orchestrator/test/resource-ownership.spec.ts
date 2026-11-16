@@ -20,6 +20,7 @@ import type { IStorageService } from '../src/storage/storage.interface';
 
 const owner = '11111111-1111-4111-8111-111111111111';
 const other = '22222222-2222-4222-8222-222222222222';
+const member = '55555555-5555-4555-8555-555555555555';
 
 describe('camera ownership', () => {
   it('uses the application owner ID to scope camera listings', async () => {
@@ -29,10 +30,10 @@ describe('camera ownership', () => {
 
     await cameras.findAll(filter);
 
-    expect(query).toHaveBeenCalledWith(expect.stringContaining('d.owner_user_id = $2'), [
-      true,
-      owner,
-    ]);
+    expect(query).toHaveBeenCalledWith(
+      expect.stringContaining('shares_camera_household($2, d.owner_user_id)'),
+      [true, owner],
+    );
   });
 
   it('scopes event results and their count before pagination', async () => {
@@ -41,25 +42,32 @@ describe('camera ownership', () => {
 
     await events.listEvents({ page: 1, pageSize: 20, actorId: owner });
 
-    expect(query).toHaveBeenNthCalledWith(1, expect.stringContaining('d.owner_user_id = $1'), [
-      owner,
-    ]);
-    expect(query).toHaveBeenNthCalledWith(2, expect.stringContaining('d.owner_user_id = $1'), [
-      owner,
-      20,
-      0,
-    ]);
+    expect(query).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('shares_camera_household($1, d.owner_user_id)'),
+      [owner],
+    );
+    expect(query).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('shares_camera_household($1, d.owner_user_id)'),
+      [owner, 20, 0],
+    );
   });
 
-  it('sends camera events to their owner and administrators only', async () => {
+  it('sends camera events to members of the owning household and the system admin', async () => {
     let isAdmin = true;
     const verifyAccessToken = (sub: string) =>
       ({
         sub,
-        role: sub === 'admin' ? 'ADMIN' : 'VIEWER',
+        role: sub === member ? 'VIEWER' : 'ADMIN',
       }) as TokenClaims;
     const events = new EventsService(
-      { isActiveAdmin: async () => isAdmin } as unknown as EventsRepository,
+      {
+        canReceiveEvent: async (sub: string, recipients: string[]) =>
+          sub === 'admin'
+            ? isAdmin
+            : (sub === owner || sub === member) && recipients.includes(owner),
+      } as unknown as EventsRepository,
       {} as MediaService,
       {} as EscalationEngineService,
       {} as IStorageService,
@@ -68,10 +76,12 @@ describe('camera ownership', () => {
     const receiveOwner = jest.fn();
     const receiveOther = jest.fn();
     const receiveAdmin = jest.fn();
+    const receiveMember = jest.fn();
     const subscriptions = [
       (await events.streamEvents(owner)).subscribe(receiveOwner),
       (await events.streamEvents(other)).subscribe(receiveOther),
       (await events.streamEvents('admin')).subscribe(receiveAdmin),
+      (await events.streamEvents(member)).subscribe(receiveMember),
     ];
 
     const event = {
@@ -85,6 +95,7 @@ describe('camera ownership', () => {
       await new Promise<void>((resolve) => setImmediate(resolve));
 
       expect(receiveOwner).toHaveBeenCalledTimes(1);
+      expect(receiveMember).toHaveBeenCalledTimes(1);
       expect(receiveOther).not.toHaveBeenCalled();
       expect(receiveAdmin).toHaveBeenCalledTimes(2);
 
@@ -107,7 +118,9 @@ describe('resource access over HTTP', () => {
   const listEventMediaWithUrls = jest.fn().mockResolvedValue([{ url: privateUrl }]);
   const listCameras = jest.fn().mockResolvedValue({ data: [] });
   const query = jest.fn(async (_sql: string, [id, actor]: [string, string]) => ({
-    rows: [cameraId, eventId].includes(id) ? [{ allowed: actor === owner }] : [],
+    rows: [cameraId, eventId].includes(id)
+      ? [{ allowed: actor === owner || actor === member }]
+      : [],
   }));
 
   let app: INestApplication;
@@ -125,7 +138,8 @@ describe('resource access over HTTP', () => {
           useValue: {
             verifyAccessToken: (sub: string) => ({
               sub,
-              role: sub === 'admin' ? 'ADMIN' : 'VIEWER',
+              role: sub === member ? 'VIEWER' : 'ADMIN',
+              email: sub === 'admin' ? 'admin@camerai.local' : 'household@example.test',
             }),
           },
         },
@@ -148,7 +162,7 @@ describe('resource access over HTTP', () => {
   it('authenticates before serving a camera list and scopes it to the current user', async () => {
     expect((await get('/cameras')).status).toBe(401);
     expect((await get('/cameras', owner)).status).toBe(200);
-    expect(listCameras).toHaveBeenLastCalledWith({}, 'VIEWER', owner);
+    expect(listCameras).toHaveBeenLastCalledWith({}, 'ADMIN', owner);
     expect((await get('/cameras', 'admin')).status).toBe(200);
     expect(listCameras).toHaveBeenLastCalledWith({}, 'ADMIN', undefined);
   });
@@ -166,6 +180,7 @@ describe('resource access over HTTP', () => {
     expect(listEventMediaWithUrls).not.toHaveBeenCalled();
 
     expect(await (await get(snapshot, owner)).json()).toEqual({ url: privateUrl });
+    expect(await (await get(snapshot, member)).json()).toEqual({ url: privateUrl });
     expect(await (await get(media, owner)).json()).toEqual({ data: [{ url: privateUrl }] });
 
     query.mockClear();

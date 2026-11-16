@@ -280,10 +280,22 @@ export class EventsRepository {
 
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
-  async isActiveAdmin(userId: string): Promise<boolean> {
+  async canReceiveEvent(userId: string, recipients: string[]): Promise<boolean> {
     const { rowCount } = await this.pool.query(
-      "SELECT 1 FROM users WHERE id = $1 AND is_active AND role = 'ADMIN'",
-      [userId],
+      `SELECT 1 FROM users actor WHERE id = $1 AND is_active
+       AND ((email = 'admin@camerai.local' AND role = 'ADMIN') OR EXISTS (
+         SELECT 1 FROM unnest($2::uuid[]) AS recipient(id)
+         WHERE shares_camera_household(actor.id, recipient.id)
+       ))`,
+      [userId, recipients],
+    );
+    return rowCount === 1;
+  }
+
+  async canViewEvent(userId: string, eventId: string): Promise<boolean> {
+    const { rowCount } = await this.pool.query(
+      `SELECT 1 FROM events e WHERE e.id = $2 AND ${eventVisibilityPredicate('$1')}`,
+      [userId, eventId],
     );
     return rowCount === 1;
   }
@@ -690,7 +702,7 @@ export class EventsRepository {
              COUNT(*) FILTER (WHERE c.is_enabled AND d.status = 'ONLINE')::int AS online_count
       FROM cameras c
       JOIN devices d ON d.id = c.device_id
-      ${actor ? 'WHERE d.owner_user_id = $1' : ''};
+      ${actor ? 'WHERE shares_camera_household($1, d.owner_user_id)' : ''};
     `;
     const res = await this.pool.query<CameraAvailabilityRecord>(query, actor ? [actor] : []);
     return res.rows[0] ?? { online_count: 0, total_count: 0 };

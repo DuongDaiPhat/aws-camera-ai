@@ -84,8 +84,11 @@ export class UsersController {
 
   @Get()
   @ApiOperation({ summary: 'Danh sách tài khoản CameraAI' })
-  list(@Query() { page, pageSize, role }: ListUsersQueryDto): ReturnType<UsersService['list']> {
-    return this.users.list(page, pageSize, role);
+  list(
+    @Query() { page, pageSize, role }: ListUsersQueryDto,
+    @Req() request: AuthenticatedRequest,
+  ): ReturnType<UsersService['list']> {
+    return this.users.list(request.auth?.sub, page, pageSize, role);
   }
 
   @Patch(':userId/role')

@@ -45,6 +45,7 @@ describe('EventsService (US-06)', () => {
       findEventDetailById: jest.fn(),
       listStatusHistoryByEventId: jest.fn(),
       getEventStats: jest.fn(),
+      canReceiveEvent: jest.fn().mockResolvedValue(true),
     };
 
     const mockMediaService = {
@@ -182,6 +183,7 @@ describe('EventsService (US-06)', () => {
       });
 
       service.emitEvent(await service.toEventSummary(mockRecord), 'event.created', ['u-1']);
+      await new Promise<void>((resolve) => setImmediate(resolve));
       expect(received).toHaveLength(1);
     });
   });

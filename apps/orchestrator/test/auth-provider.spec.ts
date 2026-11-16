@@ -119,7 +119,7 @@ describe('Cognito account management over HTTP', () => {
     isCognitoLinked: true,
     cognitoEmail: 'member-login@example.org',
   };
-  const actor = { ...target, id: actorId, role: 'ADMIN' };
+  const actor = { ...target, id: actorId, role: 'ADMIN', email: 'admin@camerai.local' };
   const input = {
     email: 'new-user@example.org',
     fullName: 'Người dùng mới',
@@ -196,6 +196,7 @@ describe('Cognito account management over HTTP', () => {
       authority,
       input.cognitoSub,
       actorId,
+      'admin@camerai.local',
     ]);
   });
 
@@ -275,6 +276,14 @@ describe('Cognito account management over HTTP', () => {
     expect((await changeRole(target.id, { role: 'ADMIN' })).status).toBe(403);
     expect((await changeRole(target.id, { role: 'ADMIN' })).status).toBe(404);
     expect(query).toHaveBeenCalledTimes(2);
+  });
+
+  it('prevents a household admin from editing users outside the household', async () => {
+    query.mockResolvedValueOnce({
+      rows: [{ ...actor, email: 'household@example.org' }, target],
+    });
+    expect((await changeRole(target.id, { role: 'ADMIN' })).status).toBe(404);
+    expect(query).toHaveBeenCalledTimes(1);
   });
 });
 

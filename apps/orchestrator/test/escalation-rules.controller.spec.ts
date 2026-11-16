@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { EscalationRulesController } from '../src/escalation-rules/escalation-rules.controller';
 import { EscalationRulesService } from '../src/escalation-rules/escalation-rules.service';
 import { RolesGuard } from '../src/auth/roles.guard';
+import { SYSTEM_ADMIN_REQUIRED } from '../src/auth/system-admin';
 import type { EscalationRuleDto } from '../src/escalation-rules/dto/escalation-rule-response.dto';
 import type { AuthenticatedRequest } from '../src/auth/jwt-auth.guard';
 
@@ -110,20 +111,20 @@ describe('EscalationRulesController & RolesGuard (US-15)', () => {
       guard = new RolesGuard(reflector);
     });
 
-    function createMockContext(role?: string): ExecutionContext {
+    function createMockContext(role?: string, email = 'household@example.test'): ExecutionContext {
       return {
         getHandler: () => ({}),
         getClass: () => ({}),
         switchToHttp: () => ({
           getRequest: () => ({
-            auth: role ? { role, sub: 'user-1' } : undefined,
+            auth: role ? { role, email, sub: 'user-1' } : undefined,
           }),
         }),
       } as unknown as ExecutionContext;
     }
 
     it('cho phép truy cập khi user có role ADMIN khớp với yêu cầu', () => {
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['ADMIN']);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce(['ADMIN']);
 
       const context = createMockContext('ADMIN');
       expect(guard.canActivate(context)).toBe(true);
@@ -151,6 +152,15 @@ describe('EscalationRulesController & RolesGuard (US-15)', () => {
 
       const context = createMockContext('VIEWER');
       expect(guard.canActivate(context)).toBe(true);
+    });
+
+    it('reserves changes to global rules for the system administrator', () => {
+      jest
+        .spyOn(reflector, 'getAllAndOverride')
+        .mockImplementation((key) => (key === SYSTEM_ADMIN_REQUIRED ? true : undefined));
+
+      expect(() => guard.canActivate(createMockContext('ADMIN'))).toThrow(ForbiddenException);
+      expect(guard.canActivate(createMockContext('ADMIN', 'admin@camerai.local'))).toBe(true);
     });
   });
 });

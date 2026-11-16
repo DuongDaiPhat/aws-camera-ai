@@ -33,6 +33,7 @@ export class ZonesController {
   }
 
   @Post('cameras/:cameraId/zones')
+  @CheckResourceAccess('cameraId')
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Tạo vùng mới và đưa cấu hình Frigate vào hàng đợi' })
   async create(
@@ -43,6 +44,7 @@ export class ZonesController {
   }
 
   @Patch('zones/:zoneId')
+  @CheckResourceAccess('zoneId')
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Cập nhật vùng và đưa cấu hình Frigate vào hàng đợi' })
   async update(
@@ -53,6 +55,7 @@ export class ZonesController {
   }
 
   @Delete('zones/:zoneId')
+  @CheckResourceAccess('zoneId')
   @Roles('ADMIN')
   @HttpCode(204)
   @ApiOperation({ summary: 'Xóa vùng và đưa cấu hình Frigate vào hàng đợi' })

@@ -144,13 +144,13 @@ export interface paths {
     };
     /**
      * Danh sach nguoi dung
-     * @description Chi ADMIN goi duoc (FR-AUT-05).
+     * @description Quan tri he thong xem tat ca tai khoan. Quan tri ho chi xem tai khoan trong ho (FR-AUT-05).
      */
     get: operations['listUsers'];
     put?: never;
     /**
      * Tao tai khoan ung dung tu nguoi dung Cognito
-     * @description Chi ADMIN duoc tao. Nguoi dung Cognito da ton tai trong User Pool dang cau hinh.
+     * @description Chi ADMIN duoc tao. Tai khoan do quan tri ho tao thuoc cung ho. Danh tinh phai ton tai trong User Pool dang cau hinh.
      */
     post: operations['createUser'];
     delete?: never;
@@ -197,7 +197,7 @@ export interface paths {
     head?: never;
     /**
      * Doi vai tro CameraAI cua nguoi dung
-     * @description Chi ADMIN trong che do Cognito duoc doi vai tro cua tai khoan khac.
+     * @description Chi ADMIN trong che do Cognito duoc doi vai tro. Quan tri ho chi duoc doi vai tro cua tai khoan khac trong ho.
      */
     patch: operations['changeUserRole'];
     trace?: never;
@@ -250,7 +250,7 @@ export interface paths {
     };
     /**
      * Danh sach camera
-     * @description ADMIN xem tat ca. Tai khoan thuong chi xem camera thuoc thiet bi cua minh.
+     * @description Quan tri he thong xem tat ca. Thanh vien cua ho chi xem camera thuoc ho cua minh.
      */
     get: operations['listCameras'];
     put?: never;

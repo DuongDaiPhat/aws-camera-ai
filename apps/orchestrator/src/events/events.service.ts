@@ -7,7 +7,8 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Subject, Observable, concatMap, defer, filter, of } from 'rxjs';
+import { Subject, Observable, concatMap, filter } from 'rxjs';
+import { isSystemAdmin } from '../auth/system-admin';
 import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
 import { TOKEN_SERVICE, type TokenService, type TokenClaims } from '../auth/auth.types';
 import { MediaService } from '../media/media.service';
@@ -122,7 +123,7 @@ export class EventsService {
       from: query.from,
       to: query.to,
       isFalseAlarm: query.isFalseAlarm,
-      ...(actor && actor.role !== 'ADMIN' ? { actorId: actor.sub } : {}),
+      ...(actor && !isSystemAdmin(actor) ? { actorId: actor.sub } : {}),
     });
 
     const data = await Promise.all(events.map((e) => this.toEventSummary(e)));
@@ -152,10 +153,8 @@ export class EventsService {
 
     if (
       actor &&
-      record.event_type === 'WELLNESS_TIMEOUT' &&
-      actor.role !== 'ADMIN' &&
-      actor.sub !== record.wellness_owner_user_id &&
-      actor.sub !== record.wellness_resident_user_id
+      !isSystemAdmin(actor) &&
+      !(await this.eventsRepository.canViewEvent(actor.sub, eventId))
     )
       throw new ForbiddenException('Bạn không có quyền xem yêu cầu này');
     const [summary, media, statusHistory] = await Promise.all([
@@ -271,7 +270,7 @@ export class EventsService {
   ): Promise<EventStatsResponseDto> {
     const since = new Date(Date.now() - windowHours * MILLISECONDS_PER_HOUR);
     const records =
-      actor && actor.role !== 'ADMIN'
+      actor && !isSystemAdmin(actor)
         ? await this.eventsRepository.getEventStats(since, STATS_GROUP_LIMIT, actor.sub)
         : await this.eventsRepository.getEventStats(since, STATS_GROUP_LIMIT);
     return this.toEventStats(windowHours, records);
@@ -394,18 +393,12 @@ export class EventsService {
     }
 
     return this.eventSubject.asObservable().pipe(
-      filter((item) => actor.role === 'ADMIN' || item.recipients.includes(actor.sub)),
-      concatMap((item) =>
-        item.recipients.includes(actor.sub)
-          ? of(item.message)
-          : defer(async () => {
-              // An open dashboard can outlive a role change.
-              const isAdmin = await this.eventsRepository
-                .isActiveAdmin(actor.sub)
-                .catch(() => false);
-              return isAdmin ? item.message : undefined;
-            }),
-      ),
+      concatMap(async (item) => {
+        const allowed = await this.eventsRepository
+          .canReceiveEvent(actor.sub, item.recipients)
+          .catch(() => false);
+        return allowed ? item.message : undefined;
+      }),
       filter((message): message is MessageEvent => message !== undefined),
     );
   }

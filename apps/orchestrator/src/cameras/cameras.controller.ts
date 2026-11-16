@@ -26,6 +26,7 @@ import {
 } from '@nestjs/swagger';
 import type { AuthenticatedRequest } from '../auth/jwt-auth.guard';
 import { CheckResourceAccess } from '../auth/resource-access.guard';
+import { isSystemAdmin } from '../auth/system-admin';
 import type { UserRole } from '../auth/auth.types';
 import { CamerasService } from './cameras.service';
 import { ListCamerasQueryDto } from './dto/list-cameras-query.dto';
@@ -67,7 +68,7 @@ export class CamerasController {
     return await this.camerasService.listCameras(
       query,
       actor.role,
-      actor.role === 'ADMIN' ? undefined : actor.sub,
+      isSystemAdmin(actor) ? undefined : actor.sub,
     );
   }
 

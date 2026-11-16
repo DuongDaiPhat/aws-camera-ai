@@ -39,7 +39,8 @@ export class CamerasRepository {
     if (filter?.ownerUserId) {
       values.push(filter.ownerUserId);
       conditions.push(
-        `EXISTS (SELECT 1 FROM devices d WHERE d.id = c.device_id AND d.owner_user_id = $${values.length})`,
+        `EXISTS (SELECT 1 FROM devices d WHERE d.id = c.device_id
+                 AND shares_camera_household($${values.length}, d.owner_user_id))`,
       );
     }
 

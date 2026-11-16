@@ -20,9 +20,15 @@ export class UsersService {
     @Inject(AUTH_SETTINGS) private readonly settings: AuthSettings,
   ) {}
 
-  list(page: number, pageSize: number, role?: User['role']): Promise<UsersPage> {
+  list(
+    actorId: string | undefined,
+    page: number,
+    pageSize: number,
+    role?: User['role'],
+  ): Promise<UsersPage> {
+    if (!actorId) throw new UnauthorizedException();
     const issuer = this.settings.provider === 'cognito' ? this.settings.cognito.authority : null;
-    return this.users.list(page, pageSize, role, issuer);
+    return this.users.list(actorId, page, pageSize, role, issuer);
   }
 
   async changeRole(actorId: string | undefined, userId: string, role: User['role']): Promise<User> {
