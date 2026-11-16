@@ -76,9 +76,15 @@ export class KnownFacesRepository {
         );
         if (Number(total.rows[0]?.count) >= 1000)
           throw faceError(409, 'KNOWN_FACE_LIMIT', 'Đã đạt giới hạn 1000 người quen.');
-        // Chưa có household mapping: chỉ cho phép liên kết chính tài khoản đang đăng ký.
-        if (dto.linkedUserId && dto.linkedUserId !== owner)
-          throw faceError(403, 'FORBIDDEN', 'Tài khoản liên kết ngoài phạm vi.');
+        if (dto.linkedUserId && dto.linkedUserId !== owner) {
+          const linked = await client.query<{ allowed: boolean }>(
+            'SELECT shares_camera_household($1, $2) AS allowed',
+            [owner, dto.linkedUserId],
+          );
+          if (!linked.rows[0]?.allowed) {
+            throw faceError(403, 'FORBIDDEN', 'Tài khoản liên kết ngoài phạm vi.');
+          }
+        }
         const result = await client.query<{ id: string }>(
           `INSERT INTO known_faces
           (owner_user_id, person_name, relationship, linked_user_id, embedding, embedding_dim, model_version, source_image_count)

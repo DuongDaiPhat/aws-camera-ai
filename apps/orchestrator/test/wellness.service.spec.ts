@@ -55,6 +55,7 @@ describe('WellnessService (US-20)', () => {
   beforeEach(() => {
     repository = {
       getPoolClient: jest.fn(),
+      canAccessHousehold: jest.fn().mockResolvedValue(false),
       listSchedules: jest.fn(),
       getScheduleById: jest.fn(),
       findConflictingSchedule: jest.fn(),

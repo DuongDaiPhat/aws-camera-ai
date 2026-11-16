@@ -7,6 +7,37 @@ RTSP hoặc WebRTC.
 Webcam → FFmpeg → RTSP → MediaMTX → RTSP/WebRTC client
 ```
 
+## Chọn đúng backend xác thực
+
+MediaMTX phải kiểm tra vé xem và phát webcam tại chính backend đã cấp vé. Nếu mở
+CameraAI trên `https://argusai.dynv6.net` và dùng MediaMTX trên máy Windows này, đặt
+trong `.env` của máy Windows:
+
+```dotenv
+MEDIAMTX_AUTH_HTTP_ADDRESS=https://argusai.dynv6.net/api/v1/mediamtx/authorize
+```
+
+Nếu cả CameraAI và backend đều chạy trong Docker trên máy này, dùng:
+
+```dotenv
+MEDIAMTX_AUTH_HTTP_ADDRESS=http://orchestrator:3001/api/v1/mediamtx/authorize
+```
+
+Áp dụng thay đổi bằng `docker compose up -d --no-deps --build --force-recreate mediamtx`.
+Image MediaMTX của dự án bổ sung bộ chứng chỉ CA để gọi backend qua HTTPS. Nếu log
+có `x509: certificate signed by unknown authority`, cần build lại image này.
+Tải lại trang CameraAI để lấy vé mới. Không nhập tài khoản Cognito vào hộp đăng nhập
+`localhost:8889`; hộp này xuất hiện khi MediaMTX từ chối yêu cầu xem.
+
+Mỗi lần chỉ dùng một chương trình để mở webcam vật lý. Dừng FFmpeg trước khi bấm
+**Bật xem trước Webcam** trong CameraAI; nếu FFmpeg vẫn giữ thiết bị, trình duyệt có
+thể báo `Device in use`. Các lệnh RTSP thủ công bên dưới cần tài khoản nội bộ đã
+cấu hình trong `MEDIAMTX_PUBLISH_USERNAME` và `MEDIAMTX_PUBLISH_PASSWORD` khi bật
+xác thực MediaMTX. Không tắt xác thực để xử lý lỗi đăng nhập.
+
+Địa chỉ kiểm tra vé chỉ giải quyết xác thực. Để xem từ máy khác qua domain, URL
+WebRTC do backend trả về và đường truyền media cũng phải truy cập được từ máy đó.
+
 ## 1. Cài FFmpeg
 
 Mở PowerShell và chạy:

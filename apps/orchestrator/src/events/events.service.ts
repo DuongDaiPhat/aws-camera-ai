@@ -7,7 +7,8 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Subject, Observable, filter, map } from 'rxjs';
+import { Subject, Observable, concatMap, filter } from 'rxjs';
+import { isSystemAdmin } from '../auth/system-admin';
 import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
 import { TOKEN_SERVICE, type TokenService, type TokenClaims } from '../auth/auth.types';
 import { MediaService } from '../media/media.service';
@@ -76,6 +77,14 @@ function hasValidAiResultValue(candidate: Partial<AiResultItem>): boolean {
   return hasValidLabel && hasValidStatus && hasValidConfidence;
 }
 
+export function eventRecipients(record: EventListItemRecord): string[] {
+  const recipients =
+    record.event_type === 'WELLNESS_TIMEOUT'
+      ? [record.wellness_owner_user_id, record.wellness_resident_user_id]
+      : [record.camera_owner_user_id];
+  return recipients.filter((id): id is string => Boolean(id));
+}
+
 function toIsoStringOrNull(value: Date | null): string | null {
   return value ? value.toISOString() : null;
 }
@@ -83,7 +92,7 @@ function toIsoStringOrNull(value: Date | null): string | null {
 @Injectable()
 export class EventsService {
   private readonly logger = new Logger(EventsService.name);
-  private readonly eventSubject = new Subject<{ message: MessageEvent; recipients?: string[] }>();
+  private readonly eventSubject = new Subject<{ message: MessageEvent; recipients: string[] }>();
 
   constructor(
     private readonly eventsRepository: EventsRepository,
@@ -114,7 +123,7 @@ export class EventsService {
       from: query.from,
       to: query.to,
       isFalseAlarm: query.isFalseAlarm,
-      ...(actor ? { wellnessActorId: actor.sub, wellnessAdmin: actor.role === 'ADMIN' } : {}),
+      ...(actor && !isSystemAdmin(actor) ? { actorId: actor.sub } : {}),
     });
 
     const data = await Promise.all(events.map((e) => this.toEventSummary(e)));
@@ -144,10 +153,8 @@ export class EventsService {
 
     if (
       actor &&
-      record.event_type === 'WELLNESS_TIMEOUT' &&
-      actor.role !== 'ADMIN' &&
-      actor.sub !== record.wellness_owner_user_id &&
-      actor.sub !== record.wellness_resident_user_id
+      !isSystemAdmin(actor) &&
+      !(await this.eventsRepository.canViewEvent(actor.sub, eventId))
     )
       throw new ForbiddenException('Bạn không có quyền xem yêu cầu này');
     const [summary, media, statusHistory] = await Promise.all([
@@ -177,15 +184,7 @@ export class EventsService {
     const summary = await this.eventsRepository.findEventSummaryById(eventId);
     if (summary) {
       const summaryDto = await this.toEventSummary(summary);
-      this.emitEvent(
-        summaryDto,
-        'event.updated',
-        summary.event_type === 'WELLNESS_TIMEOUT'
-          ? [summary.wellness_owner_user_id, summary.wellness_resident_user_id].filter(
-              (id): id is string => !!id,
-            )
-          : undefined,
-      );
+      this.emitEvent(summaryDto, 'event.updated', eventRecipients(summary));
     }
 
     return result;
@@ -194,15 +193,7 @@ export class EventsService {
   async publishCommittedUpdate(eventId: string): Promise<void> {
     const summary = await this.eventsRepository.findEventSummaryById(eventId);
     if (summary)
-      this.emitEvent(
-        await this.toEventSummary(summary),
-        'event.updated',
-        summary.event_type === 'WELLNESS_TIMEOUT'
-          ? [summary.wellness_owner_user_id, summary.wellness_resident_user_id].filter(
-              (id): id is string => !!id,
-            )
-          : undefined,
-      );
+      this.emitEvent(await this.toEventSummary(summary), 'event.updated', eventRecipients(summary));
   }
 
   /**
@@ -222,15 +213,7 @@ export class EventsService {
     const summary = await this.eventsRepository.findEventSummaryById(eventId);
     if (summary) {
       const summaryDto = await this.toEventSummary(summary);
-      this.emitEvent(
-        summaryDto,
-        'event.updated',
-        summary.event_type === 'WELLNESS_TIMEOUT'
-          ? [summary.wellness_owner_user_id, summary.wellness_resident_user_id].filter(
-              (id): id is string => !!id,
-            )
-          : undefined,
-      );
+      this.emitEvent(summaryDto, 'event.updated', eventRecipients(summary));
     }
 
     return result;
@@ -287,7 +270,7 @@ export class EventsService {
   ): Promise<EventStatsResponseDto> {
     const since = new Date(Date.now() - windowHours * MILLISECONDS_PER_HOUR);
     const records =
-      actor && actor.role !== 'ADMIN'
+      actor && !isSystemAdmin(actor)
         ? await this.eventsRepository.getEventStats(since, STATS_GROUP_LIMIT, actor.sub)
         : await this.eventsRepository.getEventStats(since, STATS_GROUP_LIMIT);
     return this.toEventStats(windowHours, records);
@@ -378,11 +361,11 @@ export class EventsService {
   emitEvent(
     event: EventSummaryDto,
     eventType: string = 'event.created',
-    recipients?: string[],
+    recipients: string[] = [],
   ): void {
     this.eventSubject.next({
       message: { type: eventType, data: JSON.stringify(event) },
-      recipients: event.eventType === 'WELLNESS_TIMEOUT' ? (recipients ?? []) : undefined,
+      recipients,
     });
   }
 
@@ -410,13 +393,13 @@ export class EventsService {
     }
 
     return this.eventSubject.asObservable().pipe(
-      filter(
-        (item) =>
-          item.recipients === undefined ||
-          actor?.role === 'ADMIN' ||
-          item.recipients.includes(actor?.sub),
-      ),
-      map((item) => item.message),
+      concatMap(async (item) => {
+        const allowed = await this.eventsRepository
+          .canReceiveEvent(actor.sub, item.recipients)
+          .catch(() => false);
+        return allowed ? item.message : undefined;
+      }),
+      filter((message): message is MessageEvent => message !== undefined),
     );
   }
 }

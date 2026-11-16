@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { createHash } from 'node:crypto';
 import type { PoolClient } from 'pg';
 import type { TokenClaims } from '../auth/auth.types';
+import { isSystemAdmin } from '../auth/system-admin';
 import { WellnessRepository } from './wellness.repository';
 import { canonicalJson, wellnessInteger } from './wellness-policy';
 import type {
@@ -31,6 +32,11 @@ export interface WellnessConfirmationSource {
   updateId: string;
   ttlSeconds: number;
 }
+
+function wellnessRole(user: TokenClaims): TokenClaims['role'] {
+  return user.role === 'ADMIN' && !isSystemAdmin(user) ? 'CAREGIVER' : user.role;
+}
+
 @Injectable()
 export class WellnessService {
   constructor(
@@ -41,18 +47,26 @@ export class WellnessService {
     user: TokenClaims,
     residentUserId?: string,
   ): Promise<WellnessScheduleRecord[]> {
-    return this.repository.listSchedules(user.sub, user.role, residentUserId);
+    return this.repository.listSchedules(user.sub, wellnessRole(user), residentUserId);
   }
   async getScheduleById(user: TokenClaims, id: string): Promise<WellnessScheduleRecord> {
     const row = await this.repository.getScheduleById(id);
     if (!row) throw new NotFoundException('Không tìm thấy lịch kiểm tra');
-    this.authorizeSchedule(user, row);
+    await this.authorizeSchedule(user, row);
     return row;
   }
-  private authorizeSchedule(user: TokenClaims, row: WellnessScheduleRecord): void {
+  private async authorizeSchedule(
+    user: TokenClaims,
+    row: WellnessScheduleRecord,
+    client?: PoolClient,
+  ): Promise<void> {
+    const role = wellnessRole(user);
     if (
-      (user.role === 'CAREGIVER' && row.owner_user_id !== user.sub) ||
-      (user.role === 'VIEWER' && row.resident_user_id !== user.sub)
+      (role === 'CAREGIVER' &&
+        row.owner_user_id !== user.sub &&
+        (!row.owner_user_id ||
+          !(await this.repository.canAccessHousehold(user.sub, row.owner_user_id, client)))) ||
+      (role === 'VIEWER' && row.resident_user_id !== user.sub)
     )
       throw new ForbiddenException('Bạn không có quyền xem hoặc sửa lịch này');
   }
@@ -123,7 +137,7 @@ export class WellnessService {
       await client.query('SELECT id FROM wellness_schedules WHERE id=$1 FOR UPDATE', [id]);
       const existing = await this.repository.getScheduleById(id, client);
       if (!existing) throw new NotFoundException('Không tìm thấy lịch kiểm tra');
-      this.authorizeSchedule(user, existing);
+      await this.authorizeSchedule(user, existing, client);
       const owner = existing.owner_user_id ?? user.sub,
         resident = dto.residentUserId ?? existing.resident_user_id;
       await this.validateSchedule(
@@ -155,8 +169,7 @@ export class WellnessService {
   }
   async deleteSchedule(user: TokenClaims, id: string): Promise<void> {
     this.requireManager(user);
-    const row = await this.getScheduleById(user, id);
-    this.authorizeSchedule(user, row);
+    await this.getScheduleById(user, id);
     if (!(await this.repository.deleteSchedule(id)))
       throw new NotFoundException('Không tìm thấy lịch kiểm tra');
   }
@@ -164,7 +177,7 @@ export class WellnessService {
     user: TokenClaims,
     query: ListWellnessChecksQueryDto,
   ): Promise<{ data: WellnessCheckRunRecord[]; total: number }> {
-    return this.repository.listChecks(user.sub, user.role, {
+    return this.repository.listChecks(user.sub, wellnessRole(user), {
       residentUserId: query.residentUserId,
       scheduleId: query.scheduleId,
       page: query.page ?? 1,

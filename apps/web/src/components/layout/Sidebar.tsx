@@ -200,11 +200,13 @@ function SidebarNavLinks({
   onSelectNav,
   unresolvedEventCount,
   onlineCameraCount,
+  isAdmin,
 }: {
   activeNav: string;
   onSelectNav: (nav: string) => void;
   unresolvedEventCount: number;
   onlineCameraCount: number;
+  isAdmin: boolean;
 }) {
   return (
     <nav className={styles.nav}>
@@ -261,6 +263,26 @@ function SidebarNavLinks({
       />
       <div className={styles.navDivider} />
 
+      {isAdmin && (
+        <NavItem
+          label="Quản lý tài khoản"
+          active={activeNav === 'users'}
+          onClick={() => onSelectNav('users')}
+          icon={
+            <svg
+              className={styles.navIcon}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              aria-hidden="true"
+            >
+              <circle cx="10" cy="7" r="3" />
+              <path d="M3 20v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2m3-12v6m-3-3h6" />
+            </svg>
+          }
+        />
+      )}
       <NavItem
         label="Cài đặt"
         active={activeNav === 'settings'}
@@ -288,6 +310,7 @@ export function Sidebar({
           onSelectNav={onSelectNav}
           unresolvedEventCount={unresolvedEventCount}
           onlineCameraCount={onlineCameraCount}
+          isAdmin={user?.role === 'ADMIN'}
         />
       </div>
       <SidebarUserProfile user={user} onLogout={onLogout} />

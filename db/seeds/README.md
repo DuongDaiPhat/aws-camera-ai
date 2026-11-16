@@ -39,6 +39,22 @@ Mật khẩu: Admin@12345
 
 Mật khẩu trên chỉ dùng để demo local và được lưu trong database dưới dạng Argon2id.
 
+## Tài khoản Cognito theo hộ
+
+`pnpm db:migrate` đồng bộ tài khoản, gateway và camera sau khi chạy migration SQL,
+kể cả khi không có migration mới. Đặt tệp cấu hình tại `.env.cognito-households.json`
+ở thư mục gốc hoặc đặt `COGNITO_HOUSEHOLD_SEED_FILE` thành đường dẫn trên máy triển khai.
+Môi trường thiếu cấu hình mặc định sẽ bỏ qua bước đồng bộ.
+
+Tệp gồm `poolId`, `systemAdmin` và mảng `households` có đúng 5 phần tử.
+Mỗi hộ gồm `ownerName`, `slug` và `accounts` chứa ba khóa `ADMIN`, `CAREGIVER`,
+`VIEWER`. Mỗi tài khoản (kể cả `systemAdmin`) có `email` và `sub` đã xác minh.
+Giữ cấu hình tài khoản bên ngoài Git. Dùng cùng tệp trên các môi trường cần đồng bộ.
+
+Chạy lại cập nhật vai trò và liên kết hộ theo cấu hình, giữ ID, trạng thái kích hoạt
+và dữ liệu đang vận hành. Khi email đã liên kết với một danh tính khác hoặc slug
+đã thuộc hộ khác, giao dịch đồng bộ bị hủy để tránh cấp nhầm quyền.
+
 ## Tài khoản kiểm thử US-20
 
 File `0003_test_users.sql` bổ sung hai tài khoản riêng:

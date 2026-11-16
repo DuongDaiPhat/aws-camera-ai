@@ -1,9 +1,11 @@
 import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CheckResourceAccess } from '../auth/resource-access.guard';
 import { MediaService } from './media.service';
 import { ListEventMediaResponseDto } from './dto/event-media-response.dto';
 
 @ApiTags('media')
+@CheckResourceAccess('eventId')
 @Controller('events')
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}

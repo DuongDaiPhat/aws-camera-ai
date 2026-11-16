@@ -24,6 +24,8 @@ export async function logout(): Promise<'redirect' | void> {
     const manager = await getCognitoManager(config);
     try {
       await manager.revokeTokens(['refresh_token']);
+    } catch {
+      // End the managed-login session even when token revocation is unavailable.
     } finally {
       await manager.removeUser();
       setAccessToken(null);

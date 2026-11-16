@@ -204,8 +204,14 @@ export class CamerasService implements CameraConfigPortV1 {
   // Các hàm nghiệp vụ REST API
   // -------------------------------------------------------------------
 
-  async listCameras(query: ListCamerasQueryDto, role: UserRole): Promise<{ data: CameraDto[] }> {
-    const records = await this.camerasRepository.findAll(query);
+  async listCameras(
+    query: ListCamerasQueryDto,
+    role: UserRole,
+    ownerUserId?: string,
+  ): Promise<{ data: CameraDto[] }> {
+    const records = await this.camerasRepository.findAll(
+      ownerUserId ? { ...query, ownerUserId } : query,
+    );
     const reconciledRecords = await Promise.all(
       records.map((record) => this.reconcileRuntimeStatus(record)),
     );

@@ -7,7 +7,6 @@ interface TopHeaderProps {
   userName?: string;
   selectedZone: string;
   onSelectZone: (zone: string) => void;
-  onSimulateNewEvent: () => void;
   pendingCount?: number | null;
 }
 
@@ -72,7 +71,6 @@ export function TopHeader({
   userName = 'Đức Anh',
   selectedZone,
   onSelectZone,
-  onSimulateNewEvent,
   pendingCount = null,
 }: TopHeaderProps) {
   const [timeText, setTimeText] = useState('12:32');
@@ -119,19 +117,6 @@ export function TopHeader({
       </div>
 
       <div className={styles.rightSection}>
-        <button
-          type="button"
-          className={styles.simulateBtn}
-          onClick={onSimulateNewEvent}
-          title="Mô phỏng sự kiện mới thời gian thực (Scenario 2)"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          <span>Thử sự kiện mới</span>
-        </button>
-
         <div className={styles.liveBadge}>
           <span className={styles.pulseDot} aria-hidden="true" />
           <span>Cập nhật trực tiếp</span>

@@ -531,9 +531,10 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     eventsRepository.updateEvent.mockResolvedValueOnce(existingEvent);
     eventMediaRepository.findMediaByEventIdAndType.mockResolvedValueOnce(null);
     mediaService.downloadAndStoreSnapshot.mockResolvedValueOnce(createSnapshotMedia());
-    eventsRepository.findEventSummaryById.mockResolvedValueOnce(
-      summary as unknown as Awaited<ReturnType<EventsRepository['findEventSummaryById']>>,
-    );
+    eventsRepository.findEventSummaryById.mockResolvedValueOnce({
+      ...summary,
+      camera_owner_user_id: 'camera-owner',
+    } as unknown as Awaited<ReturnType<EventsRepository['findEventSummaryById']>>);
     eventsService.toEventSummary.mockResolvedValueOnce(
       summary as unknown as Awaited<ReturnType<EventsService['toEventSummary']>>,
     );
@@ -543,7 +544,9 @@ describe('MqttConsumerService (US-03, US-04)', () => {
       buildSnapshotUpdateMessage('track-late-snapshot'),
     );
 
-    expect(eventsService.emitEvent).toHaveBeenCalledWith(summary, 'event.updated');
+    expect(eventsService.emitEvent).toHaveBeenCalledWith(summary, 'event.updated', [
+      'camera-owner',
+    ]);
   });
 
   it('không phát lại SSE khi snapshot đã được lưu từ trước', async () => {

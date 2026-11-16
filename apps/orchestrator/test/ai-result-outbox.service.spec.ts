@@ -115,7 +115,10 @@ describe('AI result outbox (US-11)', () => {
       .mockResolvedValueOnce(escalationMessage)
       .mockResolvedValueOnce(updateMessage)
       .mockResolvedValue(null);
-    eventsRepository.findEventSummaryById.mockResolvedValue({ id: eventId });
+    eventsRepository.findEventSummaryById.mockResolvedValue({
+      id: eventId,
+      camera_owner_user_id: 'camera-owner',
+    });
     eventsService.toEventSummary.mockResolvedValue({ id: eventId, status: 'NOTIFIED' });
 
     await worker.dispatchAvailable();
@@ -123,6 +126,7 @@ describe('AI result outbox (US-11)', () => {
     expect(eventsService.emitEvent).toHaveBeenCalledWith(
       { id: eventId, status: 'NOTIFIED' },
       'event.updated',
+      ['camera-owner'],
     );
     expect(escalationEngine.evaluateAndTransition.mock.invocationCallOrder[0]).toBeLessThan(
       eventsService.emitEvent.mock.invocationCallOrder[0],

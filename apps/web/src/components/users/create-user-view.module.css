@@ -1,0 +1,79 @@
+.section {
+  display: grid;
+  gap: 12px;
+  max-width: 640px;
+  color: #0f172a;
+}
+
+.section h2,
+.section p {
+  margin: 0;
+}
+
+.section p {
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.form {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.form fieldset {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.form label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.form input,
+.form select {
+  width: 100%;
+  padding: 9px 12px;
+  background: white;
+  border: 1px solid #94a3b8;
+  border-radius: 8px;
+  color: inherit;
+  font: inherit;
+  font-weight: 400;
+}
+
+.form button {
+  justify-self: start;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #1d4ed8;
+  color: white;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.form button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.form .error {
+  color: #b91c1c;
+}
+
+.form .success {
+  color: #166534;
+}

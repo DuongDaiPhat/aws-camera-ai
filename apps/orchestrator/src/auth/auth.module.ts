@@ -3,6 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { Argon2PasswordHasher } from './argon2-password-hasher';
 import { AuthController } from './auth.controller';
+import { UsersController } from './users.controller';
+import { UsersRepository } from './users.repository';
+import { UsersService } from './users.service';
 import { PostgresAuthRepository } from './auth.repository';
 import { AuthService } from './auth.service';
 import {
@@ -19,14 +22,17 @@ import {
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { JwtTokenService } from './jwt-token.service';
 import { RolesGuard } from './roles.guard';
+import { ResourceAccessGuard } from './resource-access.guard';
 import { AUTH_SETTINGS, readAuthSettings, type AuthSettings } from './auth.config';
 import { CognitoTokenService } from './cognito-token.service';
 import { CognitoVerifierService } from './cognito-verifier.service';
 import { DatabaseService } from '../database/database.service';
 
 @Module({
-  controllers: [AuthController],
+  controllers: [AuthController, UsersController],
   providers: [
+    UsersRepository,
+    UsersService,
     AuthService,
     PostgresAuthRepository,
     Argon2PasswordHasher,
@@ -75,6 +81,7 @@ import { DatabaseService } from '../database/database.service';
     },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: ResourceAccessGuard },
   ],
   exports: [AuthService, TOKEN_SERVICE],
 })

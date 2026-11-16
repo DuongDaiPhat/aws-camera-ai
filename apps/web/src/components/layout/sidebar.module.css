@@ -237,3 +237,47 @@
   width: 16px;
   height: 16px;
 }
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: static;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding: 12px 16px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .brand {
+    padding: 0 0 12px;
+  }
+
+  .nav,
+  .navGroup {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .navGroup {
+    grid-column: 1 / -1;
+  }
+
+  .navItem {
+    min-height: 40px;
+    padding: 7px 8px;
+  }
+
+  .navItemContent {
+    gap: 7px;
+  }
+
+  .navDivider {
+    display: none;
+  }
+
+  .userFooter {
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+}
