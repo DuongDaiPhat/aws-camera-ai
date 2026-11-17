@@ -1,6 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { IStorageService, PresignedUrlResult, UploadResult } from './storage.interface';
 
@@ -58,5 +63,9 @@ export class S3StorageService implements IStorageService {
       url,
       expiresAt,
     };
+  }
+
+  async delete(key: string): Promise<void> {
+    await this.s3Client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
   }
 }

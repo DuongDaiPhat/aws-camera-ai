@@ -45,14 +45,6 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
       - name: Deploy and wait for SSM result
         run: bash tools/cd/request-deploy.sh
-      - name: Check HTTPS and release version
-        run: |
-          set -euo pipefail
-          curl --fail --silent --show-error --retry 6 --retry-all-errors --retry-delay 5 \
-            "$APP_URL/api/v1/health" | jq -e --arg release "$RELEASE_ID" '.status == "ok" and .version == $release'
-          curl --fail --silent --show-error "$APP_URL/login" > /dev/null
-          curl --fail --silent --show-error "$APP_URL/api/v1/auth/config" | \
-            jq -e '.provider == "jwt" or .provider == "cognito"'
       - name: Update face Lambda and alias
         if: env.FACE_FUNCTION_NAME != ''
         run: |
@@ -81,6 +73,13 @@ jobs:
           verified_version=$(aws lambda get-alias --function-name "$FACE_FUNCTION_NAME" --name "$alias_name" --query FunctionVersion --output text)
           test "$verified_version" = "$version"
           printf 'Face Lambda: `%s:%s` -> version `%s` (previous: `%s`)\n' "$FACE_FUNCTION_NAME" "$alias_name" "$version" "$prev_version" >> "$GITHUB_STEP_SUMMARY"
+      - name: Run environment smoke tests (API, DB, Auth, S3/Lambda)
+        env:
+          SMOKE_INTERNAL_TOKEN: ${{ secrets.SMOKE_INTERNAL_TOKEN }}
+          SMOKE_REFRESH_TOKEN: ${{ secrets.SMOKE_REFRESH_TOKEN }}
+          SMOKE_TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
+          SMOKE_TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD }}
+        run: bash tools/cd/smoke.sh
       - name: Write release summary
         run: |
           printf 'Release: `%s`\n\nURL: %s\n' "$RELEASE_ID" "$APP_URL" >> "$GITHUB_STEP_SUMMARY"

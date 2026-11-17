@@ -1015,6 +1015,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/internal/smoke': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Kiem tra san sang API, DB, Auth, Storage va Cloud Queue tren moi truong deploy
+     * @description Read-only/safe smoke diagnostic protected by the internal service token. Verifies Postgres connectivity/schema, Auth provider configuration (and Cognito JWKS reachability), S3/MinIO upload-download-presign-delete, and SQS queue visibility when enabled.
+     */
+    get: operations['getSmokeStatus'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/internal/fire/health': {
     parameters: {
       query?: never;
@@ -1256,6 +1276,26 @@ export interface components {
       uptimeSeconds?: number;
       /** Format: date-time */
       timestamp?: string;
+    };
+    SmokeCheckResult: {
+      /** @enum {string} */
+      status: 'ok' | 'error';
+      detail?: string;
+      reason?: string;
+    };
+    SmokeStatus: {
+      /** @enum {string} */
+      status: 'ok' | 'degraded';
+      service: string;
+      version: string;
+      /** Format: date-time */
+      timestamp: string;
+      checks: {
+        database: components['schemas']['SmokeCheckResult'];
+        auth: components['schemas']['SmokeCheckResult'];
+        storage: components['schemas']['SmokeCheckResult'];
+        cloudQueue: components['schemas']['SmokeCheckResult'];
+      };
     };
     AuthConfig:
       | {
@@ -4534,6 +4574,36 @@ export interface operations {
         content?: never;
       };
       404: components['responses']['NotFound'];
+    };
+  };
+  getSmokeStatus: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Tat ca thanh phan bat buoc hoat dong binh thuong */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SmokeStatus'];
+        };
+      };
+      401: components['responses']['Unauthorized'];
+      /** @description Mot hoac nhieu thanh phan phu thuoc gap loi */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SmokeStatus'];
+        };
+      };
     };
   };
   getFireHealth: {
