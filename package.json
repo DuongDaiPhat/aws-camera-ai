@@ -9,6 +9,7 @@
     "pnpm": ">=9.0.0"
   },
   "scripts": {
+    "argus": "node tools/argus/cli.mjs",
     "dev": "docker compose up -d && pnpm -r --parallel dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
