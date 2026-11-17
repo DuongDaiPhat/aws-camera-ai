@@ -17,6 +17,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { seedCognitoHouseholds } from './seed-cognito-households.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const MIGRATIONS_DIR = join(ROOT, 'db', 'migrations');
@@ -70,6 +71,7 @@ async function up(client) {
   }
 
   console.log(soFileMoi === 0 ? 'Khong co migration moi.' : `Da chay ${soFileMoi} migration.`);
+  await seedCognitoHouseholds(client, ROOT);
 }
 
 async function status(client) {
@@ -79,7 +81,9 @@ async function status(client) {
 
   for (const file of await layDanhSachFile()) {
     const thoiDiem = daChay.get(file);
-    console.log(`${thoiDiem ? '[x]' : '[ ]'} ${file}${thoiDiem ? `  (${thoiDiem.toISOString()})` : ''}`);
+    console.log(
+      `${thoiDiem ? '[x]' : '[ ]'} ${file}${thoiDiem ? `  (${thoiDiem.toISOString()})` : ''}`,
+    );
   }
 }
 

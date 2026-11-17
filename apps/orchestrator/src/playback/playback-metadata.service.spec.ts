@@ -46,7 +46,7 @@ describe('Incident geometry in recordings', () => {
     );
     await expect(
       service.interval(
-        { sub: 'viewer', role: 'VIEWER' },
+        { sub: 'viewer', role: 'VIEWER', email: 'viewer@example.test' },
         'camera',
         at.toISOString(),
         new Date(at.getTime() + 10000).toISOString(),

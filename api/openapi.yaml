@@ -176,6 +176,22 @@ paths:
   # ===================================================================
   # AUTH — US-05, US-25
   # ===================================================================
+  /auth/config:
+    get:
+      tags: [auth]
+      summary: Cau hinh dang nhap cong khai tai thoi diem chay
+      operationId: getAuthConfig
+      security: []
+      responses:
+        "200":
+          description: Chi chua provider va cau hinh Cognito cong khai, khong chua secret
+          headers:
+            Cache-Control:
+              schema: { type: string, example: no-store }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthConfig" }
+
   /auth/login:
     post:
       tags: [auth]
@@ -197,6 +213,11 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/AuthTokens" }
         "400": { $ref: "#/components/responses/BadRequest" }
+        "409":
+          description: Login local khong hoat dong khi AUTH_PROVIDER=cognito
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
         "401":
           description: Sai email hoac mat khau
           content:
@@ -232,6 +253,12 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/AuthTokens" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+
+        "409":
+          description: Refresh local khong hoat dong khi AUTH_PROVIDER=cognito
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
 
   /auth/logout:
     post:
@@ -284,7 +311,7 @@ paths:
     get:
       tags: [users]
       summary: Danh sach nguoi dung
-      description: Chi ADMIN goi duoc (FR-AUT-05).
+      description: Quan tri he thong xem tat ca tai khoan. Quan tri ho chi xem tai khoan trong ho (FR-AUT-05).
       operationId: listUsers
       parameters:
         - $ref: "#/components/parameters/Page"
@@ -298,17 +325,20 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/PaginatedResponse"
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items: { $ref: "#/components/schemas/User" }
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/User" }
+                  meta: { $ref: "#/components/schemas/PaginatedResponse/properties/meta" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
     post:
       tags: [users]
-      summary: Tao nguoi dung moi
+      summary: Tao tai khoan ung dung tu nguoi dung Cognito
+      description: Chi ADMIN duoc tao. Tai khoan do quan tri ho tao thuoc cung ho. Danh tinh phai ton tai trong User Pool dang cau hinh.
       operationId: createUser
       requestBody:
         required: true
@@ -322,6 +352,8 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/User" }
         "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "409": { $ref: "#/components/responses/Conflict" }
 
   /users/{userId}:
@@ -361,6 +393,36 @@ paths:
       responses:
         "204": { description: Da vo hieu hoa }
         "404": { $ref: "#/components/responses/NotFound" }
+
+  /users/{userId}/role:
+    parameters:
+      - $ref: "#/components/parameters/UserId"
+    patch:
+      tags: [users]
+      summary: Doi vai tro CameraAI cua nguoi dung
+      description: Chi ADMIN trong che do Cognito duoc doi vai tro. Quan tri ho chi duoc doi vai tro cua tai khoan khac trong ho.
+      operationId: changeUserRole
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [role]
+              properties:
+                role: { $ref: "#/components/schemas/UserRole" }
+      responses:
+        "200":
+          description: Vai tro da duoc luu
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
 
   # ===================================================================
   # DEVICES
@@ -449,6 +511,7 @@ paths:
     get:
       tags: [cameras]
       summary: Danh sach camera
+      description: Quan tri he thong xem tat ca. Thanh vien cua ho chi xem camera thuoc ho cua minh.
       operationId: listCameras
       parameters:
         - name: deviceId
@@ -503,6 +566,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Camera" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
     patch:
       tags: [cameras]
@@ -542,6 +606,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/CameraPreview" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
         "503":
           description: Camera dang offline, khong lay duoc frame
@@ -585,6 +650,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/CameraRuntimeStatusResponse" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /cameras/{cameraId}/source:
@@ -600,6 +666,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/CameraSourceDetail" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
     put:
       tags: [cameras]
@@ -766,6 +833,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/CameraDebugStream" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   # ===================================================================
@@ -790,6 +858,7 @@ paths:
                     type: array
                     items: { $ref: "#/components/schemas/Zone" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
     post:
       tags: [zones]
@@ -1099,6 +1168,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/EventDetail" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
     patch:
       tags: [events]
@@ -1206,6 +1276,7 @@ paths:
                   data:
                     type: array
                     items: { $ref: "#/components/schemas/EventMedia" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /events/{eventId}/history:
@@ -1622,6 +1693,27 @@ paths:
   # ===================================================================
   # INTERNAL — AI service callback & webhook
   # ===================================================================
+  /internal/smoke:
+    get:
+      tags: [internal]
+      summary: Kiem tra san sang API, DB, Auth, Storage va Cloud Queue tren moi truong deploy
+      description: Read-only/safe smoke diagnostic protected by the internal service token. Verifies Postgres connectivity/schema, Auth provider configuration (and Cognito JWKS reachability), S3/MinIO upload-download-presign-delete, and SQS queue visibility when enabled.
+      operationId: getSmokeStatus
+      security:
+        - internalToken: []
+      responses:
+        "200":
+          description: Tat ca thanh phan bat buoc hoat dong binh thuong
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SmokeStatus" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "503":
+          description: Mot hoac nhieu thanh phan phu thuoc gap loi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SmokeStatus" }
+
   /internal/fire/health:
     get:
       tags: [internal]
@@ -1835,7 +1927,83 @@ paths:
         "404":
           description: Khong tim thay notification khop voi contactId
 
-# =====================================================================
+  # =====================================================================
+  /internal/cloud/face-jobs/{jobId}:
+    parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [internal]
+      summary: Read an authorized durable SQS face job and active owner mappings
+      operationId: getCloudFaceJobContext
+      security:
+        - internalToken: []
+      responses:
+        "200":
+          description: Current job, durable cached result and active owner mappings
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [envelope, cached_result, mappings]
+                properties:
+                  envelope:
+                    type: object
+                    description: Canonical face.job envelope in aws/sprint4/contracts/queue-v1.schema.json
+                    additionalProperties: true
+                  cached_result:
+                    anyOf:
+                      - $ref: "#/components/schemas/CloudFaceResultEnvelope"
+                      - type: "null"
+                  mappings:
+                    type: object
+                    description: Rekognition FaceId to active application knownFaceId for this owner
+                    additionalProperties:
+                      type: string
+                      format: uuid
+        "401":
+          description: Invalid internal service token
+        "404":
+          description: Job missing, ownership changed or collection version stale
+  /internal/cloud/face-jobs/{jobId}/result:
+    parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags: [internal]
+      summary: Persist the first complete face result before publishing to Results SQS
+      description: Concurrent writes return the first persisted result, including its unchanged processedAt.
+      operationId: cacheCloudFaceJobResult
+      security:
+        - internalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CloudFaceResultEnvelope"
+      responses:
+        "200":
+          description: Durable result to publish unchanged to the shared Results queue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudFaceResultEnvelope"
+        "400":
+          description: Invalid queue contract or job identity
+        "401":
+          description: Invalid internal service token
+        "404":
+          description: Job missing or stale
+
 components:
   securitySchemes:
     bearerAuth:
@@ -2114,7 +2282,51 @@ components:
         uptimeSeconds: { type: integer }
         timestamp: { type: string, format: date-time }
 
+    SmokeCheckResult:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [ok, error] }
+        detail: { type: string }
+        reason: { type: string }
+
+    SmokeStatus:
+      type: object
+      required: [status, service, version, timestamp, checks]
+      properties:
+        status: { type: string, enum: [ok, degraded] }
+        service: { type: string }
+        version: { type: string }
+        timestamp: { type: string, format: date-time }
+        checks:
+          type: object
+          required: [database, auth, storage, cloudQueue]
+          properties:
+            database: { $ref: "#/components/schemas/SmokeCheckResult" }
+            auth: { $ref: "#/components/schemas/SmokeCheckResult" }
+            storage: { $ref: "#/components/schemas/SmokeCheckResult" }
+            cloudQueue: { $ref: "#/components/schemas/SmokeCheckResult" }
+
     # ---------------- Auth ----------------
+    AuthConfig:
+      oneOf:
+        - type: object
+          required: [provider]
+          properties:
+            provider: { type: string, enum: [jwt] }
+        - type: object
+          required: [provider, cognito]
+          properties:
+            provider: { type: string, enum: [cognito] }
+            cognito:
+              type: object
+              required: [authority, clientId, domain, scope]
+              properties:
+                authority: { type: string, format: uri }
+                clientId: { type: string }
+                domain: { type: string, format: uri }
+                scope: { type: string }
+
     LoginRequest:
       type: object
       required: [email, password]
@@ -2145,19 +2357,23 @@ components:
         phoneE164: { type: ["string", "null"], pattern: '^\+[1-9][0-9]{7,14}$' }
         telegramChatId: { type: ["string", "null"] }
         isActive: { type: boolean }
+        isCognitoLinked: { type: boolean, description: Da lien ket voi User Pool dang cau hinh }
+        cognitoEmail:
+          type: ["string", "null"]
+          format: email
+          description: Email dang nhap Cognito da luu khi lien ket, chi co trong danh sach cua ADMIN.
         lastLoginAt: { type: ["string", "null"], format: date-time }
         createdAt: { type: string, format: date-time }
 
     CreateUserRequest:
       type: object
-      required: [email, fullName, role]
+      additionalProperties: false
+      required: [email, fullName, role, cognitoSub]
       properties:
-        email: { type: string, format: email }
-        password: { type: string, minLength: 8 }
-        fullName: { type: string, maxLength: 120 }
+        email: { type: string, format: email, maxLength: 254, description: Email dang nhap Cognito }
+        fullName: { type: string, minLength: 1, maxLength: 120 }
         role: { $ref: "#/components/schemas/UserRole" }
-        phoneE164: { type: string }
-        telegramChatId: { type: string }
+        cognitoSub: { type: string, minLength: 1, maxLength: 128, pattern: '^\S+$' }
 
     UpdateUserRequest:
       type: object
@@ -4043,3 +4259,40 @@ components:
                     type: number
                     minimum: 0
                     maximum: 1
+
+    CloudFaceResultEnvelope:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, type, messageId, correlationId, occurredAt, payload]
+      properties:
+        schemaVersion:
+          type: integer
+          enum: [1]
+        type:
+          type: string
+          enum: [face.result]
+        messageId:
+          type: string
+          format: uuid
+        correlationId:
+          type: string
+          format: uuid
+        occurredAt:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          additionalProperties: false
+          required: [jobId, ownerScopeId, cameraId, body]
+          properties:
+            jobId:
+              type: string
+              format: uuid
+            ownerScopeId:
+              type: string
+              format: uuid
+            cameraId:
+              type: string
+              format: uuid
+            body:
+              $ref: "#/components/schemas/FaceResultSubmission"

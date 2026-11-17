@@ -126,7 +126,7 @@ describe('CamerasController (Slice CAM)', () => {
 
     const result = await controller.listCameras({}, adminReq);
 
-    expect(service.listCameras).toHaveBeenCalledWith({}, 'ADMIN');
+    expect(service.listCameras).toHaveBeenCalledWith({}, 'ADMIN', undefined);
     expect(result.data).toHaveLength(1);
     expect(result.data[0].id).toBe(mockCameraDto.id);
   });

@@ -24,6 +24,7 @@ import { Public } from '../auth/public.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import type { AuthenticatedRequest } from '../auth/jwt-auth.guard';
+import { CheckResourceAccess } from '../auth/resource-access.guard';
 import { EventsService } from './events.service';
 import { ListEventsQueryDto } from './dto/list-events-query.dto';
 import { GetEventStatsQueryDto } from './dto/get-event-stats-query.dto';
@@ -35,6 +36,7 @@ import { ConfirmationResponseDto } from './dto/confirmation-response.dto';
 
 @ApiTags('events')
 @ApiBearerAuth('bearer')
+@CheckResourceAccess('eventId')
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
@@ -81,7 +83,7 @@ export class EventsController {
   })
   @ApiResponse({ status: 200, description: 'Luồng SSE' })
   @ApiResponse({ status: 401, description: 'Token không hợp lệ hoặc thiếu' })
-  streamEvents(@Query('token') token?: string): Observable<MessageEvent> {
+  streamEvents(@Query('token') token?: string): Promise<Observable<MessageEvent>> {
     return this.eventsService.streamEvents(token);
   }
 

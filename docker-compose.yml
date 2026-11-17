@@ -117,11 +117,14 @@ services:
   # 4. mediamtx - gia lap camera RTSP tu webcam / file mp4 (task 0.6)
   # ------------------------------------------------------------------
   mediamtx:
-    image: bluenviron/mediamtx:latest
+    build:
+      context: ./infra/mediamtx
+    image: camerai-mediamtx
     container_name: camerai-mediamtx
     restart: unless-stopped
     environment:
       MTX_WEBRTCADDITIONALHOSTS: ${MEDIAMTX_WEBRTC_ADDITIONAL_HOSTS:-localhost}
+      MTX_AUTHHTTPADDRESS: ${MEDIAMTX_AUTH_HTTP_ADDRESS:-http://orchestrator:3001/api/v1/mediamtx/authorize}
     ports:
       - "${PORT_RTSP:-8554}:8554"
       - "${PORT_WEBRTC_HTTP:-8889}:8889"
@@ -279,6 +282,14 @@ services:
     env_file: .env
     environment:
       PORT: 3001
+      FACE_JOB_TRANSPORT: ${FACE_JOB_TRANSPORT:-bullmq}
+      AWS_REGION: ${AWS_REGION:-ap-southeast-1}
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-minio}
+      S3_BUCKET: ${S3_BUCKET:-}
+      FACE_JOBS_QUEUE_URL: ${FACE_JOBS_QUEUE_URL:-}
+      NOTIFICATION_JOBS_QUEUE_URL: ${NOTIFICATION_JOBS_QUEUE_URL:-}
+      APPLICATION_RESULTS_QUEUE_URL: ${APPLICATION_RESULTS_QUEUE_URL:-}
+      APPLICATION_RESULTS_CONSUMER_ENABLED: ${APPLICATION_RESULTS_CONSUMER_ENABLED:-false}
       FIRE_HEALTH_STALE_SECONDS: ${FIRE_HEALTH_STALE_SECONDS:-5}
       FIRE_HEALTH_TIMEOUT_MS: ${FIRE_HEALTH_TIMEOUT_MS:-1000}
       FRIGATE_URL: ${FRIGATE_URL:-http://frigate:5000}
@@ -291,6 +302,9 @@ services:
       M2A_ENABLED: ${M2A_ENABLED:-false}
       FALL_IMMOBILITY_SECONDS: ${FALL_IMMOBILITY_SECONDS:-3}
       POSE_MAX_STALE_FRAME_SECONDS: ${POSE_MAX_STALE_FRAME_SECONDS:-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
     ports:
       - "${PORT_ORCHESTRATOR:-3001}:3001"
     volumes:

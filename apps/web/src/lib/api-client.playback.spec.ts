@@ -1,4 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+vi.mock('./auth-config', () => ({ getAuthConfig: vi.fn(async () => ({ provider: 'jwt' })) }));
+vi.mock('./cognito-session', () => ({ refreshCognitoToken: vi.fn() }));
+vi.mock('./auth-config', () => ({ getAuthConfig: vi.fn(async () => ({ provider: 'jwt' })) }));
+vi.mock('./cognito-session', () => ({ refreshCognitoToken: vi.fn() }));
 import { apiFetchBlob, setAccessToken } from './api-client';
 describe('Authenticated video client', () => {
   afterEach(() => {

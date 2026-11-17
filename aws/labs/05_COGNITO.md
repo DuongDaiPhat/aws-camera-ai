@@ -14,6 +14,10 @@ Qua lab 00, frontend/API local chạy được. A/B học song song luồng face
 
 ## B. Nối vào dashboard và NestJS
 
+Để chuyển đổi provider và rollback bằng cấu hình, xem
+[hướng dẫn JWT local / Cognito](../../docs/architecture/AUTH_PROVIDERS.md).
+Không thay guard thủ công hoặc xóa cấu hình JWT khi cần giữ đường rollback.
+
 1. A tạo login/callback/logout bằng thư viện OIDC được nhóm chọn và khóa version qua PR; flow **Authorization Code + PKCE S256**. Client tạo state/nonce/verifier, kiểm tra callback state, đổi code lấy token. Không ghép thủ công access token vào URL.
 2. B thêm verifier Cognito vào guard/adapter auth hiện có. Có thể dùng `aws-jwt-verify` theo [hướng dẫn AWS](https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-verifying-a-jwt.html); dependency phải được review trước khi thêm, không coi package đã có.
 3. Guard kiểm tra signature/JWKS, issuer, expiry, token_use access, client ID và scope mong đợi; audience nếu app dùng resource binding. Cache JWKS; không gọi Cognito cho mỗi API request.

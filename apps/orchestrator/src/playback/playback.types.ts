@@ -1,6 +1,6 @@
 import type { components } from '@cam/contracts';
 import type { TokenClaims } from '../auth/auth.types';
-export type PlaybackActor = Pick<TokenClaims, 'sub' | 'role'>;
+export type PlaybackActor = Pick<TokenClaims, 'sub' | 'role' | 'email'>;
 export type PlaybackCamera = components['schemas']['PlaybackCamera'];
 export type RecordingDay = components['schemas']['RecordingDay'];
 export type RecordingSegment = components['schemas']['RecordingSegment'];

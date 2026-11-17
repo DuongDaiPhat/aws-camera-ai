@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import type { AuthenticatedRequest } from './jwt-auth.guard';
 import { ROLES_KEY } from './roles.decorator';
 import type { UserRole } from './auth.types';
+import { isSystemAdmin, SYSTEM_ADMIN_REQUIRED } from './system-admin';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -14,14 +15,21 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    if (!requiredRoles || requiredRoles.length === 0) {
+    const systemAdminRequired = this.reflector.getAllAndOverride<boolean>(SYSTEM_ADMIN_REQUIRED, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (!systemAdminRequired && !requiredRoles?.length) {
       return true;
     }
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const userRole = request.auth?.role;
 
-    if (!userRole || !requiredRoles.includes(userRole)) {
+    if (
+      (systemAdminRequired && !isSystemAdmin(request.auth)) ||
+      (requiredRoles?.length && (!userRole || !requiredRoles.includes(userRole)))
+    ) {
       throw new ForbiddenException({
         error: {
           code: 'FORBIDDEN',

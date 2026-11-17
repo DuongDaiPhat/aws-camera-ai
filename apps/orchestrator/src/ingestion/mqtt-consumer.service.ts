@@ -16,7 +16,7 @@ import {
   EventsRepository,
   ZoneRecord,
 } from '../events/events.repository';
-import { EventsService } from '../events/events.service';
+import { eventRecipients, EventsService } from '../events/events.service';
 import { EventMediaRepository } from '../media/event-media.repository';
 import { MediaService } from '../media/media.service';
 import { FrigateEventAfterDto, FrigateEventMessageDto } from './dto/frigate-event.dto';
@@ -411,7 +411,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
         return;
       }
       const summary = await this.eventsService.toEventSummary(summaryRecord);
-      this.eventsService.emitEvent(summary, sseEventType);
+      this.eventsService.emitEvent(summary, sseEventType, eventRecipients(summaryRecord));
     } catch (error) {
       this.logger.error(
         { eventId, sseEventType, err: error instanceof Error ? error.message : String(error) },
@@ -439,6 +439,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       if (isCreated) {
         await this.emitEventToStream(event.id, 'event.created');
         if (
+          this.configService.get<string>('FACE_JOB_TRANSPORT', 'bullmq') === 'bullmq' &&
           this.faceQueue &&
           (event.event_type === 'PERSON_DETECTED' || event.event_type === 'RESTRICTED_ZONE')
         ) {

@@ -89,6 +89,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/auth/config': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Cau hinh dang nhap cong khai tai thoi diem chay */
+    get: operations['getAuthConfig'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/auth/login': {
     parameters: {
       query?: never;
@@ -195,11 +212,14 @@ export interface paths {
     };
     /**
      * Danh sach nguoi dung
-     * @description Chi ADMIN goi duoc (FR-AUT-05).
+     * @description Quan tri he thong xem tat ca tai khoan. Quan tri ho chi xem tai khoan trong ho (FR-AUT-05).
      */
     get: operations['listUsers'];
     put?: never;
-    /** Tao nguoi dung moi */
+    /**
+     * Tao tai khoan ung dung tu nguoi dung Cognito
+     * @description Chi ADMIN duoc tao. Tai khoan do quan tri ho tao thuoc cung ho. Danh tinh phai ton tai trong User Pool dang cau hinh.
+     */
     post: operations['createUser'];
     delete?: never;
     options?: never;
@@ -226,6 +246,28 @@ export interface paths {
     head?: never;
     /** Cap nhat nguoi dung */
     patch: operations['updateUser'];
+    trace?: never;
+  };
+  '/users/{userId}/role': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        userId: components['parameters']['UserId'];
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Doi vai tro CameraAI cua nguoi dung
+     * @description Chi ADMIN trong che do Cognito duoc doi vai tro. Quan tri ho chi duoc doi vai tro cua tai khoan khac trong ho.
+     */
+    patch: operations['changeUserRole'];
     trace?: never;
   };
   '/devices': {
@@ -274,7 +316,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Danh sach camera */
+    /**
+     * Danh sach camera
+     * @description Quan tri he thong xem tat ca. Thanh vien cua ho chi xem camera thuoc ho cua minh.
+     */
     get: operations['listCameras'];
     put?: never;
     /**
@@ -1038,6 +1083,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/internal/smoke': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Kiem tra san sang API, DB, Auth, Storage va Cloud Queue tren moi truong deploy
+     * @description Read-only/safe smoke diagnostic protected by the internal service token. Verifies Postgres connectivity/schema, Auth provider configuration (and Cognito JWKS reachability), S3/MinIO upload-download-presign-delete, and SQS queue visibility when enabled.
+     */
+    get: operations['getSmokeStatus'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/internal/fire/health': {
     parameters: {
       query?: never;
@@ -1137,6 +1202,47 @@ export interface paths {
      * @description US-27 — nguoi nghe bam phim 1 de xac nhan da tiep nhan.
      */
     post: operations['connectWebhook'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/internal/cloud/face-jobs/{jobId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    /** Read an authorized durable SQS face job and active owner mappings */
+    get: operations['getCloudFaceJobContext'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/internal/cloud/face-jobs/{jobId}/result': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Persist the first complete face result before publishing to Results SQS
+     * @description Concurrent writes return the first persisted result, including its unchanged processedAt.
+     */
+    put: operations['cacheCloudFaceJobResult'];
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -1298,6 +1404,43 @@ export interface components {
       /** Format: date-time */
       timestamp?: string;
     };
+    SmokeCheckResult: {
+      /** @enum {string} */
+      status: 'ok' | 'error';
+      detail?: string;
+      reason?: string;
+    };
+    SmokeStatus: {
+      /** @enum {string} */
+      status: 'ok' | 'degraded';
+      service: string;
+      version: string;
+      /** Format: date-time */
+      timestamp: string;
+      checks: {
+        database: components['schemas']['SmokeCheckResult'];
+        auth: components['schemas']['SmokeCheckResult'];
+        storage: components['schemas']['SmokeCheckResult'];
+        cloudQueue: components['schemas']['SmokeCheckResult'];
+      };
+    };
+    AuthConfig:
+      | {
+          /** @enum {string} */
+          provider: 'jwt';
+        }
+      | {
+          /** @enum {string} */
+          provider: 'cognito';
+          cognito: {
+            /** Format: uri */
+            authority: string;
+            clientId: string;
+            /** Format: uri */
+            domain: string;
+            scope: string;
+          };
+        };
     LoginRequest: {
       /** Format: email */
       email: string;
@@ -1321,19 +1464,27 @@ export interface components {
       phoneE164?: string | null;
       telegramChatId?: string | null;
       isActive: boolean;
+      /** @description Da lien ket voi User Pool dang cau hinh */
+      isCognitoLinked?: boolean;
+      /**
+       * Format: email
+       * @description Email dang nhap Cognito da luu khi lien ket, chi co trong danh sach cua ADMIN.
+       */
+      cognitoEmail?: string | null;
       /** Format: date-time */
       lastLoginAt?: string | null;
       /** Format: date-time */
       createdAt: string;
     };
     CreateUserRequest: {
-      /** Format: email */
+      /**
+       * Format: email
+       * @description Email dang nhap Cognito
+       */
       email: string;
-      password?: string;
       fullName: string;
       role: components['schemas']['UserRole'];
-      phoneE164?: string;
-      telegramChatId?: string;
+      cognitoSub: string;
     };
     UpdateUserRequest: {
       fullName?: string;
@@ -2496,6 +2647,27 @@ export interface components {
         };
       }[];
     };
+    CloudFaceResultEnvelope: {
+      /** @enum {integer} */
+      schemaVersion: 1;
+      /** @enum {string} */
+      type: 'face.result';
+      /** Format: uuid */
+      messageId: string;
+      /** Format: uuid */
+      correlationId: string;
+      /** Format: date-time */
+      occurredAt: string;
+      payload: {
+        /** Format: uuid */
+        jobId: string;
+        /** Format: uuid */
+        ownerScopeId: string;
+        /** Format: uuid */
+        cameraId: string;
+        body: components['schemas']['FaceResultSubmission'];
+      };
+    };
     FireRuntimeHealth: {
       /** @enum {string} */
       status: 'DISABLED' | 'STARTING' | 'READY' | 'DEGRADED';
@@ -2745,6 +2917,27 @@ export interface operations {
       };
     };
   };
+  getAuthConfig: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Chi chua provider va cau hinh Cognito cong khai, khong chua secret */
+      200: {
+        headers: {
+          'Cache-Control'?: string;
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AuthConfig'];
+        };
+      };
+    };
+  };
   login: {
     parameters: {
       query?: never;
@@ -2770,6 +2963,15 @@ export interface operations {
       400: components['responses']['BadRequest'];
       /** @description Sai email hoac mat khau */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Login local khong hoat dong khi AUTH_PROVIDER=cognito */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -2813,6 +3015,15 @@ export interface operations {
         };
       };
       401: components['responses']['Unauthorized'];
+      /** @description Refresh local khong hoat dong khi AUTH_PROVIDER=cognito */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
     };
   };
   logout: {
@@ -2906,11 +3117,14 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['PaginatedResponse'] & {
-            data?: components['schemas']['User'][];
+          'application/json': {
+            data: components['schemas']['User'][];
+            meta: components['schemas']['PaginatedResponse']['meta'];
           };
         };
       };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
       403: components['responses']['Forbidden'];
     };
   };
@@ -2937,6 +3151,8 @@ export interface operations {
         };
       };
       400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
       409: components['responses']['Conflict'];
     };
   };
@@ -3009,6 +3225,39 @@ export interface operations {
         };
       };
       404: components['responses']['NotFound'];
+    };
+  };
+  changeUserRole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        userId: components['parameters']['UserId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          role: components['schemas']['UserRole'];
+        };
+      };
+    };
+    responses: {
+      /** @description Vai tro da duoc luu */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['User'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
+      404: components['responses']['NotFound'];
+      409: components['responses']['Conflict'];
     };
   };
   listDevices: {
@@ -3205,6 +3454,7 @@ export interface operations {
           'application/json': components['schemas']['Camera'];
         };
       };
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };
@@ -3276,6 +3526,7 @@ export interface operations {
           'application/json': components['schemas']['CameraPreview'];
         };
       };
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
       /** @description Camera dang offline, khong lay duoc frame */
       503: {
@@ -3338,6 +3589,7 @@ export interface operations {
           'application/json': components['schemas']['CameraRuntimeStatusResponse'];
         };
       };
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };
@@ -3361,6 +3613,7 @@ export interface operations {
           'application/json': components['schemas']['CameraSourceDetail'];
         };
       };
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };
@@ -3616,6 +3869,7 @@ export interface operations {
           'application/json': components['schemas']['CameraDebugStream'];
         };
       };
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };
@@ -3642,6 +3896,7 @@ export interface operations {
         };
       };
       401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };
@@ -4000,6 +4255,7 @@ export interface operations {
           'application/json': components['schemas']['EventDetail'];
         };
       };
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };
@@ -4133,6 +4389,7 @@ export interface operations {
           };
         };
       };
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };
@@ -4584,6 +4841,36 @@ export interface operations {
       404: components['responses']['NotFound'];
     };
   };
+  getSmokeStatus: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Tat ca thanh phan bat buoc hoat dong binh thuong */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SmokeStatus'];
+        };
+      };
+      401: components['responses']['Unauthorized'];
+      /** @description Mot hoac nhieu thanh phan phu thuoc gap loi */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SmokeStatus'];
+        };
+      };
+    };
+  };
   getFireHealth: {
     parameters: {
       query?: never;
@@ -4705,6 +4992,99 @@ export interface operations {
       };
       401: components['responses']['Unauthorized'];
       /** @description Khong tim thay notification khop voi contactId */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getCloudFaceJobContext: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current job, durable cached result and active owner mappings */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @description Canonical face.job envelope in aws/sprint4/contracts/queue-v1.schema.json */
+            envelope: {
+              [key: string]: unknown;
+            };
+            cached_result: components['schemas']['CloudFaceResultEnvelope'] | null;
+            /** @description Rekognition FaceId to active application knownFaceId for this owner */
+            mappings: {
+              [key: string]: string;
+            };
+          };
+        };
+      };
+      /** @description Invalid internal service token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Job missing, ownership changed or collection version stale */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  cacheCloudFaceJobResult: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CloudFaceResultEnvelope'];
+      };
+    };
+    responses: {
+      /** @description Durable result to publish unchanged to the shared Results queue */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CloudFaceResultEnvelope'];
+        };
+      };
+      /** @description Invalid queue contract or job identity */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid internal service token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Job missing or stale */
       404: {
         headers: {
           [name: string]: unknown;

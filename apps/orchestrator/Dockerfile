@@ -30,9 +30,14 @@ RUN pnpm --filter @cam/orchestrator build
 # ---------- production ----------
 FROM base AS production
 ENV NODE_ENV=production
-COPY --from=build /workspace/apps/orchestrator/dist ./dist
+COPY --from=build /workspace/apps/orchestrator/dist ./apps/orchestrator/dist
 COPY --from=build /workspace/node_modules ./node_modules
 COPY --from=build /workspace/apps/orchestrator/node_modules ./apps/orchestrator/node_modules
+COPY --from=build /workspace/packages/contracts/dist ./packages/contracts/dist
+COPY --from=build /workspace/packages/contracts/package.json ./packages/contracts/package.json
+COPY --from=build /workspace/db/migrations /workspace/db/migrations
+COPY --from=build /workspace/tools/cd/migrate.mjs /workspace/apps/orchestrator/cd-migrate.mjs
 EXPOSE 3001
 USER node
+WORKDIR /workspace/apps/orchestrator
 CMD ["node", "dist/main.js"]

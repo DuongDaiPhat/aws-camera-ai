@@ -20,6 +20,7 @@ CMD ["pnpm", "dev"]
 
 FROM deps AS build
 COPY . .
+ARG NEXT_PUBLIC_API_BASE_URL
 RUN pnpm --filter @cam/web build
 
 FROM base AS production

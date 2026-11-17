@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "type": "face.job",
+  "messageId": "00000000-0000-4000-8000-000000000004",
+  "correlationId": "00000000-0000-4000-8000-000000000003",
+  "occurredAt": "2026-11-05T03:00:00Z",
+  "payload": {
+    "jobId": "00000000-0000-4000-8000-000000000004",
+    "eventId": "00000000-0000-4000-8000-000000000003",
+    "cameraId": "00000000-0000-4000-8000-000000000002",
+    "ownerScopeId": "00000000-0000-4000-8000-000000000001",
+    "trackId": "lab-track-01",
+    "sourceSessionId": "lab-session-01",
+    "observationId": "track:lab-track-01:face",
+    "revision": 1,
+    "collectionVersion": 1,
+    "collectionId": "camerai-s4-dev-owner-00000000-0000-4000-8000-000000000001",
+    "image": {
+      "bucket": "camerai-s4-dev-media-fixture-only",
+      "key": "owners/00000000-0000-4000-8000-000000000001/cameras/00000000-0000-4000-8000-000000000002/events/00000000-0000-4000-8000-000000000003/face/00000000-0000-4000-8000-000000000004.jpg"
+    },
+    "resultId": "00000000-0000-4000-8000-000000000005"
+  }
+}

@@ -45,6 +45,7 @@ describe('US16/17 production pipeline with PostgreSQL16, MQTT and MinIO', () => 
   let outbox: AiResultOutboxService;
   let consumer: PoseFrameConsumer;
   let cameraId: string;
+  let cameraOwner: string;
   let response: Record<string, unknown>;
   let s3: S3Client;
   const jpeg = Buffer.from(
@@ -162,16 +163,16 @@ describe('US16/17 production pipeline with PostgreSQL16, MQTT and MinIO', () => 
     );
     consumer = new PoseFrameConsumer(config, new CamerasRepository(pool), coordinator);
     mqtt = await connectAsync(`mqtt://${broker.getHost()}:${broker.getMappedPort(1883)}`);
-    const owner = randomUUID(),
-      device = randomUUID();
+    cameraOwner = randomUUID();
+    const device = randomUUID();
     cameraId = randomUUID();
     await pool.query(
       "INSERT INTO users(id,email,full_name,role,password_hash) VALUES($1,'fall-qa@example.invalid','Fall QA','ADMIN','unused')",
-      [owner],
+      [cameraOwner],
     );
     await pool.query(
       "INSERT INTO devices(id,owner_user_id,name,status) VALUES($1,$2,'QA','ONLINE')",
-      [device, owner],
+      [device, cameraOwner],
     );
     await pool.query(
       "INSERT INTO cameras(id,device_id,name,slug,rtsp_url) VALUES($1,$2,'QA','fall_qa','rtsp://127.0.0.1/qa')",
@@ -290,6 +291,7 @@ describe('US16/17 production pipeline with PostgreSQL16, MQTT and MinIO', () => 
     expect(emitted).toHaveBeenCalledWith(
       expect.objectContaining({ id: event.id, eventType: 'FALL_DETECTED', priority: 'P1' }),
       'event.updated',
+      [cameraOwner],
     );
     const snapshot = await new EventMediaRepository(pool).findMediaByEventIdAndType(
       event.id,

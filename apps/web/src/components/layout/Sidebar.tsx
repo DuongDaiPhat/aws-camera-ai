@@ -25,6 +25,7 @@ const navigation: SlidingTabItem[] = [
   { id: 'zones', label: 'Khu vực', icon: 'zone' },
   { id: 'wellness', label: 'Sức khỏe', icon: 'heart' },
   { id: 'settings', label: 'Cài đặt', icon: 'settings' },
+  { id: 'users', label: 'Quản lý tài khoản', icon: 'users' },
 ];
 const roles: Record<string, string> = {
   ADMIN: 'Quản trị viên',
@@ -43,15 +44,17 @@ export function Sidebar({
   expanded,
   onToggle,
 }: SidebarProps) {
-  const items = navigation.map((item) => ({
-    ...item,
-    count:
-      item.id === 'events'
-        ? unresolvedEventCount
-        : item.id === 'cameras'
-          ? onlineCameraCount
-          : undefined,
-  }));
+  const items = navigation
+    .filter((item) => item.id !== 'users' || user?.role === 'ADMIN')
+    .map((item) => ({
+      ...item,
+      count:
+        item.id === 'events'
+          ? unresolvedEventCount
+          : item.id === 'cameras'
+            ? onlineCameraCount
+            : undefined,
+    }));
   const initials =
     user?.fullName
       ?.trim()

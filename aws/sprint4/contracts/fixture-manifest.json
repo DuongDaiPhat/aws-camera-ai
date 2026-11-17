@@ -1,0 +1,62 @@
+[
+  {
+    "file": "fixtures/face-job.valid.json",
+    "definition": null,
+    "expected": "valid"
+  },
+  {
+    "file": "fixtures/face-result-known.valid.json",
+    "definition": null,
+    "expected": "valid"
+  },
+  {
+    "file": "fixtures/notification-job.valid.json",
+    "definition": null,
+    "expected": "valid"
+  },
+  {
+    "file": "fixtures/notification-outcome.valid.json",
+    "definition": null,
+    "expected": "valid"
+  },
+  {
+    "file": "fixtures/deadline-command.valid.json",
+    "definition": "deadlineCommand",
+    "expected": "valid"
+  },
+  {
+    "file": "fixtures/notification-claim.valid.json",
+    "definition": "notificationClaim",
+    "expected": "valid"
+  },
+  {
+    "file": "fixtures/face-result-unknown.valid.json",
+    "definition": null,
+    "expected": "valid"
+  },
+  {
+    "file": "fixtures/face-result-undetermined.valid.json",
+    "definition": null,
+    "expected": "valid"
+  },
+  {
+    "file": "fixtures/face-result-error.valid.json",
+    "definition": null,
+    "expected": "valid"
+  },
+  {
+    "file": "fixtures/face-job-invalid-uuid.invalid.json",
+    "definition": null,
+    "expected": "invalid"
+  },
+  {
+    "file": "fixtures/dry-run-called-provider.invalid.json",
+    "definition": null,
+    "expected": "invalid"
+  },
+  {
+    "file": "fixtures/face-result-score-range.invalid.json",
+    "definition": null,
+    "expected": "invalid"
+  }
+]

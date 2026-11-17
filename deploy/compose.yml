@@ -1,0 +1,83 @@
+name: camerai-${APP_ENV:?APP_ENV is required}
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:?POSTGRES_IMAGE is required}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  redis:
+    image: ${REDIS_IMAGE:?REDIS_IMAGE is required}
+    restart: unless-stopped
+    command: [redis-server, --appendonly, "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  orchestrator:
+    image: ${ORCHESTRATOR_IMAGE:?ORCHESTRATOR_IMAGE is required}
+    restart: unless-stopped
+    env_file: ${RUNTIME_ENV_FILE:?RUNTIME_ENV_FILE is required}
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      APP_VERSION: ${RELEASE_ID:?}
+      REDIS_HOST: redis
+      CAMERA_VIDEO_STORAGE_PATH: /workspace/storage/videos
+    volumes:
+      - /opt/camerai/videos:/workspace/storage/videos
+    healthcheck:
+      test: [CMD-SHELL, "wget -qO- http://localhost:3001/api/v1/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+    stop_grace_period: 45s
+  web:
+    image: ${WEB_IMAGE:?WEB_IMAGE is required}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+    healthcheck:
+      test: [CMD-SHELL, "wget -qO- http://127.0.0.1:3000/login > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 20s
+  migrate:
+    image: ${ORCHESTRATOR_IMAGE:?ORCHESTRATOR_IMAGE is required}
+    profiles: [tools]
+    env_file: ${RUNTIME_ENV_FILE:?RUNTIME_ENV_FILE is required}
+    working_dir: /workspace/apps/orchestrator
+    entrypoint: [node, cd-migrate.mjs]
+    restart: "no"
+  caddy:
+    image: ${CADDY_IMAGE:?CADDY_IMAGE is required}
+    restart: unless-stopped
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?APP_DOMAIN is required}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+      - caddyconfig:/config
+volumes:
+  pgdata:
+  redisdata:
+  caddydata:
+  caddyconfig:

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "type": "notification.job",
+  "messageId": "00000000-0000-4000-8000-000000000007",
+  "correlationId": "00000000-0000-4000-8000-000000000003",
+  "occurredAt": "2026-11-05T03:00:00Z",
+  "payload": {
+    "notificationId": "00000000-0000-4000-8000-000000000007",
+    "eventId": "00000000-0000-4000-8000-000000000003",
+    "ownerScopeId": "00000000-0000-4000-8000-000000000001",
+    "expectedEventVersion": 3,
+    "channel": "SNS_EMAIL"
+  }
+}

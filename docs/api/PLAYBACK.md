@@ -10,7 +10,7 @@ Frigate recording no longer depends on enabling the fire module. PLAYBACK_CONTIN
 
 ## Historical detections
 
-Apply db/migrations/0017_playback_frames.sql to existing installations. It adds playback_frames and its expiry index. The MQTT frame consumer offers valid person telemetry to a bounded background writer; no database work blocks live frame handling. Geometry is normalized using the camera detection dimensions, sampled every PLAYBACK_METADATA_SAMPLE_MS (default 500), and expires after PLAYBACK_METADATA_RETENTION_DAYS (default 7). Empty stored frame arrays are distinct from missing archived analysis.
+Apply db/migrations/0020_playback_frames.sql to existing installations. It adds playback_frames and its expiry index. The MQTT frame consumer offers valid person telemetry to a bounded background writer; no database work blocks live frame handling. Geometry is normalized using the camera detection dimensions, sampled every PLAYBACK_METADATA_SAMPLE_MS (default 500), and expires after PLAYBACK_METADATA_RETENTION_DAYS (default 7). Empty stored frame arrays are distinct from missing archived analysis.
 
 GET /api/v1/playback/cameras/{id}/metadata?startAt=...&endAt=... requires the same JWT household authorization as footage. It returns only stored person samples and confirmed fall/fire result geometry, using the original observation/confirmation timestamp. The player draws boxes with a bounded timestamp tolerance and the same contain/letterbox geometry as the video. It never subscribes to live detections for archived video. Older recordings without stored geometry explicitly show that historical analysis is unavailable.
 

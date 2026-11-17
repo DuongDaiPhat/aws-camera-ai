@@ -1,5 +1,7 @@
 # Lộ trình lab AWS — học đến đâu, nối CameraAI đến đó
 
+**Phân công đúng ba người:** đọc [Sprint 4 cho người mới làm song song](../sprint4/README.md) để chọn luồng A/B/C, rồi dùng các lab bên dưới làm bài thực hành bổ trợ.
+
 **Dành cho:** nhóm chưa từng tích hợp AWS. **Cập nhật:** 21/10/2026.
 
 Không bắt đầu bằng cách dựng toàn bộ sơ đồ. Trước tiên làm một việc nhỏ nhìn thấy kết quả: upload ảnh, gọi Lambda, gửi message. Khi hiểu các mảnh đó mới nối vào NestJS, database và model thật.

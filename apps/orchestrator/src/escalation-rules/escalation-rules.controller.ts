@@ -15,7 +15,7 @@ import {
   ListEscalationRulesResponseDto,
 } from './dto/escalation-rule-response.dto';
 import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { SystemAdminOnly } from '../auth/system-admin';
 import type { AuthenticatedRequest } from '../auth/jwt-auth.guard';
 
 @ApiTags('escalation-rules')
@@ -55,7 +55,7 @@ export class EscalationRulesController {
 
   @Patch(':eventType')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN')
+  @SystemAdminOnly()
   @ApiOperation({
     summary: 'Update thresholds only (US-15)',
     description:
@@ -94,7 +94,7 @@ export class EscalationRulesController {
 
   @Put(':eventType')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN')
+  @SystemAdminOnly()
   @ApiOperation({
     summary: 'Cập nhật ngưỡng và thời gian chờ (Tương thích OpenAPI)',
     description:

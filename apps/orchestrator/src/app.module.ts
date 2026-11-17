@@ -1,4 +1,5 @@
 import { PlaybackModule } from './playback/playback.module';
+import { CloudQueueModule } from './cloud-queue/cloud-queue.module';
 import { Module } from '@nestjs/common';
 import { KnownFacesModule } from './known-faces/known-faces.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -47,6 +48,7 @@ import { FireModule } from './fire/fire.module';
     }),
     DatabaseModule,
     PlaybackModule,
+    CloudQueueModule,
     AuthModule,
     KnownFacesModule,
     AiResultsModule,

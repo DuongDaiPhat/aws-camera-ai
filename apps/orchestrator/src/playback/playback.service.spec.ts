@@ -12,7 +12,7 @@ describe('Recording archive policy and gaps', () => {
     recordingEnabled: false,
     retentionDays: 7,
   };
-  const actor: PlaybackActor = { sub: 'viewer', role: 'VIEWER' };
+  const actor: PlaybackActor = { sub: 'viewer', role: 'VIEWER', email: 'viewer@example.test' };
   const repo = { cameras: jest.fn() };
   const archive: jest.Mocked<RecordingArchive> = { list: jest.fn(), clip: jest.fn() };
   const service = new PlaybackService(

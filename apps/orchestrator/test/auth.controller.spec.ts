@@ -4,6 +4,7 @@ import type { Response } from 'express';
 import { AuthController } from '../src/auth/auth.controller';
 import { AuthService } from '../src/auth/auth.service';
 import { JWT_CONFIG } from '../src/auth/auth.types';
+import { AUTH_SETTINGS } from '../src/auth/auth.config';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -40,6 +41,7 @@ describe('AuthController', () => {
         { provide: AuthService, useValue: mockAuthService },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: JWT_CONFIG, useValue: mockJwtConfig },
+        { provide: AUTH_SETTINGS, useValue: { provider: 'jwt' } },
       ],
     }).compile();
 
