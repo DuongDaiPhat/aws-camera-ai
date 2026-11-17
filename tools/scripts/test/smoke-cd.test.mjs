@@ -1,14 +1,17 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { execFile, spawnSync } from 'node:child_process';
+import { once } from 'node:events';
 import { readFileSync } from 'node:fs';
 import http from 'node:http';
 import { describe, it } from 'node:test';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const SMOKE_SH = join(ROOT, 'tools', 'cd', 'smoke.sh');
 const DEPLOY_HOST_SH = join(ROOT, 'tools', 'cd', 'deploy-host.sh');
+const execFileAsync = promisify(execFile);
 
 function hasCommand(cmd, args = ['--version']) {
   const res = spawnSync(cmd, args, { encoding: 'utf8' });
@@ -106,27 +109,30 @@ describe('CD staging smoke scripts', () => {
       res.end('{}');
     });
 
-    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-    const address = server.address();
-    const port = typeof address === 'object' && address ? address.port : 0;
+    await once(server.listen(0, '127.0.0.1'), 'listening');
+    const { port } = server.address();
 
     try {
-      const res = spawnSync('bash', [SMOKE_SH], {
-        encoding: 'utf8',
+      // Keep the event loop free to serve the script's HTTP requests.
+      const { stdout } = await execFileAsync('bash', [SMOKE_SH], {
+        timeout: 30_000,
         env: {
           ...process.env,
           APP_URL: `http://127.0.0.1:${port}`,
           RELEASE_ID: releaseId,
           SMOKE_INTERNAL_TOKEN: token,
+          SMOKE_BEARER_TOKEN: '',
           SMOKE_TEST_EMAIL: 'admin@camerai.local',
           SMOKE_TEST_PASSWORD: 'secret',
           FACE_FUNCTION_NAME: '',
         },
       });
-      assert.equal(res.status, 0, `smoke.sh failed: ${res.stderr || res.stdout}`);
-      assert.match(res.stdout, /All staging smoke checks passed/);
+      assert.match(stdout, /All staging smoke checks passed/);
     } finally {
-      await new Promise((resolve) => server.close(resolve));
+      await new Promise((resolve) => {
+        server.close(resolve);
+        server.closeAllConnections();
+      });
     }
   });
 });
