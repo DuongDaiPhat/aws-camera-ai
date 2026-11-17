@@ -132,3 +132,84 @@
     font-size: 11px;
   }
 }
+
+.vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+  box-shadow: none;
+}
+.vertical .pill {
+  top: 0;
+  bottom: auto;
+  border-radius: 15px;
+  background: linear-gradient(110deg, #ae89e6, #d8bff9);
+  border: 1px solid #dfcafa;
+  box-shadow: 0 5px 18px #ad80ef1a;
+  z-index: -1;
+}
+.vertical .button {
+  justify-content: flex-start;
+  min-height: 46px;
+  height: 46px;
+  width: 100%;
+  padding: 11px 15px;
+  gap: 12px;
+  color: #c2bdc9;
+  border-radius: 15px;
+  font-size: 12px;
+  overflow: hidden;
+}
+.vertical .button > svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+.vertical .button[aria-current='page'] {
+  color: #e0c9ff;
+  border-color: #b98ce843;
+  background: #bd89fa0b;
+}
+.vertical .button.highlighted {
+  color: #21112f;
+}
+.vertical .label {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  opacity: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition:
+    opacity 0.18s ease,
+    transform 0.25s ease;
+}
+.vertical .count {
+  position: absolute;
+  right: 7px;
+  top: 3px;
+  font-size: 9px;
+  padding: 0 3px;
+  min-width: 13px;
+  line-height: 15px;
+  background: #3b3247;
+  color: #ece2fb;
+}
+.vertical .highlighted .count {
+  background: #4d2c6d;
+  color: #fff;
+}
+.vertical[data-collapsed='true'] .label {
+  opacity: 0;
+  transform: translateX(-4px);
+}
+.vertical[data-collapsed='false'] .button {
+  padding-right: 23px;
+}

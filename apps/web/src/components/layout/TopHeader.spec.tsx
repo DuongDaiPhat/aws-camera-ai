@@ -4,14 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { TopHeader } from './TopHeader';
 
 function render(pendingCount: number | null): string {
-  return renderToStaticMarkup(
-    <TopHeader
-      selectedZone="ALL"
-      onSelectZone={() => {}}
-      onSimulateNewEvent={() => {}}
-      pendingCount={pendingCount}
-    />,
-  );
+  return renderToStaticMarkup(<TopHeader pendingCount={pendingCount} />);
 }
 
 describe('dashboard alert status', () => {

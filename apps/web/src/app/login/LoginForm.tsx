@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { ApiError } from '@/lib/api-client';
 import { login } from '@/lib/auth-client';
+import { markLoginEntrance } from '@/lib/login-entrance';
 import styles from './login.module.css';
 
 export function LoginForm() {
@@ -18,11 +19,19 @@ export function LoginForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    const fields = new FormData(event.currentTarget);
+    const credentials = {
+      email: String(fields.get('email') ?? '').trim(),
+      password: String(fields.get('password') ?? ''),
+    };
+    setEmail(credentials.email);
+    setPassword(credentials.password);
     setSubmitting(true);
     setErrorMessage(null);
 
     try {
-      await login({ email, password });
+      await login(credentials);
+      markLoginEntrance();
       router.replace('/');
       router.refresh();
     } catch (error: unknown) {

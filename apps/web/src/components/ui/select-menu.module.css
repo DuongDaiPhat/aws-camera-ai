@@ -1,0 +1,230 @@
+.root {
+  display: inline-flex;
+  min-width: 0;
+  max-width: 100%;
+  vertical-align: middle;
+}
+.trigger {
+  display: inline-flex !important;
+  position: relative;
+  align-items: center;
+  justify-content: space-between !important;
+  gap: 9px !important;
+  min-width: 0 !important;
+  max-width: 100%;
+  height: 35px !important;
+  padding: 0 10px !important;
+  background: #faf7fe !important;
+  color: #69517f !important;
+  border: 1px solid #e4d8ef !important;
+  border-radius: 10px !important;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  outline: none !important;
+  box-shadow: none;
+  transition:
+    background 0.16s,
+    border-color 0.16s;
+}
+.trigger > span {
+  display: block !important;
+  position: static !important;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: none !important;
+  color: inherit !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+}
+.trigger > svg {
+  flex: none;
+  position: static !important;
+  pointer-events: none;
+}
+.trigger .chevron {
+  transition: transform 0.2s;
+}
+.trigger[aria-expanded='true'] .chevron {
+  transform: rotate(180deg);
+}
+.trigger:hover {
+  background: #f1e9fa !important;
+  border-color: #d5c3e6 !important;
+}
+.trigger:focus-visible {
+  box-shadow: inset 0 0 0 1px #7e7588 !important;
+}
+.trigger:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.menu {
+  position: fixed;
+  z-index: 120;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 5px;
+  border: 1px solid #e6dcef;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 12px 32px #34204320;
+  animation: menu-in 0.14s ease-out;
+  scrollbar-width: thin;
+  color: #4a365d;
+}
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1.4;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+.option > span {
+  overflow-wrap: anywhere;
+}
+.option > svg {
+  flex: none;
+}
+.option[data-active='true'] {
+  background: #f5effc;
+}
+.option[aria-selected='true'] {
+  background: #eee4fa;
+  color: #8150b4;
+  font-weight: 600;
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu {
+    animation: none;
+  }
+  .trigger,
+  .trigger .chevron,
+  .option {
+    transition: none;
+  }
+}
+
+.trigger {
+  background-color: #25222b !important;
+  color: #ffffff !important;
+  border-color: #3b3644 !important;
+}
+
+.trigger > span {
+  color: #ffffff !important;
+}
+
+.trigger:hover {
+  background-color: #302b38 !important;
+  border-color: #484154 !important;
+}
+
+.trigger:focus-visible {
+  box-shadow: inset 0 0 0 1px #e3daf2 !important;
+}
+
+.menu {
+  background-color: #ffffff;
+}
+
+.option {
+  background-color: #ffffff;
+  color: #171619;
+}
+
+.option[data-active='true'] {
+  background-color: #f6f5fb;
+  color: #171619;
+}
+
+.option[aria-selected='true'] {
+  background-color: #25222b;
+  color: #ffffff;
+}
+
+.trigger[data-tone='light'] {
+  background: #fff !important;
+  color: #302a38 !important;
+  border-color: #ded9e5 !important;
+}
+.trigger[data-tone='light']:hover {
+  background: #f3f0f7 !important;
+  border-color: #c8c0d2 !important;
+}
+.trigger[data-tone='light']:focus-visible {
+  box-shadow: inset 0 0 0 1px #80728f !important;
+}
+
+.trigger[data-tone='light'] > span {
+  color: inherit !important;
+}
+
+.trigger[data-tone='violet'] {
+  background: linear-gradient(135deg, #7c3aed, #6b21a8) !important;
+  color: #ffffff !important;
+  border: 1px solid #6b21a8 !important;
+  font-weight: 700;
+  height: 35px;
+  min-height: 35px;
+}
+
+.trigger[data-tone='violet']:hover {
+  background: linear-gradient(135deg, #7635dc, #6823ab) !important;
+  border-color: #7c3aed !important;
+}
+
+.trigger[data-tone='violet']:focus-visible {
+  outline: none !important;
+  box-shadow: inset 0 0 0 1px #e9d5ff !important;
+  outline-offset: 2px !important;
+}
+
+.menu[data-tone='violet'] .option {
+  background: linear-gradient(135deg, #7c3aed, #6b21a8);
+  color: #ffffff;
+  font-weight: 700;
+
+  min-height: 34px;
+}
+
+.menu[data-tone='violet'] .option:hover,
+.menu[data-tone='violet'] .option[data-active='true'] {
+  background: linear-gradient(135deg, #7635dc, #6823ab);
+  color: #ffffff;
+}
+
+.menu[data-tone='violet'] .option[aria-selected='true'] {
+  background: linear-gradient(135deg, #6d28d9, #581c87);
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.7);
+}
+
+.menu[data-tone='violet'] .option:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: -2px;
+}
+
+.menu[data-tone='violet'] .option + .option {
+  margin-top: 4px;
+}

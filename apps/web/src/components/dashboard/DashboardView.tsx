@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
-import { OverviewPanel, SystemOverview } from './OverviewPanel';
+import { NotificationBell, isPendingNotification } from './NotificationBell';
+import { DashboardOverview } from './DashboardOverview';
+import { useLoginEntrance } from '@/hooks/useLoginEntrance';
 import { useFireAttention } from '@/hooks/useFireAttention';
 import { FireAttention } from '@/components/events/FireAttention';
 import { fireReviewKey } from '@/lib/fire-alerts';
@@ -22,7 +23,7 @@ import styles from './dashboard-view.module.css';
 const PAGE_TITLES: Record<string, string> = {
   dashboard: 'Tổng quan',
   cameras: 'Camera trực tiếp',
-  events: 'Lịch sử sự kiện',
+  events: 'Thông báo',
   'known-faces': 'Người quen',
   zones: 'Khu vực giám sát',
   wellness: 'Kiểm tra sức khỏe',
@@ -109,7 +110,7 @@ function EventHistory({
         <div className={styles.sectionHeader}>
           <div className={styles.sectionTitles}>
             <h2 id="events-title" className={styles.sectionTitle}>
-              Sự kiện gần đây
+              Danh sách thông báo
             </h2>
             <p className={styles.sectionSubtitle}>
               Những hoạt động mới nhất được camera và cảm biến ghi nhận trong thời gian thực.
@@ -176,34 +177,22 @@ function DashboardEventDetails({
   );
 }
 
-function eventZoneOptions(events: UIEventItem[]) {
-  return Array.from(
-    new Map(
-      events.flatMap((event) =>
-        event.zone
-          ? [
-              [
-                event.zone.id,
-                {
-                  id: `zone:${event.zone.id}`,
-                  name: [event.camera?.name, event.zone.name].filter(Boolean).join(' · '),
-                },
-              ] as const,
-            ]
-          : [],
-      ),
-    ).values(),
-  ).sort((a, b) => a.name.localeCompare(b.name, 'vi'));
-}
-
 function HistoryContent({
+  userId,
   overview,
+  isAdmin,
+  blocked,
   state,
   metrics,
   onNavigate,
   onViewDetail,
+  onReady,
 }: {
+  userId?: string;
+  onReady: () => void;
   overview: boolean;
+  isAdmin: boolean;
+  blocked: boolean;
   state: ReturnType<typeof useEvents>;
   metrics: ReturnType<typeof useEventStats>;
   onNavigate: (page: string) => void;
@@ -212,46 +201,43 @@ function HistoryContent({
   if (!overview)
     return <EventHistory state={state} metrics={metrics} onViewDetail={onViewDetail} />;
   return (
-    <>
-      <OverviewPanel metrics={metrics} onNavigate={onNavigate} />
-      <div className={styles.lowerGrid}>
-        <EventHistory
-          state={state}
-          metrics={metrics}
-          onViewDetail={onViewDetail}
-          showMetrics={false}
-        />
-        <SystemOverview events={state.events} onNavigate={onNavigate} />
-      </div>
-    </>
+    <DashboardOverview
+      userId={userId}
+      onReady={onReady}
+      isAdmin={isAdmin}
+      blocked={blocked}
+      onNavigate={onNavigate}
+    />
   );
 }
 
 export function DashboardView() {
   const { user, handleLogout } = useAuth();
   const eventState = useEvents();
-  const {
-    events,
-    counts,
-    selectedZone,
-    setSelectedZone,
-    liveNoticeText,
-    confirmOk,
-    confirmHelp,
-    closeEmergency,
-  } = eventState;
+  const { events, liveNoticeText, confirmOk, confirmHelp, closeEmergency } = eventState;
   const attention = useFireAttention(events, user?.id);
+  const notificationCount =
+    eventState.isLoading || eventState.error ? null : events.filter(isPendingNotification).length;
 
   // Telegram confirmations update an existing event without changing the list length.
   const statsRefreshToken = events.map((event) => `${event.id}:${event.status}`).join('|');
   const metrics = useEventStats(statsRefreshToken);
 
   const [activeNav, setActiveNav] = useState('dashboard');
+  const entrance = useLoginEntrance(user?.id);
+  const navigate = (page: string) => {
+    entrance.finish();
+    setActiveNav(page);
+  };
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [selectedEventForModal, setSelectedEventForModal] = useState<UIEventItem | null>(null);
   const attentionId = attention.event?.id;
   useEffect(() => {
-    if (attentionId) setSelectedEventForModal(null);
-  }, [attentionId]);
+    if (attentionId) {
+      setSelectedEventForModal(null);
+      entrance.finish();
+    }
+  }, [attentionId, entrance.finish]);
   const selectedEvent = selectedEventForModal
     ? (events.find((event) => event.id === selectedEventForModal.id) ?? selectedEventForModal)
     : null;
@@ -260,41 +246,56 @@ export function DashboardView() {
     <>
       <div
         className={styles.layoutWrapper}
+        data-sidebar-expanded={sidebarExpanded}
+        data-page={activeNav}
+        data-login-entry={entrance.phase}
         ref={(node) => {
           if (node) node.inert = Boolean(attention.event);
         }}
         aria-hidden={attention.event ? true : undefined}
       >
         <Sidebar
+          expanded={sidebarExpanded}
+          onToggle={() => setSidebarExpanded((value) => !value)}
           user={user}
           activeNav={activeNav}
-          onSelectNav={setActiveNav}
+          onSelectNav={(nav) => {
+            navigate(nav);
+            if (window.matchMedia('(max-width: 700px)').matches) setSidebarExpanded(false);
+          }}
           onLogout={handleLogout}
-          unresolvedEventCount={metrics.stats?.pendingCount ?? counts.urgent}
+          unresolvedEventCount={notificationCount ?? undefined}
           onlineCameraCount={metrics.stats?.cameraOnlineCount}
         />
 
+        {sidebarExpanded && (
+          <button
+            className={styles.sidebarBackdrop}
+            aria-label="Đóng menu"
+            onClick={() => setSidebarExpanded(false)}
+          />
+        )}
         <div className={styles.mainContent}>
           <TopHeader
+            isDashboard={activeNav === 'dashboard'}
             userName={user?.fullName || 'bạn'}
-            zones={eventZoneOptions(events)}
-            selectedZone={selectedZone}
-            onSelectZone={setSelectedZone}
-            pendingCount={
-              metrics.isLoading || metrics.error ? null : (metrics.stats?.pendingCount ?? null)
-            }
+            pendingCount={notificationCount}
             pageTitle={PAGE_TITLES[activeNav] ?? PAGE_TITLES.dashboard}
-            showZoneFilter={activeNav === 'dashboard' || activeNav === 'events'}
-            onViewEvents={() => setActiveNav('events')}
+            onViewEvents={() => navigate('events')}
+            notificationControl={
+              <NotificationBell
+                events={events}
+                isLoading={eventState.isLoading}
+                error={eventState.error}
+                onRetry={eventState.reload}
+                onViewDetail={setSelectedEventForModal}
+                onViewAll={() => navigate('events')}
+                disabled={Boolean(attention.event)}
+              />
+            }
           />
 
-          <motion.main
-            key={activeNav}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.24, ease: [0.2, 0.75, 0.25, 1] }}
-            className={styles.workspace}
-          >
+          <main key={activeNav} className={styles.workspace}>
             {activeNav === 'wellness' ? (
               <WellnessView user={user} />
             ) : activeNav === 'cameras' ? (
@@ -307,7 +308,7 @@ export function DashboardView() {
               <ZonesView user={user} />
             ) : (
               <>
-                {liveNoticeText && (
+                {activeNav !== 'dashboard' && liveNoticeText && (
                   <div className={styles.newEventNotice} role="status">
                     <span>{liveNoticeText}</span>
                     <small>Vừa chèn lên đầu danh sách</small>
@@ -323,15 +324,19 @@ export function DashboardView() {
                 )}
 
                 <HistoryContent
+                  userId={user?.id}
+                  isAdmin={user?.role === 'ADMIN'}
+                  blocked={Boolean(attention.event)}
                   overview={activeNav === 'dashboard'}
                   state={eventState}
                   metrics={metrics}
-                  onNavigate={setActiveNav}
+                  onNavigate={navigate}
+                  onReady={entrance.onReady}
                   onViewDetail={setSelectedEventForModal}
                 />
               </>
             )}
-          </motion.main>
+          </main>
         </div>
 
         <DashboardEventDetails
