@@ -36,6 +36,22 @@ smoke() {
     const r = await fetch("http://orchestrator:3001/api/v1/auth/config");
     if (!r.ok || !["jwt", "cognito"].includes((await r.json()).provider)) process.exit(1);
   '
+  local internal_token
+  internal_token=$(awk -F= '/^INTERNAL_SERVICE_TOKEN=/{sub(/^[^=]*=/, ""); gsub(/^[[:space:]"\x27]+|[[:space:]"\x27\r]+$/, ""); print; exit}' "$directory/runtime.env")
+  if [[ -n $internal_token ]]; then
+    dc "$directory" exec -T -e SMOKE_INTERNAL_TOKEN="$internal_token" web node --input-type=module -e '
+      const r = await fetch("http://orchestrator:3001/api/v1/internal/smoke", {
+        headers: { "x-internal-token": process.env.SMOKE_INTERNAL_TOKEN ?? "" },
+      });
+      if (r.status === 404) {
+        console.log("Internal smoke endpoint absent in release; skipping");
+        process.exit(0);
+      }
+      const body = await r.json();
+      console.log("Internal smoke:", JSON.stringify({ status: body.status, checks: body.checks }));
+      if (!r.ok || body.status !== "ok") process.exit(1);
+    '
+  fi
 }
 
 if [[ $mode == apply ]]; then
