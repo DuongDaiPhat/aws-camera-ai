@@ -1615,6 +1615,27 @@ paths:
   # ===================================================================
   # INTERNAL — AI service callback & webhook
   # ===================================================================
+  /internal/smoke:
+    get:
+      tags: [internal]
+      summary: Kiem tra san sang API, DB, Auth, Storage va Cloud Queue tren moi truong deploy
+      description: Read-only/safe smoke diagnostic protected by the internal service token. Verifies Postgres connectivity/schema, Auth provider configuration (and Cognito JWKS reachability), S3/MinIO upload-download-presign-delete, and SQS queue visibility when enabled.
+      operationId: getSmokeStatus
+      security:
+        - internalToken: []
+      responses:
+        "200":
+          description: Tat ca thanh phan bat buoc hoat dong binh thuong
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SmokeStatus" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "503":
+          description: Mot hoac nhieu thanh phan phu thuoc gap loi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SmokeStatus" }
+
   /internal/fire/health:
     get:
       tags: [internal]
@@ -2101,6 +2122,31 @@ components:
         version: { type: string }
         uptimeSeconds: { type: integer }
         timestamp: { type: string, format: date-time }
+
+    SmokeCheckResult:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [ok, error] }
+        detail: { type: string }
+        reason: { type: string }
+
+    SmokeStatus:
+      type: object
+      required: [status, service, version, timestamp, checks]
+      properties:
+        status: { type: string, enum: [ok, degraded] }
+        service: { type: string }
+        version: { type: string }
+        timestamp: { type: string, format: date-time }
+        checks:
+          type: object
+          required: [database, auth, storage, cloudQueue]
+          properties:
+            database: { $ref: "#/components/schemas/SmokeCheckResult" }
+            auth: { $ref: "#/components/schemas/SmokeCheckResult" }
+            storage: { $ref: "#/components/schemas/SmokeCheckResult" }
+            cloudQueue: { $ref: "#/components/schemas/SmokeCheckResult" }
 
     # ---------------- Auth ----------------
     AuthConfig:
