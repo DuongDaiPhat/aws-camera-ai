@@ -12,6 +12,7 @@ import {
   Cpu,
   Flame,
   HeartPulse,
+  History,
   Layers3,
   LayoutDashboard,
   LogOut,
@@ -34,6 +35,7 @@ import {
 } from 'lucide-react';
 
 const icons = {
+  history: History,
   grid: LayoutDashboard,
   bell: Bell,
   camera: Cctv,

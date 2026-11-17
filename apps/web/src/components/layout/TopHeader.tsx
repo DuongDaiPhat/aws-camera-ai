@@ -14,6 +14,9 @@ import { DatePicker } from './DatePicker';
 import styles from './top-header.module.css';
 
 interface TopHeaderProps {
+  selectedDate?: Date | null;
+  onSelectDate?: (date: Date | null) => void;
+  onViewPlayback?: () => void;
   userName?: string;
   pendingCount?: number | null;
   pageTitle?: string;
@@ -30,9 +33,18 @@ function addDays(date: Date, count: number) {
   return next;
 }
 
-function WeekCalendar() {
+function WeekCalendar({
+  selectedDate,
+  onSelectDate,
+  onViewPlayback,
+}: Pick<TopHeaderProps, 'selectedDate' | 'onSelectDate' | 'onViewPlayback'>) {
   const [today, setToday] = useState<Date | null>(null);
-  const [chosen, setChosen] = useState<Date | null>(null);
+  const [localDate, setLocalDate] = useState<Date | null>(null);
+  const chosen = selectedDate === undefined ? localDate : selectedDate;
+  const setChosen = (date: Date | null) => {
+    setLocalDate(date);
+    onSelectDate?.(date);
+  };
   useEffect(() => {
     const update = () => setToday(new Date());
     update();
@@ -106,6 +118,11 @@ function WeekCalendar() {
             })}
           </time>
         )}
+        {onViewPlayback && (
+          <button type="button" onClick={onViewPlayback}>
+            Xem lại ngày này ↗
+          </button>
+        )}
         {!isToday && (
           <button type="button" aria-label="Về hôm nay" onClick={() => setChosen(null)}>
             Hôm nay
@@ -123,6 +140,9 @@ export function TopHeader({
   onViewEvents,
   isDashboard = true,
   notificationControl,
+  selectedDate,
+  onSelectDate,
+  onViewPlayback,
 }: TopHeaderProps) {
   const status =
     pendingCount === null
@@ -173,7 +193,11 @@ export function TopHeader({
           </div>
         </div>
       </div>
-      <WeekCalendar />
+      <WeekCalendar
+        selectedDate={selectedDate}
+        onSelectDate={onSelectDate}
+        onViewPlayback={onViewPlayback}
+      />
     </header>
   );
 }

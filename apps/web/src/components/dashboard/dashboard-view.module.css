@@ -336,3 +336,36 @@
     opacity: 1;
   }
 }
+
+@media (min-width: 901px) {
+  .layoutWrapper[data-page='playback'] .mainContent {
+    height: calc(100dvh - 44px);
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .layoutWrapper[data-page='playback'] .workspace {
+    min-height: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+}
+
+@media (min-width: 901px) {
+  .layoutWrapper[data-page='playback'] .mainContent > header {
+    flex-shrink: 0;
+  }
+  .layoutWrapper[data-page='playback'] {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+@media (min-width: 901px) {
+  .layoutWrapper[data-page='playback'] .mainContent {
+    padding-bottom: 0;
+  }
+}

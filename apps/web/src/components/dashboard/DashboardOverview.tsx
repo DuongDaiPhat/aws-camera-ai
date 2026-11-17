@@ -12,6 +12,7 @@ import { fetchCameraDebugStream } from '@/lib/cameras-client';
 import { CameraLiveStream } from '@/components/cameras/CameraLiveStream';
 import { Icon } from '@/components/ui/Icon';
 import { SelectMenu } from '@/components/ui/SelectMenu';
+import { cameraGrid } from '@/lib/camera-grid';
 import { CameraAreas } from './CameraAreas';
 import styles from './dashboard-overview.module.css';
 
@@ -126,21 +127,21 @@ export function DashboardOverview({
     if (!isLoading && layoutReady) onReady?.();
   }, [isLoading, layoutReady, onReady]);
   const [page, setPage] = useState(0);
+  const [pinnedId, setPinnedId] = useState<string | null>(null);
   const [fullscreenId, setFullscreenId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const expandedRef = useDialogFocus(Boolean(expandedId) && !blocked, () => setExpandedId(null));
   const screenId = fullscreenId ?? expandedId;
   const panelRef = useRef<HTMLElement>(null);
-  const size = Math.max(
-    1,
-    Math.min(ordered.length || 1, layout === 'custom' ? custom : Number(layout)),
-  );
-  const pages = Math.max(1, Math.ceil(ordered.length / size));
-  const currentPage = Math.min(page, pages - 1);
+  const requested = layout === 'custom' ? custom : Number(layout);
+  const available = ordered.filter((camera) => camera.isEnabled);
+  const grid = cameraGrid(available, pinnedId, requested, page);
+  const pages = grid.pages,
+    currentPage = grid.currentPage;
   const visible =
     expandedId && expandedId !== 'camera-monitor'
-      ? ordered.filter((camera) => `live-${camera.id}` === expandedId)
-      : ordered.slice(currentPage * size, currentPage * size + size);
+      ? available.filter((camera) => 'live-' + camera.id === expandedId)
+      : grid.visible;
   const columns = visible.length <= 2 ? visible.length : visible.length <= 4 ? 2 : 3;
   useEffect(() => {
     const changed = () => setFullscreenId(document.fullscreenElement?.id ?? null);
@@ -160,8 +161,8 @@ export function DashboardOverview({
   }, [blocked]);
   function choose(id: string) {
     selectCamera(id);
-    const index = ordered.findIndex((camera) => camera.id === id);
-    if (index >= 0) setPage(Math.floor(index / size));
+    setPinnedId(id);
+    setPage(0);
   }
   async function fullscreen(element: HTMLElement | null) {
     if (expandedId) {
@@ -195,10 +196,10 @@ export function DashboardOverview({
             label="Chọn camera"
             tone="violet"
             value={selectedCamera?.id ?? ''}
-            disabled={!ordered.length}
+            disabled={!available.length}
             options={
-              ordered.length
-                ? ordered.map((camera) => ({ value: camera.id, label: camera.name }))
+              available.length
+                ? available.map((camera) => ({ value: camera.id, label: camera.name }))
                 : [{ value: '', label: 'Chưa có camera' }]
             }
             onChange={choose}
@@ -224,13 +225,13 @@ export function DashboardOverview({
               className={styles.customCount}
               type="number"
               min={1}
-              max={Math.max(1, ordered.length)}
+              max={64}
               aria-label="Số camera tùy chỉnh"
               value={custom}
               onChange={(event) => {
                 const value = Number(event.target.value);
                 if (Number.isInteger(value) && value > 0) {
-                  setCustom(Math.min(value, Math.max(1, ordered.length)));
+                  setCustom(Math.min(value, 64));
                   setPage(0);
                 }
               }}
@@ -257,6 +258,12 @@ export function DashboardOverview({
           </button>
         </div>
       )}
+      {!isLoading && requested > available.length && available.length > 0 && (
+        <p className={styles.preferenceNotice} role="status">
+          Bạn chỉ có {available.length} camera đang bật nên chỉ hiển thị {available.length} thay vì{' '}
+          {requested} khung.
+        </p>
+      )}
       {saveError && (
         <p className={styles.preferenceNotice} role="status">
           {saveError}
@@ -266,10 +273,12 @@ export function DashboardOverview({
         <div className={styles.placeholder} role="status">
           Đang tải camera…
         </div>
-      ) : !ordered.length ? (
+      ) : !available.length ? (
         <div className={styles.placeholder}>
           <Icon name="camera" size={32} />
-          <strong>Chưa có camera được cấp quyền</strong>
+          <strong>
+            {ordered.length ? 'Chưa có camera đang bật' : 'Chưa có camera được cấp quyền'}
+          </strong>
           <button type="button" onClick={() => onNavigate('cameras')}>
             Mở trang Camera
           </button>
@@ -310,7 +319,7 @@ export function DashboardOverview({
           </div>
           <footer className={styles.monitorFooter}>
             <span>
-              {visible.length} / {ordered.length} camera{' '}
+              {visible.length} / {available.length} camera{' '}
               <span className={styles.priorityHint}>· Theo ưu tiên khu vực</span>
             </span>
             <div>
@@ -378,7 +387,11 @@ export function DashboardOverview({
         onSaveOrder={(ids) => {
           const message = save(ids);
           setPage(0);
-          if (ids[0]) selectCamera(ids[0]);
+          setPinnedId(null);
+          const firstEnabled = ids.find((id) =>
+            cameras.some((camera) => camera.id === id && camera.isEnabled),
+          );
+          if (firstEnabled) selectCamera(firstEnabled);
           return message;
         }}
       />

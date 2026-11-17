@@ -1,3 +1,4 @@
+import { PlaybackModule } from './playback/playback.module';
 import { Module } from '@nestjs/common';
 import { KnownFacesModule } from './known-faces/known-faces.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -45,6 +46,7 @@ import { FireModule } from './fire/fire.module';
       }),
     }),
     DatabaseModule,
+    PlaybackModule,
     AuthModule,
     KnownFacesModule,
     AiResultsModule,

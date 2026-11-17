@@ -74,6 +74,84 @@ security:
   - bearerAuth: []
 
 paths:
+  /playback/cameras/{cameraId}/metadata:
+    get:
+      tags: [cameras]
+      operationId: getPlaybackMetadata
+      summary: Timestamped historical detections for an authorized recorded interval
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: cameraId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: startAt, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: endAt, in: query, required: true, schema: { type: string, format: date-time } }
+      responses:
+        "200":
+          description: Only persisted geometry; an empty archive does not imply negative AI results
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PlaybackMetadata" }
+        "400": { description: Invalid or overlong interval }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /playback/cameras:
+    get:
+      tags: [cameras]
+      operationId: listPlaybackCameras
+      summary: List cameras the current household member can replay
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Accessible camera archives
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/PlaybackCamera" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /playback/cameras/{cameraId}/recordings:
+    get:
+      tags: [cameras]
+      operationId: getRecordingDay
+      summary: List retained intervals for a date in the camera timezone
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: cameraId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: date, in: query, required: true, schema: { type: string, format: date } }
+      responses:
+        "200":
+          description: Recorded intervals; gaps contain no video
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RecordingDay" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "503": { description: Recording service unavailable }
+  /playback/cameras/{cameraId}/clip:
+    get:
+      tags: [cameras]
+      operationId: getRecordingClip
+      summary: Read an authenticated bounded MP4 interval with no recording gaps
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: cameraId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: startAt, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: endAt, in: query, required: true, schema: { type: string, format: date-time } }
+      responses:
+        "200":
+          description: Private MP4 clip, no-store
+          content:
+            video/mp4:
+              schema: { type: string, format: binary }
+        "400": { description: Invalid interval or duration exceeds configured maximum }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "413": { description: Clip exceeds configured byte limit }
+        "503": { description: Recording service unavailable }
+
   # ===================================================================
   # HEALTH
   # ===================================================================
@@ -1836,6 +1914,87 @@ components:
           schema: { $ref: "#/components/schemas/ErrorResponse" }
 
   schemas:
+    PlaybackBox:
+      type: object
+      required: [label, x, y, width, height, confidence]
+      properties:
+        label: { type: string, enum: [person, fall, fire, smoke] }
+        x: { type: number, minimum: 0, maximum: 1 }
+        y: { type: number, minimum: 0, maximum: 1 }
+        width: { type: number, minimum: 0, maximum: 1 }
+        height: { type: number, minimum: 0, maximum: 1 }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+    PlaybackMetadata:
+      type: object
+      required: [frames, events, toleranceMs]
+      properties:
+        toleranceMs: { type: integer }
+        frames:
+          type: array
+          items:
+            type: object
+            required: [at, boxes]
+            properties:
+              at: { type: string, format: date-time }
+              boxes:
+                type: array
+                items: { $ref: "#/components/schemas/PlaybackBox" }
+        events:
+          type: array
+          items:
+            type: object
+            required: [id, label, at]
+            properties:
+              id: { type: string }
+              label: { type: string, enum: [person, fall, fire, smoke] }
+              at: { type: string, format: date-time }
+    PlaybackCamera:
+      type: object
+      required: [id, name, timeZone, isEnabled, recordingEnabled, retentionDays]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        timeZone: { type: string }
+        isEnabled: { type: boolean }
+        recordingEnabled: { type: boolean }
+        retentionDays: { type: integer }
+    RecordingSegment:
+      type: object
+      required: [id, startAt, endAt, durationSeconds, hasMotion]
+      properties:
+        id: { type: string }
+        startAt: { type: string, format: date-time }
+        endAt: { type: string, format: date-time }
+        durationSeconds: { type: number }
+        hasMotion: { type: boolean }
+    RecordingDay:
+      type: object
+      required:
+        [
+          cameraId,
+          date,
+          timeZone,
+          dayStartAt,
+          dayEndAt,
+          recordingEnabled,
+          retentionDays,
+          isFutureDate,
+          segments,
+        ]
+      properties:
+        cameraId: { type: string, format: uuid }
+        date: { type: string, format: date }
+        timeZone: { type: string }
+        dayStartAt: { type: string, format: date-time }
+        dayEndAt: { type: string, format: date-time }
+        recordingEnabled: { type: boolean }
+        retentionDays: { type: integer }
+        isFutureDate: { type: boolean }
+        sourceStatus: { type: string, enum: [receiving, no_frames, unavailable] }
+        segments:
+          type: array
+          items: { $ref: "#/components/schemas/RecordingSegment" }
+
     # ---------------- Enum dung chung ----------------
     UserRole:
       type: string

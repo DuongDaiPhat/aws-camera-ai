@@ -31,8 +31,8 @@ function parsePreference(raw: string | null): Preference {
   }
 }
 
-export function useCameraLayout(userId?: string) {
-  const key = userId ? `cameraai.dashboard.camera-layout.${userId}` : null;
+export function useCameraLayout(userId?: string, scope: 'dashboard' | 'playback' = 'dashboard') {
+  const key = userId ? `cameraai.${scope}.camera-layout.${userId}` : null;
   const [state, setState] = useState<{ owner: string | null | undefined; preference: Preference }>({
     owner: undefined,
     preference: defaults,

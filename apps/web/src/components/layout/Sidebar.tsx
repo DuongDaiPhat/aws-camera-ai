@@ -19,6 +19,7 @@ interface SidebarProps {
 const navigation: SlidingTabItem[] = [
   { id: 'dashboard', label: 'Tổng quan', icon: 'grid' },
   { id: 'cameras', label: 'Camera', icon: 'camera' },
+  { id: 'playback', label: 'Xem lại thời gian', icon: 'history' },
   { id: 'events', label: 'Thông báo', icon: 'bell' },
   { id: 'known-faces', label: 'Người quen', icon: 'face' },
   { id: 'zones', label: 'Khu vực', icon: 'zone' },

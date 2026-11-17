@@ -1,3 +1,4 @@
+import { PlaybackFramesService } from '../playback/playback-frames.service';
 import { WellnessSourceAdapter } from '../wellness/wellness-source.adapter';
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -66,6 +67,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     @Optional() @InjectQueue('face-recognition') private readonly faceQueue?: Queue,
     @Optional() private readonly wellnessSource?: WellnessSourceAdapter,
     @Optional() private readonly poseFrameConsumer?: PoseFrameConsumer,
+    @Optional() private readonly playbackFrames?: PlaybackFramesService,
   ) {}
 
   onModuleInit(): void {
@@ -152,6 +154,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
         try {
           const payload: unknown = JSON.parse(buffer.toString('utf8'));
           this.detectionTracker.frames.accept(payload);
+          this.playbackFrames?.enqueue(payload);
           this.wellnessSource?.enqueueFrame(payload);
         } catch {
           this.logger.warn('Invalid camera frame metadata');

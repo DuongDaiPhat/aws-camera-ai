@@ -4,6 +4,74 @@
  */
 
 export interface paths {
+  '/playback/cameras/{cameraId}/metadata': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Timestamped historical detections for an authorized recorded interval */
+    get: operations['getPlaybackMetadata'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/playback/cameras': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List cameras the current household member can replay */
+    get: operations['listPlaybackCameras'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/playback/cameras/{cameraId}/recordings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List retained intervals for a date in the camera timezone */
+    get: operations['getRecordingDay'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/playback/cameras/{cameraId}/clip': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Read an authenticated bounded MP4 interval with no recording gaps */
+    get: operations['getRecordingClip'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/health': {
     parameters: {
       query?: never;
@@ -1079,6 +1147,65 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    PlaybackBox: {
+      /** @enum {string} */
+      label: 'person' | 'fall' | 'fire' | 'smoke';
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      confidence: number;
+    };
+    PlaybackMetadata: {
+      toleranceMs: number;
+      frames: {
+        /** Format: date-time */
+        at: string;
+        boxes: components['schemas']['PlaybackBox'][];
+      }[];
+      events: {
+        id: string;
+        /** @enum {string} */
+        label: 'person' | 'fall' | 'fire' | 'smoke';
+        /** Format: date-time */
+        at: string;
+      }[];
+    };
+    PlaybackCamera: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      timeZone: string;
+      isEnabled: boolean;
+      recordingEnabled: boolean;
+      retentionDays: number;
+    };
+    RecordingSegment: {
+      id: string;
+      /** Format: date-time */
+      startAt: string;
+      /** Format: date-time */
+      endAt: string;
+      durationSeconds: number;
+      hasMotion: boolean;
+    };
+    RecordingDay: {
+      /** Format: uuid */
+      cameraId: string;
+      /** Format: date */
+      date: string;
+      timeZone: string;
+      /** Format: date-time */
+      dayStartAt: string;
+      /** Format: date-time */
+      dayEndAt: string;
+      recordingEnabled: boolean;
+      retentionDays: number;
+      isFutureDate: boolean;
+      /** @enum {string} */
+      sourceStatus?: 'receiving' | 'no_frames' | 'unavailable';
+      segments: components['schemas']['RecordingSegment'][];
+    };
     /** @enum {string} */
     UserRole: 'ADMIN' | 'CAREGIVER' | 'VIEWER';
     /** @enum {string} */
@@ -2451,6 +2578,144 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  getPlaybackMetadata: {
+    parameters: {
+      query: {
+        startAt: string;
+        endAt: string;
+      };
+      header?: never;
+      path: {
+        cameraId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Only persisted geometry; an empty archive does not imply negative AI results */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlaybackMetadata'];
+        };
+      };
+      /** @description Invalid or overlong interval */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components['responses']['Unauthorized'];
+      404: components['responses']['NotFound'];
+    };
+  };
+  listPlaybackCameras: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Accessible camera archives */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            data: components['schemas']['PlaybackCamera'][];
+          };
+        };
+      };
+      401: components['responses']['Unauthorized'];
+    };
+  };
+  getRecordingDay: {
+    parameters: {
+      query: {
+        date: string;
+      };
+      header?: never;
+      path: {
+        cameraId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Recorded intervals; gaps contain no video */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RecordingDay'];
+        };
+      };
+      401: components['responses']['Unauthorized'];
+      404: components['responses']['NotFound'];
+      /** @description Recording service unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getRecordingClip: {
+    parameters: {
+      query: {
+        startAt: string;
+        endAt: string;
+      };
+      header?: never;
+      path: {
+        cameraId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Private MP4 clip, no-store */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'video/mp4': string;
+        };
+      };
+      /** @description Invalid interval or duration exceeds configured maximum */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components['responses']['Unauthorized'];
+      404: components['responses']['NotFound'];
+      /** @description Clip exceeds configured byte limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Recording service unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   getHealth: {
     parameters: {
       query?: never;

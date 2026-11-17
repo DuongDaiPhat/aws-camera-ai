@@ -22,20 +22,27 @@ export class FrigateConfigService {
   private readonly logger = new Logger(FrigateConfigService.name);
   constructor(private readonly config: ConfigService) {}
 
-  private fireRecording(
+  private continuousRecording(
     record: Record<string, unknown>,
     enabled: boolean,
   ): Record<string, unknown> {
-    if (!enabled || this.config.get<string>('M3_ENABLED') !== 'true') return record;
-    const days = Number(this.config.get<string | number>('FIRE_CONTINUOUS_RECORDING_DAYS', 1));
+    if (!enabled) return record;
+    const archiveDays = Number(
+      this.config.get<string | number>('PLAYBACK_CONTINUOUS_RECORDING_DAYS', 1),
+    );
+    const fireDays =
+      this.config.get<string>('M3_ENABLED') === 'true'
+        ? Number(this.config.get<string | number>('FIRE_CONTINUOUS_RECORDING_DAYS', 1))
+        : 0;
+    const days = Math.max(archiveDays, fireDays);
     if (!Number.isSafeInteger(days) || days < 1 || days > 30)
-      throw new Error('Invalid FIRE_CONTINUOUS_RECORDING_DAYS');
+      throw new Error('Invalid PLAYBACK_CONTINUOUS_RECORDING_DAYS');
     const existing = record.continuous;
     const continuous =
       existing && typeof existing === 'object' && !Array.isArray(existing) ? existing : {};
     const priorDays =
       'days' in continuous && typeof continuous.days === 'number' ? continuous.days : 0;
-    return { ...record, continuous: { ...continuous, days: Math.max(days, priorDays) } };
+    return { ...record, continuous: { ...continuous, days: Math.max(days, fireDays, priorDays) } };
   }
 
   generateUpdatedConfig(rawYaml: string, data: CameraFrigateData): string {
@@ -116,7 +123,7 @@ export class FrigateConfigService {
         bounding_box: settings?.snapshot_bounding_box ?? snapshots.bounding_box ?? true,
       },
       record: {
-        ...this.fireRecording(
+        ...this.continuousRecording(
           recordOptions,
           settings?.recording_enabled ?? record.enabled !== false,
         ),
@@ -219,7 +226,20 @@ export class FrigateConfigService {
   private resolveStreamUrl(camera: CameraAggregateRecord, mediamtxRtspBaseUrl: string): string {
     if (camera.source_type_val === 'RTSP') {
       const rtspUrl = camera.source_rtsp_url ?? camera.rtsp_url;
-      if (rtspUrl) return rtspUrl;
+      if (rtspUrl) {
+        const url = new URL(rtspUrl),
+          internal = new URL(mediamtxRtspBaseUrl);
+        if (url.hostname === internal.hostname && url.port === internal.port) {
+          url.username =
+            internal.username ||
+            this.config.get<string>('MEDIAMTX_PUBLISH_USERNAME', 'cam-internal');
+          url.password =
+            internal.password ||
+            this.config.get<string>('MEDIAMTX_PUBLISH_PASSWORD', 'local-dev-password');
+          return url.toString();
+        }
+        return rtspUrl;
+      }
     }
     return `${mediamtxRtspBaseUrl}/${camera.slug}`;
   }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { PlaybackView } from '@/components/playback/PlaybackView';
 import { NotificationBell, isPendingNotification } from './NotificationBell';
 import { DashboardOverview } from './DashboardOverview';
 import { useLoginEntrance } from '@/hooks/useLoginEntrance';
@@ -22,6 +23,7 @@ import styles from './dashboard-view.module.css';
 
 const PAGE_TITLES: Record<string, string> = {
   dashboard: 'Tổng quan',
+  playback: 'Xem lại thời gian',
   cameras: 'Camera trực tiếp',
   events: 'Thông báo',
   'known-faces': 'Người quen',
@@ -224,6 +226,7 @@ export function DashboardView() {
   const metrics = useEventStats(statsRefreshToken);
 
   const [activeNav, setActiveNav] = useState('dashboard');
+  const [calendarDate, setCalendarDate] = useState<Date | null>(null);
   const entrance = useLoginEntrance(user?.id);
   const navigate = (page: string) => {
     entrance.finish();
@@ -277,6 +280,9 @@ export function DashboardView() {
         )}
         <div className={styles.mainContent}>
           <TopHeader
+            selectedDate={calendarDate}
+            onSelectDate={setCalendarDate}
+            onViewPlayback={() => navigate('playback')}
             isDashboard={activeNav === 'dashboard'}
             userName={user?.fullName || 'bạn'}
             pendingCount={notificationCount}
@@ -296,7 +302,9 @@ export function DashboardView() {
           />
 
           <main key={activeNav} className={styles.workspace}>
-            {activeNav === 'wellness' ? (
+            {activeNav === 'playback' ? (
+              <PlaybackView selectedDate={calendarDate} userId={user?.id} />
+            ) : activeNav === 'wellness' ? (
               <WellnessView user={user} />
             ) : activeNav === 'cameras' ? (
               <CameraView user={user} />

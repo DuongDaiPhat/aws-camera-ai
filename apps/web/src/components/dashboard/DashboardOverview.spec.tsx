@@ -186,3 +186,29 @@ it('waits for an online camera before opening its stream', async () => {
     cameras[0] = original;
   }
 });
+
+it('explains a layout larger than enabled sources and pins a dropdown selection in multi view', async () => {
+  const removed = cameras.splice(4);
+  try {
+    localStorage.setItem(
+      'cameraai.dashboard.camera-layout.short',
+      JSON.stringify({ version: 1, layout: '6', custom: 3 }),
+    );
+    await act(async () =>
+      root.render(<DashboardOverview userId="short" isAdmin onNavigate={() => {}} />),
+    );
+    expect(tiles()).toHaveLength(4);
+    expect(host.textContent).toContain('4 camera đang bật');
+    expect(host.textContent).toContain('thay vì 6 khung');
+    await act(async () =>
+      host.querySelector<HTMLButtonElement>('[aria-label="Chọn camera"]')?.click(),
+    );
+    const option = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]')).find(
+      (item) => item.textContent === 'Camera 4',
+    );
+    await act(async () => option?.click());
+    expect(tiles()[0]?.id).toBe('live-c4');
+  } finally {
+    cameras.push(...removed);
+  }
+});
