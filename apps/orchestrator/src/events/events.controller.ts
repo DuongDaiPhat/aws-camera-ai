@@ -33,6 +33,8 @@ import { EventDetailDto } from './dto/event-detail-response.dto';
 import { EventStatsResponseDto } from './dto/event-stats-response.dto';
 import { ConfirmEventDto, CloseEventDto } from './dto/confirm-event.dto';
 import { ConfirmationResponseDto } from './dto/confirmation-response.dto';
+import { SosHelpDto } from './dto/sos-help.dto';
+import { EventSummaryDto } from './dto/event-summary-response.dto';
 
 @ApiTags('events')
 @ApiBearerAuth('bearer')
@@ -87,6 +89,26 @@ export class EventsController {
     return this.eventsService.streamEvents(token);
   }
 
+  @Post('sos')
+  @UseGuards(RolesGuard)
+  @Roles('VIEWER', 'CAREGIVER', 'ADMIN')
+  @ApiOperation({
+    summary: 'Gửi yêu cầu trợ giúp khẩn cấp (SOS) từ Viewer tới Caregiver trong hộ',
+    description:
+      'Tạo sự kiện mức P1 trạng thái ESCALATED, ghi nhận người gửi và đẩy thông báo real-time (SSE + Telegram) về cho Caregiver/Admin cùng hộ.',
+  })
+  @ApiBody({ type: SosHelpDto })
+  @ApiResponse({ status: 201, type: EventSummaryDto })
+  @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
+  @ApiResponse({ status: 403, description: 'Không có quyền thực hiện' })
+  async triggerSos(
+    @Body() dto: SosHelpDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<EventSummaryDto> {
+    const actorUserId = req.auth?.sub ?? '';
+    return await this.eventsService.triggerSos(actorUserId, dto);
+  }
+
   @Get(':eventId')
   @ApiOperation({
     summary: 'Chi tiết sự kiện kèm media, kết quả AI và lịch sử trạng thái (US-21)',
@@ -105,11 +127,11 @@ export class EventsController {
 
   @Post(':eventId/confirm')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CAREGIVER')
+  @Roles('ADMIN', 'CAREGIVER', 'VIEWER')
   @ApiOperation({
     summary: 'Xác nhận sự kiện ("Tôi ổn" / "Cần giúp đỡ") - FR-ESC-03/04 (US-13)',
     description:
-      'Chỉ ADMIN và CAREGIVER mới có quyền xác nhận. Nhận response IM_OK hoặc NEED_HELP.',
+      'ADMIN, CAREGIVER và VIEWER trong hộ có quyền xác nhận. Nhận response IM_OK hoặc NEED_HELP.',
   })
   @ApiParam({ name: 'eventId', type: 'string', format: 'uuid' })
   @ApiBody({ type: ConfirmEventDto })
@@ -130,10 +152,10 @@ export class EventsController {
 
   @Post(':eventId/close')
   @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'CAREGIVER')
+  @Roles('ADMIN', 'CAREGIVER', 'VIEWER')
   @ApiOperation({
     summary: 'Đóng sự kiện khẩn cấp sau khi tiếp nhận xử lý - FR-ESC-04/09 (US-13)',
-    description: 'Chỉ ADMIN và CAREGIVER mới có quyền đóng sự kiện khẩn cấp.',
+    description: 'ADMIN, CAREGIVER và VIEWER trong hộ có quyền đóng sự kiện khẩn cấp.',
   })
   @ApiParam({ name: 'eventId', type: 'string', format: 'uuid' })
   @ApiBody({ type: CloseEventDto })

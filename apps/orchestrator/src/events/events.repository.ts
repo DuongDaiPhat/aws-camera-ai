@@ -741,6 +741,99 @@ export class EventsRepository {
     );
     return res.rows[0]?.synced_version ?? 1;
   }
+
+  /**
+   * Tạo sự kiện cầu cứu khẩn cấp (SOS) do thành viên trong hộ bấm nút Yêu cầu trợ giúp,
+   * chuyển thẳng sang trạng thái ESCALATED và tạo thông báo Telegram tới Caregiver/Admin cùng hộ.
+   */
+  async createSosEvent(actorUserId: string, note?: string): Promise<string> {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      const userRes = await client.query<{
+        id: string;
+        full_name: string;
+        household_owner_id: string;
+      }>(
+        `SELECT id, full_name, COALESCE(household_owner_id, id) AS household_owner_id
+         FROM users
+         WHERE id = $1 AND is_active = TRUE
+         LIMIT 1`,
+        [actorUserId],
+      );
+      const actor = userRes.rows[0];
+      if (!actor) {
+        throw new Error(`Active user not found for SOS event: ${actorUserId}`);
+      }
+
+      const now = new Date();
+      const trimmedNote = note?.trim() || null;
+      const eventRes = await client.query<{ id: string }>(
+        `INSERT INTO events (
+           event_type, status, priority, source, detected_at, notified_at, escalated_at,
+           wellness_owner_user_id, wellness_resident_user_id, rule_snapshot, aggregate_version
+         )
+         VALUES (
+           'WELLNESS_TIMEOUT', 'ESCALATED', 'P1', 'MANUAL', $1, $1, $1,
+           $2, $3, $4::jsonb, 1
+         )
+         RETURNING id`,
+        [
+          now,
+          actor.household_owner_id,
+          actor.id,
+          JSON.stringify({
+            priority: 'P1',
+            source: 'MANUAL_SOS',
+            requesterUserId: actor.id,
+            requesterName: actor.full_name,
+            note: trimmedNote,
+          }),
+        ],
+      );
+      const eventId = eventRes.rows[0].id;
+
+      await client.query(
+        `INSERT INTO event_status_history (
+           event_id, from_status, to_status, reason, actor_type, actor_user_id, channel, metadata
+         )
+         VALUES (
+           $1, 'NOTIFIED', 'ESCALATED', 'VIEWER_SOS_HELP', 'USER', $2, 'DASHBOARD',
+           jsonb_build_object('source', 'MANUAL_SOS', 'requesterName', $3::text, 'note', $4::text)
+         )`,
+        [eventId, actor.id, actor.full_name, trimmedNote],
+      );
+
+      await client.query(
+        `INSERT INTO notifications (
+           event_id, recipient_user_id, channel, status, escalation_level, payload
+         )
+         SELECT $1, u.id, 'TELEGRAM', 'PENDING', 1,
+                jsonb_build_object(
+                  'eventType', 'WELLNESS_TIMEOUT',
+                  'priority', 'P1',
+                  'source', 'MANUAL_SOS',
+                  'requesterUserId', $2::text,
+                  'requesterName', $3::text,
+                  'note', $4::text
+                )
+         FROM users u
+         WHERE u.is_active = TRUE
+           AND u.role IN ('ADMIN', 'CAREGIVER')
+           AND shares_camera_household($2::uuid, u.id)`,
+        [eventId, actor.id, actor.full_name, trimmedNote],
+      );
+
+      await client.query('COMMIT');
+      return eventId;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
 }
 
 export interface FilterConditionsResult {

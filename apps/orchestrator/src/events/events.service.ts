@@ -30,6 +30,7 @@ import type {
 import type { EventStatsResponseDto } from './dto/event-stats-response.dto';
 import type { ConfirmEventDto, CloseEventDto } from './dto/confirm-event.dto';
 import type { ConfirmationResponseDto } from './dto/confirmation-response.dto';
+import type { SosHelpDto } from './dto/sos-help.dto';
 import { DEFAULT_STATS_WINDOW_HOURS } from './dto/get-event-stats-query.dto';
 
 const PRESIGNED_URL_TTL_SECONDS = 900; // 15 phút (FR-EVT-07)
@@ -217,6 +218,20 @@ export class EventsService {
     }
 
     return result;
+  }
+
+  /**
+   * Tạo sự kiện cầu cứu khẩn cấp (SOS) do Viewer bấm nút Yêu cầu trợ giúp và phát SSE ngay cho Caregiver.
+   */
+  async triggerSos(actorUserId: string, dto: SosHelpDto): Promise<EventSummaryDto> {
+    const eventId = await this.eventsRepository.createSosEvent(actorUserId, dto.note);
+    const summary = await this.eventsRepository.findEventSummaryById(eventId);
+    if (!summary) {
+      throw new NotFoundException(`Sự kiện SOS ${eventId} không tồn tại sau khi tạo`);
+    }
+    const summaryDto = await this.toEventSummary(summary);
+    this.emitEvent(summaryDto, 'event.created', eventRecipients(summary));
+    return summaryDto;
   }
 
   private toEventDetail(
