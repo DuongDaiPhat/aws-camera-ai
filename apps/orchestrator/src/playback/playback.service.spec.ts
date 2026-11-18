@@ -24,6 +24,38 @@ describe('Recording archive policy and gaps', () => {
     jest.clearAllMocks();
     repo.cameras.mockResolvedValue([camera]);
   });
+  it('returns and grows saved footage while the same camera remains enabled and receiving', async () => {
+    const now = jest.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-11-17T12:00:00Z'));
+    const start = Date.parse('2026-11-17T10:00:00Z') / 1000;
+    const receiving = jest.fn().mockResolvedValue(true);
+    const activeArchive = {
+      list: jest.fn().mockResolvedValue([{ start, end: start + 600, motion: false }]),
+      clip: jest.fn(),
+      receivingFrames: receiving,
+    };
+    const activeRepo = {
+      cameras: jest
+        .fn()
+        .mockResolvedValue([{ ...camera, isEnabled: true, recordingEnabled: true }]),
+    };
+    const activeService = new PlaybackService(
+      activeRepo as unknown as PlaybackRepository,
+      activeArchive,
+      new ConfigService(),
+    );
+    try {
+      const first = await activeService.day(actor, 'camera', '2026-11-17');
+      expect(first.sourceStatus).toBe('receiving');
+      expect(first.segments[0].startAt).toBe(new Date(start * 1000).toISOString());
+      activeArchive.list.mockResolvedValue([{ start, end: start + 7190, motion: false }]);
+      const latest = await activeService.day(actor, 'camera', '2026-11-17');
+      expect(Date.parse(latest.segments.at(-1)!.endAt)).toBe((start + 7190) * 1000);
+      expect(activeRepo.cameras.mock.results).toHaveLength(2);
+      expect(latest.sourceStatus).toBe('receiving');
+    } finally {
+      now.mockRestore();
+    }
+  });
   it('hides inaccessible cameras and never reads the archive', async () => {
     repo.cameras.mockResolvedValue([]);
     await expect(service.day(actor, 'other', '2026-11-16')).rejects.toThrow('Không tìm thấy');

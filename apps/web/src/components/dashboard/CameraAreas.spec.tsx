@@ -5,8 +5,24 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Camera } from '@/types';
 import { CameraAreas } from './CameraAreas';
 import { useCameraOrder } from '@/hooks/useCameraOrder';
+import type { LiveStreamStatus } from '@/components/cameras/live/camera-reader';
 
-vi.mock('@/hooks/useCameraSnapshot', () => ({ useCameraSnapshot: () => ({ preview: null }) }));
+let playbackStatus: LiveStreamStatus = 'connecting';
+
+vi.mock('@/components/cameras/LiveCameraViewport', () => ({
+  LiveCameraViewport: ({
+    camera,
+    onStatusChange,
+  }: {
+    camera: Camera;
+    onStatusChange?: (status: LiveStreamStatus) => void;
+  }) => {
+    React.useEffect(() => {
+      onStatusChange?.(playbackStatus);
+    }, [onStatusChange, playbackStatus]);
+    return <span data-live-camera={camera.id} />;
+  },
+}));
 const cameras = Array.from(
   { length: 6 },
   (_, i) =>
@@ -44,6 +60,7 @@ function Harness({
   );
 }
 beforeEach(() => {
+  playbackStatus = 'connecting';
   localStorage.clear();
   toggle.mockClear();
   Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', {
@@ -53,6 +70,19 @@ beforeEach(() => {
   host = document.createElement('div');
   document.body.append(host);
   root = createRoot(host);
+});
+
+it('uses actual video playback for online labels instead of stale camera metadata', async () => {
+  await act(async () => root.render(<Harness />));
+  expect(host.querySelectorAll('[data-online=true]')).toHaveLength(0);
+  expect(host.textContent).not.toContain('Trực tuyến');
+  playbackStatus = 'live';
+  await act(async () => root.render(<Harness />));
+  expect(host.querySelectorAll('[data-online=true]')).toHaveLength(4);
+  playbackStatus = 'unavailable';
+  await act(async () => root.render(<Harness />));
+  expect(host.querySelectorAll('[data-online=true]')).toHaveLength(0);
+  expect(host.textContent).toContain('Chưa có tín hiệu');
 });
 afterEach(async () => {
   await act(async () => root.unmount());

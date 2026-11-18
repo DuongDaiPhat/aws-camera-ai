@@ -24,3 +24,5 @@ paths:
     source: publisher
   cam_test:
     source: publisher
+  cam_study_room:
+    source: publisher

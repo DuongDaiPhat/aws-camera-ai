@@ -9,6 +9,19 @@ const segment = (id: string, start: number, end: number): RecordingSegment => ({
   hasMotion: false,
 });
 describe('Continuous recording presentation', () => {
+  it('groups actual encoder boundary gaps while preserving capture time and real outages', () => {
+    const items = [
+      segment('a', 0, 9.986),
+      segment('b', 10, 19.922),
+      segment('c', 20, 30),
+      segment('outage', 40, 50),
+    ];
+    const sessions = recordingSessions(items);
+    expect(sessions.map((value) => value.segments.length)).toEqual([3, 1]);
+    expect(nextRecording(items, items[0])?.contiguous).toBe(true);
+    expect(nextRecording(items, items[1])?.segment.startAt).toBe(new Date(20000).toISOString());
+    expect(nextRecording(items, items[2])?.contiguous).toBe(false);
+  });
   it('adds hourly bookmarks for a full-day stream while preserving seek offsets', () => {
     const sessions = recordingSessions([segment('long', 0, 10800)]);
     expect(sessions).toHaveLength(3);

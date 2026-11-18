@@ -35,7 +35,9 @@ export class PlaybackController {
   @Get() cameras(@Req() req: AuthenticatedRequest): Promise<{ data: PlaybackCamera[] }> {
     return this.playback.cameras(this.actor(req));
   }
-  @Get(':id/recordings') day(
+  @Get(':id/recordings')
+  @Header('Cache-Control', 'private, no-store')
+  day(
     @Req() req: AuthenticatedRequest,
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: RecordingDayQuery,
@@ -43,6 +45,7 @@ export class PlaybackController {
     return this.playback.day(this.actor(req), id, query.date);
   }
   @Get(':id/metadata')
+  @Header('Cache-Control', 'private, no-store')
   metadataForInterval(
     @Req() req: AuthenticatedRequest,
     @Param('id', ParseUUIDPipe) id: string,

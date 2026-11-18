@@ -1,0 +1,44 @@
+.signals {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  max-width: calc(100% - 16px);
+  gap: 5px;
+  pointer-events: none;
+}
+.signals span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border: 1px solid #38bdf880;
+  border-radius: 6px;
+  background: #082f49e6;
+  color: white;
+  font-size: clamp(9px, 1vw, 11px);
+  line-height: 1.3;
+  font-weight: 650;
+}
+.signals [data-signal='fire'] {
+  background: #9f1239ed;
+  border-color: #fb7185;
+  animation: alertGlow 1.4s ease-in-out infinite;
+}
+.signals [data-signal='fall'],
+.signals [data-signal='stranger'] {
+  background: #78350fed;
+  border-color: #fbbf24;
+}
+@keyframes alertGlow {
+  50% {
+    box-shadow: 0 0 0 3px #fb718533;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .signals [data-signal='fire'] {
+    animation: none;
+  }
+}

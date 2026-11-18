@@ -6,7 +6,7 @@ The daily list groups touching recording chunks and adds hourly navigation bookm
 
 ## Recording
 
-Frigate recording no longer depends on enabling the fire module. PLAYBACK_CONTINUOUS_RECORDING_DAYS defaults to 1; explicitly disabled recording stays disabled. Internal MediaMTX reads use the configured internal credentials. Only retained, finalized recording segments can be replayed; a camera must actually send frames. The first finalized segment may take several seconds to appear.
+Frigate recording no longer depends on enabling the fire module. PLAYBACK_CONTINUOUS_RECORDING_DAYS defaults to 30 days; explicitly disabled recording stays disabled. Internal MediaMTX reads use the configured internal credentials. Only retained, finalized recording segments can be replayed; a camera must actually send frames. The first finalized segment may take several seconds to appear. Storage segments of about 10 seconds and PLAYBACK_MAX_CLIP_SECONDS (default 120) bound individual playback downloads, not the total archive. The daily list can cover a full day and the calendar selects earlier retained days. Increasing retention preserves future available footage; it cannot recover footage that was never received or already deleted. Adequate disk capacity and an uninterrupted camera publisher are required. Video is stored in the persistent frigatemedia volume. Historical detection geometry has its own retention below.
 
 ## Historical detections
 

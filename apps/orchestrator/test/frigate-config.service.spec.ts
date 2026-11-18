@@ -46,11 +46,13 @@ describe('FrigateConfigService', () => {
   it('keeps recording before a fire even without a person or motion trigger when M3 is enabled', () => {
     const fireService = new FrigateConfigService(new ConfigService({ M3_ENABLED: 'true' }));
     const config = YAML.parse(fireService.generateUpdatedConfig('', { camera: mockCamera }));
-    expect(config.cameras[mockCamera.slug].record.continuous.days).toBe(1);
+    expect(config.cameras[mockCamera.slug].record.continuous.days).toBe(30);
   });
 
   it('honors an explicit recording disable and preserves longer existing continuous retention', () => {
-    const fireService = new FrigateConfigService(new ConfigService({ M3_ENABLED: 'true' }));
+    const fireService = new FrigateConfigService(
+      new ConfigService({ M3_ENABLED: 'true', PLAYBACK_CONTINUOUS_RECORDING_DAYS: 1 }),
+    );
     const prior = `cameras:\n  ${mockCamera.slug}:\n    record:\n      continuous:\n        days: 3\n`;
     const config = YAML.parse(fireService.generateUpdatedConfig(prior, { camera: mockCamera }));
     expect(config.cameras[mockCamera.slug].record.continuous.days).toBe(3);
@@ -78,6 +80,7 @@ describe('FrigateConfigService', () => {
     expect(parsed.cameras.camera_cong_chinh.detect.fps).toBe(5);
     expect(parsed.cameras.camera_cong_chinh.detect.min_initialized).toBeGreaterThanOrEqual(2);
     expect(parsed.cameras.camera_cong_chinh.record.retain).toBeUndefined();
+    expect(parsed.cameras.camera_cong_chinh.record.continuous.days).toBe(30);
     expect(parsed.cameras.camera_cong_chinh.record.detections.retain.days).toBe(7);
     expect(parsed.cameras.camera_cong_chinh.record.alerts.retain.days).toBe(7);
   });

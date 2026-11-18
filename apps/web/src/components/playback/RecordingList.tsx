@@ -59,6 +59,17 @@ export function RecordingList({
         </button>
       </div>
       <p className={styles.listCamera}>{cameraName || 'Chọn camera'} · Theo giờ ghi hình</p>
+      {day?.sourceStatus === 'receiving' && (
+        <p role="status" className={styles.notice}>
+          Đang ghi liên tục. Bạn có thể xem các đoạn đã lưu mà không cần tắt camera.
+          {day.segments.length > 0 && (
+            <>
+              {' '}
+              Đã lưu đến {recordingTime(day.segments[day.segments.length - 1].endAt, day.timeZone)}.
+            </>
+          )}
+        </p>
+      )}
       {error && (
         <p role="status" className={styles.notice}>
           {error} Dữ liệu đã tải vẫn được giữ lại.

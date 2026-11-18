@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import type { Camera } from '@/types';
-import type { CameraDebugStream } from '@/lib/cameras-client';
-import { fetchCameraDebugStream } from '@/lib/cameras-client';
-import { CameraLiveStream } from './CameraLiveStream';
-import { PersonBoxLayer } from './debug/PersonBoxLayer';
+import { CameraStreamViewport } from './CameraStreamViewport';
+import { useCameraDebugStream } from './live/use-camera-debug-stream';
+import { CameraAnnotations } from './CameraAnnotations';
 import { useLivePersonDetections } from './live/use-live-person-detections';
 import { CameraStatusBadge } from './CameraStatusBadge';
 import { useWebcamSession } from './source/webcam-session-manager';
+import { hasLiveSource } from './live/live-stream-state';
+import type { LiveStreamStatus } from './live/camera-reader';
 import styles from './styles/camera-grid.module.css';
 
 function GridTileOsd({
@@ -66,41 +67,8 @@ export function CameraGridTile({
   onToggleState,
   onToggleFocus,
 }: CameraGridTileProps) {
-  const [debugData, setDebugData] = useState<CameraDebugStream | null>(null);
-  const [hasError, setHasError] = useState(false);
-
-  useEffect(() => {
-    let isCancelled = false;
-    let inFlight = false;
-    const loadStream = () => {
-      if (!camera.isEnabled) {
-        setDebugData(null);
-        return;
-      }
-      if (inFlight) return;
-      inFlight = true;
-      fetchCameraDebugStream(camera.id)
-        .then((data) => {
-          if (!isCancelled) {
-            setDebugData(data);
-            setHasError(false);
-          }
-        })
-        .catch(() => {
-          if (!isCancelled) setHasError(true);
-        })
-        .finally(() => {
-          inFlight = false;
-        });
-    };
-
-    void loadStream();
-    const interval = camera.isEnabled ? setInterval(loadStream, showDetections ? 80 : 1000) : null;
-    return () => {
-      isCancelled = true;
-      if (interval) clearInterval(interval);
-    };
-  }, [camera.id, camera.isEnabled, showDetections]);
+  const [playback, setPlayback] = useState<{ id: string; status: LiveStreamStatus } | null>(null);
+  const { data: debugData, error: hasError } = useCameraDebugStream(camera.id, camera.isEnabled);
 
   const personDetections = useLivePersonDetections(
     debugData,
@@ -112,10 +80,15 @@ export function CameraGridTile({
 
   const { isPublishing: isWebcamPublishing } = useWebcamSession(camera.id);
   const isWebcamActive = camera.sourceType === 'BROWSER_WEBCAM' && isWebcamPublishing;
-  const isLive =
-    camera.isEnabled &&
-    (camera.runtimeStatus === 'ONLINE' || Boolean(debugData?.streamUrl) || isWebcamActive);
-  const effectiveStatus = isLive ? 'ONLINE' : camera.runtimeStatus;
+  const canRead = hasLiveSource(camera, isWebcamActive);
+  const isLive = canRead && playback?.id === camera.id && playback.status === 'live';
+  const effectiveStatus = isLive
+    ? 'ONLINE'
+    : camera.runtimeStatus === 'ONLINE'
+      ? playback?.status === 'unavailable'
+        ? 'FAILED'
+        : 'STARTING'
+      : camera.runtimeStatus;
   const resolution =
     camera.detectWidth && camera.detectHeight
       ? `${camera.detectWidth}x${camera.detectHeight}`
@@ -150,12 +123,22 @@ export function CameraGridTile({
         }}
         title={`${camera.name} - Bấm để phóng to hoặc chọn`}
       >
-        {isLive && debugData?.streamUrl && !hasError ? (
-          <CameraLiveStream
+        {canRead && debugData?.streamUrl ? (
+          <CameraStreamViewport
             streamUrl={debugData.streamUrl}
             title={camera.name}
-            className={styles.videoFrame}
-          />
+            width={camera.detectWidth}
+            height={camera.detectHeight}
+            onStatusChange={(status) => setPlayback({ id: camera.id, status })}
+          >
+            {isLive && showDetections && (
+              <CameraAnnotations
+                cameraId={camera.id}
+                people={personDetections}
+                height={overlayHeight}
+              />
+            )}
+          </CameraStreamViewport>
         ) : (
           <div className={styles.noSignalWrapper}>
             <div className={styles.crosshair} />
@@ -167,19 +150,6 @@ export function CameraGridTile({
                   : 'ĐANG KẾT NỐI LUỒNG...'}
             </span>
           </div>
-        )}
-
-        {isLive && showDetections && (
-          <svg className={styles.detectionSvgOverlay} viewBox={`0 0 1000 ${overlayHeight}`}>
-            {personDetections.map((person) => (
-              <PersonBoxLayer
-                key={person.id}
-                person={person}
-                height={overlayHeight}
-                showFootpoint={false}
-              />
-            ))}
-          </svg>
         )}
 
         {showOsd && (

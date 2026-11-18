@@ -479,9 +479,15 @@
 }
 
 .preferenceNotice {
-  margin: 0 0 9px;
-  font-size: 11px;
-  color: #8b6b9f;
+  margin: 0 0 10px;
+  padding: 9px 12px;
+  border: 1px solid #cbb4e8;
+  border-radius: 9px;
+  background: #f1e8fc;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.5;
+  color: #563079;
 }
 
 @media (max-width: 600px) {

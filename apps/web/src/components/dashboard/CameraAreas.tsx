@@ -13,14 +13,15 @@ import {
   ArrowDown,
 } from 'lucide-react';
 import type { Camera } from '@/types';
-import { useCameraSnapshot } from '@/hooks/useCameraSnapshot';
+import { LiveCameraViewport } from '@/components/cameras/LiveCameraViewport';
+import type { LiveStreamStatus } from '@/components/cameras/live/camera-reader';
 import { useDialogFocus } from '@/hooks/useDialogFocus';
 import { Icon } from '@/components/ui/Icon';
 import { reconcileCameraOrder, moveCamera } from '@/lib/camera-order';
 import styles from './camera-areas.module.css';
 
 const labels: Record<string, string> = {
-  ONLINE: 'Trực tuyến',
+  ONLINE: 'Đang kết nối',
   OFFLINE: 'Ngoại tuyến',
   STARTING: 'Đang kết nối',
   FAILED: 'Lỗi kết nối',
@@ -31,15 +32,26 @@ function AreaCard({
   camera,
   selected,
   editing = false,
+  paused = false,
   onSelect,
 }: {
   camera: Camera;
   selected: boolean;
   editing?: boolean;
+  paused?: boolean;
   onSelect: () => void;
 }) {
-  const { preview } = useCameraSnapshot(camera.isEnabled ? camera.id : null, false);
-  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const [playback, setPlayback] = useState<LiveStreamStatus>('connecting');
+  const online = camera.isEnabled && !paused && playback === 'live';
+  const label = !camera.isEnabled
+    ? labels.DISABLED
+    : online
+      ? 'Trực tuyến'
+      : playback === 'unavailable'
+        ? 'Chưa có tín hiệu'
+        : playback === 'unsupported'
+          ? 'Chưa hỗ trợ xem trực tiếp'
+          : (labels[camera.runtimeStatus] ?? 'Đang kết nối');
   return (
     <button
       type="button"
@@ -50,30 +62,11 @@ function AreaCard({
       onClick={onSelect}
     >
       <span className={styles.image}>
-        {preview?.url && preview.url !== failedUrl ? (
-          <img
-            src={preview.url}
-            width={320}
-            height={180}
-            alt=""
-            loading="lazy"
-            draggable={false}
-            onError={() => setFailedUrl(preview.url)}
-          />
-        ) : (
-          <span className={styles.artwork}>
-            <Icon name="camera" size={26} />
-          </span>
-        )}
-        <span
-          className={styles.dot}
-          data-online={camera.isEnabled && camera.runtimeStatus === 'ONLINE'}
-        />
+        <LiveCameraViewport camera={camera} compact paused={paused} onStatusChange={setPlayback} />
+        <span className={styles.dot} data-online={online} />
       </span>
       <strong title={camera.name}>{camera.name}</strong>
-      <small>
-        {labels[camera.isEnabled ? camera.runtimeStatus : 'DISABLED'] ?? camera.runtimeStatus}
-      </small>
+      <small>{label}</small>
     </button>
   );
 }
@@ -165,6 +158,7 @@ export function CameraAreas({
                 <AreaCard
                   camera={camera}
                   selected={camera.id === selectedId}
+                  paused={open}
                   onSelect={() => onSelect(camera.id)}
                 />
               </div>

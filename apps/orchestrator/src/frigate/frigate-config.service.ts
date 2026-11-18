@@ -28,7 +28,7 @@ export class FrigateConfigService {
   ): Record<string, unknown> {
     if (!enabled) return record;
     const archiveDays = Number(
-      this.config.get<string | number>('PLAYBACK_CONTINUOUS_RECORDING_DAYS', 1),
+      this.config.get<string | number>('PLAYBACK_CONTINUOUS_RECORDING_DAYS', 30),
     );
     const fireDays =
       this.config.get<string>('M3_ENABLED') === 'true'

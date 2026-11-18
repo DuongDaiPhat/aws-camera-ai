@@ -7,7 +7,7 @@ export function listPlaybackCameras(signal: AbortSignal) {
 export function getRecordingDay(cameraId: string, date: string, signal: AbortSignal) {
   return apiFetch<RecordingDay>(
     '/playback/cameras/' + cameraId + '/recordings?date=' + encodeURIComponent(date),
-    { signal },
+    { signal, cache: 'no-store' },
   );
 }
 export function getRecordingClip(cameraId: string, segment: RecordingSegment, signal: AbortSignal) {

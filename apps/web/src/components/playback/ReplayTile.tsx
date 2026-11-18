@@ -27,10 +27,12 @@ export function ReplayTile({ camera, day, primary, command, onActive, error }: P
       play: boolean;
     } | null>(null),
     [gap, setGap] = useState('');
+  const [waitingForRecording, setWaitingForRecording] = useState(false);
   const select = useCallback(
     (segment: RecordingSegment, seek = 0, play = false) => {
       setActive((old) => ({ segment, seek, nonce: (old?.nonce ?? 0) + 1, play }));
       setGap('');
+      setWaitingForRecording(false);
       if (primary)
         onActive(camera.id, new Date(Date.parse(segment.startAt) + seek * 1000).toISOString());
     },
@@ -62,14 +64,26 @@ export function ReplayTile({ camera, day, primary, command, onActive, error }: P
     ? (day?.segments.findIndex((item) => item.startAt === active.segment.startAt) ?? -1)
     : -1;
   const previous = index > 0 ? day?.segments[index - 1] : null;
+  useEffect(() => {
+    if (waitingForRecording && next?.contiguous) select(next.segment, next.seekSeconds, true);
+  }, [
+    waitingForRecording,
+    next?.segment.startAt,
+    next?.segment.endAt,
+    next?.seekSeconds,
+    next?.contiguous,
+    select,
+  ]);
   const ended = () => {
     if (next?.contiguous) select(next.segment, next.seekSeconds, true);
-    else
+    else {
+      setWaitingForRecording(!next && day?.sourceStatus === 'receiving');
       setGap(
         next
           ? 'Không có dữ liệu đến ' + recordingTime(next.segment.startAt, camera.timeZone)
           : 'Đã đến cuối bản ghi hiện có. Danh sách sẽ tiếp tục tự cập nhật.',
       );
+    }
   };
   return (
     <div className={styles.replayTile} data-primary={primary}>

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getCurrentUser, logout } from '@/lib/auth-client';
 import type { CurrentUser } from '@/types';
+import { stopAllWebcamSessions } from '@/components/cameras/source/webcam-session-manager';
 
 export function useAuth() {
   const router = useRouter();
@@ -29,6 +30,7 @@ export function useAuth() {
   }, []);
 
   const handleLogout = useCallback(async () => {
+    stopAllWebcamSessions();
     try {
       if ((await logout()) === 'redirect') return;
     } catch {

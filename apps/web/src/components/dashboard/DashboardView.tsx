@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { CameraSignalsProvider } from '@/components/cameras/live/CameraSignals';
 import { PlaybackView } from '@/components/playback/PlaybackView';
 import { NotificationBell, isPendingNotification } from './NotificationBell';
 import { DashboardOverview } from './DashboardOverview';
@@ -248,7 +249,7 @@ export function DashboardView() {
     : null;
 
   return (
-    <>
+    <CameraSignalsProvider events={events}>
       <div
         className={styles.layoutWrapper}
         data-sidebar-expanded={sidebarExpanded}
@@ -369,6 +370,6 @@ export function DashboardView() {
           onCloseEmergency={closeEmergency}
         />
       )}
-    </>
+    </CameraSignalsProvider>
   );
 }

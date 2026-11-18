@@ -343,6 +343,7 @@ services:
       - "${PORT_WEB:-3000}:3000"
     volumes:
       - ./apps/web/src:/workspace/apps/web/src
+      - ./apps/web/next.config.mjs:/workspace/apps/web/next.config.mjs:ro
       - ./packages/contracts/src:/workspace/packages/contracts/src
       - ./packages/contracts/dist:/workspace/packages/contracts/dist
     logging: *default-logging

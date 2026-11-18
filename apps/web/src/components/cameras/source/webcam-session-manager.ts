@@ -13,8 +13,19 @@ export interface WebcamSessionState {
   error: string | null;
 }
 
-const sessions = new Map<string, WebcamSessionState>();
-const listeners = new Map<string, Set<(session: WebcamSessionState) => void>>();
+// The publisher belongs to the browser session, never to a page or video reader.
+interface WebcamStore {
+  sessions: Map<string, WebcamSessionState>;
+  listeners: Map<string, Set<(session: WebcamSessionState) => void>>;
+  unloadAttached: boolean;
+}
+const browser = globalThis as typeof globalThis & { __cameraAiWebcams?: WebcamStore };
+const store: WebcamStore = (browser.__cameraAiWebcams ??= {
+  sessions: new Map(),
+  listeners: new Map(),
+  unloadAttached: false,
+});
+const { sessions, listeners } = store;
 
 function getOrCreateSession(cameraId: string): WebcamSessionState {
   let session = sessions.get(cameraId);
@@ -105,7 +116,14 @@ export async function startWebcamPublish(
   onSourceUpdated?: () => void,
 ): Promise<void> {
   const current = getOrCreateSession(cameraId);
-  if (current.isStarting) return;
+  if (
+    current.isStarting ||
+    (current.isPublishing &&
+      current.pc &&
+      current.pc.connectionState !== 'closed' &&
+      current.pc.connectionState !== 'failed')
+  )
+    return;
   updateSession(cameraId, { isStarting: true, error: null });
 
   try {
@@ -169,12 +187,13 @@ export function stopAllWebcamSessions(): void {
     if (session.stream) {
       session.stream.getTracks().forEach((t) => t.stop());
     }
-    void revokeBrowserPublishSession(cameraId).catch(() => undefined);
+    if (session.pc) void revokeBrowserPublishSession(cameraId).catch(() => undefined);
   }
   sessions.clear();
 }
 
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && !store.unloadAttached) {
+  store.unloadAttached = true;
   window.addEventListener('beforeunload', () => {
     stopAllWebcamSessions();
   });

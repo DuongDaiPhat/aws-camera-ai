@@ -8,88 +8,24 @@ import type { Camera } from '@/types';
 import { useCameras } from '@/hooks/useCameras';
 import { useCameraLayout } from '@/hooks/useCameraLayout';
 import { useCameraOrder } from '@/hooks/useCameraOrder';
-import { fetchCameraDebugStream } from '@/lib/cameras-client';
-import { CameraLiveStream } from '@/components/cameras/CameraLiveStream';
+import { LiveCameraViewport } from '@/components/cameras/LiveCameraViewport';
 import { Icon } from '@/components/ui/Icon';
 import { SelectMenu } from '@/components/ui/SelectMenu';
 import { cameraGrid } from '@/lib/camera-grid';
 import { CameraAreas } from './CameraAreas';
 import styles from './dashboard-overview.module.css';
 
-const LiveCamera = memo(
-  function LiveCamera({ camera }: { camera: Camera }) {
-    const [streamUrl, setStreamUrl] = useState<string | null>(null);
-    const [error, setError] = useState(false);
-    useEffect(() => {
-      let cancelled = false;
-      let inFlight = false;
-      setStreamUrl(null);
-      setError(false);
-      if (!camera.isEnabled || camera.runtimeStatus !== 'ONLINE') return;
-      const load = async () => {
-        if (inFlight) return;
-        inFlight = true;
-        try {
-          const result = await fetchCameraDebugStream(camera.id);
-          if (!cancelled) {
-            setStreamUrl(result.streamUrl || null);
-            setError(false);
-          }
-        } catch {
-          if (!cancelled) {
-            setStreamUrl(null);
-            setError(true);
-          }
-        } finally {
-          inFlight = false;
-        }
-      };
-      void load();
-      const interval = setInterval(() => void load(), 2000);
-      return () => {
-        cancelled = true;
-        clearInterval(interval);
-      };
-    }, [camera.id, camera.isEnabled, camera.runtimeStatus]);
-
-    return (
-      <div className={styles.liveFrame}>
-        {streamUrl ? (
-          <CameraLiveStream
-            streamUrl={streamUrl}
-            title={camera.name}
-            className={styles.liveVideo}
-          />
-        ) : (
-          <div className={styles.noSignal} role="status">
-            <Icon name="camera" size={42} />
-            <strong>
-              {!camera.isEnabled
-                ? 'Camera đang tắt'
-                : error || camera.runtimeStatus === 'OFFLINE' || camera.runtimeStatus === 'FAILED'
-                  ? 'Chưa kết nối được camera'
-                  : 'Đang chờ luồng camera'}
-            </strong>
-            <span>
-              {!camera.isEnabled
-                ? 'Mở trang Camera để quản lý nguồn phát.'
-                : 'Hình ảnh sẽ xuất hiện khi nguồn phát sẵn sàng.'}
-            </span>
-          </div>
-        )}
-        <span className={styles.frameLabel}>
-          <Icon name="camera" size={15} />
-          {camera.name}
-        </span>
-      </div>
-    );
-  },
-  (previous, next) =>
-    previous.camera.id === next.camera.id &&
-    previous.camera.name === next.camera.name &&
-    previous.camera.isEnabled === next.camera.isEnabled &&
-    previous.camera.runtimeStatus === next.camera.runtimeStatus,
-);
+const LiveCamera = memo(function LiveCamera({ camera }: { camera: Camera }) {
+  return (
+    <div className={styles.liveFrame}>
+      <LiveCameraViewport camera={camera} />
+      <span className={styles.frameLabel}>
+        <Icon name="camera" size={15} />
+        {camera.name}
+      </span>
+    </div>
+  );
+});
 
 export function DashboardOverview({
   userId,
@@ -195,7 +131,7 @@ export function DashboardOverview({
           <SelectMenu
             label="Chọn camera"
             tone="violet"
-            value={selectedCamera?.id ?? ''}
+            value={visible[0]?.id ?? selectedCamera?.id ?? ''}
             disabled={!available.length}
             options={
               available.length
@@ -259,9 +195,9 @@ export function DashboardOverview({
         </div>
       )}
       {!isLoading && requested > available.length && available.length > 0 && (
-        <p className={styles.preferenceNotice} role="status">
-          Bạn chỉ có {available.length} camera đang bật nên chỉ hiển thị {available.length} thay vì{' '}
-          {requested} khung.
+        <p className={styles.preferenceNotice} role="alert">
+          Hiện tại chỉ có tối đa {available.length} camera đang bật. Bố cục tối đa là{' '}
+          {available.length}, thay vì {requested} khung.
         </p>
       )}
       {saveError && (
@@ -299,7 +235,7 @@ export function DashboardOverview({
                 key={camera.id}
                 id={`live-${camera.id}`}
                 className={styles.tile}
-                data-selected={camera.id === selectedCamera?.id}
+                data-selected={camera.id === (visible[0]?.id ?? selectedCamera?.id)}
               >
                 <LiveCamera camera={camera} />
                 <button
@@ -376,7 +312,7 @@ export function DashboardOverview({
         : monitor}
       <CameraAreas
         cameras={ordered}
-        selectedId={selectedCamera?.id}
+        selectedId={visible[0]?.id ?? selectedCamera?.id}
         onSelect={choose}
         isLoading={isLoading}
         isAdmin={isAdmin}

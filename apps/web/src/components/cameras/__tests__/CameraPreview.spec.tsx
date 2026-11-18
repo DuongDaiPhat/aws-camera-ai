@@ -101,7 +101,9 @@ describe('CameraPreview & 2 Toggle Overlay Components', () => {
     expect(html).toContain('Person boundary: ON');
     expect(html).toContain('Zone boundary: ON');
     expect(html).toContain('No current person detections');
-    expect(html).toContain('ONLINE');
+    // Server rendering cannot confirm a playing video, even with stale ONLINE metadata.
+    expect(html).toContain('STARTING');
+    expect(html).not.toContain('ONLINE');
     expect(html).toContain('RES: 1280x720');
     expect(html).toContain('FPS: 5');
     expect(html).toContain('Camera zones');

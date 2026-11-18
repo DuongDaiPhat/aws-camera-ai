@@ -5,7 +5,9 @@ export interface RecordingSession {
   endAt: string;
   segments: RecordingSegment[];
 }
-const CONTIGUOUS_MS = 1;
+// Adjacent encoder files can be separated by a frame boundary, not a source outage.
+const CONTIGUOUS_MS = 500;
+const END_GROWTH_MS = 1;
 export function recordingSessions(
   segments: RecordingSegment[],
   timeZone = 'UTC',
@@ -57,7 +59,7 @@ export function recordingSessions(
 export function nextRecording(segments: RecordingSegment[], current: RecordingSegment) {
   const end = Date.parse(current.endAt);
   const continuation = segments.find(
-    (item) => Date.parse(item.startAt) <= end && Date.parse(item.endAt) > end + CONTIGUOUS_MS,
+    (item) => Date.parse(item.startAt) <= end && Date.parse(item.endAt) > end + END_GROWTH_MS,
   );
   if (continuation)
     return {

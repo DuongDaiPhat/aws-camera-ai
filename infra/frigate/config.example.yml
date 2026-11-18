@@ -90,7 +90,7 @@ snapshots:
 record:
   enabled: true
   continuous:
-    days: 1 # Continuous archive for playback, independent of AI triggers.
+    days: 30 # Retain all footage for 30 days, independent of AI triggers.
   motion:
     days: 1
   alerts:

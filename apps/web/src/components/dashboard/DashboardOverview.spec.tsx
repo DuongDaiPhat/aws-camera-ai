@@ -30,7 +30,7 @@ vi.mock('@/hooks/useCameras', () => ({
     toggleLoadingMap: {},
   }),
 }));
-vi.mock('@/hooks/useCameraSnapshot', () => ({ useCameraSnapshot: () => ({ preview: null }) }));
+
 let root: Root, host: HTMLDivElement;
 beforeEach(() => {
   Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', {
@@ -170,18 +170,22 @@ it('recovers from invalid preferences without overwriting saved data on first lo
   expect(localStorage.getItem(key)).toBe('{bad json');
 });
 
-it('waits for an online camera before opening its stream', async () => {
+it('waits for an actual source even when the API has issued a stream URL', async () => {
   vi.mocked(fetchCameraDebugStream).mockClear();
   const original = cameras[0]!;
   try {
     cameras[0] = { ...original, runtimeStatus: 'STARTING' };
     await act(async () => root.render(<DashboardOverview isAdmin onNavigate={() => {}} />));
-    expect(fetchCameraDebugStream).not.toHaveBeenCalled();
-    expect(host.querySelector('iframe')).toBeNull();
+    expect(fetchCameraDebugStream).toHaveBeenCalledWith(original.id, expect.any(AbortSignal));
+    expect(host.querySelectorAll('video[data-stream-url]')).toHaveLength(0);
     cameras[0] = { ...original, runtimeStatus: 'ONLINE' };
     await act(async () => root.render(<DashboardOverview isAdmin onNavigate={() => {}} />));
-    expect(fetchCameraDebugStream).toHaveBeenCalledWith(original.id);
-    expect(host.querySelector('iframe')?.getAttribute('src')).toBe('/ready-stream');
+    expect(fetchCameraDebugStream).toHaveBeenCalledWith(original.id, expect.any(AbortSignal));
+    expect(
+      host
+        .querySelector<HTMLVideoElement>('video[data-stream-url]')
+        ?.getAttribute('data-stream-url'),
+    ).toBe('/ready-stream');
   } finally {
     cameras[0] = original;
   }
@@ -212,3 +216,18 @@ it('explains a layout larger than enabled sources and pins a dropdown selection 
     cameras.push(...removed);
   }
 });
+
+vi.mock('@/components/cameras/CameraLiveStream', () => ({
+  CameraLiveStream: ({
+    streamUrl,
+    onStatusChange,
+  }: {
+    streamUrl: string;
+    onStatusChange?: (status: 'live') => void;
+  }) => {
+    React.useEffect(() => {
+      onStatusChange?.('live');
+    }, [streamUrl]);
+    return <video data-stream-url={streamUrl} />;
+  },
+}));
