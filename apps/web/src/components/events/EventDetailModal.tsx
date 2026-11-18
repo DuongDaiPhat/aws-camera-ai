@@ -20,6 +20,8 @@ interface EventDetailModalProps {
   onToggleFalseAlarm?: (eventId: string) => void;
   requireReview?: boolean;
   onReview?: () => void;
+  readOnly?: boolean;
+  canCloseEmergency?: boolean;
 }
 
 const PERSON_STATUS_LABELS: Record<string, string> = {
@@ -172,6 +174,8 @@ export function EventDetailModal({
   onToggleFalseAlarm,
   requireReview = false,
   onReview,
+  readOnly = false,
+  canCloseEmergency = true,
 }: EventDetailModalProps) {
   const { detail, isLoading, error, reload } = useEventDetail(event);
   const ref = useDialogFocus(Boolean(event), requireReview ? undefined : onClose);
@@ -287,6 +291,8 @@ export function EventDetailModal({
           requireReview={requireReview}
           canReview={Boolean(detail || error)}
           onReview={onReview}
+          readOnly={readOnly}
+          canCloseEmergency={canCloseEmergency}
         />
       </div>
     </div>

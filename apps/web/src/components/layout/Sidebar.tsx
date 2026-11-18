@@ -27,6 +27,13 @@ const navigation: SlidingTabItem[] = [
   { id: 'settings', label: 'Cài đặt', icon: 'settings' },
   { id: 'users', label: 'Quản lý tài khoản', icon: 'users' },
 ];
+const viewerNavigation: SlidingTabItem[] = [
+  { id: 'dashboard', label: 'Trang của tôi', icon: 'grid' },
+  { id: 'cameras', label: 'Camera trực tiếp', icon: 'camera' },
+  { id: 'playback', label: 'Xem lại', icon: 'history' },
+  { id: 'events', label: 'Thông báo của tôi', icon: 'bell' },
+  { id: 'settings', label: 'Cài đặt cá nhân', icon: 'settings' },
+];
 const roles: Record<string, string> = {
   ADMIN: 'Quản trị viên',
   CAREGIVER: 'Người giám sát',
@@ -44,17 +51,19 @@ export function Sidebar({
   expanded,
   onToggle,
 }: SidebarProps) {
-  const items = navigation
-    .filter((item) => item.id !== 'users' || user?.role === 'ADMIN')
-    .map((item) => ({
-      ...item,
-      count:
-        item.id === 'events'
-          ? unresolvedEventCount
-          : item.id === 'cameras'
-            ? onlineCameraCount
-            : undefined,
-    }));
+  const isViewer = user?.role === 'VIEWER';
+  const baseNavigation = isViewer
+    ? viewerNavigation
+    : navigation.filter((item) => item.id !== 'users' || user?.role === 'ADMIN');
+  const items = baseNavigation.map((item) => ({
+    ...item,
+    count:
+      item.id === 'events'
+        ? unresolvedEventCount
+        : item.id === 'cameras'
+          ? onlineCameraCount
+          : undefined,
+  }));
   const initials =
     user?.fullName
       ?.trim()

@@ -16,6 +16,7 @@ interface FireAttentionProps {
   onConfirmOk: (id: string, note?: string) => Promise<void>;
   onConfirmHelp: (id: string, note?: string) => Promise<void>;
   onCloseEmergency: (id: string, note?: string) => Promise<void>;
+  canCloseEmergency?: boolean;
 }
 
 function AttentionSnapshot({ event }: { event: UIEventItem }) {

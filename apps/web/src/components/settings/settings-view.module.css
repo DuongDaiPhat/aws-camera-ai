@@ -554,3 +554,71 @@
 .pageTitle svg {
   flex: none;
 }
+
+/* Viewer Personal Settings */
+.viewerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px;
+}
+
+.viewerCardTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.viewerCardBody {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.viewerFieldRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--surface-muted);
+}
+
+.viewerFieldRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.viewerFieldLabel {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.viewerFieldValue {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.viewerHint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-secondary);
+}
+
+.viewerToggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.viewerSavedNotice {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--primary, #6d28d9);
+}

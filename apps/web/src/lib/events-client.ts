@@ -208,3 +208,11 @@ export function subscribeEventsStream(handlers: EventsStreamHandlers): () => voi
     eventSource.close();
   };
 }
+
+export async function triggerSosHelp(note?: string): Promise<UIEventItem> {
+  const summary = await apiFetch<EventSummary>('/events/sos', {
+    method: 'POST',
+    body: JSON.stringify(note ? { note } : {}),
+  });
+  return toUIEventItem(summary);
+}

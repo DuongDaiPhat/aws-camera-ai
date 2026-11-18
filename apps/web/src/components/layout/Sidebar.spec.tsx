@@ -29,9 +29,21 @@ describe('Merged sidebar navigation', () => {
     expect(html).toContain('Xem lại thời gian');
     expect(html).toContain('Quản lý tài khoản');
   });
-  it.each(['CAREGIVER', 'VIEWER'] as const)('keeps account management hidden for %s', (role) => {
-    const html = render(role);
+  it('keeps account management hidden for CAREGIVER', () => {
+    const html = render('CAREGIVER');
     expect(html).toContain('Xem lại thời gian');
     expect(html).not.toContain('>Quản lý tài khoản<');
+  });
+  it('shows only Viewer pages and hides Caregiver/Admin pages for VIEWER', () => {
+    const html = render('VIEWER');
+    expect(html).toContain('Trang của tôi');
+    expect(html).toContain('Camera trực tiếp');
+    expect(html).toContain('Xem lại');
+    expect(html).toContain('Thông báo của tôi');
+    expect(html).toContain('Cài đặt cá nhân');
+    expect(html).not.toContain('>Quản lý tài khoản<');
+    expect(html).not.toContain('>Người quen<');
+    expect(html).not.toContain('>Khu vực<');
+    expect(html).not.toContain('>Sức khỏe<');
   });
 });

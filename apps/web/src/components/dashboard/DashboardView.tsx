@@ -5,6 +5,7 @@ import { CameraSignalsProvider } from '@/components/cameras/live/CameraSignals';
 import { PlaybackView } from '@/components/playback/PlaybackView';
 import { NotificationBell, isPendingNotification } from './NotificationBell';
 import { DashboardOverview } from './DashboardOverview';
+import { ViewerHome } from './ViewerHome';
 import { useLoginEntrance } from '@/hooks/useLoginEntrance';
 import { useFireAttention } from '@/hooks/useFireAttention';
 import { FireAttention } from '@/components/events/FireAttention';
@@ -33,6 +34,14 @@ const PAGE_TITLES: Record<string, string> = {
   wellness: 'Kiểm tra sức khỏe',
   settings: 'Cài đặt cảnh báo',
   users: 'Quản lý tài khoản',
+};
+
+const VIEWER_PAGE_TITLES: Record<string, string> = {
+  dashboard: 'Trang của tôi',
+  cameras: 'Camera trực tiếp',
+  playback: 'Xem lại',
+  events: 'Thông báo của tôi',
+  settings: 'Cài đặt cá nhân',
 };
 
 function EventsListSection({
@@ -157,10 +166,14 @@ function DashboardEventDetails({
   event,
   actions,
   onClose,
+  readOnly = false,
+  canManageEvents = true,
 }: {
   event: UIEventItem | null;
   actions: ReturnType<typeof useEvents>;
   onClose: () => void;
+  readOnly?: boolean;
+  canManageEvents?: boolean;
 }) {
   const after =
     (action: (id: string, note?: string) => Promise<void>) => async (id: string, note?: string) => {
@@ -171,13 +184,19 @@ function DashboardEventDetails({
     <EventDetailModal
       event={event}
       onClose={onClose}
+      readOnly={readOnly}
+      canCloseEmergency={canManageEvents}
       onConfirmOk={after(actions.confirmOk)}
       onConfirmHelp={after(actions.confirmHelp)}
-      onCloseEmergency={after(actions.closeEmergency)}
-      onToggleFalseAlarm={(id) => {
-        actions.toggleFalseAlarm(id);
-        onClose();
-      }}
+      onCloseEmergency={canManageEvents ? after(actions.closeEmergency) : undefined}
+      onToggleFalseAlarm={
+        canManageEvents
+          ? (id) => {
+              actions.toggleFalseAlarm(id);
+              onClose();
+            }
+          : undefined
+      }
     />
   );
 }
@@ -218,6 +237,7 @@ function HistoryContent({
 
 export function DashboardView() {
   const { user, handleLogout } = useAuth();
+  const isViewer = user?.role === 'VIEWER';
   const eventState = useEvents();
   const { events, liveNoticeText, confirmOk, confirmHelp, closeEmergency } = eventState;
   const attention = useFireAttention(events, user?.id);
@@ -289,7 +309,11 @@ export function DashboardView() {
             isDashboard={activeNav === 'dashboard'}
             userName={user?.fullName || 'bạn'}
             pendingCount={notificationCount}
-            pageTitle={PAGE_TITLES[activeNav] ?? PAGE_TITLES.dashboard}
+            pageTitle={
+              isViewer
+                ? (VIEWER_PAGE_TITLES[activeNav] ?? VIEWER_PAGE_TITLES.dashboard)
+                : (PAGE_TITLES[activeNav] ?? PAGE_TITLES.dashboard)
+            }
             onViewEvents={() => navigate('events')}
             notificationControl={
               <NotificationBell
@@ -307,18 +331,26 @@ export function DashboardView() {
           <main key={activeNav} className={styles.workspace}>
             {activeNav === 'playback' ? (
               <PlaybackView selectedDate={calendarDate} userId={user?.id} />
-            ) : activeNav === 'wellness' ? (
-              <WellnessView user={user} />
             ) : activeNav === 'cameras' ? (
               <CameraView user={user} />
             ) : activeNav === 'settings' ? (
               <SettingsView user={user} />
-            ) : activeNav === 'users' && user?.role === 'ADMIN' ? (
+            ) : !isViewer && activeNav === 'wellness' ? (
+              <WellnessView user={user} />
+            ) : !isViewer && activeNav === 'users' && user?.role === 'ADMIN' ? (
               <UsersView currentUserId={user.id} />
-            ) : activeNav === 'known-faces' ? (
+            ) : !isViewer && activeNav === 'known-faces' ? (
               <KnownFacesView isAdmin={user?.role === 'ADMIN'} />
-            ) : activeNav === 'zones' ? (
+            ) : !isViewer && activeNav === 'zones' ? (
               <ZonesView user={user} />
+            ) : isViewer && activeNav !== 'events' ? (
+              <ViewerHome
+                userName={user?.fullName}
+                events={events}
+                onNavigate={navigate}
+                onViewEvent={setSelectedEventForModal}
+                onReady={entrance.onReady}
+              />
             ) : (
               <>
                 {activeNav !== 'dashboard' && liveNoticeText && (
@@ -340,7 +372,7 @@ export function DashboardView() {
                   userId={user?.id}
                   isAdmin={user?.role === 'ADMIN'}
                   blocked={Boolean(attention.event)}
-                  overview={activeNav === 'dashboard'}
+                  overview={!isViewer && activeNav === 'dashboard'}
                   state={eventState}
                   metrics={metrics}
                   onNavigate={navigate}
@@ -356,12 +388,14 @@ export function DashboardView() {
           event={attention.event ? null : selectedEvent}
           actions={eventState}
           onClose={() => setSelectedEventForModal(null)}
+          canManageEvents={!isViewer}
         />
       </div>
       {attention.event && (
         <FireAttention
           key={fireReviewKey(attention.event)}
           event={attention.event}
+          canCloseEmergency={!isViewer}
           onReviewed={() => {
             if (attention.event) attention.review(attention.event.id);
           }}
