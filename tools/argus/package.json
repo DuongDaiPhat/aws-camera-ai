@@ -1,0 +1,12 @@
+{
+  "name": "@cam/argus-dev-cli",
+  "version": "0.0.1",
+  "private": true,
+  "description": "ArgusAI development mode switcher",
+  "bin": {
+    "argus": "./cli.mjs"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

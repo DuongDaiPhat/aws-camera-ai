@@ -68,3 +68,7 @@ pnpm-debug.log*
 *.postman_collection.json
 .postman/
 postman/
+
+# ---- Tai lieu nguon su that CI/CD (Dev -> Staging -> Production) giua cac agent (KHONG commit) ----
+docs/CI_CD_STAGING_SOURCE_OF_TRUTH.md
+docs/CI_CD_PRODUCTION_SOURCE_OF_TRUTH.md

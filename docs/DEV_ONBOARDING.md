@@ -7,6 +7,7 @@
 
 - [1. Cần cài gì](#1-cần-cài-gì)
 - [2. Chạy lần đầu](#2-chạy-lần-đầu)
+- [Chuyển giữa Dev Local và Dev Cloud](#chuyển-giữa-dev-local-và-dev-cloud)
 - [3. Cấu trúc monorepo](#3-cấu-trúc-monorepo)
 - [4. Các cổng dịch vụ](#4-các-cổng-dịch-vụ)
 - [5. Lệnh hay dùng](#5-lệnh-hay-dùng)
@@ -184,6 +185,29 @@ activate lại. Đây chính là lý do nên dùng `pnpm check:ai`.
 </details>
 
 ---
+
+### Chuyển giữa Dev Local và Dev Cloud
+
+Chạy ở thư mục gốc sau khi đã thiết lập môi trường Docker Compose dev.
+
+| Lệnh                | Chế độ                                                      |
+| ------------------- | ----------------------------------------------------------- |
+| `pnpm argus local`  | JWT, MinIO, face local và BullMQ                            |
+| `pnpm argus cloud`  | Cognito, S3, Rekognition, SQS và bộ nhận kết quả            |
+| `pnpm argus status` | Xem chế độ trong `.env` và mode vận chuyển trong PostgreSQL |
+
+Để gọi trực tiếp `argus local`, `argus cloud` hay `argus status`, chạy `npm link --ignore-scripts` một lần trong `tools/argus`. Lệnh `argus` trỏ tới bản checkout đã liên kết.
+
+**Thiết lập Cloud một lần.** Điền các nhóm sau vào `.env` bằng thông tin môi trường AWS dev của nhóm.
+
+- AWS và S3 gồm `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `S3_BUCKET` và `AWS_SESSION_TOKEN` nếu dùng thông tin xác thực tạm thời.
+- Cognito gồm `COGNITO_USER_POOL_ID`, `COGNITO_CLIENT_ID`, `COGNITO_DOMAIN`. Thêm `/auth/callback` và URL đăng xuất của web dev vào Allowed callback URLs và Allowed sign-out URLs của app client. Liên kết tài khoản PostgreSQL với user Cognito trước khi thử đăng nhập.
+- SQS gồm `FACE_JOBS_QUEUE_URL`, `NOTIFICATION_JOBS_QUEUE_URL`, `APPLICATION_RESULTS_QUEUE_URL`. Mỗi URL phải trỏ tới một Standard queue riêng trong `AWS_REGION`. Chỉ chạy một bộ nhận kết quả trên mỗi Results queue khi các máy dùng PostgreSQL riêng.
+- `INTERNAL_SERVICE_TOKEN` dài ít nhất 32 ký tự. Để Lambda dev gọi về máy qua HTTPS tunnel, cấu hình URL nội bộ và token tương ứng trên Lambda. Đăng ký Rekognition collection của owner trong `cloud_face_collections` trước khi thử xử lý job khuôn mặt.
+
+Argus cập nhật `.env`, đổi mode PostgreSQL khi Orchestrator đã dừng và tạo lại `ai-service`, `orchestrator` và `web`. Khi sang Cloud, Argus sao lưu PostgreSQL tại `artifacts/argus/` trước khi đổi mode hoặc áp dụng các migration Cloud `0017`–`0019` còn thiếu. DB cũ hơn `0016` cần cập nhật schema trước. Argus giữ các giá trị cloud trong `.env` cho lần chuyển sau và tạo `JWT_SECRET` nếu còn trống khi về Local.
+
+Nếu dịch vụ mới khởi động lỗi, Argus thử khôi phục `.env`, mode vận chuyển và các dịch vụ dev đang chạy trước đó. Migration đã áp dụng vẫn có hiệu lực. Nếu tiến trình bị ngắt và còn `.env.argus-lock`, kiểm tra lần chạy trước đã kết thúc, xóa thư mục khóa rồi chạy lại chế độ cần dùng để đồng bộ.
 
 ## 3. Cấu trúc monorepo
 
