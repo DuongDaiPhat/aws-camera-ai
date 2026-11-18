@@ -29,7 +29,6 @@ const navigation: SlidingTabItem[] = [
 ];
 const viewerNavigation: SlidingTabItem[] = [
   { id: 'dashboard', label: 'Trang của tôi', icon: 'grid' },
-  { id: 'cameras', label: 'Camera trực tiếp', icon: 'camera' },
   { id: 'playback', label: 'Xem lại', icon: 'history' },
   { id: 'events', label: 'Thông báo của tôi', icon: 'bell' },
   { id: 'settings', label: 'Cài đặt cá nhân', icon: 'settings' },

@@ -37,10 +37,10 @@ describe('Merged sidebar navigation', () => {
   it('shows only Viewer pages and hides Caregiver/Admin pages for VIEWER', () => {
     const html = render('VIEWER');
     expect(html).toContain('Trang của tôi');
-    expect(html).toContain('Camera trực tiếp');
     expect(html).toContain('Xem lại');
     expect(html).toContain('Thông báo của tôi');
     expect(html).toContain('Cài đặt cá nhân');
+    expect(html).not.toContain('>Camera trực tiếp<');
     expect(html).not.toContain('>Quản lý tài khoản<');
     expect(html).not.toContain('>Người quen<');
     expect(html).not.toContain('>Khu vực<');

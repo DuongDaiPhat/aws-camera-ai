@@ -22,6 +22,7 @@ interface TopHeaderProps {
   pageTitle?: string;
   onViewEvents?: () => void;
   isDashboard?: boolean;
+  leadingAction?: ReactNode;
   notificationControl?: ReactNode;
 }
 function dayKey(date: Date) {
@@ -139,6 +140,7 @@ export function TopHeader({
   pageTitle = 'Tổng quan',
   onViewEvents,
   isDashboard = true,
+  leadingAction,
   notificationControl,
   selectedDate,
   onSelectDate,
@@ -166,6 +168,7 @@ export function TopHeader({
             </span>
           </div>
           <div className={styles.greetingActions}>
+            {leadingAction}
             {notificationControl ?? (
               <button
                 type="button"

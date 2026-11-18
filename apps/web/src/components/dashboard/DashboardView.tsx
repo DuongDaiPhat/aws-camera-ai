@@ -5,7 +5,7 @@ import { CameraSignalsProvider } from '@/components/cameras/live/CameraSignals';
 import { PlaybackView } from '@/components/playback/PlaybackView';
 import { NotificationBell, isPendingNotification } from './NotificationBell';
 import { DashboardOverview } from './DashboardOverview';
-import { ViewerHome } from './ViewerHome';
+import { triggerSosHelp } from '@/lib/events-client';
 import { useLoginEntrance } from '@/hooks/useLoginEntrance';
 import { useFireAttention } from '@/hooks/useFireAttention';
 import { FireAttention } from '@/components/events/FireAttention';
@@ -257,6 +257,24 @@ export function DashboardView() {
   };
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [selectedEventForModal, setSelectedEventForModal] = useState<UIEventItem | null>(null);
+  const [sosBusy, setSosBusy] = useState(false);
+  const [sosNotice, setSosNotice] = useState<{ text: string; isError?: boolean } | null>(null);
+
+  const handleHeaderSos = async () => {
+    setSosBusy(true);
+    setSosNotice(null);
+    try {
+      await triggerSosHelp();
+      setSosNotice({ text: 'Đã gửi yêu cầu trợ giúp khẩn cấp tới người chăm sóc trong hộ.' });
+    } catch (err) {
+      setSosNotice({
+        text: err instanceof Error ? err.message : 'Không thể gửi yêu cầu trợ giúp.',
+        isError: true,
+      });
+    } finally {
+      setSosBusy(false);
+    }
+  };
   const attentionId = attention.event?.id;
   useEffect(() => {
     if (attentionId) {
@@ -273,7 +291,7 @@ export function DashboardView() {
       <div
         className={styles.layoutWrapper}
         data-sidebar-expanded={sidebarExpanded}
-        data-page={activeNav}
+        data-page={isViewer && activeNav === 'dashboard' ? 'cameras' : activeNav}
         data-login-entry={entrance.phase}
         ref={(node) => {
           if (node) node.inert = Boolean(attention.event);
@@ -315,6 +333,18 @@ export function DashboardView() {
                 : (PAGE_TITLES[activeNav] ?? PAGE_TITLES.dashboard)
             }
             onViewEvents={() => navigate('events')}
+            leadingAction={
+              isViewer ? (
+                <button
+                  type="button"
+                  className={styles.headerSosButton}
+                  disabled={sosBusy || Boolean(attention.event)}
+                  onClick={() => void handleHeaderSos()}
+                >
+                  {sosBusy ? 'Đang gửi…' : 'Yêu cầu trợ giúp'}
+                </button>
+              ) : undefined
+            }
             notificationControl={
               <NotificationBell
                 events={events}
@@ -329,6 +359,14 @@ export function DashboardView() {
           />
 
           <main key={activeNav} className={styles.workspace}>
+            {sosNotice && (
+              <p
+                className={`${styles.sosBanner} ${sosNotice.isError ? styles.sosBannerError : ''}`}
+                role={sosNotice.isError ? 'alert' : 'status'}
+              >
+                {sosNotice.text}
+              </p>
+            )}
             {activeNav === 'playback' ? (
               <PlaybackView selectedDate={calendarDate} userId={user?.id} />
             ) : activeNav === 'cameras' ? (
@@ -344,13 +382,7 @@ export function DashboardView() {
             ) : !isViewer && activeNav === 'zones' ? (
               <ZonesView user={user} />
             ) : isViewer && activeNav !== 'events' ? (
-              <ViewerHome
-                userName={user?.fullName}
-                events={events}
-                onNavigate={navigate}
-                onViewEvent={setSelectedEventForModal}
-                onReady={entrance.onReady}
-              />
+              <CameraView user={user} />
             ) : (
               <>
                 {activeNav !== 'dashboard' && liveNoticeText && (
