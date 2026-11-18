@@ -1,274 +1,129 @@
-# Người A — Làm đăng nhập và gửi thông báo
+# Người A — Nghiệm thu Cognito và hoàn thiện thông báo AWS E2E (Dev → Staging → Production)
 
-Bạn chỉ cần làm theo file này. Đọc từ trên xuống, làm xong một phần rồi sang phần tiếp theo. Những tên tiếng Anh in đậm là tên nút trên AWS; những tên trong dấu `...` là tên biến hoặc tên trong mã nguồn, cần giữ nguyên.
+Baseline của plan là `c3250bd` trên nhánh `feat/us-29-argus-dev-mode`. Người A được cấp quyền chủ động **tự tạo, cấu hình và vận hành các dịch vụ thuộc phạm vi của A** xuyên suốt **Dev → Staging (`https://argusai-staging.duckdns.org`) → Production (`https://argusai.dynv6.net/login`)**, từ lúc code local đến nghiệm thu E2E trên Production.
 
-Mục tiêu cuối cùng: người dùng đăng nhập trên trang web của nhóm, chỉ xem được dữ liệu được phép, nhận được thông báo từ một sự kiện thật và xác nhận ngay trên ứng dụng. Tài liệu này chỉ hướng dẫn hoàn thiện tính năng trên bản dùng chung để demo đồ án. Các bài làm quen dịch vụ nằm ở bộ lab khác; ở đây không tạo tài nguyên thử riêng.
+- **Phạm vi services A tự chủ:** Cognito App Client/Test Users, Notification Intent/Claim/Outcome API & UI, SNS Topics (Incident Email / SMS nếu khả dụng), Lambda Sender (`*-sender`), IAM execution role của Sender, SQS Event Source Mapping từ `*-notification-jobs`, và Amazon Connect (Instance/Outbound Contact Flow nếu đủ điều kiện tài khoản).
+- **Phối hợp với Repo Owner (Dương Đại Phát):** Khi cần thêm hoặc đổi **GitHub Actions Secrets / Variables** hay **duyệt deploy Environment `production`**, A ghi rõ danh sách cần cập nhật trong PR/bàn giao gửi **Dương Đại Phát** thực hiện trên GitHub Settings (không đưa giá trị secret vào Git).
+- **Tham chiếu kiểm kê thực tế (local gitignored):** `docs/CI_CD_STAGING_SOURCE_OF_TRUTH.md` và `docs/CI_CD_PRODUCTION_SOURCE_OF_TRUTH.md`.
 
-**Đi tới phần đang làm (vẫn trong file này):** [Bạn làm gì, cần ai giúp?](#1-bạn-làm-gì-cần-ai-giúp) · [Chuẩn bị trên máy của bạn](#2-chuẩn-bị-trên-máy-của-bạn) · [Nhận cấu hình Cognito và chuẩn bị tài khoản](#3-nhận-cấu-hình-cognito-và-chuẩn-bị-tài-khoản) · [Nối đăng nhập vào ứng dụng](#4-nối-đăng-nhập-vào-ứng-dụng) · [Nối kênh nhận thông báo vào tính năng](#5-nối-kênh-nhận-thông-báo-vào-tính-năng) · [Viết hàm gửi thông báo](#6-viết-hàm-gửi-thông-báo) · [Nối với B/C và kiểm tra từ đầu đến cuối](#7-nối-với-bc-và-kiểm-tra-từ-đầu-đến-cuối) · [Khi gặp lỗi, kiểm tra ở đâu?](#8-khi-gặp-lỗi-kiểm-tra-ở-đâu) · [Bàn giao và diễn tập demo](#9-bàn-giao-và-diễn-tập-demo)
+| Luồng         | Đã có ở baseline                                                                                                                                                                  | Phần A tự chủ hoàn thiện (Dev → Staging → Production)                                                                                                   |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cognito       | `/auth/config`, Managed Login code + PKCE, callback/refresh/logout, xác thực access token và liên kết `(issuer, sub)`, quyền household.                                           | Tự quản lý App Client callback/auth-flow và user test trên Pool `ap-southeast-1_4WQxu8bnB`, liên kết DB và chạy login/RBAC từ localhost tới Production. |
+| Thông báo AWS | `EscalationRepository.createNotificationIntent()` ghi `notifications`. `CloudQueueService.enqueueNotification()` và Results consumer có transport, schema và receipt/outcome log. | Nối intent từ nghiệp vụ, tạo claim/attempt API, viết `services/aws-workers/sender/`, áp dụng outcome ra UI; tự dựng SNS/Sender/Connect cả 3 môi trường. |
+| CD & GitHub   | Workflow CD hiện mới đóng gói Face (`face.zip`). [Hiện trạng staging](../../docs/SPRINT4_STAGING_TIEN_DO_VA_RUNBOOK.md)                                                           | Đóng gói `sender.zip`, nối bước deploy Sender vào CD, cập nhật `ArgusAI-GitHub-*-Policy` & SSM runtime-env; gửi **Dương Đại Phát** biến/secret GitHub.  |
 
-## 1. Bạn làm gì, cần ai giúp?
+---
 
-| Phần bạn làm                                           | Có thể bắt đầu ngay?                 | Khi nào phải chờ?                                                      |
-| ------------------------------------------------------ | ------------------------------------ | ---------------------------------------------------------------------- |
-| Hoàn thiện đăng nhập Cognito và hai tài khoản kiểm tra | Viết code ngay                       | Đợi C đưa pool/client/domain để nối thật                               |
-| Nối đăng nhập vào ứng dụng                             | Có, trên máy cá nhân                 | B kiểm tra phần liên kết tài khoản với dữ liệu cũ                      |
-| Nối email/SMS/cuộc gọi vào sender                      | Viết code và kiểm thử ngay           | Đợi C tạo kênh, A xác nhận email/số nhận và cùng C xử lý điều kiện gửi |
-| Viết hàm gửi thông báo                                 | Có, dùng dữ liệu giả khi API chưa có | Đợi B hoàn thiện API xin quyền gửi và nhận kết quả; đợi C có HTTPS     |
-| Chạy trọn luồng trên máy chủ                           | Chưa                                 | Đợi C đưa địa chỉ web và B tạo được yêu cầu gửi từ sự kiện             |
+## 1. Chuẩn bị môi trường & Quyền tự tạo services
 
-Bạn viết đăng nhập và gửi C yêu cầu cấu hình Cognito/kênh nhận trước. Khi đang chờ B/C, tiếp tục viết và kiểm tra hàm gửi bằng dữ liệu giả; không cần ngồi chờ cả nhóm.
-
-## 2. Chuẩn bị trên máy của bạn
-
-Cả nhóm dùng **Singapore**, mã `ap-southeast-1`. C là người duy nhất triển khai bộ tài nguyên dùng chung. C tạo và quản lý Cognito, SNS, Connect, queue và Lambda dùng chung. Bạn không tạo thêm bộ riêng; bạn đưa yêu cầu, viết mã và kiểm tra chức năng trên bộ C cấp.
-
-1. Nhóm dùng **một tài khoản AWS do C quản lý, bên trong có ba IAM User A/B/C**. Bạn đăng nhập bằng IAM User của A và dùng access key riêng của user này. C cấp quyền, không cấp một tài khoản AWS mới. Không chia sẻ root hoặc gửi key trong nhóm chat.
-2. Cài AWS CLI v2, Docker và pnpm theo yêu cầu repo. Nếu đã có access key và profile đúng thì giữ lại, không cần tạo key mới cho mỗi lần làm bài.
-3. Mở PowerShell ở thư mục gốc dự án:
-
+1. Dùng nhánh làm việc riêng từ baseline tích hợp. Chuẩn bị Node 22, pnpm theo `package.json`, Python 3.12 và Docker Compose. [Cách chạy local và chuyển Dev Cloud](../../docs/SPRINT4_DEV_CLOUD_LOCALHOST_TO_STAGING.md).
+2. Dùng IAM User A (`--profile camerai-lab --region ap-southeast-1`). Kiểm tra danh tính:
    ```powershell
-   aws --version
-   aws configure --profile camerai-lab
-   aws sts get-caller-identity --profile camerai-lab --region ap-southeast-1
-   git rev-parse HEAD
-   docker compose version
-   pnpm --version
+   aws --profile camerai-lab --region ap-southeast-1 sts get-caller-identity
    ```
+3. Với thay đổi hạ tầng/CD dùng chung (SSM `/camerai/<env>/runtime-env`, `ArgusAI-GitHub-<Env>-Policy`, `.github/workflows/*.yml`), giữ nguyên tắc **tách biệt hoàn toàn tài nguyên giữa Dev / Staging / Production**, không ghi raw secrets vào Git/log, và phối hợp C khi chạm file deploy chung.
 
-   Khi được hỏi, nhập **Access Key ID và Secret Access Key của chính IAM User mình**, Region `ap-southeast-1`, output `json`. Nếu đã có profile này, chỉ cấu hình lại khi cần thay key. Không nhập key vào lệnh để tránh lưu trong lịch sử terminal.
+---
 
-   Ba người kiểm tra kết quả STS: `Account` phải giống nhau, `Arn` phải khác nhau và đúng tên IAM User của từng người. Tên profile `camerai-lab` giống nhau trên ba máy vẫn được; nó chỉ là tên cấu hình local, không phải tài khoản hay key dùng chung. Gửi C Account/Arn để đối chiếu, không gửi key.
+## 2. Giai đoạn Dev — Tự tạo services Dev & chạy E2E từ Localhost
 
-   `aws configure` chỉ khai báo danh tính cho CLI, **không cấp quyền**. C cấp quyền cho IAM User trước. Không dùng `aws configure sso` hoặc `aws sso login` trong cách làm hiện tại của nhóm. Nguồn tra cứu: [AWS cấu hình CLI bằng IAM User](https://docs.aws.amazon.com/cli/latest/userguide/cli-authentication-user.html).
+### 2.1. Cognito Dev (US-25)
 
-4. Giữ `.env` hiện tại. Biến mới đang trống chỉ điền khi có giá trị thật. Không đổi cả bộ sang AWS trước khi code tương ứng đã có. Không đưa `.env`, ảnh mặt hay mật khẩu vào Git.
-5. Làm trên nhánh riêng, đưa thay đổi qua yêu cầu gộp mã (PR) để người khác kiểm tra. Các đường dẫn ghi **cần tạo** bên dưới là phần bạn phải lập trình, chưa có sẵn để chạy.
+1. Dùng User Pool `ap-southeast-1_4WQxu8bnB` (Domain `https://ap-southeast-14wqxu8bnb.auth.ap-southeast-1.amazoncognito.com`). Tạo hoặc dùng App Client Dev riêng cho `localhost` (Public SPA, không secret, OAuth `code` flow, scopes `openid email profile`, Callback `http://localhost:3000/auth/callback`, Sign-out `http://localhost:3000`; giữ nguyên client `5p3hgqnkmjrdc5ktb99ur46hjr` cho Production `https://argusai.dynv6.net`). [Hướng dẫn Cognito](05_SETUP_COGNITO.md).
+2. Tự tạo 2–3 user test trong Cognito Pool và liên kết `(cognito_issuer, cognito_sub, cognito_email)` vào `users` của DB test local (khác household để test phân quyền).
+3. Chuyển mode local sang cloud bằng `pnpm argus cloud` (hoặc cấu hình `.env` thủ công theo `CI_CD_STAGING_SOURCE_OF_TRUTH.md` Mục 5) rồi test `/login`, `/auth/me`, `401` (thiếu/sai/ID token), `403` (user chưa link), truy cập chéo household, refresh và logout.
 
-**Khi ghép hệ thống:** A/B/C dùng key khác nhau vẫn làm việc với cùng tài nguyên nếu đúng tài khoản, Region và được cấp quyền. Bàn giao tên bucket, queue URL/ARN, API và cấu hình; không bàn giao key cá nhân. Backend trên EC2 dùng role của EC2; Lambda dùng execution role riêng. C cấu hình các role này, nên bản cloud không phụ thuộc key laptop của ai. Việc cấu hình CLI trên laptop cũng không tự truyền quyền vào Docker local; nếu cần chạy SDK trong container local, phải cấu hình riêng mà không đưa key vào image/Git.
+### 2.2. Backend Notification Intent, Claim & Outcome
 
-## 3. Nhận cấu hình Cognito và chuẩn bị tài khoản
+1. **Tạo intent có thật:** Nối `CloudQueueService.enqueueNotification()` vào vị trí ghi intent dùng chung `EscalationRepository.createNotificationIntent()` trong cùng transaction. Đọc cờ `NOTIFICATION_DRIVER` (`local | sqs`) và chặn hai sender xử lý trùng cùng notification. Giữ luồng Telegram/local khi không chọn SQS.
+2. **API Claim:** Thêm `POST /api/v1/internal/notifications/{notificationId}/claim` bảo vệ bởi `InternalTokenGuard` (`X-Internal-Token`). Transaction kiểm tra intent, event/owner/version, recipient policy, cap (5 lần/ngày/người nhận/kênh), cooldown (60 giây), lease (120 giây), trả về `CLAIMED` (`DRY_RUN | REAL`, `delivery`), `NO_OP`, hoặc `409 BUSY` kèm `retryAt`. [Chi tiết contract G0](00_HOP_DONG_G0.md#5-sender-claimoutcome-api-v1--a-triển-khai).
+3. **Apply Outcome & UI:** Trong Results consumer (`cloud-queue.service.ts`), đối chiếu `attemptId`, commit `cloud_result_receipts` + `cloud_notification_outcomes` + cập nhật bảng `notifications` (`DRY_RUN → SKIPPED`, `PROVIDER_ACCEPTED → SENT`, `FAILED → FAILED`, `UNCERTAIN` giữ pending và khóa auto-resend) trước khi `DeleteMessage`. Hiển thị trạng thái gửi trong chi tiết sự kiện trên Web.
 
-Cognito là dịch vụ quản lý mật khẩu và cấp mã đăng nhập. Quyền xem camera vẫn do ứng dụng quyết định.
+### 2.3. Tự dựng dịch vụ Dev cho Sender (`camerai-s4-dev-sender`) & Test qua HTTPS Tunnel
 
-### 3.1. Gửi C yêu cầu và nhận cấu hình Cognito
+1. Viết `services/aws-workers/sender/` (Python 3.12, handler, `requirements.txt`, unit tests) và tích hợp đóng gói `sender.zip` vào `services/aws-workers/build.py`.
+2. Trên AWS Dev (`ap-southeast-1`), A tự tạo/cập nhật bộ dịch vụ Dev cho Sender:
+   - **SNS Email:** Dùng hoặc tạo topic `camerai-s4-dev-incident-email`, thêm email subscription của A và bấm **Confirm subscription**.
+   - **Log Group:** `/aws/lambda/camerai-s4-dev-sender` (retention 7 ngày).
+   - **IAM Role:** Tạo/cập nhật role cho Sender Dev với quyền `sqs:ReceiveMessage/DeleteMessage/GetQueueAttributes` trên `camerai-s4-dev-notification-jobs`, `sqs:SendMessage` trên `camerai-s4-dev-results`, `sns:Publish` trên topic email Dev, và Logs.
+   - **Lambda `camerai-s4-dev-sender`:** Thay thế stub 299 bytes hiện tại bằng `sender.zip` thật (`python3.12`, `x86_64`, timeout `30s`), env: `APPLICATION_RESULTS_QUEUE_URL`, `INTERNAL_API_BASE_URL=https://<tunnel-domain>/api/v1`, `INTERNAL_SERVICE_TOKEN` (>= 32 ký tự, khớp API local), `SENDER_DRY_RUN=true`, `SNS_TOPIC_ARN`; publish version + alias `live` + Event Source Mapping từ `camerai-s4-dev-notification-jobs` (`BatchSize: 1`, `ReportBatchItemFailures`).
+   - **SMS & Connect Dev (nếu tài khoản hỗ trợ):** Kiểm tra SMS sandbox (`PinpointSmsVoiceV2`) / tạo Connect instance & contact flow Dev; nếu bị AWS chặn quyền/subscription, giữ `DRY_RUN` và ghi `BLOCKED_PROVIDER`.
+3. Chạy `pnpm argus cloud`, dựng HTTPS tunnel (`artifacts/DevCloud.Caddyfile` + `cloudflared`/`ngrok`) mở thêm route `POST /api/v1/internal/notifications/<uuid>/claim`. Tạo sự kiện trong UI local (`http://localhost:3000`) → kiểm `SKIPPED` (`DRY_RUN`) → bật gửi thật tới email đã confirm → kiểm `MessageId`, `SENT` và hộp thư thực.
 
-**Đưa yêu cầu cho C ngay:** pool `camerai-s4-dev-users`, browser client `camerai-s4-dev-web`, đăng nhập bằng email, không tự đăng ký, public client không có secret, authorization code + PKCE, scope `openid email profile`. Callback local là `http://localhost:3000/auth/callback`, sign-out là `http://localhost:3000`. Khi có HTTPS, gửi C thêm hai URL cloud tương ứng. Không tự tạo pool thứ hai.
+---
 
-**Đợi C tạo Cognito và đưa pool ID, client ID, domain HTTPS, issuer cùng các URL đã lưu để nối đăng nhập thật.** Trong lúc chờ, viết backend verifier và frontend login/callback ở §4 bằng cấu hình giả trong test. Không đánh dấu login thật đã đạt bằng test giả.
+## 3. Giai đoạn Staging — Tự tạo services Staging, Note GitHub & Nghiệm thu E2E
 
-Kiểm tra cấu hình C bàn giao: pool/client khác ID, domain chỉ có HTTPS origin, không chứa `/oauth2/authorize`; callback đúng scheme/host/port/path. Nếu sai, gửi C chỗ cần sửa và kết quả mong đợi. Bạn phụ trách kiểm tra hành vi đăng nhập; C phụ trách thay đổi cấu hình tài nguyên AWS.
+### 3.1. Tự tạo/kiểm tra các services của A trên Staging (`argusai-staging-*`)
 
-### 3.2. Tạo hai người dùng thử
+1. **Cognito Staging (`75ao3v25aoscu9nlfjmi8hu7f`):** Xác nhận Callback `https://argusai-staging.duckdns.org/auth/callback`, Sign-out `https://argusai-staging.duckdns.org`, `ALLOW_USER_PASSWORD_AUTH` (đã bật). Tạo tài khoản test Staging trong pool `ap-southeast-1_4WQxu8bnB` và liên kết vào DB Staging (qua SSM Session Manager trên `i-0bd8c9cf689512b6e`).
+2. **SNS Email Staging:** Tạo Standard topic `argusai-staging-incident-email`, subscribe hộp thư test Staging và confirm subscription.
+3. **Sender Lambda Staging:**
+   - Log Group `/aws/lambda/argusai-staging-sender` (retention 7 ngày).
+   - IAM Role `ArgusAI-Lambda-Staging-Sender`: SQS consume `argusai-staging-notification-jobs`, SQS send `argusai-staging-results`, `sns:Publish` trên `arn:aws:sns:ap-southeast-1:926883321040:argusai-staging-incident-email`, Logs `/aws/lambda/argusai-staging-sender:*`.
+   - Lambda `argusai-staging-sender` (`python3.12`, `x86_64`, `30s`, alias `live`), env: `APPLICATION_RESULTS_QUEUE_URL=https://sqs.ap-southeast-1.amazonaws.com/926883321040/argusai-staging-results`, `INTERNAL_API_BASE_URL=https://argusai-staging.duckdns.org/api/v1`, `INTERNAL_SERVICE_TOKEN=<khớp /camerai/staging/runtime-env>`, `SENDER_DRY_RUN=true`, `SNS_TOPIC_ARN`.
+   - Event Source Mapping từ `argusai-staging-notification-jobs` → `argusai-staging-sender:live` (`BatchSize: 1`, `FunctionResponseTypes: ["ReportBatchItemFailures"]`, ban đầu `--no-enabled` tới khi PR claim/outcome đã lên Staging).
+4. **SMS / Connect Staging (nếu khả dụng):** Tạo Amazon Connect instance/outbound flow `argusai-staging-emergency-outbound`, bổ sung `connect:StartOutboundVoiceContact` (`Resource: "*"` + `Condition: {"StringEquals": {"aws:RequestedRegion": "ap-southeast-1"}}`) vào `ArgusAI-Lambda-Staging-Sender`.
+5. **Cập nhật quyền CD & SSM Staging:**
+   - Bổ sung vào `ArgusAI-GitHub-Staging-Policy`: quyền `lambda:GetFunction`, `UpdateFunctionCode`, `GetFunctionConfiguration`, `PublishVersion`, `UpdateAlias`, `CreateAlias`, `GetAlias`, `InvokeFunction` trên `argusai-staging-sender*`.
+   - Khi code trong PR đã đọc biến mới, cập nhật SSM `/camerai/staging/runtime-env`: `NOTIFICATION_DRIVER=sqs`, `SNS_TOPIC_ARN=arn:aws:sns:ap-southeast-1:926883321040:argusai-staging-incident-email`, `SENDER_DRY_RUN=true` (và `CONNECT_INSTANCE_ID`, `CONNECT_CONTACT_FLOW_ID` nếu bật). Lưu ý giới hạn 4 KB Standard tier của Parameter Store.
 
-1. Trong pool, mở **Users → Create user**. Tạo hai tài khoản bằng hai hộp thư nhóm đọc được.
-2. Hoàn thành đổi mật khẩu tạm và xác minh email theo trang đăng nhập. Không dùng email giả để thử quên mật khẩu.
-3. Mở từng user, ghi `sub`. Đây là mã người dùng của Cognito; **khác** mã người dùng trong DB ứng dụng.
-4. Chọn hai tài khoản ứng dụng tương ứng, mỗi tài khoản có camera riêng và không có quyền quản trị toàn hệ thống.
+### 3.2. Cập nhật CD trong PR & Danh sách gửi Repo Owner (**Dương Đại Phát**) cho `staging`
 
-**Đưa kết quả cho B:** pool ID, issuer dạng `https://cognito-idp.ap-southeast-1.amazonaws.com/<pool-id>`, client ID, domain và hai cặp application user ID ↔ Cognito sub. Gửi qua nơi nhóm quản lý cấu hình, không đưa mật khẩu vào bảng bàn giao.
+- Trong PR (tách 2 PR nhỏ nếu cần: Cognito fix & Notification E2E), bổ sung đóng gói `sender.zip` vào `cd.yml` và step cập nhật `SENDER_FUNCTION_NAME` / `SENDER_FUNCTION_ALIAS` trong `deploy-environment.yml`.
+- **Note gửi Repo Owner — Dương Đại Phát (GitHub Environment `staging`):**
 
-**Đưa kết quả cho C:** PR auth, callback/sign-out cần dùng trên HTTPS, kết quả thử hai tài khoản và cấu hình nào cần sửa. Pool/client/domain dùng đúng bộ C đã bàn giao, không tạo thêm.
+| Loại trên GitHub (`Environment: staging`) | Tên biến / secret                                                | Giá trị / Nguồn                            | Khi nào cần thêm                                             |
+| ----------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------ |
+| Environment Variable                      | `SENDER_FUNCTION_NAME`                                           | `argusai-staging-sender`                   | Trước khi merge PR nối CD cho Sender vào `main`              |
+| Environment Variable                      | `SENDER_FUNCTION_ALIAS`                                          | `live` _(mặc định nếu bỏ trống)_           | Cùng lúc với `SENDER_FUNCTION_NAME`                          |
+| Environment Secrets _(nếu đổi user test)_ | `SMOKE_TEST_EMAIL`, `SMOKE_TEST_PASSWORD`, `SMOKE_REFRESH_TOKEN` | Credentials tài khoản test Cognito Staging | Khi tạo mới hoặc xoay tài khoản test cho `tools/cd/smoke.sh` |
 
-## 4. Nối đăng nhập vào ứng dụng
+### 3.3. Nghiệm thu E2E trên Staging (`https://argusai-staging.duckdns.org`)
 
-### 4.1. Kiểm tra code và viết phần còn thiếu
+Sau khi PR merge `main` → CI xanh → CD `staging` hoàn tất:
 
-1. Kiểm tra `apps/orchestrator/src/auth/` và phần đăng nhập trong `apps/web/`. Tài liệu cũ có nhắc code ở nhánh `lab-test`; chỉ dùng sau khi đã xem thay đổi và gộp qua PR. Không mặc định code đó đã có trên nhánh hiện tại.
-2. Backend cần chọn đúng một cách đăng nhập từ `AUTH_PROVIDER`. Với Cognito, kiểm tra chữ ký, hạn dùng, issuer, client ID và `token_use=access`; giữ kiểm tra scope theo thiết kế auth của repo. Token sai trả 401, không thử lại bằng cách đăng nhập local.
-3. Backend tìm người dùng theo cặp `(issuer, sub)` rồi dùng ID, role và quyền camera đang có trong DB. Token hợp lệ nhưng chưa liên kết hoặc tài khoản bị vô hiệu hóa trả 403. Không tự cấp quản trị theo email.
-4. Thêm/hoàn thiện `GET /api/v1/auth/config` để frontend biết đang dùng Cognito. Chỉ trả cấu hình công khai, không trả mật khẩu/secret. Nếu thêm API, cập nhật `api/openapi.yaml` và phần mã tạo từ hợp đồng API.
-5. Frontend cần trang login, `/auth/callback`, làm mới phiên và logout. Dùng authorization code + PKCE S256: có thể hiểu là browser tạo một mã kiểm chứng cho mỗi lần đăng nhập. API phải nhận access token, không lấy ID token thay thế.
-6. Logout cần dọn phiên ứng dụng và đi qua trang logout của Cognito. Xác minh JWT tại backend không có nghĩa mọi token cũ bị vô hiệu tức thì ngay khi logout; ghi rõ thời hạn phiên đã chọn.
+1. Kiểm tra `GET https://argusai-staging.duckdns.org/api/v1/health` đúng `RELEASE_ID`, test đăng nhập Cognito với 2 user khác household (`200` / `401` / `403` / refresh / logout).
+2. Bật Event Source Mapping `argusai-staging-sender:live`, test ca `DRY_RUN` (`SKIPPED`), sau đó test gửi email thật tới hộp thư test Staging (`SENT` + `MessageId` + xác nhận nhận thư).
+3. Sau khi ghép cùng phần Deadline của B, chạy một ca hết hạn từ `NOTIFIED` → `ESCALATED` đi xuyên suốt qua Sender Staging. Ghi lại `RELEASE_ID`, `eventId`, `notificationId`, `attemptId`, `outcomeId`, `providerId` (che thông tin riêng tư).
 
-### 4.2. Liên kết với tài khoản cũ
+---
 
-**Đợi B kiểm tra migration và hai người dùng trong DB trước khi thử đăng nhập đầy đủ.** Trong lúc chờ, bạn vẫn kiểm tra màn hình login/callback và các trường cấu hình.
+## 4. Giai đoạn Production — Tự tạo services Production, Note GitHub & Xác minh (`https://argusai.dynv6.net/login`)
 
-B chạy migration bổ sung `cognito_issuer` nếu nhánh tích hợp chưa có, giữ nguyên users.id, role và camera. Sau khi đã xác nhận đúng người dùng, B có thể dùng câu lệnh sau trong DB thử; thay placeholder bằng ID thật, không chạy nguyên mẫu:
+_(Chỉ triển khai khi các PR của A đã pass nghiệm thu trên Staging và hạ tầng nền Production ở `docs/CI_CD_PRODUCTION_SOURCE_OF_TRUTH.md` đã được C cutover)._
 
-```sql
-UPDATE users
-SET cognito_sub = '<sub-da-xac-minh>',
-    cognito_issuer = 'https://cognito-idp.ap-southeast-1.amazonaws.com/<pool-id>'
-WHERE id = '<application-user-id>' AND cognito_sub IS NULL;
-```
+### 4.1. Tự tạo các services của A trên Production (`argusai-production-*`)
 
-Phải cập nhật đúng một dòng. Nếu đã có sub, B kiểm tra liên kết cũ rồi xử lý riêng; không ghi đè người dùng khác. Không đổi password_hash hoặc role chỉ để login qua được.
+1. **Cognito Production (`5p3hgqnkmjrdc5ktb99ur46hjr`):**
+   - Kiểm tra Callback `https://argusai.dynv6.net/auth/callback` và Logout `https://argusai.dynv6.net`.
+   - Nếu `smoke.sh` dùng `SMOKE_TEST_EMAIL`/`SMOKE_TEST_PASSWORD`, bật thêm `ALLOW_USER_PASSWORD_AUTH` trong `ExplicitAuthFlows` của client `5p3hgqnkmjrdc5ktb99ur46hjr` (hoặc xuất `SMOKE_REFRESH_TOKEN` từ tài khoản test read-only Production) và xác nhận mapping `(cognito_issuer, cognito_sub)` trong DB Production.
+2. **SNS & Sender Lambda Production (tách biệt hoàn toàn khỏi Dev/Staging):**
+   - Tạo SNS Standard topic `argusai-production-incident-email` + confirm email nhận cảnh báo Production hợp lệ.
+   - Tạo Log Group `/aws/lambda/argusai-production-sender` (retention 14–30 ngày).
+   - Tạo Role `ArgusAI-Lambda-Production-Sender`: SQS consume `argusai-production-notification-jobs`, SQS send `argusai-production-results`, `sns:Publish` trên `argusai-production-incident-email`, Logs `/aws/lambda/argusai-production-sender:*` (thêm `connect:StartOutboundVoiceContact` với Region condition nếu bật Connect Production).
+   - Tạo Lambda `argusai-production-sender` (`python3.12`, `x86_64`, `30s`, alias `live`), env: `APPLICATION_RESULTS_QUEUE_URL=https://sqs.ap-southeast-1.amazonaws.com/926883321040/argusai-production-results`, `INTERNAL_API_BASE_URL=https://argusai.dynv6.net/api/v1`, `INTERNAL_SERVICE_TOKEN=<khớp /camerai/production/runtime-env>`, `SENDER_DRY_RUN=true` (chỉ chuyển `false` sau khi smoke Production đạt), `SNS_TOPIC_ARN`, và Event Source Mapping (`BatchSize: 1`, `ReportBatchItemFailures`).
+   - Nếu bật Amazon Connect Production: tạo instance/flow riêng cho Production, không dùng chung với Staging.
+3. **Cập nhật quyền CD & SSM Production:**
+   - Thêm quyền update/alias `argusai-production-sender*` vào `ArgusAI-GitHub-Production-Policy`.
+   - Cập nhật SSM `/camerai/production/runtime-env`: `NOTIFICATION_DRIVER=sqs`, `SNS_TOPIC_ARN`, `SENDER_DRY_RUN` (và `CONNECT_*` nếu có).
 
-### 4.3. Điền biến và chạy thử local
+### 4.2. Note gửi Repo Owner (**Dương Đại Phát**) cho GitHub Environment `production`
 
-```dotenv
-AUTH_PROVIDER=cognito
-COGNITO_USER_POOL_ID=<pool-id-thuc>
-COGNITO_CLIENT_ID=<client-id-thuc>
-COGNITO_DOMAIN=<https-origin-cognito>
-WEB_ORIGIN=http://localhost:3000
-NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api/v1
-```
+| Loại trên GitHub (`Environment: production`) | Tên biến / secret / hành động                                    | Giá trị / Yêu cầu                                              | Khi nào cần thực hiện                                     |
+| -------------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------- |
+| Environment Variable                         | `SENDER_FUNCTION_NAME`                                           | `argusai-production-sender`                                    | Trước khi duyệt release đầu tiên có Sender lên Production |
+| Environment Variable                         | `SENDER_FUNCTION_ALIAS`                                          | `live`                                                         | Cùng lúc với `SENDER_FUNCTION_NAME`                       |
+| Environment Secrets                          | `SMOKE_TEST_EMAIL`, `SMOKE_TEST_PASSWORD`, `SMOKE_REFRESH_TOKEN` | Tài khoản test read-only riêng cho `https://argusai.dynv6.net` | Trước khi bật Production smoke có authenticated API       |
+| Approval Gate                                | **Approve deployment `production`**                              | Kèm link CD run + bằng chứng Staging PASS của A                | Mỗi release promote từ Staging sang Production            |
 
-Đây là mẫu giá trị cần thay, không chép nguyên dấu `<...>` vào `.env`. Nếu code cũ còn dùng `COGNITO_REDIRECT_URI`/`COGNITO_LOGOUT_URI`, giữ chúng khớp callback/sign-out đã đăng ký; không tự xóa cấu hình đang dùng.
+### 4.3. Nghiệm thu Production tại `https://argusai.dynv6.net/login`
 
-```powershell
-pnpm --filter @cam/orchestrator typecheck
-pnpm --filter @cam/orchestrator test -- --runInBand
-pnpm --filter @cam/orchestrator build
-pnpm --filter @cam/web build
-pnpm api:lint
-docker compose up -d --build orchestrator web
-Invoke-RestMethod 'http://localhost:3001/api/v1/auth/config'
-```
+1. Mở `https://argusai.dynv6.net/login` bằng tài khoản Production hợp lệ → kiểm tra Cognito PKCE redirect `/auth/callback`, đọc `/auth/me`, kiểm tra DevTools không gọi `localhost` hay `argusai-staging.duckdns.org`, kiểm tra logout.
+2. Kiểm tra luồng Notification với release ID đã promote (`DRY_RUN` hoặc 1 ca email có kiểm soát tới người nhận cho phép), xác nhận `notifications` cập nhật đúng trạng thái và không có message rơi vào `argusai-production-notification-jobs-dlq` hoặc `argusai-production-results-dlq`.
 
-API config phải báo `provider=cognito`. Mở `http://localhost:3000/login` và đăng nhập bằng hai tài khoản. Nếu chỉ thay `.env`, dùng `docker compose up -d --no-deps --force-recreate orchestrator`; lệnh restart đơn thuần không nạp biến mới. Kiểm tra Compose có truyền các biến vào container.
+---
 
-| Cách thử                                         | Kết quả cần thấy                                           |
-| ------------------------------------------------ | ---------------------------------------------------------- |
-| Không có token, token sai/hết hạn, dùng ID token | API trả 401                                                |
-| Token đúng nhưng user chưa liên kết              | API trả 403                                                |
-| User A mở camera/ảnh của user B                  | Bị từ chối, không lộ URL ảnh                               |
-| User đúng mở camera/sự kiện của mình             | Xem được theo quyền                                        |
-| Hết hạn access token                             | Làm mới phiên đúng cách hoặc yêu cầu đăng nhập lại         |
-| Logout rồi tải lại trang                         | Phải đăng nhập lại, không giữ dữ liệu riêng của user trước |
+## 5. Bàn giao tổng hợp cho C & Repo Owner
 
-**Đưa kết quả đăng nhập cho C:** PR đã gộp, tên biến, lệnh chạy, cách tạo/liên kết hai user và kết quả bảng trên. C dùng code này cho bản máy chủ. B kiểm tra chéo ca truy cập camera của người khác.
-
-## 5. Nối kênh nhận thông báo vào tính năng
-
-### 5.1. Nối email vào sender
-
-1. **Đưa yêu cầu cho C:** topic Standard `camerai-s4-dev-incident-email`, email người nhận đã đồng ý và phạm vi dữ liệu họ được phép nhận. C tạo topic/subscription và đưa topic ARN.
-2. **Đợi C đưa ARN topic và xác nhận subscription đã tạo.** Bạn mở hộp thư, bấm Confirm subscription rồi báo C kết quả. Không dùng topic có nhiều người không cùng quyền nhận để gửi dữ liệu riêng của một người.
-3. Đặt `SNS_TOPIC_ARN` đúng ARN C cấp; đưa B để backend tạo delivery/claim. Viết adapter SNS nhận topic/message từ claim hợp lệ, lưu MessageId trong outcome.
-4. Không dùng Publish thủ công trên Console để nghiệm thu. Kiểm tra email bằng sự kiện do ứng dụng tạo theo §7: intent → queue → claim → SNS → outcome → DB/UI và thư đến người nhận.
-
-### 5.2. Nối SMS và cuộc gọi nếu thuộc phạm vi đồ án
-
-- **Đưa yêu cầu cho C sớm:** kênh cần dùng, quốc gia/số nhận đã đồng ý, lời nhắc cuộc gọi và mức chi được phép. C kiểm tra tài khoản, số nguồn/quota, tạo Connect instance/flow và bật quyền cần thiết. A thực hiện xác minh người nhận/OTP khi được yêu cầu.
-- **Đợi C đưa cấu hình kênh đã sẵn sàng:** SMS đủ điều kiện gửi; Connect có instance ID, flow ID và số nguồn/queue. Viết adapter trước bằng nhà cung cấp giả để kiểm tra cách xử lý thành công/lỗi.
-- Sender gọi `StartOutboundVoiceContact` với ClientToken cố định theo notificationId; lưu ContactId. SNS SMS lưu MessageId. Không log đầy đủ số nhận.
-- Kiểm tra từ **sự kiện trong app**, người nhận nhận được SMS/nghe được lời nhắc, outcome lưu trong ứng dụng. Có providerId mới là AWS nhận yêu cầu, chưa thay thế xác nhận trên thiết bị người nhận.
-- Nếu bị chặn quyền/số/quota, báo C và chủ đồ án ngay; ghi kênh chưa hoàn thành. Email không thay thế tiêu chí SMS/cuộc gọi, không tự đổi Region.
-
-**Đưa kết quả cho B và C:** cấu hình đã nối, PR sender, người nhận tham chiếu, kết quả từng kênh và providerId mẫu đã che dữ liệu riêng. B dùng để đối chiếu nhật ký; C dùng để kiểm tra quyền và bản triển khai.
-
-## 6. Viết hàm gửi thông báo
-
-Bạn viết `services/aws-workers/sender/` (**cần tạo**), kèm cách đóng gói, chạy và kiểm thử. Hàm này chạy trên Lambda. Không mở Function URL, không truy cập DB trực tiếp.
-
-Luồng cần viết: nhận việc từ SQS → hỏi backend có được gửi không → gửi thật hoặc chạy thử → đưa kết quả về hàng đợi kết quả. SQS là nơi giữ công việc; Lambda là chương trình lấy công việc đó ra làm.
-
-### 6.1. Dữ liệu nhận từ B
-
-Mọi gói việc có phần ngoài:
-
-```json
-{
-  "schemaVersion": 1,
-  "type": "notification.job",
-  "messageId": "<notificationId-UUID>",
-  "correlationId": "<eventId-UUID>",
-  "occurredAt": "<thoi-diem-UTC-ket-thuc-bang-Z>",
-  "payload": {
-    "notificationId": "<UUID>",
-    "eventId": "<UUID>",
-    "ownerScopeId": "<ID-user-ung-dung-UUID>",
-    "expectedEventVersion": 3,
-    "channel": "SNS_EMAIL"
-  }
-}
-```
-
-Các chuỗi trong `<...>` chỉ để giải thích, phải thay bằng dữ liệu đúng trước khi chạy. `channel` còn có SNS_SMS hoặc CONNECT_CALL. Không lấy người nhận từ message; backend sẽ trả về người nhận được phép.
-
-### 6.2. API xin quyền gửi do B làm
-
-Gọi `POST /api/v1/internal/notifications/{notificationId}/claim` qua HTTPS, header `X-Internal-Token` lấy từ `INTERNAL_SERVICE_TOKEN`:
-
-```json
-{
-  "schemaVersion": 1,
-  "claimId": "<UUID-giu-nguyen-khi-thu-lai>",
-  "eventId": "<UUID>",
-  "expectedEventVersion": 3
-}
-```
-
-| Backend trả về                           | Hàm gửi phải làm gì?                                     |
-| ---------------------------------------- | -------------------------------------------------------- |
-| 200, disposition=CLAIMED                 | Dùng attemptId, leaseUntil, mode và delivery được trả về |
-| 200, disposition=NO_OP                   | Không gửi; backend đã ghi lý do. Hoàn tất message        |
-| 409, code=BUSY và retryAt                | Chờ/thử lại theo thời điểm đó, không bỏ việc             |
-| 400/401/404 hoặc conflict không sửa được | Ghi lý do, chuyển xử lý lỗi; không gửi                   |
-| Mất mạng/429/5xx                         | Thử lại có giới hạn, giữ cùng claimId                    |
-
-Khi CLAIMED, response có `notificationId`, `attemptId`, `leaseUntil`, `mode=DRY_RUN|REAL`, `delivery={channel,recipientRef,topicArn?,destination?,message,subject?}`. Không ghi nguyên response vào log vì có thể chứa người nhận. Hết thời gian lease thì không gửi.
-
-Chạy thử DRY_RUN nghĩa là đi đủ luồng nhưng không gọi SNS/Connect. Backend quyết định mode; sender chỉ được giảm REAL thành DRY_RUN để an toàn, không tự nâng ngược lại.
-
-### 6.3. Gửi và trả kết quả
-
-1. Kiểm tra version/type/UUID, không nhận message của bài echo cũ. Chốt `claimId=notificationId` để mỗi việc có mã xin quyền cố định; Lambda chạy lại vẫn dùng mã này, không sinh mã mới.
-2. Sau khi được phép, gọi SNS email/SMS hoặc Connect theo delivery. Không thêm người nhận do message tự khai báo.
-3. Tạo outcomeId ổn định cho kết quả của attempt. Gửi vào `APPLICATION_RESULTS_QUEUE_URL`, type=`notification.outcome`, messageId=outcomeId, correlationId=eventId; giữ các trường ngoài giống §6.1.
-4. Payload kết quả gồm `outcomeId, notificationId, eventId, ownerScopeId, attemptId, status, providerCalled, providerId, reason`.
-
-   | status            | Ý nghĩa                                                        |
-   | ----------------- | -------------------------------------------------------------- |
-   | DRY_RUN           | Không gọi AWS gửi tin; providerCalled=false, providerId=null   |
-   | PROVIDER_ACCEPTED | AWS nhận yêu cầu; providerCalled=true và có providerId         |
-   | FAILED            | Thất bại đã biết rõ; reason giải thích                         |
-   | UNCERTAIN         | Chưa biết AWS đã gửi hay chưa; phải đối soát trước khi gửi lại |
-
-5. Chỉ báo message đã xử lý khi kết quả đã được đưa đi thành công. Với xử lý từng phần trong lô, code và cấu hình kích hoạt Lambda đều phải bật `ReportBatchItemFailures`. C khởi đầu bằng batch size 1.
-6. Nếu AWS đã nhận yêu cầu mà gửi kết quả về bị lỗi, thử gửi lại **kết quả đã lưu**, không gọi nhà cung cấp để gửi thông báo lần nữa. B cần lưu nhật ký attempt/kết quả bền vững; nếu không khôi phục được kết quả, giữ trạng thái UNCERTAIN để người phụ trách kiểm tra. Không hứa SNS chỉ gửi đúng một lần trong mọi tình huống.
-
-**Đợi B hoàn thiện API claim, nơi lưu nhật ký và nhận outcome để làm tiếp luồng thật. Đợi C hoàn thiện HTTPS và Lambda có quyền đúng.** Trong lúc chờ, viết các ca kiểm thử bằng API/nhà cung cấp giả có nhãn rõ ràng.
-
-**Đưa kết quả cho C:** thư mục mã sender, runtime, lệnh build/test, handler, timeout, biến cần truyền, queue nguồn/đích và quyền SNS/Connect cần dùng. **Đưa kết quả cho B:** ví dụ job/outcome hợp lệ, cách giữ claimId/outcomeId và kết quả các ca lỗi.
-
-## 7. Nối với B/C và kiểm tra từ đầu đến cuối
-
-Các biến sender cần có: `AWS_REGION`, `APPLICATION_RESULTS_QUEUE_URL`, `INTERNAL_API_BASE_URL`, `INTERNAL_SERVICE_TOKEN`, `SENDER_DRY_RUN`. Backend của B cần thêm `NOTIFICATION_DRIVER=sqs`, `NOTIFICATION_JOBS_QUEUE_URL`, `SNS_TOPIC_ARN` và cấu hình Connect khi dùng. `INTERNAL_API_BASE_URL` là `https://<domain>/api/v1`, không có slash cuối. B/C phải viết phần đọc biến và truyền vào chương trình; file `.env` có giá trị chưa đủ.
-
-1. **Đợi C đưa HTTPS origin và bản đã triển khai code A/B.** Gửi C callback `https://<domain>/auth/callback` và sign-out `https://<domain>` để C cập nhật Cognito; kiểm tra lại sau khi C xác nhận đã lưu. C đặt WEB_ORIGIN và build web với API URL đúng; không dùng localhost trên bản cloud.
-2. Cả nhóm dùng một bản code. Đăng nhập từ máy thứ hai, chạy lại bảng kiểm tra ở §4.3.
-3. **Đợi B tạo được yêu cầu gửi từ sự kiện trong ứng dụng.** Giữ SENDER_DRY_RUN=true. Tạo sự kiện → nhìn notificationId ở backend → sender xin quyền → kết quả về DB → xem trạng thái chạy thử trong ứng dụng.
-4. Thử message trùng, sự kiện đã xác nhận, claim hết hạn, đã đủ mức gửi/người nhận và đang phải chờ giữa hai lần gửi. Không trường hợp nào được vượt quy tắc backend. Mặc định bản dev giới hạn 5 lần/ngày/người nhận/kênh và chờ 60 giây giữa hai lần.
-5. Thử lỗi sau khi nhà cung cấp nhận nhưng chưa lưu kết quả bằng nhà cung cấp giả; hệ thống phải giữ trạng thái chưa rõ, không tự gửi lại thật.
-6. Khi chạy thử đạt, cho phép gửi thật trên đúng tài khoản/email thử. Tạo **sự kiện mới từ ứng dụng**, nhận email và kiểm tra ứng dụng lưu providerId. Console publish không thay thế bước này.
-7. Làm tương tự với SMS/cuộc gọi nếu có trong yêu cầu đồ án. Nếu thiếu quyền, phần đó vẫn chưa hoàn thành.
-8. Tạo sự kiện, xác nhận trước hạn: không có gửi nâng mức mới. Tạo sự kiện khác, không xác nhận: sau hạn có đúng một quyết định nâng mức và yêu cầu gửi hợp lệ theo kênh đã chọn.
-
-## 8. Khi gặp lỗi, kiểm tra ở đâu?
-
-| Hiện tượng                            | Kiểm tra theo thứ tự                                                                      |
-| ------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Login quay vòng                       | callback đúng client/origin → domain → code callback/PKCE → biến trong container          |
-| API auth/config trả 404               | Nhánh code/PR auth đã gộp chưa; chỉnh Cognito không tạo ra endpoint thiếu                 |
-| Có token nhưng 403                    | issuer/sub đã liên kết đúng users.id chưa → role → camera ownership                       |
-| Sender báo 401                        | INTERNAL_API_BASE_URL đúng chưa → token API/Lambda có cùng secret ref chưa                |
-| Sender chạy nhưng không có thư        | mode chạy thử hay thật → claim → MessageId → subscription đã confirm → hộp thư            |
-| Có thư nhưng app không đổi trạng thái | message outcome → Results consumer của B → nhật ký/receipt DB                             |
-| Có thông báo trùng                    | Có hai chương trình gửi cùng việc không → mã claimId/attempt → tình huống chưa rõ sau gửi |
-
-Không gửi token, signed URL hoặc mật khẩu trong ảnh chụp lỗi. Gửi B/C eventId, notificationId, thời điểm và thông báo lỗi đã che dữ liệu riêng.
-
-## 9. Bàn giao và diễn tập demo
-
-Dùng ngay mẫu này trong ghi chép nhóm; không phải mở tài liệu bàn giao khác:
-
-```text
-Phần của A / ngày / người làm / người kiểm tra:
-Commit hoặc PR đã gộp:
-Pool ID / client ID / Cognito domain / callback và sign-out:
-Hai application user IDs đã liên kết (không ghi mật khẩu):
-Topic email / trạng thái email, SMS, cuộc gọi:
-Sender: đường dẫn, runtime, lệnh build/test, tên handler:
-Bản triển khai của C / URL HTTPS:
-Các ca đã chạy / kết quả mong đợi / kết quả thực tế / nơi lưu bằng chứng:
-EventId / notificationId / attemptId / providerId mẫu:
-Phần còn chờ ai / cần kết quả gì:
-```
-
-Phần A xong khi B/C làm lại được: login đúng quyền → sự kiện tạo yêu cầu gửi → sender xin phép → email thật tới người nhận → trạng thái được lưu → xác nhận trên app đúng tác dụng. Chạy thêm trường hợp không xác nhận và một trường hợp lỗi. Lưu bản ghi demo dự phòng của cùng bản code, nói rõ đó là bản ghi nếu phải dùng.
-
-Ghi trạng thái bằng tiếng Việt: **Đã chạy đạt / Cần sửa / Đang chờ B hoặc C / Bị chặn quyền AWS**. Mỗi kết quả phải nói rõ chạy bằng dữ liệu mẫu hay model thật, gửi thử hay gửi thật. Chưa nhận được thư thật thì không ghi tính năng thông báo đã hoàn thành.
+Ghi lại theo từng môi trường (**Dev / Staging / Production**) gồm: commit SHA / `RELEASE_ID`, Cognito Client ID & test user mapping (không ghi mật khẩu), tên SNS topic/subscription/Connect IDs, tên Lambda Function/Alias/Version, SQS Event Source Mapping UUID, các biến SSM đã thêm, danh sách GitHub Variables/Secrets đã yêu cầu **Dương Đại Phát** cập nhật, và bằng chứng E2E (`eventId`, `notificationId`, `attemptId`, `outcomeId`, `providerId` đã che dữ liệu nhạy cảm).

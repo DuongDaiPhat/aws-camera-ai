@@ -2,7 +2,7 @@
 
 > Tài liệu kỹ thuật để bảo trì quy ước và schema, không phải tài liệu làm bài. Thành viên A/B/C chỉ cần file theo vai trò của mình; các quy tắc cần thiết đã có tại đó.
 
-**Chốt ngày 05/11/2026 theo yêu cầu chủ đồ án.** Đây là quyết định triển khai chung cho A/B/C, áp dụng tới khi có thay đổi contract được ghi và review. Đối chiếu baseline `10e015cb0582ad568057b7b4fbea3c5765df5bb3`. Chưa xác minh account/quyền AWS, chưa merge code auth bổ sung, chưa chạy tích hợp; không dùng tài liệu này làm evidence G0 hạ tầng hoặc Sprint đã PASS.
+**Hợp đồng V1 chốt ngày 05/11/2026.** Phân công cập nhật ngày 17/11/2026 theo baseline `c3250bd`. Cognito, S3 và transport Face/Results đã có trong code. Đối chiếu account, quyền và kết quả E2E theo từng môi trường.
 
 ## 1. Phạm vi, owner và thứ tự triển khai đã chốt
 
@@ -12,10 +12,10 @@
 | Môi trường tích hợp                     | `dev`, Region `ap-southeast-1`, profile laptop `camerai-lab`                                                                                                                                                           |
 | Danh tính nhóm                          | Một tài khoản AWS do C quản lý; ba IAM User A/B/C, mỗi người dùng access key riêng. Không dùng Organizations/SSO cho bài này. CLI dùng `aws configure --profile camerai-lab`; STS phải cùng Account, khác IAM User Arn |
 | Quyền người và chương trình             | C cấp quyền cho từng IAM User; EC2/Lambda dùng role riêng khi chạy. Key cá nhân không phải đầu vào ghép hệ thống và không đưa lên bản cloud                                                                            |
-| Người tạo/quản lý tài nguyên dùng chung | C tạo Cognito/SNS/Connect/S3/SQS/Lambda/workflow và triển khai; A/B gửi yêu cầu, viết mã và kiểm thử chức năng. Không tạo bộ lab riêng trong các hướng dẫn này                                                         |
-| A                                       | Viết auth/frontend/sender, quản lý user kiểm thử, xác minh người nhận và kiểm tra kênh do C cấp; review UI/ownership của B                                                                                             |
-| B                                       | Contract/migration/outbox/Results consumer/face/enrollment/deadline/claim/outcome; review auth của A                                                                                                                   |
-| C                                       | Tạo/quản lý toàn bộ tài nguyên dùng chung, gồm Cognito/SNS/Connect; SAM/IAM/EC2/HTTPS/VPN/config/deploy/monitoring/recovery/CD; cấp đầu ra và quyền cho A/B                                                            |
+| Người tạo/quản lý tài nguyên dùng chung | C quản lý AWS dùng chung và cấu hình staging. A/B tự test trên bộ Dev được cấp quyền và bàn giao cấu hình cho C.                                                                                                       |
+| A                                       | Nghiệm thu Cognito. Sở hữu thông báo E2E gồm intent dispatch, claim, Sender, outcome và hiển thị trạng thái.                                                                                                           |
+| B                                       | Sở hữu S3/Face/enrollment và Deadline E2E đến trạng thái, lịch sử và intent. Giữ contract Face/Deadline và nhánh Face trong Results.                                                                                   |
+| C                                       | Quản lý AWS dùng chung, IAM, runtime config, staging deploy, monitoring và recovery. Cấp phạm vi Dev và nhận cấu hình triển khai từ A/B.                                                                               |
 | Auth bản demo cloud                     | `AUTH_PROVIDER=cognito`, public client code + PKCE; role/ownership do DB ứng dụng quyết định                                                                                                                           |
 | Face cloud                              | `FACE_PROVIDER=rekognition`, `FACE_JOB_TRANSPORT=sqs`; fall/fire tiếp tục chạy ở edge                                                                                                                                  |
 | Deadline cloud                          | `DEADLINE_DRIVER=stepfunctions`; một operation nghiệp vụ idempotent dùng chung cho command/reconcile                                                                                                                   |
@@ -25,7 +25,7 @@
 | Source of truth                         | PostgreSQL: user/owner/camera/event/version/deadline/intent/ledger/receipt. AWS message không được tự đổi quyền                                                                                                        |
 | Giữ chức năng đang có                   | Telegram/local vẫn có thể phục vụ chức năng khác; không để local và cloud gửi cùng notification hoặc xử lý cùng face job/deadline                                                                                      |
 
-Thứ tự PR: **B contract → B outbox/consumer → B face → B deadline → A+B sender**, trong khi **A auth** và **C template/HTTPS** làm song song. Claim/outcome contract đã chốt ở §5 nên A có thể viết adapter với mock ngay; chỉ nối thật sau khi backend và HTTPS hoạt động. C tích hợp từng PR đã review vào bản dev; không deploy nguyên nhánh docs.
+PR **A Cognito nếu cần sửa / A Notification E2E**, **B Media/Face / B Deadline** làm song song theo contract. A dùng sự kiện đầu vào của escalation engine hiện có để tạo intent. B nghiệm thu Deadline tới trạng thái và một intent qua `EscalationRepository.createNotificationIntent()`. A nối dispatch AWS tại đường tạo intent dùng chung. Sau merge, thử một ca timeout đi qua Sender. Policy role và màn hình chung ghép theo [phân công tích hợp](README.md#phối-hợp-với-nhánh-ui-và-api-phân-quyền).
 
 Tên nhánh triển khai mặc định `codex/s4-<owner>-<feature>` nếu tạo bằng agent; thành viên dùng quy ước repo. Nhánh tích hợp là `main` sau PR được người khác review; không tạo thêm nhánh sống lâu và không push trực tiếp main. Commit/digest demo được C ghi riêng khi release, không mặc định bằng baseline nêu trên.
 
@@ -39,6 +39,7 @@ Tên nhánh triển khai mặc định `codex/s4-<owner>-<feature>` nếu tạo 
 - Object key do backend sinh: `owners/<ownerUuid>/cameras/<cameraUuid>/events/<eventUuid>/face/<jobUuid>.jpg`. Không gửi ảnh/base64/embedding/token/presigned URL trong message. Bucket private; API media kiểm tra quyền trước khi cấp URL có hạn.
 - Queue là Standard, giao ít nhất một lần; không giả định thứ tự hoặc exactly-once. Outbox được ghi trong transaction nghiệp vụ; receipt/result commit trước DeleteMessage. Payload lỗi terminal phải có reason và lưu quarantine/DLQ; lỗi tạm retry hữu hạn. Replay DLQ qua runner được kiểm soát, không đổi ID để né conflict.
 - Results Queue dùng chung **một application consumer** route theo `type`. Không tạo hai consumer face/notification tranh cùng queue. Worker face/sender không ghi SQL trực tiếp; nghiệp vụ đi qua service của backend.
+- `EscalationRepository.createNotificationIntent()` là điểm nối chung. B tạo `notifications` intent cùng transaction chuyển trạng thái. A thêm ghi cloud job ngay trong transaction đó cho driver/kênh AWS đã bật. Dùng `notifications.id` làm `notificationId` của job và version event sau chuyển trạng thái làm `expectedEventVersion`.
 
 ## 3. Message v1 đã chốt
 
@@ -79,7 +80,7 @@ Item có `module=M1_FACE`, label trùng personStatus, `boundingBox=null` hoặc 
 
 `notification.outcome.payload`: `outcomeId`, `notificationId`, `eventId`, `ownerScopeId`, `attemptId`, `status`, `providerCalled`, `providerId` (string hoặc null), `reason` (string hoặc null). Status: DRY_RUN/PROVIDER_ACCEPTED/FAILED/UNCERTAIN. `providerId` bắt buộc khác null khi PROVIDER_ACCEPTED; `providerCalled=false` cho DRY_RUN. Outcome gắn attempt đã claim, không tự tạo notification mới. No-op claim không tạo attempt và sender hoàn tất job sau response no-op đã được backend lưu reason.
 
-Status outcome là contract ledger mới; không insert trực tiếp những chuỗi này vào enum `notifications.status` hiện chỉ có PENDING/SENT/FAILED/CONFIRMED/SKIPPED. B bổ sung ledger/migration và mapping: PROVIDER_ACCEPTED → SENT; FAILED → FAILED; DRY_RUN → SKIPPED kèm reason; UNCERTAIN giữ pending nhưng khóa auto resend bằng ledger. SENT chỉ nghĩa provider nhận request; không tự ghi CONFIRMED/ack. Xác nhận người nhận qua workflow ứng dụng riêng.
+Status outcome là contract ledger mới; không insert trực tiếp những chuỗi này vào enum `notifications.status` hiện chỉ có PENDING/SENT/FAILED/CONFIRMED/SKIPPED. A bổ sung ledger/migration và mapping: PROVIDER_ACCEPTED → SENT; FAILED → FAILED; DRY_RUN → SKIPPED kèm reason; UNCERTAIN giữ pending nhưng khóa auto resend bằng ledger. SENT chỉ nghĩa provider nhận request; không tự ghi CONFIRMED/ack. Xác nhận người nhận qua workflow ứng dụng riêng.
 
 ## 4. Deadline command và workflow input v1 — B cần triển khai
 
@@ -93,7 +94,7 @@ Malformed 400; auth 401; event không tồn tại 404; ID dùng lại khác payl
 
 Transaction dùng lock và clock DB: kiểm tra command receipt, state, deadlineVersion và deadline đã lưu, sau đó đổi trạng thái + history + notification intent/outbox + command receipt nguyên tử. Ack đã commit trước lock → no escalation. Command commit trước ack → escalation đã tạo giữ lịch sử; sender claim kiểm tra lại trạng thái để không gửi intent đã hết hiệu lực. Không hứa ack thu hồi được request provider đã nhận.
 
-## 5. Sender claim/outcome API v1 — B cần triển khai
+## 5. Sender claim/outcome API v1 — A triển khai
 
 **Claim:** `POST /api/v1/internal/notifications/{notificationId}/claim`, cùng service auth ở §4. Body `{schemaVersion:1, claimId:UUID, eventId:UUID, expectedEventVersion:int}`; claimId giữ nguyên qua retry cùng job. Backend kiểm tra DB owner/channel/version/state/recipient policy/cap/cooldown; không tin job chỉ vì schema hợp lệ.
 
@@ -110,31 +111,31 @@ Sau provider nhận nhưng chưa lưu outcome là cửa sổ không chắc chắ
 
 Các biến có nhãn **mới** là yêu cầu PR phải bổ sung validator/reader/Compose, chưa có hiệu lực chỉ bằng cách thêm vào `.env`. Mode cloud thiếu config phải fail startup, không tự chạy local thay thế. Giữ default local của repo cho người chưa làm AWS.
 
-| Biến                                                    | Giá trị/nguồn cloud                        | Nơi đọc / owner                                                                                             |
-| ------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| AWS_REGION                                              | ap-southeast-1                             | Backend và workers / C                                                                                      |
-| AUTH_PROVIDER                                           | cognito                                    | Auth config cần tích hợp / A                                                                                |
-| COGNITO_USER_POOL_ID, COGNITO_CLIENT_ID, COGNITO_DOMAIN | Outputs; domain là HTTPS origin            | Backend/auth config / A                                                                                     |
-| WEB_ORIGIN                                              | HTTPS origin do C cấp                      | Backend CORS / A,C                                                                                          |
-| NEXT_PUBLIC_API_BASE_URL                                | `<WEB_ORIGIN>/api/v1`                      | Web build / A,C                                                                                             |
-| STORAGE_PROVIDER, S3_BUCKET                             | s3, MediaBucketName                        | Storage adapter / B,C                                                                                       |
-| FACE_PROVIDER                                           | rekognition                                | Face/enrollment routing cần triển khai / B                                                                  |
-| FACE_JOB_TRANSPORT **mới**                              | sqs (local: bullmq)                        | Face producer + worker gating / B                                                                           |
-| FACE_JOBS_QUEUE_URL **mới**                             | FaceJobsQueueUrl                           | Outbox dispatcher / B                                                                                       |
-| APPLICATION_RESULTS_QUEUE_URL **mới**                   | ApplicationResultsQueueUrl                 | Face/sender publish + Results consumer / A,B                                                                |
-| APPLICATION_RESULTS_CONSUMER_ENABLED **mới**            | true ở dev                                 | Results consumer lifecycle / B                                                                              |
-| REKOGNITION_MATCH_THRESHOLD **mới**                     | 0.90, thang 0..1                           | Face adapter; giữ FACE_MATCH_THRESHOLD cho local / B                                                        |
-| DEADLINE_DRIVER **mới**                                 | stepfunctions (local: local)               | Deadline dispatch + local worker gating / B                                                                 |
-| DEADLINE_STATE_MACHINE_ARN **mới**                      | DeadlineStateMachineArn                    | Workflow dispatcher / B                                                                                     |
-| INTERNAL_API_BASE_URL **mới**                           | `<WEB_ORIGIN>/api/v1`, không có slash cuối | Deadline/sender gọi các path trong §4/5 / A,B,C                                                             |
-| INTERNAL_SERVICE_TOKEN                                  | Secret ref riêng của dev                   | API guard, deadline/sender; không log / C                                                                   |
-| NOTIFICATION_DRIVER **mới**                             | sqs (local: local)                         | Intent dispatcher + local sender gating theo channel / B                                                    |
-| NOTIFICATION_JOBS_QUEUE_URL **mới**                     | NotificationJobsQueueUrl                   | Intent outbox dispatcher / B                                                                                |
-| SENDER_DRY_RUN **mới**                                  | true, chỉ false sau test/review kênh thật  | Backend claim quyết định mode; sender chỉ được giảm REAL thành DRY_RUN, không nâng DRY_RUN thành REAL / A,B |
-| SNS_TOPIC_ARN                                           | IncidentEmailTopicArn, tách ops topic      | Backend recipient routing/claim; quyền sender / A,C                                                         |
-| CONNECT_INSTANCE_ID, CONNECT_CONTACT_FLOW_ID            | Resource đã xác minh khi bật call          | Backend delivery config và sender / A,C                                                                     |
+| Biến                                                    | Giá trị/nguồn cloud                        | Nơi đọc / owner                                                                                           |
+| ------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| AWS_REGION                                              | ap-southeast-1                             | Backend và workers / C                                                                                    |
+| AUTH_PROVIDER                                           | cognito                                    | Auth config hiện có / A nghiệm thu                                                                        |
+| COGNITO_USER_POOL_ID, COGNITO_CLIENT_ID, COGNITO_DOMAIN | Outputs; domain là HTTPS origin            | Backend/auth config / A                                                                                   |
+| WEB_ORIGIN                                              | HTTPS origin do C cấp                      | Backend CORS / A,C                                                                                        |
+| NEXT_PUBLIC_API_BASE_URL                                | `<WEB_ORIGIN>/api/v1`                      | Web build / A,C                                                                                           |
+| STORAGE_PROVIDER, S3_BUCKET                             | s3, MediaBucketName                        | Storage adapter / B,C                                                                                     |
+| FACE_PROVIDER                                           | rekognition                                | Face/enrollment routing cần triển khai / B                                                                |
+| FACE_JOB_TRANSPORT                                      | sqs (local: bullmq)                        | Face producer + worker gating / B                                                                         |
+| FACE_JOBS_QUEUE_URL                                     | FaceJobsQueueUrl                           | Outbox dispatcher / B                                                                                     |
+| APPLICATION_RESULTS_QUEUE_URL                           | ApplicationResultsQueueUrl                 | Face/sender publish + Results consumer / A,B                                                              |
+| APPLICATION_RESULTS_CONSUMER_ENABLED                    | true ở dev                                 | Results consumer lifecycle / B                                                                            |
+| REKOGNITION_MATCH_THRESHOLD                             | 0.90, thang 0..1                           | Face adapter; giữ FACE_MATCH_THRESHOLD cho local / B                                                      |
+| DEADLINE_DRIVER **mới**                                 | stepfunctions (local: local)               | Deadline dispatch + local worker gating / B                                                               |
+| DEADLINE_STATE_MACHINE_ARN **mới**                      | DeadlineStateMachineArn                    | Workflow dispatcher / B                                                                                   |
+| INTERNAL_API_BASE_URL                                   | `<WEB_ORIGIN>/api/v1`, không có slash cuối | Face/Deadline/Sender gọi API nội bộ / A,B,C                                                               |
+| INTERNAL_SERVICE_TOKEN                                  | Secret ref riêng của dev                   | API guard và cả ba Lambda / token theo môi trường, không log                                              |
+| NOTIFICATION_DRIVER **mới**                             | sqs (local: local)                         | Intent dispatcher + local sender gating theo channel / A                                                  |
+| NOTIFICATION_JOBS_QUEUE_URL                             | NotificationJobsQueueUrl                   | Intent outbox dispatcher dùng chung / A                                                                   |
+| SENDER_DRY_RUN **mới**                                  | true, chỉ false sau test/review kênh thật  | Backend claim quyết định mode; sender chỉ được giảm REAL thành DRY_RUN, không nâng DRY_RUN thành REAL / A |
+| SNS_TOPIC_ARN                                           | IncidentEmailTopicArn, tách ops topic      | Backend recipient routing/claim; quyền sender / A,C                                                       |
+| CONNECT_INSTANCE_ID, CONNECT_CONTACT_FLOW_ID            | Resource đã xác minh khi bật call          | Backend delivery config và sender / A,C                                                                   |
 
-Collection/owner mapping là dữ liệu registry, không dùng một env REKOGNITION_COLLECTION_ID chung làm nguồn quyền. Allowlist/cap/cooldown và cấu hình kênh theo owner lưu DB hoặc config được quản lý, không lấy từ queue. Giá trị lab mặc định: dry-run, cap 5 request provider/ngày/người nhận/kênh, cooldown 60 giây; B áp dụng transaction khi claim. Chủ đồ án có thể điều chỉnh có ghi evidence, không chỉnh bằng message.
+Collection/owner mapping là dữ liệu registry, không dùng một env REKOGNITION_COLLECTION_ID chung làm nguồn quyền. Allowlist/cap/cooldown và cấu hình kênh theo owner lưu DB hoặc config được quản lý, không lấy từ queue. Giá trị lab mặc định: dry-run, cap 5 request provider/ngày/người nhận/kênh, cooldown 60 giây; A áp dụng transaction khi claim. Chủ đồ án có thể điều chỉnh có ghi evidence, không chỉnh bằng message.
 
 File đọc config mới do PR tạo: backend `apps/orchestrator/src/aws/aws.config.ts`; workers `services/aws-workers/<face|sender|deadline>/config.*` (**đích cần tạo**). Điền file thực vào 09 sau merge nếu tổ chức khác, giữ nguyên tên biến. Không sửa `.env.example` gốc thành mode cloud khi code chưa đọc các biến này.
 
@@ -146,17 +147,17 @@ Outputs bắt buộc: `MediaBucketName`, `FaceJobsQueueUrl`, `FaceJobsQueueArn`,
 
 ## 8. Các giá trị chưa thể tự điền và điều kiện qua G0
 
-| Giá trị thực tế còn phải xác minh                                     | Người cung cấp                   | Chặn bước nào                                      |
-| --------------------------------------------------------------------- | -------------------------------- | -------------------------------------------------- |
-| Account alias/ID, IAM User A/B/C, STS đúng, quyền/PassRole, ngân sách | C và chủ account                 | Tạo/deploy AWS; không chặn viết code/fixtures      |
-| Danh tính thành viên A/B/C và người review                            | Nhóm điền tên vào 06             | Phân công cá nhân; trách nhiệm vai trò đã chốt     |
-| Pool/client/domain Cognito và hai application user IDs                | A                                | Auth integration; fixtures chỉ có UUID giả lập     |
-| Camera/known face/collection IDs ứng dụng thật                        | B                                | Chạy fixture lên dev; phải seed bằng quy trình app |
-| Domain HTTPS/DNS, VPN và secret refs                                  | C                                | Lambda gọi API và E2E cloud                        |
-| Email/số nhận đã đồng ý, subscription/Connect/quota                   | A                                | Gửi thật đúng kênh                                 |
-| Model artifact/checksum/report                                        | B phối hợp người phụ trách model | E2E model thật                                     |
-| Commit/digest deploy và Outputs thực                                  | C sau PR triển khai              | Nghiệm thu bản dev/demo                            |
+| Giá trị thực tế còn phải xác minh                                     | Người cung cấp                                | Chặn bước nào                                      |
+| --------------------------------------------------------------------- | --------------------------------------------- | -------------------------------------------------- |
+| Account alias/ID, IAM User A/B/C, STS đúng, quyền/PassRole, ngân sách | C và chủ account                              | Tạo/deploy AWS; không chặn viết code/fixtures      |
+| Danh tính thành viên A/B/C và người review                            | Nhóm điền tên vào 06                          | Phân công cá nhân; trách nhiệm vai trò đã chốt     |
+| Pool/client/domain Cognito và hai application user IDs                | A                                             | Auth integration; fixtures chỉ có UUID giả lập     |
+| Camera/known face/collection IDs ứng dụng thật                        | B                                             | Chạy fixture lên dev; phải seed bằng quy trình app |
+| Domain HTTPS/DNS, VPN và secret refs                                  | A/B mở tunnel Dev khi cần, C cấu hình hạ tầng | Callback Lambda khi điều kiện HTTPS chưa có        |
+| Email/số nhận đã đồng ý, subscription/Connect/quota                   | A                                             | Gửi thật đúng kênh                                 |
+| Model artifact/checksum/report                                        | B phối hợp người phụ trách model              | E2E model thật                                     |
+| Commit/digest deploy và Outputs thực                                  | C sau PR triển khai                           | Nghiệm thu bản dev/demo                            |
 
-**G0_CONTRACT=CHỐT_V1. G0_ACCESS=CHƯA_XÁC_MINH.** Nhóm bắt đầu các phần code độc lập ngay theo contract này. Chỉ ghi G0 đầy đủ PASS khi STS/quyền/budget và các giá trị cần cho bước triển khai đầu đã có bằng chứng trong bàn giao của A/B/C; tài liệu không giả lập sự đồng ý của reviewer hoặc quyền của account.
+**G0_CONTRACT=CHỐT_V1.** A và B bắt đầu các phần độc lập ngay. Ghi trạng thái quyền và tài nguyên theo đúng ARN và môi trường Dev/staging của lượt test.
 
-Mọi thay đổi type/field/endpoint/semantics/tên config phải cập nhật tài liệu này, schema/fixtures, OpenAPI/generated contracts nếu liên quan, producer/consumer và test trong cùng chuỗi PR phối hợp. B quản lý contract, A review tương thích sender/auth, C review deploy; ghi version và migration plan trước khi bật. Không một người đổi contract để riêng worker mình chạy xanh.
+Mọi thay đổi type/field/endpoint/semantics/tên config phải cập nhật tài liệu này, schema/fixtures, OpenAPI/generated contracts nếu liên quan, producer/consumer và test trong cùng chuỗi PR phối hợp. A quản lý contract thông báo, B quản lý Face/Deadline, người làm API quyền review thay đổi truy cập và C review config/deploy; ghi version và migration plan trước khi bật. Không một người đổi contract để riêng worker mình chạy xanh.
