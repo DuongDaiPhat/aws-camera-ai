@@ -9,6 +9,7 @@ import {
   IsUUID,
   IsDateString,
   IsBoolean,
+  IsIn,
 } from 'class-validator';
 import {
   EVENT_TYPES,
@@ -83,4 +84,13 @@ export class ListEventsQueryDto {
   @Transform(({ value }) => toBoolean(value))
   @IsBoolean()
   isFalseAlarm?: boolean;
+
+  @IsOptional()
+  @Transform(({ value }) => toBoolean(value))
+  @IsBoolean()
+  urgentFirst?: boolean;
+
+  @IsOptional()
+  @IsIn(['pending', 'done', 'logged'])
+  notificationState?: 'pending' | 'done' | 'logged';
 }

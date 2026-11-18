@@ -166,6 +166,7 @@
 
 /* Card Body */
 .cardBody {
+  container: rule-editor / inline-size;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -186,20 +187,6 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-}
-
-.waitPanelHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.waitPanelHeader h4 {
-  margin: 0;
-  font-size: 14px;
-  color: #6743b1;
 }
 
 .waitSavedValue {
@@ -621,4 +608,205 @@
   margin: 4px 0 0;
   font-size: 13px;
   color: var(--primary, #6d28d9);
+}
+
+/* Dense list view for settings; expanded forms retain their existing controls. */
+.compactSettings {
+  gap: 12px;
+}
+.compactSettings > .policyGuideBox {
+  padding: 10px 14px;
+  font-size: 12px;
+}
+.compactSettings .rulesList {
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.compactRule,
+.compactRule:hover {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.compactRule + .compactRule {
+  border-top: 1px solid var(--border);
+}
+.compactRule > summary {
+  min-height: 48px;
+  padding: 12px 16px;
+  border-bottom: 0;
+  background: transparent;
+  cursor: pointer;
+  list-style: none;
+}
+.compactRule > summary::-webkit-details-marker {
+  display: none;
+}
+.compactRule > summary:hover,
+.compactRule[open] > summary {
+  background: var(--surface-muted);
+}
+.compactRule > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
+}
+.compactRule .ruleDisplayName {
+  font-size: 14px;
+}
+.ruleSummaryWait {
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.ruleDraftStatus {
+  color: #86520d;
+  font-size: 12px;
+}
+.ruleChevron {
+  color: var(--ink-muted);
+  transition: transform 160ms ease-out;
+}
+.compactRule[open] .ruleChevron {
+  transform: rotate(180deg);
+}
+.compactRule .cardBody {
+  padding: 16px;
+  gap: 12px;
+}
+.ruleEditors {
+  container-type: inline-size;
+}
+.waitLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+  gap: 20px;
+  align-items: start;
+}
+.ruleEditors {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+.ruleEditors .waitPanel,
+.thresholdSection {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.editorTitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.ruleEditors .inputsGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 18px;
+}
+.ruleEditors .fieldGroup {
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 3;
+  align-items: start;
+  min-width: 0;
+  gap: 6px;
+}
+.ruleEditors .fieldLabel {
+  flex-wrap: wrap;
+  align-self: end;
+}
+.ruleEditors .fieldHint {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.ruleEditors .inputNumber {
+  inline-size: 7rem;
+  max-inline-size: 100%;
+  height: 36px;
+  padding: 6px 8px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.ruleEditors .waitPresets {
+  margin-top: 0;
+}
+.ruleEditors .waitPreset {
+  min-height: 32px;
+  padding: 5px 8px;
+}
+.waitReadout {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+.waitReadout .waitSavedValue,
+.waitReadout .waitNotice,
+.waitReadout .waitDraftNotice {
+  margin: 0;
+  font-size: 12px;
+}
+.waitReadout .waitPreview {
+  padding: 8px;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+}
+.waitReadout .waitPreview strong {
+  font-variant-numeric: tabular-nums;
+}
+@container (max-width: 23rem) {
+  .ruleEditors .inputsGrid {
+    grid-template-columns: 1fr;
+  }
+  .ruleEditors .fieldGroup {
+    grid-template-rows: auto;
+    grid-row: auto;
+  }
+}
+.compactRule .cardFooter {
+  padding: 10px 16px;
+  background: transparent;
+}
+.compactRule .metaInfo {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 11px;
+}
+@container rule-editor (max-width: 48rem) {
+  .waitLayout {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 620px) {
+  .compactRule > summary {
+    padding: 12px;
+    gap: 8px;
+  }
+  .compactRule .badgesArea {
+    margin-left: auto;
+    gap: 6px;
+  }
+  .compactRule .ruleDisplayName {
+    font-size: 13px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ruleChevron {
+    transition: none;
+  }
+}
+
+.compactRule:not([open]) > :not(summary) {
+  display: none;
 }

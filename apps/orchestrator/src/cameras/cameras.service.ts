@@ -772,7 +772,7 @@ export class CamerasService implements CameraConfigPortV1 {
     return this.mapToSourceDetail(refreshed, role);
   }
 
-  async getCameraDebugStream(cameraId: string): Promise<CameraDebugStream> {
+  async getCameraDebugStream(cameraId: string, actorId?: string): Promise<CameraDebugStream> {
     const now = Date.now();
     let camera: CameraAggregateRecord;
 
@@ -820,7 +820,11 @@ export class CamerasService implements CameraConfigPortV1 {
       }
     }
 
-    const readSession = this.cameraSourcesService.createBrowserReadSession(camera.slug, camera.id);
+    const readSession = this.cameraSourcesService.createBrowserReadSession(
+      camera.slug,
+      camera.id,
+      actorId,
+    );
 
     const isCameraActive = camera.is_enabled;
 
@@ -924,11 +928,11 @@ export class CamerasService implements CameraConfigPortV1 {
   // -------------------------------------------------------------------
 
   private assertAdmin(role: UserRole): void {
-    if (role !== 'ADMIN') {
+    if (!['ADMIN', 'CAREGIVER'].includes(role)) {
       throw new ForbiddenException({
         error: {
           code: 'FORBIDDEN',
-          message: 'Chỉ Quản trị viên (ADMIN) mới có quyền thực hiện thao tác này.',
+          message: 'Chỉ chủ hộ hoặc quản trị viên được thực hiện thao tác này.',
         },
       });
     }
@@ -1066,7 +1070,7 @@ export class CamerasService implements CameraConfigPortV1 {
   }
 
   private mapToCameraDto(r: CameraAggregateRecord, role: UserRole): CameraDto {
-    const isMasked = role !== 'ADMIN';
+    const isMasked = !['ADMIN', 'CAREGIVER'].includes(role);
     const maskedRtsp = isMasked
       ? null
       : r.rtsp_url
@@ -1106,7 +1110,7 @@ export class CamerasService implements CameraConfigPortV1 {
   }
 
   private mapToSourceDetail(s: CameraSourceRecord, role: UserRole): CameraSourceDetail {
-    const isMasked = role !== 'ADMIN';
+    const isMasked = !['ADMIN', 'CAREGIVER'].includes(role);
     const maskedRtsp = isMasked
       ? null
       : s.rtsp_url

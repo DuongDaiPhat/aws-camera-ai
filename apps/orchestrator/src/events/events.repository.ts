@@ -15,6 +15,8 @@ export interface ListEventsFilters {
   from?: string;
   to?: string;
   isFalseAlarm?: boolean;
+  urgentFirst?: boolean;
+  notificationState?: 'pending' | 'done' | 'logged';
   actorId?: string;
 }
 
@@ -31,6 +33,18 @@ export const PERSON_EVENT_TYPES: EventType[] = [
   'RESTRICTED_ZONE',
 ];
 
+// Notification retention is a presentation rule. It does not change the incident lifecycle.
+const NOTIFICATION_STATE_SQL = `
+  CASE
+    WHEN e.status = 'LOGGED_ONLY' THEN 'logged'
+    WHEN e.status IN ('RESOLVED', 'CLOSED') OR e.is_false_alarm IS TRUE
+      OR e.detected_at <= statement_timestamp() - CASE e.priority
+        WHEN 'P0' THEN INTERVAL '3 hours' ELSE INTERVAL '8 hours' END
+      THEN 'done'
+    ELSE 'pending'
+  END
+`;
+
 export interface EventDetailRecord extends EventListItemRecord {
   source: string;
   track_id: string | null;
@@ -41,7 +55,6 @@ export interface EventDetailRecord extends EventListItemRecord {
   aggregate_version: number;
   retain: boolean;
   correlation_id: string;
-  escalation_deadline_at: Date | null;
   notified_at: Date | null;
   escalated_at: Date | null;
   resolved_at: Date | null;
@@ -111,6 +124,7 @@ export interface EventListItemRecord {
   person_status: PersonStatus | null;
   is_false_alarm: boolean;
   detected_at: Date;
+  escalation_deadline_at?: Date | null;
   camera_id: string | null;
   camera_name: string | null;
   camera_owner_user_id?: string | null;
@@ -134,6 +148,7 @@ const EVENT_SUMMARY_PROJECTION = `
     e.person_status,
     e.is_false_alarm,
     e.detected_at,
+    e.escalation_deadline_at,
     c.id AS camera_id,
     c.name AS camera_name,
     cd.owner_user_id AS camera_owner_user_id,
@@ -280,7 +295,8 @@ export class EventsRepository {
 
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
-  async canReceiveEvent(userId: string, recipients: string[]): Promise<boolean> {
+  async canReceiveEvent(userId: string, recipients: string[], eventId?: string): Promise<boolean> {
+    if (eventId) return this.canViewEvent(userId, eventId);
     const { rowCount } = await this.pool.query(
       `SELECT 1 FROM users actor WHERE id = $1 AND is_active
        AND ((email = 'admin@camerai.local' AND role = 'ADMIN') OR EXISTS (
@@ -518,11 +534,19 @@ export class EventsRepository {
 
     const offset = (filters.page - 1) * filters.pageSize;
     const dataParams = [...params, filters.pageSize, offset];
+    const urgentOrder = filters.urgentFirst
+      ? `CASE
+           WHEN e.status <> 'AI_FAILED' AND e.detected_at <= statement_timestamp()
+             AND (${NOTIFICATION_STATE_SQL}) = 'pending'
+             THEN CASE e.priority WHEN 'P0' THEN 0 WHEN 'P1' THEN 1 WHEN 'P2' THEN 2 ELSE 3 END
+           ELSE 3
+         END, `
+      : '';
     const dataQuery = `
       SELECT ${EVENT_SUMMARY_PROJECTION}
       ${EVENT_SUMMARY_SOURCE}
       ${whereClause}
-      ORDER BY e.detected_at DESC
+      ORDER BY ${urgentOrder}e.detected_at DESC, e.id DESC
       LIMIT $${nextIdx} OFFSET $${nextIdx + 1};
     `;
 
@@ -559,7 +583,6 @@ export class EventsRepository {
              e.aggregate_version,
              e.retain,
              e.correlation_id,
-             e.escalation_deadline_at,
              e.notified_at,
              e.escalated_at,
              e.resolved_at,
@@ -702,7 +725,7 @@ export class EventsRepository {
              COUNT(*) FILTER (WHERE c.is_enabled AND d.status = 'ONLINE')::int AS online_count
       FROM cameras c
       JOIN devices d ON d.id = c.device_id
-      ${actor ? 'WHERE shares_camera_household($1, d.owner_user_id)' : ''};
+      ${actor ? 'WHERE can_access_camera($1, c.id)' : ''};
     `;
     const res = await this.pool.query<CameraAvailabilityRecord>(query, actor ? [actor] : []);
     return res.rows[0] ?? { online_count: 0, total_count: 0 };
@@ -849,6 +872,11 @@ interface FilterConditionHandler {
 }
 
 const FILTER_HANDLERS: FilterConditionHandler[] = [
+  {
+    check: (f) => f.notificationState !== undefined,
+    sql: (i) => `(${NOTIFICATION_STATE_SQL}) = $${i}`,
+    param: (f) => f.notificationState,
+  },
   {
     check: (f) => Boolean(f.eventType?.length),
     sql: (i) => `e.event_type = ANY($${i})`,

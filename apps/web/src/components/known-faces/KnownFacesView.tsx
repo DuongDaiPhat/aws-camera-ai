@@ -2,10 +2,25 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { deleteKnownFace, listKnownFaces, type KnownFace } from '@/lib/known-faces-client';
+import { KnownFaceEditor } from './KnownFaceEditor';
+import { getHousehold, type HouseholdMember } from '@/lib/household-client';
 import { AddKnownFaceForm } from './AddKnownFaceForm';
 import styles from './known-faces.module.css';
 
 export function KnownFacesView({ isAdmin }: { isAdmin: boolean }) {
+  const [members, setMembers] = useState<HouseholdMember[]>([]);
+  const [editing, setEditing] = useState<KnownFace | null>(null);
+  useEffect(() => {
+    if (!isAdmin) return;
+    const abort = new AbortController();
+    void getHousehold(abort.signal)
+      .then((data) => setMembers(data.members))
+      .catch((e: unknown) => {
+        if (!abort.signal.aborted)
+          setError(e instanceof Error ? e.message : 'Không tải được thành viên.');
+      });
+    return () => abort.abort();
+  }, [isAdmin]);
   const [faces, setFaces] = useState<KnownFace[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -73,6 +88,7 @@ export function KnownFacesView({ isAdmin }: { isAdmin: boolean }) {
       {error && <p role="alert">{error}</p>}
       {adding && isAdmin && (
         <AddKnownFaceForm
+          members={members}
           onCancel={() => setAdding(false)}
           onCreated={(face) => {
             setAdding(false);
@@ -81,6 +97,19 @@ export function KnownFacesView({ isAdmin }: { isAdmin: boolean }) {
                 ? 'Đã đăng ký, sẵn sàng nhận diện.'
                 : 'Đã đăng ký, đang chờ đồng bộ nhận diện.',
             );
+            void reload();
+          }}
+        />
+      )}
+      {editing && (
+        <KnownFaceEditor
+          key={editing.id}
+          face={editing}
+          members={members}
+          onCancel={() => setEditing(null)}
+          onSaved={() => {
+            setEditing(null);
+            setNotice('Đã cập nhật và gửi đồng bộ người quen.');
             void reload();
           }}
         />
@@ -110,7 +139,12 @@ export function KnownFacesView({ isAdmin }: { isAdmin: boolean }) {
               <time dateTime={face.createdAt}>
                 {new Date(face.createdAt).toLocaleString('vi-VN')}
               </time>
-              {isAdmin && <button onClick={() => setDeleting(face)}>Xóa</button>}
+              {isAdmin && (
+                <div className={styles.actions}>
+                  <button onClick={() => setEditing(face)}>Sửa / Liên kết Viewer</button>
+                  <button onClick={() => setDeleting(face)}>Xóa</button>
+                </div>
+              )}
             </li>
           ))}
         </ul>

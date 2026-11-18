@@ -11,6 +11,7 @@ import { useCameraOrder } from '@/hooks/useCameraOrder';
 import { LiveCameraViewport } from '@/components/cameras/LiveCameraViewport';
 import { Icon } from '@/components/ui/Icon';
 import { SelectMenu } from '@/components/ui/SelectMenu';
+import { availableCameraLayout, cameraLayoutOptions } from '@/lib/camera-layout';
 import { cameraGrid } from '@/lib/camera-grid';
 import { CameraAreas } from './CameraAreas';
 import styles from './dashboard-overview.module.css';
@@ -69,8 +70,9 @@ export function DashboardOverview({
   const expandedRef = useDialogFocus(Boolean(expandedId) && !blocked, () => setExpandedId(null));
   const screenId = fullscreenId ?? expandedId;
   const panelRef = useRef<HTMLElement>(null);
-  const requested = layout === 'custom' ? custom : Number(layout);
   const available = ordered.filter((camera) => camera.isEnabled);
+  const displayLayout = availableCameraLayout(layout, available.length);
+  const requested = displayLayout === 'custom' ? custom : Number(displayLayout);
   const grid = cameraGrid(available, pinnedId, requested, page);
   const pages = grid.pages,
     currentPage = grid.currentPage;
@@ -145,12 +147,10 @@ export function DashboardOverview({
           <SelectMenu
             label="Số camera hiển thị"
             disabled={!layoutReady}
-            value={layout}
+            value={displayLayout}
+            visibleOptions={6}
             icon={<LayoutGrid size={15} />}
-            options={[
-              ...[1, 2, 4, 6, 8].map((n) => ({ value: String(n), label: `${n} camera` })),
-              { value: 'custom', label: 'Tùy chỉnh' },
-            ]}
+            options={cameraLayoutOptions(available.length)}
             onChange={(value) => {
               setLayout(value);
               setPage(0);
@@ -161,13 +161,13 @@ export function DashboardOverview({
               className={styles.customCount}
               type="number"
               min={1}
-              max={64}
+              max={Math.max(1, available.length)}
               aria-label="Số camera tùy chỉnh"
-              value={custom}
+              value={Math.min(custom, Math.max(1, available.length))}
               onChange={(event) => {
                 const value = Number(event.target.value);
                 if (Number.isInteger(value) && value > 0) {
-                  setCustom(Math.min(value, 64));
+                  setCustom(Math.min(value, Math.max(1, available.length)));
                   setPage(0);
                 }
               }}
@@ -193,12 +193,6 @@ export function DashboardOverview({
             Thử lại
           </button>
         </div>
-      )}
-      {!isLoading && requested > available.length && available.length > 0 && (
-        <p className={styles.preferenceNotice} role="alert">
-          Hiện tại chỉ có tối đa {available.length} camera đang bật. Bố cục tối đa là{' '}
-          {available.length}, thay vì {requested} khung.
-        </p>
       )}
       {saveError && (
         <p className={styles.preferenceNotice} role="status">

@@ -9,9 +9,10 @@
 - [Luồng 1 — Phát hiện người (walking skeleton, Sprint 1)](#luồng-1--phát-hiện-người-walking-skeleton-sprint-1)
 - [Luồng 2 — Người lạ → cảnh báo → leo thang (Sprint 2)](#luồng-2--người-lạ--cảnh-báo--leo-thang-sprint-2)
 - [Luồng 3 — Té ngã (Sprint 3)](#luồng-3--té-ngã-sprint-3)
-- [Luồng 4 — Cháy/khói, ưu tiên P0 (Sprint 3)](#luồng-4--cháykhói-ưu-tiên-p0-sprint-3)
+- [Luồng 4 — Cháy lửa ưu tiên P0 theo code hiện tại](#luồng-4--cháy-lửa-ưu-tiên-p0-theo-code-hiện-tại)
 - [Luồng 5 — Wellness check (Sprint 3)](#luồng-5--wellness-check-sprint-3)
 - [Luồng 6 — Xem ảnh/clip qua presigned URL](#luồng-6--xem-ảnhclip-qua-presigned-url)
+- [Luồng 7 — Telegram gửi cảnh báo và nhận phản hồi](#luồng-7--telegram-gửi-cảnh-báo-và-nhận-phản-hồi)
 - [Ngân sách độ trễ](#ngân-sách-độ-trễ)
 - [Xử lý lỗi trên từng chặng](#xử-lý-lỗi-trên-từng-chặng)
 
@@ -141,6 +142,9 @@ một track chỉ có một event.
 
 Đây là luồng đầy đủ nhất, chạm vào gần như mọi thành phần.
 
+> Phần gửi nhận Telegram của sơ đồ Luồng 2 dưới đây là phác thảo Sprint 2.
+> Sequence Telegram đã đối chiếu code hiện tại nằm ở Luồng 7; không dùng các bước ACK hoặc gửi trực tiếp trong sơ đồ cũ làm đặc tả triển khai.
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -261,40 +265,56 @@ sequenceDiagram
 
 ---
 
-## Luồng 4 — Cháy/khói, ưu tiên P0 (Sprint 3)
+## Luồng 4 — Cháy lửa ưu tiên P0 theo code hiện tại
+
+Đối chiếu ngày 12/11/2026 tại commit `d23cad6`. Checkpoint hai lớp giữ nguyên class map,
+nhưng M3 hiện chỉ dùng `fire` để xác nhận cảnh báo. Nhánh full frame hoạt động độc lập với person.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant FRG as Frigate
-    participant ORC as Orchestrator
-    participant AI as AI Service (fire)
-    participant PG as PostgreSQL
-    participant TG as Telegram
-
-    loop Mỗi frame
-        FRG->>ORC: frame
-        ORC->>AI: POST /fire/detect
-        AI->>AI: YOLO fire/smoke inference
-
-        alt 1-2 frame có tín hiệu
-            AI-->>ORC: {confirmed:false, consecutiveFrames:2}
-            Note over ORC: Có thể là đèn màu / ánh nắng.<br/>Chưa báo.
-        else ≥ 3 frame liên tiếp trong 5 giây
-            AI-->>ORC: {confirmed:true, maxConfidence:0.81}
-            ORC->>PG: INSERT events (FIRE_SMOKE_DETECTED, P0)
-            Note over ORC: skip_logged_only = TRUE →<br/>vào thẳng NOTIFIED bất kể confidence
-            ORC->>PG: status=NOTIFIED, deadline = now() + 30s
-            ORC->>TG: 🔥 CẢNH BÁO P0 (gửi TRƯỚC mọi P1/P2 đang xếp hàng)
-        end
+    participant F as Frigate frame bridge
+    participant M as MQTT Mosquitto
+    participant O as Orchestrator M3
+    participant A as AI Service ONNX CPU
+    participant DB as PostgreSQL
+    participant S as MinIO hoặc S3
+    participant T as Worker Telegram
+    F->>M: Topic frigate/camerai/fire/frames header và JPEG đúng timestamp
+    Note over F,O: Full frame không phụ thuộc person QoS 0 queue hữu hạn ưu tiên frame mới
+    M->>O: Fire frame envelope
+    O->>O: Kiểm tra độ tươi thứ tự camera và giới hạn
+    O->>A: POST /fire/detect ảnh và metadata với X-Internal-Token
+    A->>A: Letterbox 640 RGB FP32 NCHW rồi ONNX
+    A->>A: NMS trong graph chỉ giữ class fire
+    alt Chưa đủ 3 frame hợp lệ đạt ngưỡng
+        A-->>O: INSUFFICIENT_FRAMES hoặc lý do chưa xác nhận
+    else Đủ chuỗi trong 5 giây gap không quá 1 giây
+        A-->>O: CONFIRMED episode và incidentConfidence bằng min score
+        O->>O: Kiểm tra lại bằng chứng
+        O->>DB: Transaction tạo event lửa P0 riêng và fire_incidents
+        O->>S: Lưu snapshot của frame xác nhận
+        O->>DB: event_media và AI result receipt cùng outbox
+        O->>DB: Engine tạo NOTIFIED và notification PENDING theo rule
+        T->>DB: Claim công việc gửi
+        Note over T: Gửi ảnh hoặc text và xử lý callback theo Luồng 7
     end
+    Note over O,DB: Người dùng xác nhận không xóa latch Chỉ chuỗi âm tính hợp lệ mới clear episode
 ```
 
-### Hàng đợi ưu tiên (FR-ESC-08)
+Mặc định mỗi frame phải có fire score ít nhất 0,50; cần tối thiểu 3 frame trong 5 giây,
+gap không quá 1 giây. Incident confidence là **min score** của các frame xác nhận.
+Frame sai thứ tự, quá cũ, replay hoặc lỗi suy luận không được dùng để cộng đủ chuỗi.
+Snapshot giữ đúng ảnh của frame xác nhận. Latch trong `fire_incidents` chỉ được clear
+sau quan sát âm tính hợp lệ liên tục 10 giây, không phải khi người dùng bấm Tôi ổn.
 
-Khi nhiều sự kiện chờ gửi cùng lúc, P0 được gửi trước. Cách làm đơn giản nhất mà đủ dùng:
-sắp xếp hàng đợi theo `(priority ASC, detected_at ASC)` trước mỗi lượt gửi. Không cần message
-queue riêng cho quy mô đồ án này.
+P0 là ưu tiên nghiệp vụ. Truy vấn claim Telegram hiện `ORDER BY n.created_at, n.id`,
+chưa ưu tiên mọi P0 vượt toàn bộ P1/P2. `skip_logged_only` không bỏ qua kiểm tra bằng chứng AI.
+Rule escalation và deadline đọc từ cấu hình, không coi seed 30 giây là giá trị luôn cố định.
+
+Nguồn: `FireFramesConsumer`, `FireProcessorService`, `FireDeliveryService`,
+`FireTracker`, `FireDetector`, `NotificationsRepository` và migration `0014_fire_incidents.sql`.
+Phần model, số liệu train và ERD xem [báo cáo của Nhân](../BAO_CAO_PHAN_CONG_NHAN.md).
 
 ---
 
@@ -368,6 +388,88 @@ Hạn 15 phút là đủ cho người dùng xem xong, ngắn đến mức link r
 
 ---
 
+## Luồng 7 — Telegram gửi cảnh báo và nhận phản hồi
+
+Đây là luồng gửi nhận hiện tại thay cho đoạn Telegram minh họa trong Luồng 2 của bản Sprint 2.
+Chỉ cập nhật phạm vi Telegram; thuật toán Face AI và escalation chi tiết thuộc tài liệu của phần tương ứng.
+
+### Chiều gửi từ event đến người nhận
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant E as Escalation Engine
+    participant DB as PostgreSQL
+    participant W as NotificationRetryWorker
+    participant S as MinIO hoặc S3
+    participant T as Telegram Bot API
+    participant U as Người giám sát
+    E->>DB: Transaction event NOTIFIED và notification PENDING
+    W->>DB: Claim lease bằng FOR UPDATE SKIP LOCKED
+    DB-->>W: Job và người nhận đã liên kết
+    W->>S: Tải snapshot đúng event
+    alt Có ảnh phù hợp
+        W->>W: Render bbox lửa nếu đủ metadata
+        W->>T: sendPhoto JPEG caption và inline buttons
+    else Không lấy được ảnh
+        W->>T: sendMessage kèm Chưa lấy được ảnh
+    end
+    T-->>W: chat_id và message_id
+    W->>DB: Mark SENT lưu định danh và loại PHOTO hoặc TEXT
+    T->>U: Hiển thị tin cảnh báo
+    Note over W,T: Timeout có thể là DELIVERY_UNCERTAIN và retry có thể tạo tin trùng
+```
+
+`NOTIFIED` ở event là quyết định nghiệp vụ. Notification chỉ chuyển sang `SENT` sau khi
+Bot API phản hồi thành công. Người nhận phải đang hoạt động và đã liên kết Telegram;
+chat ID đơn lẻ chưa đủ. Mặc định chiều gửi tối đa 4 attempts với backoff 2/4/8 giây,
+HTTP 429 tôn trọng `retry_after`; lỗi 4xx khác 429 không retry. Không bảo đảm exactly once qua HTTP.
+
+### Chiều callback và chỉnh sửa tin
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Người giám sát
+    participant T as Telegram
+    participant API as Webhook API
+    participant DB as PostgreSQL
+    participant W as TelegramWorkWorker
+    participant E as Escalation Engine
+    U->>T: Bấm Tôi ổn hoặc Cần giúp đỡ
+    T->>API: POST webhook với secret header
+    API->>API: Parse update và kiểm tra secret
+    API->>DB: INSERT inbox theo update_id chống trùng
+    DB-->>API: Đã lưu bền vững
+    API-->>T: HTTP 200
+    W->>DB: Claim inbox sau ACK
+    W->>E: confirmInitial với actor chat message và TTL
+    E->>DB: Khóa event kiểm tra quyền và trạng thái
+    alt IM_OK hợp lệ
+        E->>DB: COMMIT confirmation RESOLVED và history
+    else NEED_HELP hợp lệ
+        E->>DB: COMMIT confirmation ESCALATED và intent tiếp theo
+    else Replay hết hạn sai actor hoặc đã xử lý
+        E-->>W: Kết quả đã xử lý hoặc từ chối phù hợp
+    end
+    W->>DB: Lưu outcome và reconcile telegram_message_edits
+    W->>T: answerCallbackQuery
+    W->>T: editMessageCaption hoặc editMessageText và gỡ nút
+    Note over W,E: Wellness có nhánh xác nhận chuyên biệt không phải INITIAL thông thường
+```
+
+Webhook `/api/v1/webhooks/telegram` kiểm tra secret header, lưu inbox chống trùng trước HTTP 200.
+Sau ACK, worker nền xác minh actor/chat/message/TTL và trạng thái event qua cổng xác nhận.
+Callback và edit có công việc bền vững riêng, mặc định tối đa 8 attempts, không nhầm với
+4 attempts của gửi cảnh báo. Sửa tin lỗi không làm rollback xác nhận đã commit.
+Wellness có nhánh xác nhận riêng trong `WellnessService`.
+
+Nguồn: các file `notifications/telegram`, `NotificationRetryWorker`, `NotificationsRepository`
+và migrations `0007_telegram_delivery.sql`, `0011_telegram_confirmation_delivery.sql`.
+Hình minh họa và giải thích xem [báo cáo của Nhân](../BAO_CAO_PHAN_CONG_NHAN.md).
+
+---
+
 ## Ngân sách độ trễ
 
 NFR-01 yêu cầu **< 10 giây** từ lúc sự kiện xảy ra đến khi người dùng nhận thông báo.
@@ -391,16 +493,16 @@ Phân bổ ngân sách cho từng chặng để biết chặng nào đang ăn h�
 
 ## Xử lý lỗi trên từng chặng
 
-| Chặng hỏng                       | Hành vi bắt buộc                                                 | FR                   |
-| -------------------------------- | ---------------------------------------------------------------- | -------------------- |
-| RTSP mất kết nối                 | Ghi log, tự thử lại sau 30 s, **không crash**                    | FR-ING-03            |
-| Message MQTT sai định dạng       | Ghi vào dead-letter log, consumer **vẫn sống**                   | US-03, US-08         |
-| AI service timeout > 5 s         | `status = AI_FAILED`, sự kiện vẫn được lưu                       | US-10                |
-| Rekognition lỗi                  | Tự fallback về model local, ghi cảnh báo                         | FR-DET-M1-06         |
-| Upload MinIO/S3 thất bại         | Retry 3 lần (2 s / 4 s / 8 s), sự kiện vẫn tồn tại không có ảnh  | US-29                |
-| Telegram lỗi                     | Retry 3 lần, ghi `FAILED`, **vẫn tiếp tục đếm giờ escalation**   | FR-NOT-03, FR-NOT-05 |
-| Một camera bắn > 20 sự kiện/phút | Kích hoạt rate limit, gộp thành 1 cảnh báo tổng hợp              | FR-ADM-05            |
-| PostgreSQL chết                  | Không có kế hoạch B — dừng nhận sự kiện mới, ghi log lỗi rõ ràng | —                    |
+| Chặng hỏng                       | Hành vi bắt buộc                                                                                     | FR                   |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------- |
+| RTSP mất kết nối                 | Ghi log, tự thử lại sau 30 s, **không crash**                                                        | FR-ING-03            |
+| Message MQTT sai định dạng       | Ghi vào dead-letter log, consumer **vẫn sống**                                                       | US-03, US-08         |
+| AI service timeout > 5 s         | `status = AI_FAILED`, sự kiện vẫn được lưu                                                           | US-10                |
+| Rekognition lỗi                  | Tự fallback về model local, ghi cảnh báo                                                             | FR-DET-M1-06         |
+| Upload MinIO/S3 thất bại         | Retry 3 lần (2 s / 4 s / 8 s), sự kiện vẫn tồn tại không có ảnh                                      | US-29                |
+| Telegram lỗi                     | Mặc định 4 attempts tổng cộng, retry 2/4/8 giây; khi lỗi ghi `FAILED`, **timer escalation vẫn chạy** | FR-NOT-03, FR-NOT-05 |
+| Một camera bắn > 20 sự kiện/phút | Kích hoạt rate limit, gộp thành 1 cảnh báo tổng hợp                                                  | FR-ADM-05            |
+| PostgreSQL chết                  | Không có kế hoạch B — dừng nhận sự kiện mới, ghi log lỗi rõ ràng                                     | —                    |
 
 ### Mẫu retry dùng chung
 

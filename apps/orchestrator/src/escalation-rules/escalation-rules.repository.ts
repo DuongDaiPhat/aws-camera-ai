@@ -56,7 +56,7 @@ export class RuleVersionConflictError extends Error {
 export class EscalationRulesRepository {
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
-  async findAll(): Promise<EscalationRuleRecord[]> {
+  async findAll(eventId?: string): Promise<EscalationRuleRecord[]> {
     const query = `
       SELECT
         er.id,
@@ -87,7 +87,26 @@ export class EscalationRulesRepository {
         er.event_type ASC;
     `;
     const result = await this.pool.query<EscalationRuleRecord>(query);
-    return result.rows;
+    if (!eventId) return result.rows;
+    const overrides = await this.pool.query<EscalationRuleRecord>(
+      `SELECT h.* FROM household_escalation_rules h JOIN events e ON e.id=$1
+       LEFT JOIN cameras c ON c.id=e.camera_id LEFT JOIN devices d ON d.id=c.device_id
+       WHERE h.owner_user_id=camera_household_root(COALESCE(d.owner_user_id,e.wellness_owner_user_id))`,
+      [eventId],
+    );
+    return result.rows.map((rule) => {
+      const local = overrides.rows.find((item) => item.event_type === rule.event_type);
+      return local
+        ? {
+            ...rule,
+            t_low: local.t_low,
+            t_high: local.t_high,
+            t_wait_seconds: local.t_wait_seconds,
+            high_wait_seconds: local.high_wait_seconds,
+            version: local.version,
+          }
+        : rule;
+    });
   }
 
   async findByEventType(eventType: string): Promise<EscalationRuleRecord | null> {

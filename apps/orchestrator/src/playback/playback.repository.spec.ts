@@ -8,7 +8,7 @@ describe('Playback access after household integration', () => {
   it('uses the same household policy as the camera API for viewers', async () => {
     await repo.cameras({ sub: 'viewer', role: 'VIEWER', email: 'viewer@example.test' }, 'camera');
     const [sql, values] = query.mock.calls[0];
-    expect(sql).toContain('shares_camera_household');
+    expect(sql).toContain('can_access_camera($2::uuid,c.id,TRUE)');
     expect(values).toEqual([false, 'viewer', 'camera', 1000]);
   });
   it('does not grant a household administrator cross-household access', async () => {

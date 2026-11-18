@@ -4,10 +4,15 @@ import React, { useState, useRef, useEffect, useCallback, useMemo, useId } from 
 import { createPortal } from 'react-dom';
 import type { UIEventItem } from '@/types';
 import { Icon } from '@/components/ui/Icon';
+import { notificationState } from '@/lib/notification-state';
+import { alertEmphasis, alertEmphasisRank } from '@/lib/fire-alerts';
+import criticalStyles from '@/components/events/alert-emphasis.module.css';
 import styles from './notification-bell.module.css';
 
 export interface NotificationBellProps {
   events: UIEventItem[];
+  now?: number;
+  readIds?: ReadonlySet<string>;
   isLoading?: boolean;
   error?: string | null;
   onRetry?: () => void;
@@ -16,10 +21,8 @@ export interface NotificationBellProps {
   disabled?: boolean;
 }
 
-const EXCLUDED_STATUSES = new Set(['RESOLVED', 'CLOSED', 'LOGGED_ONLY']);
-
-export function isPendingNotification(item: UIEventItem) {
-  return item.priority !== 'P3' && !EXCLUDED_STATUSES.has(item.status);
+export function isPendingNotification(item: UIEventItem, now = Date.now()) {
+  return item.priority !== 'P3' && notificationState(item, now) === 'pending';
 }
 
 const EVENT_ICON_MAP: Record<
@@ -45,6 +48,8 @@ const EVENT_TYPE_LABEL_MAP: Record<UIEventItem['eventType'], string> = {
 
 export const NotificationBell: React.FC<NotificationBellProps> = ({
   events,
+  now = Date.now(),
+  readIds,
   isLoading = false,
   error = null,
   onRetry,
@@ -62,18 +67,23 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
 
   const pendingCount = useMemo(() => {
     return events.reduce((count, item) => {
-      if (isPendingNotification(item)) {
+      if (isPendingNotification(item, now)) {
         return count + 1;
       }
       return count;
     }, 0);
-  }, [events]);
+  }, [events, now]);
 
+  const hasCritical = events.some((item) => alertEmphasis(item, now) === 'urgent');
   const recentEvents = useMemo(() => {
     return [...events]
-      .sort((a, b) => new Date(b.detectedAt).getTime() - new Date(a.detectedAt).getTime())
+      .sort(
+        (a, b) =>
+          alertEmphasisRank(b, now) - alertEmphasisRank(a, now) ||
+          Date.parse(b.detectedAt) - Date.parse(a.detectedAt),
+      )
       .slice(0, 5);
-  }, [events]);
+  }, [events, now]);
 
   const updatePosition = useCallback(() => {
     if (!triggerRef.current) return;
@@ -198,7 +208,11 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
       >
         <Icon name="bell" className={styles.bellIcon} />
         {pendingCount > 0 && (
-          <span className={styles.badge} aria-hidden="true">
+          <span
+            className={styles.badge}
+            data-critical={hasCritical || undefined}
+            aria-hidden="true"
+          >
             {pendingCount > 99 ? '99+' : pendingCount}
           </span>
         )}
@@ -273,13 +287,17 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                   {recentEvents.map((item) => {
                     const iconName = EVENT_ICON_MAP[item.eventType] || 'bell';
                     const typeLabel = EVENT_TYPE_LABEL_MAP[item.eventType] || item.eventType;
-                    const isP1 = item.priority === 'P0' || item.priority === 'P1';
+                    const emphasis = alertEmphasis(item, now);
+                    const status = notificationState(item, now);
+                    const unread = !readIds?.has(item.id);
 
                     return (
                       <li key={item.id} className={styles.eventItem}>
                         <button
                           type="button"
-                          className={`${styles.eventButton} ${isP1 ? styles.urgentEvent : ''}`}
+                          className={`${styles.eventButton} ${criticalStyles.emphasis}`}
+                          data-alert={emphasis}
+                          data-unread={unread || undefined}
                           onClick={() => handleItemClick(item)}
                         >
                           <div className={styles.iconAvatar}>
@@ -291,7 +309,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                                 {typeLabel}
                               </span>
                               <span
-                                className={`${styles.priorityTag} ${styles[`priority_${item.priority}`]}`}
+                                className={`${styles.priorityTag} ${emphasis ? styles[`priority_${item.priority}`] : ''}`}
                               >
                                 {item.priority}
                               </span>
@@ -301,8 +319,19 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                                 <span className={styles.cameraName}>{item.camera.name}</span>
                               )}
                               <span className={styles.timeText}>{item.relativeTimeText}</span>
+                              {status === 'done' ? (
+                                <span>Đã xử lý</span>
+                              ) : (
+                                item.status === 'ESCALATED' && <span>Đã chuyển cấp</span>
+                              )}
                             </div>
+                            {emphasis && (
+                              <span className={criticalStyles.urgencyTag}>
+                                {emphasis === 'urgent' ? 'Khẩn cấp' : 'Ưu tiên'}
+                              </span>
+                            )}
                           </div>
+                          {unread && <span className={criticalStyles.unreadLabel}>Chưa đọc</span>}
                           {item.thumbnailUrl && (
                             <img
                               src={item.thumbnailUrl}

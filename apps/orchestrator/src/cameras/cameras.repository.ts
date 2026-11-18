@@ -40,7 +40,7 @@ export class CamerasRepository {
       values.push(filter.ownerUserId);
       conditions.push(
         `EXISTS (SELECT 1 FROM devices d WHERE d.id = c.device_id
-                 AND shares_camera_household($${values.length}, d.owner_user_id))`,
+                 AND can_access_camera($${values.length}, c.id))`,
       );
     }
 

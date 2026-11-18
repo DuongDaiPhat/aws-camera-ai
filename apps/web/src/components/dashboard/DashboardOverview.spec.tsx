@@ -191,7 +191,7 @@ it('waits for an actual source even when the API has issued a stream URL', async
   }
 });
 
-it('explains a layout larger than enabled sources and pins a dropdown selection in multi view', async () => {
+it('adapts a saved layout to available sources without a shortage warning and pins a selection', async () => {
   const removed = cameras.splice(4);
   try {
     localStorage.setItem(
@@ -202,8 +202,10 @@ it('explains a layout larger than enabled sources and pins a dropdown selection 
       root.render(<DashboardOverview userId="short" isAdmin onNavigate={() => {}} />),
     );
     expect(tiles()).toHaveLength(4);
-    expect(host.textContent).toContain('4 camera đang bật');
-    expect(host.textContent).toContain('thay vì 6 khung');
+    expect(host.textContent).not.toContain('thay vì');
+    expect(host.querySelector('[aria-label="Số camera hiển thị"]')?.textContent).toContain(
+      '4 camera',
+    );
     await act(async () =>
       host.querySelector<HTMLButtonElement>('[aria-label="Chọn camera"]')?.click(),
     );

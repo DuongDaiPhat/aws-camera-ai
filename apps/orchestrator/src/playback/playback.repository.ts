@@ -17,7 +17,7 @@ export class PlaybackRepository {
     FROM cameras c JOIN devices d ON d.id=c.device_id
     LEFT JOIN camera_frigate_settings f ON f.camera_id=c.id
     WHERE ($3::uuid IS NULL OR c.id=$3::uuid) AND
-      ($1::boolean OR shares_camera_household($2::uuid,d.owner_user_id))
+      ($1::boolean OR can_access_camera($2::uuid,c.id,TRUE))
     ORDER BY c.created_at, c.id LIMIT $4`,
       [
         isSystemAdmin(actor),

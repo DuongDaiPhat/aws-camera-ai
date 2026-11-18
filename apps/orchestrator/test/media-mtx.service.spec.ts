@@ -59,6 +59,15 @@ describe('MediaMtxService (Slice CAM)', () => {
     });
   });
 
+  it('isolates read tokens by viewer while preserving each player session', () => {
+    const first = service.createBrowserReadSession('cam_front', 'camera-id', 'viewer-one');
+    const second = service.createBrowserReadSession('cam_front', 'camera-id', 'viewer-two');
+    expect(first.token).not.toBe(second.token);
+    expect(service.getBrowserReadActor('cam_front', first.token)).toBe('viewer-one');
+    expect(service.createBrowserReadSession('cam_front', 'camera-id', 'viewer-one').token).toBe(
+      first.token,
+    );
+  });
   describe('Session Token Security & Revocation', () => {
     it('verifyBrowserSession tra ve true voi token hop le', () => {
       const session = service.createBrowserSession('cam_test', 'camera-id-1');

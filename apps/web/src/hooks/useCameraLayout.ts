@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 
-const layouts = ['1', '2', '4', '6', '8', 'custom'] as const;
-export type CameraLayout = (typeof layouts)[number];
+import { isCameraLayout } from '@/lib/camera-layout';
+
+export type CameraLayout = 'custom' | `${number}`;
 interface Preference {
   layout: CameraLayout;
   custom: number;
@@ -15,8 +16,7 @@ function parsePreference(raw: string | null): Preference {
     const value: unknown = JSON.parse(raw ?? 'null');
     if (typeof value !== 'object' || !value) return defaults;
     const candidate = value as Record<string, unknown>;
-    if (candidate.version !== 1 || !layouts.includes(candidate.layout as CameraLayout))
-      return defaults;
+    if (candidate.version !== 1 || !isCameraLayout(candidate.layout)) return defaults;
     return {
       layout: candidate.layout as CameraLayout,
       custom:
@@ -74,8 +74,7 @@ export function useCameraLayout(userId?: string, scope: 'dashboard' | 'playback'
     ready: state.owner === key,
     saveError,
     setLayout: (layout: string) => {
-      if (layouts.includes(layout as CameraLayout))
-        update({ ...preference, layout: layout as CameraLayout });
+      if (isCameraLayout(layout)) update({ ...preference, layout: layout as CameraLayout });
     },
     setCustom: (custom: number) => {
       if (Number.isSafeInteger(custom) && custom > 0) update({ ...preference, custom });

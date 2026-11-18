@@ -12,8 +12,8 @@ export class KnownFacesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     if (!request.auth) throw faceError(401, 'UNAUTHORIZED', 'Bạn cần đăng nhập.');
     if (request.method === 'GET') return true;
-    if (request.auth.role !== 'ADMIN')
-      throw faceError(403, 'FORBIDDEN', 'Chỉ quản trị viên được thực hiện thao tác này.');
+    if (!['ADMIN', 'CAREGIVER'].includes(request.auth.role))
+      throw faceError(403, 'FORBIDDEN', 'Chỉ chủ hộ hoặc quản trị viên được quản lý người quen.');
     if (request.method !== 'POST') return true;
     const now = Date.now();
     for (const [key, value] of this.attempts) if (value.expires <= now) this.attempts.delete(key);

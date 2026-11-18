@@ -41,6 +41,7 @@ async function render(props: Partial<React.ComponentProps<typeof NotificationBel
     root.render(
       <NotificationBell
         events={events}
+        now={Date.parse('2026-11-16T10:10:00Z')}
         onViewDetail={detail}
         onViewAll={all}
         onRetry={retry}
@@ -94,4 +95,30 @@ it('restores bell focus on Escape and excludes resolved or routine events from p
   );
   expect(document.querySelector('[role="dialog"]')).toBeNull();
   expect(document.activeElement).toBe(button('Thông báo mới nhất'));
+});
+
+it('promotes P0 only while within three hours and reorders on expiry without marking it read', async () => {
+  const expiresAt = Date.parse('2026-11-16T10:10:00Z');
+  const p0 = toUIEventItem({
+    id: 'old-fire',
+    eventType: 'FIRE_SMOKE_DETECTED',
+    priority: 'P0',
+    status: 'ESCALATED',
+    detectedAt: new Date(expiresAt - 10800000).toISOString(),
+  });
+  const notifications = [events[6]!, p0];
+  await render({ events: notifications, now: expiresAt - 1 });
+  await click('Thông báo mới nhất');
+  let rows = Array.from(document.querySelectorAll('li button'));
+  expect(rows[0]?.getAttribute('data-alert')).toBe('urgent');
+
+  await render({ events: notifications, now: expiresAt });
+  rows = Array.from(document.querySelectorAll('li button'));
+  expect(rows[0]?.textContent).toContain('Cam 6');
+  expect(rows[1]?.hasAttribute('data-alert')).toBe(false);
+  expect(rows[1]?.textContent).toContain('Đã xử lý');
+  expect(rows[1]?.getAttribute('data-unread')).toBe('true');
+
+  await render({ events: notifications, now: expiresAt, readIds: new Set([p0.id]) });
+  expect(document.querySelectorAll('li button')[1]?.hasAttribute('data-unread')).toBe(false);
 });

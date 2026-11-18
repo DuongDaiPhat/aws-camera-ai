@@ -35,7 +35,7 @@ const viewerNavigation: SlidingTabItem[] = [
 ];
 const roles: Record<string, string> = {
   ADMIN: 'Quản trị viên',
-  CAREGIVER: 'Người giám sát',
+  CAREGIVER: 'Chủ hộ',
   VIEWER: 'Người xem',
   RESIDENT: 'Thành viên',
 };
@@ -51,14 +51,33 @@ export function Sidebar({
   onToggle,
 }: SidebarProps) {
   const isViewer = user?.role === 'VIEWER';
-  const baseNavigation = isViewer
-    ? viewerNavigation
-    : navigation.filter((item) => item.id !== 'users' || user?.role === 'ADMIN');
+  const caregiverNavigation = navigation
+    .filter((item) => item.id !== 'users')
+    .map((item) => ({
+      ...item,
+      label:
+        item.id === 'wellness'
+          ? 'Kiểm tra an toàn'
+          : item.id === 'zones'
+            ? 'Khu vực giám sát'
+            : item.label,
+    }));
+  caregiverNavigation.splice(caregiverNavigation.length - 1, 0, {
+    id: 'family',
+    label: 'Thành viên gia đình',
+    icon: 'users',
+  });
+  const baseNavigation =
+    user?.role === 'CAREGIVER'
+      ? caregiverNavigation
+      : isViewer
+        ? viewerNavigation
+        : navigation.filter((item) => item.id !== 'users' || user?.role === 'ADMIN');
   const items = baseNavigation.map((item) => ({
     ...item,
     count:
       item.id === 'events'
-        ? unresolvedEventCount
+        ? unresolvedEventCount || undefined
         : item.id === 'cameras'
           ? onlineCameraCount
           : undefined,
@@ -72,7 +91,12 @@ export function Sidebar({
       .join('') || 'CA';
 
   return (
-    <aside className={styles.sidebar} data-expanded={expanded} aria-label="Thanh điều hướng">
+    <aside
+      className={styles.sidebar}
+      data-expanded={expanded}
+      data-role={user?.role}
+      aria-label="Thanh điều hướng"
+    >
       <button
         type="button"
         className={styles.brand}

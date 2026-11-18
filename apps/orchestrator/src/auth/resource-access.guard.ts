@@ -9,7 +9,7 @@ import {
   type ExecutionContext,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { isUUID } from 'class-validator';
+import { DATABASE_UUID_PATTERN } from './database-uuid';
 import { DatabaseService } from '../database/database.service';
 import type { AuthenticatedRequest } from './jwt-auth.guard';
 import { isSystemAdmin } from './system-admin';
@@ -25,7 +25,7 @@ export function eventVisibilityPredicate(actor: string): string {
       OR shares_camera_household(${actor}, e.wellness_resident_user_id)
     ELSE EXISTS (
       SELECT 1 FROM cameras camera JOIN devices d ON d.id = camera.device_id
-      WHERE camera.id = e.camera_id AND shares_camera_household(${actor}, d.owner_user_id)
+      WHERE camera.id = e.camera_id AND can_access_camera(${actor}, camera.id)
     ) END)`;
 }
 
@@ -48,12 +48,13 @@ export class ResourceAccessGuard implements CanActivate {
     if (id === undefined) return true;
     if (!request.auth) throw new UnauthorizedException();
     if (isSystemAdmin(request.auth)) return true;
-    if (!isUUID(id)) throw new BadRequestException('Validation failed (uuid is expected)');
+    if (typeof id !== 'string' || !DATABASE_UUID_PATTERN.test(id))
+      throw new BadRequestException('Validation failed (uuid is expected)');
 
     const queries: Record<ResourceId, string> = {
-      cameraId: `SELECT shares_camera_household($2, d.owner_user_id) AS allowed
+      cameraId: `SELECT can_access_camera($2, c.id) AS allowed
                 FROM cameras c JOIN devices d ON d.id = c.device_id WHERE c.id = $1`,
-      zoneId: `SELECT shares_camera_household($2, d.owner_user_id) AS allowed
+      zoneId: `SELECT can_access_camera($2, c.id) AS allowed
               FROM zones z JOIN cameras c ON c.id = z.camera_id
               JOIN devices d ON d.id = c.device_id WHERE z.id = $1`,
       eventId: `SELECT ${eventVisibilityPredicate('$2')} AS allowed FROM events e WHERE e.id = $1`,

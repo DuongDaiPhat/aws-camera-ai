@@ -30,10 +30,10 @@ describe('camera ownership', () => {
 
     await cameras.findAll(filter);
 
-    expect(query).toHaveBeenCalledWith(
-      expect.stringContaining('shares_camera_household($2, d.owner_user_id)'),
-      [true, owner],
-    );
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('can_access_camera($2, c.id)'), [
+      true,
+      owner,
+    ]);
   });
 
   it('scopes event results and their count before pagination', async () => {
@@ -44,12 +44,12 @@ describe('camera ownership', () => {
 
     expect(query).toHaveBeenNthCalledWith(
       1,
-      expect.stringContaining('shares_camera_household($1, d.owner_user_id)'),
+      expect.stringContaining('can_access_camera($1, camera.id)'),
       [owner],
     );
     expect(query).toHaveBeenNthCalledWith(
       2,
-      expect.stringContaining('shares_camera_household($1, d.owner_user_id)'),
+      expect.stringContaining('can_access_camera($1, camera.id)'),
       [owner, 20, 0],
     );
   });

@@ -1,13 +1,14 @@
 'use client';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import type { PlaybackCamera, RecordingDay, RecordingSegment } from '@/types';
 import { nextRecording } from '@/lib/recording-sessions';
 import { recordingTime } from '@/lib/playback-client';
+import { recordingCoverage, recordingAt } from '@/lib/playback-timeline';
 import { PlaybackPlayer } from './PlaybackPlayer';
-import styles from './playback.module.css';
+import styles from './archive-workspace.module.css';
+
 export interface ReplayCommand {
-  cameraId: string;
-  startAt: string;
+  at: number;
   nonce: number;
 }
 interface Props {
@@ -15,98 +16,137 @@ interface Props {
   day?: RecordingDay;
   primary: boolean;
   command: ReplayCommand | null;
-  onActive: (cameraId: string, start: string) => void;
+  cursor: number | null;
+  playing: boolean;
+  rate: number;
+  onPosition: (id: string, at: number) => void;
+  onBlocked: (message: string) => void;
+  onFocus: (id: string) => void;
   error?: string;
 }
-export function ReplayTile({ camera, day, primary, command, onActive, error }: Props) {
+export function ReplayTile({
+  camera,
+  day,
+  primary,
+  command,
+  cursor,
+  playing,
+  rate,
+  onPosition,
+  onBlocked,
+  onFocus,
+  error,
+}: Props) {
   const consumed = useRef(0);
   const [active, setActive] = useState<{
-      segment: RecordingSegment;
-      seek: number;
-      nonce: number;
-      play: boolean;
-    } | null>(null),
-    [gap, setGap] = useState('');
-  const [waitingForRecording, setWaitingForRecording] = useState(false);
-  const select = useCallback(
-    (segment: RecordingSegment, seek = 0, play = false) => {
-      setActive((old) => ({ segment, seek, nonce: (old?.nonce ?? 0) + 1, play }));
-      setGap('');
-      setWaitingForRecording(false);
-      if (primary)
-        onActive(camera.id, new Date(Date.parse(segment.startAt) + seek * 1000).toISOString());
-    },
-    [primary, onActive, camera.id],
-  );
-  useEffect(() => {
-    if (!active && day?.segments[0]) select(day.segments[0]);
-  }, [day, active, select]);
-  useEffect(() => {
-    if (command?.cameraId !== camera.id || !day || command.nonce === consumed.current) return;
-    consumed.current = command.nonce;
-    const segment = day.segments.find(
-      (item) =>
-        Date.parse(item.startAt) <= Date.parse(command.startAt) &&
-        Date.parse(item.endAt) > Date.parse(command.startAt),
+    segment: RecordingSegment;
+    seek: number;
+    nonce: number;
+  } | null>(null);
+  const [gap, setGap] = useState('');
+  const [waiting, setWaiting] = useState(false);
+  const sequence = useRef(0);
+  const select = useCallback((segment: RecordingSegment | null, at: number) => {
+    setActive(
+      segment
+        ? {
+            segment,
+            seek: Math.max(0, (at - Date.parse(segment.startAt)) / 1000),
+            nonce: ++sequence.current,
+          }
+        : null,
     );
-    if (segment)
-      select(segment, (Date.parse(command.startAt) - Date.parse(segment.startAt)) / 1000, true);
-  }, [command, camera.id, day, select]);
+    setGap(segment ? '' : 'Không có bản ghi tại thời điểm này');
+    setWaiting(false);
+  }, []);
   useEffect(() => {
-    if (primary && active)
-      onActive(
-        camera.id,
-        new Date(Date.parse(active.segment.startAt) + active.seek * 1000).toISOString(),
-      );
-  }, [primary, active, camera.id, onActive]);
+    if (!command || !day || consumed.current === command.nonce) return;
+    consumed.current = command.nonce;
+    const segment = recordingAt(day.segments, command.at);
+    select(segment, command.at);
+    if (!segment && primary)
+      onBlocked('Không có bản ghi tại thời điểm này. Chọn vùng có dữ liệu trên timeline.');
+  }, [command, day, select, primary, onBlocked]);
+  useEffect(() => {
+    if (primary || cursor === null || !day || !command || consumed.current !== command.nonce)
+      return;
+    const segment = recordingAt(day.segments, cursor);
+    if (segment?.id !== active?.segment.id) select(segment, cursor);
+  }, [primary, cursor, day, active?.segment.id, command, select]);
   const next = active ? nextRecording(day?.segments ?? [], active.segment) : null;
-  const index = active
-    ? (day?.segments.findIndex((item) => item.startAt === active.segment.startAt) ?? -1)
-    : -1;
-  const previous = index > 0 ? day?.segments[index - 1] : null;
   useEffect(() => {
-    if (waitingForRecording && next?.contiguous) select(next.segment, next.seekSeconds, true);
+    if (waiting && next?.contiguous && playing)
+      select(next.segment, Date.parse(next.segment.startAt) + next.seekSeconds * 1000);
   }, [
-    waitingForRecording,
+    waiting,
     next?.segment.startAt,
     next?.segment.endAt,
     next?.seekSeconds,
     next?.contiguous,
+    playing,
     select,
   ]);
-  const ended = () => {
-    if (next?.contiguous) select(next.segment, next.seekSeconds, true);
-    else {
-      setWaitingForRecording(!next && day?.sourceStatus === 'receiving');
-      setGap(
-        next
-          ? 'Không có dữ liệu đến ' + recordingTime(next.segment.startAt, camera.timeZone)
-          : 'Đã đến cuối bản ghi hiện có. Danh sách sẽ tiếp tục tự cập nhật.',
-      );
+  function ended() {
+    // Secondary channels follow the primary clock instead of racing into the next clip.
+    if (!primary) return;
+    if (next?.contiguous) {
+      select(next.segment, Date.parse(next.segment.startAt) + next.seekSeconds * 1000);
+      return;
     }
-  };
+    const message = next
+      ? `Mất dữ liệu đến ${recordingTime(next.segment.startAt, camera.timeZone)}. Chọn khoảng có dữ liệu tiếp theo.`
+      : day?.sourceStatus === 'receiving'
+        ? 'Đã đến cuối dữ liệu hiện có. Đang chờ camera lưu thêm hình ảnh…'
+        : 'Đã đến cuối dữ liệu của camera trong ngày này.';
+    setGap(message);
+    setWaiting(!next && day?.sourceStatus === 'receiving');
+    if (primary && (next || day?.sourceStatus !== 'receiving')) onBlocked(message);
+  }
+  // Counting coverage does not invent recordings for disabled or disconnected cameras.
+  const empty = !day
+    ? 'Đang tải dữ liệu trong ngày…'
+    : day.isFutureDate
+      ? 'Ngày này chưa có dữ liệu'
+      : !day.recordingEnabled
+        ? 'Camera chưa bật lưu bản ghi'
+        : !recordingCoverage(day.segments).length
+          ? 'Không có dữ liệu trong ngày này'
+          : undefined;
   return (
-    <div className={styles.replayTile} data-primary={primary}>
+    <div className={styles.tile} data-primary={primary}>
+      <button
+        className={styles.activateChannel}
+        type="button"
+        aria-pressed={primary}
+        aria-label={`Điều khiển ${camera.name}`}
+        onClick={() => onFocus(camera.id)}
+      />
       <PlaybackPlayer
         cameraId={camera.id}
         cameraName={camera.name}
         timeZone={camera.timeZone}
         segment={active?.segment ?? null}
         seek={{ seconds: active?.seek ?? 0, nonce: active?.nonce ?? 0 }}
-        autoPlay={active?.play ?? false}
+        playing={playing}
+        rate={rate}
+        followAt={primary ? undefined : cursor}
+        emptyMessage={error || empty || gap}
         onEnded={ended}
-        onPrevious={() => {
-          if (previous) select(previous, 0, true);
+        onPosition={(at) => {
+          if (primary) onPosition(camera.id, at);
         }}
-        onNext={() => {
-          if (next) select(next.segment, next.seekSeconds, true);
+        onPlaybackError={() => {
+          if (primary) onBlocked('Chưa thể phát camera đang điều khiển.');
         }}
-        hasPrevious={Boolean(previous)}
-        hasNext={Boolean(next)}
       />
-      {(gap || error) && (
-        <p role="status" className={styles.gapNotice}>
-          {gap || error}
+      {gap && active && (
+        <p className={styles.gap} role="status">
+          {gap}
+        </p>
+      )}
+      {error && (
+        <p className={styles.gap} role="alert">
+          {error}
         </p>
       )}
     </div>

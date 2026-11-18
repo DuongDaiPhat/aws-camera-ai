@@ -27,12 +27,14 @@ export function SelectMenu({
   disabled,
   icon,
   tone = 'dark',
+  visibleOptions,
 }: {
   label: string;
   value: string;
   options: SelectOption[];
   onChange: (value: string) => void;
   disabled?: boolean;
+  visibleOptions?: number;
   icon?: ReactNode;
   tone?: 'dark' | 'light' | 'violet';
 }) {
@@ -54,7 +56,9 @@ export function SelectMenu({
       const rect = trigger.current?.getBoundingClientRect();
       if (!rect) return;
       const width = Math.min(Math.max(rect.width, 180), innerWidth - 24);
-      const desired = Math.min(options.length * (tone === 'violet' ? 38 : 36) + 12, 260);
+      const desired = visibleOptions
+        ? Math.min(options.length, visibleOptions) * 38 + 12
+        : Math.min(options.length * (tone === 'violet' ? 38 : 36) + 12, 260);
       const below = innerHeight - rect.bottom - 16;
       const above = rect.top - 16;
       const up = below < desired && above > below;
@@ -73,7 +77,7 @@ export function SelectMenu({
       window.removeEventListener('resize', locate);
       window.removeEventListener('scroll', locate, true);
     };
-  }, [enabled, options.length, tone]);
+  }, [enabled, options.length, tone, visibleOptions]);
   useEffect(() => {
     if (!enabled) return;
     const outside = (event: PointerEvent) => {
@@ -164,6 +168,7 @@ export function SelectMenu({
         createPortal(
           <div
             className={styles.menu}
+            data-limited={Boolean(visibleOptions)}
             data-tone={tone}
             id={id}
             role="listbox"

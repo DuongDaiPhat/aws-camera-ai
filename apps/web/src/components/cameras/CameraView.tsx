@@ -9,6 +9,7 @@ import { CameraPreview } from './CameraPreview';
 import { CameraSettingsPanel } from './CameraSettingsPanel';
 import { CameraGridView } from './CameraGridView';
 import { stopWebcamSession } from './source/webcam-session-manager';
+import { AddCameraButton } from '@/components/household/AddCameraButton';
 import styles from './styles/camera-view.module.css';
 
 interface CameraViewProps {
@@ -169,7 +170,7 @@ function CameraDetailPanel({
 }
 
 export function CameraView({ user }: CameraViewProps) {
-  const isAdmin = user?.role === 'ADMIN';
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'CAREGIVER';
   const isViewer = user?.role === 'VIEWER';
   const {
     cameras,
@@ -225,6 +226,14 @@ export function CameraView({ user }: CameraViewProps) {
         </div>
 
         <div className={styles.headerActions}>
+          {isAdmin && (
+            <AddCameraButton
+              onCreated={(id) => {
+                void loadCameras();
+                selectCamera(id);
+              }}
+            />
+          )}
           {/* Nút toggle chuyển qua lại giữa Danh sách và Lưới toàn bộ cam */}
           <div className={styles.viewModeGroup} role="group" aria-label="Chế độ xem camera">
             <button

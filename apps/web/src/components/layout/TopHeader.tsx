@@ -24,6 +24,8 @@ interface TopHeaderProps {
   isDashboard?: boolean;
   leadingAction?: ReactNode;
   notificationControl?: ReactNode;
+  compact?: boolean;
+  showCalendar?: boolean;
 }
 function dayKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -145,6 +147,8 @@ export function TopHeader({
   selectedDate,
   onSelectDate,
   onViewPlayback,
+  compact = false,
+  showCalendar = true,
 }: TopHeaderProps) {
   const status =
     pendingCount === null
@@ -153,7 +157,7 @@ export function TopHeader({
         ? `${pendingCount} cảnh báo đang chờ xử lý.`
         : 'Không có cảnh báo đang chờ xử lý.';
   return (
-    <header className={styles.header}>
+    <header className={styles.header} data-compact={compact} data-calendar={showCalendar}>
       <div className={styles.greetingCard} data-entry-part="greeting">
         <div className={styles.greetingContent}>
           <div className={styles.copy}>
@@ -196,11 +200,13 @@ export function TopHeader({
           </div>
         </div>
       </div>
-      <WeekCalendar
-        selectedDate={selectedDate}
-        onSelectDate={onSelectDate}
-        onViewPlayback={onViewPlayback}
-      />
+      {showCalendar && (
+        <WeekCalendar
+          selectedDate={selectedDate}
+          onSelectDate={onSelectDate}
+          onViewPlayback={onViewPlayback}
+        />
+      )}
     </header>
   );
 }

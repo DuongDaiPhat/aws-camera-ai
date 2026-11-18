@@ -17,10 +17,7 @@ export const FIRE_ATTENTION_POLL_MS = milliseconds(
   10000,
 );
 export const EVENTS_REFRESH_MS = milliseconds(process.env.NEXT_PUBLIC_EVENTS_REFRESH_MS, 60000);
-export const FIRE_ATTENTION_MAX_AGE_MS = milliseconds(
-  process.env.NEXT_PUBLIC_FIRE_ATTENTION_MAX_AGE_MS,
-  3 * 60 * 60 * 1000,
-);
+export const FIRE_ATTENTION_MAX_AGE_MS = 3 * 60 * 60 * 1000;
 export const FIRE_ATTENTION_EPISODE_GAP_MS = milliseconds(
   process.env.NEXT_PUBLIC_FIRE_ATTENTION_EPISODE_GAP_MS,
   5 * 60 * 1000,

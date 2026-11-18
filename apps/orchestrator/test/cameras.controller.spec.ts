@@ -259,8 +259,8 @@ describe('CamerasController (Slice CAM)', () => {
     };
     service.getCameraDebugStream.mockResolvedValueOnce(mockDebugStream);
 
-    const result = await controller.getCameraDebugStream(mockCameraDto.id);
-    expect(service.getCameraDebugStream).toHaveBeenCalledWith(mockCameraDto.id);
+    const result = await controller.getCameraDebugStream(mockCameraDto.id, adminReq);
+    expect(service.getCameraDebugStream).toHaveBeenCalledWith(mockCameraDto.id, adminReq.auth!.sub);
     expect(result.streamUrl).toContain('/camera_cong_chinh');
   });
 

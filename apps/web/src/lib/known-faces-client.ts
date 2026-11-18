@@ -16,9 +16,11 @@ export function registerKnownFace(
   files: File[],
   selected: (number | null)[],
   signal?: AbortSignal,
+  linkedUserId?: string,
 ): Promise<KnownFace> {
   const body = new FormData();
   body.append('personName', name.trim());
+  if (linkedUserId) body.append('linkedUserId', linkedUserId);
   if (relationship.trim()) body.append('relationship', relationship.trim());
   body.append('faceSelections', JSON.stringify(selected));
   for (const file of files) body.append('images', file);

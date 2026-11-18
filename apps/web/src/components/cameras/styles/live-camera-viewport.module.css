@@ -32,8 +32,8 @@
 .surface[data-compact='true'] .placeholder {
   padding: 8px;
   gap: 5px;
-  background: radial-gradient(circle at 55% 40%, #e6d7f6, #eee8f5);
-  color: #9274a7;
+  background: #101014;
+  color: #c0b1cf;
 }
 .surface[data-compact='true'] .placeholder strong {
   font-size: 9px;

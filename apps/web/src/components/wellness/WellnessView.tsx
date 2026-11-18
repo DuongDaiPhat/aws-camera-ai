@@ -49,6 +49,7 @@ const labels: Record<string, string> = {
 };
 
 export function WellnessView({ user }: { user: CurrentUser | null }) {
+  const pageTitle = user?.role === 'CAREGIVER' ? 'Kiểm tra an toàn' : 'Kiểm tra sức khỏe';
   const manager = user?.role === 'ADMIN' || user?.role === 'CAREGIVER';
   const [schedules, setSchedules] = useState<WellnessSchedule[]>([]);
   const [checks, setChecks] = useState<WellnessCheck[]>([]);
@@ -165,9 +166,9 @@ export function WellnessView({ user }: { user: CurrentUser | null }) {
   const residentName = (id: string) =>
     residents.find((r) => r.id === id)?.name ?? (id === user?.id ? user.fullName : id);
   return (
-    <section className={styles.root} aria-label="Kiểm tra sức khỏe">
+    <section className={styles.root} aria-label={pageTitle}>
       <header>
-        <h2 className={styles.pageTitle}>Kiểm tra sức khỏe</h2>
+        <h2 className={styles.pageTitle}>{pageTitle}</h2>
         <p>Lịch theo dõi hoạt động và yêu cầu xác nhận của người được giám sát.</p>
       </header>
       {error && (

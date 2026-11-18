@@ -80,6 +80,18 @@ describe('EventsRepository (US-03, US-06)', () => {
   });
 
   describe('listEvents', () => {
+    it('uses notification age for the read-only inbox filter without altering raw event statuses', async () => {
+      mockPool.query
+        .mockResolvedValueOnce({ rows: [{ total: 0 }] })
+        .mockResolvedValueOnce({ rows: [] });
+      await repository.listEvents({ page: 1, pageSize: 10, notificationState: 'done' });
+      const [sql, bounds] = mockPool.query.mock.calls[0]!;
+      expect(sql).toContain("INTERVAL '3 hours'");
+      expect(sql).toContain("INTERVAL '8 hours'");
+      expect(sql).toContain("WHEN e.status = 'LOGGED_ONLY' THEN 'logged'");
+      expect(bounds).toEqual(['done']);
+      expect(mockPool.query.mock.calls[1]?.[0]).toContain('ORDER BY e.detected_at DESC, e.id DESC');
+    });
     it('loc theo cac tieu chi day du va phan trang chinh xac', async () => {
       mockPool.query
         .mockResolvedValueOnce({ rows: [{ total: 10 }] }) // Count query
@@ -101,6 +113,17 @@ describe('EventsRepository (US-03, US-06)', () => {
       expect(result.total).toBe(10);
       expect(result.events).toHaveLength(2);
       expect(mockPool.query).toHaveBeenCalledTimes(2);
+    });
+
+    it('sorts actionable P0 and P1 before applying the page limit when requested', async () => {
+      mockPool.query
+        .mockResolvedValueOnce({ rows: [{ total: 30 }] })
+        .mockResolvedValueOnce({ rows: [] });
+      await repository.listEvents({ page: 2, pageSize: 10, urgentFirst: true });
+      const [sql, params] = mockPool.query.mock.calls[1]!;
+      expect(sql).toMatch(/ORDER BY CASE[\s\S]*WHEN 'P0' THEN 0 WHEN 'P1' THEN 1[\s\S]*LIMIT/);
+      expect(sql).toContain('e.escalation_deadline_at');
+      expect(params).toEqual([10, 10]);
     });
 
     it('hoat dong mac dinh khi khong truyen filter', async () => {

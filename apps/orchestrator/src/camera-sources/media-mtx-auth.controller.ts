@@ -40,7 +40,9 @@ export class MediaMtxAuthController {
     const token = this.getBrowserToken(body);
     if (body.action !== 'read' || body.protocol !== 'webrtc' || !token) return false;
     if (!this.mediaMtxService.verifyBrowserReadSession(slug, token)) return false;
-    return await this.cameraSourcesRepository.isEnabledMediaPath(slug, 'read');
+    const actorId = this.mediaMtxService.getBrowserReadActor(slug, token);
+    if (!actorId) return false;
+    return await this.cameraSourcesRepository.isEnabledMediaPath(slug, 'read', actorId);
   }
 
   private async isBrowserPublish(body: MediaMtxAuthRequest, slug: string): Promise<boolean> {

@@ -24,9 +24,15 @@ function localDate(year: number, month: number, day: number) {
 export function DatePicker({
   value,
   onChange,
+  label = 'Chọn ngày',
+  showValue = false,
+  maxDate,
 }: {
   value: Date | null;
   onChange: (date: Date) => void;
+  label?: string;
+  showValue?: boolean;
+  maxDate?: Date;
 }) {
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState(0);
@@ -37,6 +43,7 @@ export function DatePicker({
   const popup = useRef<HTMLDivElement>(null);
   const chosenKey = value ? key(value) : '';
   const today = new Date();
+  const latest = maxDate && maxDate < today ? maxDate : today;
   const first = localDate(year, month, 1);
   const offset = (first.getDay() + 6) % 7;
   const count = localDate(year, month + 1, 0).getDate();
@@ -48,6 +55,7 @@ export function DatePicker({
     if (restore) trigger.current?.focus();
   }
   function choose(date: Date) {
+    if (maxDate && date > maxDate) return;
     onChange(date);
     close();
   }
@@ -95,8 +103,8 @@ export function DatePicker({
       <button
         type="button"
         ref={trigger}
-        aria-label="Chọn ngày"
-        title="Chọn ngày bất kỳ"
+        aria-label={label}
+        title={label}
         aria-expanded={open}
         aria-haspopup="dialog"
         disabled={!value}
@@ -108,7 +116,8 @@ export function DatePicker({
           setOpen(!open);
         }}
       >
-        <CalendarDays size={16} />
+        {showValue && value && <span>{value.toLocaleDateString('vi-VN')}</span>}
+        <CalendarDays size={16} aria-hidden="true" />
       </button>
       {open &&
         createPortal(
@@ -119,7 +128,11 @@ export function DatePicker({
             style={position}
             role="dialog"
             aria-modal="false"
-            aria-label="Chọn ngày tháng năm"
+            aria-label={
+              label === 'Chọn ngày'
+                ? 'Chọn ngày tháng năm'
+                : `Chọn ${label.toLocaleLowerCase('vi')}`
+            }
             onKeyDown={(event) => {
               if (event.key === 'Escape') {
                 event.preventDefault();
@@ -201,7 +214,11 @@ export function DatePicker({
                   aria-pressed={key(date) === chosenKey}
                   aria-current={key(date) === key(today) ? 'date' : undefined}
                   data-other={date.getMonth() !== month}
-                  disabled={date.getFullYear() < 1 || date.getFullYear() > 9999}
+                  disabled={
+                    date.getFullYear() < 1 ||
+                    date.getFullYear() > 9999 ||
+                    Boolean(maxDate && date > maxDate)
+                  }
                   onClick={() => choose(date)}
                 >
                   {date.getDate()}
@@ -210,12 +227,12 @@ export function DatePicker({
             </div>
             <footer>
               <span>{value?.toLocaleDateString('vi-VN')}</span>
-              <button type="button" onClick={() => choose(today)}>
-                Hôm nay
+              <button type="button" onClick={() => choose(latest)}>
+                {latest === today ? 'Hôm nay' : 'Ngày gần nhất'}
               </button>
             </footer>
           </div>,
-          document.body,
+          trigger.current?.closest('[data-floating-surface]') ?? document.body,
         )}
     </>
   );

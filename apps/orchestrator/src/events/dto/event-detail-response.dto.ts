@@ -19,7 +19,7 @@ export class EventDetailDto extends EventSummaryDto {
   aggregateVersion!: number;
   retain!: boolean;
   correlationId!: string;
-  escalationDeadlineAt!: string | null;
+  declare escalationDeadlineAt: string | null;
   notifiedAt!: string | null;
   escalatedAt!: string | null;
   resolvedAt!: string | null;

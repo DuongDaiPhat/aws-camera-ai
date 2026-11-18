@@ -444,3 +444,72 @@
 .calendarFooter > time {
   min-width: 0;
 }
+
+/* Reserve the page height for recorded observation and its shared timeline. */
+.header[data-compact='true'] {
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.header[data-compact='true'] .greetingCard {
+  padding: 14px 18px;
+  border-radius: 18px;
+}
+.header[data-compact='true'] .copy h1 {
+  font-size: 23px;
+}
+.header[data-compact='true'] .copy p {
+  margin-top: 6px;
+  font-size: 11px;
+}
+.header[data-compact='true'] .alertStatus {
+  display: none;
+}
+.header[data-compact='true'] .calendarCard {
+  min-height: 112px;
+  padding: 10px 14px;
+  gap: 5px;
+  border-radius: 18px;
+}
+.header[data-compact='true'] .day {
+  min-height: 34px;
+  padding-block: 4px;
+  gap: 4px;
+}
+@media (min-width: 901px) and (max-width: 1000px) {
+  .header[data-compact='true'] {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 40%);
+  }
+  .header[data-compact='true'] .copy p {
+    display: none;
+  }
+  .header[data-compact='true'] .greetingContent {
+    flex-direction: column;
+  }
+}
+@media (max-width: 560px) {
+  .header[data-compact='true'] .greetingContent {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+  .header[data-compact='true'] .copy {
+    flex-basis: auto;
+  }
+  .header[data-compact='true'] .copy h1 {
+    font-size: 19px;
+  }
+  .header[data-compact='true'] .copy p {
+    display: none;
+  }
+  .header[data-compact='true'] .greetingActions {
+    order: 0;
+    width: auto;
+  }
+}
+
+.header[data-calendar='false'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.header[data-calendar='false'] .copy p {
+  display: none;
+}

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { ChevronDown } from 'lucide-react';
 import type { EscalationRule } from '@/lib/escalation-rules-client';
 import type { RuleDraft } from '@/hooks/useEscalationRules';
 import {
@@ -13,6 +14,7 @@ import styles from './settings-view.module.css';
 
 interface EscalationRuleCardProps {
   rule: EscalationRule;
+  compact?: boolean;
   draft: RuleDraft;
   isDirty: boolean;
   isSaving: boolean;
@@ -27,6 +29,7 @@ interface EscalationRuleCardProps {
 
 export function EscalationRuleCard({
   rule,
+  compact = false,
   draft,
   isDirty,
   isSaving,
@@ -38,6 +41,8 @@ export function EscalationRuleCard({
   onSaveRule,
   onReload,
 }: EscalationRuleCardProps) {
+  const Container = compact ? 'details' : 'article';
+  const Header = compact ? 'summary' : 'div';
   const isWellness = rule.eventType === 'WELLNESS_TIMEOUT';
 
   // Kiểm tra tính hợp lệ cơ bản tại form
@@ -85,27 +90,39 @@ export function EscalationRuleCard({
   };
 
   return (
-    <article className={styles.ruleCard} aria-labelledby={`rule-title-${rule.eventType}`}>
+    <Container
+      className={`${styles.ruleCard} ${compact ? styles.compactRule : ''}`}
+      aria-labelledby={`rule-title-${rule.eventType}`}
+    >
       {/* Header */}
-      <div className={styles.cardHeader}>
+      <Header className={styles.cardHeader}>
         <div className={styles.titleArea}>
           <h3 id={`rule-title-${rule.eventType}`} className={styles.ruleDisplayName}>
             {rule.displayName || rule.eventType}
           </h3>
-          <span className={styles.eventTypeCode}>{rule.eventType}</span>
+          {!compact && <span className={styles.eventTypeCode}>{rule.eventType}</span>}
         </div>
         <div className={styles.badgesArea}>
+          {compact && <span className={styles.ruleSummaryWait}>Chờ {rule.tWaitSeconds} giây</span>}
+          {compact && (errorMessage || isDirty || isSaving) && (
+            <span className={styles.ruleDraftStatus}>
+              {errorMessage ? 'Lỗi lưu' : isSaving ? 'Đang lưu…' : 'Chưa lưu'}
+            </span>
+          )}
           <span
             className={`${styles.priorityBadge} ${priorityClass}`}
             title={`Mức độ ưu tiên cảnh báo: ${rule.priority}`}
           >
             Ưu tiên {rule.priority}
           </span>
-          <span className={styles.versionBadge} title="Phiên bản cấu hình hiện tại">
-            v{rule.version ?? 1}
-          </span>
+          {!compact && (
+            <span className={styles.versionBadge} title="Phiên bản cấu hình hiện tại">
+              v{rule.version ?? 1}
+            </span>
+          )}
+          {compact && <ChevronDown className={styles.ruleChevron} size={16} aria-hidden="true" />}
         </div>
-      </div>
+      </Header>
 
       {/* Body */}
       <div className={styles.cardBody}>
@@ -116,77 +133,76 @@ export function EscalationRuleCard({
           disabled={!isAdmin || isSaving}
           onChange={(seconds) => onUpdateDraft(rule.eventType, 'tWaitSeconds', seconds)}
           onHighWaitChange={(seconds) => onUpdateDraft(rule.eventType, 'highWaitSeconds', seconds)}
-        />
-        {isWellness ? (
-          <div className={styles.notApplicableBox}>
-            Sự kiện an sinh được kích hoạt theo lịch kiểm tra định kỳ (không sử dụng ngưỡng
-            confidence).
-          </div>
-        ) : (
-          <div className={styles.inputsGrid}>
-            <div className={styles.fieldGroup}>
-              <label htmlFor={`tLow-${rule.eventType}`} className={styles.fieldLabel}>
-                <span>Ngưỡng tối thiểu (T_low)</span>
-                {draft.tLow !== null && !Number.isNaN(draft.tLow) && (
-                  <span style={{ color: '#a5b7ff', fontWeight: 600, fontSize: 12 }}>
-                    (~{Math.round(draft.tLow * 100)}% chắc chắn)
-                  </span>
-                )}
-              </label>
-              <span className={styles.fieldHint}>
-                Đơn vị từ 0.00 đến 1.00. Dưới mức này AI chỉ âm thầm ghi log, không nhắn tin làm
-                phiền.
-              </span>
-              <div className={styles.inputWrapper}>
-                <input
-                  id={`tLow-${rule.eventType}`}
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="1"
-                  disabled={!isAdmin || isSaving}
-                  className={styles.inputNumber}
-                  value={draft.tLow !== null ? draft.tLow : ''}
-                  onChange={(e) => {
-                    const val = e.target.value === '' ? null : parseFloat(e.target.value);
-                    onUpdateDraft(rule.eventType, 'tLow', val);
-                  }}
-                />
-              </div>
+        >
+          {isWellness ? (
+            <div className={styles.notApplicableBox}>
+              Sự kiện an sinh được kích hoạt theo lịch kiểm tra định kỳ (không sử dụng ngưỡng
+              confidence).
             </div>
+          ) : (
+            <section
+              className={styles.thresholdSection}
+              aria-labelledby={`threshold-title-${rule.eventType}`}
+            >
+              <h4 id={`threshold-title-${rule.eventType}`} className={styles.editorTitle}>
+                Ngưỡng tin cậy
+              </h4>
+              <div className={styles.inputsGrid}>
+                <div className={styles.fieldGroup}>
+                  <label htmlFor={`tLow-${rule.eventType}`} className={styles.fieldLabel}>
+                    <span>Ngưỡng tối thiểu (T_low)</span>
+                  </label>
 
-            <div className={styles.fieldGroup}>
-              <label htmlFor={`tHigh-${rule.eventType}`} className={styles.fieldLabel}>
-                <span>Ngưỡng tin cậy cao (T_high)</span>
-                {draft.tHigh !== null && !Number.isNaN(draft.tHigh) && (
-                  <span style={{ color: '#f5ac82', fontWeight: 600, fontSize: 12 }}>
-                    (~{Math.round(draft.tHigh * 100)}% chắc chắn)
+                  <div className={styles.inputWrapper}>
+                    <input
+                      id={`tLow-${rule.eventType}`}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="1"
+                      disabled={!isAdmin || isSaving}
+                      className={styles.inputNumber}
+                      value={draft.tLow !== null ? draft.tLow : ''}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? null : parseFloat(e.target.value);
+                        onUpdateDraft(rule.eventType, 'tLow', val);
+                      }}
+                    />
+                  </div>
+                  <span className={styles.fieldHint}>
+                    Dưới ngưỡng này, hệ thống chỉ ghi nhận sự kiện.
                   </span>
-                )}
-              </label>
-              <span className={styles.fieldHint}>
-                Đơn vị từ 0.00 đến 1.00. Đạt mức này AI rất chắc chắn, kích hoạt hẹn giờ rút ngắn
-                khẩn cấp.
-              </span>
-              <div className={styles.inputWrapper}>
-                <input
-                  id={`tHigh-${rule.eventType}`}
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="1"
-                  disabled={!isAdmin || isSaving}
-                  className={styles.inputNumber}
-                  value={draft.tHigh !== null ? draft.tHigh : ''}
-                  onChange={(e) => {
-                    const val = e.target.value === '' ? null : parseFloat(e.target.value);
-                    onUpdateDraft(rule.eventType, 'tHigh', val);
-                  }}
-                />
+                </div>
+
+                <div className={styles.fieldGroup}>
+                  <label htmlFor={`tHigh-${rule.eventType}`} className={styles.fieldLabel}>
+                    <span>Ngưỡng tin cậy cao (T_high)</span>
+                  </label>
+
+                  <div className={styles.inputWrapper}>
+                    <input
+                      id={`tHigh-${rule.eventType}`}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="1"
+                      disabled={!isAdmin || isSaving}
+                      className={styles.inputNumber}
+                      value={draft.tHigh !== null ? draft.tHigh : ''}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? null : parseFloat(e.target.value);
+                        onUpdateDraft(rule.eventType, 'tHigh', val);
+                      }}
+                    />
+                  </div>
+                  <span className={styles.fieldHint}>
+                    Từ ngưỡng này, hệ thống có thể áp dụng thời gian chờ khẩn cấp.
+                  </span>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </section>
+          )}
+        </EscalationWaitControl>
 
         {/* Validation warning inline */}
         {isThresholdInvalid && (
@@ -254,6 +270,6 @@ export function EscalationRuleCard({
           </div>
         )}
       </div>
-    </article>
+    </Container>
   );
 }

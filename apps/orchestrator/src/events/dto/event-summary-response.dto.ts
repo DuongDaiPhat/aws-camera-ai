@@ -35,6 +35,7 @@ export class EventSummaryDto {
   thumbnailUrl?: string | null;
   isFalseAlarm?: boolean;
   detectedAt!: string;
+  escalationDeadlineAt?: string | null;
 }
 
 export class PaginationMetaDto {

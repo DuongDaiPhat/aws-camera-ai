@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getRecordingDay } from '@/lib/playback-client';
 import type { RecordingDay } from '@/types';
 const ARCHIVE_REFRESH_MS = 10000,
@@ -7,16 +7,18 @@ const ARCHIVE_REFRESH_MS = 10000,
 export function useRecordingDays(cameraIds: string[], date: string) {
   const key = cameraIds.join('|');
   const [days, setDays] = useState<Record<string, RecordingDay>>({}),
-    [errors, setErrors] = useState<Record<string, string>>({}),
-    [revision, setRevision] = useState(0);
+    [errors, setErrors] = useState<Record<string, string>>({});
+  const [isRefreshing, setRefreshing] = useState(false);
+  const reload = useRef<() => Promise<boolean>>(async () => false);
   useEffect(() => {
     const controller = new AbortController();
-    let inFlight = false;
-    const load = async () => {
-      if (inFlight) return;
-      inFlight = true;
+    let inFlight: Promise<boolean> | null = null;
+    const load = (): Promise<boolean> => {
+      if (inFlight) return inFlight;
+      setRefreshing(true);
       const ids = key.split('|').filter(Boolean);
-      let index = 0;
+      let index = 0,
+        success = true;
       const worker = async () => {
         while (index < ids.length && !controller.signal.aborted) {
           const id = ids[index++];
@@ -27,6 +29,7 @@ export function useRecordingDays(cameraIds: string[], date: string) {
               setErrors((old) => ({ ...old, [date + ':' + id]: '' }));
             }
           } catch (error: unknown) {
+            success = false;
             if (!controller.signal.aborted)
               setErrors((old) => ({
                 ...old,
@@ -36,12 +39,15 @@ export function useRecordingDays(cameraIds: string[], date: string) {
           }
         }
       };
-      try {
-        await Promise.all(Array.from({ length: Math.min(ids.length, MAX_PARALLEL) }, worker));
-      } finally {
-        inFlight = false;
-      }
+      inFlight = Promise.all(Array.from({ length: Math.min(ids.length, MAX_PARALLEL) }, worker))
+        .then(() => success && !controller.signal.aborted)
+        .finally(() => {
+          inFlight = null;
+          if (!controller.signal.aborted) setRefreshing(false);
+        });
+      return inFlight;
     };
+    reload.current = load;
     void load();
     const timer = setInterval(() => {
       if (!document.hidden) void load();
@@ -50,10 +56,15 @@ export function useRecordingDays(cameraIds: string[], date: string) {
       controller.abort();
       clearInterval(timer);
     };
-  }, [key, date, revision]);
+  }, [key, date]);
   return {
-    days: Object.fromEntries(Object.entries(days).filter(([, day]) => day.date === date)),
+    days: daysForDate(days, date),
     errors: Object.fromEntries(cameraIds.map((id) => [id, errors[date + ':' + id] ?? ''])),
-    retry: () => setRevision((n) => n + 1),
+    isRefreshing,
+    retry: () => reload.current(),
   };
+}
+
+function daysForDate(days: Record<string, RecordingDay>, date: string) {
+  return Object.fromEntries(Object.entries(days).filter(([, day]) => day.date === date));
 }

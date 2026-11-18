@@ -29,6 +29,16 @@ export function useAuth() {
     };
   }, []);
 
+  useEffect(() => {
+    const refresh = () => {
+      void getCurrentUser()
+        .then(setUser)
+        .catch(() => {});
+    };
+    window.addEventListener('camerai-profile-updated', refresh);
+    return () => window.removeEventListener('camerai-profile-updated', refresh);
+  }, []);
+
   const handleLogout = useCallback(async () => {
     stopAllWebcamSessions();
     try {

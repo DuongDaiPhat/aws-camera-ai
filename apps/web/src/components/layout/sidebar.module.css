@@ -216,3 +216,8 @@
     transition: none;
   }
 }
+
+/* Keep all nine household pages visible on laptop-height screens. */
+.sidebar[data-role='CAREGIVER'] .navigation { margin-top:24px; scrollbar-width:thin; scrollbar-color:#51465e transparent; }
+.sidebar[data-role='CAREGIVER'] .navigation > div {gap:4px;}
+.sidebar[data-role='CAREGIVER'] .navigation button {min-height:40px;height:40px;padding-block:8px;}

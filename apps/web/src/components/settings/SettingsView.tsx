@@ -1,5 +1,6 @@
 'use client';
 
+import { CaregiverSettingsView } from '@/components/household/CaregiverSettingsView';
 import React, { useEffect, useState } from 'react';
 import type { CurrentUser } from '@/lib/auth-client';
 import { EscalationRulesSection } from './EscalationRulesSection';
@@ -98,7 +99,7 @@ function ViewerPersonalSettings({ user }: { user: CurrentUser }) {
           </div>
           <div className={styles.viewerCardBody}>
             <label className={styles.viewerToggleRow}>
-              <span>Hiển thị thông báo trực tiếp trên ứng dụng</span>
+              <span>Hiển thị thông báo thông thường trong ứng dụng</span>
               <input
                 type="checkbox"
                 checked={prefs.inAppAlerts}
@@ -134,6 +135,7 @@ function ViewerPersonalSettings({ user }: { user: CurrentUser }) {
 }
 
 export function SettingsView({ user }: SettingsViewProps) {
+  if (user?.role === 'CAREGIVER') return <CaregiverSettingsView />;
   if (user?.role === 'VIEWER') {
     return <ViewerPersonalSettings user={user} />;
   }

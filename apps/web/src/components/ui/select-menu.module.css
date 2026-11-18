@@ -228,3 +228,9 @@
 .menu[data-tone='violet'] .option + .option {
   margin-top: 4px;
 }
+
+.menu[data-limited='true'] .option {
+  height: 38px;
+  min-height: 38px;
+  box-sizing: border-box;
+}

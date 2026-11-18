@@ -24,7 +24,7 @@ export function toRuleDraft(rule: EscalationRule): RuleDraft {
   };
 }
 
-export function useEscalationRules() {
+export function useEscalationRules(household = false) {
   const [rules, setRules] = useState<EscalationRule[]>([]);
   const [drafts, setDrafts] = useState<Record<string, RuleDraft>>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -38,7 +38,7 @@ export function useEscalationRules() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchEscalationRules();
+      const data = await fetchEscalationRules(household);
       // Loại bỏ rule nội bộ PERSON_DETECTED nếu có
       const filtered = data.filter((r) => r.eventType !== 'PERSON_DETECTED');
       setRules(filtered);
@@ -57,7 +57,7 @@ export function useEscalationRules() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [household]);
 
   useEffect(() => {
     void loadRules();
@@ -127,13 +127,17 @@ export function useEscalationRules() {
       setSuccessMap((prev) => ({ ...prev, [eventType]: null }));
 
       try {
-        const updated = await updateEscalationThresholds(eventType, {
-          tLow: draft.tLow,
-          tHigh: draft.tHigh,
-          tWaitSeconds: draft.tWaitSeconds,
-          highWaitSeconds: draft.highWaitSeconds,
-          expectedVersion: canonical.version ?? 1,
-        });
+        const updated = await updateEscalationThresholds(
+          eventType,
+          {
+            tLow: draft.tLow,
+            tHigh: draft.tHigh,
+            tWaitSeconds: draft.tWaitSeconds,
+            highWaitSeconds: draft.highWaitSeconds,
+            expectedVersion: canonical.version ?? 1,
+          },
+          household,
+        );
 
         setRules((prev) => prev.map((r) => (r.eventType === eventType ? updated : r)));
 

@@ -72,7 +72,7 @@ export class WellnessRepository {
   async enabledCameraIds(owner: string, ids: string[], client?: PoolClient): Promise<string[]> {
     const result = await (client ?? this.pool).query<{ id: string }>(
       `SELECT c.id FROM cameras c JOIN devices d ON d.id=c.device_id
-      WHERE d.owner_user_id=$1 AND c.is_enabled AND (cardinality($2::uuid[])=0 OR c.id=ANY($2::uuid[])) ORDER BY c.id`,
+      WHERE can_access_camera($1,c.id) AND c.is_enabled AND (cardinality($2::uuid[])=0 OR c.id=ANY($2::uuid[])) ORDER BY c.id`,
       [owner, ids],
     );
     return result.rows.map((row) => row.id);
@@ -170,7 +170,7 @@ export class WellnessRepository {
     await client.query(
       `INSERT INTO notifications(event_id,emergency_contact_id,channel,status,escalation_level,payload)
       SELECT $1,id,'CONNECT_CALL','PENDING',priority_order,jsonb_build_object('reason',$3::text,'priority','P2')
-      FROM emergency_contacts WHERE owner_user_id=$2 AND is_enabled AND is_verified`,
+      FROM emergency_contacts WHERE owner_user_id=camera_household_root($2) AND is_enabled AND is_verified`,
       [eventId, owner, reason],
     );
     await this.enqueueEventUpdate(eventId, client);
@@ -400,7 +400,7 @@ export class WellnessRepository {
         AND (
           EXISTS (
             SELECT 1 FROM known_faces kf
-            WHERE kf.owner_user_id = $2 AND kf.linked_user_id = $1 AND kf.is_active = true
+            WHERE shares_camera_household($2,kf.owner_user_id) AND kf.linked_user_id = $1 AND kf.is_active = true
           )
         )
     `;

@@ -25,24 +25,34 @@ export class FrigateConfigService {
   private continuousRecording(
     record: Record<string, unknown>,
     enabled: boolean,
+    retentionDays?: number,
   ): Record<string, unknown> {
     if (!enabled) return record;
     const archiveDays = Number(
-      this.config.get<string | number>('PLAYBACK_CONTINUOUS_RECORDING_DAYS', 30),
+      retentionDays ?? this.config.get<string | number>('PLAYBACK_CONTINUOUS_RECORDING_DAYS', 30),
     );
     const fireDays =
       this.config.get<string>('M3_ENABLED') === 'true'
         ? Number(this.config.get<string | number>('FIRE_CONTINUOUS_RECORDING_DAYS', 1))
         : 0;
     const days = Math.max(archiveDays, fireDays);
-    if (!Number.isSafeInteger(days) || days < 1 || days > 30)
+    if (!Number.isSafeInteger(days) || days < 1 || days > 90)
       throw new Error('Invalid PLAYBACK_CONTINUOUS_RECORDING_DAYS');
     const existing = record.continuous;
     const continuous =
       existing && typeof existing === 'object' && !Array.isArray(existing) ? existing : {};
     const priorDays =
       'days' in continuous && typeof continuous.days === 'number' ? continuous.days : 0;
-    return { ...record, continuous: { ...continuous, days: Math.max(days, fireDays, priorDays) } };
+    return {
+      ...record,
+      continuous: {
+        ...continuous,
+        days:
+          retentionDays === undefined
+            ? Math.max(days, fireDays, priorDays)
+            : Math.max(days, fireDays),
+      },
+    };
   }
 
   generateUpdatedConfig(rawYaml: string, data: CameraFrigateData): string {
@@ -126,6 +136,7 @@ export class FrigateConfigService {
         ...this.continuousRecording(
           recordOptions,
           settings?.recording_enabled ?? record.enabled !== false,
+          camera.retention_days,
         ),
         enabled: settings?.recording_enabled ?? record.enabled ?? true,
         detections: {

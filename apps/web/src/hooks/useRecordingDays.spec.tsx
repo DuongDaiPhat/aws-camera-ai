@@ -47,3 +47,51 @@ it('polls new recordings without clearing the day already being played', async (
     vi.useRealTimers();
   }
 });
+
+it('awaits a manual refresh, shares an in-flight poll, and retains the last day on failure', async () => {
+  vi.mocked(getRecordingDay).mockReset();
+  let finish: (day: RecordingDay) => void = () => {};
+  const pending = new Promise<RecordingDay>((resolve) => {
+    finish = resolve;
+  });
+  vi.mocked(getRecordingDay).mockReturnValueOnce(pending);
+  let current: ReturnType<typeof useRecordingDays>;
+  function Harness() {
+    current = useRecordingDays(['camera'], '2026-11-18');
+    return (
+      <output>
+        {String(current.isRefreshing)}|{current.days.camera?.date ?? 'blank'}
+      </output>
+    );
+  }
+  const host = document.createElement('div');
+  document.body.append(host);
+  const root = createRoot(host);
+  try {
+    await act(async () => root.render(<Harness />));
+    expect(host.textContent).toBe('true|blank');
+    let refresh!: Promise<boolean>;
+    await act(async () => {
+      refresh = current!.retry();
+    });
+    expect(getRecordingDay).toHaveBeenCalledTimes(1);
+    const day = { cameraId: 'camera', date: '2026-11-18', segments: [] } as unknown as RecordingDay;
+    await act(async () => {
+      finish(day);
+      await refresh;
+    });
+    expect(await refresh).toBe(true);
+    expect(host.textContent).toBe('false|2026-11-18');
+    vi.mocked(getRecordingDay).mockRejectedValueOnce(new Error('Offline'));
+    let success = true;
+    await act(async () => {
+      success = await current!.retry();
+    });
+    expect(success).toBe(false);
+    expect(host.textContent).toBe('false|2026-11-18');
+    expect(current!.errors.camera).toBe('Offline');
+  } finally {
+    await act(async () => root.unmount());
+    host.remove();
+  }
+});

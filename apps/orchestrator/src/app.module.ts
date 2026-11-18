@@ -1,3 +1,4 @@
+import { HouseholdModule } from './household/household.module';
 import { PlaybackModule } from './playback/playback.module';
 import { CloudQueueModule } from './cloud-queue/cloud-queue.module';
 import { Module } from '@nestjs/common';
@@ -47,6 +48,7 @@ import { FireModule } from './fire/fire.module';
       }),
     }),
     DatabaseModule,
+    HouseholdModule,
     PlaybackModule,
     CloudQueueModule,
     AuthModule,

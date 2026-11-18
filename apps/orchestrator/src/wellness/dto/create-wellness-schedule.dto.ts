@@ -14,6 +14,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { DATABASE_UUID_PATTERN } from '../../auth/database-uuid';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -93,7 +94,7 @@ export class CreateWellnessScheduleDto {
   @IsArray()
   @ArrayMaxSize(100)
   @ArrayUnique()
-  @IsUUID(undefined, { each: true })
+  @Matches(DATABASE_UUID_PATTERN, { each: true })
   cameraIds?: string[];
 
   @ApiPropertyOptional({

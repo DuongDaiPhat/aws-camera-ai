@@ -264,14 +264,6 @@
   outline-offset: -2px;
 }
 
-.urgentEvent {
-  background-color: #fff9f9;
-}
-
-.urgentEvent:hover {
-  background-color: #fff2f2;
-}
-
 .iconAvatar {
   display: flex;
   align-items: center;
@@ -469,4 +461,13 @@
 .wrapper .trigger .badge {
   background: #000000 !important;
   color: #ffffff !important;
+}
+
+.badge[data-critical='true'] {
+  background: #a52e4a;
+  color: #fff;
+}
+
+.itemMeta {
+  flex-wrap: wrap;
 }

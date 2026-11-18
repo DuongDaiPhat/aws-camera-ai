@@ -1,0 +1,228 @@
+.root {
+  min-width: 0;
+  width: 100%;
+}
+.root > label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #655d70;
+}
+.field {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  min-width: 0;
+  border: 1px solid #dcd5e5;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+.field:focus-within {
+  border-color: #8260ad;
+}
+.field input {
+  min-width: 0;
+  width: 100%;
+  flex: 1;
+  height: 100%;
+  padding: 0 10px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #29232f;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+.field button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  height: 34px;
+  width: 34px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #75568e;
+  cursor: pointer;
+}
+.field button:hover {
+  background: #f1ebf8;
+}
+.field button:focus-visible {
+  outline: 2px solid #8460ae;
+  outline-offset: -3px;
+}
+.root[data-tone='dark'] .field {
+  background: #24212b;
+  border-color: #51485d;
+}
+.root[data-tone='dark'] input,
+.root[data-tone='dark'] .field button {
+  color: #f5f1fa;
+}
+.root[data-tone='dark'] .field button:hover {
+  background: #44364f;
+}
+.error {
+  display: block;
+  margin-top: 5px;
+  color: #b52f48;
+  font-size: 11px;
+}
+.popup {
+  position: fixed;
+  z-index: 160;
+  width: min(232px, calc(100vw - 16px));
+  padding: 9px;
+  border: 1px solid #ded6e7;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 14px 40px #21162d26;
+  color: #302638;
+  animation: enter 0.14s ease-out;
+}
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 7px;
+  font-size: 12px;
+}
+.heading span {
+  font-weight: 400;
+  color: #776981;
+}
+.heading button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 6px;
+  background: #f4f0f8;
+  color: #725b84;
+  cursor: pointer;
+}
+.columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.unitLabel {
+  display: block;
+  padding-bottom: 7px;
+  text-align: center;
+  font-size: 11px;
+  color: #75697f;
+}
+.list {
+  height: 122px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #c3b0d5 #f5f1f8;
+  background: #f8f5fb;
+  border-radius: 8px;
+  padding: 3px;
+}
+.list button {
+  display: block;
+  width: 100%;
+  height: 27px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #4c3b59;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.list button:hover {
+  background: #e9def3;
+}
+.list button[aria-selected='true'] {
+  background: #28212f;
+  color: #fff;
+  font-weight: 700;
+}
+.list button:focus-visible,
+.footer button:focus-visible,
+.heading button:focus-visible {
+  outline: 2px solid #9866d0;
+  outline-offset: -2px;
+}
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid #eee8f4;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+.footer output {
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.footer button {
+  border: 0;
+  border-radius: 7px;
+  padding: 7px 10px;
+  background: #312039;
+  color: #fff;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+}
+.footer button:hover {
+  background: #604172;
+}
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .popup {
+    animation: none;
+  }
+}
+
+.root[data-compact='true'] {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+}
+.root[data-compact='true'] > label {
+  margin: 0;
+  font-size: 10px;
+}
+.root[data-compact='true'] .field {
+  height: 29px;
+  border-radius: 6px;
+}
+.root[data-compact='true'] .field input {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 0 7px;
+  letter-spacing: 0;
+}
+.root[data-compact='true'] .field button {
+  width: 26px;
+  height: 25px;
+}
+.root[data-compact='true'] .error {
+  grid-column: 2;
+  margin: 0;
+}

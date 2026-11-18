@@ -6,9 +6,14 @@ import { PlaybackView } from '@/components/playback/PlaybackView';
 import { NotificationBell, isPendingNotification } from './NotificationBell';
 import { DashboardOverview } from './DashboardOverview';
 import { triggerSosHelp } from '@/lib/events-client';
+import { FamilyView } from '@/components/household/FamilyView';
+import { useAccountPreferences, useNewAlertSound } from '@/hooks/useAccountPreferences';
 import { useLoginEntrance } from '@/hooks/useLoginEntrance';
 import { useFireAttention } from '@/hooks/useFireAttention';
+import { useNotificationClock } from '@/hooks/useNotificationClock';
+import { useNotificationReadState } from '@/hooks/useNotificationReadState';
 import { FireAttention } from '@/components/events/FireAttention';
+import { NotificationInbox } from '@/components/events/NotificationInbox';
 import { fireReviewKey } from '@/lib/fire-alerts';
 import { KnownFacesView } from '@/components/known-faces/KnownFacesView';
 import type { UIEventItem } from '@/types';
@@ -34,6 +39,7 @@ const PAGE_TITLES: Record<string, string> = {
   wellness: 'Kiểm tra sức khỏe',
   settings: 'Cài đặt cảnh báo',
   users: 'Quản lý tài khoản',
+  family: 'Thành viên gia đình',
 };
 
 const VIEWER_PAGE_TITLES: Record<string, string> = {
@@ -168,16 +174,19 @@ function DashboardEventDetails({
   onClose,
   readOnly = false,
   canManageEvents = true,
+  onAction,
 }: {
   event: UIEventItem | null;
   actions: ReturnType<typeof useEvents>;
   onClose: () => void;
   readOnly?: boolean;
   canManageEvents?: boolean;
+  onAction: () => void;
 }) {
   const after =
     (action: (id: string, note?: string) => Promise<void>) => async (id: string, note?: string) => {
       await action(id, note);
+      onAction();
       onClose();
     };
   return (
@@ -238,17 +247,26 @@ function HistoryContent({
 export function DashboardView() {
   const { user, handleLogout } = useAuth();
   const isViewer = user?.role === 'VIEWER';
+  const canManageHousehold = user?.role === 'ADMIN' || user?.role === 'CAREGIVER';
   const eventState = useEvents();
   const { events, liveNoticeText, confirmOk, confirmHelp, closeEmergency } = eventState;
+  const preferences = useAccountPreferences(user?.id);
+  useNewAlertSound(events, preferences.soundAlerts, user?.id);
   const attention = useFireAttention(events, user?.id);
+  const notificationNow = useNotificationClock(events);
+  const { read, markRead } = useNotificationReadState(user?.id);
   const notificationCount =
-    eventState.isLoading || eventState.error ? null : events.filter(isPendingNotification).length;
+    eventState.isLoading || eventState.error
+      ? null
+      : events.filter((event) => isPendingNotification(event, notificationNow)).length;
 
   // Telegram confirmations update an existing event without changing the list length.
   const statsRefreshToken = events.map((event) => `${event.id}:${event.status}`).join('|');
   const metrics = useEventStats(statsRefreshToken);
 
   const [activeNav, setActiveNav] = useState('dashboard');
+  const [eventActionVersion, setEventActionVersion] = useState(0);
+  const showInbox = user?.role === 'CAREGIVER' && activeNav === 'events';
   const [calendarDate, setCalendarDate] = useState<Date | null>(null);
   const entrance = useLoginEntrance(user?.id);
   const navigate = (page: string) => {
@@ -274,6 +292,11 @@ export function DashboardView() {
     } finally {
       setSosBusy(false);
     }
+  };
+
+  const openEventDetails = (event: UIEventItem) => {
+    markRead(event.id);
+    setSelectedEventForModal(event);
   };
   const attentionId = attention.event?.id;
   useEffect(() => {
@@ -320,43 +343,50 @@ export function DashboardView() {
           />
         )}
         <div className={styles.mainContent}>
-          <TopHeader
-            selectedDate={calendarDate}
-            onSelectDate={setCalendarDate}
-            onViewPlayback={() => navigate('playback')}
-            isDashboard={activeNav === 'dashboard'}
-            userName={user?.fullName || 'bạn'}
-            pendingCount={notificationCount}
-            pageTitle={
-              isViewer
-                ? (VIEWER_PAGE_TITLES[activeNav] ?? VIEWER_PAGE_TITLES.dashboard)
-                : (PAGE_TITLES[activeNav] ?? PAGE_TITLES.dashboard)
-            }
-            onViewEvents={() => navigate('events')}
-            leadingAction={
-              isViewer ? (
-                <button
-                  type="button"
-                  className={styles.headerSosButton}
-                  disabled={sosBusy || Boolean(attention.event)}
-                  onClick={() => void handleHeaderSos()}
-                >
-                  {sosBusy ? 'Đang gửi…' : 'Yêu cầu trợ giúp'}
-                </button>
-              ) : undefined
-            }
-            notificationControl={
-              <NotificationBell
-                events={events}
-                isLoading={eventState.isLoading}
-                error={eventState.error}
-                onRetry={eventState.reload}
-                onViewDetail={setSelectedEventForModal}
-                onViewAll={() => navigate('events')}
-                disabled={Boolean(attention.event)}
-              />
-            }
-          />
+          {!showInbox && (
+            <TopHeader
+              selectedDate={calendarDate}
+              onSelectDate={setCalendarDate}
+              onViewPlayback={activeNav === 'playback' ? undefined : () => navigate('playback')}
+              isDashboard={activeNav === 'dashboard'}
+              compact={activeNav === 'playback'}
+              userName={user?.fullName || 'bạn'}
+              pendingCount={notificationCount}
+              pageTitle={
+                isViewer
+                  ? (VIEWER_PAGE_TITLES[activeNav] ?? VIEWER_PAGE_TITLES.dashboard)
+                  : user?.role === 'CAREGIVER' && activeNav === 'wellness'
+                    ? 'Kiểm tra an toàn'
+                    : (PAGE_TITLES[activeNav] ?? PAGE_TITLES.dashboard)
+              }
+              onViewEvents={() => navigate('events')}
+              leadingAction={
+                isViewer ? (
+                  <button
+                    type="button"
+                    className={styles.headerSosButton}
+                    disabled={sosBusy || Boolean(attention.event)}
+                    onClick={() => void handleHeaderSos()}
+                  >
+                    {sosBusy ? 'Đang gửi…' : 'Yêu cầu trợ giúp'}
+                  </button>
+                ) : undefined
+              }
+              notificationControl={
+                <NotificationBell
+                  now={notificationNow}
+                  readIds={read}
+                  events={events}
+                  isLoading={eventState.isLoading}
+                  error={eventState.error}
+                  onRetry={eventState.reload}
+                  onViewDetail={openEventDetails}
+                  onViewAll={() => navigate('events')}
+                  disabled={Boolean(attention.event)}
+                />
+              }
+            />
+          )}
 
           <main key={activeNav} className={styles.workspace}>
             {sosNotice && (
@@ -375,22 +405,27 @@ export function DashboardView() {
               <SettingsView user={user} />
             ) : !isViewer && activeNav === 'wellness' ? (
               <WellnessView user={user} />
+            ) : user?.role === 'CAREGIVER' && activeNav === 'family' ? (
+              <FamilyView />
             ) : !isViewer && activeNav === 'users' && user?.role === 'ADMIN' ? (
               <UsersView currentUserId={user.id} />
             ) : !isViewer && activeNav === 'known-faces' ? (
-              <KnownFacesView isAdmin={user?.role === 'ADMIN'} />
+              <KnownFacesView isAdmin={canManageHousehold} />
             ) : !isViewer && activeNav === 'zones' ? (
               <ZonesView user={user} />
             ) : isViewer && activeNav !== 'events' ? (
               <CameraView user={user} />
             ) : (
               <>
-                {activeNav !== 'dashboard' && liveNoticeText && (
-                  <div className={styles.newEventNotice} role="status">
-                    <span>{liveNoticeText}</span>
-                    <small>Vừa chèn lên đầu danh sách</small>
-                  </div>
-                )}
+                {!showInbox &&
+                  preferences.inAppAlerts &&
+                  activeNav !== 'dashboard' &&
+                  liveNoticeText && (
+                    <div className={styles.newEventNotice} role="status">
+                      <span>{liveNoticeText}</span>
+                      <small>Vừa chèn lên đầu danh sách</small>
+                    </div>
+                  )}
                 {attention.error && (
                   <div className={styles.newEventNotice} role="alert">
                     {attention.error}{' '}
@@ -400,17 +435,26 @@ export function DashboardView() {
                   </div>
                 )}
 
-                <HistoryContent
-                  userId={user?.id}
-                  isAdmin={user?.role === 'ADMIN'}
-                  blocked={Boolean(attention.event)}
-                  overview={!isViewer && activeNav === 'dashboard'}
-                  state={eventState}
-                  metrics={metrics}
-                  onNavigate={navigate}
-                  onReady={entrance.onReady}
-                  onViewDetail={setSelectedEventForModal}
-                />
+                {showInbox ? (
+                  <NotificationInbox
+                    readIds={read}
+                    recentEvents={events}
+                    actionVersion={eventActionVersion}
+                    onViewDetail={openEventDetails}
+                  />
+                ) : (
+                  <HistoryContent
+                    userId={user?.id}
+                    isAdmin={canManageHousehold}
+                    blocked={Boolean(attention.event)}
+                    overview={!isViewer && activeNav === 'dashboard'}
+                    state={eventState}
+                    metrics={metrics}
+                    onNavigate={navigate}
+                    onReady={entrance.onReady}
+                    onViewDetail={openEventDetails}
+                  />
+                )}
               </>
             )}
           </main>
@@ -421,12 +465,14 @@ export function DashboardView() {
           actions={eventState}
           onClose={() => setSelectedEventForModal(null)}
           canManageEvents={!isViewer}
+          onAction={() => setEventActionVersion((version) => version + 1)}
         />
       </div>
       {attention.event && (
         <FireAttention
           key={fireReviewKey(attention.event)}
           event={attention.event}
+          onInspect={markRead}
           canCloseEmergency={!isViewer}
           onReviewed={() => {
             if (attention.event) attention.review(attention.event.id);

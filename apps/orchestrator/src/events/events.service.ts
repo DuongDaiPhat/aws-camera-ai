@@ -124,6 +124,8 @@ export class EventsService {
       from: query.from,
       to: query.to,
       isFalseAlarm: query.isFalseAlarm,
+      ...(query.urgentFirst ? { urgentFirst: true } : {}),
+      ...(query.notificationState ? { notificationState: query.notificationState } : {}),
       ...(actor && !isSystemAdmin(actor) ? { actorId: actor.sub } : {}),
     });
 
@@ -251,7 +253,7 @@ export class EventsService {
       aggregateVersion: Number(record.aggregate_version),
       retain: record.retain,
       correlationId: record.correlation_id,
-      escalationDeadlineAt: toIsoStringOrNull(record.escalation_deadline_at),
+      escalationDeadlineAt: toIsoStringOrNull(record.escalation_deadline_at ?? null),
       notifiedAt: toIsoStringOrNull(record.notified_at),
       escalatedAt: toIsoStringOrNull(record.escalated_at),
       resolvedAt: toIsoStringOrNull(record.resolved_at),
@@ -367,6 +369,9 @@ export class EventsService {
       thumbnailUrl,
       isFalseAlarm: record.is_false_alarm,
       detectedAt: record.detected_at.toISOString(),
+      ...(record.priority === 'P0'
+        ? { escalationDeadlineAt: toIsoStringOrNull(record.escalation_deadline_at ?? null) }
+        : {}),
     };
   }
 
@@ -410,7 +415,11 @@ export class EventsService {
     return this.eventSubject.asObservable().pipe(
       concatMap(async (item) => {
         const allowed = await this.eventsRepository
-          .canReceiveEvent(actor.sub, item.recipients)
+          .canReceiveEvent(
+            actor.sub,
+            item.recipients,
+            (JSON.parse(String(item.message.data)) as { id?: string }).id,
+          )
           .catch(() => false);
         return allowed ? item.message : undefined;
       }),

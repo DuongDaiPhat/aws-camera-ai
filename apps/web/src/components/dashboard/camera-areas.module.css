@@ -55,15 +55,15 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 3px;
 }
 .card {
   min-width: 0;
   position: relative;
-  border: 1px solid #e7ddf2;
-  border-radius: 15px;
-  background: #fff;
-  padding: 5px;
+  border: 1px solid #ded7e6;
+  border-radius: 0;
+  background: #f5f3f8;
+  padding: 0;
   overflow: hidden;
 }
 .card[data-dragging='true'] {
@@ -80,12 +80,12 @@
   border: 0;
   background: transparent;
   padding: 0 0 7px;
-  border-radius: 11px;
+  border-radius: 0;
   color: #2d2339;
 }
 .camera[aria-pressed='true'] {
-  background: #f7f1ff;
-  box-shadow: 0 0 0 1px #b78bea;
+  background: #eee6f7;
+  box-shadow: inset 0 0 0 1px #a17bc8;
 }
 .camera:disabled {
   pointer-events: none;
@@ -97,8 +97,8 @@
   width: 100%;
   aspect-ratio: 1.5;
   overflow: hidden;
-  border-radius: 10px;
-  background: #eee8f5;
+  border-radius: 0;
+  background: #101014;
 }
 .image img {
   width: 100%;
@@ -125,7 +125,7 @@
 .camera small {
   padding: 0 5px;
   font-size: 10px;
-  color: #98859f;
+  color: #74657e;
 }
 .dot {
   position: absolute;
@@ -466,7 +466,7 @@
 .areaScroll .grid {
   height: 100%;
   grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 3px;
 }
 .areaScroll .card {
   display: flex;

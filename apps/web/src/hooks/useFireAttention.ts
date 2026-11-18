@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { UIEventItem } from '@/types';
-import { fetchPendingFireEvents } from '@/lib/events-client';
+import { fetchPendingCriticalEvents } from '@/lib/events-client';
 import {
-  canInterruptFire,
+  canInterruptCriticalAlert,
+  criticalAlertDeadline,
   nextUnreviewedFire,
   reconcileFireReceipts,
   rememberFireAttention,
@@ -15,7 +16,7 @@ import {
   readFireReceipts,
   saveFireReceipts,
 } from '@/lib/fire-attention-storage';
-import { FIRE_ATTENTION_MAX_AGE_MS, FIRE_ATTENTION_POLL_MS } from '@/lib/fire-ui-config';
+import { FIRE_ATTENTION_POLL_MS } from '@/lib/fire-ui-config';
 
 function usePendingFireEvents(userId: string | undefined, token: string) {
   const [data, setData] = useState<{ userId: string; events: UIEventItem[] } | null>(null);
@@ -27,13 +28,13 @@ function usePendingFireEvents(userId: string | undefined, token: string) {
     let timer: ReturnType<typeof setTimeout>;
     async function load(): Promise<void> {
       try {
-        const events = await fetchPendingFireEvents();
+        const events = await fetchPendingCriticalEvents();
         if (mounted) {
           setData({ userId: owner, events });
           setError(null);
         }
       } catch {
-        if (mounted) setError('Chưa đồng bộ được danh sách cảnh báo lửa.');
+        if (mounted) setError('Chưa đồng bộ được danh sách cảnh báo khẩn cấp.');
       } finally {
         if (mounted) timer = setTimeout(() => void load(), FIRE_ATTENTION_POLL_MS);
       }
@@ -49,7 +50,7 @@ function usePendingFireEvents(userId: string | undefined, token: string) {
 
 function useAttentionClock(event: UIEventItem | null) {
   const [now, setNow] = useState(Date.now);
-  const expiresAt = event ? Date.parse(event.detectedAt) + FIRE_ATTENTION_MAX_AGE_MS : Infinity;
+  const expiresAt = event ? (criticalAlertDeadline(event) ?? Infinity) : Infinity;
   useEffect(() => {
     const delay = Math.min(FIRE_ATTENTION_POLL_MS, Math.max(1, expiresAt - Date.now()));
     const timer = setTimeout(() => setNow(Date.now()), delay);
@@ -86,9 +87,9 @@ export function useFireAttention(events: UIEventItem[], userId: string | undefin
     if (!userId) return;
     let cancelled = false;
     const source = pending.error ? [...events] : [...(pending.events ?? events)];
-    // A terminal SSE update takes precedence over an earlier pending-list response.
+    // A later lifecycle SSE update takes precedence over an earlier pending-list response.
     for (const event of events) {
-      if (['RESOLVED', 'CLOSED'].includes(event.status)) {
+      if (['RESOLVED', 'CLOSED', 'ESCALATED'].includes(event.status) || event.isFalseAlarm) {
         const index = source.findIndex((item) => item.id === event.id);
         if (index >= 0) source[index] = event;
       }
@@ -101,7 +102,9 @@ export function useFireAttention(events: UIEventItem[], userId: string | undefin
       const previous = currentRef.current?.userId === userId ? currentRef.current.event : null;
       const latest = source.find((item) => item.id === previous?.id);
       const event =
-        latest && canInterruptFire(latest, at) ? latest : nextUnreviewedFire(source, receipts, at);
+        latest && canInterruptCriticalAlert(latest, at)
+          ? latest
+          : nextUnreviewedFire(source, receipts, at);
       if (event) receipts = rememberFireAttention(source, event, receipts, at);
       setStorageError(saveFireReceipts(userId, receipts) ?? stored.warning);
       currentRef.current = event ? { userId, event } : null;
@@ -116,7 +119,7 @@ export function useFireAttention(events: UIEventItem[], userId: string | undefin
     };
   }, [events, pending.events, pending.error, userId, now, revision]);
   return {
-    event: active,
+    event: active && canInterruptCriticalAlert(active) ? active : null,
     error: pending.error ?? storageError,
     retry: () => setRevision((value) => value + 1),
     review: (eventId: string) => {

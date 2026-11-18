@@ -9,6 +9,7 @@ import {
 } from './face-inference.interface';
 import { KnownFacesRepository, type KnownFace } from './known-faces.repository';
 import { FaceCollectionSyncService } from './face-collection-sync.service';
+import type { UpdateKnownFaceDto } from './dto/update-known-face.dto';
 import { CreateKnownFaceDto } from './dto/create-known-face.dto';
 import { aggregate, selections, validateImages } from './embedding';
 import { faceError } from './face-error';
@@ -25,11 +26,12 @@ export class KnownFacesService {
   ) {}
 
   async list(owner: string): Promise<{ data: KnownFace[] }> {
-    return { data: await this.repository.list(owner) };
+    return { data: await this.repository.list(await this.repository.householdOwner(owner)) };
   }
 
   async create(owner: string, dto: CreateKnownFaceDto, files: FaceUpload[]): Promise<KnownFace> {
     try {
+      owner = await this.repository.householdOwner(owner);
       validateImages(
         files,
         Number(this.config.get('FACE_MAX_IMAGE_BYTES', 5242880)),
@@ -64,6 +66,21 @@ export class KnownFacesService {
     }
   }
 
+  async update(actor: string, id: string, input: UpdateKnownFaceDto): Promise<KnownFace> {
+    const owner = await this.repository.householdOwner(actor);
+    try {
+      await this.repository.update(owner, id, input, actor);
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23505')
+        throw faceError(409, 'KNOWN_FACE_NAME_EXISTS', 'Tên người quen đã tồn tại.');
+      throw error;
+    }
+    await this.sync.sync(owner);
+    const face = (await this.repository.list(owner)).find((item) => item.id === id);
+    if (!face) throw faceError(404, 'NOT_FOUND', 'Không tìm thấy người quen.');
+    return face;
+  }
+
   private checkResults(results: EmbeddingResult[]): void {
     const images: components['schemas']['FaceSelectionDetails']['images'] = [];
     for (const [imageIndex, result] of results.entries()) {
@@ -96,6 +113,7 @@ export class KnownFacesService {
     ip: string | null,
     agent: string | null,
   ): Promise<boolean> {
+    owner = await this.repository.householdOwner(owner);
     await this.repository.remove(owner, id, ip, agent);
     return this.sync.sync(owner);
   }

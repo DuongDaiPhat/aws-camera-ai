@@ -13,6 +13,36 @@ beforeEach(() => {
   document.body.append(host);
   root = createRoot(host);
 });
+
+it('limits long camera layout menus to six rows and reaches remaining options with the keyboard', async () => {
+  const change = vi.fn();
+  const choices = [1, 2, 4, 6, 8, 10, 12]
+    .map((count) => ({ value: String(count), label: `${count} camera` }))
+    .concat({ value: 'custom', label: 'Tùy chỉnh' });
+  await act(async () =>
+    root.render(
+      <SelectMenu
+        label="Bố cục"
+        options={choices}
+        value="2"
+        onChange={change}
+        visibleOptions={6}
+      />,
+    ),
+  );
+  const trigger = host.querySelector('button')!;
+  await act(async () => trigger.click());
+  const list = document.querySelector<HTMLElement>('[role="listbox"]')!;
+  expect(list.style.maxHeight).toBe('240px');
+  expect(list.querySelectorAll('[role="option"]')).toHaveLength(8);
+  await act(async () =>
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true })),
+  );
+  await act(async () =>
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })),
+  );
+  expect(change).toHaveBeenCalledWith('custom');
+});
 afterEach(async () => {
   await act(async () => root.unmount());
   host.remove();

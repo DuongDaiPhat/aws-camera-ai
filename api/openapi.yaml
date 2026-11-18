@@ -74,6 +74,466 @@ security:
   - bearerAuth: []
 
 paths:
+  /household:
+    get:
+      operationId: getHousehold
+      tags:
+        - household
+      summary: getHousehold
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HouseholdSnapshot"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
+  /household/members:
+    post:
+      operationId: createHouseholdMember
+      tags:
+        - household
+      summary: createHouseholdMember
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateHouseholdMemberRequest"
+      responses:
+        "201":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - email
+                  - fullName
+                properties:
+                  id: &a2
+                    type: string
+                    format: uuid
+                  email: &a1
+                    type: string
+                  fullName: *a1
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
+  /household/members/{memberId}/cameras:
+    put:
+      operationId: setHouseholdCameraGrants
+      tags:
+        - household
+      summary: setHouseholdCameraGrants
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: memberId
+          required: true
+          schema: *a2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - grants
+              properties:
+                grants:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/HouseholdCameraGrant"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - saved
+                properties:
+                  saved: &a3
+                    type: boolean
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
+  /household/members/{memberId}:
+    delete:
+      operationId: removeHouseholdMember
+      tags:
+        - household
+      summary: removeHouseholdMember
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: memberId
+          required: true
+          schema: *a2
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
+  /household/contacts:
+    post:
+      operationId: createHouseholdContact
+      tags:
+        - household
+      summary: createHouseholdContact
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HouseholdContactRequest"
+      responses:
+        "201":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id: *a2
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
+  /household/contacts/{contactId}:
+    put:
+      operationId: updateHouseholdContact
+      tags:
+        - household
+      summary: updateHouseholdContact
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contactId
+          required: true
+          schema: *a2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HouseholdContactRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id: *a2
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
+    delete:
+      operationId: removeHouseholdContact
+      tags:
+        - household
+      summary: removeHouseholdContact
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contactId
+          required: true
+          schema: *a2
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
+  /household/settings:
+    put:
+      operationId: updateHouseholdSettings
+      tags:
+        - household
+      summary: updateHouseholdSettings
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HouseholdSettings"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - retentionDays
+                  - storageQuotaGb
+                  - syncFailures
+                properties:
+                  retentionDays:
+                    type: integer
+                    minimum: 1
+                    maximum: 90
+                  storageQuotaGb:
+                    type: integer
+                    minimum: 1
+                    maximum: 100000
+                  syncFailures:
+                    type: array
+                    items: *a2
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
+  /household/cameras:
+    post:
+      operationId: createHouseholdCamera
+      tags:
+        - household
+      summary: createHouseholdCamera
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 120
+      responses:
+        "201":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id: *a2
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
+  /account:
+    get:
+      operationId: getAccountSettings
+      tags:
+        - household
+      summary: getAccountSettings
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountSettings"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
+  /account/profile:
+    patch:
+      operationId: updateAccountProfile
+      tags:
+        - household
+      summary: updateAccountProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountProfileRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountSettings"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
+  /account/preferences:
+    put:
+      operationId: updateNotificationPreferences
+      tags:
+        - household
+      summary: updateNotificationPreferences
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationPreferences"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPreferences"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
+  /account/password:
+    post:
+      operationId: changeAccountPassword
+      tags:
+        - household
+      summary: changeAccountPassword
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeAccountPasswordRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - saved
+                properties:
+                  saved: *a3
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
+  /household/escalation-rules:
+    get:
+      operationId: listHouseholdEscalationRules
+      tags:
+        - household
+      summary: listHouseholdEscalationRules
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/EscalationRule"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
+  /household/escalation-rules/{eventType}:
+    put:
+      operationId: updateHouseholdEscalationRule
+      tags:
+        - household
+      summary: updateHouseholdEscalationRule
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: eventType
+          required: true
+          schema: *a1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEscalationThresholdsRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EscalationRule"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
   /playback/cameras/{cameraId}/metadata:
     get:
       tags: [cameras]
@@ -86,7 +546,8 @@ paths:
         - { name: endAt, in: query, required: true, schema: { type: string, format: date-time } }
       responses:
         "200":
-          description: Only persisted geometry; an empty archive does not imply negative AI results
+          description: Only persisted geometry; an empty archive does not imply negative
+            AI results
           content:
             application/json:
               schema: { $ref: "#/components/schemas/PlaybackMetadata" }
@@ -311,7 +772,8 @@ paths:
     get:
       tags: [users]
       summary: Danh sach nguoi dung
-      description: Quan tri he thong xem tat ca tai khoan. Quan tri ho chi xem tai khoan trong ho (FR-AUT-05).
+      description: Quan tri he thong xem tat ca tai khoan. Quan tri ho chi xem tai
+        khoan trong ho (FR-AUT-05).
       operationId: listUsers
       parameters:
         - $ref: "#/components/parameters/Page"
@@ -338,7 +800,8 @@ paths:
     post:
       tags: [users]
       summary: Tao tai khoan ung dung tu nguoi dung Cognito
-      description: Chi ADMIN duoc tao. Tai khoan do quan tri ho tao thuoc cung ho. Danh tinh phai ton tai trong User Pool dang cau hinh.
+      description: Chi ADMIN duoc tao. Tai khoan do quan tri ho tao thuoc cung ho.
+        Danh tinh phai ton tai trong User Pool dang cau hinh.
       operationId: createUser
       requestBody:
         required: true
@@ -400,7 +863,8 @@ paths:
     patch:
       tags: [users]
       summary: Doi vai tro CameraAI cua nguoi dung
-      description: Chi ADMIN trong che do Cognito duoc doi vai tro. Quan tri ho chi duoc doi vai tro cua tai khoan khac trong ho.
+      description: Chi ADMIN trong che do Cognito duoc doi vai tro. Quan tri ho chi
+        duoc doi vai tro cua tai khoan khac trong ho.
       operationId: changeUserRole
       requestBody:
         required: true
@@ -511,7 +975,8 @@ paths:
     get:
       tags: [cameras]
       summary: Danh sach camera
-      description: Quan tri he thong xem tat ca. Thanh vien cua ho chi xem camera thuoc ho cua minh.
+      description: Quan tri he thong xem tat ca. Thanh vien cua ho chi xem camera
+        thuoc ho cua minh.
       operationId: listCameras
       parameters:
         - name: deviceId
@@ -927,7 +1392,8 @@ paths:
       tags: [known-faces]
       summary: Danh sach nguoi quen
       operationId: listKnownFaces
-      description: Danh sach thuoc user trong access token; khong suy dien quyen ho gia dinh.
+      description: Danh sach thuoc user trong access token; khong suy dien quyen ho
+        gia dinh.
       responses:
         "200":
           description: Danh sach nguoi quen
@@ -966,7 +1432,10 @@ paths:
                 faceSelections:
                   type: array
                   maxItems: 5
-                  description: Same image order as images; null means auto-select only if exactly one face. Required selections for ambiguous images are returned by validation. Resubmit original files; server does not retain them between requests.
+                  description: Same image order as images; null means auto-select only if exactly
+                    one face. Required selections for ambiguous images are
+                    returned by validation. Resubmit original files; server does
+                    not retain them between requests.
                   items: { type: ["integer", "null"], minimum: 0 }
                 images:
                   type: array
@@ -1017,12 +1486,47 @@ paths:
               { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
           }
         "422":
-          description: NO_FACE_DETECTED, MULTIPLE_FACES, FACE_SELECTION_INVALID, FACE_IMAGES_INCONSISTENT. details follows FaceSelectionDetails when images require correction.
+          description: NO_FACE_DETECTED, MULTIPLE_FACES, FACE_SELECTION_INVALID,
+            FACE_IMAGES_INCONSISTENT. details follows FaceSelectionDetails when
+            images require correction.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorResponse" }
 
   /known-faces/{knownFaceId}:
+    patch:
+      operationId: updateKnownFace
+      tags:
+        - household
+      summary: updateKnownFace
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: knownFaceId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateKnownFaceRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnownFace"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden
     parameters:
       - name: knownFaceId
         in: path
@@ -1038,7 +1542,8 @@ paths:
       responses:
         "204": { description: Da xoa DB va dong bo collection }
         "202":
-          description: Da xoa DB va ghi audit; collection dang cho dong bo. Khong coi la da xoa hoan tat.
+          description: Da xoa DB va ghi audit; collection dang cho dong bo. Khong coi la
+            da xoa hoan tat.
           content:
             application/json:
               schema:
@@ -1095,6 +1600,14 @@ paths:
         - name: isFalseAlarm
           in: query
           schema: { type: boolean }
+        - name: urgentFirst
+          in: query
+          description: Uu tien P0 con han 3 gio va P1/P2 con han 8 gio.
+          schema: { type: boolean }
+        - name: notificationState
+          in: query
+          description: Trang thai trong hop thong bao, bao gom het han uu tien.
+          schema: { type: string, enum: [pending, done, logged] }
       responses:
         "200":
           description: Danh sach su kien
@@ -1376,7 +1889,8 @@ paths:
       tags: [escalation-rules]
       summary: Update thresholds only (US-15)
       operationId: updateEscalationThresholds
-      description: ADMIN only. Atomic version check; preserve channels/priority/flags. New events see committed changes within 60 seconds.
+      description: ADMIN only. Atomic version check; preserve channels/priority/flags.
+        New events see committed changes within 60 seconds.
       requestBody:
         required: true
         content:
@@ -1425,7 +1939,15 @@ paths:
       tags:
         - wellness
       summary: Danh sach lich wellness theo quyen truy cap
-      description: US-20. ADMIN/CAREGIVER manage schedules only for a registered resident in their household; assigned residents (normally role VIEWER) can read their own schedules. Resident identity uses active known_faces.linked_user_id and household camera ownership. All activity is resident-specific verified motion/arrival evidence, not arbitrary person detection or face match alone. Empty cameraIds means enabled cameras of this household. Time is HH:mm in an IANA timezone; 09:00 and 18:00 are two schedule records. Default lookbackHours=6, graceSeconds=300. No computer vision is performed by the scheduler.
+      description: US-20. ADMIN/CAREGIVER manage schedules only for a registered
+        resident in their household; assigned residents (normally role VIEWER)
+        can read their own schedules. Resident identity uses active
+        known_faces.linked_user_id and household camera ownership. All activity
+        is resident-specific verified motion/arrival evidence, not arbitrary
+        person detection or face match alone. Empty cameraIds means enabled
+        cameras of this household. Time is HH:mm in an IANA timezone; 09:00 and
+        18:00 are two schedule records. Default lookbackHours=6,
+        graceSeconds=300. No computer vision is performed by the scheduler.
       operationId: listWellnessSchedules
       parameters:
         - name: residentUserId
@@ -1455,7 +1977,18 @@ paths:
       tags:
         - wellness
       summary: Tao lich wellness cho nguoi da dang ky
-      description: US-20. ADMIN/CAREGIVER manage schedules only for a registered resident in their household; assigned residents (normally role VIEWER) can read their own schedules. Resident identity uses active known_faces.linked_user_id and household camera ownership. All activity is resident-specific verified motion/arrival evidence, not arbitrary person detection or face match alone. Empty cameraIds means enabled cameras of this household. Time is HH:mm in an IANA timezone; 09:00 and 18:00 are two schedule records. Default lookbackHours=6, graceSeconds=300. No computer vision is performed by the scheduler. New writes require a valid household link and a usable resident confirmation channel. Duplicate non-deleted resident/checkAt returns 409; never silently replace a schedule.
+      description: US-20. ADMIN/CAREGIVER manage schedules only for a registered
+        resident in their household; assigned residents (normally role VIEWER)
+        can read their own schedules. Resident identity uses active
+        known_faces.linked_user_id and household camera ownership. All activity
+        is resident-specific verified motion/arrival evidence, not arbitrary
+        person detection or face match alone. Empty cameraIds means enabled
+        cameras of this household. Time is HH:mm in an IANA timezone; 09:00 and
+        18:00 are two schedule records. Default lookbackHours=6,
+        graceSeconds=300. No computer vision is performed by the scheduler. New
+        writes require a valid household link and a usable resident confirmation
+        channel. Duplicate non-deleted resident/checkAt returns 409; never
+        silently replace a schedule.
       operationId: createWellnessSchedule
       requestBody:
         required: true
@@ -1491,7 +2024,11 @@ paths:
       tags:
         - wellness
       summary: Cap nhat tung phan lich wellness
-      description: ADMIN/CAREGIVER of the schedule household. At least one field is required. Revalidate the merged schedule and its resident/cameras/timezone. Changes apply to future occurrences; existing evidence and confirmation deadlines retain their snapshots. Duplicate resident/checkAt returns 409.
+      description: ADMIN/CAREGIVER of the schedule household. At least one field is
+        required. Revalidate the merged schedule and its
+        resident/cameras/timezone. Changes apply to future occurrences; existing
+        evidence and confirmation deadlines retain their snapshots. Duplicate
+        resident/checkAt returns 409.
       operationId: updateWellnessSchedule
       requestBody:
         required: true
@@ -1520,7 +2057,9 @@ paths:
       tags:
         - wellness
       summary: Xoa lich wellness va giu lich su kiem tra
-      description: ADMIN/CAREGIVER of the schedule household. Soft-delete and disable future admission. Existing alerts, confirmations, deadlines and audit records continue.
+      description: ADMIN/CAREGIVER of the schedule household. Soft-delete and disable
+        future admission. Existing alerts, confirmations, deadlines and audit
+        records continue.
       operationId: deleteWellnessSchedule
       responses:
         "204":
@@ -1537,7 +2076,11 @@ paths:
       tags:
         - wellness
       summary: Lich su va yeu cau wellness dang cho xac nhan
-      description: ADMIN/CAREGIVER see household runs; assigned residents (normally role VIEWER) see only their own. Camera-less M5 events use explicit household/resident scope. Run status is the scheduler decision; eventStatus is the alert lifecycle. No image or inference call is needed.
+      description: ADMIN/CAREGIVER see household runs; assigned residents (normally
+        role VIEWER) see only their own. Camera-less M5 events use explicit
+        household/resident scope. Run status is the scheduler decision;
+        eventStatus is the alert lifecycle. No image or inference call is
+        needed.
       operationId: listWellnessChecks
       parameters:
         - name: residentUserId
@@ -1582,7 +2125,18 @@ paths:
       tags:
         - wellness
       summary: Nguoi duoc giam sat xac nhan Toi on hoac Can giup do
-      description: US-20. Only the authenticated resident assigned to this check can confirm INITIAL through this endpoint, including role VIEWER. Existing /events/{eventId}/confirm ADMIN/CAREGIVER permissions remain unchanged. A sent request and NOTIFIED event are required. First successful resident-channel dispatch starts snapshotted graceSeconds (default 300); retries never extend it. Server transaction time must be strictly before confirmationDeadlineAt; at equality/after, atomically escalate and return 409. IM_OK -> RESOLVED; NEED_HELP -> ESCALATED immediately. Actor/time are server-derived. Same commandId/payload replays the original 200 response even after event changes; another/changed confirmation returns 409. Worker and confirmation lock the same event/run in fixed order. Do not resolve an already escalated event.
+      description: US-20. Only the authenticated resident assigned to this check can
+        confirm INITIAL through this endpoint, including role VIEWER. Existing
+        /events/{eventId}/confirm ADMIN/CAREGIVER permissions remain unchanged.
+        A sent request and NOTIFIED event are required. First successful
+        resident-channel dispatch starts snapshotted graceSeconds (default 300);
+        retries never extend it. Server transaction time must be strictly before
+        confirmationDeadlineAt; at equality/after, atomically escalate and
+        return 409. IM_OK -> RESOLVED; NEED_HELP -> ESCALATED immediately.
+        Actor/time are server-derived. Same commandId/payload replays the
+        original 200 response even after event changes; another/changed
+        confirmation returns 409. Worker and confirmation lock the same
+        event/run in fixed order. Do not resolve an already escalated event.
       operationId: confirmWellnessCheck
       requestBody:
         required: true
@@ -1606,7 +2160,8 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
         "409":
-          description: ALREADY_CONFIRMED, INVALID_STATE, REQUEST_NOT_SENT or DEADLINE_EXPIRED; canonical state included.
+          description: ALREADY_CONFIRMED, INVALID_STATE, REQUEST_NOT_SENT or
+            DEADLINE_EXPIRED; canonical state included.
           content:
             application/json:
               schema:
@@ -1616,7 +2171,17 @@ paths:
       tags:
         - internal
       summary: Nhan bang chung hoat dong va hien dien tu M1
-      description: "US-20, internal token only. Store trusted existing identity/motion/direction evidence; perform no computer vision and accept no user self-reported activity. observationId/payload are idempotent: identical retry -> DUPLICATE; changed payload -> 409. Store observedAt separately from receivedAt. Ordered ARRIVAL/MOTION => HOME; validated DEPARTURE => AWAY. Silence, unknown person, model failure and camera outage never mean AWAY or healthy activity. Expired presence means UNKNOWN. Late evidence may affect future checks but cannot silently resolve an existing timeout. M1 currently lacks a directional departure feed: integrate verified source evidence before claiming skip-away acceptance; never infer departure from a track ending."
+      description: "US-20, internal token only. Store trusted existing
+        identity/motion/direction evidence; perform no computer vision and
+        accept no user self-reported activity. observationId/payload are
+        idempotent: identical retry -> DUPLICATE; changed payload -> 409. Store
+        observedAt separately from receivedAt. Ordered ARRIVAL/MOTION => HOME;
+        validated DEPARTURE => AWAY. Silence, unknown person, model failure and
+        camera outage never mean AWAY or healthy activity. Expired presence
+        means UNKNOWN. Late evidence may affect future checks but cannot
+        silently resolve an existing timeout. M1 currently lacks a directional
+        departure feed: integrate verified source evidence before claiming
+        skip-away acceptance; never infer departure from a track ending."
       operationId: submitWellnessObservation
       security:
         - internalToken: []
@@ -1628,7 +2193,8 @@ paths:
               $ref: "#/components/schemas/WellnessObservationRequest"
       responses:
         "202":
-          description: Persisted/deduplicated observation; ordered presence updated atomically.
+          description: Persisted/deduplicated observation; ordered presence updated
+            atomically.
           content:
             application/json:
               schema:
@@ -1696,8 +2262,12 @@ paths:
   /internal/smoke:
     get:
       tags: [internal]
-      summary: Kiem tra san sang API, DB, Auth, Storage va Cloud Queue tren moi truong deploy
-      description: Read-only/safe smoke diagnostic protected by the internal service token. Verifies Postgres connectivity/schema, Auth provider configuration (and Cognito JWKS reachability), S3/MinIO upload-download-presign-delete, and SQS queue visibility when enabled.
+      summary: Kiem tra san sang API, DB, Auth, Storage va Cloud Queue tren moi truong
+        deploy
+      description: Read-only/safe smoke diagnostic protected by the internal service
+        token. Verifies Postgres connectivity/schema, Auth provider
+        configuration (and Cognito JWKS reachability), S3/MinIO
+        upload-download-presign-delete, and SQS queue visibility when enabled.
       operationId: getSmokeStatus
       security:
         - internalToken: []
@@ -1718,13 +2288,16 @@ paths:
     get:
       tags: [internal]
       summary: Inspect M3 frame freshness, queue drops, MQTT and model readiness
-      description: Read-only diagnostics protected by the internal service token. Counters reset on backend restart. Does not create an event or change detector state.
+      description: Read-only diagnostics protected by the internal service token.
+        Counters reset on backend restart. Does not create an event or change
+        detector state.
       operationId: getFireHealth
       security:
         - internalToken: []
       responses:
         "200":
-          description: Runtime diagnostics; READY requires fresh successful observations for every listed enabled camera.
+          description: Runtime diagnostics; READY requires fresh successful observations
+            for every listed enabled camera.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/FireHealth" }
@@ -1953,7 +2526,8 @@ paths:
                 properties:
                   envelope:
                     type: object
-                    description: Canonical face.job envelope in aws/sprint4/contracts/queue-v1.schema.json
+                    description: Canonical face.job envelope in
+                      aws/sprint4/contracts/queue-v1.schema.json
                     additionalProperties: true
                   cached_result:
                     anyOf:
@@ -1980,7 +2554,8 @@ paths:
     put:
       tags: [internal]
       summary: Persist the first complete face result before publishing to Results SQS
-      description: Concurrent writes return the first persisted result, including its unchanged processedAt.
+      description: Concurrent writes return the first persisted result, including its
+        unchanged processedAt.
       operationId: cacheCloudFaceJobResult
       security:
         - internalToken: []
@@ -2082,6 +2657,248 @@ components:
           schema: { $ref: "#/components/schemas/ErrorResponse" }
 
   schemas:
+    HouseholdCameraGrant:
+      type: object
+      required:
+        - cameraId
+        - canLive
+        - canPlayback
+      properties:
+        cameraId: &a2
+          type: string
+          format: uuid
+        canLive: &a1
+          type: boolean
+        canPlayback: *a1
+    HouseholdMember:
+      type: object
+      required:
+        - id
+        - email
+        - fullName
+        - role
+        - isActive
+        - telegramLinked
+        - grants
+      properties:
+        id: *a2
+        email: &a3
+          type: string
+        fullName: *a3
+        role:
+          type: string
+          enum:
+            - ADMIN
+            - CAREGIVER
+            - VIEWER
+        isActive: *a1
+        telegramLinked: *a1
+        grants:
+          type: array
+          items:
+            $ref: "#/components/schemas/HouseholdCameraGrant"
+    CreateHouseholdMemberRequest:
+      type: object
+      required:
+        - email
+        - fullName
+      properties:
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+          minLength: 1
+          maxLength: 120
+        password:
+          type: string
+          minLength: 10
+          maxLength: 128
+        cognitoSub: *a3
+    HouseholdContact:
+      type: object
+      required:
+        - id
+        - name
+        - phone
+        - priority
+        - isEnabled
+        - isVerified
+      properties:
+        id: *a2
+        name: *a3
+        phone: *a3
+        priority:
+          type: integer
+        isEnabled: *a1
+        isVerified: *a1
+    HouseholdContactRequest:
+      type: object
+      required:
+        - name
+        - phone
+        - priority
+        - isEnabled
+      properties:
+        name: *a3
+        phone:
+          type: string
+          pattern: ^\+[1-9][0-9]{7,14}$
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 3
+        isEnabled: *a1
+    HouseholdSettings:
+      type: object
+      required:
+        - retentionDays
+        - storageQuotaGb
+      properties:
+        retentionDays:
+          type: integer
+          minimum: 1
+          maximum: 90
+        storageQuotaGb:
+          type: integer
+          minimum: 1
+          maximum: 100000
+    NotificationPreferences:
+      type: object
+      required:
+        - inAppAlerts
+        - soundAlerts
+        - telegramAlerts
+      properties:
+        inAppAlerts: *a1
+        soundAlerts: *a1
+        telegramAlerts: *a1
+    HouseholdSnapshot:
+      type: object
+      required:
+        - ownerId
+        - members
+        - cameras
+        - contacts
+        - settings
+        - storage
+        - authProvider
+      properties:
+        ownerId: *a2
+        members:
+          type: array
+          items:
+            $ref: "#/components/schemas/HouseholdMember"
+        cameras:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - name
+              - isEnabled
+              - recordingEnabled
+            properties:
+              id: *a2
+              name: *a3
+              isEnabled: *a1
+              recordingEnabled: *a1
+        contacts:
+          type: array
+          items:
+            $ref: "#/components/schemas/HouseholdContact"
+        settings:
+          $ref: "#/components/schemas/HouseholdSettings"
+        storage:
+          type: object
+          required:
+            - alertMediaBytes
+          properties:
+            alertMediaBytes: *a3
+        authProvider:
+          type: string
+          enum:
+            - jwt
+            - cognito
+    AccountSettings:
+      type: object
+      required:
+        - id
+        - email
+        - fullName
+        - phone
+        - role
+        - telegramLinked
+        - inAppAlerts
+        - soundAlerts
+        - telegramAlerts
+        - authProvider
+      properties:
+        id: *a2
+        email: *a3
+        fullName: *a3
+        phone:
+          type:
+            - string
+            - "null"
+        role:
+          type: string
+          enum:
+            - ADMIN
+            - CAREGIVER
+            - VIEWER
+        telegramLinked: *a1
+        inAppAlerts: *a1
+        soundAlerts: *a1
+        telegramAlerts: *a1
+        authProvider:
+          type: string
+          enum:
+            - jwt
+            - cognito
+    AccountProfileRequest:
+      type: object
+      required:
+        - fullName
+      properties:
+        fullName:
+          type: string
+          minLength: 1
+          maxLength: 120
+        phone:
+          type: string
+          pattern: ^\+[1-9][0-9]{7,14}$
+    ChangeAccountPasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          minLength: 1
+          maxLength: 128
+        newPassword:
+          type: string
+          minLength: 10
+          maxLength: 128
+    UpdateKnownFaceRequest:
+      type: object
+      required:
+        - personName
+      properties:
+        personName:
+          type: string
+          minLength: 1
+          maxLength: 120
+        relationship:
+          type: string
+          maxLength: 60
+        linkedUserId:
+          type:
+            - string
+            - "null"
+          format: uuid
     PlaybackBox:
       type: object
       required: [label, x, y, width, height, confidence]
@@ -2361,7 +3178,8 @@ components:
         cognitoEmail:
           type: ["string", "null"]
           format: email
-          description: Email dang nhap Cognito da luu khi lien ket, chi co trong danh sach cua ADMIN.
+          description: Email dang nhap Cognito da luu khi lien ket, chi co trong danh sach
+            cua ADMIN.
         lastLoginAt: { type: ["string", "null"], format: date-time }
         createdAt: { type: string, format: date-time }
 
@@ -2534,7 +3352,8 @@ components:
             capturedAt: { type: string, format: date-time }
     CameraSourceSettings:
       type: object
-      description: ADMIN input only. VIDEO_FILE uses an uploaded object ID, never a server path or shell command.
+      description: ADMIN input only. VIDEO_FILE uses an uploaded object ID, never a
+        server path or shell command.
       required: [sourceType]
       properties:
         sourceType: { $ref: "#/components/schemas/CameraSourceType" }
@@ -2691,7 +3510,9 @@ components:
         serverTime: { type: number, description: "Server Unix time in milliseconds" }
         detectionFrames:
           type: array
-          description: "Recent per-frame tracking samples, ordered by frameTime. Empty when the Frigate metadata bridge is unavailable; MQTT events are not frame samples."
+          description: "Recent per-frame tracking samples, ordered by frameTime. Empty
+            when the Frigate metadata bridge is unavailable; MQTT events are not
+            frame samples."
           items:
             type: object
             required: [frameTime, detections]
@@ -2789,7 +3610,8 @@ components:
         activeFrom:
           type: ["string", "null"]
           pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
-          description: Hai dau cung null la ca ngay; khoang [activeFrom, activeTo) co the qua nua dem.
+          description: Hai dau cung null la ca ngay; khoang [activeFrom, activeTo) co the
+            qua nua dem.
         activeTo:
           type: ["string", "null"]
           pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
@@ -2923,12 +3745,17 @@ components:
         detectedAt:
           type: string
           format: date-time
+        escalationDeadlineAt:
+          type: [string, "null"]
+          format: date-time
+          description: Han phan hoi ban dau cua su kien P0.
         wellnessResidentUserId:
           type:
             - string
             - "null"
           format: uuid
-          description: Present for M5 only; authorization uses assigned resident/household rather than camera.
+          description: Present for M5 only; authorization uses assigned resident/household
+            rather than camera.
         wellnessResidentName:
           type:
             - string
@@ -3070,7 +3897,8 @@ components:
         totalEvents: { type: integer }
         personDetectedCount:
           type: integer
-          description: So su kien co nguoi (PERSON_DETECTED, UNKNOWN_PERSON, RESTRICTED_ZONE) — US-03.
+          description: So su kien co nguoi (PERSON_DETECTED, UNKNOWN_PERSON,
+            RESTRICTED_ZONE) — US-03.
         pendingCount:
           type: integer
           description: DETECTED / NOTIFIED / ESCALATED — con cho nguoi dung xu ly.
@@ -3085,7 +3913,8 @@ components:
         latestEventAt: { type: ["string", "null"], format: date-time }
         latestPendingEvent:
           type: ["object", "null"]
-          description: Su kien chua xu ly gan nhat, dung cho dong mo ta the "Can chu y ngay".
+          description: Su kien chua xu ly gan nhat, dung cho dong mo ta the "Can chu y
+            ngay".
           properties:
             id: { type: string, format: uuid }
             eventType: { $ref: "#/components/schemas/EventType" }
@@ -3113,12 +3942,16 @@ components:
     ConfirmEventRequest:
       type: object
       required: [response]
-      description: Actor and timestamp come from authenticated server context. IM_OK/NEED_HELP only in NOTIFIED; ACKNOWLEDGED only in ESCALATED by an authorized emergency handler. Confirmation phases are independent.
+      description: Actor and timestamp come from authenticated server context.
+        IM_OK/NEED_HELP only in NOTIFIED; ACKNOWLEDGED only in ESCALATED by an
+        authorized emergency handler. Confirmation phases are independent.
       properties:
         commandId:
           type: string
           format: uuid
-          description: Stable per action/retry. Identical replay returns original confirmation; changed payload conflicts. Legacy requests without this field still use first-confirmation protection.
+          description: Stable per action/retry. Identical replay returns original
+            confirmation; changed payload conflicts. Legacy requests without
+            this field still use first-confirmation protection.
         response: { $ref: "#/components/schemas/ConfirmationResponse" }
         note: { type: string, maxLength: 500 }
 
@@ -3145,7 +3978,8 @@ components:
         respondedAt: { type: string, format: date-time }
         resultingStatus:
           $ref: "#/components/schemas/EventStatus"
-          description: IM_OK -> RESOLVED, NEED_HELP -> ESCALATED, ACKNOWLEDGED -> CLOSED (FR-ESC-03/04).
+          description: IM_OK -> RESOLVED, NEED_HELP -> ESCALATED, ACKNOWLEDGED -> CLOSED
+            (FR-ESC-03/04).
 
     ConfirmationConflict:
       allOf:
@@ -3197,12 +4031,14 @@ components:
           type: integer
           minimum: 0
           readOnly: true
-          description: Thời gian hiệu lực nhánh tin cậy cao; dùng highWaitSeconds đã lưu, không tự chia đôi.
+          description: Thời gian hiệu lực nhánh tin cậy cao; dùng highWaitSeconds đã lưu,
+            không tự chia đôi.
         highWaitSeconds:
           type: ["integer", "null"]
           minimum: 0
           maximum: 3599
-          description: Thời gian nhập tay cho confidence >= T_high, phải nhỏ hơn tWaitSeconds. Null với rule không dùng nhánh này.
+          description: Thời gian nhập tay cho confidence >= T_high, phải nhỏ hơn
+            tWaitSeconds. Null với rule không dùng nhánh này.
         eventType: { $ref: "#/components/schemas/EventType" }
         priority: { $ref: "#/components/schemas/PriorityLevel" }
         tLow:
@@ -3250,9 +4086,14 @@ components:
           type: ["integer", "null"]
           minimum: 0
           maximum: 3599
-          description: Nhập tay, phải nhỏ hơn tWaitSeconds; bỏ trường này để giữ giá trị đang lưu. Null với FIRE/WELLNESS không dùng nhánh chia theo confidence.
+          description: Nhập tay, phải nhỏ hơn tWaitSeconds; bỏ trường này để giữ giá trị
+            đang lưu. Null với FIRE/WELLNESS không dùng nhánh chia theo
+            confidence.
         expectedVersion: { type: integer, minimum: 1 }
-      description: tLow <= tHigh; WELLNESS_TIMEOUT requires both null. Other alert types require both numbers. highWaitSeconds is a non-negative integer less than tWaitSeconds when applicable. Updates only future evaluations; existing deadlines are not reset.
+      description: tLow <= tHigh; WELLNESS_TIMEOUT requires both null. Other alert
+        types require both numbers. highWaitSeconds is a non-negative integer
+        less than tWaitSeconds when applicable. Updates only future evaluations;
+        existing deadlines are not reset.
 
     UpdateEscalationRuleRequest:
       type: object
@@ -3324,7 +4165,8 @@ components:
           minimum: 60
           maximum: 3600
           default: 300
-          description: Resident response window; default five minutes, explicitly configurable. Snapshot per occurrence.
+          description: Resident response window; default five minutes, explicitly
+            configurable. Snapshot per occurrence.
         cameraIds:
           type: array
           uniqueItems: true
@@ -3333,13 +4175,15 @@ components:
             type: string
             format: uuid
           default: []
-          description: Enabled household cameras only; empty means all enabled cameras of this household.
+          description: Enabled household cameras only; empty means all enabled cameras of
+            this household.
         timezone:
           type: string
           minLength: 1
           maxLength: 128
           default: Asia/Ho_Chi_Minh
-          description: IANA name validated against PostgreSQL pg_timezone_names. UTC timestamps are used on the wire.
+          description: IANA name validated against PostgreSQL pg_timezone_names. UTC
+            timestamps are used on the wire.
         isEnabled:
           type: boolean
           default: true
@@ -3364,7 +4208,9 @@ components:
             - READY
             - INVALID_CONFIG
           readOnly: true
-      description: US-20 schedule. ownerUserId/version/configurationStatus are additive; legacy schedules with ambiguous household ownership require explicit repair before admission.
+      description: US-20 schedule. ownerUserId/version/configurationStatus are
+        additive; legacy schedules with ambiguous household ownership require
+        explicit repair before admission.
 
     CreateWellnessScheduleRequest:
       type: object
@@ -3410,7 +4256,8 @@ components:
           minimum: 60
           maximum: 3600
           default: 300
-          description: Resident response window; default five minutes, explicitly configurable. Snapshot per occurrence.
+          description: Resident response window; default five minutes, explicitly
+            configurable. Snapshot per occurrence.
         cameraIds:
           type: array
           uniqueItems: true
@@ -3419,13 +4266,15 @@ components:
             type: string
             format: uuid
           default: []
-          description: Enabled household cameras only; empty means all enabled cameras of this household.
+          description: Enabled household cameras only; empty means all enabled cameras of
+            this household.
         timezone:
           type: string
           minLength: 1
           maxLength: 128
           default: Asia/Ho_Chi_Minh
-          description: IANA name validated against PostgreSQL pg_timezone_names. UTC timestamps are used on the wire.
+          description: IANA name validated against PostgreSQL pg_timezone_names. UTC
+            timestamps are used on the wire.
         isEnabled:
           type: boolean
           default: true
@@ -3480,7 +4329,9 @@ components:
         counters:
           type: object
           additionalProperties: { type: integer, minimum: 0 }
-          description: Process-lifetime receivedFrames, invalidFrames, staleFrames, queueDroppedFrames, capacityDroppedFrames, processedFrames and processingErrors.
+          description: Process-lifetime receivedFrames, invalidFrames, staleFrames,
+            queueDroppedFrames, capacityDroppedFrames, processedFrames and
+            processingErrors.
         cameras:
           type: array
           items: { $ref: "#/components/schemas/FireCameraHealth" }
@@ -3573,7 +4424,10 @@ components:
         metadata:
           type: object
           additionalProperties: true
-          description: For confirmed M2A_FALL results, new producers validate the documented FallResultMetadata before submission. Kept generic for compatibility with existing modules; no overlapping oneOf branch is introduced.
+          description: For confirmed M2A_FALL results, new producers validate the
+            documented FallResultMetadata before submission. Kept generic for
+            compatibility with existing modules; no overlapping oneOf branch is
+            introduced.
 
     FallResultMetadata:
       type: object
@@ -3623,46 +4477,66 @@ components:
         episodeId:
           type: string
           format: uuid
-          description: Stable UUIDv5 from /pose/fall; namespace 6ba7b811-9dad-11d1-80b4-00c04fd430c8 (URL), name is compact UTF-8 JSON [cameraSlug, sourceSessionId, trackId, candidateStartedAt] with timestamp in UTC YYYY-MM-DDTHH:mm:ss.SSSZ. Never regenerate identity on retry.
+          description: Stable UUIDv5 from /pose/fall; namespace
+            6ba7b811-9dad-11d1-80b4-00c04fd430c8 (URL), name is compact UTF-8
+            JSON [cameraSlug, sourceSessionId, trackId, candidateStartedAt] with
+            timestamp in UTC YYYY-MM-DDTHH:mm:ss.SSSZ. Never regenerate identity
+            on retry.
         frameId: { type: string, minLength: 1, maxLength: 128 }
         candidateStartedAt: { type: string, format: date-time }
         confirmedAt:
           type: string
           format: date-time
-          description: UTC capture time of the first frame confirming the episode; incident detectedAt uses this time. Must not precede candidateStartedAt.
+          description: UTC capture time of the first frame confirming the episode;
+            incident detectedAt uses this time. Must not precede
+            candidateStartedAt.
         immobileSeconds:
           type: number
           minimum: 0
-          description: Validated continuously observed immobility, strictly greater than thresholdSeconds; default requires >3 seconds. Movement, missing pose or invalid gaps reset this interval.
+          description: Validated continuously observed immobility, strictly greater than
+            thresholdSeconds; default requires >3 seconds. Movement, missing
+            pose or invalid gaps reset this interval.
         thresholdSeconds: { type: integer, minimum: 1, default: 3 }
         torsoAngleDeg:
           type: number
           minimum: 0
           maximum: 90
-          description: Torso angle in degrees to horizontal, computed in full-image pixels. Must be strictly below the active threshold (default 30 degrees).
+          description: Torso angle in degrees to horizontal, computed in full-image
+            pixels. Must be strictly below the active threshold (default 30
+            degrees).
         aspectRatio:
           type: number
           exclusiveMinimum: 0
-          description: Full-image person bbox height/width; diagnostic, not an extra gate in v1.
+          description: Full-image person bbox height/width; diagnostic, not an extra gate
+            in v1.
         centerHeight:
           type: number
-          description: 1 minus torso-center y/full-image height; 2D proxy, not meters. Torso center is the mean of shoulder and hip midpoints.
+          description: 1 minus torso-center y/full-image height; 2D proxy, not meters.
+            Torso center is the mean of shoulder and hip midpoints.
         centerDropRatio:
           type: number
-          description: Center drop relative to the frozen median center/height of 10 preceding valid pose frames; positive means downward. Candidate gate uses configurable threshold, default >=0.20.
+          description: Center drop relative to the frozen median center/height of 10
+            preceding valid pose frames; positive means downward. Candidate gate
+            uses configurable threshold, default >=0.20.
         motionScore:
           type: number
           minimum: 0
-          description: Median displacement of quality-matched full-image landmark pairs divided by frozen bbox height and elapsed frame seconds, in body-heights/second. Strictly below configured motion threshold, default 0.05.
+          description: Median displacement of quality-matched full-image landmark pairs
+            divided by frozen bbox height and elapsed frame seconds, in
+            body-heights/second. Strictly below configured motion threshold,
+            default 0.05.
         inRestArea:
           type: boolean
           const: false
-          description: Revalidated by orchestrator against enabled REST_AREA polygons for this camera using bbox center, including polygon boundary. Config/lookup errors cannot be treated as outside.
+          description: Revalidated by orchestrator against enabled REST_AREA polygons for
+            this camera using bbox center, including polygon boundary.
+            Config/lookup errors cannot be treated as outside.
         zoneConfigVersion: { type: integer, minimum: 0 }
         confidencePolicyVersion:
           type: string
           const: fall-rule-evidence-v1
-          description: Complete confirmed rule evidence yields confidence=1; this is not a calibrated probability or a MediaPipe/Frigate detection score.
+          description: Complete confirmed rule evidence yields confidence=1; this is not a
+            calibrated probability or a MediaPipe/Frigate detection score.
 
     ResultIdentity:
       type: object
@@ -3686,7 +4560,9 @@ components:
         module: { type: string }
         modelVersion: { type: string, minLength: 1 }
         processedAt: { type: string, format: date-time }
-      description: eventId must match path. Same resultId and payload is replay-safe; changed payload is IDEMPOTENCY_CONFLICT. Persist before 202. Older revisions cannot replace newer results.
+      description: eventId must match path. Same resultId and payload is replay-safe;
+        changed payload is IDEMPOTENCY_CONFLICT. Persist before 202. Older
+        revisions cannot replace newer results.
 
     FaceResultMetadata:
       type: object
@@ -3710,7 +4586,10 @@ components:
             - $ref: "#/components/schemas/NormalizedBox"
             - type: "null"
         metadata: { $ref: "#/components/schemas/FaceResultMetadata" }
-      description: KNOWN confidence=similarity; UNKNOWN=1-similarity; loaded empty collection uses similarity=null and confidence=1 with empty-collection-v1. UNDETERMINED has null confidence/similarity and a qualityReason. Scores are not calibrated probabilities.
+      description: KNOWN confidence=similarity; UNKNOWN=1-similarity; loaded empty
+        collection uses similarity=null and confidence=1 with
+        empty-collection-v1. UNDETERMINED has null confidence/similarity and a
+        qualityReason. Scores are not calibrated probabilities.
 
     NormalizedBox:
       type: object
@@ -3751,7 +4630,10 @@ components:
                 results: { maxItems: 0 }
                 matchedKnownFaceId: { type: "null" }
                 error: { $ref: "#/components/schemas/ResultError" }
-      description: Successful label equals personStatus. KNOWN requires matchedKnownFaceId; other labels require null. Technical errors omit personStatus; AI_FAILED is event state, never a person label. Server verifies owner/model/collection and resolves name.
+      description: Successful label equals personStatus. KNOWN requires
+        matchedKnownFaceId; other labels require null. Technical errors omit
+        personStatus; AI_FAILED is event state, never a person label. Server
+        verifies owner/model/collection and resolves name.
 
     ResultError:
       type: object
@@ -3789,7 +4671,9 @@ components:
         dwellEvidence:
           type: string
           const: FRIGATE_CURRENT_ZONE_LOITERING
-          description: Frigate confirmed current_zones after configured loitering_time. Exact zone entry time and dwell duration are unavailable and must remain null.
+          description: Frigate confirmed current_zones after configured loitering_time.
+            Exact zone entry time and dwell duration are unavailable and must
+            remain null.
         minDwellSeconds: { type: integer, minimum: 0, maximum: 300 }
         scheduleActive: { type: boolean, const: true }
         zoneConfigVersion: { type: integer, minimum: 1 }
@@ -3828,7 +4712,11 @@ components:
                       - $ref: "#/components/schemas/NormalizedBox"
                       - type: "null"
                   metadata: { $ref: "#/components/schemas/ZoneResultMetadata" }
-      description: Only submit enabled RESTRICTED zones with proven dwell and active schedule. Score comes from the matching Frigate person observation, never fabricated as 1. Missing score is diagnostic, not a risk result. Deduplicate event/zone/track; modelVersion identifies detector and metadata identifies config.
+      description: Only submit enabled RESTRICTED zones with proven dwell and active
+        schedule. Score comes from the matching Frigate person observation,
+        never fabricated as 1. Missing score is diagnostic, not a risk result.
+        Deduplicate event/zone/track; modelVersion identifies detector and
+        metadata identifies config.
 
     UpdateWellnessScheduleRequest:
       type: object
@@ -3862,7 +4750,8 @@ components:
           type: integer
           minimum: 60
           maximum: 3600
-          description: Resident response window; default five minutes, explicitly configurable. Snapshot per occurrence.
+          description: Resident response window; default five minutes, explicitly
+            configurable. Snapshot per occurrence.
         cameraIds:
           type: array
           uniqueItems: true
@@ -3870,12 +4759,14 @@ components:
           items:
             type: string
             format: uuid
-          description: Enabled household cameras only; empty means all enabled cameras of this household.
+          description: Enabled household cameras only; empty means all enabled cameras of
+            this household.
         timezone:
           type: string
           minLength: 1
           maxLength: 128
-          description: IANA name validated against PostgreSQL pg_timezone_names. UTC timestamps are used on the wire.
+          description: IANA name validated against PostgreSQL pg_timezone_names. UTC
+            timestamps are used on the wire.
         isEnabled:
           type: boolean
 
@@ -4016,7 +4907,13 @@ components:
         - trackId
         - kind
         - observedAt
-      description: Trusted M1 integration only. Validate registered resident/household, scoped camera/session/track, identity event and motion/directional evidence. MOTION requires a verified moving identified track; a face match alone is insufficient. ARRIVAL/DEPARTURE require directionalEvidence from an explicitly configured household boundary. Reject future/stale observations under configured limits. New source IDs are not client JWT identities.
+      description: Trusted M1 integration only. Validate registered
+        resident/household, scoped camera/session/track, identity event and
+        motion/directional evidence. MOTION requires a verified moving
+        identified track; a face match alone is insufficient. ARRIVAL/DEPARTURE
+        require directionalEvidence from an explicitly configured household
+        boundary. Reject future/stale observations under configured limits. New
+        source IDs are not client JWT identities.
       properties:
         observationId:
           type: string
@@ -4122,12 +5019,18 @@ components:
             - DUPLICATE
         presenceUpdated:
           type: boolean
-          description: False for duplicate or out-of-order observations. Such evidence cannot overwrite newer presence.
+          description: False for duplicate or out-of-order observations. Such evidence
+            cannot overwrite newer presence.
 
     FireResultMetadata:
       type: object
       additionalProperties: false
-      description: US-18 documentation-only evidence schema for new M3_FIRE producers. OtherAiResultItem.metadata stays generic. Validate aligned unique frame IDs/timestamps, ordered span <= windowSeconds, every gap <= maxFrameGapSeconds, scores >= thresholdUsed and incident score fire-only-temporal-min-v1 before submission. No raw image, credentials or RTSP URL.
+      description: US-18 documentation-only evidence schema for new M3_FIRE producers.
+        OtherAiResultItem.metadata stays generic. Validate aligned unique frame
+        IDs/timestamps, ordered span <= windowSeconds, every gap <=
+        maxFrameGapSeconds, scores >= thresholdUsed and incident score
+        fire-only-temporal-min-v1 before submission. No raw image, credentials
+        or RTSP URL.
       required:
         - cameraId
         - sourceSessionId

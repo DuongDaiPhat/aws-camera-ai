@@ -509,8 +509,8 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
   });
 
   describe('updateCameraState', () => {
-    it('chan quyen neu role khong phai ADMIN', async () => {
-      await expect(service.updateCameraState(mockCamera.id, false, 'CAREGIVER')).rejects.toThrow(
+    it('chan quyen ghi doi voi VIEWER', async () => {
+      await expect(service.updateCameraState(mockCamera.id, false, 'VIEWER')).rejects.toThrow(
         ForbiddenException,
       );
     });

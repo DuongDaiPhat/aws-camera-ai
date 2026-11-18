@@ -61,7 +61,7 @@ export function ZonesView({ user }: { user: CurrentUser | null }) {
   const [deleteTarget, setDeleteTarget] = useState<Zone | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const snapshot = useCameraSnapshot(cameraId, draft !== null);
-  const isAdmin = user?.role === 'ADMIN';
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'CAREGIVER';
 
   const selectedZone = useMemo(
     () => zonesState.zones.find((zone) => zone.id === selectedZoneId) ?? null,

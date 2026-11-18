@@ -7,9 +7,15 @@ import styles from './settings-view.module.css';
 
 interface EscalationRulesSectionProps {
   isAdmin: boolean;
+  household?: boolean;
+  compact?: boolean;
 }
 
-export function EscalationRulesSection({ isAdmin }: EscalationRulesSectionProps) {
+export function EscalationRulesSection({
+  isAdmin,
+  household = false,
+  compact = true,
+}: EscalationRulesSectionProps) {
   const {
     rules,
     drafts,
@@ -23,7 +29,7 @@ export function EscalationRulesSection({ isAdmin }: EscalationRulesSectionProps)
     savingMap,
     errorMap,
     successMap,
-  } = useEscalationRules();
+  } = useEscalationRules(household);
 
   if (isLoading) {
     return (
@@ -57,7 +63,7 @@ export function EscalationRulesSection({ isAdmin }: EscalationRulesSectionProps)
   }
 
   return (
-    <div className={styles.settingsContainer}>
+    <div className={`${styles.settingsContainer} ${compact ? styles.compactSettings : ''}`}>
       <details className={styles.policyGuideBox}>
         <summary className={styles.policyGuideTitle}>Hệ thống xử lý cảnh báo như thế nào?</summary>
         <ul className={styles.policyGuideList}>
@@ -102,6 +108,7 @@ export function EscalationRulesSection({ isAdmin }: EscalationRulesSectionProps)
           return (
             <EscalationRuleCard
               key={rule.eventType}
+              compact={compact}
               rule={rule}
               draft={draft}
               isDirty={isDirty(rule.eventType)}
