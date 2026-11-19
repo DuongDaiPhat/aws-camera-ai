@@ -120,6 +120,22 @@ export class UpdateSystemSettingsDto {
   maxUploadMb?: number;
 }
 
+export class GetServicesQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(2_147_483_647)
+  incidentPage = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  incidentPageSize = 5;
+}
+
 export class ListAuditLogsQueryDto {
   @IsOptional()
   @Type(() => Number)
@@ -133,7 +149,7 @@ export class ListAuditLogsQueryDto {
   @IsInt()
   @Min(1)
   @Max(100)
-  pageSize = 20;
+  pageSize = 5;
 
   @IsOptional()
   @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value))

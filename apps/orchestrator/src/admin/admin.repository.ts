@@ -55,6 +55,14 @@ export interface SystemSettingsRow {
   updatedAt: string;
 }
 
+export interface AdminOverviewTrendPoint {
+  date: string;
+  storageAddedBytes: number;
+  errorsCount: number;
+  notificationTotal: number;
+  notificationSuccessRate: number;
+}
+
 export interface ServiceChannelMetric {
   channel: string;
   sent24h: number;
@@ -164,6 +172,79 @@ export class AdminRepository {
       aiErrors24h: err?.ai_errors ?? 0,
       notificationErrors24h: err?.notification_errors ?? 0,
     };
+  }
+
+  async getOverviewTrends(days = 7): Promise<AdminOverviewTrendPoint[]> {
+    const res = await this.db.query<{
+      day: Date;
+      storage_added_bytes: string;
+      errors_count: number;
+      notification_total: number;
+      notification_sent: number;
+    }>(
+      `
+      WITH days AS (
+        SELECT generate_series(
+          (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date - ($1::int - 1),
+          (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date,
+          interval '1 day'
+        )::date AS day
+      ),
+      media_daily AS (
+        SELECT
+          (created_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date AS day,
+          COALESCE(SUM(size_bytes), 0) AS bytes
+        FROM event_media
+        WHERE created_at >= now() - ($1::int || ' days')::interval
+        GROUP BY 1
+      ),
+      ai_err_daily AS (
+        SELECT
+          (created_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date AS day,
+          COUNT(*)::int AS cnt
+        FROM events
+        WHERE status = 'AI_FAILED'
+          AND created_at >= now() - ($1::int || ' days')::interval
+        GROUP BY 1
+      ),
+      notif_daily AS (
+        SELECT
+          (created_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date AS day,
+          COUNT(*)::int AS total,
+          COUNT(*) FILTER (WHERE status IN ('SENT', 'CONFIRMED'))::int AS sent,
+          COUNT(*) FILTER (WHERE status = 'FAILED')::int AS failed
+        FROM notifications
+        WHERE created_at >= now() - ($1::int || ' days')::interval
+        GROUP BY 1
+      )
+      SELECT
+        d.day,
+        COALESCE(m.bytes, 0)::text AS storage_added_bytes,
+        (COALESCE(a.cnt, 0) + COALESCE(n.failed, 0))::int AS errors_count,
+        COALESCE(n.total, 0)::int AS notification_total,
+        COALESCE(n.sent, 0)::int AS notification_sent
+      FROM days d
+      LEFT JOIN media_daily m ON m.day = d.day
+      LEFT JOIN ai_err_daily a ON a.day = d.day
+      LEFT JOIN notif_daily n ON n.day = d.day
+      ORDER BY d.day ASC
+      `,
+      [days],
+    );
+
+    return res.rows.map((row) => {
+      const rate =
+        row.notification_total > 0
+          ? Math.round((row.notification_sent / row.notification_total) * 100)
+          : 100;
+      return {
+        date: row.day.toISOString().slice(0, 10),
+        storageAddedBytes: Number(row.storage_added_bytes ?? 0),
+        errorsCount: row.errors_count,
+        notificationTotal: row.notification_total,
+        notificationSuccessRate: rate,
+      };
+    });
   }
 
   async listHouseholds(): Promise<HouseholdAdminRow[]> {
@@ -366,12 +447,46 @@ export class AdminRepository {
     });
   }
 
-  async getServiceDiagnostics(): Promise<{
+  async getServiceDiagnostics(
+    incidentPage = 1,
+    incidentPageSize = 5,
+  ): Promise<{
     frigateSync: { pending: number; synced: number; failed: number };
     notificationChannels: ServiceChannelMetric[];
-    incidents: TechnicalIncidentItem[];
+    incidents: {
+      items: TechnicalIncidentItem[];
+      total: number;
+      page: number;
+      pageSize: number;
+    };
   }> {
-    const [frigateRes, notifRes, incidentsRes] = await Promise.all([
+    const offset = (incidentPage - 1) * incidentPageSize;
+    const incidentsCte = `
+      WITH all_incidents AS (
+        SELECT id::text, 'RECORDING'::text AS subsystem,
+               COALESCE(last_error_code, 'FRIGATE_SYNC_FAILED') AS code,
+               'Lỗi đồng bộ cấu hình ghi hình Frigate' AS summary,
+               updated_at AS occurred_at
+        FROM frigate_config_sync_jobs
+        WHERE status = 'FAILED'
+        UNION ALL
+        SELECT id::text, 'AI'::text AS subsystem,
+               'AI_PROCESSING_FAILED' AS code,
+               'Lỗi xử lý suy luận AI trên sự kiện' AS summary,
+               created_at AS occurred_at
+        FROM events
+        WHERE status = 'AI_FAILED'
+        UNION ALL
+        SELECT id::text, 'NOTIFICATION'::text AS subsystem,
+               COALESCE(error_code, 'DELIVERY_FAILED') AS code,
+               'Lỗi gửi thông báo qua kênh ' || channel::text AS summary,
+               COALESCE(failed_at, updated_at) AS occurred_at
+        FROM notifications
+        WHERE status = 'FAILED'
+      )
+    `;
+
+    const [frigateRes, notifRes, incidentsCountRes, incidentsRes] = await Promise.all([
       this.db.query<{
         pending: number;
         synced: number;
@@ -399,36 +514,23 @@ export class AdminRepository {
         GROUP BY channel
         ORDER BY channel
       `),
+      this.db.query<{ total: number }>(
+        `${incidentsCte} SELECT COUNT(*)::int AS total FROM all_incidents`,
+      ),
       this.db.query<{
         id: string;
         subsystem: 'RECORDING' | 'AI' | 'NOTIFICATION';
         code: string;
         summary: string;
         occurred_at: Date;
-      }>(`
-        SELECT id::text, 'RECORDING'::text AS subsystem,
-               COALESCE(last_error_code, 'FRIGATE_SYNC_FAILED') AS code,
-               'Lỗi đồng bộ cấu hình ghi hình Frigate' AS summary,
-               updated_at AS occurred_at
-        FROM frigate_config_sync_jobs
-        WHERE status = 'FAILED'
-        UNION ALL
-        SELECT id::text, 'AI'::text AS subsystem,
-               'AI_PROCESSING_FAILED' AS code,
-               'Lỗi xử lý suy luận AI trên sự kiện' AS summary,
-               created_at AS occurred_at
-        FROM events
-        WHERE status = 'AI_FAILED'
-        UNION ALL
-        SELECT id::text, 'NOTIFICATION'::text AS subsystem,
-               COALESCE(error_code, 'DELIVERY_FAILED') AS code,
-               'Lỗi gửi thông báo qua kênh ' || channel::text AS summary,
-               COALESCE(failed_at, updated_at) AS occurred_at
-        FROM notifications
-        WHERE status = 'FAILED'
-        ORDER BY occurred_at DESC
-        LIMIT 25
-      `),
+      }>(
+        `${incidentsCte}
+         SELECT id, subsystem, code, summary, occurred_at
+         FROM all_incidents
+         ORDER BY occurred_at DESC
+         LIMIT $1 OFFSET $2`,
+        [incidentPageSize, offset],
+      ),
     ]);
 
     const frig = frigateRes.rows[0];
@@ -444,13 +546,18 @@ export class AdminRepository {
         failed24h: r.failed_24h,
         pending24h: r.pending_24h,
       })),
-      incidents: incidentsRes.rows.map((r) => ({
-        id: r.id,
-        subsystem: r.subsystem,
-        code: r.code,
-        summary: r.summary,
-        occurredAt: r.occurred_at.toISOString(),
-      })),
+      incidents: {
+        items: incidentsRes.rows.map((r) => ({
+          id: r.id,
+          subsystem: r.subsystem,
+          code: r.code,
+          summary: r.summary,
+          occurredAt: r.occurred_at.toISOString(),
+        })),
+        total: incidentsCountRes.rows[0]?.total ?? 0,
+        page: incidentPage,
+        pageSize: incidentPageSize,
+      },
     };
   }
 

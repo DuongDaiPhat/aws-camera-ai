@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { AuthenticatedRequest } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import {
+  GetServicesQueryDto,
   ListAuditLogsQueryDto,
   UpdateHouseholdQuotaDto,
   UpdateResourceLimitsDto,
@@ -54,8 +55,8 @@ export class AdminController {
   @ApiOperation({
     summary: 'Tình trạng dịch vụ, kết nối, lỗi ghi hình/AI/thông báo (đã loại dữ liệu nhạy cảm)',
   })
-  getServicesStatus() {
-    return this.admin.getServicesStatus();
+  getServicesStatus(@Query() query: GetServicesQueryDto) {
+    return this.admin.getServicesStatus(query);
   }
 
   @Get('resources')

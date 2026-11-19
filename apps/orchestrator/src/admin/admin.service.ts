@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { readAuthSettings } from '../auth/auth.config';
 import { SmokeService } from '../health/smoke.service';
 import type {
+  GetServicesQueryDto,
   ListAuditLogsQueryDto,
   UpdateHouseholdQuotaDto,
   UpdateResourceLimitsDto,
@@ -59,8 +60,9 @@ export class AdminService {
   }
 
   async getOverview() {
-    const [counts, smoke, aiService] = await Promise.all([
+    const [counts, trends, smoke, aiService] = await Promise.all([
       this.repo.getOverviewCounts(),
+      this.repo.getOverviewTrends(7),
       this.smoke.check(),
       this.checkAiService(),
     ]);
@@ -104,6 +106,7 @@ export class AdminService {
       overallStatus: services.every((s) => s.status === 'ok') ? 'ok' : 'degraded',
       services,
       counts,
+      trends,
     };
   }
 
@@ -132,11 +135,11 @@ export class AdminService {
     return updated;
   }
 
-  async getServicesStatus() {
+  async getServicesStatus(query: GetServicesQueryDto) {
     const [smoke, aiService, diagnostics] = await Promise.all([
       this.smoke.check(),
       this.checkAiService(),
-      this.repo.getServiceDiagnostics(),
+      this.repo.getServiceDiagnostics(query.incidentPage, query.incidentPageSize),
     ]);
 
     return {
