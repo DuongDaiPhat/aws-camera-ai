@@ -1,6 +1,5 @@
 .settingsPage {
   gap: 20px;
-  max-inline-size: 68rem;
   container: household-settings / inline-size;
 }
 .settingsPage > header h2 {
