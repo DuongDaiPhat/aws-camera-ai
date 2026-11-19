@@ -128,6 +128,109 @@ export function AdminOverviewView({ onNavigate }: AdminOverviewViewProps) {
           ))}
         </div>
       </section>
+
+      <section className={styles.panel}>
+        <div className={styles.panelHeader}>
+          <div>
+            <h3 className={styles.panelTitle}>Xu hướng vận hành 7 ngày qua</h3>
+            <p className={styles.panelSubtitle}>
+              Theo dõi dung lượng lưu trữ tăng thêm, số lỗi kỹ thuật và tỉ lệ gửi thông báo thành
+              công theo ngày (không chứa hình ảnh camera).
+            </p>
+          </div>
+        </div>
+
+        <div className={styles.trendGrid}>
+          {(() => {
+            const trends = data.trends ?? [];
+            const maxMb = Math.max(
+              1,
+              ...trends.map((t) => Number((t.storageAddedBytes / (1024 * 1024)).toFixed(1))),
+            );
+            const maxErr = Math.max(1, ...trends.map((t) => t.errorsCount));
+            const formatDay = (iso: string) => iso.slice(5).split('-').reverse().join('/');
+
+            return (
+              <>
+                <div className={styles.trendCard}>
+                  <div>
+                    <h4 className={styles.trendTitle}>Dung lượng lưu trữ tăng thêm (MB/ngày)</h4>
+                    <p className={styles.trendSub}>Tổng hợp từ metadata sự kiện media</p>
+                  </div>
+                  <div className={styles.barChart}>
+                    {trends.map((t) => {
+                      const mb = Number((t.storageAddedBytes / (1024 * 1024)).toFixed(1));
+                      const pct = mb > 0 ? Math.max(8, Math.round((mb / maxMb) * 100)) : 4;
+                      return (
+                        <div key={t.date} className={styles.barCol} title={`${t.date}: ${mb} MB`}>
+                          <span className={styles.barValue}>{mb}</span>
+                          <div className={styles.barTrack}>
+                            <div className={styles.barFill} style={{ height: `${pct}%` }} />
+                          </div>
+                          <span className={styles.barLabel}>{formatDay(t.date)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className={styles.trendCard}>
+                  <div>
+                    <h4 className={styles.trendTitle}>Số lỗi kỹ thuật theo ngày</h4>
+                    <p className={styles.trendSub}>Lỗi AI &amp; lỗi gửi thông báo</p>
+                  </div>
+                  <div className={styles.barChart}>
+                    {trends.map((t) => {
+                      const pct =
+                        t.errorsCount > 0
+                          ? Math.max(10, Math.round((t.errorsCount / maxErr) * 100))
+                          : 4;
+                      return (
+                        <div
+                          key={t.date}
+                          className={styles.barCol}
+                          title={`${t.date}: ${t.errorsCount} lỗi`}
+                        >
+                          <span className={styles.barValue}>{t.errorsCount}</span>
+                          <div className={styles.barTrack}>
+                            <div className={styles.barFillDanger} style={{ height: `${pct}%` }} />
+                          </div>
+                          <span className={styles.barLabel}>{formatDay(t.date)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className={styles.trendCard}>
+                  <div>
+                    <h4 className={styles.trendTitle}>Tỉ lệ gửi thông báo thành công (%/ngày)</h4>
+                    <p className={styles.trendSub}>100% khi không có lỗi gửi trong ngày</p>
+                  </div>
+                  <div className={styles.barChart}>
+                    {trends.map((t) => (
+                      <div
+                        key={t.date}
+                        className={styles.barCol}
+                        title={`${t.date}: ${t.notificationSuccessRate}% (${t.notificationTotal} lượt)`}
+                      >
+                        <span className={styles.barValue}>{t.notificationSuccessRate}%</span>
+                        <div className={styles.barTrack}>
+                          <div
+                            className={styles.barFillSuccess}
+                            style={{ height: `${Math.max(4, t.notificationSuccessRate)}%` }}
+                          />
+                        </div>
+                        <span className={styles.barLabel}>{formatDay(t.date)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      </section>
     </div>
   );
 }

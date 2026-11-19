@@ -213,18 +213,18 @@ export function AdminResourcesView() {
                     <td>
                       <span className={styles.badgeNeutral}>{h.servicePlan}</span>
                     </td>
-                    <td>
-                      {h.cameraCount} / {h.maxCameras} camera
+                    <td className={styles.mono}>
+                      {h.cameraCount}/{h.maxCameras} cam
                     </td>
                     <td style={{ minWidth: 180 }}>
-                      <div>
+                      <div className={styles.mono}>
                         {formatBytes(h.storageUsedBytes)} / {h.storageQuotaGb} GB
                       </div>
                       <div className={styles.progressTrack}>
                         <div className={styles.progressFill} style={{ width: `${pct}%` }} />
                       </div>
                     </td>
-                    <td>{h.retentionDays} ngày</td>
+                    <td className={styles.mono}>{h.retentionDays}d</td>
                   </tr>
                 );
               })}

@@ -30,11 +30,13 @@ import {
   AdminResourcesView,
   AdminServicesView,
   AdminSettingsView,
+  AdminStatusStrip,
 } from '@/components/admin';
 import { SettingsView } from '@/components/settings';
 import { ZonesView } from '@/components/zones';
 import { WellnessView } from '@/components/wellness/WellnessView';
 import styles from './dashboard-view.module.css';
+import adminStyles from '@/components/admin/admin.module.css';
 
 const PAGE_TITLES: Record<string, string> = {
   dashboard: 'Tổng quan',
@@ -330,6 +332,7 @@ export function DashboardView() {
     return (
       <div
         className={styles.layoutWrapper}
+        data-admin="true"
         data-sidebar-expanded={sidebarExpanded}
         data-page={activeNav}
         data-login-entry={entrance.phase}
@@ -355,15 +358,22 @@ export function DashboardView() {
         )}
 
         <div className={styles.mainContent}>
-          <TopHeader
-            selectedDate={calendarDate}
-            onSelectDate={setCalendarDate}
-            isDashboard={false}
-            compact
-            userName={user.fullName || 'Quản trị viên'}
-            pendingCount={null}
-            pageTitle={adminTitle}
-          />
+          <header className={adminStyles.adminTopBar}>
+            <div className={adminStyles.adminTopBarMeta}>
+              <span className={adminStyles.adminRoleTag}>System Admin Console</span>
+              <h1 className={adminStyles.adminTopBarTitle}>{adminTitle}</h1>
+              <p className={adminStyles.adminTopBarSub}>
+                Khu vực vận hành &amp; quản trị hạ tầng CameraAI — tách biệt khỏi dữ liệu hộ gia
+                đình.
+              </p>
+            </div>
+            <div className={adminStyles.adminTopBarUser}>
+              <span>{user.fullName || 'Quản trị viên'}</span>
+              <span className={adminStyles.badgeOk}>ADMIN</span>
+            </div>
+          </header>
+
+          <AdminStatusStrip />
 
           <main key={activeNav} className={styles.workspace}>
             {activeNav === 'admin-accounts' ? (

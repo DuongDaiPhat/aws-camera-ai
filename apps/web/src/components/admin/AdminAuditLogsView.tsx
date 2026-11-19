@@ -10,7 +10,7 @@ export function AdminAuditLogsView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(5);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [actionFilter, setActionFilter] = useState('');
@@ -116,7 +116,9 @@ export function AdminAuditLogsView() {
                 <tbody>
                   {data.items.map((log) => (
                     <tr key={log.id}>
-                      <td>{new Date(log.createdAt).toLocaleString('vi-VN')}</td>
+                      <td className={styles.mono}>
+                        {new Date(log.createdAt).toLocaleString('vi-VN')}
+                      </td>
                       <td>
                         <div className={styles.cellStack}>
                           <span className={styles.cellPrimary}>

@@ -154,6 +154,11 @@
   box-shadow: 0 5px 18px #ad80ef1a;
   z-index: -1;
 }
+:global([data-role='ADMIN']) .vertical .pill {
+  background: linear-gradient(110deg, #38bdf8, #7dd3fc);
+  border: 1px solid #bae6fd;
+  box-shadow: 0 5px 18px rgba(56, 189, 248, 0.22);
+}
 .vertical .button {
   justify-content: flex-start;
   min-height: 46px;

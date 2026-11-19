@@ -220,8 +220,8 @@ export function AdminAccountsView({ currentUserId }: AdminAccountsViewProps) {
                         ) : (
                           <div className={styles.cellStack}>
                             <span>{item.memberCount} thành viên</span>
-                            <span className={styles.cellSecondary}>
-                              {item.cameraCount} / {item.maxCameras} camera
+                            <span className={`${styles.cellSecondary} ${styles.mono}`}>
+                              {item.cameraCount}/{item.maxCameras} cam
                             </span>
                           </div>
                         )}
@@ -260,11 +260,11 @@ export function AdminAccountsView({ currentUserId }: AdminAccountsViewProps) {
                           </div>
                         ) : (
                           <div className={styles.cellStack}>
-                            <span>
+                            <span className={styles.mono}>
                               {formatBytes(item.storageUsedBytes)} / {item.storageQuotaGb} GB
                             </span>
-                            <span className={styles.cellSecondary}>
-                              Lưu trữ {item.retentionDays} ngày
+                            <span className={`${styles.cellSecondary} ${styles.mono}`}>
+                              TTL {item.retentionDays}d
                             </span>
                           </div>
                         )}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { ErrorState } from '@/components/ui';
+import { ErrorState, Pagination } from '@/components/ui';
 import { fetchAdminServices, type AdminServicesData } from '@/lib/admin-client';
 import styles from './admin.module.css';
 
@@ -15,18 +15,20 @@ export function AdminServicesView() {
   const [data, setData] = useState<AdminServicesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [incidentPage, setIncidentPage] = useState(1);
+  const [incidentPageSize, setIncidentPageSize] = useState(5);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      setData(await fetchAdminServices());
+      setData(await fetchAdminServices({ incidentPage, incidentPageSize }));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không tải được tình trạng dịch vụ.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [incidentPage, incidentPageSize]);
 
   useEffect(() => {
     void load();
@@ -116,34 +118,60 @@ export function AdminServicesView() {
           </div>
         </div>
 
-        {data.incidents.length === 0 ? (
-          <p className={styles.cellSecondary}>Không ghi nhận sự cố kỹ thuật nào.</p>
-        ) : (
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Thời điểm</th>
-                  <th>Phân hệ</th>
-                  <th>Mã lỗi</th>
-                  <th>Mô tả kỹ thuật</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.incidents.map((item) => (
-                  <tr key={`${item.subsystem}-${item.id}`}>
-                    <td>{new Date(item.occurredAt).toLocaleString('vi-VN')}</td>
-                    <td>
-                      <span className={styles.badgeNeutral}>{SUBSYSTEM_LABEL[item.subsystem]}</span>
-                    </td>
-                    <td className={styles.mono}>{item.code}</td>
-                    <td>{item.summary}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        {(() => {
+          const incidents: AdminServicesData['incidents'] = Array.isArray(data.incidents)
+            ? { items: data.incidents, total: data.incidents.length, page: 1, pageSize: 5 }
+            : (data.incidents ?? { items: [], total: 0, page: 1, pageSize: 5 });
+
+          if (incidents.items.length === 0) {
+            return <p className={styles.cellSecondary}>Không ghi nhận sự cố kỹ thuật nào.</p>;
+          }
+
+          return (
+            <>
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Thời điểm</th>
+                      <th>Phân hệ</th>
+                      <th>Mã lỗi</th>
+                      <th>Mô tả kỹ thuật</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {incidents.items.map((item) => (
+                      <tr key={`${item.subsystem}-${item.id}`}>
+                        <td className={styles.mono}>
+                          {new Date(item.occurredAt).toLocaleString('vi-VN')}
+                        </td>
+                        <td>
+                          <span className={styles.badgeNeutral}>
+                            {SUBSYSTEM_LABEL[item.subsystem]}
+                          </span>
+                        </td>
+                        <td className={styles.mono}>{item.code}</td>
+                        <td>{item.summary}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <Pagination
+                currentPage={incidents.page}
+                totalPages={Math.max(1, Math.ceil(incidents.total / incidents.pageSize))}
+                totalItems={incidents.total}
+                pageSize={incidents.pageSize}
+                onPageChange={setIncidentPage}
+                onPageSizeChange={(size) => {
+                  setIncidentPage(1);
+                  setIncidentPageSize(size);
+                }}
+              />
+            </>
+          );
+        })()}
       </section>
     </div>
   );

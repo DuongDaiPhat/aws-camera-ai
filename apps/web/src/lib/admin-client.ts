@@ -7,6 +7,14 @@ export interface AdminServiceCheck {
   detail: string;
 }
 
+export interface AdminOverviewTrendPoint {
+  date: string;
+  storageAddedBytes: number;
+  errorsCount: number;
+  notificationTotal: number;
+  notificationSuccessRate: number;
+}
+
 export interface AdminOverviewData {
   generatedAt: string;
   overallStatus: 'ok' | 'degraded';
@@ -26,6 +34,7 @@ export interface AdminOverviewData {
     aiErrors24h: number;
     notificationErrors24h: number;
   };
+  trends: AdminOverviewTrendPoint[];
 }
 
 export interface AdminHouseholdItem {
@@ -64,13 +73,18 @@ export interface AdminServicesData {
     failed24h: number;
     pending24h: number;
   }>;
-  incidents: Array<{
-    id: string;
-    subsystem: 'RECORDING' | 'AI' | 'NOTIFICATION';
-    code: string;
-    summary: string;
-    occurredAt: string;
-  }>;
+  incidents: {
+    items: Array<{
+      id: string;
+      subsystem: 'RECORDING' | 'AI' | 'NOTIFICATION';
+      code: string;
+      summary: string;
+      occurredAt: string;
+    }>;
+    total: number;
+    page: number;
+    pageSize: number;
+  };
 }
 
 export interface AdminResourcesData {
@@ -175,8 +189,12 @@ export function updateAdminHouseholdQuota(
   });
 }
 
-export function fetchAdminServices() {
-  return apiFetch<AdminServicesData>('/admin/services');
+export function fetchAdminServices(params?: { incidentPage?: number; incidentPageSize?: number }) {
+  const qs = new URLSearchParams();
+  if (params?.incidentPage) qs.set('incidentPage', String(params.incidentPage));
+  if (params?.incidentPageSize) qs.set('incidentPageSize', String(params.incidentPageSize));
+  const query = qs.toString();
+  return apiFetch<AdminServicesData>(`/admin/services${query ? `?${query}` : ''}`);
 }
 
 export function fetchAdminResources() {

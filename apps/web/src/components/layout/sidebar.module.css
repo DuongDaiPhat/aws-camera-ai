@@ -17,6 +17,16 @@
 .sidebar[data-expanded='true'] {
   border-radius: 32px;
 }
+.sidebar[data-role='ADMIN'] {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: #1e293b;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.22);
+}
+.sidebar[data-role='ADMIN'] .avatar {
+  background: #bae6fd;
+  color: #0c4a6e;
+}
 .brand {
   position: relative;
   display: flex;
