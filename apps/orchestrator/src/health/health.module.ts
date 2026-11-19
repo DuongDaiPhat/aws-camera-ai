@@ -8,5 +8,6 @@ import { SmokeService } from './smoke.service';
 @Module({
   controllers: [HealthController, SmokeController],
   providers: [HealthService, SmokeService, InternalTokenGuard],
+  exports: [SmokeService],
 })
 export class HealthModule {}

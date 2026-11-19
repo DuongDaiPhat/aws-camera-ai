@@ -23,7 +23,14 @@ import { MetricCards } from '@/components/dashboard/MetricCards';
 import { EventCard, EventDetailModal, EventFilter } from '@/components/events';
 import { CameraView } from '@/components/cameras';
 import { EmptyState, ErrorState, Pagination } from '@/components/ui';
-import { UsersView } from '@/components/users/UsersView';
+import {
+  AdminAccountsView,
+  AdminAuditLogsView,
+  AdminOverviewView,
+  AdminResourcesView,
+  AdminServicesView,
+  AdminSettingsView,
+} from '@/components/admin';
 import { SettingsView } from '@/components/settings';
 import { ZonesView } from '@/components/zones';
 import { WellnessView } from '@/components/wellness/WellnessView';
@@ -48,6 +55,15 @@ const VIEWER_PAGE_TITLES: Record<string, string> = {
   playback: 'Xem lại',
   events: 'Thông báo của tôi',
   settings: 'Cài đặt cá nhân',
+};
+
+const ADMIN_PAGE_TITLES: Record<string, string> = {
+  dashboard: 'Tổng quan hệ thống',
+  'admin-accounts': 'Tài khoản & Hộ gia đình',
+  'admin-services': 'Tình trạng dịch vụ',
+  'admin-resources': 'Tài nguyên & Hạn mức',
+  'admin-audit': 'Nhật ký quản trị',
+  'admin-settings': 'Cài đặt hệ thống',
 };
 
 function EventsListSection({
@@ -309,6 +325,66 @@ export function DashboardView() {
     ? (events.find((event) => event.id === selectedEventForModal.id) ?? selectedEventForModal)
     : null;
 
+  if (user?.role === 'ADMIN') {
+    const adminTitle = ADMIN_PAGE_TITLES[activeNav] ?? ADMIN_PAGE_TITLES.dashboard;
+    return (
+      <div
+        className={styles.layoutWrapper}
+        data-sidebar-expanded={sidebarExpanded}
+        data-page={activeNav}
+        data-login-entry={entrance.phase}
+      >
+        <Sidebar
+          expanded={sidebarExpanded}
+          onToggle={() => setSidebarExpanded((value) => !value)}
+          user={user}
+          activeNav={activeNav}
+          onSelectNav={(nav) => {
+            navigate(nav);
+            if (window.matchMedia('(max-width: 700px)').matches) setSidebarExpanded(false);
+          }}
+          onLogout={handleLogout}
+        />
+
+        {sidebarExpanded && (
+          <button
+            className={styles.sidebarBackdrop}
+            aria-label="Đóng menu"
+            onClick={() => setSidebarExpanded(false)}
+          />
+        )}
+
+        <div className={styles.mainContent}>
+          <TopHeader
+            selectedDate={calendarDate}
+            onSelectDate={setCalendarDate}
+            isDashboard={false}
+            compact
+            userName={user.fullName || 'Quản trị viên'}
+            pendingCount={null}
+            pageTitle={adminTitle}
+          />
+
+          <main key={activeNav} className={styles.workspace}>
+            {activeNav === 'admin-accounts' ? (
+              <AdminAccountsView currentUserId={user.id} />
+            ) : activeNav === 'admin-services' ? (
+              <AdminServicesView />
+            ) : activeNav === 'admin-resources' ? (
+              <AdminResourcesView />
+            ) : activeNav === 'admin-audit' ? (
+              <AdminAuditLogsView />
+            ) : activeNav === 'admin-settings' ? (
+              <AdminSettingsView />
+            ) : (
+              <AdminOverviewView onNavigate={navigate} />
+            )}
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <CameraSignalsProvider events={events}>
       <div
@@ -407,8 +483,6 @@ export function DashboardView() {
               <WellnessView user={user} />
             ) : user?.role === 'CAREGIVER' && activeNav === 'family' ? (
               <FamilyView />
-            ) : !isViewer && activeNav === 'users' && user?.role === 'ADMIN' ? (
-              <UsersView currentUserId={user.id} />
             ) : !isViewer && activeNav === 'known-faces' ? (
               <KnownFacesView isAdmin={canManageHousehold} />
             ) : !isViewer && activeNav === 'zones' ? (

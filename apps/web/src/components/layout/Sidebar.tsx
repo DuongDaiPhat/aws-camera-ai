@@ -33,6 +33,14 @@ const viewerNavigation: SlidingTabItem[] = [
   { id: 'events', label: 'Thông báo của tôi', icon: 'bell' },
   { id: 'settings', label: 'Cài đặt cá nhân', icon: 'settings' },
 ];
+const adminNavigation: SlidingTabItem[] = [
+  { id: 'dashboard', label: 'Tổng quan hệ thống', icon: 'grid' },
+  { id: 'admin-accounts', label: 'Tài khoản & Hộ gia đình', icon: 'users' },
+  { id: 'admin-services', label: 'Tình trạng dịch vụ', icon: 'activity' },
+  { id: 'admin-resources', label: 'Tài nguyên & Hạn mức', icon: 'layers' },
+  { id: 'admin-audit', label: 'Nhật ký quản trị', icon: 'history' },
+  { id: 'admin-settings', label: 'Cài đặt hệ thống', icon: 'settings' },
+];
 const roles: Record<string, string> = {
   ADMIN: 'Quản trị viên',
   CAREGIVER: 'Chủ hộ',
@@ -67,12 +75,14 @@ export function Sidebar({
     label: 'Thành viên gia đình',
     icon: 'users',
   });
-  const baseNavigation =
-    user?.role === 'CAREGIVER'
+  const isAdmin = user?.role === 'ADMIN';
+  const baseNavigation = isAdmin
+    ? adminNavigation
+    : user?.role === 'CAREGIVER'
       ? caregiverNavigation
       : isViewer
         ? viewerNavigation
-        : navigation.filter((item) => item.id !== 'users' || user?.role === 'ADMIN');
+        : navigation.filter((item) => item.id !== 'users');
   const items = baseNavigation.map((item) => ({
     ...item,
     count:
@@ -109,7 +119,7 @@ export function Sidebar({
         </span>
         <span className={styles.reveal}>
           <strong>CameraAI</strong>
-          <small>Giám sát tại nhà</small>
+          <small>{isAdmin ? 'Quản trị hệ thống' : 'Giám sát tại nhà'}</small>
         </span>
       </button>
       <button

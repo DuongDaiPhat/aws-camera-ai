@@ -25,10 +25,20 @@ describe('Merged sidebar navigation', () => {
         onLogout={() => {}}
       />,
     );
-  it('keeps playback and exposes the incoming account page to administrators', () => {
+  it('shows dedicated system administration pages and hides camera/playback for ADMIN', () => {
     const html = render('ADMIN');
-    expect(html).toContain('Xem lại thời gian');
-    expect(html).toContain('Quản lý tài khoản');
+    for (const label of [
+      'Tổng quan hệ thống',
+      'Tài khoản &amp; Hộ gia đình',
+      'Tình trạng dịch vụ',
+      'Tài nguyên &amp; Hạn mức',
+      'Nhật ký quản trị',
+      'Cài đặt hệ thống',
+    ]) {
+      expect(html).toContain(label);
+    }
+    expect(html).not.toContain('Xem lại thời gian');
+    expect(html).not.toContain('>Camera<');
   });
   it('keeps account management hidden for CAREGIVER', () => {
     const html = render('CAREGIVER');

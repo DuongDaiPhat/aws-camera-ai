@@ -24,6 +24,7 @@ import { WellnessModule } from './wellness/wellness.module';
 import { FallDetectionModule } from './fall-detection/fall-detection.module';
 import { BullModule } from '@nestjs/bullmq';
 import { FireModule } from './fire/fire.module';
+import { AdminModule } from './admin/admin.module';
 
 /**
  * Module goc.
@@ -70,6 +71,7 @@ import { FireModule } from './fire/fire.module';
     WellnessModule,
     FallDetectionModule,
     FireModule,
+    AdminModule,
   ],
 })
 export class AppModule {}
