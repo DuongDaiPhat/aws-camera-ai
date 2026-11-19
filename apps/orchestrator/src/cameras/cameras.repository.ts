@@ -306,6 +306,8 @@ export class CamerasRepository {
         transport = COALESCE($7::camera_transport_enum, camera_sources.transport),
         webcam_device_label = CASE WHEN $8::text IS NOT NULL THEN $8::text ELSE camera_sources.webcam_device_label END,
         status = COALESCE($9::camera_source_status_enum, camera_sources.status),
+        last_error_code = CASE WHEN $9 IS NULL THEN camera_sources.last_error_code ELSE NULL END,
+        last_error_message = CASE WHEN $9 IS NULL THEN camera_sources.last_error_message ELSE NULL END,
         updated_at = now()
       RETURNING *
     `;

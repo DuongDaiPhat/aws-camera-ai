@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { isDeepStrictEqual } from 'node:util';
 import YAML from 'yaml';
 import type { CameraAggregateRecord } from '../cameras/cameras.types';
 import type { CameraFrigateSettingsRecord } from '../cameras/cameras.types';
@@ -170,6 +171,10 @@ export class FrigateConfigService {
     );
   }
 
+  hasSameConfig(rawConfig: string, expectedConfig: string): boolean {
+    return isDeepStrictEqual(this.parseConfig(rawConfig), this.parseConfig(expectedConfig));
+  }
+
   hasAppliedSettings(runningConfig: string, expectedConfig: string, cameraSlug: string): boolean {
     const running = this.parseConfig(runningConfig);
     const expected = this.parseConfig(expectedConfig);
@@ -179,6 +184,16 @@ export class FrigateConfigService {
           value && typeof value === 'object' ? (value as Record<string, unknown>)[key] : undefined,
         config,
       );
+    const expectedPath = valueAt(expected, 'ffmpeg.inputs.0.path');
+    const runningPath = valueAt(running, 'ffmpeg.inputs.0.path');
+    // The running config API masks RTSP credentials. The raw config comparison checks them.
+    if (
+      typeof expectedPath === 'string' &&
+      (typeof runningPath !== 'string' ||
+        this.maskStreamAuth(runningPath) !== this.maskStreamAuth(expectedPath))
+    )
+      return false;
+
     return [
       'enabled',
       'detect.enabled',
@@ -205,6 +220,10 @@ export class FrigateConfigService {
       }
       return actual === target;
     });
+  }
+
+  private maskStreamAuth(url: string): string {
+    return url.replace(/^(rtsps?:\/\/)[^/@]+@/i, '$1***:***@');
   }
 
   private toFrigateZone(

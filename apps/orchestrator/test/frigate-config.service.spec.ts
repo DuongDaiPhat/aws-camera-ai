@@ -201,6 +201,20 @@ describe('FrigateConfigService', () => {
     ).toThrow('YAML cấu hình Frigate không hợp lệ');
   });
 
+  it('checks the running stream input with Frigate-masked credentials', () => {
+    const expected = service.generateUpdatedConfig('cameras: {}', { camera: mockCamera });
+    const running = YAML.parse(expected);
+    const input = running.cameras[mockCamera.slug].ffmpeg.inputs[0];
+    input.path = input.path.replace(/\/\/[^/@]+@/, '//***:***@');
+    expect(service.hasAppliedSettings(JSON.stringify(running), expected, mockCamera.slug)).toBe(
+      true,
+    );
+    input.path += '/old-source';
+    expect(service.hasAppliedSettings(JSON.stringify(running), expected, mockCamera.slug)).toBe(
+      false,
+    );
+  });
+
   it('checks running detection settings even when the zone names already match', () => {
     const expected = service.generateUpdatedConfig('cameras: {}', { camera: mockCamera });
     const running = YAML.parse(expected);

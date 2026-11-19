@@ -560,6 +560,55 @@ describe('CamerasService & CameraConfigPortV1 (Slice CAM)', () => {
       expect(session.token).toBe('tok-uuid-12345');
     });
 
+    it('retries a pending webcam sync before issuing a WHIP session', async () => {
+      repository.findById.mockResolvedValueOnce({
+        ...mockCamera,
+        source_type_val: 'BROWSER_WEBCAM',
+        sync_status: 'PENDING',
+        source_error_code: 'VIDEO_NOT_FOUND',
+      });
+
+      await service.createBrowserPublishSession(mockCamera.id, 'CAREGIVER');
+
+      expect(repository.upsertSource).toHaveBeenCalledWith(mockCamera.id, { status: 'STARTING' });
+      expect(mockFrigateSyncService.syncCamera).toHaveBeenCalledWith(mockCamera.id);
+      expect(mockCameraSourcesService.createBrowserSession).toHaveBeenCalledWith(
+        mockCamera.slug,
+        mockCamera.id,
+      );
+    });
+
+    it('reports the current sync failure without issuing a WHIP session', async () => {
+      repository.findById.mockResolvedValueOnce({
+        ...mockCamera,
+        source_type_val: 'BROWSER_WEBCAM',
+        sync_status: 'FAILED',
+      });
+      mockFrigateSyncService.syncCamera.mockResolvedValueOnce({
+        success: false,
+        errorCode: 'FRIGATE_SYNC_FAILED',
+        errorMessage: 'Frigate chưa sẵn sàng.',
+      });
+
+      await expect(
+        service.createBrowserPublishSession(mockCamera.id, 'CAREGIVER'),
+      ).rejects.toMatchObject({
+        response: { error: { code: 'FRIGATE_SYNC_FAILED', message: 'Frigate chưa sẵn sàng.' } },
+      });
+      expect(mockCameraSourcesService.createBrowserSession).not.toHaveBeenCalled();
+    });
+
+    it('does not show the previous video file error on a webcam', async () => {
+      repository.findById.mockResolvedValueOnce({
+        ...mockCamera,
+        source_type_val: 'BROWSER_WEBCAM',
+        source_error_code: 'VIDEO_NOT_FOUND',
+        source_error_msg: 'Missing old video',
+      });
+      const result = await service.getCameraRuntimeStatus(mockCamera.id);
+      expect(result.details).toMatchObject({ errorCode: null, errorMessage: null });
+    });
+
     it('khong cap phien WHIP khi camera chua chon webcam hoac dang tat', async () => {
       repository.findById.mockResolvedValueOnce(mockCamera);
       await expect(

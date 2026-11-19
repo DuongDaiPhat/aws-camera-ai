@@ -73,6 +73,7 @@ describe('publishWebcam', () => {
     await publishWebcam('camera-id', stream);
 
     expect(calls).toEqual(['source', 'state', 'session', 'whip']);
+    expect(fetchCamera).toHaveBeenCalledTimes(1);
     expect(updateCameraSource).toHaveBeenCalledWith('camera-id', {
       sourceType: 'BROWSER_WEBCAM',
       videoLoop: true,
@@ -93,16 +94,21 @@ describe('publishWebcam', () => {
     vi.mocked(updateCameraSource).mockResolvedValue(
       {} as Awaited<ReturnType<typeof updateCameraSource>>,
     );
-    vi.mocked(updateCameraState).mockResolvedValue({
-      frigateSync: { status: 'FAILED', errorMessage: 'Frigate unavailable' },
-    } as Awaited<ReturnType<typeof updateCameraState>>);
+    vi.mocked(fetchCamera).mockResolvedValue({
+      sourceType: 'BROWSER_WEBCAM',
+      isEnabled: true,
+      frigateSync: { status: 'FAILED' },
+    } as Awaited<ReturnType<typeof fetchCamera>>);
+    vi.mocked(createBrowserPublishSession).mockRejectedValue(new Error('Frigate unavailable'));
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(publishWebcam('camera-id', {} as MediaStream)).rejects.toThrow(
       'Frigate unavailable',
     );
-    expect(createBrowserPublishSession).not.toHaveBeenCalled();
+    expect(createBrowserPublishSession).toHaveBeenCalledWith('camera-id');
+    expect(updateCameraSource).not.toHaveBeenCalled();
+    expect(updateCameraState).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
