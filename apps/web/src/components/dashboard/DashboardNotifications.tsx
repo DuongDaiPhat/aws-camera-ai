@@ -6,7 +6,7 @@ import type { UIEventItem } from '@/types';
 import type { useEvents } from '@/hooks/useEvents';
 import type { useEventStats } from '@/hooks/useEventStats';
 import { Icon, type IconName } from '@/components/ui/Icon';
-import { formatExactTime } from '@/lib/format';
+import { formatExactTime, getEventTypeLabel } from '@/lib/format';
 import styles from './dashboard-notifications.module.css';
 
 type Kind = 'all' | 'stranger' | 'fire' | 'fall';
@@ -21,7 +21,11 @@ const presentation: Record<
   { kind: string; title: string; icon: IconName }
 > = {
   UNKNOWN_PERSON: { kind: 'stranger', title: 'Phát hiện người lạ', icon: 'face' },
-  FIRE_SMOKE_DETECTED: { kind: 'fire', title: 'Phát hiện lửa / khói', icon: 'flame' },
+  FIRE_SMOKE_DETECTED: {
+    kind: 'fire',
+    title: getEventTypeLabel('FIRE_SMOKE_DETECTED'),
+    icon: 'flame',
+  },
   FALL_DETECTED: { kind: 'fall', title: 'Phát hiện dấu hiệu té ngã', icon: 'fall' },
   RESTRICTED_ZONE: { kind: 'stranger', title: 'Có người vào khu vực giới hạn', icon: 'zone' },
   PERSON_DETECTED: { kind: 'activity', title: 'Phát hiện người', icon: 'users' },

@@ -16,7 +16,7 @@ import { useNotificationClock } from '@/hooks/useNotificationClock';
 import { fetchNotificationPage } from '@/lib/events-client';
 import { notificationState } from '@/lib/notification-state';
 import { alertEmphasis } from '@/lib/fire-alerts';
-import { formatExactTime, getPriorityInfo } from '@/lib/format';
+import { formatExactTime, getEventTypeLabel, getPriorityInfo } from '@/lib/format';
 import {
   archiveWindow,
   dayStart,
@@ -42,8 +42,8 @@ const PAGE_SIZE = 10;
 const CATEGORIES: Record<EventType, { label: string; title: string; icon: IconName }> = {
   UNKNOWN_PERSON: { label: 'Người lạ', title: 'Phát hiện người lạ', icon: 'face' },
   FIRE_SMOKE_DETECTED: {
-    label: 'Lửa / khói',
-    title: 'Phát hiện dấu hiệu lửa hoặc khói',
+    label: 'Lửa',
+    title: getEventTypeLabel('FIRE_SMOKE_DETECTED'),
     icon: 'flame',
   },
   FALL_DETECTED: { label: 'Té ngã', title: 'Phát hiện dấu hiệu té ngã', icon: 'fall' },

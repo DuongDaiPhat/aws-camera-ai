@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo, useId } from 
 import { createPortal } from 'react-dom';
 import type { UIEventItem } from '@/types';
 import { Icon } from '@/components/ui/Icon';
+import { getEventTypeLabel } from '@/lib/format';
 import { notificationState } from '@/lib/notification-state';
 import { alertEmphasis, alertEmphasisRank } from '@/lib/fire-alerts';
 import criticalStyles from '@/components/events/alert-emphasis.module.css';
@@ -39,7 +40,7 @@ const EVENT_ICON_MAP: Record<
 
 const EVENT_TYPE_LABEL_MAP: Record<UIEventItem['eventType'], string> = {
   UNKNOWN_PERSON: 'Người lạ xuất hiện',
-  FIRE_SMOKE_DETECTED: 'Phát hiện khói/lửa',
+  FIRE_SMOKE_DETECTED: getEventTypeLabel('FIRE_SMOKE_DETECTED'),
   FALL_DETECTED: 'Phát hiện ngã',
   RESTRICTED_ZONE: 'Xâm nhập khu vực cấm',
   PERSON_DETECTED: 'Phát hiện người',

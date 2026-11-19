@@ -104,7 +104,7 @@ it('opens on today and uses exact day-wide totals independent of the active list
   const countQueries = queries().filter((params) => params.get('pageSize') === '1');
   expect(countQueries).toHaveLength(4);
   expect(countQueries.every((params) => params.get('from') === local(12).toISOString())).toBe(true);
-  await choose('Loại thông báo', 'Lửa / khói');
+  await choose('Loại thông báo', 'Lửa');
   expect(listQuery().get('eventType')).toBe('FIRE_SMOKE_DETECTED');
   expect(queries().filter((params) => params.has('eventType'))).toHaveLength(1);
   expect(host.querySelector('li button')?.textContent).toContain('Đã xử lý');

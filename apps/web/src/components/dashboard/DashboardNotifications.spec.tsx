@@ -87,7 +87,7 @@ describe('notification categories', () => {
     await act(async () => host.querySelector<HTMLButtonElement>('[data-kind="stranger"]')!.click());
     expect(open).toHaveBeenCalledWith(items[0]);
     await click('Lửa');
-    expect(host.querySelector('[data-kind="fire"]')).not.toBeNull();
+    expect(host.querySelector('[data-kind="fire"] strong')?.textContent).toBe('Phát hiện lửa');
     expect(host.querySelector('[data-kind="fall"]')).toBeNull();
     await click('Té ngã');
     expect(host.querySelector('[data-kind="fall"]')).not.toBeNull();

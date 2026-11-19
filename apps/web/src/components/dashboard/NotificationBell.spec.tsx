@@ -111,6 +111,7 @@ it('promotes P0 only while within three hours and reorders on expiry without mar
   await click('Thông báo mới nhất');
   let rows = Array.from(document.querySelectorAll('li button'));
   expect(rows[0]?.getAttribute('data-alert')).toBe('urgent');
+  expect(rows[0]?.textContent).toContain('Phát hiện lửa');
 
   await render({ events: notifications, now: expiresAt });
   rows = Array.from(document.querySelectorAll('li button'));

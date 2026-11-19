@@ -4,14 +4,14 @@ export const CAMERA_FEATURES = [
   {
     id: 'fire',
     icon: 'flame',
-    title: 'Lửa & khói',
+    title: 'Phát hiện lửa',
     description:
       'Quan sát cách camera hướng về đám cháy, xác định vùng nguy hiểm và chuyển thông tin thành cảnh báo.',
     action: 'Xem sự kiện',
     page: 'events',
     part: 'processor',
     result: 'Nguy hiểm · Phát hiện lửa',
-    detail: 'Lửa và khói trong vùng quan sát',
+    detail: 'Ngọn lửa trong vùng quan sát',
     color: '#ff8b45',
   },
   {
