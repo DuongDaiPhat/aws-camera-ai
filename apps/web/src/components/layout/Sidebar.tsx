@@ -111,14 +111,14 @@ export function Sidebar({
         type="button"
         className={styles.brand}
         onClick={() => onSelectNav('dashboard')}
-        aria-label="CameraAI — về Tổng quan"
-        title="CameraAI"
+        aria-label="Argus AI — về Tổng quan"
+        title="Argus AI"
       >
         <span className={styles.brandMark}>
           <Icon name="aperture" size={30} />
         </span>
         <span className={styles.reveal}>
-          <strong>CameraAI</strong>
+          <strong>Argus AI</strong>
           <small>{isAdmin ? 'Quản trị hệ thống' : 'Giám sát tại nhà'}</small>
         </span>
       </button>

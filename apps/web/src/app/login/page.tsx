@@ -6,8 +6,8 @@ import { LoginForm } from './LoginForm';
 import styles from './login.module.css';
 
 export const metadata: Metadata = {
-  title: 'Đăng nhập | CameraAI',
-  description: 'Đăng nhập vào hệ thống giám sát tại nhà CameraAI.',
+  title: 'Đăng nhập | Argus AI',
+  description: 'Đăng nhập vào hệ thống giám sát tại nhà Argus AI.',
 };
 
 export default function LoginPage() {
@@ -20,7 +20,7 @@ export default function LoginPage() {
         <span className={styles.brandMark}>
           <Icon name="aperture" size={22} />
         </span>
-        CameraAI
+        Argus AI
       </header>
 
       <section className={styles.authContent} aria-labelledby="login-title">

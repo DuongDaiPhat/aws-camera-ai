@@ -46,7 +46,7 @@ describe('account management', () => {
       expect(adminRow.querySelector('button')).toBeNull();
       expect(adminRow.textContent?.match(/admin@example\.org/g)).toHaveLength(1);
       expect(viewerRow.textContent).toContain('Cognito viewer-login@example.org');
-      expect(viewerRow.textContent).toContain('CameraAI viewer@example.org');
+      expect(viewerRow.textContent).toContain('Argus AI viewer@example.org');
 
       act(() => viewerRow.querySelector('button')!.click());
       const role = viewerRow.querySelector('select')!;

@@ -363,7 +363,7 @@ export function DashboardView() {
               <span className={adminStyles.adminRoleTag}>System Admin Console</span>
               <h1 className={adminStyles.adminTopBarTitle}>{adminTitle}</h1>
               <p className={adminStyles.adminTopBarSub}>
-                Khu vực vận hành &amp; quản trị hạ tầng CameraAI — tách biệt khỏi dữ liệu hộ gia
+                Khu vực vận hành &amp; quản trị hạ tầng Argus AI — tách biệt khỏi dữ liệu hộ gia
                 đình.
               </p>
             </div>
