@@ -35,8 +35,12 @@ export interface FrigateSyncRetryResponse {
 
 export type CameraDebugStream = components['schemas']['CameraDebugStream'];
 
-export function fetchCameraDebugStream(cameraId: string): Promise<CameraDebugStream> {
-  return apiFetch<CameraDebugStream>(`/cameras/${encodeURIComponent(cameraId)}/debug-stream`);
+export function fetchCameraDebugStream(
+  cameraId: string,
+  signal?: AbortSignal,
+): Promise<CameraDebugStream> {
+  const path = `/cameras/${encodeURIComponent(cameraId)}/debug-stream`;
+  return signal ? apiFetch<CameraDebugStream>(path, { signal }) : apiFetch<CameraDebugStream>(path);
 }
 
 /**

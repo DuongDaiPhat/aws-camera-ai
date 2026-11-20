@@ -3,7 +3,7 @@
 import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
@@ -107,9 +107,7 @@ def recognize(p, mappings):
                 if similarity >= threshold:
                     known_id = mappings.get(best["Face"]["FaceId"])
                     if not known_id:
-                        raise ValueError(
-                            "Rekognition FaceId has no active owner mapping"
-                        )
+                        raise ValueError("Rekognition FaceId has no active owner mapping")
                     status, confidence = "KNOWN", similarity
                 else:
                     status, confidence = "UNKNOWN", 1 - similarity
@@ -122,7 +120,7 @@ def recognize(p, mappings):
         "revision": p["revision"],
         "module": "M1_FACE",
         "modelVersion": model,
-        "processedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "processedAt": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "collectionVersion": p["collectionVersion"],
         "personStatus": status,
         "matchedKnownFaceId": known_id,

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { components } from '@cam/contracts';
 import type { PoolClient } from 'pg';
 import { DatabaseService } from '../database/database.service';
+import type { UpdateKnownFaceDto } from './dto/update-known-face.dto';
 import type { CreateKnownFaceDto } from './dto/create-known-face.dto';
 import type { CollectionRequest } from './face-inference.interface';
 import { faceError } from './face-error';
@@ -49,6 +50,50 @@ function publicFace(row: FaceRow): KnownFace {
 export class KnownFacesRepository {
   constructor(private readonly db: DatabaseService) {}
 
+  async householdOwner(actorId: string): Promise<string> {
+    const result = await this.db.query<{ owner: string }>(
+      `SELECT COALESCE(household_owner_id,id) AS owner FROM users WHERE id=$1 AND is_active`,
+      [actorId],
+    );
+    if (!result.rows[0]) throw faceError(401, 'UNAUTHORIZED', 'Bạn cần đăng nhập.');
+    return result.rows[0].owner;
+  }
+  async update(
+    owner: string,
+    id: string,
+    input: UpdateKnownFaceDto,
+    actorId = owner,
+  ): Promise<void> {
+    await this.db.transaction(async (client) => {
+      if (input.linkedUserId) {
+        const linked = await client.query(
+          `SELECT id FROM users WHERE id=$1 AND is_active AND role='VIEWER' AND shares_camera_household($2,id)`,
+          [input.linkedUserId, owner],
+        );
+        if (!linked.rows[0])
+          throw faceError(403, 'FORBIDDEN', 'Chỉ được liên kết Viewer đang hoạt động trong hộ.');
+      }
+      const result = await client.query<{ model_version: string; embedding_dim: number }>(
+        `UPDATE known_faces SET person_name=$3,relationship=CASE WHEN $6 THEN $4 ELSE relationship END,linked_user_id=CASE WHEN $7 THEN $5 ELSE linked_user_id END WHERE id=$1 AND owner_user_id=$2 RETURNING model_version,embedding_dim`,
+        [
+          id,
+          owner,
+          input.personName.trim(),
+          input.relationship?.trim() || null,
+          input.linkedUserId ?? null,
+          input.relationship !== undefined,
+          input.linkedUserId !== undefined,
+        ],
+      );
+      if (!result.rows[0]) throw faceError(404, 'NOT_FOUND', 'Không tìm thấy người quen trong hộ.');
+      await this.bump(client, owner, result.rows[0].model_version, result.rows[0].embedding_dim);
+      await client.query(
+        "INSERT INTO audit_logs(actor_user_id,action,entity_type,entity_id) VALUES($1,'KNOWN_FACE_UPDATED','KNOWN_FACE',$2)",
+        [actorId, id],
+      );
+    });
+  }
+
   async list(owner: string): Promise<KnownFace[]> {
     const result = await this.db.query<FaceRow>(
       `SELECT ${PUBLIC_COLUMNS} FROM known_faces f ${JOIN_SYNC}
@@ -76,9 +121,9 @@ export class KnownFacesRepository {
         );
         if (Number(total.rows[0]?.count) >= 1000)
           throw faceError(409, 'KNOWN_FACE_LIMIT', 'Đã đạt giới hạn 1000 người quen.');
-        if (dto.linkedUserId && dto.linkedUserId !== owner) {
+        if (dto.linkedUserId) {
           const linked = await client.query<{ allowed: boolean }>(
-            'SELECT shares_camera_household($1, $2) AS allowed',
+            "SELECT EXISTS(SELECT 1 FROM users WHERE id=$2 AND is_active AND role='VIEWER' AND shares_camera_household($1,id)) AS allowed",
             [owner, dto.linkedUserId],
           );
           if (!linked.rows[0]?.allowed) {

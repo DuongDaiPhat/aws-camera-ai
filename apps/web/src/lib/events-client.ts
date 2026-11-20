@@ -89,7 +89,7 @@ export function toUIEventItem(event: EventSummary): UIEventItem {
  */
 export async function fetchEvents(
   pageSize: number = DEFAULT_EVENTS_PAGE_SIZE,
-  includePendingFire = false,
+  includePendingPriority = false,
 ): Promise<{
   events: UIEventItem[];
   total: number;
@@ -98,13 +98,27 @@ export async function fetchEvents(
   const data = Array.isArray(response.data) ? response.data : [];
 
   const recent = data.map(toUIEventItem);
-  const pending = includePendingFire ? await fetchPendingFireEvents() : [];
+  const pending = includePendingPriority
+    ? await fetchPriorityNotifications(['P0', 'P1', 'P2'])
+    : [];
   const merged = Array.from(
     new Map([...recent, ...pending].map((event) => [event.id, event])).values(),
   );
   return {
     events: merged,
     total: response.meta?.total ?? data.length,
+  };
+}
+
+/** Tải một trang lịch sử đã lọc trên Orchestrator. */
+export async function fetchNotificationPage(query: string, signal: AbortSignal) {
+  const response = await apiFetch<ListEventsResponse>(`/events?${query}`, {
+    cache: 'no-store',
+    signal,
+  });
+  return {
+    events: response.data.map(toUIEventItem),
+    total: response.meta?.total ?? response.data.length,
   };
 }
 
@@ -115,17 +129,21 @@ export function fetchEventDetail(eventId: string): Promise<EventDetail> {
   return apiFetch<EventDetail>(`/events/${eventId}`, { cache: 'no-store' });
 }
 
-/** Query pending fire alerts independently of recent-event filters and pagination. */
-export async function fetchPendingFireEvents(): Promise<UIEventItem[]> {
+/** Query current P0 alerts independently of the recent-event feed. */
+export function fetchPendingCriticalEvents(): Promise<UIEventItem[]> {
+  return fetchPriorityNotifications(['P0']);
+}
+
+async function fetchPriorityNotifications(
+  priorities: ['P0'] | ['P0', 'P1', 'P2'],
+): Promise<UIEventItem[]> {
+  const query = new URLSearchParams({ notificationState: 'pending', pageSize: '100' });
+  for (const priority of priorities) query.append('priority', priority);
+  for (const status of ['DETECTED', 'NOTIFIED', 'ESCALATED']) query.append('status', status);
   const events: UIEventItem[] = [];
   let page = 1;
   for (;;) {
-    const query = new URLSearchParams({
-      eventType: 'FIRE_SMOKE_DETECTED',
-      pageSize: '100',
-      page: String(page),
-    });
-    for (const status of ['DETECTED', 'NOTIFIED', 'ESCALATED']) query.append('status', status);
+    query.set('page', String(page));
     const result = await apiFetch<ListEventsResponse>(`/events?${query}`, { cache: 'no-store' });
     events.push(...result.data.map(toUIEventItem));
     const pages = Math.ceil(
@@ -207,4 +225,12 @@ export function subscribeEventsStream(handlers: EventsStreamHandlers): () => voi
   return () => {
     eventSource.close();
   };
+}
+
+export async function triggerSosHelp(note?: string): Promise<UIEventItem> {
+  const summary = await apiFetch<EventSummary>('/events/sos', {
+    method: 'POST',
+    body: JSON.stringify(note ? { note } : {}),
+  });
+  return toUIEventItem(summary);
 }

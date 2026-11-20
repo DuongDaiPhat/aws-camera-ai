@@ -2,16 +2,18 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { ApiError } from '@/lib/api-client';
+import { ApiError, setAccessToken } from '@/lib/api-client';
 import { login } from '@/lib/auth-client';
+import { markLoginEntrance } from '@/lib/login-entrance';
 import { getAuthConfig, type AuthConfig } from '@/lib/auth-config';
 import { startCognitoLogin } from '@/lib/cognito-login';
 import { clearBrowserSession } from '@/lib/auth-session';
-import { setAccessToken } from '@/lib/api-client';
 import styles from './login.module.css';
 
 export function LoginForm() {
   const router = useRouter();
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setPasswordVisible] = useState(false);
@@ -49,11 +51,19 @@ export function LoginForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    const fields = new FormData(event.currentTarget);
+    const credentials = {
+      email: String(fields.get('email') ?? '').trim(),
+      password: String(fields.get('password') ?? ''),
+    };
+    setEmail(credentials.email);
+    setPassword(credentials.password);
     setSubmitting(true);
     setErrorMessage(null);
 
     try {
-      await login({ email, password });
+      await login(credentials);
+      markLoginEntrance();
       router.replace('/');
       router.refresh();
     } catch (error: unknown) {
@@ -82,7 +92,7 @@ export function LoginForm() {
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} noValidate>
+    <form className={styles.form} onSubmit={handleSubmit} method="post" noValidate>
       <div className={styles.field}>
         <label htmlFor="email">Email</label>
         <input
@@ -133,7 +143,7 @@ export function LoginForm() {
         </div>
       ) : null}
 
-      <button className={styles.submitButton} type="submit" disabled={isSubmitting}>
+      <button className={styles.submitButton} type="submit" disabled={!ready || isSubmitting}>
         {isSubmitting ? 'Đang đăng nhập…' : 'Đăng nhập'}
       </button>
 

@@ -15,7 +15,7 @@
 .pageTitle {
   font-size: 22px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ink);
   letter-spacing: -0.4px;
   margin: 0;
   display: flex;
@@ -25,28 +25,28 @@
 
 .pageSubtitle {
   font-size: 14px;
-  color: #64748b;
+  color: var(--ink-muted);
   margin: 0;
   line-height: 1.5;
 }
 
 /* Policy Guide Box */
 .policyGuideBox {
-  background-color: #f1f5f9;
-  border: 1px solid #cbd5e1;
+  background-color: var(--surface-muted);
+  border: 1px solid #e6deef;
   border-radius: 10px;
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   font-size: 13px;
-  color: #334155;
+  color: var(--ink-secondary);
   line-height: 1.6;
 }
 
 .policyGuideTitle {
   font-weight: 600;
-  color: #0f172a;
+  color: var(--ink);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -65,8 +65,8 @@
 
 /* Rule Card */
 .ruleCard {
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition:
@@ -76,14 +76,14 @@
 }
 
 .ruleCard:hover {
-  border-color: #cbd5e1;
+  border-color: #e6deef;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
 }
 
 .cardHeader {
   padding: 16px 20px;
-  background-color: #fafafa;
-  border-bottom: 1px solid #f1f5f9;
+  background-color: #f5f2fa;
+  border-bottom: 1px solid var(--surface-muted);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -101,18 +101,18 @@
 .ruleDisplayName {
   font-size: 16px;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--ink);
   margin: 0;
 }
 
 .eventTypeCode {
   font-family: monospace;
   font-size: 12px;
-  color: #64748b;
-  background-color: #f1f5f9;
+  color: var(--ink-muted);
+  background-color: var(--surface-muted);
   padding: 2px 8px;
   border-radius: 4px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
 }
 
 .badgesArea {
@@ -131,41 +131,42 @@
 }
 
 .priorityP0 {
-  background-color: #fee2e2;
-  color: #b91c1c;
-  border: 1px solid #fca5a5;
+  background-color: #fee7ed;
+  color: #b52a4d;
+  border: 1px solid #794056;
 }
 
 .priorityP1 {
-  background-color: #ffedd5;
-  color: #c2410c;
+  background-color: #fff4e7;
+  color: #ac571f;
   border: 1px solid #fdba74;
 }
 
 .priorityP2 {
-  background-color: #fef3c7;
-  color: #b45309;
+  background-color: #fff4df;
+  color: #916014;
   border: 1px solid #fde68a;
 }
 
 .priorityP3 {
-  background-color: #f1f5f9;
-  color: #475569;
-  border: 1px solid #e2e8f0;
+  background-color: var(--surface-muted);
+  color: var(--ink-secondary);
+  border: 1px solid var(--border);
 }
 
 .versionBadge {
   font-size: 11px;
   font-weight: 600;
-  color: #64748b;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  color: var(--ink-muted);
+  background-color: var(--bg);
+  border: 1px solid var(--border);
   padding: 3px 7px;
   border-radius: 6px;
 }
 
 /* Card Body */
 .cardBody {
+  container: rule-editor / inline-size;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -180,30 +181,16 @@
 
 .waitPanel {
   padding: 16px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid #3e5178;
   border-radius: 10px;
-  background: #f8fbff;
+  background: var(--surface-muted);
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-.waitPanelHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.waitPanelHeader h4 {
-  margin: 0;
-  font-size: 14px;
-  color: #1e3a8a;
-}
-
 .waitSavedValue {
-  color: #475569;
+  color: var(--ink-secondary);
   font-size: 12px;
 }
 
@@ -216,24 +203,24 @@
 
 .waitPreset {
   padding: 8px 10px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #e6deef;
   border-radius: 6px;
-  background: #fff;
-  color: #334155;
+  background: var(--surface);
+  color: var(--ink-secondary);
   font: inherit;
   font-size: 12px;
   cursor: pointer;
 }
 
 .waitPreset[aria-pressed='true'] {
-  background: #dbeafe;
-  border-color: #2563eb;
-  color: #1d4ed8;
+  background: #e6edfa;
+  border-color: var(--accent);
+  color: var(--accent-hover);
   font-weight: 600;
 }
 
 .waitPreset:focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -247,10 +234,10 @@
   flex-direction: column;
   gap: 10px;
   padding: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: #fff;
-  color: #475569;
+  background: var(--surface);
+  color: var(--ink-secondary);
   font-size: 12px;
 }
 
@@ -262,7 +249,7 @@
 }
 
 .waitPreview strong {
-  color: #1d4ed8;
+  color: var(--accent-hover);
 }
 
 .waitNotice,
@@ -270,11 +257,11 @@
   margin: 0;
   font-size: 12px;
   line-height: 1.6;
-  color: #475569;
+  color: var(--ink-secondary);
 }
 
 .waitDraftNotice {
-  color: #92400e;
+  color: #916014;
 }
 
 .fieldGroup {
@@ -286,7 +273,7 @@
 .fieldLabel {
   font-size: 13px;
   font-weight: 600;
-  color: #334155;
+  color: var(--ink-secondary);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -294,7 +281,7 @@
 
 .fieldHint {
   font-size: 11px;
-  color: #64748b;
+  color: var(--ink-muted);
   font-weight: 400;
 }
 
@@ -309,10 +296,10 @@
   width: 100%;
   padding: 8px 12px;
   font-size: 14px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #e6deef;
   border-radius: 6px;
-  color: #0f172a;
-  background-color: #ffffff;
+  color: var(--ink);
+  background-color: var(--surface);
   transition:
     border-color 0.15s,
     box-shadow 0.15s;
@@ -320,15 +307,15 @@
 
 .inputNumber:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .inputNumber:disabled {
-  background-color: #f8fafc;
-  color: #94a3b8;
+  background-color: var(--bg);
+  color: var(--ink-muted);
   cursor: not-allowed;
-  border-color: #e2e8f0;
+  border-color: var(--border);
 }
 
 .inputSuffix {
@@ -336,12 +323,12 @@
   flex: 0 0 auto;
   padding-left: 10px;
   font-size: 12px;
-  color: #64748b;
+  color: var(--ink-muted);
   pointer-events: none;
 }
 
 .computedWaitBox {
-  background-color: #f0fdf4;
+  background-color: #ebf8f1;
   border: 1px solid #bbf7d0;
   border-radius: 8px;
   padding: 10px 14px;
@@ -350,7 +337,7 @@
   justify-content: space-between;
   gap: 12px;
   font-size: 12px;
-  color: #166534;
+  color: #087b60;
 }
 
 .computedWaitValue {
@@ -359,20 +346,20 @@
 }
 
 .notApplicableBox {
-  background-color: #f8fafc;
-  border: 1px dashed #cbd5e1;
+  background-color: var(--bg);
+  border: 1px dashed #e6deef;
   border-radius: 8px;
   padding: 12px 16px;
   font-size: 13px;
-  color: #64748b;
+  color: var(--ink-muted);
   text-align: center;
 }
 
 /* Card Footer */
 .cardFooter {
   padding: 12px 20px;
-  background-color: #fafafa;
-  border-top: 1px solid #f1f5f9;
+  background-color: #f5f2fa;
+  border-top: 1px solid var(--surface-muted);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -382,7 +369,7 @@
 
 .metaInfo {
   font-size: 12px;
-  color: #64748b;
+  color: var(--ink-muted);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -398,9 +385,9 @@
   padding: 7px 14px;
   font-size: 13px;
   font-weight: 500;
-  color: #475569;
-  background-color: #ffffff;
-  border: 1px solid #cbd5e1;
+  color: var(--ink-secondary);
+  background-color: var(--surface);
+  border: 1px solid #e6deef;
   border-radius: 6px;
   cursor: pointer;
   transition:
@@ -409,8 +396,8 @@
 }
 
 .btnCancel:hover:not(:disabled) {
-  background-color: #f1f5f9;
-  color: #0f172a;
+  background-color: var(--surface-muted);
+  color: var(--ink);
 }
 
 .btnCancel:disabled {
@@ -422,9 +409,9 @@
   padding: 7px 16px;
   font-size: 13px;
   font-weight: 600;
-  color: #ffffff;
-  background-color: #2563eb;
-  border: 1px solid #1d4ed8;
+  color: #f2f5ff;
+  background-color: var(--accent);
+  border: 1px solid var(--accent-hover);
   border-radius: 6px;
   cursor: pointer;
   display: flex;
@@ -434,12 +421,12 @@
 }
 
 .btnSave:hover:not(:disabled) {
-  background-color: #1d4ed8;
+  background-color: var(--accent-hover);
 }
 
 .btnSave:disabled {
-  background-color: #94a3b8;
-  border-color: #94a3b8;
+  background-color: #435573;
+  border-color: var(--ink-muted);
   cursor: not-allowed;
   opacity: 0.7;
 }
@@ -456,21 +443,21 @@
 }
 
 .feedbackSuccess {
-  background-color: #f0fdf4;
-  color: #15803d;
+  background-color: #ebf8f1;
+  color: #087b60;
   border: 1px solid #86efac;
 }
 
 .feedbackError {
-  background-color: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fca5a5;
+  background-color: #fff0f3;
+  color: #b52a4d;
+  border: 1px solid #794056;
 }
 
 .btnReloadInline {
   background: none;
   border: underline;
-  color: #b91c1c;
+  color: #b52a4d;
   font-weight: 700;
   cursor: pointer;
   padding: 0;
@@ -486,15 +473,15 @@
   justify-content: center;
   padding: 60px 20px;
   gap: 12px;
-  color: #64748b;
+  color: var(--ink-muted);
   font-size: 14px;
 }
 
 .spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid #e2e8f0;
-  border-top-color: #2563eb;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -530,4 +517,296 @@
   .actionsArea {
     justify-content: flex-end;
   }
+}
+
+.policyGuideTitle {
+  cursor: pointer;
+  list-style: none;
+  min-height: 28px;
+  justify-content: space-between;
+}
+.policyGuideTitle::-webkit-details-marker {
+  display: none;
+}
+.policyGuideTitle::after {
+  content: '+';
+  font-size: 20px;
+}
+.policyGuideBox[open] > .policyGuideTitle::after {
+  content: '−';
+}
+.policyGuideBox[open] > .policyGuideList {
+  margin-top: 12px;
+}
+.pageTitle svg {
+  flex: none;
+}
+
+/* Viewer Personal Settings */
+.viewerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px;
+}
+
+.viewerCardTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.viewerCardBody {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.viewerFieldRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--surface-muted);
+}
+
+.viewerFieldRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.viewerFieldLabel {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.viewerFieldValue {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.viewerHint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-secondary);
+}
+
+.viewerToggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.viewerSavedNotice {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--primary, #6d28d9);
+}
+
+/* Dense list view for settings; expanded forms retain their existing controls. */
+.compactSettings {
+  gap: 12px;
+}
+.compactSettings > .policyGuideBox {
+  padding: 10px 14px;
+  font-size: 12px;
+}
+.compactSettings .rulesList {
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.compactRule,
+.compactRule:hover {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.compactRule + .compactRule {
+  border-top: 1px solid var(--border);
+}
+.compactRule > summary {
+  min-height: 48px;
+  padding: 12px 16px;
+  border-bottom: 0;
+  background: transparent;
+  cursor: pointer;
+  list-style: none;
+}
+.compactRule > summary::-webkit-details-marker {
+  display: none;
+}
+.compactRule > summary:hover,
+.compactRule[open] > summary {
+  background: var(--surface-muted);
+}
+.compactRule > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
+}
+.compactRule .ruleDisplayName {
+  font-size: 14px;
+}
+.ruleSummaryWait {
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.ruleDraftStatus {
+  color: #86520d;
+  font-size: 12px;
+}
+.ruleChevron {
+  color: var(--ink-muted);
+  transition: transform 160ms ease-out;
+}
+.compactRule[open] .ruleChevron {
+  transform: rotate(180deg);
+}
+.compactRule .cardBody {
+  padding: 16px;
+  gap: 12px;
+}
+.ruleEditors {
+  container-type: inline-size;
+}
+.waitLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+  gap: 20px;
+  align-items: start;
+}
+.ruleEditors {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+.ruleEditors .waitPanel,
+.thresholdSection {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.editorTitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.ruleEditors .inputsGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 18px;
+}
+.ruleEditors .fieldGroup {
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 3;
+  align-items: start;
+  min-width: 0;
+  gap: 6px;
+}
+.ruleEditors .fieldLabel {
+  flex-wrap: wrap;
+  align-self: end;
+}
+.ruleEditors .fieldHint {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.ruleEditors .inputNumber {
+  inline-size: 7rem;
+  max-inline-size: 100%;
+  height: 36px;
+  padding: 6px 8px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.ruleEditors .waitPresets {
+  margin-top: 0;
+}
+.ruleEditors .waitPreset {
+  min-height: 32px;
+  padding: 5px 8px;
+}
+.waitReadout {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+.waitReadout .waitSavedValue,
+.waitReadout .waitNotice,
+.waitReadout .waitDraftNotice {
+  margin: 0;
+  font-size: 12px;
+}
+.waitReadout .waitPreview {
+  padding: 8px;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+}
+.waitReadout .waitPreview strong {
+  font-variant-numeric: tabular-nums;
+}
+@container (max-width: 23rem) {
+  .ruleEditors .inputsGrid {
+    grid-template-columns: 1fr;
+  }
+  .ruleEditors .fieldGroup {
+    grid-template-rows: auto;
+    grid-row: auto;
+  }
+}
+.compactRule .cardFooter {
+  padding: 10px 16px;
+  background: transparent;
+}
+.compactRule .metaInfo {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 11px;
+}
+@container rule-editor (max-width: 48rem) {
+  .waitLayout {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 620px) {
+  .compactRule > summary {
+    padding: 12px;
+    gap: 8px;
+  }
+  .compactRule .badgesArea {
+    margin-left: auto;
+    gap: 6px;
+  }
+  .compactRule .ruleDisplayName {
+    font-size: 13px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ruleChevron {
+    transition: none;
+  }
+}
+
+.compactRule:not([open]) > :not(summary) {
+  display: none;
 }

@@ -1,322 +1,291 @@
-/*
- * Trang đăng nhập: hai cột — bảng giới thiệu sản phẩm bên trái, form bên phải.
- * Mobile (<= 920px) ẩn cột giới thiệu để form xuất hiện ngay đầu trang.
- */
 .page {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(420px, 0.85fr);
+  grid-template-columns: minmax(0, 1.1fr) minmax(420px, 0.9fr);
+  background: var(--surface);
 }
-
 .productRail {
+  padding: 42px clamp(30px, 5vw, 76px) 30px;
+  background: var(--navy);
+  color: #fff;
   display: flex;
   flex-direction: column;
-  gap: 40px;
-  padding: clamp(28px, 4vw, 56px);
-  background: #e9f0f9;
-  border-right: 1px solid var(--border);
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
 }
-
-.brand {
+.brand,
+.mobileHeader {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 15px;
+  gap: 11px;
+  font-size: 24px;
   font-weight: 700;
-  color: var(--ink);
+  letter-spacing: -0.8px;
 }
-
 .brandMark {
-  flex: none;
-  width: 30px;
-  height: 30px;
   display: grid;
   place-items: center;
-  border-radius: 9px;
-  background: var(--accent);
+  height: 37px;
+  width: 37px;
+  border: 1px solid #4a698c;
+  border-radius: 11px;
+  background: #243b5a;
 }
-
 .brandMark span {
-  width: 10px;
-  height: 10px;
-  border: 2px solid #fff;
+  width: 15px;
+  height: 15px;
+  border: 3px solid #8edbe7;
   border-radius: 50%;
 }
-
 .productMessage {
-  max-width: 480px;
-  margin: auto 0;
+  margin: 50px 0 30px;
+  max-width: 550px;
 }
-
 .context {
-  margin: 0 0 10px;
-  font-size: 13px;
+  color: #8ad7e3;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--accent);
+  margin: 0 0 16px;
 }
-
 .productMessage h1 {
-  margin: 0 0 14px;
-  font-size: clamp(26px, 2.6vw, 32px);
-  font-weight: 700;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-  color: var(--ink);
+  margin: 0 0 18px;
+  font-size: clamp(29px, 3.4vw, 49px);
+  font-weight: 600;
+  letter-spacing: -1.5px;
+  line-height: 1.17;
+  color: #f5f9ff;
 }
-
 .lead {
   margin: 0;
-  font-size: 15px;
-  line-height: 1.65;
-  color: var(--ink-secondary);
+  max-width: 460px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #b6c7df;
 }
-
+.cameraArt {
+  display: block;
+  width: min(100%, 470px);
+  margin: 12px auto 2px;
+}
 .features {
-  margin: 36px 0 0;
-  padding: 0;
   list-style: none;
+  margin: 0;
+  padding: 0;
   display: grid;
-  gap: 16px;
+  gap: 14px;
 }
-
 .features li {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ink-secondary);
+  gap: 11px;
+  font-size: 12px;
+  color: #d3e0f1;
+  line-height: 1.5;
 }
-
 .featureIcon {
   flex: none;
-  width: 36px;
-  height: 36px;
+  height: 29px;
+  width: 29px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  background: var(--surface);
-  color: var(--accent);
+  color: #88d6e2;
+  border-radius: 8px;
+  background: #1e3552;
 }
-
 .featureIcon svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
-
 .railFooter {
-  margin: auto 0 0;
-  font-size: 12.5px;
-  color: var(--ink-muted);
+  color: #a5b9d2;
+  font-size: 10px;
+  margin: 18px 0 0;
+  padding-top: 21px;
+  border-top: 1px solid #30425d;
 }
-
 .authArea {
+  padding: 48px clamp(28px, 5vw, 80px);
   display: flex;
   flex-direction: column;
-  padding: 40px clamp(24px, 4vw, 64px);
-  background: var(--surface);
+  justify-content: center;
 }
-
 .mobileHeader {
   display: none;
 }
-
 .authContent {
-  width: min(100%, 360px);
+  width: min(100%, 380px);
   margin: auto;
 }
-
-.authHeading h2 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 700;
+.authHeading {
+  margin-bottom: 32px;
 }
-
+.authHeading h2 {
+  margin: 0 0 10px;
+  font-size: 34px;
+  letter-spacing: -1px;
+  font-weight: 650;
+}
 .authHeading p {
-  margin: 6px 0 32px;
-  font-size: 14px;
-  line-height: 1.6;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
   color: var(--ink-muted);
 }
-
-/* Phần dưới dùng chung cho LoginForm.tsx */
 .form {
   display: grid;
-  gap: 18px;
+  gap: 22px;
 }
-
 .field {
   display: grid;
-  gap: 8px;
+  gap: 9px;
 }
-
 .field label {
-  font-size: 13.5px;
-  font-weight: 600;
+  font-size: 12px;
   color: var(--ink-secondary);
+  font-weight: 600;
 }
-
 .field input {
   width: 100%;
-  height: 46px;
-  padding: 0 14px;
+  height: 50px;
+  padding: 0 15px;
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-control);
+  border-radius: 10px;
   background: var(--surface);
   color: var(--ink);
+  font-size: 14px;
   transition:
-    border-color 120ms ease,
-    box-shadow 120ms ease;
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
-
 .field input::placeholder {
   color: var(--ink-muted);
 }
-
 .field input:focus-visible {
-  outline: none;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
-
+.field input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
 .passwordField {
   position: relative;
 }
-
 .passwordField input {
-  padding-right: 68px;
+  padding-right: 65px;
 }
-
 .visibilityButton {
   position: absolute;
-  top: 50%;
-  right: 8px;
-  transform: translateY(-50%);
-  padding: 6px 10px;
+  right: 4px;
+  top: 3px;
+  bottom: 3px;
+  min-width: 50px;
+  min-height: 44px;
   border: 0;
-  border-radius: 6px;
   background: transparent;
   color: var(--ink-muted);
-  font-size: 13px;
+  border-radius: 7px;
+  font-size: 12px;
   font-weight: 600;
-  cursor: pointer;
 }
-
 .visibilityButton:hover {
-  color: var(--ink);
+  color: var(--accent);
+  background: var(--accent-soft);
 }
-
-.visibilityButton:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+.submitButton {
+  min-height: 50px;
+  border: 0;
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--accent);
+  transition: background 0.15s;
 }
-
+.submitButton:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+.submitButton:disabled {
+  opacity: 0.65;
+}
 .error {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 11px 13px;
-  border: 1px solid #f0d6cf;
-  border-left: 3px solid var(--danger);
-  border-radius: var(--radius-control);
   background: var(--danger-soft);
-  color: #8a3527;
-  font-size: 13.5px;
-  line-height: 1.5;
+  border: 1px solid #ecc1bb;
+  color: var(--danger);
+  border-radius: 9px;
+  padding: 12px;
+  font-size: 12px;
 }
-
 .error span {
-  flex: none;
-  width: 18px;
-  height: 18px;
   display: grid;
   place-items: center;
-  border: 1.5px solid currentColor;
+  flex: none;
+  width: 19px;
+  height: 19px;
+  border: 1px solid currentColor;
   border-radius: 50%;
-  font-size: 11px;
-  font-weight: 700;
 }
-
 .error p {
   margin: 0;
 }
-
-.submitButton {
-  height: 46px;
-  border: 0;
-  border-radius: var(--radius-control);
-  background: var(--accent);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 120ms ease;
-}
-
-.submitButton:hover:not(:disabled) {
-  background: var(--accent-hover);
-}
-
-.submitButton:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.submitButton:disabled {
-  opacity: 0.7;
-  cursor: default;
-}
-
 .securityNote {
-  margin: -2px 0 0;
-  font-size: 13px;
+  font-size: 11px;
+  line-height: 1.6;
   text-align: center;
   color: var(--ink-muted);
+  margin: 0;
+  padding-top: 3px;
 }
-
-@media (max-width: 920px) {
-  .page {
-    grid-template-columns: 1fr;
+@media (max-width: 1050px) {
+  .productRail {
+    padding: 35px;
   }
-
+  .productMessage h1 {
+    font-size: 34px;
+  }
+  .authArea {
+    padding: 40px;
+  }
+  .cameraArt {
+    max-width: 350px;
+  }
+}
+@media (max-width: 800px) {
+  .page {
+    display: block;
+  }
   .productRail {
     display: none;
   }
-
   .authArea {
-    justify-content: flex-start;
-    padding: 28px 22px;
+    min-height: 100dvh;
+    padding: 30px 25px;
   }
-
-  .authContent {
-    width: 100%;
-    margin: 0;
-  }
-
-  .authHeading p {
-    margin-bottom: 24px;
-  }
-
   .mobileHeader {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 40px;
-    font-size: 15px;
-    font-weight: 700;
+    font-size: 23px;
+    margin-bottom: 70px;
+  }
+  .mobileHeader .brandMark {
+    background: var(--navy);
+  }
+  .authContent {
+    margin: 0 auto auto;
+    max-width: 420px;
+  }
+  .authHeading h2 {
+    font-size: 30px;
   }
 }
-
 @media (max-width: 380px) {
   .authArea {
-    padding: 24px 18px;
+    padding: 25px 20px;
   }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .field input,
-  .submitButton {
-    transition: none;
+  .mobileHeader {
+    margin-bottom: 55px;
   }
 }

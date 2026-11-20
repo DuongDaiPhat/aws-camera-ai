@@ -3,8 +3,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  background-color: #ffffff;
-  border: 1px solid #eef0f4;
+  background-color: var(--surface);
+  border: 1px solid #e6deef;
   border-radius: 12px;
   padding: 14px 18px;
   position: relative;
@@ -15,14 +15,14 @@
 }
 
 .card:hover {
-  border-color: #cbd5e1;
+  border-color: #e6deef;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
   transform: translateY(-1px);
 }
 
 .card.fireActive {
   border-color: transparent;
-  background: #fff7f7;
+  background: #fff3f5;
 }
 
 .fireBorder {
@@ -43,17 +43,17 @@
 }
 
 .fireActive .eventTitle {
-  color: #7f1d1d;
+  color: #ae3451;
 }
 .fireActive .noteText {
-  color: #991b1b;
+  color: #ae3451;
 }
 .fireHistory {
-  background: #fff7f7;
-  border-color: #fecaca;
+  background: #fff3f5;
+  border-color: #6b3449;
 }
 .fireHistory .eventTitle {
-  color: #7f1d1d;
+  color: #ae3451;
 }
 @media (prefers-reduced-motion: no-preference) {
   .fireBorder rect {
@@ -88,11 +88,11 @@
 }
 
 .accentClosed {
-  border-left: 4px solid #64748b;
+  border-left: 4px solid var(--ink-muted);
 }
 
 .accentNeutral {
-  border-left: 4px solid #94a3b8;
+  border-left: 4px solid var(--ink-muted);
 }
 
 .leftGroup {
@@ -115,7 +115,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #1e293b;
+  border: 1px solid var(--ink);
 }
 
 /* Anh snapshot that do Frigate chup, phu kin khung thumbnail */
@@ -134,8 +134,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #334155;
-  opacity: 0.6;
+  color: #aabbdc;
+  opacity: 1;
 }
 
 .thumbBackground svg {
@@ -148,7 +148,7 @@
   bottom: 6px;
   left: 6px;
   background-color: rgba(15, 23, 42, 0.85);
-  color: #f1f5f9;
+  color: #d6e0f5;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.4px;
@@ -173,28 +173,28 @@
 }
 
 .aiTagDanger {
-  background-color: #ef4444;
-  color: #ffffff;
+  background-color: #c83240;
+  color: #fff;
 }
 
 .aiTagWarning {
-  background-color: #f59e0b;
-  color: #ffffff;
+  background-color: #965606;
+  color: #fff;
 }
 
 .aiTagInfo {
-  background-color: #2563eb;
-  color: #ffffff;
+  background-color: var(--accent);
+  color: #f2f5ff;
 }
 
 .aiTagSuccess {
-  background-color: #10b981;
-  color: #ffffff;
+  background-color: #087b60;
+  color: #fff;
 }
 
 .aiTagNeutral {
-  background-color: #475569;
-  color: #f1f5f9;
+  background-color: #e7dff1;
+  color: #51465e;
 }
 
 /* Event Info */
@@ -225,83 +225,83 @@
 }
 
 .priorityBadgeP0 {
-  background-color: #fef2f2;
+  background-color: #fff0f3;
   color: #dc2626;
   border: 1px solid #fee2e2;
 }
 
 .priorityBadgeP1 {
-  background-color: #fffbeb;
-  color: #b45309;
+  background-color: #fff4e7;
+  color: #925009;
   border: 1px solid #fef3c7;
 }
 
 .priorityBadgeP2 {
-  background-color: #eff6ff;
-  color: #1d4ed8;
+  background-color: var(--accent-soft);
+  color: var(--accent-hover);
   border: 1px solid #dbeafe;
 }
 
 .priorityBadgeNeutral {
-  background-color: #f1f5f9;
-  color: #475569;
-  border: 1px solid #e2e8f0;
+  background-color: var(--surface-muted);
+  color: var(--ink-secondary);
+  border: 1px solid var(--border);
 }
 
 .priorityBadgeMuted {
-  background-color: #f8fafc;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
+  background-color: var(--bg);
+  color: var(--ink-muted);
+  border: 1px solid var(--border);
 }
 
 .statusBadge {
   font-size: 11px;
   font-weight: 500;
-  color: #64748b;
-  background-color: #f8fafc;
+  color: var(--ink-muted);
+  background-color: var(--bg);
   padding: 2px 8px;
   border-radius: 6px;
   border: 1px solid #eef2f6;
 }
 
 .statusBadgeAlert {
-  color: #b45309;
-  background-color: #fef3c7;
+  color: #925009;
+  background-color: #fff4df;
   border-color: #fde68a;
   font-weight: 600;
 }
 
 .statusBadgeNotified {
-  color: #92400e;
-  background-color: #fffbeb;
+  color: #925009;
+  background-color: #fff4e7;
   border-color: #fde68a;
   font-weight: 600;
 }
 
 .statusBadgeEscalated {
-  color: #b91c1c;
-  background-color: #fef2f2;
-  border-color: #fecaca;
+  color: #b12d4b;
+  background-color: #fff0f3;
+  border-color: #6b3449;
   font-weight: 700;
 }
 
 .statusBadgeResolved {
-  color: #047857;
-  background-color: #ecfdf5;
+  color: #087b60;
+  background-color: var(--surface-muted);
   border-color: #a7f3d0;
   font-weight: 700;
 }
 
 .statusBadgeClosed {
-  color: #475569;
-  background-color: #f1f5f9;
-  border-color: #cbd5e1;
+  color: var(--ink-secondary);
+  background-color: var(--surface-muted);
+  border-color: #e6deef;
   font-weight: 600;
 }
 
 .statusBadgeFailed {
-  color: #b45309;
-  background-color: #fffbeb;
+  color: #925009;
+  background-color: #fff4e7;
   border-color: #fde68a;
   font-weight: 600;
 }
@@ -311,7 +311,7 @@
   align-items: center;
   gap: 4px;
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--ink-muted);
   margin-left: 2px;
 }
 
@@ -323,7 +323,7 @@
 .eventTitle {
   font-size: 15px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ink);
   margin: 0;
   line-height: 1.3;
 }
@@ -333,14 +333,14 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #64748b;
+  color: var(--ink-muted);
   margin: 0;
   flex-wrap: wrap;
 }
 
 .locationCam {
   font-weight: 500;
-  color: #475569;
+  color: var(--ink-secondary);
 }
 
 .locationSeparator {
@@ -348,7 +348,7 @@
 }
 
 .locationZone {
-  color: #64748b;
+  color: var(--ink-muted);
 }
 
 .noteText {
@@ -370,8 +370,8 @@
 }
 
 .actionButtonP0 {
-  background-color: #ef4444;
-  color: #ffffff;
+  background-color: #c83240;
+  color: #fff;
 }
 
 .actionButtonP0:hover {
@@ -379,24 +379,24 @@
 }
 
 .actionButtonPrimary {
-  background-color: #2563eb;
-  color: #ffffff;
+  background-color: var(--accent);
+  color: #f2f5ff;
 }
 
 .actionButtonPrimary:hover {
-  background-color: #1d4ed8;
+  background-color: var(--accent-hover);
 }
 
 .actionButtonOutline {
-  background-color: #ffffff;
-  color: #334155;
-  border: 1px solid #e2e8f0;
+  background-color: var(--surface);
+  color: var(--ink-secondary);
+  border: 1px solid var(--border);
 }
 
 .actionButtonOutline:hover {
-  background-color: #f8fafc;
-  border-color: #cbd5e1;
-  color: #0f172a;
+  background-color: var(--bg);
+  border-color: #e6deef;
+  color: var(--ink);
 }
 
 @media (max-width: 600px) {
@@ -420,4 +420,15 @@
   .actionButton {
     margin-left: auto;
   }
+}
+
+.thumbBackground[data-event-type='FIRE_SMOKE_DETECTED'] {
+  color: #ff924d;
+}
+.thumbBackground[data-event-type='FIRE_SMOKE_DETECTED'] svg {
+  fill: #ff924d26;
+  stroke-width: 2.2;
+}
+.thumbBackground[data-event-type='FALL_DETECTED'] {
+  color: #c2bcff;
 }

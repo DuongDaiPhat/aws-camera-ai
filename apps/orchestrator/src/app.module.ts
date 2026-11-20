@@ -1,3 +1,5 @@
+import { HouseholdModule } from './household/household.module';
+import { PlaybackModule } from './playback/playback.module';
 import { CloudQueueModule } from './cloud-queue/cloud-queue.module';
 import { Module } from '@nestjs/common';
 import { KnownFacesModule } from './known-faces/known-faces.module';
@@ -22,6 +24,7 @@ import { WellnessModule } from './wellness/wellness.module';
 import { FallDetectionModule } from './fall-detection/fall-detection.module';
 import { BullModule } from '@nestjs/bullmq';
 import { FireModule } from './fire/fire.module';
+import { AdminModule } from './admin/admin.module';
 
 /**
  * Module goc.
@@ -46,6 +49,8 @@ import { FireModule } from './fire/fire.module';
       }),
     }),
     DatabaseModule,
+    HouseholdModule,
+    PlaybackModule,
     CloudQueueModule,
     AuthModule,
     KnownFacesModule,
@@ -66,6 +71,7 @@ import { FireModule } from './fire/fire.module';
     WellnessModule,
     FallDetectionModule,
     FireModule,
+    AdminModule,
   ],
 })
 export class AppModule {}

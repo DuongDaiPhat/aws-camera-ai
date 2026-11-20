@@ -1,10 +1,11 @@
 'use client';
 
+import { Siren } from 'lucide-react';
 import { useState } from 'react';
 import type { UIEventItem } from '@/types';
 import { useDialogFocus } from '@/hooks/useDialogFocus';
 import { useEventDetail } from '@/hooks/useEventDetail';
-import { formatExactTime } from '@/lib/format';
+import { formatExactTime, getEventTypeLabel } from '@/lib/format';
 import { EventDetailModal } from './EventDetailModal';
 import { FireEmergencyCall } from './FireEmergencyCall';
 import { EventSnapshot } from './EventEvidenceViewer';
@@ -13,9 +14,11 @@ import styles from './fire-attention.module.css';
 interface FireAttentionProps {
   event: UIEventItem;
   onReviewed: () => void;
+  onInspect: (eventId: string) => void;
   onConfirmOk: (id: string, note?: string) => Promise<void>;
   onConfirmHelp: (id: string, note?: string) => Promise<void>;
   onCloseEmergency: (id: string, note?: string) => Promise<void>;
+  canCloseEmergency?: boolean;
 }
 
 function AttentionSnapshot({ event }: { event: UIEventItem }) {
@@ -26,7 +29,7 @@ function AttentionSnapshot({ event }: { event: UIEventItem }) {
 export function FireAttention(props: FireAttentionProps) {
   const [opened, setOpened] = useState(false);
   const ref = useDialogFocus(!opened);
-  const { event, onReviewed } = props;
+  const { event, onReviewed, onInspect } = props;
   if (opened)
     return <EventDetailModal {...props} onClose={onReviewed} requireReview onReview={onReviewed} />;
   return (
@@ -41,9 +44,9 @@ export function FireAttention(props: FireAttentionProps) {
         aria-describedby="fire-attention-description"
       >
         <div className={styles.alarmLabel}>
-          <span aria-hidden="true">🔥</span> CẢNH BÁO KHẨN CẤP · P0
+          <Siren size={17} aria-hidden="true" /> CẢNH BÁO KHẨN CẤP · P0
         </div>
-        <h2 id="fire-attention-title">Phát hiện lửa</h2>
+        <h2 id="fire-attention-title">{getEventTypeLabel(event.eventType)}</h2>
         <div className={styles.location}>
           <strong>
             {event.camera?.name ?? 'Camera'}
@@ -53,13 +56,30 @@ export function FireAttention(props: FireAttentionProps) {
         </div>
         <AttentionSnapshot event={event} />
         <p id="fire-attention-description">
-          Xem bằng chứng và thời điểm phát hiện để kiểm tra cảnh báo.
+          Xem bằng chứng và xác nhận tình trạng.
+          {event.status === 'NOTIFIED' && event.escalationDeadlineAt && (
+            <>
+              {' '}
+              Hạn xác nhận{' '}
+              <time dateTime={event.escalationDeadlineAt}>
+                {formatExactTime(event.escalationDeadlineAt)}
+              </time>
+              .
+            </>
+          )}
         </p>
         <div className={styles.actions}>
-          <button type="button" className={styles.inspect} onClick={() => setOpened(true)}>
+          <button
+            type="button"
+            className={styles.inspect}
+            onClick={() => {
+              onInspect(event.id);
+              setOpened(true);
+            }}
+          >
             Xem chi tiết ngay
           </button>
-          <FireEmergencyCall />
+          {event.eventType === 'FIRE_SMOKE_DETECTED' && <FireEmergencyCall />}
         </div>
       </div>
     </div>

@@ -1,32 +1,44 @@
 BEGIN;
 
 -- 1. Thêm Users (Mật khẩu dev là Admin@12345, hash bằng Argon2id theo 0001_demo_users.sql)
-INSERT INTO users (id, email, password_hash, full_name, role) VALUES 
+INSERT INTO users (id, email, password_hash, full_name, role, household_owner_id) VALUES 
 (
     '11111111-1111-4111-8111-111111111111',
     'admin@camerai.local',
     '$argon2id$v=19$m=65536,p=4,t=3$t/FGrLv6QCsVGRNKlgaoPA$VEX5Op2XTiAYQEvy1dUIbsuGGAqE98grgmHV3Y90gyo',
     'Quản trị CameraAI',
-    'ADMIN'
+    'ADMIN',
+    NULL
 ),
 (
     '00000000-0000-0000-0000-000000000002',
     'caregiver@camerai.local',
     '$argon2id$v=19$m=65536,p=4,t=3$t/FGrLv6QCsVGRNKlgaoPA$VEX5Op2XTiAYQEvy1dUIbsuGGAqE98grgmHV3Y90gyo',
     'Caregiver User',
-    'CAREGIVER'
+    'CAREGIVER',
+    '11111111-1111-4111-8111-111111111111'
 ),
 (
     '22222222-2222-4222-8222-222222222222',
     'resident@camerai.local',
     '$argon2id$v=19$m=65536,p=4,t=3$t/FGrLv6QCsVGRNKlgaoPA$VEX5Op2XTiAYQEvy1dUIbsuGGAqE98grgmHV3Y90gyo',
     'Ong Noi (Resident)',
-    'VIEWER'
+    'VIEWER',
+    '11111111-1111-4111-8111-111111111111'
+),
+(
+    '33333333-3333-4333-8333-333333333333',
+    'viewer@camerai.local',
+    '$argon2id$v=19$m=65536,p=4,t=3$t/FGrLv6QCsVGRNKlgaoPA$VEX5Op2XTiAYQEvy1dUIbsuGGAqE98grgmHV3Y90gyo',
+    'Viewer User',
+    'VIEWER',
+    '11111111-1111-4111-8111-111111111111'
 )
 ON CONFLICT (email) DO UPDATE
 SET password_hash = EXCLUDED.password_hash,
     full_name = EXCLUDED.full_name,
     role = EXCLUDED.role,
+    household_owner_id = EXCLUDED.household_owner_id,
     is_active = TRUE,
     failed_login_count = 0,
     locked_until = NULL;

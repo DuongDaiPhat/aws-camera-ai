@@ -8,7 +8,7 @@ import {
   toUIEventItem,
   confirmEvent,
   closeEvent,
-  fetchPendingFireEvents,
+  fetchPendingCriticalEvents,
 } from './events-client';
 import type { EventStats, EventSummary } from '@/types';
 
@@ -107,7 +107,7 @@ describe('toUIEventItem', () => {
   });
 });
 
-describe('pending fire alerts', () => {
+describe('pending P0 alerts', () => {
   it('queries active fire independently and follows server pagination', async () => {
     const event: EventSummary = {
       id: 'older-fire',
@@ -127,13 +127,15 @@ describe('pending fire alerts', () => {
           meta: { page: 2, pageSize: 1, total: 2 },
         }),
       );
-    expect((await fetchPendingFireEvents()).map((item) => item.id)).toEqual([
+    expect((await fetchPendingCriticalEvents()).map((item) => item.id)).toEqual([
       'older-fire',
       'other-fire',
     ]);
     const query = new URL(String(request.mock.calls[0][0])).searchParams;
     expect(query.getAll('status')).toEqual(['DETECTED', 'NOTIFIED', 'ESCALATED']);
-    expect(query.get('eventType')).toBe('FIRE_SMOKE_DETECTED');
+    expect(query.get('priority')).toBe('P0');
+    expect(query.get('notificationState')).toBe('pending');
+    expect(query.has('eventType')).toBe(false);
     expect(String(request.mock.calls[1][0])).toContain('page=2');
   });
 });

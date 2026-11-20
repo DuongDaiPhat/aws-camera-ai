@@ -10,6 +10,11 @@ export type {
   ConfirmationPhase,
 } from '@cam/contracts';
 
+export type PlaybackMetadata = components['schemas']['PlaybackMetadata'];
+export type PlaybackCamera = components['schemas']['PlaybackCamera'];
+export type RecordingSegment = components['schemas']['RecordingSegment'];
+export type RecordingDay = components['schemas']['RecordingDay'];
+
 export type EventSummary = components['schemas']['EventSummary'];
 export type EventDetail = components['schemas']['EventDetail'];
 export type EventMedia = components['schemas']['EventMedia'];

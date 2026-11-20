@@ -4,16 +4,10 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { TopHeader } from './TopHeader';
 
 function render(pendingCount: number | null): string {
-  return renderToStaticMarkup(
-    <TopHeader selectedZone="ALL" onSelectZone={() => {}} pendingCount={pendingCount} />,
-  );
+  return renderToStaticMarkup(<TopHeader pendingCount={pendingCount} />);
 }
 
 describe('dashboard alert status', () => {
-  it('omits the demo event action from the header', () => {
-    expect(render(0)).not.toContain('Thử sự kiện mới');
-  });
-
   it('shows pending alerts instead of claiming that the house is safe', () => {
     expect(render(1)).toContain('1 cảnh báo đang chờ xử lý.');
     expect(render(1)).not.toContain('Mọi thứ trong nhà đang an toàn');

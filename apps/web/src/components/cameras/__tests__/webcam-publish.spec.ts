@@ -1,6 +1,7 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import {
   createBrowserPublishSession,
+  fetchCamera,
   updateCameraSource,
   updateCameraState,
 } from '@/lib/cameras-client';
@@ -8,11 +9,19 @@ import { publishWebcam } from '../source/webcam-publish';
 
 vi.mock('@/lib/cameras-client', () => ({
   createBrowserPublishSession: vi.fn(),
+  fetchCamera: vi.fn(),
   updateCameraSource: vi.fn(),
   updateCameraState: vi.fn(),
 }));
 
 describe('publishWebcam', () => {
+  beforeEach(() =>
+    vi
+      .mocked(fetchCamera)
+      .mockResolvedValue({ sourceType: 'RTSP', isEnabled: false } as Awaited<
+        ReturnType<typeof fetchCamera>
+      >),
+  );
   afterEach(() => {
     vi.clearAllMocks();
     vi.unstubAllGlobals();
@@ -64,6 +73,7 @@ describe('publishWebcam', () => {
     await publishWebcam('camera-id', stream);
 
     expect(calls).toEqual(['source', 'state', 'session', 'whip']);
+    expect(fetchCamera).toHaveBeenCalledTimes(1);
     expect(updateCameraSource).toHaveBeenCalledWith('camera-id', {
       sourceType: 'BROWSER_WEBCAM',
       videoLoop: true,
@@ -84,16 +94,53 @@ describe('publishWebcam', () => {
     vi.mocked(updateCameraSource).mockResolvedValue(
       {} as Awaited<ReturnType<typeof updateCameraSource>>,
     );
-    vi.mocked(updateCameraState).mockResolvedValue({
-      frigateSync: { status: 'FAILED', errorMessage: 'Frigate unavailable' },
-    } as Awaited<ReturnType<typeof updateCameraState>>);
+    vi.mocked(fetchCamera).mockResolvedValue({
+      sourceType: 'BROWSER_WEBCAM',
+      isEnabled: true,
+      frigateSync: { status: 'FAILED' },
+    } as Awaited<ReturnType<typeof fetchCamera>>);
+    vi.mocked(createBrowserPublishSession).mockRejectedValue(new Error('Frigate unavailable'));
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(publishWebcam('camera-id', {} as MediaStream)).rejects.toThrow(
       'Frigate unavailable',
     );
-    expect(createBrowserPublishSession).not.toHaveBeenCalled();
+    expect(createBrowserPublishSession).toHaveBeenCalledWith('camera-id');
+    expect(updateCameraSource).not.toHaveBeenCalled();
+    expect(updateCameraState).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('reuses an enabled webcam configuration without resetting Frigate or recording', async () => {
+    vi.mocked(fetchCamera).mockResolvedValue({
+      sourceType: 'BROWSER_WEBCAM',
+      isEnabled: true,
+      frigateSync: { status: 'SYNCED' },
+    } as Awaited<ReturnType<typeof fetchCamera>>);
+    vi.mocked(createBrowserPublishSession).mockResolvedValue({
+      publishUrl: 'http://localhost:8889/cam/whip',
+      token: 'test-token',
+      streamKey: 'cam',
+      expiresAt: new Date().toISOString(),
+    });
+    class Peer {
+      iceGatheringState = 'complete';
+      localDescription = { sdp: 'offer' };
+      addTrack = vi.fn();
+      close = vi.fn();
+      createOffer = vi.fn(async () => ({ type: 'offer', sdp: 'offer' }));
+      setLocalDescription = vi.fn(async () => {});
+      setRemoteDescription = vi.fn(async () => {});
+    }
+    vi.stubGlobal('RTCPeerConnection', Peer);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: true, text: async () => 'answer' })),
+    );
+    await publishWebcam('already-live', { getTracks: () => [] } as unknown as MediaStream);
+    expect(updateCameraSource).not.toHaveBeenCalled();
+    expect(updateCameraState).not.toHaveBeenCalled();
+    expect(createBrowserPublishSession).toHaveBeenCalledOnce();
   });
 });

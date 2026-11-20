@@ -1,3 +1,4 @@
+import { PlaybackModule } from '../playback/playback.module';
 import { WellnessModule } from '../wellness/wellness.module';
 import { Module } from '@nestjs/common';
 import { EventsModule } from '../events/events.module';
@@ -12,6 +13,7 @@ import { FallDetectionModule } from '../fall-detection/fall-detection.module';
 
 @Module({
   imports: [
+    PlaybackModule,
     EventsModule,
     WellnessModule,
     MediaModule,

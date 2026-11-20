@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { LoginForm } from './LoginForm';
+import { CameraIllustration } from '@/components/showcase/CameraIllustration';
 import styles from './login.module.css';
 
 export const metadata: Metadata = {
@@ -87,6 +88,7 @@ export default function LoginPage() {
             kèm ảnh để bạn phản ứng kịp thời.
           </p>
 
+          <CameraIllustration className={styles.cameraArt} />
           <ul className={styles.features}>
             {PRODUCT_FEATURES.map((feature) => (
               <li key={feature.icon}>
@@ -99,7 +101,7 @@ export default function LoginPage() {
           </ul>
         </div>
 
-        <p className={styles.railFooter}>CameraAI · Giám sát hành vi ứng dụng AI và AWS</p>
+        <p className={styles.railFooter}>CameraAI · Không gian an toàn cho người thân</p>
       </aside>
 
       <section className={styles.authArea} aria-labelledby="login-title">

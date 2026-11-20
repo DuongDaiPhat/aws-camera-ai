@@ -1,0 +1,41 @@
+.surface {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #101014;
+}
+.placeholder {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px;
+  gap: 12px;
+  text-align: center;
+  color: #d9c9ed;
+}
+.placeholder > svg {
+  color: #ab93c0;
+  flex-shrink: 0;
+}
+.placeholder strong {
+  font-size: clamp(11px, 1vw, 15px);
+  font-weight: 550;
+}
+.placeholder span {
+  font-size: 11px;
+  line-height: 1.5;
+  max-width: 260px;
+  color: #a998ba;
+}
+.surface[data-compact='true'] .placeholder {
+  padding: 8px;
+  gap: 5px;
+  background: #101014;
+  color: #c0b1cf;
+}
+.surface[data-compact='true'] .placeholder strong {
+  font-size: 9px;
+  font-weight: 500;
+}

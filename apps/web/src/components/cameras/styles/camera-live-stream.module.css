@@ -1,0 +1,60 @@
+.player {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #101014;
+  container-type: inline-size;
+}
+.player video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  text-align: center;
+  color: #d9cee8;
+  background: #101014;
+}
+.state > svg {
+  position: static;
+  width: 30px;
+  height: 30px;
+  color: #ad95c6;
+  flex-shrink: 0;
+}
+.state strong {
+  font-size: clamp(10px, 1vw, 14px);
+  line-height: 1.5;
+}
+.state span {
+  max-width: 340px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #aa9aba;
+}
+@container (max-width: 260px) {
+  .state {
+    padding: 8px;
+    gap: 5px;
+  }
+  .state > svg {
+    width: 22px;
+    height: 22px;
+  }
+  .state strong {
+    font-size: 10px;
+  }
+  .state span {
+    display: none;
+  }
+}

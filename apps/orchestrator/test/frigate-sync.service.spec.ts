@@ -66,6 +66,7 @@ describe('FrigateSyncService', () => {
     const mockConfig = {
       generateUpdatedConfig: jest.fn(),
       hasAppliedSettings: jest.fn().mockReturnValue(true),
+      hasSameConfig: jest.fn().mockReturnValue(false),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -283,6 +284,21 @@ describe('FrigateSyncService', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it('reconciles an already running configuration without restarting other cameras', async () => {
+    camerasRepository.findById.mockResolvedValue(mockCamera);
+    camerasRepository.findFrigateSettingsByCameraId.mockResolvedValue(null);
+    camerasRepository.updateFrigateSettings.mockResolvedValue({ config_version: 1 } as any);
+    frigateClient.getRawConfig.mockResolvedValue('cameras: {}');
+    frigateConfig.generateUpdatedConfig.mockReturnValue('cameras: {}');
+    frigateConfig.hasSameConfig.mockReturnValue(true);
+
+    const result = await service.syncCamera(mockCamera.id);
+
+    expect(result.syncStatus).toBe('SYNCED');
+    expect(frigateClient.saveConfig).not.toHaveBeenCalled();
+    expect(frigateClient.getRuntimeState).toHaveBeenCalledTimes(1);
   });
 
   it('waits through a restart outage before preparing the next configuration', async () => {

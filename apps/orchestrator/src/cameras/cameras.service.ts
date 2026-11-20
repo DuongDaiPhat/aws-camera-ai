@@ -6,6 +6,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
@@ -453,6 +454,11 @@ export class CamerasService implements CameraConfigPortV1 {
       return this.mapToSourceDetail(currentSource, role);
     }
 
+    if (currentSource && currentSource.source_type !== dto.sourceType) {
+      await this.cameraSourcesService.stopCameraSource(cameraId);
+      this.detectionTracker.clearCamera(camera.slug);
+    }
+
     const updatedSource = await this.camerasRepository.upsertSource(cameraId, {
       source_type: dto.sourceType,
       rtsp_url: dto.rtspUrl,
@@ -524,14 +530,18 @@ export class CamerasService implements CameraConfigPortV1 {
       });
     }
 
-    await this.camerasRepository.upsertSource(cameraId, {
-      source_type: 'BROWSER_WEBCAM',
-      status: 'STARTING',
-    });
-    if (camera.sync_status !== 'SYNCED') {
-      await this.frigateSyncService.syncCamera(cameraId).catch((error) => {
-        this.logger.warn(`Đồng bộ Frigate khi tạo phiên WHIP camera ${cameraId} thất bại:`, error);
-      });
+    await this.camerasRepository.upsertSource(cameraId, { status: 'STARTING' });
+    if (camera.sync_status !== 'SYNCED' || camera.applied_version !== camera.config_version) {
+      const result = await this.frigateSyncService.syncCamera(cameraId);
+      if (!result.success) {
+        throw new ServiceUnavailableException({
+          error: {
+            code: result.errorCode ?? 'FRIGATE_SYNC_FAILED',
+            message:
+              result.errorMessage ?? 'Không thể đồng bộ camera với Frigate. Vui lòng thử lại.',
+          },
+        });
+      }
     }
 
     return this.cameraSourcesService.createBrowserSession(camera.slug, cameraId);
@@ -569,8 +579,11 @@ export class CamerasService implements CameraConfigPortV1 {
       lastCheckedAt: new Date().toISOString(),
       details: {
         sourceType: camera.source_type_val ?? 'RTSP',
-        errorCode: camera.source_error_code ?? null,
-        errorMessage: camera.source_error_msg ?? null,
+        ...this.sourceError(
+          camera.source_type_val,
+          camera.source_error_code,
+          camera.source_error_msg,
+        ),
       },
     };
   }
@@ -772,7 +785,7 @@ export class CamerasService implements CameraConfigPortV1 {
     return this.mapToSourceDetail(refreshed, role);
   }
 
-  async getCameraDebugStream(cameraId: string): Promise<CameraDebugStream> {
+  async getCameraDebugStream(cameraId: string, actorId?: string): Promise<CameraDebugStream> {
     const now = Date.now();
     let camera: CameraAggregateRecord;
 
@@ -820,7 +833,11 @@ export class CamerasService implements CameraConfigPortV1 {
       }
     }
 
-    const readSession = this.cameraSourcesService.createBrowserReadSession(camera.slug, camera.id);
+    const readSession = this.cameraSourcesService.createBrowserReadSession(
+      camera.slug,
+      camera.id,
+      actorId,
+    );
 
     const isCameraActive = camera.is_enabled;
 
@@ -924,11 +941,11 @@ export class CamerasService implements CameraConfigPortV1 {
   // -------------------------------------------------------------------
 
   private assertAdmin(role: UserRole): void {
-    if (role !== 'ADMIN') {
+    if (!['ADMIN', 'CAREGIVER'].includes(role)) {
       throw new ForbiddenException({
         error: {
           code: 'FORBIDDEN',
-          message: 'Chỉ Quản trị viên (ADMIN) mới có quyền thực hiện thao tác này.',
+          message: 'Chỉ chủ hộ hoặc quản trị viên được thực hiện thao tác này.',
         },
       });
     }
@@ -1016,12 +1033,15 @@ export class CamerasService implements CameraConfigPortV1 {
   private buildSourceInfo(r: CameraAggregateRecord): CameraSourceInfo {
     const isPublishing = r.is_enabled && r.source_status === 'ONLINE';
     // A source URL can contain credentials. Keep it out of display metadata for every role.
-    const displayName = r.source_video_name ?? (r.source_type_val ? r.name : null);
+    const isVideo = r.source_type_val === 'VIDEO_FILE';
+    const displayName =
+      (isVideo ? r.source_video_name : null) ?? (r.source_type_val ? r.name : null);
     return {
       type: r.source_type_val ?? 'RTSP',
       displayName,
       isPublishing,
-      lastError: this.redactCredentials(r.source_error_msg),
+      lastError: this.sourceError(r.source_type_val, r.source_error_code, r.source_error_msg)
+        .errorMessage,
       requiresBrowserPublisher: r.source_type_val === 'BROWSER_WEBCAM',
     };
   }
@@ -1066,7 +1086,7 @@ export class CamerasService implements CameraConfigPortV1 {
   }
 
   private mapToCameraDto(r: CameraAggregateRecord, role: UserRole): CameraDto {
-    const isMasked = role !== 'ADMIN';
+    const isMasked = !['ADMIN', 'CAREGIVER'].includes(role);
     const maskedRtsp = isMasked
       ? null
       : r.rtsp_url
@@ -1105,27 +1125,43 @@ export class CamerasService implements CameraConfigPortV1 {
     };
   }
 
+  private sourceError(
+    sourceType: CameraSourceRecord['source_type'] | null,
+    code: string | null,
+    message: string | null,
+  ): { errorCode: string | null; errorMessage: string | null } {
+    if (sourceType !== 'VIDEO_FILE' && code === 'VIDEO_NOT_FOUND') {
+      return { errorCode: null, errorMessage: null };
+    }
+    return { errorCode: code, errorMessage: this.redactCredentials(message) };
+  }
+
   private mapToSourceDetail(s: CameraSourceRecord, role: UserRole): CameraSourceDetail {
-    const isMasked = role !== 'ADMIN';
+    const isMasked = !['ADMIN', 'CAREGIVER'].includes(role);
     const maskedRtsp = isMasked
       ? null
       : s.rtsp_url
         ? s.rtsp_url.replace(/(rtsp:\/\/[^:]+:)[^@]+(@.*)/, '$1***$2')
         : null;
 
+    const { errorCode, errorMessage } = this.sourceError(
+      s.source_type,
+      s.last_error_code,
+      s.last_error_message,
+    );
     return {
       id: s.id,
       cameraId: s.camera_id,
       sourceType: s.source_type,
       rtspUrl: maskedRtsp,
-      videoOriginalName: s.video_original_name,
+      videoOriginalName: s.source_type === 'VIDEO_FILE' ? s.video_original_name : null,
       videoLoop: s.video_loop,
       transport: s.transport,
       inputFormat: s.input_format,
       webcamDeviceLabel: s.webcam_device_label,
       status: s.status,
-      lastErrorCode: s.last_error_code,
-      lastErrorMessage: s.last_error_message,
+      lastErrorCode: errorCode,
+      lastErrorMessage: errorMessage,
       startedAt: s.started_at ? s.started_at.toISOString() : null,
       stoppedAt: s.stopped_at ? s.stopped_at.toISOString() : null,
       updatedAt: s.updated_at ? s.updated_at.toISOString() : new Date().toISOString(),

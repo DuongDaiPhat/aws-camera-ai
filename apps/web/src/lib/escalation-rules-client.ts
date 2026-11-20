@@ -9,17 +9,23 @@ export interface ListEscalationRulesResponse {
   data: EscalationRule[];
 }
 
-export async function fetchEscalationRules(): Promise<EscalationRule[]> {
-  const response = await apiFetch<ListEscalationRulesResponse>('/escalation-rules');
+export async function fetchEscalationRules(household = false): Promise<EscalationRule[]> {
+  const response = await apiFetch<ListEscalationRulesResponse>(
+    household ? '/household/escalation-rules' : '/escalation-rules',
+  );
   return response.data;
 }
 
 export async function updateEscalationThresholds(
   eventType: string,
   request: UpdateEscalationThresholdsRequest,
+  household = false,
 ): Promise<EscalationRule> {
-  return apiFetch<EscalationRule>(`/escalation-rules/${eventType}`, {
-    method: 'PATCH',
-    body: JSON.stringify(request),
-  });
+  return apiFetch<EscalationRule>(
+    `${household ? '/household' : ''}/escalation-rules/${eventType}`,
+    {
+      method: household ? 'PUT' : 'PATCH',
+      body: JSON.stringify(request),
+    },
+  );
 }

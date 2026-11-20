@@ -9,6 +9,7 @@ import { CameraPreview } from './CameraPreview';
 import { CameraSettingsPanel } from './CameraSettingsPanel';
 import { CameraGridView } from './CameraGridView';
 import { stopWebcamSession } from './source/webcam-session-manager';
+import { AddCameraButton } from '@/components/household/AddCameraButton';
 import styles from './styles/camera-view.module.css';
 
 interface CameraViewProps {
@@ -33,11 +34,11 @@ function CameraSummaryBanner({
         <span className={styles.summaryValue}>{total}</span>
       </div>
       <div className={styles.summaryCard}>
-        <span className={styles.summaryLabel}>Đang kích hoạt (Config)</span>
+        <span className={styles.summaryLabel}>Đã bật</span>
         <span className={styles.summaryValue}>{active}</span>
       </div>
       <div className={styles.summaryCard}>
-        <span className={styles.summaryLabel}>Đang online (Runtime)</span>
+        <span className={styles.summaryLabel}>Đang trực tuyến</span>
         <span className={`${styles.summaryValue} ${styles.summaryValueOnline}`}>{online}</span>
       </div>
       <div className={styles.summaryCard}>
@@ -53,23 +54,26 @@ function CameraSummaryBanner({
 function CameraDetailPanel({
   camera,
   isAdmin,
+  isViewer,
   isToggling,
   onToggleState,
   onRefreshCameras,
 }: {
   camera: Camera | null;
   isAdmin: boolean;
+  isViewer: boolean;
   isToggling: boolean;
   onToggleState: (id: string, isEnabled: boolean) => void;
   onRefreshCameras?: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<'preview' | 'source' | 'frigate'>('preview');
+  const currentTab = isViewer ? 'preview' : activeTab;
 
   if (!camera) {
     return (
       <div className={styles.detailColumn}>
         <div className={styles.emptyState}>
-          <span>Vui lòng chọn một camera để xem chi tiết.</span>
+          <span>Vui lòng chọn một camera để xem trực tiếp.</span>
         </div>
       </div>
     );
@@ -85,9 +89,11 @@ function CameraDetailPanel({
       <div className={styles.detailHeader}>
         <div className={styles.titles}>
           <h2 className={styles.detailTitle}>{camera.name}</h2>
-          <span className={styles.subtitle}>
-            Độ phân giải: {resolution} · {camera.fps} FPS · Nguồn: {camera.sourceType}
-          </span>
+          {!isViewer && (
+            <span className={styles.subtitle}>
+              Độ phân giải: {resolution} · {camera.fps} FPS · Nguồn: {camera.sourceType}
+            </span>
+          )}
         </div>
 
         {isAdmin && (
@@ -103,61 +109,69 @@ function CameraDetailPanel({
         )}
       </div>
 
-      <div className={styles.tabControls}>
-        <button
-          type="button"
-          className={`${styles.tabBtn} ${activeTab === 'preview' ? styles.tabBtnActive : ''}`}
-          onClick={() => setActiveTab('preview')}
-        >
-          Luồng xem trực tiếp & Debug View
-        </button>
-        <button
-          type="button"
-          className={`${styles.tabBtn} ${activeTab === 'source' ? styles.tabBtnActive : ''}`}
-          onClick={() => setActiveTab('source')}
-        >
-          Cấu hình nguồn phát ({camera.sourceType})
-        </button>
-        <button
-          type="button"
-          className={`${styles.tabBtn} ${activeTab === 'frigate' ? styles.tabBtnActive : ''}`}
-          onClick={() => setActiveTab('frigate')}
-        >
-          Cài đặt Frigate & Đồng bộ
-        </button>
-      </div>
+      {!isViewer && (
+        <div className={styles.tabControls}>
+          <button
+            type="button"
+            className={`${styles.tabBtn} ${currentTab === 'preview' ? styles.tabBtnActive : ''}`}
+            onClick={() => setActiveTab('preview')}
+          >
+            Xem trực tiếp và chẩn đoán
+          </button>
+          <button
+            type="button"
+            className={`${styles.tabBtn} ${currentTab === 'source' ? styles.tabBtnActive : ''}`}
+            onClick={() => setActiveTab('source')}
+          >
+            Cấu hình nguồn phát ({camera.sourceType})
+          </button>
+          <button
+            type="button"
+            className={`${styles.tabBtn} ${currentTab === 'frigate' ? styles.tabBtnActive : ''}`}
+            onClick={() => setActiveTab('frigate')}
+          >
+            Cài đặt Frigate & Đồng bộ
+          </button>
+        </div>
+      )}
 
-      <div style={{ display: activeTab === 'preview' ? 'block' : 'none' }}>
+      <div style={{ display: currentTab === 'preview' ? 'block' : 'none' }}>
         <CameraPreview camera={camera} />
       </div>
 
-      <div style={{ display: activeTab === 'source' ? 'block' : 'none' }}>
-        <CameraSourceForm
-          cameraId={camera.id}
-          slug={camera.slug}
-          initialSourceType={camera.sourceType}
-          initialRtspUrl={camera.rtspUrl}
-          initialVideoFileName={
-            camera.sourceType === 'VIDEO_FILE' ? camera.source.displayName : null
-          }
-          isAdmin={isAdmin}
-          onSourceUpdated={onRefreshCameras}
-        />
-      </div>
+      {!isViewer && (
+        <>
+          <div style={{ display: currentTab === 'source' ? 'block' : 'none' }}>
+            <CameraSourceForm
+              cameraId={camera.id}
+              slug={camera.slug}
+              initialSourceType={camera.sourceType}
+              initialRtspUrl={camera.rtspUrl}
+              initialVideoFileName={
+                camera.sourceType === 'VIDEO_FILE' ? camera.source.displayName : null
+              }
+              isAdmin={isAdmin}
+              onSourceUpdated={onRefreshCameras}
+            />
+          </div>
 
-      <div style={{ display: activeTab === 'frigate' ? 'block' : 'none' }}>
-        <CameraSettingsPanel
-          key={camera.id}
-          camera={camera}
-          isAdmin={isAdmin}
-          onSynced={onRefreshCameras}
-        />
-      </div>
+          <div style={{ display: currentTab === 'frigate' ? 'block' : 'none' }}>
+            <CameraSettingsPanel
+              key={camera.id}
+              camera={camera}
+              isAdmin={isAdmin}
+              onSynced={onRefreshCameras}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
 export function CameraView({ user }: CameraViewProps) {
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'CAREGIVER';
+  const isViewer = user?.role === 'VIEWER';
   const {
     cameras,
     selectedCameraId,
@@ -170,7 +184,7 @@ export function CameraView({ user }: CameraViewProps) {
     toggleCamera,
   } = useCameras();
 
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => (isViewer ? 'grid' : 'list'));
 
   const handleSetViewMode = (mode: 'list' | 'grid') => {
     setViewMode(mode);
@@ -179,8 +193,6 @@ export function CameraView({ user }: CameraViewProps) {
     }
     void loadCameras();
   };
-
-  const isAdmin = user?.role === 'ADMIN';
 
   const stats = useMemo(() => {
     const total = cameras.length;
@@ -203,14 +215,25 @@ export function CameraView({ user }: CameraViewProps) {
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.titles}>
-          <h1 className={styles.title}>Quản lý Camera & Nguồn phát</h1>
+          <h2 className={styles.title}>
+            {isViewer ? 'Camera trực tiếp' : 'Quản lý Camera & Nguồn phát'}
+          </h2>
           <p className={styles.subtitle}>
-            Giám sát trạng thái hoạt động, cấu hình nguồn cấp (RTSP, Webcam, Video) và kiểm thử
-            Debug View.
+            {isViewer
+              ? 'Xem các camera được chia sẻ với bạn, đổi bố cục và phóng to.'
+              : 'Theo dõi trạng thái, xem trực tiếp và quản lý nguồn hình ảnh từ camera, webcam hoặc video.'}
           </p>
         </div>
 
         <div className={styles.headerActions}>
+          {isAdmin && (
+            <AddCameraButton
+              onCreated={(id) => {
+                void loadCameras();
+                selectCamera(id);
+              }}
+            />
+          )}
           {/* Nút toggle chuyển qua lại giữa Danh sách và Lưới toàn bộ cam */}
           <div className={styles.viewModeGroup} role="group" aria-label="Chế độ xem camera">
             <button
@@ -296,12 +319,14 @@ export function CameraView({ user }: CameraViewProps) {
         </div>
       )}
 
-      <CameraSummaryBanner
-        total={stats.total}
-        active={stats.active}
-        online={stats.online}
-        errors={stats.errors}
-      />
+      {!isViewer && (
+        <CameraSummaryBanner
+          total={stats.total}
+          active={stats.active}
+          online={stats.online}
+          errors={stats.errors}
+        />
+      )}
 
       {viewMode === 'grid' ? (
         <CameraGridView
@@ -329,6 +354,7 @@ export function CameraView({ user }: CameraViewProps) {
           <CameraDetailPanel
             camera={selectedCamera}
             isAdmin={isAdmin}
+            isViewer={isViewer}
             isToggling={Boolean(selectedCamera && toggleLoadingMap[selectedCamera.id])}
             onToggleState={(id, isEnabled) => void handleToggleState(id, isEnabled)}
             onRefreshCameras={() => void loadCameras()}

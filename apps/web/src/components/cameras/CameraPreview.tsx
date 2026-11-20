@@ -2,12 +2,16 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Camera } from '@/types';
-import type { CameraDebugStream, CameraZone } from '@/lib/cameras-client';
-import { fetchCameraDebugStream, fetchCameraZones } from '@/lib/cameras-client';
+import type { CameraZone } from '@/lib/cameras-client';
+import { fetchCameraZones } from '@/lib/cameras-client';
 import { CameraDebugToolbar } from './CameraDebugToolbar';
 import { ZonePolygonLayer } from './debug/ZonePolygonLayer';
-import { PersonBoxLayer } from './debug/PersonBoxLayer';
-import { CameraLiveStream } from './CameraLiveStream';
+import { CameraAnnotations } from './CameraAnnotations';
+import { CameraStreamViewport } from './CameraStreamViewport';
+import { useCameraDebugStream } from './live/use-camera-debug-stream';
+import { hasLiveSource } from './live/live-stream-state';
+import type { LiveStreamStatus } from './live/camera-reader';
+import { useWebcamSession } from './source/webcam-session-manager';
 import { useLivePersonDetections } from './live/use-live-person-detections';
 import styles from './styles/camera-preview.module.css';
 
@@ -36,50 +40,38 @@ function useStoredToggle(key: string, defaultValue: boolean): [boolean, () => vo
 }
 
 export function CameraPreview({ camera }: CameraPreviewProps) {
+  const [playback, setPlayback] = useState<{ id: string; status: LiveStreamStatus } | null>(null);
+  const isPlaying = camera.isEnabled && playback?.id === camera.id && playback.status === 'live';
+  const effectiveStatus = isPlaying
+    ? 'ONLINE'
+    : camera.runtimeStatus === 'ONLINE'
+      ? playback?.status === 'unavailable'
+        ? 'FAILED'
+        : 'STARTING'
+      : camera.runtimeStatus;
+  const { isPublishing } = useWebcamSession(camera.id);
   const [debugEnabled, toggleDebug] = useStoredToggle(`cam_debug_enabled_${camera.id}`, true);
   const [showPerson, togglePerson] = useStoredToggle(`cam_debug_person_${camera.id}`, true);
   const [showZone, toggleZone] = useStoredToggle(`cam_debug_zone_${camera.id}`, true);
 
   const [zones, setZones] = useState<CameraZone[]>([]);
-  const [debugData, setDebugData] = useState<CameraDebugStream | null>(null);
-  const [loadError, setLoadError] = useState(false);
-
-  // Tải danh sách zones thực tế từ DB/API, nếu rỗng thì dùng sample zones
+  const { data: debugData, error: loadError } = useCameraDebugStream(camera.id, camera.isEnabled);
+  const [zoneError, setZoneError] = useState(false);
   useEffect(() => {
-    let isCancelled = false;
-    let inFlight = false;
-    const loadDebugData = () => {
-      if (!camera.isEnabled) {
-        setDebugData(null);
-        return;
-      }
-      if (inFlight) return;
-      inFlight = true;
-      fetchCameraDebugStream(camera.id)
-        .then((stream) => {
-          if (!isCancelled) {
-            setDebugData(stream);
-            setLoadError(false);
-          }
-        })
-        .catch(() => {
-          if (!isCancelled) setLoadError(true);
-        })
-        .finally(() => {
-          inFlight = false;
-        });
-    };
-
-    void fetchCameraZones(camera.id).then((cameraZones) => {
-      if (!isCancelled) setZones(cameraZones.filter((zone) => zone.isEnabled));
-    });
-    void loadDebugData();
-    const refreshTimer = camera.isEnabled ? setInterval(loadDebugData, 80) : null;
+    let cancelled = false;
+    setZones([]);
+    setZoneError(false);
+    fetchCameraZones(camera.id)
+      .then((result) => {
+        if (!cancelled) setZones(result.filter((zone) => zone.isEnabled));
+      })
+      .catch(() => {
+        if (!cancelled) setZoneError(true);
+      });
     return () => {
-      isCancelled = true;
-      if (refreshTimer) clearInterval(refreshTimer);
+      cancelled = true;
     };
-  }, [camera.id, camera.isEnabled]);
+  }, [camera.id]);
 
   const activeZoneSlugs = useMemo(() => {
     return new Set(debugData?.activeZones ?? []);
@@ -112,12 +104,32 @@ export function CameraPreview({ camera }: CameraPreviewProps) {
       />
 
       <div className={styles.videoWrapper}>
-        {debugData?.streamUrl && camera.isEnabled ? (
-          <CameraLiveStream
-            className={styles.videoElement}
+        {debugData?.streamUrl && hasLiveSource(camera, isPublishing) ? (
+          <CameraStreamViewport
             streamUrl={debugData.streamUrl}
             title={camera.name}
-          />
+            width={camera.detectWidth}
+            height={camera.detectHeight}
+            fullscreen
+            onStatusChange={(status) => setPlayback({ id: camera.id, status })}
+          >
+            {debugEnabled && camera.isEnabled && (
+              <CameraAnnotations
+                cameraId={camera.id}
+                people={showPerson ? detectedPeople : []}
+                height={overlayHeight}
+                showFootpoint={showZone}
+              >
+                {showZone && (
+                  <ZonePolygonLayer
+                    zones={zones}
+                    activeZoneSlugs={activeZoneSlugs}
+                    height={overlayHeight}
+                  />
+                )}
+              </CameraAnnotations>
+            )}
+          </CameraStreamViewport>
         ) : (
           <div className={styles.videoPlaceholder}>
             <div className={styles.placeholderGrid} />
@@ -125,7 +137,7 @@ export function CameraPreview({ camera }: CameraPreviewProps) {
               {loadError
                 ? 'Không tải được dữ liệu camera'
                 : camera.isEnabled
-                  ? 'Chưa có snapshot camera'
+                  ? 'Đang chờ nguồn phát camera'
                   : 'Camera đang tắt'}
             </span>
           </div>
@@ -133,34 +145,13 @@ export function CameraPreview({ camera }: CameraPreviewProps) {
 
         <div className={styles.hudBadges}>
           <span className={styles.hudBadge}>
-            {camera.runtimeStatus === 'ONLINE' && <span className={styles.hudLiveDot} />}
-            {camera.runtimeStatus}
+            {isPlaying && <span className={styles.hudLiveDot} />}
+            {effectiveStatus}
           </span>
           <span className={styles.hudBadge}>RES: {resolution}</span>
           <span className={styles.hudBadge}>FPS: {camera.fps}</span>
           <span className={styles.hudBadge}>SOURCE: {camera.sourceType}</span>
         </div>
-
-        {debugEnabled && camera.isEnabled && (
-          <svg className={styles.svgOverlay} viewBox={`0 0 1000 ${overlayHeight}`}>
-            {showZone && (
-              <ZonePolygonLayer
-                zones={zones}
-                activeZoneSlugs={activeZoneSlugs}
-                height={overlayHeight}
-              />
-            )}
-            {showPerson &&
-              detectedPeople.map((person, index) => (
-                <PersonBoxLayer
-                  key={person.id || `${person.label}-${index}`}
-                  person={person}
-                  showFootpoint={showZone}
-                  height={overlayHeight}
-                />
-              ))}
-          </svg>
-        )}
       </div>
 
       <div className={styles.infoFootnote}>
@@ -170,7 +161,8 @@ export function CameraPreview({ camera }: CameraPreviewProps) {
             : 'No current person detections'}
         </span>
         <span className={styles.footpointLegend}>
-          <span className={styles.footpointDot} /> Camera zones
+          <span className={styles.footpointDot} />{' '}
+          {zoneError ? 'Không tải được vùng giám sát' : 'Camera zones'}
         </span>
       </div>
     </div>

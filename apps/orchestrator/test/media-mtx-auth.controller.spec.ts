@@ -8,6 +8,7 @@ describe('MediaMtxAuthController', () => {
   const mediaMtxService = {
     verifyBrowserSession: jest.fn(),
     verifyBrowserReadSession: jest.fn(),
+    getBrowserReadActor: jest.fn(),
     verifyInternalStreamCredentials: jest.fn(),
   } as unknown as MediaMtxService;
   const cameraSourcesRepository = {
@@ -16,6 +17,7 @@ describe('MediaMtxAuthController', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(mediaMtxService.getBrowserReadActor).mockReturnValue('actor-id');
     jest.mocked(mediaMtxService.verifyInternalStreamCredentials).mockReturnValue(false);
     jest.mocked(mediaMtxService.verifyBrowserReadSession).mockReturnValue(false);
     controller = new MediaMtxAuthController(mediaMtxService, cameraSourcesRepository);
@@ -37,9 +39,43 @@ describe('MediaMtxAuthController', () => {
       'cam_front',
       'viewer-token',
     );
-    expect(cameraSourcesRepository.isEnabledMediaPath).toHaveBeenCalledWith('cam_front', 'read');
+    expect(cameraSourcesRepository.isEnabledMediaPath).toHaveBeenCalledWith(
+      'cam_front',
+      'read',
+      'actor-id',
+    );
   });
 
+  it('rechecks current read grants even while a viewer token remains valid', async () => {
+    jest.mocked(mediaMtxService.verifyBrowserReadSession).mockReturnValue(true);
+    jest.mocked(cameraSourcesRepository.isEnabledMediaPath).mockResolvedValue(false);
+    await expect(
+      controller.authorize({
+        action: 'read',
+        protocol: 'webrtc',
+        path: 'cam_front',
+        token: 'issued-before-revocation',
+      }),
+    ).rejects.toThrow(UnauthorizedException);
+    expect(cameraSourcesRepository.isEnabledMediaPath).toHaveBeenCalledWith(
+      'cam_front',
+      'read',
+      'actor-id',
+    );
+  });
+  it('rejects unbound legacy read tokens', async () => {
+    jest.mocked(mediaMtxService.verifyBrowserReadSession).mockReturnValue(true);
+    jest.mocked(mediaMtxService.getBrowserReadActor).mockReturnValue(null);
+    await expect(
+      controller.authorize({
+        action: 'read',
+        protocol: 'webrtc',
+        path: 'cam_front',
+        token: 'unbound',
+      }),
+    ).rejects.toThrow(UnauthorizedException);
+    expect(cameraSourcesRepository.isEnabledMediaPath).not.toHaveBeenCalled();
+  });
   it('reads a camera-bound WebRTC token from the MediaMTX query payload', async () => {
     jest.mocked(mediaMtxService.verifyBrowserReadSession).mockReturnValue(true);
     jest.mocked(cameraSourcesRepository.isEnabledMediaPath).mockResolvedValue(true);

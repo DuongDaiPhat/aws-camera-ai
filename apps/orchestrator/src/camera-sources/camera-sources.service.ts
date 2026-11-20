@@ -80,8 +80,12 @@ export class CameraSourcesService implements OnModuleInit {
     return this.mediaMtxService.createBrowserSession(slug, cameraId);
   }
 
-  createBrowserReadSession(slug: string, cameraId?: string): BrowserReadSessionResult {
-    return this.mediaMtxService.createBrowserReadSession(slug, cameraId);
+  createBrowserReadSession(
+    slug: string,
+    cameraId?: string,
+    actorId?: string,
+  ): BrowserReadSessionResult {
+    return this.mediaMtxService.createBrowserReadSession(slug, cameraId, actorId);
   }
 
   revokeBrowserSession(cameraId: string): boolean {

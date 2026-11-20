@@ -391,10 +391,18 @@ RTSP/Frigate/recording/browser gate.
 
 ## Enable and observe
 
-All new settings are documented in `.env.example`. Both admission flags default
-to false. After staging the verified candidate and accepting the deployment run,
-set `M3_ENABLED=true`, `FRIGATE_FIRE_FRAMES_ENABLED=true` and the registered
-`FIRE_MODEL_SHA256` in the deployment environment. Keep the model version,
+Settings are documented in `.env.example`. After staging the verified model
+and its contract, set `M3_ENABLED=true` and the registered `FIRE_MODEL_SHA256`.
+In the local Docker Compose stack, leave `FRIGATE_FIRE_FRAMES_ENABLED` empty to
+follow `M3_ENABLED`, or set it to `true` if an existing environment defines
+it as `false`. Apply the configuration from the repository root:
+
+```powershell
+docker compose --profile cv up -d --no-deps frigate ai-service orchestrator
+```
+
+The default remains disabled. For deployments that do not use the local Compose
+wiring, set the publisher flag explicitly after deployment acceptance. Keep the model version,
 threshold/window/gap/clear settings equal in AI and orchestrator. Restart those
 services after changing a model or rule so partial evidence cannot span versions.
 Synchronize host/container clocks: the default future tolerance is 500 ms, and

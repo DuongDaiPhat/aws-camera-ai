@@ -64,6 +64,9 @@ const claimTelegramSql = (scoped: boolean): string => `
   WITH ready AS (
     SELECT n.id FROM notifications n
     WHERE n.channel = 'TELEGRAM'
+      AND EXISTS (SELECT 1 FROM users recipient LEFT JOIN user_notification_preferences prefs ON prefs.user_id=recipient.id
+        JOIN events event ON event.id=n.event_id WHERE recipient.id=n.recipient_user_id AND recipient.is_active
+        AND COALESCE(prefs.telegram_alerts,TRUE) AND (event.event_type='WELLNESS_TIMEOUT' OR can_access_camera(recipient.id,event.camera_id)))
       ${scoped ? DELIVERY_SCOPE_SQL : ''}
       AND n.status IN ('PENDING', 'FAILED')
       AND n.attempt_count < CASE WHEN n.attempt_count = 0 THEN $3 ELSE n.max_attempts END

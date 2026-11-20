@@ -1,5 +1,6 @@
 import {
   createBrowserPublishSession,
+  fetchCamera,
   updateCameraSource,
   updateCameraState,
 } from '@/lib/cameras-client';
@@ -29,15 +30,16 @@ export async function publishWebcam(
   cameraId: string,
   stream: MediaStream,
 ): Promise<RTCPeerConnection> {
-  await updateCameraSource(cameraId, {
-    sourceType: 'BROWSER_WEBCAM',
-    videoLoop: true,
-    transport: 'TCP',
-  });
-  const camera = await updateCameraState(cameraId, true);
-  if (camera.frigateSync.status !== 'SYNCED') {
-    throw new Error(camera.frigateSync.errorMessage ?? 'Không thể đồng bộ camera với Frigate');
+  // Re-entering the source page must not reconfigure Frigate or restart recording.
+  const camera = await fetchCamera(cameraId);
+  if (camera.sourceType !== 'BROWSER_WEBCAM') {
+    await updateCameraSource(cameraId, {
+      sourceType: 'BROWSER_WEBCAM',
+      videoLoop: true,
+      transport: 'TCP',
+    });
   }
+  if (!camera.isEnabled) await updateCameraState(cameraId, true);
 
   const session = await createBrowserPublishSession(cameraId);
   const pc = new RTCPeerConnection();

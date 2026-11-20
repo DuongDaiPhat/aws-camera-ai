@@ -88,7 +88,8 @@ export function CameraList({
         <input
           type="text"
           className={styles.searchInput}
-          placeholder="Tìm theo tên hoặc slug camera..."
+          aria-label="Tìm camera"
+          placeholder="Tìm theo tên hoặc mã camera…"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />

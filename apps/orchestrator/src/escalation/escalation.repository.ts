@@ -272,7 +272,7 @@ export class EscalationRepository {
        WHERE n.id = $1 AND n.event_id = $2 AND n.channel = 'TELEGRAM'
          AND n.escalation_level = 0 AND n.status IN ('SENT', 'CONFIRMED')
          AND u.id = $3 AND u.is_active = TRUE AND u.role IN ('ADMIN', 'CAREGIVER')
-         AND (u.id = d.owner_user_id OR u.role = 'ADMIN')
+         AND can_access_camera(u.id,c.id)
          AND u.telegram_user_id = $4 AND u.telegram_linked_at IS NOT NULL
          AND u.telegram_chat_id = $5 AND n.provider_chat_id = $5 AND n.provider_message_id = $6
          AND n.sent_at > now() - ($7 * interval '1 second')
@@ -309,7 +309,9 @@ export class EscalationRepository {
       ) VALUES (
         $1,
         COALESCE($2::uuid, (
-          SELECT d.owner_user_id
+          SELECT COALESCE((SELECT manager.id FROM users manager
+            WHERE manager.is_active AND manager.role='CAREGIVER' AND shares_camera_household(manager.id,d.owner_user_id)
+            ORDER BY manager.created_at,manager.id LIMIT 1),d.owner_user_id)
           FROM events e
           JOIN cameras c ON c.id = e.camera_id
           JOIN devices d ON d.id = c.device_id

@@ -64,7 +64,15 @@ export async function apiUpload<T>(
   return uploadRequest<T>(path, body, onProgress, true);
 }
 
-async function request<T>(path: string, init: RequestInit, canRefresh: boolean): Promise<T> {
+export async function apiFetchBlob(path: string, init: RequestInit = {}): Promise<Blob> {
+  return request<Blob>(path, init, true, true);
+}
+async function request<T>(
+  path: string,
+  init: RequestInit,
+  canRefresh: boolean,
+  binary = false,
+): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers: buildHeaders(init.headers, init.body instanceof FormData),
@@ -75,7 +83,7 @@ async function request<T>(path: string, init: RequestInit, canRefresh: boolean):
     try {
       const refreshedToken = await refreshAccessToken();
       setAccessToken(refreshedToken);
-      return request<T>(path, init, false);
+      return request<T>(path, init, false, binary);
     } catch (error: unknown) {
       setAccessToken(null);
       redirectToLogin();
@@ -100,7 +108,7 @@ async function request<T>(path: string, init: RequestInit, canRefresh: boolean):
   }
 
   if (response.status === 204) return undefined as T;
-  return (await response.json()) as T;
+  return (binary ? await response.blob() : await response.json()) as T;
 }
 
 async function uploadRequest<T>(

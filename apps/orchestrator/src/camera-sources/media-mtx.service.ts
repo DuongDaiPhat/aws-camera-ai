@@ -21,6 +21,7 @@ interface ActiveSessionEntry {
   token: string;
   slug: string;
   cameraId: string;
+  actorId?: string;
   expiresAt: Date;
 }
 
@@ -109,15 +110,20 @@ export class MediaMtxService {
     return true;
   }
 
-  createBrowserReadSession(slug: string, cameraId?: string): BrowserReadSessionResult {
+  createBrowserReadSession(
+    slug: string,
+    cameraId?: string,
+    actorId?: string,
+  ): BrowserReadSessionResult {
     this.assertValidSlug(slug);
 
     const effectiveId = cameraId ?? slug;
-    const existing = this.activeReadSessions.get(effectiveId);
+    const sessionKey = `${effectiveId}:${actorId ?? ''}`;
+    const existing = this.activeReadSessions.get(sessionKey);
     if (existing?.slug === slug && existing.expiresAt.getTime() > Date.now() + 30_000) {
       return this.buildBrowserReadSessionResult(existing);
     }
-    this.revokeBrowserReadSession(effectiveId);
+    this.revokeBrowserReadSession(sessionKey);
 
     const token = randomUUID();
     const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
@@ -128,7 +134,8 @@ export class MediaMtxService {
       expiresAt,
     };
 
-    this.activeReadSessions.set(effectiveId, entry);
+    entry.actorId = actorId;
+    this.activeReadSessions.set(sessionKey, entry);
     this.readTokenMap.set(token, entry);
 
     return this.buildBrowserReadSessionResult(entry);
@@ -139,11 +146,16 @@ export class MediaMtxService {
     if (!entry || entry.slug !== slug) return false;
 
     if (entry.expiresAt.getTime() <= Date.now()) {
-      this.revokeBrowserReadSession(entry.cameraId);
+      this.revokeBrowserReadSession(`${entry.cameraId}:${entry.actorId ?? ''}`);
       return false;
     }
 
     return true;
+  }
+
+  getBrowserReadActor(slug: string, token: string): string | null {
+    if (!this.verifyBrowserReadSession(slug, token)) return null;
+    return this.readTokenMap.get(token)?.actorId ?? null;
   }
 
   private revokeBrowserReadSession(cameraIdOrSlug: string): boolean {

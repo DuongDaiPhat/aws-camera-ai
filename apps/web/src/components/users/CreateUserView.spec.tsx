@@ -19,9 +19,16 @@ describe('account creation', () => {
       createdAt: '2026-11-06T00:00:00.000Z',
     };
     const html = renderToStaticMarkup(
-      <Sidebar user={user} activeNav="dashboard" onSelectNav={() => {}} onLogout={() => {}} />,
+      <Sidebar
+        expanded
+        onToggle={() => {}}
+        user={user}
+        activeNav="dashboard"
+        onSelectNav={() => {}}
+        onLogout={() => {}}
+      />,
     );
-    expect(html.includes('Quản lý tài khoản')).toBe(visible);
+    expect(html.includes('Tài khoản &amp; Hộ gia đình')).toBe(visible);
   });
 
   it('defaults to VIEWER and offers the other two roles explicitly', () => {

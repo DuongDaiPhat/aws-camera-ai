@@ -90,7 +90,7 @@ snapshots:
 record:
   enabled: true
   continuous:
-    days: 0
+    days: 30 # Retain all footage for 30 days, independent of AI triggers.
   motion:
     days: 1
   alerts:

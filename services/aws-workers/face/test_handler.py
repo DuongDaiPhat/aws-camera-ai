@@ -13,9 +13,7 @@ FIXTURES = Path(__file__).resolve().parents[3] / "aws/sprint4/contracts/fixtures
 class FaceWorkerTests(unittest.TestCase):
     def setUp(self):
         self.job = json.loads((FIXTURES / "face-job.valid.json").read_text())
-        self.result = json.loads(
-            (FIXTURES / "face-result-unknown.valid.json").read_text()
-        )
+        self.result = json.loads((FIXTURES / "face-result-unknown.valid.json").read_text())
         self.environment = patch.dict(
             os.environ,
             {
@@ -43,9 +41,7 @@ class FaceWorkerTests(unittest.TestCase):
         ):
             handler.process(self.job)
         recognize.assert_not_called()
-        self.assertEqual(
-            json.loads(sqs.send_message.call_args.kwargs["MessageBody"]), self.result
-        )
+        self.assertEqual(json.loads(sqs.send_message.call_args.kwargs["MessageBody"]), self.result)
 
     def test_cache_commit_precedes_publication_and_first_writer_wins(self):
         calls = []
@@ -60,9 +56,7 @@ class FaceWorkerTests(unittest.TestCase):
         sqs.send_message.side_effect = lambda **_kwargs: calls.append("send")
         with (
             patch.object(handler, "backend", backend),
-            patch.object(
-                handler, "recognize", return_value=self.result["payload"]["body"]
-            ),
+            patch.object(handler, "recognize", return_value=self.result["payload"]["body"]),
             patch.object(handler, "client", return_value=sqs),
         ):
             handler.process(self.job)

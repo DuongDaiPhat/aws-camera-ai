@@ -30,6 +30,7 @@ import type {
 import type { EventStatsResponseDto } from './dto/event-stats-response.dto';
 import type { ConfirmEventDto, CloseEventDto } from './dto/confirm-event.dto';
 import type { ConfirmationResponseDto } from './dto/confirmation-response.dto';
+import type { SosHelpDto } from './dto/sos-help.dto';
 import { DEFAULT_STATS_WINDOW_HOURS } from './dto/get-event-stats-query.dto';
 
 const PRESIGNED_URL_TTL_SECONDS = 900; // 15 phút (FR-EVT-07)
@@ -123,6 +124,8 @@ export class EventsService {
       from: query.from,
       to: query.to,
       isFalseAlarm: query.isFalseAlarm,
+      ...(query.urgentFirst ? { urgentFirst: true } : {}),
+      ...(query.notificationState ? { notificationState: query.notificationState } : {}),
       ...(actor && !isSystemAdmin(actor) ? { actorId: actor.sub } : {}),
     });
 
@@ -219,6 +222,20 @@ export class EventsService {
     return result;
   }
 
+  /**
+   * Tạo sự kiện cầu cứu khẩn cấp (SOS) do Viewer bấm nút Yêu cầu trợ giúp và phát SSE ngay cho Caregiver.
+   */
+  async triggerSos(actorUserId: string, dto: SosHelpDto): Promise<EventSummaryDto> {
+    const eventId = await this.eventsRepository.createSosEvent(actorUserId, dto.note);
+    const summary = await this.eventsRepository.findEventSummaryById(eventId);
+    if (!summary) {
+      throw new NotFoundException(`Sự kiện SOS ${eventId} không tồn tại sau khi tạo`);
+    }
+    const summaryDto = await this.toEventSummary(summary);
+    this.emitEvent(summaryDto, 'event.created', eventRecipients(summary));
+    return summaryDto;
+  }
+
   private toEventDetail(
     record: EventDetailRecord,
     summary: EventSummaryDto,
@@ -236,7 +253,7 @@ export class EventsService {
       aggregateVersion: Number(record.aggregate_version),
       retain: record.retain,
       correlationId: record.correlation_id,
-      escalationDeadlineAt: toIsoStringOrNull(record.escalation_deadline_at),
+      escalationDeadlineAt: toIsoStringOrNull(record.escalation_deadline_at ?? null),
       notifiedAt: toIsoStringOrNull(record.notified_at),
       escalatedAt: toIsoStringOrNull(record.escalated_at),
       resolvedAt: toIsoStringOrNull(record.resolved_at),
@@ -352,6 +369,9 @@ export class EventsService {
       thumbnailUrl,
       isFalseAlarm: record.is_false_alarm,
       detectedAt: record.detected_at.toISOString(),
+      ...(record.priority === 'P0'
+        ? { escalationDeadlineAt: toIsoStringOrNull(record.escalation_deadline_at ?? null) }
+        : {}),
     };
   }
 
@@ -395,7 +415,11 @@ export class EventsService {
     return this.eventSubject.asObservable().pipe(
       concatMap(async (item) => {
         const allowed = await this.eventsRepository
-          .canReceiveEvent(actor.sub, item.recipients)
+          .canReceiveEvent(
+            actor.sub,
+            item.recipients,
+            (JSON.parse(String(item.message.data)) as { id?: string }).id,
+          )
           .catch(() => false);
         return allowed ? item.message : undefined;
       }),

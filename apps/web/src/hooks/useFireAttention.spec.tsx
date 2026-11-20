@@ -3,12 +3,12 @@ import React, { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { useFireAttention } from './useFireAttention';
-import { fetchPendingFireEvents, toUIEventItem } from '@/lib/events-client';
+import { fetchPendingCriticalEvents, toUIEventItem } from '@/lib/events-client';
 import type { UIEventItem } from '@/types';
 
 vi.mock('@/lib/events-client', async (original) => ({
   ...(await original<typeof import('@/lib/events-client')>()),
-  fetchPendingFireEvents: vi.fn(),
+  fetchPendingCriticalEvents: vi.fn(),
 }));
 const NOW = Date.parse('2026-10-27T10:00:00Z');
 let root: Root;
@@ -20,6 +20,7 @@ function event(id: string, at = NOW - 60000, cameraId = 'camera-a'): UIEventItem
     priority: 'P0',
     eventType: 'FIRE_SMOKE_DETECTED',
     detectedAt: new Date(at).toISOString(),
+    escalationDeadlineAt: new Date(at + 120000).toISOString(),
     camera: { id: cameraId, name: cameraId },
   });
 }
@@ -42,7 +43,7 @@ beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(NOW);
   localStorage.clear();
-  vi.mocked(fetchPendingFireEvents).mockReset().mockResolvedValue([]);
+  vi.mocked(fetchPendingCriticalEvents).mockReset().mockResolvedValue([]);
   Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', {
     value: true,
     configurable: true,
@@ -58,19 +59,18 @@ afterEach(async () => {
 });
 const current = () => container.querySelector('output')?.textContent;
 async function show(events: UIEventItem[], userId?: string) {
-  vi.mocked(fetchPendingFireEvents).mockResolvedValue(events);
+  vi.mocked(fetchPendingCriticalEvents).mockResolvedValue(events);
   await act(async () => root.render(<Harness events={events} userId={userId} />));
 }
 
 describe('persistent bounded fire attention', () => {
-  it('keeps one dialog open while pending status changes, then never reopens it on remount', async () => {
+  it('keeps an interruption within three hours after escalation and deduplicates on reload', async () => {
     const first = event('fire');
     await show([first]);
     expect(current()).toBe('fire');
-    await show([{ ...first, status: 'ESCALATED' }]);
+
+    await act(async () => root.render(<Harness events={[{ ...first, status: 'ESCALATED' }]} />));
     expect(current()).toBe('fire');
-    await act(async () => container.querySelector('button')?.click());
-    expect(current()).toBe('none');
     await act(async () => root.unmount());
     root = createRoot(container);
     await show([{ ...first, status: 'ESCALATED' }]);
@@ -85,14 +85,14 @@ describe('persistent bounded fire attention', () => {
     await show(events);
     expect(current()).toBe('none');
   });
-  it('closes at the three-hour deadline even when no SSE or poll arrives', async () => {
-    await show([event('expiring', NOW - 10800000 + 500)]);
+  it('closes exactly at three hours even when no SSE or poll arrives', async () => {
+    await show([{ ...event('expiring', NOW - 10800000 + 500), status: 'ESCALATED' }]);
     expect(current()).toBe('expiring');
     await act(async () => vi.advanceTimersByTimeAsync(500));
     expect(current()).toBe('none');
   });
   it('does not show historical incidents or repeat another ID from the same episode', async () => {
-    await show([event('old', NOW - 10800001)]);
+    await show([{ ...event('old', NOW - 10800001), status: 'ESCALATED' }]);
     expect(current()).toBe('none');
     await show([event('first')]);
     expect(current()).toBe('first');
@@ -101,6 +101,12 @@ describe('persistent bounded fire attention', () => {
     expect(current()).toBe('none');
     await show([event('different-camera', NOW, 'b')]);
     expect(current()).toBe('different-camera');
+  });
+  it('shows a newly detected P0 between ticks, without waiting for the poll clock', async () => {
+    await show([]);
+    await act(async () => vi.advanceTimersByTimeAsync(300));
+    await show([{ ...event('new-fall', NOW + 300), eventType: 'FALL_DETECTED' }]);
+    expect(current()).toBe('new-fall');
   });
   it('scopes the persisted interruption to its account', async () => {
     const events = [event('fire')];

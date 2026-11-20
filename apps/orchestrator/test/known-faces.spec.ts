@@ -59,7 +59,10 @@ describe('US-09 orchestration', () => {
   const inference = { embed: jest.fn(), sync: jest.fn() };
   const sync = new FaceCollectionSyncService(repository, inference, new ConfigService());
   const service = new KnownFacesService(repository, inference, sync, new ConfigService());
-  beforeEach(() => jest.restoreAllMocks());
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    jest.spyOn(repository, 'householdOwner').mockResolvedValue('owner');
+  });
   afterAll(async () => pool.end());
 
   it('thu thập lỗi nhiều ảnh, không ghi DB và dọn buffer', async () => {

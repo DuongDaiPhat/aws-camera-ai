@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getCurrentUser, logout } from '@/lib/auth-client';
 import type { CurrentUser } from '@/types';
+import { stopAllWebcamSessions } from '@/components/cameras/source/webcam-session-manager';
 
 export function useAuth() {
   const router = useRouter();
@@ -28,7 +29,18 @@ export function useAuth() {
     };
   }, []);
 
+  useEffect(() => {
+    const refresh = () => {
+      void getCurrentUser()
+        .then(setUser)
+        .catch(() => {});
+    };
+    window.addEventListener('camerai-profile-updated', refresh);
+    return () => window.removeEventListener('camerai-profile-updated', refresh);
+  }, []);
+
   const handleLogout = useCallback(async () => {
+    stopAllWebcamSessions();
     try {
       if ((await logout()) === 'redirect') return;
     } catch {

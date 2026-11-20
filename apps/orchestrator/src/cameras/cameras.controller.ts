@@ -87,11 +87,11 @@ export class CamerasController {
   }
 
   @Patch(':cameraId')
-  @ApiOperation({ summary: 'Cập nhật thông tin camera (chỉ ADMIN)' })
+  @ApiOperation({ summary: 'Cập nhật thông tin camera (ADMIN hoặc CAREGIVER)' })
   @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
   @ApiResponse({ status: 200, description: 'Cập nhật thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN hoặc CAREGIVER)' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
   async updateCamera(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
@@ -104,11 +104,11 @@ export class CamerasController {
 
   @Delete(':cameraId')
   @HttpCode(204)
-  @ApiOperation({ summary: 'Xóa camera (chỉ ADMIN)' })
+  @ApiOperation({ summary: 'Xóa camera (ADMIN hoặc CAREGIVER)' })
   @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
   @ApiResponse({ status: 204, description: 'Đã xóa camera thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN hoặc CAREGIVER)' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
   async deleteCamera(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
@@ -135,13 +135,13 @@ export class CamerasController {
 
   @Put(':cameraId/state')
   @ApiOperation({
-    summary: 'Bật hoặc tắt camera (desired state, chỉ ADMIN)',
+    summary: 'Bật hoặc tắt camera (desired state, ADMIN hoặc CAREGIVER)',
     description: 'Chuyển đổi trạng thái isEnabled và đồng bộ runtime status.',
   })
   @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
   @ApiResponse({ status: 200, description: 'Trạng thái camera sau khi cập nhật' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN hoặc CAREGIVER)' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
   async updateCameraState(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
@@ -179,11 +179,11 @@ export class CamerasController {
   }
 
   @Put(':cameraId/source')
-  @ApiOperation({ summary: 'Cập nhật cấu hình nguồn phát camera (chỉ ADMIN)' })
+  @ApiOperation({ summary: 'Cập nhật cấu hình nguồn phát camera (ADMIN hoặc CAREGIVER)' })
   @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
   @ApiResponse({ status: 200, description: 'Nguồn phát sau khi cập nhật' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN hoặc CAREGIVER)' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
   async updateCameraSource(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
@@ -195,11 +195,11 @@ export class CamerasController {
   }
 
   @Post(':cameraId/source/test')
-  @ApiOperation({ summary: 'Kiểm tra kết nối RTSP mà không lưu cấu hình (chỉ ADMIN)' })
+  @ApiOperation({ summary: 'Kiểm tra kết nối RTSP mà không lưu cấu hình (ADMIN hoặc CAREGIVER)' })
   @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
   @ApiResponse({ status: 200, description: 'Kết quả kiểm tra kết nối RTSP' })
   @ApiResponse({ status: 400, description: 'URL RTSP không hợp lệ hoặc không thể kết nối' })
-  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN hoặc CAREGIVER)' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
   async testRtspConnection(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
@@ -212,13 +212,13 @@ export class CamerasController {
 
   @Post(':cameraId/source/video')
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 524288000 } }))
-  @ApiOperation({ summary: 'Upload file video nguồn phát cho camera (chỉ ADMIN)' })
+  @ApiOperation({ summary: 'Upload file video nguồn phát cho camera (ADMIN hoặc CAREGIVER)' })
   @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 200, description: 'Nguồn phát video sau khi upload' })
   @ApiResponse({ status: 400, description: 'File không hợp lệ hoặc quá lớn' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN hoặc CAREGIVER)' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
   async uploadCameraVideo(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
@@ -233,11 +233,11 @@ export class CamerasController {
 
   @Delete(':cameraId/source/video')
   @HttpCode(204)
-  @ApiOperation({ summary: 'Xóa file video nguồn phát của camera (chỉ ADMIN)' })
+  @ApiOperation({ summary: 'Xóa file video nguồn phát của camera (ADMIN hoặc CAREGIVER)' })
   @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
   @ApiResponse({ status: 204, description: 'Đã xóa file video thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN hoặc CAREGIVER)' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
   async deleteCameraVideo(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
@@ -248,12 +248,14 @@ export class CamerasController {
   }
 
   @Post(':cameraId/source/start')
-  @ApiOperation({ summary: 'Bắt đầu phát nguồn camera (video publisher / webcam) (chỉ ADMIN)' })
+  @ApiOperation({
+    summary: 'Bắt đầu phát nguồn camera (video publisher / webcam) (ADMIN hoặc CAREGIVER)',
+  })
   @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
   @ApiResponse({ status: 200, description: 'Nguồn phát đã khởi động' })
   @ApiResponse({ status: 400, description: 'Nguồn chưa được cấu hình' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN hoặc CAREGIVER)' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
   async startCameraSource(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
@@ -264,11 +266,11 @@ export class CamerasController {
   }
 
   @Post(':cameraId/source/stop')
-  @ApiOperation({ summary: 'Dừng phát nguồn camera (chỉ ADMIN)' })
+  @ApiOperation({ summary: 'Dừng phát nguồn camera (ADMIN hoặc CAREGIVER)' })
   @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
   @ApiResponse({ status: 200, description: 'Nguồn phát đã dừng' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN hoặc CAREGIVER)' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
   async stopCameraSource(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
@@ -280,12 +282,12 @@ export class CamerasController {
 
   @Post(':cameraId/source/browser-session')
   @ApiOperation({
-    summary: 'Cấp phiên publish WebRTC/WHIP cho webcam trình duyệt (chỉ ADMIN)',
+    summary: 'Cấp phiên publish WebRTC/WHIP cho webcam trình duyệt (ADMIN hoặc CAREGIVER)',
   })
   @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
   @ApiResponse({ status: 200, description: 'Thông tin publish WebRTC/WHIP kèm token' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN hoặc CAREGIVER)' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
   async createBrowserPublishSession(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
@@ -298,12 +300,12 @@ export class CamerasController {
   @Delete(':cameraId/source/browser-session')
   @HttpCode(204)
   @ApiOperation({
-    summary: 'Thu hồi phiên publish WebRTC/WHIP cho webcam trình duyệt (chỉ ADMIN)',
+    summary: 'Thu hồi phiên publish WebRTC/WHIP cho webcam trình duyệt (ADMIN hoặc CAREGIVER)',
   })
   @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
   @ApiResponse({ status: 204, description: 'Đã thu hồi phiên publish thành công' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN hoặc CAREGIVER)' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
   async revokeBrowserPublishSession(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
@@ -323,18 +325,20 @@ export class CamerasController {
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
   async getCameraDebugStream(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
+    @Req() request: AuthenticatedRequest,
   ): Promise<CameraDebugStream> {
-    return await this.camerasService.getCameraDebugStream(cameraId);
+    if (!request.auth) throw new UnauthorizedException();
+    return await this.camerasService.getCameraDebugStream(cameraId, request.auth.sub);
   }
 
   @Post(':cameraId/frigate-sync/retry')
   @ApiOperation({
-    summary: 'Thử lại đồng bộ cấu hình xuống Frigate (chỉ ADMIN)',
+    summary: 'Thử lại đồng bộ cấu hình xuống Frigate (ADMIN hoặc CAREGIVER)',
   })
   @ApiParam({ name: 'cameraId', type: 'string', format: 'uuid' })
   @ApiResponse({ status: 200, description: 'Kết quả thử lại đồng bộ' })
   @ApiResponse({ status: 401, description: 'Chưa đăng nhập' })
-  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền (yêu cầu ADMIN hoặc CAREGIVER)' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy camera' })
   async retryFrigateSync(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,

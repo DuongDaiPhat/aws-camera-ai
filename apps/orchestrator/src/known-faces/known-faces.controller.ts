@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Patch,
   Req,
   Res,
   UploadedFiles,
@@ -16,6 +17,7 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import type { AuthenticatedRequest } from '../auth/jwt-auth.guard';
+import { UpdateKnownFaceDto } from './dto/update-known-face.dto';
 import { CreateKnownFaceDto } from './dto/create-known-face.dto';
 import { KnownFacesService } from './known-faces.service';
 import { KnownFacesGuard } from './known-faces.guard';
@@ -46,6 +48,15 @@ export class KnownFacesController {
     @UploadedFiles() files: FaceUpload[],
   ) {
     return this.service.create(owner(request), dto, files ?? []);
+  }
+
+  @Patch(':knownFaceId')
+  update(
+    @Req() request: AuthenticatedRequest,
+    @Param('knownFaceId', ParseUUIDPipe) id: string,
+    @Body() input: UpdateKnownFaceDto,
+  ) {
+    return this.service.update(owner(request), id, input);
   }
 
   @Delete(':knownFaceId')

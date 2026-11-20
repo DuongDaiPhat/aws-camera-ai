@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { markLoginEntrance } from '@/lib/login-entrance';
 import { setAccessToken } from '@/lib/api-client';
 import { markBrowserSession } from '@/lib/auth-session';
 import { completeCognitoLogin } from '@/lib/cognito-session';
@@ -17,6 +18,7 @@ export default function CallbackPage() {
         if (!active) return;
         setAccessToken(user.access_token);
         markBrowserSession();
+        markLoginEntrance();
         router.replace('/');
         router.refresh();
       })

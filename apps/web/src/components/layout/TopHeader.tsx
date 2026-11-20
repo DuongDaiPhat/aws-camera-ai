@@ -1,177 +1,212 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import {
+  Bell,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpRight,
+  Sun,
+  Moon,
+} from 'lucide-react';
+import { DatePicker } from './DatePicker';
 import styles from './top-header.module.css';
 
 interface TopHeaderProps {
+  selectedDate?: Date | null;
+  onSelectDate?: (date: Date | null) => void;
+  onViewPlayback?: () => void;
   userName?: string;
-  selectedZone: string;
-  onSelectZone: (zone: string) => void;
   pendingCount?: number | null;
+  pageTitle?: string;
+  onViewEvents?: () => void;
+  isDashboard?: boolean;
+  leadingAction?: ReactNode;
+  notificationControl?: ReactNode;
+  compact?: boolean;
+  showCalendar?: boolean;
+}
+function dayKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+function addDays(date: Date, count: number) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + count);
+  return next;
 }
 
-const ZONE_OPTIONS = [
-  { id: 'ALL', name: 'Tất cả khu vực' },
-  { id: 'bep', name: 'Khu vực bếp nấu' },
-  { id: 'phong-khach', name: 'Khu vực ghế sofa' },
-  { id: 'cua-chinh', name: 'Lối vào sảnh' },
-  { id: 'tang-1', name: 'Tầng 1' },
-  { id: 'phong-ngu', name: 'Phòng ngủ' },
-];
-
-function ZoneDropdownMenu({
-  isOpen,
-  selectedZone,
-  onSelect,
-}: {
-  isOpen: boolean;
-  selectedZone: string;
-  onSelect: (id: string) => void;
-}) {
-  if (!isOpen) return null;
-
+function WeekCalendar({
+  selectedDate,
+  onSelectDate,
+  onViewPlayback,
+}: Pick<TopHeaderProps, 'selectedDate' | 'onSelectDate' | 'onViewPlayback'>) {
+  const [today, setToday] = useState<Date | null>(null);
+  const [localDate, setLocalDate] = useState<Date | null>(null);
+  const chosen = selectedDate === undefined ? localDate : selectedDate;
+  const setChosen = (date: Date | null) => {
+    setLocalDate(date);
+    onSelectDate?.(date);
+  };
+  useEffect(() => {
+    const update = () => setToday(new Date());
+    update();
+    const timer = setInterval(update, 60_000);
+    return () => clearInterval(timer);
+  }, []);
+  const viewed = chosen ?? today;
+  const monday = viewed ? addDays(viewed, -((viewed.getDay() + 6) % 7)) : null;
+  const days = monday ? Array.from({ length: 7 }, (_, index) => addDays(monday, index)) : [];
+  const isToday = viewed && today ? dayKey(viewed) === dayKey(today) : true;
   return (
-    <div className={styles.zoneDropdown} role="listbox">
-      {ZONE_OPTIONS.map((z) => (
-        <button
-          key={z.id}
-          type="button"
-          className={`${styles.zoneOption} ${selectedZone === z.id ? styles.zoneOptionActive : ''}`}
-          onClick={() => onSelect(z.id)}
-          role="option"
-          aria-selected={selectedZone === z.id}
-        >
-          <span>{z.name}</span>
-          {selectedZone === z.id && <span>✓</span>}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function AlertStatus({ pendingCount }: { pendingCount: number | null }) {
-  return (
-    <div
-      className={`${styles.statusPill} ${pendingCount === null ? styles.statusUnknown : pendingCount > 0 ? styles.statusWarning : ''}`}
-      role="status"
-    >
-      <span className={styles.greenDot} aria-hidden="true" />
-      <span>
-        {pendingCount === null
-          ? 'Đang đồng bộ trạng thái cảnh báo.'
-          : pendingCount > 0
-            ? `${pendingCount} cảnh báo đang chờ xử lý.`
-            : 'Không có cảnh báo đang chờ xử lý.'}
-      </span>
-    </div>
+    <section className={styles.calendarCard} data-entry-part="calendar" aria-label="Lịch tuần">
+      <div className={styles.calendarHeader}>
+        <span className={styles.month}>
+          <CalendarDays size={17} aria-hidden="true" />
+          {viewed ? `Tháng ${viewed.getMonth() + 1}, ${viewed.getFullYear()}` : 'Lịch của bạn'}
+        </span>
+        <div className={styles.calendarActions}>
+          <DatePicker value={viewed} onChange={setChosen} />
+          <button
+            type="button"
+            aria-label="Tuần trước"
+            disabled={!viewed}
+            onClick={() => viewed && setChosen(addDays(viewed, -7))}
+          >
+            <ChevronLeft size={15} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            aria-label="Tuần sau"
+            disabled={!viewed}
+            onClick={() => viewed && setChosen(addDays(viewed, 7))}
+          >
+            <ChevronRight size={15} aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+      <div className={styles.week}>
+        {days.length ? (
+          days.map((day, index) => (
+            <button
+              type="button"
+              key={dayKey(day)}
+              className={styles.day}
+              aria-label={day.toLocaleDateString('vi-VN', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })}
+              aria-current={today && dayKey(day) === dayKey(today) ? 'date' : undefined}
+              aria-pressed={viewed ? dayKey(day) === dayKey(viewed) : false}
+              onClick={() => setChosen(day)}
+            >
+              <span>{['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'][index]}</span>
+              <time dateTime={dayKey(day)}>{day.getDate()}</time>
+            </button>
+          ))
+        ) : (
+          <span className={styles.calendarLoading}>Đang tải lịch…</span>
+        )}
+      </div>
+      <div className={styles.calendarFooter}>
+        {viewed && (
+          <time dateTime={dayKey(viewed)}>
+            {viewed.toLocaleDateString('vi-VN', {
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+          </time>
+        )}
+        {onViewPlayback && (
+          <button type="button" onClick={onViewPlayback}>
+            Xem lại ngày này ↗
+          </button>
+        )}
+        {!isToday && (
+          <button type="button" aria-label="Về hôm nay" onClick={() => setChosen(null)}>
+            Hôm nay
+          </button>
+        )}
+      </div>
+    </section>
   );
 }
 
 export function TopHeader({
-  userName = 'Đức Anh',
-  selectedZone,
-  onSelectZone,
+  userName = 'bạn',
   pendingCount = null,
+  pageTitle = 'Tổng quan',
+  onViewEvents,
+  isDashboard = true,
+  leadingAction,
+  notificationControl,
+  selectedDate,
+  onSelectDate,
+  onViewPlayback,
+  compact = false,
+  showCalendar = true,
 }: TopHeaderProps) {
-  const [timeText, setTimeText] = useState('12:32');
-  const [greeting, setGreeting] = useState('Chào buổi tối');
-  const [isZoneOpen, setZoneOpen] = useState(false);
-  const zoneRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function updateClock() {
-      const now = new Date();
-      const hours = now.getHours();
-      const mins = now.getMinutes().toString().padStart(2, '0');
-      setTimeText(`${hours}:${mins}`);
-      setGreeting(hours < 12 ? 'Chào buổi sáng' : hours < 18 ? 'Chào buổi chiều' : 'Chào buổi tối');
-    }
-    updateClock();
-    const timer = setInterval(updateClock, 30000);
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (zoneRef.current && !zoneRef.current.contains(event.target as Node)) {
-        setZoneOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const selectedZoneLabel =
-    ZONE_OPTIONS.find((z) => z.id === selectedZone)?.name ?? 'Tất cả khu vực';
-
+  const status =
+    pendingCount === null
+      ? 'Đang đồng bộ trạng thái cảnh báo.'
+      : pendingCount > 0
+        ? `${pendingCount} cảnh báo đang chờ xử lý.`
+        : 'Không có cảnh báo đang chờ xử lý.';
   return (
-    <header className={styles.header}>
-      <div className={styles.leftSection}>
-        <h1 className={styles.greeting}>
-          {greeting}, {userName}
-        </h1>
-        <span className={styles.divider} aria-hidden="true">
-          /
-        </span>
-        <AlertStatus pendingCount={pendingCount} />
-      </div>
-
-      <div className={styles.rightSection}>
-        <div className={styles.liveBadge}>
-          <span className={styles.pulseDot} aria-hidden="true" />
-          <span>Cập nhật trực tiếp</span>
-          <span className={styles.clockTime}>• {timeText}</span>
-        </div>
-
-        <span className={styles.vSeparator} aria-hidden="true" />
-
-        <button
-          type="button"
-          className={styles.iconButton}
-          aria-label="Xem thông báo"
-          title="Thông báo hệ thống"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-          </svg>
-          <span className={styles.bellBadge} aria-hidden="true" />
-        </button>
-
-        <div className={styles.zoneSelectWrapper} ref={zoneRef}>
-          <button
-            type="button"
-            className={styles.zoneSelectButton}
-            onClick={() => setZoneOpen((o) => !o)}
-            aria-expanded={isZoneOpen}
-            aria-haspopup="listbox"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <line x1="4" y1="21" x2="4" y2="14" />
-              <line x1="4" y1="10" x2="4" y2="3" />
-              <line x1="12" y1="21" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12" y2="3" />
-              <line x1="20" y1="21" x2="20" y2="16" />
-              <line x1="20" y1="12" x2="20" y2="3" />
-              <line x1="1" y1="14" x2="7" y2="14" />
-              <line x1="9" y1="8" x2="15" y2="8" />
-              <line x1="17" y1="16" x2="23" y2="16" />
-            </svg>
-            <span>{selectedZoneLabel}</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
-          <ZoneDropdownMenu
-            isOpen={isZoneOpen}
-            selectedZone={selectedZone}
-            onSelect={(id) => {
-              onSelectZone(id);
-              setZoneOpen(false);
-            }}
-          />
+    <header className={styles.header} data-compact={compact} data-calendar={showCalendar}>
+      <div className={styles.greetingCard} data-entry-part="greeting">
+        <div className={styles.greetingContent}>
+          <div className={styles.copy}>
+            <h1>{isDashboard ? `Xin chào, ${userName}!` : pageTitle}</h1>
+            <p>
+              {isDashboard
+                ? 'Giám sát camera và cảnh báo thông minh cho ngôi nhà của bạn.'
+                : `Xin chào, ${userName}. Quản lý không gian giám sát của bạn.`}
+            </p>
+            <span className={styles.alertStatus} role="status">
+              {status}
+            </span>
+          </div>
+          <div className={styles.greetingActions}>
+            {leadingAction}
+            {notificationControl ?? (
+              <button
+                type="button"
+                disabled={!onViewEvents}
+                aria-label={
+                  pendingCount ? `Xem ${pendingCount} cảnh báo đang chờ xử lý` : 'Xem cảnh báo'
+                }
+                onClick={onViewEvents}
+              >
+                <Bell size={18} aria-hidden="true" />
+                <ArrowUpRight size={12} aria-hidden="true" />
+                {Boolean(pendingCount) && <span>{pendingCount! > 99 ? '99+' : pendingCount}</span>}
+              </button>
+            )}
+            <button
+              type="button"
+              className={styles.themePreview}
+              aria-label="Giao diện sáng / tối (sắp có)"
+              aria-disabled="true"
+              title="Chuyển giao diện sáng / tối — sắp có"
+            >
+              <Sun size={17} aria-hidden="true" />
+              <Moon size={17} aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </div>
+      {showCalendar && (
+        <WeekCalendar
+          selectedDate={selectedDate}
+          onSelectDate={onSelectDate}
+          onViewPlayback={onViewPlayback}
+        />
+      )}
     </header>
   );
 }

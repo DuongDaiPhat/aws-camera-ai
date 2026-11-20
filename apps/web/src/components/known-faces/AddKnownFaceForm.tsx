@@ -7,16 +7,20 @@ import {
   type SelectionDetails,
   type KnownFace,
 } from '@/lib/known-faces-client';
+import type { HouseholdMember } from '@/lib/household-client';
 import { FaceImagePreview } from './FaceImagePicker';
 import styles from './known-faces.module.css';
 
 export function AddKnownFaceForm({
   onCreated,
   onCancel,
+  members = [],
 }: {
+  members?: HouseholdMember[];
   onCreated: (face: KnownFace) => void;
   onCancel: () => void;
 }) {
+  const [linkedUserId, setLinkedUserId] = useState('');
   const [name, setName] = useState('');
   const [relationship, setRelationship] = useState('');
   const [files, setFiles] = useState<File[]>([]);
@@ -71,6 +75,7 @@ export function AddKnownFaceForm({
         files,
         selected,
         controller.current.signal,
+        linkedUserId || undefined,
       );
       choose([]);
       onCreated(face);
@@ -110,6 +115,23 @@ export function AddKnownFaceForm({
           disabled={busy}
           onChange={(event) => setRelationship(event.target.value)}
         />
+      </label>
+      <label>
+        Tài khoản Viewer được chăm sóc
+        <select
+          value={linkedUserId}
+          disabled={busy}
+          onChange={(event) => setLinkedUserId(event.target.value)}
+        >
+          <option value="">Chưa liên kết</option>
+          {members
+            .filter((member) => member.role === 'VIEWER')
+            .map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.fullName} · {member.email}
+              </option>
+            ))}
+        </select>
       </label>
       <label>
         Chọn 1–5 ảnh JPEG, PNG hoặc WebP (Đã chọn {files.length}/5)

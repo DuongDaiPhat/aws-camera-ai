@@ -10,7 +10,7 @@
   justify-content: space-between;
   gap: 16px;
 }
-.header h1 {
+.header h2 {
   margin: 0;
   font-size: 24px;
   letter-spacing: -0.02em;
@@ -122,7 +122,7 @@
   color: var(--success);
 }
 .syncPENDING {
-  background: #fff7dd;
+  background: #fff4e7;
   color: #9a6500;
 }
 .syncFAILED {
@@ -218,7 +218,7 @@
 }
 .previewState span {
   max-width: 440px;
-  color: #94a3b8;
+  color: var(--ink-muted);
 }
 .panel {
   padding-bottom: 14px;
@@ -315,7 +315,7 @@
 .formError,
 .error {
   margin: 0;
-  border: 1px solid #fecaca;
+  border: 1px solid #6b3449;
   border-radius: var(--radius-control);
   background: var(--danger-soft);
   color: var(--danger);

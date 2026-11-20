@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { isDeepStrictEqual } from 'node:util';
 import YAML from 'yaml';
 import type { CameraAggregateRecord } from '../cameras/cameras.types';
 import type { CameraFrigateSettingsRecord } from '../cameras/cameras.types';
@@ -22,20 +23,37 @@ export class FrigateConfigService {
   private readonly logger = new Logger(FrigateConfigService.name);
   constructor(private readonly config: ConfigService) {}
 
-  private fireRecording(
+  private continuousRecording(
     record: Record<string, unknown>,
     enabled: boolean,
+    retentionDays?: number,
   ): Record<string, unknown> {
-    if (!enabled || this.config.get<string>('M3_ENABLED') !== 'true') return record;
-    const days = Number(this.config.get<string | number>('FIRE_CONTINUOUS_RECORDING_DAYS', 1));
-    if (!Number.isSafeInteger(days) || days < 1 || days > 30)
-      throw new Error('Invalid FIRE_CONTINUOUS_RECORDING_DAYS');
+    if (!enabled) return record;
+    const archiveDays = Number(
+      retentionDays ?? this.config.get<string | number>('PLAYBACK_CONTINUOUS_RECORDING_DAYS', 30),
+    );
+    const fireDays =
+      this.config.get<string>('M3_ENABLED') === 'true'
+        ? Number(this.config.get<string | number>('FIRE_CONTINUOUS_RECORDING_DAYS', 1))
+        : 0;
+    const days = Math.max(archiveDays, fireDays);
+    if (!Number.isSafeInteger(days) || days < 1 || days > 90)
+      throw new Error('Invalid PLAYBACK_CONTINUOUS_RECORDING_DAYS');
     const existing = record.continuous;
     const continuous =
       existing && typeof existing === 'object' && !Array.isArray(existing) ? existing : {};
     const priorDays =
       'days' in continuous && typeof continuous.days === 'number' ? continuous.days : 0;
-    return { ...record, continuous: { ...continuous, days: Math.max(days, priorDays) } };
+    return {
+      ...record,
+      continuous: {
+        ...continuous,
+        days:
+          retentionDays === undefined
+            ? Math.max(days, fireDays, priorDays)
+            : Math.max(days, fireDays),
+      },
+    };
   }
 
   generateUpdatedConfig(rawYaml: string, data: CameraFrigateData): string {
@@ -116,9 +134,10 @@ export class FrigateConfigService {
         bounding_box: settings?.snapshot_bounding_box ?? snapshots.bounding_box ?? true,
       },
       record: {
-        ...this.fireRecording(
+        ...this.continuousRecording(
           recordOptions,
           settings?.recording_enabled ?? record.enabled !== false,
+          camera.retention_days,
         ),
         enabled: settings?.recording_enabled ?? record.enabled ?? true,
         detections: {
@@ -152,6 +171,10 @@ export class FrigateConfigService {
     );
   }
 
+  hasSameConfig(rawConfig: string, expectedConfig: string): boolean {
+    return isDeepStrictEqual(this.parseConfig(rawConfig), this.parseConfig(expectedConfig));
+  }
+
   hasAppliedSettings(runningConfig: string, expectedConfig: string, cameraSlug: string): boolean {
     const running = this.parseConfig(runningConfig);
     const expected = this.parseConfig(expectedConfig);
@@ -161,6 +184,16 @@ export class FrigateConfigService {
           value && typeof value === 'object' ? (value as Record<string, unknown>)[key] : undefined,
         config,
       );
+    const expectedPath = valueAt(expected, 'ffmpeg.inputs.0.path');
+    const runningPath = valueAt(running, 'ffmpeg.inputs.0.path');
+    // The running config API masks RTSP credentials. The raw config comparison checks them.
+    if (
+      typeof expectedPath === 'string' &&
+      (typeof runningPath !== 'string' ||
+        this.maskStreamAuth(runningPath) !== this.maskStreamAuth(expectedPath))
+    )
+      return false;
+
     return [
       'enabled',
       'detect.enabled',
@@ -187,6 +220,10 @@ export class FrigateConfigService {
       }
       return actual === target;
     });
+  }
+
+  private maskStreamAuth(url: string): string {
+    return url.replace(/^(rtsps?:\/\/)[^/@]+@/i, '$1***:***@');
   }
 
   private toFrigateZone(
@@ -219,7 +256,20 @@ export class FrigateConfigService {
   private resolveStreamUrl(camera: CameraAggregateRecord, mediamtxRtspBaseUrl: string): string {
     if (camera.source_type_val === 'RTSP') {
       const rtspUrl = camera.source_rtsp_url ?? camera.rtsp_url;
-      if (rtspUrl) return rtspUrl;
+      if (rtspUrl) {
+        const url = new URL(rtspUrl),
+          internal = new URL(mediamtxRtspBaseUrl);
+        if (url.hostname === internal.hostname && url.port === internal.port) {
+          url.username =
+            internal.username ||
+            this.config.get<string>('MEDIAMTX_PUBLISH_USERNAME', 'cam-internal');
+          url.password =
+            internal.password ||
+            this.config.get<string>('MEDIAMTX_PUBLISH_PASSWORD', 'local-dev-password');
+          return url.toString();
+        }
+        return rtspUrl;
+      }
     }
     return `${mediamtxRtspBaseUrl}/${camera.slug}`;
   }

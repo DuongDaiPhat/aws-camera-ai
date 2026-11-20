@@ -1,0 +1,183 @@
+.settingsPage {
+  gap: 20px;
+  container: household-settings / inline-size;
+}
+.settingsPage > header h2 {
+  font-size: 18px;
+}
+.settingsPage > header p {
+  margin: 4px 0 0;
+}
+.accountGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  border: 1px solid #e6dfee;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+.accountGrid > .accountForm,
+.accountGrid > .accountSection {
+  padding: 16px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  gap: 8px 12px;
+  min-width: 0;
+  align-content: start;
+}
+.accountGrid > :nth-child(odd) {
+  border-right: 1px solid #eee8f4;
+}
+.accountGrid > :nth-child(n + 3) {
+  border-top: 1px solid #eee8f4;
+}
+.accountGrid h3,
+.settingsPage .storageSection h3,
+.rulesSection > h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.accountGrid :is(h3, button) svg,
+.storageSection h3 svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.accountGrid .accountForm label,
+.storageForm label {
+  gap: 4px;
+}
+.accountGrid .accountForm input,
+.settingsPage .storageForm input {
+  height: 36px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+.accountGrid .accountForm > p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.accountForm [data-form-actions] {
+  justify-content: flex-end;
+}
+.accountGrid .accountForm .accountIdentity {
+  grid-column: 1;
+  align-self: center;
+  max-inline-size: 100%;
+}
+.accountForm:has(.accountIdentity) [data-form-actions] {
+  grid-column: 2;
+}
+.accountGrid button,
+.settingsPage .storageForm button {
+  min-height: 34px;
+  padding: 7px 12px;
+  font-size: 12px;
+}
+.telegramCode {
+  margin-top: 12px;
+  overflow-wrap: anywhere;
+}
+.accountSection > label {
+  min-height: 34px;
+  padding: 6px 0;
+  font-size: 13px;
+}
+.accountSection > label:last-child {
+  border-bottom: 0;
+}
+.settingsPage .storageSection {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px 20px;
+  padding: 16px;
+  border-radius: 12px;
+}
+.storageSummary > p {
+  margin: 6px 0 0;
+  max-inline-size: 52ch;
+}
+.storageHelp {
+  margin-top: 4px;
+  color: #6f637b;
+  font-size: 12px;
+}
+.storageHelp > summary {
+  width: fit-content;
+  padding-block: 4px;
+  color: #694489;
+  cursor: pointer;
+}
+.storageHelp p {
+  max-width: 52ch;
+}
+.settingsPage .storageForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.settingsPage .storageForm input {
+  inline-size: 7rem;
+  max-inline-size: 100%;
+  font-variant-numeric: tabular-nums;
+}
+.storageMessages {
+  grid-column: 1 / -1;
+}
+.storageMessages:empty {
+  display: none;
+}
+.settingsPage .storageStatus {
+  margin: 0;
+}
+.rulesSection {
+  min-width: 0;
+}
+.rulesSection > p {
+  margin: 4px 0 12px;
+}
+.settingsPage :is(summary, button, input):focus-visible {
+  outline: 2px solid #9566c5;
+  outline-offset: 2px;
+}
+@container household-settings (max-width: 54rem) {
+  .settingsPage .storageSection {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@container household-settings (max-width: 42rem) {
+  .accountGrid {
+    grid-template-columns: 1fr;
+  }
+  .accountGrid > :nth-child(odd) {
+    border-right: 0;
+  }
+  .accountGrid > :nth-child(n + 2) {
+    border-top: 1px solid #eee8f4;
+  }
+}
+@container household-settings (max-width: 26rem) {
+  .accountGrid .accountForm .accountIdentity,
+  .accountForm:has(.accountIdentity) [data-form-actions] {
+    grid-column: 1 / -1;
+  }
+}
+@media (pointer: coarse) {
+  .accountGrid button,
+  .accountSection > label,
+  .settingsPage .storageForm button {
+    min-height: 44px;
+  }
+}

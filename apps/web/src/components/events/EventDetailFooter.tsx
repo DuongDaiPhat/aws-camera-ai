@@ -12,13 +12,16 @@ interface FooterProps {
   requireReview: boolean;
   canReview: boolean;
   onReview?: () => void;
+  readOnly?: boolean;
+  canCloseEmergency?: boolean;
 }
 
 function ConfirmationButtons({
   event,
   submitting,
   onAction,
-}: Pick<FooterProps, 'event' | 'submitting' | 'onAction'>) {
+  canCloseEmergency = true,
+}: Pick<FooterProps, 'event' | 'submitting' | 'onAction' | 'canCloseEmergency'>) {
   if (event.status === 'NOTIFIED')
     return (
       <>
@@ -40,7 +43,10 @@ function ConfirmationButtons({
         </button>
       </>
     );
-  if (event.status === 'ESCALATED')
+  if (event.status === 'ESCALATED') {
+    if (!canCloseEmergency) {
+      return <span className={styles.statusDoneBadge}>🚨 Đang leo thang khẩn cấp</span>;
+    }
     return (
       <button
         type="button"
@@ -51,6 +57,7 @@ function ConfirmationButtons({
         {submitting ? 'Đang đóng…' : 'Đóng sự kiện khẩn cấp'}
       </button>
     );
+  }
   if (event.status === 'RESOLVED' || event.status === 'CLOSED')
     return (
       <span className={styles.statusDoneBadge}>
@@ -70,7 +77,11 @@ export function EventDetailFooter(props: FooterProps) {
     canReview,
     onReview,
     onToggleFalseAlarm,
+    readOnly = false,
   } = props;
+  if (readOnly) {
+    return null;
+  }
   return (
     <div className={styles.modalFooter}>
       <div className={styles.footerActionsWrapper}>

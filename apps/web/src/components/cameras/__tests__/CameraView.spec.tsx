@@ -154,7 +154,9 @@ describe('CameraView component', () => {
       />,
     );
 
-    expect(html).toContain('Quản lý Camera &amp; Nguồn phát');
+    expect(html).toContain('Camera trực tiếp');
+    expect(html).not.toContain('Cấu hình nguồn phát');
+    expect(html).not.toContain('Lỗi kết nối');
   });
 
   it('hiển thị nút toggle chuyển đổi giữa Dạng danh sách và Lưới toàn bộ cam', () => {

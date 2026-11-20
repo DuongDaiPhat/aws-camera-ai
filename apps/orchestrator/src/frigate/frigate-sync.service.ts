@@ -152,17 +152,17 @@ export class FrigateSyncService {
         mediamtxRtspBaseUrl: this.getMediaMtxRtspBaseUrl(camera.source_type_val),
       });
 
-      // 3. Gửi cấu hình đã cập nhật xuống Frigate
-      await this.frigateClient.saveConfig(updatedConfig);
-
-      await this.verifyAppliedConfig(
-        beforeRestart.startedAt,
+      const enabledSlugs = zones.filter((zone) => zone.isEnabled).map((zone) => zone.slug);
+      const removedSlugs = (currentSettings?.managed_zone_slugs ?? []).filter(
+        (slug) => !enabledSlugs.includes(slug),
+      );
+      await this.applyConfig(
+        rawConfig,
         updatedConfig,
+        beforeRestart,
         camera.slug,
-        zones.filter((zone) => zone.isEnabled).map((zone) => zone.slug),
-        (currentSettings?.managed_zone_slugs ?? []).filter(
-          (slug) => !zones.some((zone) => zone.isEnabled && zone.slug === slug),
-        ),
+        enabledSlugs,
+        removedSlugs,
       );
 
       const settingsAfterApply =
@@ -215,24 +215,29 @@ export class FrigateSyncService {
     }
   }
 
-  private async verifyAppliedConfig(
-    previousStartedAt: number,
+  private async applyConfig(
+    rawConfig: string,
     expectedConfig: string,
+    running: FrigateRuntimeState,
     cameraSlug: string,
     expectedSlugs: string[],
     removedSlugs: string[],
   ): Promise<void> {
+    const isApplied = (state: FrigateRuntimeState): boolean =>
+      this.frigateConfig.hasAppliedSettings(state.rawConfig, expectedConfig, cameraSlug) &&
+      (typeof this.frigateConfig.hasAppliedZones !== 'function' ||
+        this.frigateConfig.hasAppliedZones(
+          state.rawConfig,
+          cameraSlug,
+          expectedSlugs,
+          removedSlugs,
+        ));
+
+    if (this.frigateConfig.hasSameConfig(rawConfig, expectedConfig) && isApplied(running)) return;
+
+    await this.frigateClient.saveConfig(expectedConfig);
     await this.waitForRuntime(
-      (state) =>
-        Math.abs(state.startedAt - previousStartedAt) > 2 &&
-        this.frigateConfig.hasAppliedSettings(state.rawConfig, expectedConfig, cameraSlug) &&
-        (typeof this.frigateConfig.hasAppliedZones !== 'function' ||
-          this.frigateConfig.hasAppliedZones(
-            state.rawConfig,
-            cameraSlug,
-            expectedSlugs,
-            removedSlugs,
-          )),
+      (state) => state.startedAt > running.startedAt + 2 && isApplied(state),
     );
   }
 

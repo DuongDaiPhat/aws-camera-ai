@@ -95,7 +95,11 @@ function EventThumbnail({ event }: { event: UIEventItem }) {
           onError={() => setImageError(true)}
         />
       ) : (
-        <div className={styles.thumbBackground} aria-hidden="true">
+        <div
+          className={styles.thumbBackground}
+          data-event-type={event.eventType}
+          aria-hidden="true"
+        >
           <ThumbnailPlaceholderIcon eventType={event.eventType} />
         </div>
       )}

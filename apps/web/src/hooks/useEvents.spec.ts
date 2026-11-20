@@ -36,3 +36,17 @@ describe('fire event status and room filters', () => {
     ]);
   });
 });
+
+it('filters actual zone IDs even when two cameras have the same room name', () => {
+  const first = { ...fire('NOTIFIED'), id: 'first', zone: { id: 'zone-one', name: 'Phòng khách' } };
+  const second = {
+    ...fire('NOTIFIED'),
+    id: 'second',
+    zone: { id: 'zone-two', name: 'Phòng khách' },
+  };
+  const unassigned = { ...fire('NOTIFIED'), id: 'unassigned' };
+  expect(
+    filterEvents([first, second, unassigned], 'ALL', 'zone:zone-two').map((event) => event.id),
+  ).toEqual(['second']);
+  expect(filterEvents([first, second], 'ALL', 'zone:missing')).toEqual([]);
+});

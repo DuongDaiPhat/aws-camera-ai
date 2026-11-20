@@ -1,4 +1,5 @@
 import type { UIEventItem } from '@/types';
+import { isPriorityNotification, notificationExpiresAt } from './notification-state';
 import { FIRE_ATTENTION_MAX_AGE_MS, FIRE_ATTENTION_EPISODE_GAP_MS } from './fire-ui-config';
 
 export interface FireAttentionReceipt {
@@ -12,20 +13,45 @@ interface FireEpisode extends FireAttentionReceipt {
   event: UIEventItem;
 }
 
+function isPendingPriority(event: UIEventItem): boolean {
+  return !event.isFalseAlarm && ['DETECTED', 'NOTIFIED', 'ESCALATED'].includes(event.status);
+}
+
 export function isActiveFire(event: UIEventItem): boolean {
   return (
-    event.eventType === 'FIRE_SMOKE_DETECTED' &&
-    event.priority === 'P0' &&
-    ['DETECTED', 'NOTIFIED', 'ESCALATED'].includes(event.status)
+    event.eventType === 'FIRE_SMOKE_DETECTED' && event.priority === 'P0' && isPendingPriority(event)
   );
 }
 
-export function canInterruptFire(event: UIEventItem, now = Date.now()): boolean {
-  const age = now - Date.parse(event.detectedAt);
-  return isActiveFire(event) && age >= 0 && age < FIRE_ATTENTION_MAX_AGE_MS;
+export function criticalAlertDeadline(event: UIEventItem): number | null {
+  if (event.priority !== 'P0' || !isPendingPriority(event)) return null;
+  const until = notificationExpiresAt(event);
+  return Number.isFinite(until) ? until : null;
 }
 
-/** An escalation update does not create a new fire episode. */
+export function canInterruptCriticalAlert(event: UIEventItem, now = Date.now()): boolean {
+  const deadline = criticalAlertDeadline(event);
+  return deadline !== null && Date.parse(event.detectedAt) <= now && now < deadline;
+}
+
+export function canInterruptFire(event: UIEventItem, now = Date.now()): boolean {
+  return isActiveFire(event) && canInterruptCriticalAlert(event, now);
+}
+
+export function alertEmphasis(
+  event: UIEventItem,
+  now = Date.now(),
+): 'urgent' | 'priority' | undefined {
+  if (!isPriorityNotification(event, now)) return undefined;
+  return event.priority === 'P0' ? 'urgent' : 'priority';
+}
+
+export function alertEmphasisRank(event: UIEventItem, now: number): number {
+  if (!isPriorityNotification(event, now)) return 0;
+  return event.priority === 'P0' ? 3 : event.priority === 'P1' ? 2 : 1;
+}
+
+/** An escalation update does not create a new incident or reopen its interruption. */
 export function fireReviewKey(event: UIEventItem): string {
   return event.id;
 }
@@ -42,12 +68,14 @@ function overlaps(a: FireAttentionReceipt, b: FireAttentionReceipt): boolean {
 function fireEpisodes(events: UIEventItem[], now: number): FireEpisode[] {
   const episodes: FireEpisode[] = [];
   const ordered = events
-    .filter((event) => canInterruptFire(event, now))
+    .filter((event) => canInterruptCriticalAlert(event, now))
     .sort((a, b) => Date.parse(a.detectedAt) - Date.parse(b.detectedAt));
   for (const event of ordered) {
     const at = Date.parse(event.detectedAt);
     const next: FireEpisode = {
-      cameraId: event.camera?.id ?? `event:${event.id}`,
+      cameraId:
+        (event.eventType === 'FIRE_SMOKE_DETECTED' ? event.camera?.id : undefined) ??
+        `event:${event.id}`,
       eventIds: [event.id],
       firstDetectedAt: at,
       lastDetectedAt: at,
@@ -61,7 +89,7 @@ function fireEpisodes(events: UIEventItem[], now: number): FireEpisode[] {
     }
     prior.eventIds.push(event.id);
     prior.lastDetectedAt = at;
-    if (event.status === 'ESCALATED' || prior.event.status !== 'ESCALATED') prior.event = event;
+    if (criticalAlertDeadline(event)! < criticalAlertDeadline(prior.event)!) prior.event = event;
   }
   return episodes;
 }
@@ -75,8 +103,9 @@ export function reconcileFireReceipts(
   const episodes = fireEpisodes(events, now);
   return receipts
     .filter(
-      (item) =>
-        item.lastDetectedAt >= now - FIRE_ATTENTION_MAX_AGE_MS - FIRE_ATTENTION_EPISODE_GAP_MS,
+      (receipt) =>
+        receipt.lastDetectedAt >= now - FIRE_ATTENTION_MAX_AGE_MS - FIRE_ATTENTION_EPISODE_GAP_MS ||
+        episodes.some((episode) => overlaps(episode, receipt)),
     )
     .map((receipt) => {
       const matches = episodes.filter((episode) => overlaps(episode, receipt));
@@ -105,7 +134,7 @@ export function nextUnreviewedFire(
       .filter((episode) => !receipts.some((receipt) => overlaps(episode, receipt)))
       .sort(
         (a, b) =>
-          Number(b.event.status === 'ESCALATED') - Number(a.event.status === 'ESCALATED') ||
+          criticalAlertDeadline(a.event)! - criticalAlertDeadline(b.event)! ||
           b.lastDetectedAt - a.lastDetectedAt,
       )[0]?.event ?? null
   );
@@ -120,14 +149,6 @@ export function rememberFireAttention(
   const episode = fireEpisodes(events, now).find((item) => item.eventIds.includes(event.id));
   const retained = reconcileFireReceipts(events, receipts, now);
   if (!episode || retained.some((receipt) => overlaps(receipt, episode))) return retained;
-  return [
-    ...retained,
-    {
-      cameraId: episode.cameraId,
-      eventIds: episode.eventIds,
-      firstDetectedAt: episode.firstDetectedAt,
-      lastDetectedAt: episode.lastDetectedAt,
-      shownAt: now,
-    },
-  ];
+  const { event: _event, ...receipt } = episode;
+  return [...retained, receipt];
 }

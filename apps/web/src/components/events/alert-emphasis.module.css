@@ -1,0 +1,91 @@
+button.emphasis[data-alert='urgent'] {
+  box-shadow: inset 3px 0 #a52e4a;
+  background: #fff2f4;
+}
+
+button.emphasis[data-alert='urgent'] {
+  animation: urgent-entrance 0.85s ease-out 3;
+}
+
+button.emphasis[data-alert='priority'] {
+  box-shadow: inset 2px 0 #a26b26;
+  background: #fff9ee;
+}
+
+button.emphasis[data-alert='urgent']:hover {
+  background: #fce7ec;
+}
+
+button.emphasis[data-alert='priority']:hover {
+  background: #f8efd9;
+}
+
+.urgencyTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: max-content;
+  max-width: 100%;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: #f8d9e0;
+  color: #851b3c;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.urgencyTag svg {
+  flex: none;
+}
+
+.emphasis[data-alert='priority'] .urgencyTag {
+  background: #f4e8cb;
+  color: #704715;
+}
+
+@keyframes urgent-entrance {
+  45% {
+    box-shadow: inset 5px 0 #a52e4a;
+    background: #fbdde6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button.emphasis[data-alert='urgent'] {
+    animation: none;
+  }
+}
+
+button.emphasis[data-unread='true'] {
+  position: relative;
+}
+
+button.emphasis[data-unread='true']:not([data-alert]) {
+  background-color: #f2f7fc;
+}
+
+button.emphasis[data-unread='true']:not([data-alert]):hover {
+  background-color: #eaf3fb;
+}
+
+button.emphasis[data-unread='true']::after {
+  position: absolute;
+  inset-block-start: 5px;
+  inset-inline-end: 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #2174c4;
+  content: '';
+  pointer-events: none;
+}
+
+.unreadLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

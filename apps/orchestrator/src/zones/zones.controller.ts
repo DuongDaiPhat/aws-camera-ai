@@ -34,7 +34,7 @@ export class ZonesController {
 
   @Post('cameras/:cameraId/zones')
   @CheckResourceAccess('cameraId')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CAREGIVER')
   @ApiOperation({ summary: 'Tạo vùng mới và đưa cấu hình Frigate vào hàng đợi' })
   async create(
     @Param('cameraId', ParseUUIDPipe) cameraId: string,
@@ -45,7 +45,7 @@ export class ZonesController {
 
   @Patch('zones/:zoneId')
   @CheckResourceAccess('zoneId')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CAREGIVER')
   @ApiOperation({ summary: 'Cập nhật vùng và đưa cấu hình Frigate vào hàng đợi' })
   async update(
     @Param('zoneId', ParseUUIDPipe) zoneId: string,
@@ -56,7 +56,7 @@ export class ZonesController {
 
   @Delete('zones/:zoneId')
   @CheckResourceAccess('zoneId')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CAREGIVER')
   @HttpCode(204)
   @ApiOperation({ summary: 'Xóa vùng và đưa cấu hình Frigate vào hàng đợi' })
   async delete(@Param('zoneId', ParseUUIDPipe) zoneId: string): Promise<void> {

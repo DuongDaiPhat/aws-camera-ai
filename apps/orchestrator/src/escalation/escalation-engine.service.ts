@@ -70,7 +70,7 @@ export class EscalationEngineService {
     input: EscalationEvaluationInput,
     outboxMessageId?: string,
   ): Promise<EventRecord> {
-    const rulesMap = await this.loadRulesMap();
+    const rulesMap = await this.loadRulesMap(eventId);
     const decision = evaluateEscalationPolicy(input, rulesMap);
     const client = await this.repository.getPoolClient();
 
@@ -122,8 +122,8 @@ export class EscalationEngineService {
     return event.status === decision.targetStatus && event.status !== 'DETECTED';
   }
 
-  private async loadRulesMap(): Promise<Map<EventType, EscalationRuleLookup>> {
-    const rules = await this.rulesRepository.findAll();
+  private async loadRulesMap(eventId?: string): Promise<Map<EventType, EscalationRuleLookup>> {
+    const rules = await this.rulesRepository.findAll(eventId);
     return new Map(
       rules.map((rule) => [
         rule.event_type,
@@ -467,7 +467,7 @@ export class EscalationEngineService {
 
       if (event.event_type === 'WELLNESS_TIMEOUT') {
         const scope = await client.query(
-          `SELECT 1 FROM events e JOIN users u ON u.id=$2 WHERE e.id=$1 AND u.is_active AND (u.role='ADMIN' OR e.wellness_owner_user_id=u.id)`,
+          `SELECT 1 FROM events e JOIN users u ON u.id=$2 WHERE e.id=$1 AND u.is_active AND (u.role IN ('ADMIN','CAREGIVER') AND shares_camera_household(u.id,e.wellness_owner_user_id))`,
           [eventId, actorUserId],
         );
         if (!scope.rows.length)

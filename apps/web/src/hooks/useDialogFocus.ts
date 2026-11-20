@@ -28,7 +28,7 @@ function lockScroll(): () => boolean {
 function trapTab(event: KeyboardEvent, dialog: HTMLDivElement): void {
   const elements = Array.from(
     dialog.querySelectorAll<HTMLElement>(
-      'a[href],button:not(:disabled),input:not(:disabled),video[controls],[tabindex="0"]',
+      'a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),video[controls],[tabindex="0"]',
     ),
   ).filter((item) => item.getClientRects().length > 0);
   const first = elements[0];
