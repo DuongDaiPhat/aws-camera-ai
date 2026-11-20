@@ -22,6 +22,7 @@ export interface EventRecord {
   ai_label: string | null;
   ai_results: unknown[];
   version: number;
+  deadline_version?: number;
   detected_at: Date;
   escalation_deadline_at: Date | null;
   notified_at: Date | null;
@@ -74,7 +75,7 @@ export class EscalationRepository {
     const query = `
       SELECT
         id, event_type, status, priority, confidence, ai_label, ai_results,
-        version, detected_at, escalation_deadline_at, notified_at, escalated_at,
+        version, deadline_version, detected_at, escalation_deadline_at, notified_at, escalated_at,
         resolved_at, closed_at, rule_snapshot, triggering_results
       FROM events
       WHERE id = $1
@@ -93,6 +94,7 @@ export class EscalationRepository {
       priority?: PriorityLevel;
       notifiedAt?: Date;
       escalationDeadlineAt?: Date | null;
+      bumpDeadlineVersion?: boolean;
       escalatedAt?: Date;
       resolvedAt?: Date;
       closedAt?: Date;
@@ -112,11 +114,12 @@ export class EscalationRepository {
         closed_at = COALESCE($7, closed_at),
         rule_snapshot = COALESCE($8, rule_snapshot),
         triggering_results = COALESCE($9, triggering_results),
-        version = version + 1
+        version = version + 1,
+        deadline_version = CASE WHEN $12::boolean THEN deadline_version + 1 ELSE deadline_version END
       WHERE id = $10 AND version = $11
       RETURNING
         id, event_type, status, priority, confidence, ai_label, ai_results,
-        version, detected_at, escalation_deadline_at, notified_at, escalated_at,
+        version, deadline_version, detected_at, escalation_deadline_at, notified_at, escalated_at,
         resolved_at, closed_at, rule_snapshot, triggering_results;
     `;
 
@@ -132,6 +135,7 @@ export class EscalationRepository {
       updates.triggeringResults ? JSON.stringify(updates.triggeringResults) : null,
       eventId,
       expectedVersion,
+      Boolean(updates.bumpDeadlineVersion),
     ]);
 
     if (res.rows.length === 0) {
@@ -337,12 +341,18 @@ export class EscalationRepository {
     const query = `
       SELECT
         id, event_type, status, priority, confidence, ai_label, ai_results,
-        version, detected_at, escalation_deadline_at, notified_at, escalated_at,
+        version, deadline_version, detected_at, escalation_deadline_at, notified_at, escalated_at,
         resolved_at, closed_at, rule_snapshot, triggering_results
       FROM events
       WHERE status = 'NOTIFIED' AND event_type <> 'WELLNESS_TIMEOUT'
         AND escalation_deadline_at IS NOT NULL
         AND escalation_deadline_at <= now()
+        AND NOT EXISTS (
+          SELECT 1
+          FROM deadline_workflow_dispatches d
+          WHERE d.event_id = events.id
+            AND d.deadline_version = events.deadline_version
+        )
       ORDER BY
         CASE priority
           WHEN 'P0' THEN 0

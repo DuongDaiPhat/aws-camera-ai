@@ -1,6 +1,7 @@
 import { Injectable, Logger, type OnModuleInit, type OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EscalationRepository } from './escalation.repository';
+import { readDeadlineConfig, type DeadlineConfig } from './deadline-config';
 
 @Injectable()
 export class EscalationDeadlineWorkerService implements OnModuleInit, OnModuleDestroy {
@@ -9,11 +10,13 @@ export class EscalationDeadlineWorkerService implements OnModuleInit, OnModuleDe
   private isProcessing = false;
   private readonly pollIntervalMs: number;
   private readonly batchSize: number;
+  private readonly deadlineConfig: DeadlineConfig;
 
   constructor(
     private readonly repository: EscalationRepository,
     private readonly configService: ConfigService,
   ) {
+    this.deadlineConfig = readDeadlineConfig(this.configService);
     this.pollIntervalMs = Number(
       this.configService.get<number>('ESCALATION_POLL_INTERVAL_MS') ?? 5000,
     );
@@ -21,6 +24,13 @@ export class EscalationDeadlineWorkerService implements OnModuleInit, OnModuleDe
   }
 
   onModuleInit(): void {
+    if (this.deadlineConfig.driver === 'stepfunctions') {
+      this.logger.log(
+        'DEADLINE_DRIVER=stepfunctions — tắt local EscalationDeadlineWorker để tránh xử lý trùng deadline',
+      );
+      return;
+    }
+
     this.logger.log(
       `Khởi động EscalationDeadlineWorker (quét mỗi ${this.pollIntervalMs}ms, tối đa ${this.batchSize} events/lần)`,
     );
@@ -44,6 +54,10 @@ export class EscalationDeadlineWorkerService implements OnModuleInit, OnModuleDe
    * Quét và leo thang tự động các sự kiện quá hạn deadline (FR-ESC-02, FR-ESC-07)
    */
   async scanAndProcessDueDeadlines(): Promise<number> {
+    if (this.deadlineConfig.driver === 'stepfunctions') {
+      return 0;
+    }
+
     if (this.isProcessing) {
       return 0;
     }

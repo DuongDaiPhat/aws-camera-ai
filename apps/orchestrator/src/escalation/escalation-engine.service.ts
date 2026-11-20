@@ -5,6 +5,7 @@ import {
   ConflictException,
   BadRequestException,
   ForbiddenException,
+  Optional,
 } from '@nestjs/common';
 import type {
   EventType,
@@ -15,6 +16,8 @@ import type {
 import type { PoolClient } from 'pg';
 import { EscalationRepository, type EventRecord } from './escalation.repository';
 import { EscalationRulesRepository } from '../escalation-rules/escalation-rules.repository';
+import { DeadlineRepository } from './deadline.repository';
+import { DeadlineStepFunctionsService } from './deadline-stepfunctions.service';
 import {
   evaluateEscalationPolicy,
   isValidStatusTransition,
@@ -60,6 +63,8 @@ export class EscalationEngineService {
   constructor(
     private readonly repository: EscalationRepository,
     private readonly rulesRepository: EscalationRulesRepository,
+    @Optional() private readonly deadlineRepository?: DeadlineRepository,
+    @Optional() private readonly deadlineStepFunctions?: DeadlineStepFunctionsService,
   ) {}
 
   /**
@@ -104,11 +109,20 @@ export class EscalationEngineService {
         return event;
       }
 
-      const updated = await this.applyDecision(client, event, input, decision, rulesMap);
+      const { updated, enqueuedCloudDeadline } = await this.applyDecision(
+        client,
+        event,
+        input,
+        decision,
+        rulesMap,
+      );
 
       if (outboxMessageId) await this.markAiOutboxProcessed(client, outboxMessageId);
 
       await client.query('COMMIT');
+      if (enqueuedCloudDeadline) {
+        this.deadlineStepFunctions?.wake();
+      }
       return updated;
     } catch (error) {
       await client.query('ROLLBACK');
@@ -178,7 +192,8 @@ export class EscalationEngineService {
     input: EscalationEvaluationInput,
     decision: EscalationDecision,
     rulesMap: Map<EventType, EscalationRuleLookup>,
-  ): Promise<EventRecord> {
+  ): Promise<{ updated: EventRecord; enqueuedCloudDeadline: boolean }> {
+    const schedulingDeadline = decision.targetStatus === 'NOTIFIED' && decision.deadlineAt !== null;
     const updated = await this.repository.updateEventStatus(client, event.id, event.version, {
       status: decision.targetStatus,
       priority:
@@ -187,6 +202,7 @@ export class EscalationEngineService {
           : decision.priority,
       notifiedAt: decision.targetStatus === 'NOTIFIED' ? new Date() : undefined,
       escalationDeadlineAt: decision.deadlineAt,
+      bumpDeadlineVersion: schedulingDeadline,
       ruleSnapshot: decision.ruleSnapshot,
       triggeringResults: decision.triggeringResults,
     });
@@ -198,6 +214,7 @@ export class EscalationEngineService {
       actorType: 'SYSTEM',
       metadata: { decision, detectedAt: input.detectedAt },
     });
+    let enqueuedCloudDeadline = false;
     if (decision.targetStatus === 'NOTIFIED') {
       const rule = rulesMap.get(decision.triggeringEventType ?? input.eventType);
       for (const channel of rule?.notifyChannels ?? ['TELEGRAM']) {
@@ -213,8 +230,26 @@ export class EscalationEngineService {
           },
         });
       }
+      const stateMachineArn = this.deadlineStepFunctions?.getStateMachineArn();
+      if (
+        schedulingDeadline &&
+        decision.deadlineAt &&
+        event.event_type !== 'WELLNESS_TIMEOUT' &&
+        this.deadlineStepFunctions?.isStepFunctionsEnabled() &&
+        stateMachineArn &&
+        this.deadlineRepository
+      ) {
+        const deadlineVersion = updated.deadline_version ?? (event.deadline_version ?? 1) + 1;
+        await this.deadlineRepository.enqueueDispatch(client, {
+          eventId: event.id,
+          deadlineVersion,
+          expectedDeadlineAt: decision.deadlineAt,
+          stateMachineArn,
+        });
+        enqueuedCloudDeadline = true;
+      }
     }
-    return updated;
+    return { updated, enqueuedCloudDeadline };
   }
 
   private async findInitialTelegramReplay(
@@ -388,7 +423,12 @@ export class EscalationEngineService {
         resolvedAt: targetStatus === 'RESOLVED' ? now : undefined,
         escalatedAt: targetStatus === 'ESCALATED' ? now : undefined,
         escalationDeadlineAt: null, // Huy deadline khi da xac nhan
+        bumpDeadlineVersion: true,
       });
+
+      if (this.deadlineRepository) {
+        await this.deadlineRepository.cancelPendingDispatchesForEvent(client, eventId);
+      }
 
       await this.repository.createStatusHistory(client, {
         eventId,
