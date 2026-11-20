@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { apiFetch } from '@/lib/api-client';
 import type { KnownFace } from '@/lib/known-faces-client';
 import type { HouseholdMember } from '@/lib/household-client';
+import { Icon } from '@/components/ui/Icon';
 import styles from './known-faces.module.css';
 export function KnownFaceEditor({
   face,
@@ -43,28 +44,35 @@ export function KnownFaceEditor({
         }
       }}
     >
-      <h3>Sửa thông tin người quen</h3>
+      <header className={styles.formHeader}>
+        <h3 id="known-face-form-title">Sửa thông tin</h3>
+        <button type="button" className={styles.closeButton} aria-label="Đóng" onClick={onCancel}>
+          <Icon name="close" size={18} />
+        </button>
+      </header>
+      <div className={styles.formFields}>
+        <label>
+          Tên
+          <input
+            name="name"
+            required
+            maxLength={120}
+            defaultValue={face.personName}
+            disabled={busy}
+          />
+        </label>
+        <label>
+          Quan hệ
+          <input
+            name="relationship"
+            maxLength={60}
+            defaultValue={face.relationship ?? ''}
+            disabled={busy}
+          />
+        </label>
+      </div>
       <label>
-        Tên
-        <input
-          name="name"
-          required
-          maxLength={120}
-          defaultValue={face.personName}
-          disabled={busy}
-        />
-      </label>
-      <label>
-        Quan hệ
-        <input
-          name="relationship"
-          maxLength={60}
-          defaultValue={face.relationship ?? ''}
-          disabled={busy}
-        />
-      </label>
-      <label>
-        Tài khoản Viewer được chăm sóc
+        Liên kết tài khoản Viewer
         <select name="linkedUserId" defaultValue={face.linkedUserId ?? ''} disabled={busy}>
           <option value="">Chưa liên kết</option>
           {members
@@ -76,10 +84,14 @@ export function KnownFaceEditor({
             ))}
         </select>
       </label>
-      <p>Liên kết này cho phép chọn người trong lịch Kiểm tra an toàn.</p>
-      {error && <p role="alert">{error}</p>}
+      <p className={styles.hint}>Liên kết này cho phép chọn người trong lịch Kiểm tra an toàn.</p>
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
       <div className={styles.actions}>
-        <button type="submit" disabled={busy}>
+        <button className={styles.primary} type="submit" disabled={busy}>
           Lưu thông tin
         </button>
         <button type="button" disabled={busy} onClick={onCancel}>

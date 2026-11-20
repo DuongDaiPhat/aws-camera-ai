@@ -8,6 +8,7 @@ import { markLoginEntrance } from '@/lib/login-entrance';
 import { getAuthConfig, type AuthConfig } from '@/lib/auth-config';
 import { startCognitoLogin } from '@/lib/cognito-login';
 import { clearBrowserSession } from '@/lib/auth-session';
+import { Icon } from '@/components/ui/Icon';
 import styles from './login.module.css';
 
 export function LoginForm() {
@@ -73,20 +74,32 @@ export function LoginForm() {
     }
   }
 
-  if (!authConfig) return <p role="status">{errorMessage ?? 'Đang tải…'}</p>;
+  if (!authConfig) {
+    return (
+      <p className={styles.authStatus} role={errorMessage ? 'alert' : 'status'}>
+        {errorMessage ?? 'Đang tải…'}
+      </p>
+    );
+  }
 
   if (authConfig.provider === 'cognito') {
     return (
       <div className={styles.form}>
-        {errorMessage && <p role="alert">{errorMessage}</p>}
+        {errorMessage && (
+          <p className={styles.error} role="alert">
+            {errorMessage}
+          </p>
+        )}
         <button
           className={styles.submitButton}
           type="button"
           disabled={isSubmitting}
           onClick={handleCognitoLogin}
         >
-          {isSubmitting ? 'Đang chuyển đến trang đăng nhập…' : 'Đăng nhập'}
+          <Icon name="shield" size={18} />
+          {isSubmitting ? 'Đang chuyển đến AWS…' : 'Đăng nhập bằng AWS'}
         </button>
+        <p className={styles.securityNote}>Bạn sẽ được chuyển đến AWS để xác thực tài khoản.</p>
       </div>
     );
   }

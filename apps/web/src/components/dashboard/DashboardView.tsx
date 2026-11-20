@@ -435,7 +435,7 @@ export function DashboardView() {
               onSelectDate={setCalendarDate}
               onViewPlayback={activeNav === 'playback' ? undefined : () => navigate('playback')}
               isDashboard={activeNav === 'dashboard'}
-              compact={activeNav === 'playback'}
+              compact={activeNav === 'playback' || activeNav === 'known-faces'}
               userName={user?.fullName || 'bạn'}
               pendingCount={notificationCount}
               pageTitle={
