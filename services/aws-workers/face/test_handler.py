@@ -68,6 +68,30 @@ class FaceWorkerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             handler.validate_job(altered, {"envelope": self.job})
 
+    def test_collection_prefix_env_validation(self):
+        for prefix in (
+            "camerai-s4-dev-owner-",
+            "argusai-staging-owner-",
+            "argusai-production-owner-",
+        ):
+            job = copy.deepcopy(self.job)
+            job["payload"]["collectionId"] = prefix + job["payload"]["ownerScopeId"]
+            with patch.dict(os.environ, {"REKOGNITION_COLLECTION_PREFIX": prefix}):
+                handler.validate_job(job, {"envelope": job})
+
+        with (
+            patch.dict(os.environ, {"REKOGNITION_COLLECTION_PREFIX": "argusai-staging-owner-"}),
+            self.assertRaises(ValueError),
+        ):
+            handler.validate_job(self.job, {"envelope": self.job})
+
+        for invalid in ("", "   ", "custom-owner-", "argusai-staging-"):
+            with (
+                patch.dict(os.environ, {"REKOGNITION_COLLECTION_PREFIX": invalid}),
+                self.assertRaises(ValueError),
+            ):
+                handler.validate_job(self.job, {"envelope": self.job})
+
     def test_partial_failure_retries_failed_record_only(self):
         event = {
             "Records": [

@@ -17,6 +17,20 @@ VALIDATOR = Draft202012Validator(
 )
 LOGGER = logging.getLogger(__name__)
 _CLIENTS = {}
+DEFAULT_COLLECTION_PREFIX = "camerai-s4-dev-owner-"
+ALLOWED_COLLECTION_PREFIXES = (
+    "camerai-s4-dev-owner-",
+    "argusai-staging-owner-",
+    "argusai-production-owner-",
+)
+
+
+def collection_prefix():
+    raw = os.environ.get("REKOGNITION_COLLECTION_PREFIX")
+    prefix = DEFAULT_COLLECTION_PREFIX if raw is None else raw.strip()
+    if prefix not in ALLOWED_COLLECTION_PREFIXES:
+        raise ValueError("Invalid REKOGNITION_COLLECTION_PREFIX")
+    return prefix
 
 
 def client(service):
@@ -66,7 +80,7 @@ def validate_job(message, context):
     )
     if (
         p["image"] != {"bucket": os.environ["S3_BUCKET"], "key": expected_key}
-        or p["collectionId"] != "camerai-s4-dev-owner-" + p["ownerScopeId"]
+        or p["collectionId"] != collection_prefix() + p["ownerScopeId"]
         or message["messageId"] != p["jobId"]
         or message["correlationId"] != p["eventId"]
         or p["observationId"] != f"track:{p['trackId']}:face"
