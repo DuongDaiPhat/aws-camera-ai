@@ -369,12 +369,41 @@ jobs:
           python -m pip install -r services/aws-workers/face/requirements.txt
           python -m unittest discover -s services/aws-workers/face -p "test_*.py"
   # -------------------------------------------------------------------
+  # 8. Deadline worker (unit test + G0 contract fixtures)
+  # -------------------------------------------------------------------
+  deadline-worker:
+    name: Deadline worker (unit test)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies and run unit tests
+        run: |
+          python -m pip install -r services/aws-workers/deadline/requirements.txt
+          python -m unittest discover -s services/aws-workers/deadline -p "test_*.py"
+          python aws/sprint4/contracts/validate_fixtures.py
+  # -------------------------------------------------------------------
   # Cong tong: bat branch protection vao job NAY, khong phai tung job le
   # -------------------------------------------------------------------
   ci-ok:
     name: CI xanh
     runs-on: ubuntu-latest
-    needs: [secret-scan, node, python, training, openapi, database, docker, commitlint, face-worker]
+    needs:
+      [
+        secret-scan,
+        node,
+        python,
+        training,
+        openapi,
+        database,
+        docker,
+        commitlint,
+        face-worker,
+        deadline-worker,
+      ]
     if: always()
     env:
       CI_RESULTS: ${{ toJSON(needs) }}
