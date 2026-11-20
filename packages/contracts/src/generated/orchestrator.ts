@@ -1403,6 +1403,32 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/internal/events/{eventId}/deadline': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Execute Step Functions escalation deadline command (US-13 / AWS-06)
+     * @description Sprint 4 G0 §4. Authenticated strictly with `X-Internal-Token` from
+     *     `INTERNAL_SERVICE_TOKEN` (>= 32 chars). Uses PostgreSQL row lock and
+     *     database clock (`NOW()`) inside one transaction to evaluate deadline
+     *     eligibility, persist durable `deadline_command_receipts`, and transition
+     *     due events to `ESCALATED` with a notification intent.
+     */
+    post: operations['applyEventDeadline'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/webhooks/telegram': {
     parameters: {
       query?: never;
@@ -3008,6 +3034,36 @@ export interface components {
         cameraId: string;
         body: components['schemas']['FaceResultSubmission'];
       };
+    };
+    DeadlineCommandRequest: {
+      /** @enum {integer} */
+      schemaVersion: 1;
+      /** Format: uuid */
+      commandId: string;
+      /** Format: uuid */
+      eventId: string;
+      deadlineVersion: number;
+      /** Format: date-time */
+      expectedDeadlineAt: string;
+    };
+    DeadlineCommandResponse: {
+      /** Format: uuid */
+      commandId: string;
+      /** @enum {string} */
+      disposition: 'APPLIED' | 'NO_OP';
+      /** @enum {string} */
+      reason: 'ESCALATED' | 'ACKNOWLEDGED' | 'RESOLVED' | 'STALE_DEADLINE' | 'ALREADY_APPLIED';
+      aggregateVersion: number;
+    };
+    DeadlineConflictResponse: {
+      /** @enum {string} */
+      code: 'NOT_DUE' | 'COMMAND_CONFLICT';
+      /**
+       * Format: date-time
+       * @description Present when code is NOT_DUE; equals the authoritative DB escalation_deadline_at in UTC.
+       */
+      retryAt?: string;
+      message: string;
     };
     FireRuntimeHealth: {
       /** @enum {string} */
@@ -6001,6 +6057,44 @@ export interface operations {
       401: components['responses']['Unauthorized'];
       404: components['responses']['NotFound'];
       409: components['responses']['Conflict'];
+    };
+  };
+  applyEventDeadline: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        eventId: components['parameters']['EventId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DeadlineCommandRequest'];
+      };
+    };
+    responses: {
+      /** @description Idempotent deadline decision (APPLIED or NO_OP) */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DeadlineCommandResponse'];
+        };
+      };
+      400: components['responses']['BadRequest'];
+      401: components['responses']['Unauthorized'];
+      404: components['responses']['NotFound'];
+      /** @description Event deadline not yet due (NOT_DUE with retryAt) or reused commandId with different payload (COMMAND_CONFLICT) */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DeadlineConflictResponse'];
+        };
+      };
     };
   };
   telegramWebhook: {

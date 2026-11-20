@@ -2443,6 +2443,48 @@ paths:
         "409":
           $ref: "#/components/responses/Conflict"
 
+  /internal/events/{eventId}/deadline:
+    parameters:
+      - $ref: "#/components/parameters/EventId"
+    post:
+      tags:
+        - internal
+      summary: Execute Step Functions escalation deadline command (US-13 / AWS-06)
+      description: |-
+        Sprint 4 G0 §4. Authenticated strictly with `X-Internal-Token` from
+        `INTERNAL_SERVICE_TOKEN` (>= 32 chars). Uses PostgreSQL row lock and
+        database clock (`NOW()`) inside one transaction to evaluate deadline
+        eligibility, persist durable `deadline_command_receipts`, and transition
+        due events to `ESCALATED` with a notification intent.
+      operationId: applyEventDeadline
+      security:
+        - internalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeadlineCommandRequest"
+      responses:
+        "200":
+          description: Idempotent deadline decision (APPLIED or NO_OP)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeadlineCommandResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Event deadline not yet due (NOT_DUE with retryAt) or reused commandId with different payload (COMMAND_CONFLICT)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeadlineConflictResponse"
+
   /webhooks/telegram:
     post:
       tags: [internal]
@@ -5199,3 +5241,79 @@ components:
               format: uuid
             body:
               $ref: "#/components/schemas/FaceResultSubmission"
+
+    DeadlineCommandRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - schemaVersion
+        - commandId
+        - eventId
+        - deadlineVersion
+        - expectedDeadlineAt
+      properties:
+        schemaVersion:
+          type: integer
+          enum: [1]
+        commandId:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+        deadlineVersion:
+          type: integer
+          minimum: 1
+        expectedDeadlineAt:
+          type: string
+          format: date-time
+          pattern: "Z$"
+
+    DeadlineCommandResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - commandId
+        - disposition
+        - reason
+        - aggregateVersion
+      properties:
+        commandId:
+          type: string
+          format: uuid
+        disposition:
+          type: string
+          enum:
+            - APPLIED
+            - NO_OP
+        reason:
+          type: string
+          enum:
+            - ESCALATED
+            - ACKNOWLEDGED
+            - RESOLVED
+            - STALE_DEADLINE
+            - ALREADY_APPLIED
+        aggregateVersion:
+          type: integer
+          minimum: 1
+
+    DeadlineConflictResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - NOT_DUE
+            - COMMAND_CONFLICT
+        retryAt:
+          type: string
+          format: date-time
+          pattern: "Z$"
+          description: Present when code is NOT_DUE; equals the authoritative DB escalation_deadline_at in UTC.
+        message:
+          type: string
