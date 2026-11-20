@@ -46,7 +46,7 @@ export function CreateUserView({ onCreated }: { onCreated?: () => void }) {
       <h2 id="create-user-title">Tạo tài khoản</h2>
       <p>
         Tạo người dùng trong Cognito trước. Sau đó nhập email và sao chép đúng User ID (Sub) từ cùng
-        người dùng trong User Pool của CameraAI.
+        người dùng trong User Pool của Argus AI.
       </p>
       <form className={styles.form} onSubmit={handleSubmit}>
         <fieldset disabled={isSubmitting}>

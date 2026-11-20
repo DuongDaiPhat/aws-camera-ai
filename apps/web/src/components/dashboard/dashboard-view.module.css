@@ -424,3 +424,28 @@ button.headerSosButton:disabled {
   border-color: #fecaca;
   color: #991b1b;
 }
+
+.layoutWrapper[data-page='known-faces'] {
+  --known-faces-inset: 44px;
+}
+.layoutWrapper[data-page='known-faces'] .mainContent {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - var(--known-faces-inset));
+  min-height: min-content;
+  padding-bottom: 0;
+}
+.layoutWrapper[data-page='known-faces'] .mainContent > header {
+  flex: none;
+}
+.layoutWrapper[data-page='known-faces'] .workspace {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: min-content;
+}
+@media (max-width: 1100px) {
+  .layoutWrapper[data-page='known-faces'] {
+    --known-faces-inset: 36px;
+  }
+}

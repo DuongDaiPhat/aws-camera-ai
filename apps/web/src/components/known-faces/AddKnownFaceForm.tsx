@@ -9,6 +9,8 @@ import {
 } from '@/lib/known-faces-client';
 import type { HouseholdMember } from '@/lib/household-client';
 import { FaceImagePreview } from './FaceImagePicker';
+import { ImagePlus } from 'lucide-react';
+import { Icon } from '@/components/ui/Icon';
 import styles from './known-faces.module.css';
 
 export function AddKnownFaceForm({
@@ -96,28 +98,35 @@ export function AddKnownFaceForm({
       }}
       aria-label="Đăng ký người quen"
     >
-      <h3>Thêm người quen</h3>
+      <header className={styles.formHeader}>
+        <h3 id="known-face-form-title">Thêm hồ sơ nhận diện</h3>
+        <button type="button" className={styles.closeButton} aria-label="Đóng" onClick={onCancel}>
+          <Icon name="close" size={18} />
+        </button>
+      </header>
+      <div className={styles.formFields}>
+        <label>
+          Tên
+          <input
+            required
+            maxLength={120}
+            value={name}
+            disabled={busy}
+            onChange={(event) => setName(event.target.value)}
+          />
+        </label>
+        <label>
+          Quan hệ
+          <input
+            maxLength={60}
+            value={relationship}
+            disabled={busy}
+            onChange={(event) => setRelationship(event.target.value)}
+          />
+        </label>
+      </div>
       <label>
-        Tên
-        <input
-          required
-          maxLength={120}
-          value={name}
-          disabled={busy}
-          onChange={(event) => setName(event.target.value)}
-        />
-      </label>
-      <label>
-        Quan hệ
-        <input
-          maxLength={60}
-          value={relationship}
-          disabled={busy}
-          onChange={(event) => setRelationship(event.target.value)}
-        />
-      </label>
-      <label>
-        Tài khoản Viewer được chăm sóc
+        Liên kết tài khoản Viewer
         <select
           value={linkedUserId}
           disabled={busy}
@@ -134,22 +143,26 @@ export function AddKnownFaceForm({
         </select>
       </label>
       <label>
-        Chọn 1–5 ảnh JPEG, PNG hoặc WebP (Đã chọn {files.length}/5)
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          multiple
-          disabled={busy}
-          onChange={(event) => {
-            appendFiles(Array.from(event.target.files ?? []));
-            event.target.value = '';
-          }}
-        />
+        Ảnh nhận diện ({files.length}/5)
+        <span className={styles.uploadControl}>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            disabled={busy || files.length >= 5}
+            onChange={(event) => {
+              appendFiles(Array.from(event.target.files ?? []));
+              event.target.value = '';
+            }}
+          />
+          <ImagePlus size={17} aria-hidden="true" />
+          <span>{files.length === 5 ? 'Đã chọn đủ 5 ảnh' : 'Chọn ảnh từ thiết bị'}</span>
+        </span>
       </label>
-      <p>
-        Ảnh chỉ dùng để tạo dữ liệu nhận diện trong lúc đăng ký. Hệ thống không lưu ảnh gốc dài hạn.
+      <p className={styles.hint}>
+        Chọn 1–5 ảnh JPEG, PNG hoặc WebP. Hệ thống không lưu ảnh gốc dài hạn.
       </p>
-      <div className={styles.grid}>
+      <div className={styles.previews}>
         {files.map((file, index) => (
           <FaceImagePreview
             key={`${index}-${file.name}`}
@@ -166,10 +179,18 @@ export function AddKnownFaceForm({
           />
         ))}
       </div>
-      {error && <p role="alert">{error}</p>}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
       {busy && <p role="status">Đang phân tích ảnh và đăng ký…</p>}
       <div className={styles.actions}>
-        <button disabled={busy || !name.trim() || !files.length || files.length > 5} type="submit">
+        <button
+          className={styles.primary}
+          disabled={busy || !name.trim() || !files.length || files.length > 5}
+          type="submit"
+        >
           {details ? 'Đăng ký với lựa chọn này' : 'Đăng ký'}
         </button>
         <button

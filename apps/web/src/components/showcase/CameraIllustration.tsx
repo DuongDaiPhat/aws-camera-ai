@@ -1,11 +1,11 @@
-﻿export function CameraIllustration({ className }: { className?: string }) {
+export function CameraIllustration({ className }: { className?: string }) {
   return (
     <svg
       className={className}
       viewBox="0 0 640 350"
       fill="none"
       role="img"
-      aria-label="Cụm quang học CameraAI"
+      aria-label="Cụm quang học Argus AI"
     >
       <defs>
         <radialGradient id="camera-aura">
