@@ -18,7 +18,8 @@ import {
 } from '@aws-sdk/client-sqs';
 import { DatabaseService } from '../database/database.service';
 import { FrigateMediaAdapter } from '../media/frigate-media.adapter';
-import { STORAGE_SERVICE, IStorageService } from '../storage/storage.interface';
+import { IStorageService, S3_EXPIRE_7D_TAG, STORAGE_SERVICE } from '../storage/storage.interface';
+import { buildRekognitionCollectionId } from '../known-faces/face-config';
 import { AiResultsService } from '../ai-results/ai-results.service';
 import { SubmitAiResultDto } from '../ai-results/dto/submit-ai-result.dto';
 import { readCloudConfig } from './cloud-config';
@@ -87,7 +88,7 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
     const settings = this.settings;
     await this.db.transaction(async (client) => {
       const selected =
-        await client.query(`SELECT j.*, e.track_id, e.detected_at, camera.slug AS camera_slug, c.collection_id, c.version
+        await client.query(`SELECT j.*, e.track_id, e.detected_at, e.retain, camera.slug AS camera_slug, c.collection_id, c.version
     FROM cloud_jobs j JOIN events e ON e.id=j.event_id
     JOIN cameras camera ON camera.id=e.camera_id
     LEFT JOIN cloud_face_collections c ON c.owner_user_id=j.owner_user_id
@@ -99,10 +100,22 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
         if (!job.envelope) {
           if (job.kind !== 'face.job' || !job.collection_id)
             throw new Error('Face collection registry missing');
+          const expectedCollectionId = buildRekognitionCollectionId(
+            settings.rekognitionCollectionPrefix,
+            job.owner_user_id,
+          );
+          if (job.collection_id !== expectedCollectionId) {
+            throw new Error('Face collection prefix mismatch');
+          }
           const crop = await this.media.getCroppedSnapshot(job.track_id);
           if (!crop) throw new Error('Face crop unavailable');
           const key = `owners/${job.owner_user_id}/cameras/${job.camera_id}/events/${job.event_id}/face/${job.id}.jpg`;
-          const image = await this.storage.upload(key, crop, 'image/jpeg');
+          const image = await this.storage.upload(
+            key,
+            crop,
+            'image/jpeg',
+            job.retain ? { retain: true } : { tags: S3_EXPIRE_7D_TAG },
+          );
           if (image.bucket !== settings.bucket) throw new Error('Unexpected upload bucket');
           job.envelope = parseEnvelope({
             schemaVersion: 1,
@@ -144,6 +157,7 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
       } catch (error) {
         const knownReasons = [
           'Face collection registry missing',
+          'Face collection prefix mismatch',
           'Face crop unavailable',
           'Unexpected upload bucket',
         ];

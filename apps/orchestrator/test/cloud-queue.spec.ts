@@ -97,6 +97,96 @@ describe('cloud queue safety', () => {
         new ConfigService({ ...cloud, APPLICATION_RESULTS_QUEUE_URL: cloud.FACE_JOBS_QUEUE_URL }),
       ),
     ).toThrow('separate');
+    expect(() =>
+      readCloudConfig(
+        new ConfigService({ ...cloud, REKOGNITION_COLLECTION_PREFIX: 'bad-prefix-' }),
+      ),
+    ).toThrow('Invalid REKOGNITION_COLLECTION_PREFIX');
+    expect(() =>
+      readCloudConfig(new ConfigService({ ...cloud, FACE_PROVIDER: 'invalid' })),
+    ).toThrow('FACE_PROVIDER must be local or rekognition');
+    expect(() =>
+      readCloudConfig(new ConfigService({ ...cloud, FACE_PROVIDER: 'rekognition' })),
+    ).toThrow('Missing cloud configuration: REKOGNITION_COLLECTION_PREFIX');
+    const stagingCloud = readCloudConfig(
+      new ConfigService({
+        ...cloud,
+        FACE_PROVIDER: 'rekognition',
+        REKOGNITION_COLLECTION_PREFIX: 'argusai-staging-owner-',
+      }),
+    );
+    expect(stagingCloud).toMatchObject({
+      mode: 'sqs',
+      faceProvider: 'rekognition',
+      rekognitionCollectionPrefix: 'argusai-staging-owner-',
+    });
+  });
+
+  it('tags face crop uploads with retention=expire-7d unless event retain=true', async () => {
+    const owner = '11111111-1111-4111-8111-111111111111';
+    const camera = '22222222-2222-4222-8222-222222222222';
+    const event = '33333333-3333-4333-8333-333333333333';
+    const jobId = '44444444-4444-4444-8444-444444444444';
+    const resultId = '55555555-5555-4555-8555-555555555555';
+
+    for (const retain of [false, true]) {
+      const query = jest
+        .fn()
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: jobId,
+              result_id: resultId,
+              event_id: event,
+              kind: 'face.job',
+              owner_user_id: owner,
+              camera_id: camera,
+              track_id: 'track-1',
+              detected_at: new Date('2026-11-20T00:00:00Z'),
+              created_at: new Date('2026-11-20T00:00:00Z'),
+              camera_slug: 'cam_front',
+              collection_id: `argusai-staging-owner-${owner}`,
+              version: 2,
+              retain,
+              envelope: null,
+            },
+          ],
+        })
+        .mockResolvedValue({ rows: [] });
+      const client = { query };
+      const db = { query, transaction: jest.fn(async (work) => work(client)) };
+      const media = {
+        getCroppedSnapshot: jest.fn().mockResolvedValue(Buffer.from([0xff, 0xd8, 0xff])),
+      };
+      const storage = {
+        upload: jest.fn().mockResolvedValue({
+          bucket: 'test',
+          key: `owners/${owner}/cameras/${camera}/events/${event}/face/${jobId}.jpg`,
+          sizeBytes: 3,
+          contentType: 'image/jpeg',
+        }),
+      };
+      const queues = new CloudQueueService(
+        new ConfigService({
+          ...cloud,
+          FACE_PROVIDER: 'rekognition',
+          REKOGNITION_COLLECTION_PREFIX: 'argusai-staging-owner-',
+        }),
+        db as unknown as DatabaseService,
+        media as unknown as FrigateMediaAdapter,
+        storage as unknown as IStorageService,
+        { submit: jest.fn() } as unknown as AiResultsService,
+      );
+
+      await queues.dispatchOne();
+
+      expect(storage.upload).toHaveBeenCalledWith(
+        `owners/${owner}/cameras/${camera}/events/${event}/face/${jobId}.jpg`,
+        expect.any(Buffer),
+        'image/jpeg',
+        retain ? { retain: true } : { tags: { retention: 'expire-7d' } },
+      );
+    }
   });
   it('validates canonical fixtures and rejects changed envelope identity', () => {
     for (const file of [

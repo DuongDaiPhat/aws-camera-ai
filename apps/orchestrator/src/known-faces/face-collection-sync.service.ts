@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FACE_INFERENCE, type IFaceInference } from './face-inference.interface';
+import { readFaceProvider } from './face-config';
 import { KnownFacesRepository } from './known-faces.repository';
 
 @Injectable()
@@ -21,6 +22,9 @@ export class FaceCollectionSyncService implements OnModuleInit, OnModuleDestroy 
   ) {}
 
   onModuleInit(): void {
+    if (readFaceProvider(this.config) !== 'local') {
+      return;
+    }
     // Resend cả snapshot đã sync để phục hồi khi riêng AI restart.
     this.timer = setInterval(
       () => {
@@ -46,6 +50,9 @@ export class FaceCollectionSyncService implements OnModuleInit, OnModuleDestroy 
   }
 
   async sync(owner?: string): Promise<boolean> {
+    if (readFaceProvider(this.config) !== 'local') {
+      return true;
+    }
     try {
       const snapshots = await this.repository.snapshots(owner);
       let complete = true;
