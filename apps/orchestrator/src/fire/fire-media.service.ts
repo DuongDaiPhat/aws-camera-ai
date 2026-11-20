@@ -7,7 +7,11 @@ import {
   type OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { STORAGE_SERVICE, type IStorageService } from '../storage/storage.interface';
+import {
+  S3_EXPIRE_7D_TAG,
+  STORAGE_SERVICE,
+  type IStorageService,
+} from '../storage/storage.interface';
 import { EventMediaRepository } from '../media/event-media.repository';
 import { EventsService } from '../events/events.service';
 import { FireIncidentsRepository, type FireMediaWork } from './fire-incidents.repository';
@@ -109,7 +113,12 @@ export class FireMediaService implements OnModuleInit, OnModuleDestroy {
     if (body.length < 12 || body.subarray(4, 8).toString('ascii') !== 'ftyp')
       throw new Error('Invalid fire camera MP4');
     const key = this.key(work, 'clip.mp4');
-    await this.storage.upload(key, body, 'video/mp4');
+    await this.storage.upload(
+      key,
+      body,
+      'video/mp4',
+      work.retain ? { retain: true } : { tags: S3_EXPIRE_7D_TAG },
+    );
     await this.createRecord(
       work,
       key,

@@ -7,7 +7,12 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { IStorageService, PresignedUrlResult, UploadResult } from './storage.interface';
+import {
+  IStorageService,
+  PresignedUrlResult,
+  UploadOptions,
+  UploadResult,
+} from './storage.interface';
 
 const DEFAULT_PRESIGNED_URL_TTL_SECONDS = 900;
 
@@ -48,7 +53,12 @@ export class MinioStorageService implements IStorageService {
     );
   }
 
-  async upload(key: string, body: Buffer, contentType: string): Promise<UploadResult> {
+  async upload(
+    key: string,
+    body: Buffer,
+    contentType: string,
+    _options?: UploadOptions,
+  ): Promise<UploadResult> {
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,

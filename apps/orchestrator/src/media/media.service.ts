@@ -1,7 +1,12 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
-import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
+import {
+  IStorageService,
+  S3_EXPIRE_7D_TAG,
+  STORAGE_SERVICE,
+  UploadOptions,
+} from '../storage/storage.interface';
 import { EventMediaRecord, EventMediaRepository } from './event-media.repository';
 import { EventMediaResponseDto } from './dto/event-media-response.dto';
 
@@ -65,6 +70,10 @@ export class MediaService {
     return `events/${yyyy}/${mm}/${dd}/${eventId}/${filename}`;
   }
 
+  private retentionUploadOptions(retain?: boolean): UploadOptions {
+    return retain ? { retain: true } : { tags: S3_EXPIRE_7D_TAG };
+  }
+
   /** Store the exact full-camera confirmation frame without a person track. */
   async storeCameraSnapshot(
     eventId: string,
@@ -72,10 +81,16 @@ export class MediaService {
     image: Buffer,
     width: number,
     height: number,
+    options?: { retain?: boolean },
   ): Promise<EventMediaRecord | null> {
     const objectKey = this.buildObjectKey(observedAt, eventId, 'snapshot.jpg');
     try {
-      await this.storageService.upload(objectKey, image, 'image/jpeg');
+      await this.storageService.upload(
+        objectKey,
+        image,
+        'image/jpeg',
+        this.retentionUploadOptions(options?.retain),
+      );
       return await this.eventMediaRepository.createEventMedia({
         eventId,
         mediaType: 'SNAPSHOT',
@@ -107,6 +122,7 @@ export class MediaService {
     eventId: string,
     trackId: string,
     eventDate: Date,
+    options?: { retain?: boolean },
   ): Promise<EventMediaRecord | null> {
     const existingMedia = await this.eventMediaRepository.findMediaByEventIdAndType(
       eventId,
@@ -129,7 +145,12 @@ export class MediaService {
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      await this.storageService.upload(objectKey, buffer, 'image/jpeg');
+      await this.storageService.upload(
+        objectKey,
+        buffer,
+        'image/jpeg',
+        this.retentionUploadOptions(options?.retain),
+      );
 
       return await this.eventMediaRepository.createEventMedia({
         eventId,
@@ -155,6 +176,7 @@ export class MediaService {
     buffer: Buffer,
     eventDate: Date,
     filename = 'snapshot.jpg',
+    options?: { retain?: boolean },
   ): Promise<EventMediaRecord | null> {
     const existingMedia = await this.eventMediaRepository.findMediaByEventIdAndType(
       eventId,
@@ -167,7 +189,12 @@ export class MediaService {
     const objectKey = this.buildObjectKey(eventDate, eventId, filename);
 
     try {
-      await this.storageService.upload(objectKey, buffer, 'image/jpeg');
+      await this.storageService.upload(
+        objectKey,
+        buffer,
+        'image/jpeg',
+        this.retentionUploadOptions(options?.retain),
+      );
 
       return await this.eventMediaRepository.createEventMedia({
         eventId,
@@ -192,6 +219,7 @@ export class MediaService {
     trackId: string,
     eventDate: Date,
     durationMs?: number,
+    options?: { retain?: boolean },
   ): Promise<EventMediaRecord | null> {
     const existingMedia = await this.eventMediaRepository.findMediaByEventIdAndType(
       eventId,
@@ -214,7 +242,12 @@ export class MediaService {
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      await this.storageService.upload(objectKey, buffer, 'video/mp4');
+      await this.storageService.upload(
+        objectKey,
+        buffer,
+        'video/mp4',
+        this.retentionUploadOptions(options?.retain),
+      );
 
       return await this.eventMediaRepository.createEventMedia({
         eventId,

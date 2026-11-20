@@ -55,6 +55,7 @@ describe('US-18 camera recording recovery', () => {
         expect.stringContaining('/event/clip.mp4'),
         mp4,
         'video/mp4',
+        { tags: { retention: 'expire-7d' } },
       );
       expect(media.createEventMedia).toHaveBeenCalledTimes(1);
       expect(media.createEventMedia).toHaveBeenCalledWith(
@@ -63,6 +64,24 @@ describe('US-18 camera recording recovery', () => {
       expect(events.publishCommittedUpdate).toHaveBeenCalledWith('event');
       expect(String(fetchMock.mock.calls[0][0])).toContain(
         `/start/${work.first_qualified_at.getTime() / 1000 - 5}/end/${work.confirmed_at.getTime() / 1000 + 5}/`,
+      );
+    } finally {
+      await module.close();
+    }
+  });
+
+  it('preserves retained fire clips with retain=true instead of retention=expire-7d', async () => {
+    const mp4 = Buffer.from([0, 0, 0, 20, 102, 116, 121, 112, 105, 115, 111, 109]);
+    repository.claimMedia.mockResolvedValueOnce({ ...work, retain: true });
+    fetchMock = jest.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(mp4));
+    const module = await fixture();
+    try {
+      await module.get(FireMediaService).dispatch();
+      expect(storage.upload).toHaveBeenCalledWith(
+        expect.stringContaining('/event/clip.mp4'),
+        mp4,
+        'video/mp4',
+        { retain: true },
       );
     } finally {
       await module.close();

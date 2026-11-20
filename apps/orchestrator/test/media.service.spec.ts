@@ -97,6 +97,7 @@ describe('MediaService (US-04)', () => {
         'events/2026/09/18/evt-1/snapshot.jpg',
         expect.any(Buffer),
         'image/jpeg',
+        { tags: { retention: 'expire-7d' } },
       );
       expect(eventMediaRepository.createEventMedia).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -203,6 +204,7 @@ describe('MediaService (US-04)', () => {
         'events/2026/09/18/evt-2/clip.mp4',
         expect.any(Buffer),
         'video/mp4',
+        { tags: { retention: 'expire-7d' } },
       );
       expect(eventMediaRepository.createEventMedia).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -327,6 +329,7 @@ describe('MediaService (US-04)', () => {
         'events/2026/10/17/evt-fall-1/snapshot.jpg',
         fakeBuffer,
         'image/jpeg',
+        { tags: { retention: 'expire-7d' } },
       );
       expect(eventMediaRepository.createEventMedia).toHaveBeenCalledWith({
         eventId: 'evt-fall-1',
@@ -369,6 +372,61 @@ describe('MediaService (US-04)', () => {
 
       expect(result).toBe(existingRecord);
       expect(storageService.upload).not.toHaveBeenCalled();
+    });
+
+    it('bo qua tag retention=expire-7d va gan retain=true khi media duoc giu lai', async () => {
+      const fakeBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0]);
+      storageService.upload.mockResolvedValue({
+        bucket: 'camerai-media',
+        key: 'events/2026/10/17/evt-retain/snapshot.jpg',
+        sizeBytes: 4,
+        contentType: 'image/jpeg',
+      });
+      eventMediaRepository.createEventMedia.mockResolvedValue({
+        id: 'media-retain',
+        event_id: 'evt-retain',
+        media_type: 'SNAPSHOT',
+        storage_provider: 'MINIO',
+        bucket: 'camerai-media',
+        object_key: 'events/2026/10/17/evt-retain/snapshot.jpg',
+        content_type: 'image/jpeg',
+        size_bytes: 4,
+        width: 640,
+        height: 480,
+        duration_ms: null,
+        checksum_sha256: null,
+        expires_at: null,
+        created_at: new Date('2026-10-17T15:00:00Z'),
+      });
+
+      await service.storeBufferSnapshot(
+        'evt-retain',
+        fakeBuffer,
+        new Date('2026-10-17T15:00:00Z'),
+        'snapshot.jpg',
+        { retain: true },
+      );
+      expect(storageService.upload).toHaveBeenLastCalledWith(
+        'events/2026/10/17/evt-retain/snapshot.jpg',
+        fakeBuffer,
+        'image/jpeg',
+        { retain: true },
+      );
+
+      await service.storeCameraSnapshot(
+        'evt-retain',
+        new Date('2026-10-17T15:00:00Z'),
+        fakeBuffer,
+        640,
+        480,
+        { retain: true },
+      );
+      expect(storageService.upload).toHaveBeenLastCalledWith(
+        'events/2026/10/17/evt-retain/snapshot.jpg',
+        fakeBuffer,
+        'image/jpeg',
+        { retain: true },
+      );
     });
   });
 });
