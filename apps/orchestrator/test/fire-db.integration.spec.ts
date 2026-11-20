@@ -14,6 +14,10 @@ import { SubmitAiResultDto } from '../src/ai-results/dto/submit-ai-result.dto';
 import type { ConfirmedFireResponse } from '../src/fire/fire.dto';
 import { confirmedFire, fireConfig } from './fire-fixtures';
 
+// Real PostgreSQL concurrency checks can exceed Jest's 5-second default on CI.
+const DATABASE_INTEGRATION_TIMEOUT_MS = 30_000;
+jest.setTimeout(DATABASE_INTEGRATION_TIMEOUT_MS);
+
 const suite = process.env.FIRE_TEST_DATABASE_URL ? describe : describe.skip;
 
 function submission(cameraId: string, evidence: ConfirmedFireResponse): SubmitAiResultDto {
