@@ -69,11 +69,11 @@ try {
         await client.query(await readFile(join(root, 'db', 'migrations', filename), 'utf8'));
         await client.query('INSERT INTO schema_migrations (filename) VALUES ($1)', [filename]);
       }
-      for (const filename of (await readdir(join(root, 'db', 'seeds')))
-        .filter((file) => file.endsWith('.sql'))
-        .sort()) {
-        await client.query(await readFile(join(root, 'db', 'seeds', filename), 'utf8'));
-      }
+      // Freeze the upgrade input to its baseline schema. Current demo seeds
+      // may depend on tables and columns introduced by later migrations.
+      await client.query(
+        await readFile(join(root, 'db', 'tests', 'fixtures', 'pre-sprint3.sql'), 'utf8'),
+      );
       before = (
         await client.query(
           'SELECT id, event_type, status, priority, detected_at FROM events ORDER BY id',
@@ -100,6 +100,12 @@ try {
         ).rows,
         before,
       );
+    // Validate maintained demo seeds against the complete current schema.
+    for (const filename of (await readdir(join(root, 'db', 'seeds')))
+      .filter((file) => file.endsWith('.sql'))
+      .sort()) {
+      await client.query(await readFile(join(root, 'db', 'seeds', filename), 'utf8'));
+    }
     await client.query(await readFile(join(root, 'db', 'tests', 'sprint3-gate.sql'), 'utf8'));
     console.log(`${name}: migrations, replay and Sprint 3 constraint/immutability checks PASS`);
   }

@@ -28,7 +28,7 @@ describe('account creation', () => {
         onLogout={() => {}}
       />,
     );
-    expect(html.includes('Quản lý tài khoản')).toBe(visible);
+    expect(html.includes('Tài khoản &amp; Hộ gia đình')).toBe(visible);
   });
 
   it('defaults to VIEWER and offers the other two roles explicitly', () => {

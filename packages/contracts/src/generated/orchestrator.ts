@@ -2242,7 +2242,8 @@ export interface components {
        * @description Han phan hoi ban dau cua su kien P0.
        */
       escalationDeadlineAt?: string | null;
-      /** Format: uuid
+      /**
+       * Format: uuid
        * @description Present for M5 only; authorization uses assigned resident/household rather than camera.
        */
       wellnessResidentUserId?: string | null;
