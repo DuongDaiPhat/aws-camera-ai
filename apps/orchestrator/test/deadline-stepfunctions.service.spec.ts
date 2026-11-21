@@ -1,3 +1,4 @@
+import { ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   DescribeExecutionCommand,
@@ -324,5 +325,223 @@ describe('DeadlineStepFunctionsService & local worker gating (US-13 / AWS-06)', 
     expect(processed).toBe(0);
     expect(mockEscalationRepo.getPoolClient).not.toHaveBeenCalled();
     expect(mockEscalationRepo.findDueEventsForEscalation).not.toHaveBeenCalled();
+  });
+
+  it('handles local driver mode cleanly as no-op and creates/destroys owned SFN client in stepfunctions mode', async () => {
+    const localService = new DeadlineStepFunctionsService(
+      new ConfigService({ DEADLINE_DRIVER: 'local' }),
+      deadlineRepo,
+      commandService,
+    );
+    expect(localService.isStepFunctionsEnabled()).toBe(false);
+    expect(localService.getStateMachineArn()).toBeNull();
+    await localService.onModuleInit();
+    expect(await localService.adoptPendingDeadlines()).toBe(0);
+    expect(await localService.dispatchNextPending()).toBe(false);
+    expect(await localService.reconcileStartedDispatches()).toBe(0);
+    await localService.onModuleDestroy();
+
+    const ownedClientService = new DeadlineStepFunctionsService(
+      stepFunctionsConfig,
+      deadlineRepo,
+      commandService,
+    );
+    expect(ownedClientService.isStepFunctionsEnabled()).toBe(true);
+    expect(ownedClientService.getStateMachineArn()).toBe(STATE_MACHINE_ARN);
+    await ownedClientService.onModuleDestroy();
+  });
+
+  it('runs background loop across error recovery, timer sleep, wake, and shutdown', async () => {
+    const fastConfig = new ConfigService({
+      DEADLINE_DRIVER: 'stepfunctions',
+      AWS_REGION: 'ap-southeast-1',
+      DEADLINE_STATE_MACHINE_ARN: STATE_MACHINE_ARN,
+      DEADLINE_DISPATCH_POLL_MS: '15',
+      DEADLINE_RECONCILE_POLL_MS: '5',
+    });
+
+    deadlineRepo.adoptPendingLocalDeadlines
+      .mockRejectedValueOnce(new Error('transient db glitch'))
+      .mockResolvedValueOnce(2)
+      .mockResolvedValue(0);
+
+    const service = new DeadlineStepFunctionsService(
+      fastConfig,
+      deadlineRepo,
+      commandService,
+      sfnMock as unknown as SFNClient,
+    );
+
+    await service.onModuleInit();
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    service.wake();
+    await service.onModuleDestroy();
+
+    expect(deadlineRepo.adoptPendingLocalDeadlines).toHaveBeenCalledWith(STATE_MACHINE_ARN);
+    expect(deadlineRepo.findStartedDispatchesForReconcile).toHaveBeenCalled();
+  });
+
+  it('covers dispatch edge cases: empty claim, missing executionArn, __type already-exists, reconcile failure, and exhausted retries', async () => {
+    const service = new DeadlineStepFunctionsService(
+      stepFunctionsConfig,
+      deadlineRepo,
+      commandService,
+      sfnMock as unknown as SFNClient,
+    );
+
+    deadlineRepo.claimNextPendingDispatch.mockResolvedValueOnce(null);
+    expect(await service.dispatchNextPending()).toBe(false);
+
+    // StartExecution returns without executionArn -> falls back to deriveExecutionArn
+    const dispatch = makeDispatch({ state_machine_arn: '' });
+    deadlineRepo.claimNextPendingDispatch.mockResolvedValueOnce({
+      dispatch,
+      eventState: {
+        id: EVENT_ID,
+        status: 'NOTIFIED',
+        deadline_version: 2,
+        escalation_deadline_at: dispatch.expected_deadline_at,
+        has_receipt: false,
+      },
+    });
+    sfnMock.send.mockResolvedValueOnce({});
+    expect(await service.dispatchNextPending()).toBe(true);
+    expect(deadlineRepo.markDispatchStarted).toHaveBeenCalledWith(COMMAND_ID, EXECUTION_ARN);
+
+    // __type ExecutionAlreadyExists where DescribeExecution fails -> records RECONCILE_* retry
+    deadlineRepo.claimNextPendingDispatch.mockResolvedValueOnce({
+      dispatch: makeDispatch(),
+      eventState: {
+        id: EVENT_ID,
+        status: 'NOTIFIED',
+        deadline_version: 2,
+        escalation_deadline_at: dispatch.expected_deadline_at,
+        has_receipt: false,
+      },
+    });
+    sfnMock.send
+      .mockRejectedValueOnce({ __type: 'com.amazonaws.swf#ExecutionAlreadyExists' })
+      .mockRejectedValueOnce(Object.assign(new Error('throttled'), { code: 'Throttled' }));
+    await service.dispatchNextPending();
+    expect(deadlineRepo.recordDispatchRetryOrFail).toHaveBeenCalledWith(
+      COMMAND_ID,
+      'RECONCILE_Throttled',
+      5,
+    );
+
+    // Exhausted retries (failed: true) and non-Error rejection -> UNKNOWN_ERROR
+    deadlineRepo.claimNextPendingDispatch.mockResolvedValueOnce({
+      dispatch: makeDispatch(),
+      eventState: {
+        id: EVENT_ID,
+        status: 'NOTIFIED',
+        deadline_version: 2,
+        escalation_deadline_at: dispatch.expected_deadline_at,
+        has_receipt: false,
+      },
+    });
+    sfnMock.send.mockRejectedValueOnce('weird-error-string');
+    deadlineRepo.recordDispatchRetryOrFail.mockResolvedValueOnce({ attempts: 5, failed: true });
+    await service.dispatchNextPending();
+    expect(deadlineRepo.recordDispatchRetryOrFail).toHaveBeenCalledWith(
+      COMMAND_ID,
+      'UNKNOWN_ERROR',
+      5,
+    );
+  });
+
+  it('covers reconcileStartedDispatches branches: completed early, DescribeExecution error, SUCCEEDED without receipt, TIMED_OUT NOT_DUE/recovery failure, ABORTED', async () => {
+    const service = new DeadlineStepFunctionsService(
+      stepFunctionsConfig,
+      deadlineRepo,
+      commandService,
+      sfnMock as unknown as SFNClient,
+    );
+
+    const baseDispatch = makeDispatch({ status: 'STARTED', execution_arn: null });
+    const notifiedState = {
+      id: EVENT_ID,
+      status: 'NOTIFIED' as const,
+      deadline_version: 2,
+      escalation_deadline_at: baseDispatch.expected_deadline_at,
+      has_receipt: false,
+    };
+
+    // 1. Pre-check already resolved -> markDispatchCompleted without DescribeExecution
+    deadlineRepo.findStartedDispatchesForReconcile.mockResolvedValueOnce([baseDispatch]);
+    deadlineRepo.getDispatchEventState.mockResolvedValueOnce({
+      ...notifiedState,
+      status: 'RESOLVED',
+    });
+    expect(await service.reconcileStartedDispatches()).toBe(1);
+    expect(deadlineRepo.markDispatchCompleted).toHaveBeenCalledWith(COMMAND_ID, null);
+
+    // 2. DescribeExecution throws -> swallowed and logged
+    deadlineRepo.findStartedDispatchesForReconcile.mockResolvedValueOnce([baseDispatch]);
+    deadlineRepo.getDispatchEventState.mockResolvedValueOnce(notifiedState);
+    sfnMock.send.mockRejectedValueOnce(new Error('Invalid error with spaces!'));
+    expect(await service.reconcileStartedDispatches()).toBe(0);
+
+    // 3. SUCCEEDED without DB receipt -> markDispatchFailed
+    deadlineRepo.findStartedDispatchesForReconcile.mockResolvedValueOnce([baseDispatch]);
+    deadlineRepo.getDispatchEventState
+      .mockResolvedValueOnce(notifiedState)
+      .mockResolvedValueOnce(notifiedState);
+    sfnMock.send.mockResolvedValueOnce({ status: 'SUCCEEDED' });
+    await service.reconcileStartedDispatches();
+    expect(deadlineRepo.markDispatchFailed).toHaveBeenCalledWith(
+      COMMAND_ID,
+      'EXECUTION_SUCCEEDED_WITHOUT_DB_RECEIPT',
+      EXECUTION_ARN,
+    );
+
+    // 4. TIMED_OUT -> applyCommand throws ConflictException(NOT_DUE) -> touchReconciledAt
+    deadlineRepo.findStartedDispatchesForReconcile.mockResolvedValueOnce([baseDispatch]);
+    deadlineRepo.getDispatchEventState
+      .mockResolvedValueOnce(notifiedState)
+      .mockResolvedValueOnce(notifiedState);
+    sfnMock.send.mockResolvedValueOnce({ status: 'TIMED_OUT' });
+    commandService.applyCommand.mockRejectedValueOnce(
+      new ConflictException({ code: 'NOT_DUE', retryAt: '2026-11-05T03:02:00Z' }),
+    );
+    await service.reconcileStartedDispatches();
+    expect(deadlineRepo.touchReconciledAt).toHaveBeenCalledWith(COMMAND_ID);
+
+    // 5. TIMED_OUT -> applyCommand throws unexpected error -> markDispatchFailed(RECOVERY_...)
+    deadlineRepo.findStartedDispatchesForReconcile.mockResolvedValueOnce([baseDispatch]);
+    deadlineRepo.getDispatchEventState
+      .mockResolvedValueOnce(notifiedState)
+      .mockResolvedValueOnce(notifiedState);
+    sfnMock.send.mockResolvedValueOnce({ status: 'TIMED_OUT' });
+    commandService.applyCommand.mockRejectedValueOnce(new Error('DB down'));
+    await service.reconcileStartedDispatches();
+    expect(deadlineRepo.markDispatchFailed).toHaveBeenCalledWith(
+      COMMAND_ID,
+      'RECOVERY_Error',
+      EXECUTION_ARN,
+    );
+
+    // 6. ABORTED (no error) -> EXECUTION_ABORTED and undefined status -> EXECUTION_UNKNOWN
+    deadlineRepo.findStartedDispatchesForReconcile.mockResolvedValueOnce([
+      baseDispatch,
+      baseDispatch,
+    ]);
+    deadlineRepo.getDispatchEventState
+      .mockResolvedValueOnce(notifiedState)
+      .mockResolvedValueOnce(notifiedState)
+      .mockResolvedValueOnce(notifiedState)
+      .mockResolvedValueOnce(notifiedState);
+    sfnMock.send.mockResolvedValueOnce({ status: 'ABORTED' }).mockResolvedValueOnce({});
+    await service.reconcileStartedDispatches();
+    expect(deadlineRepo.markDispatchFailed).toHaveBeenCalledWith(
+      COMMAND_ID,
+      'EXECUTION_ABORTED',
+      EXECUTION_ARN,
+    );
+    expect(deadlineRepo.markDispatchFailed).toHaveBeenCalledWith(
+      COMMAND_ID,
+      'EXECUTION_UNKNOWN',
+      EXECUTION_ARN,
+    );
   });
 });

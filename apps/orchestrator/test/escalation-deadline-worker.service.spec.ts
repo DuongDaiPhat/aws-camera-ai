@@ -138,4 +138,50 @@ describe('EscalationDeadlineWorkerService (US-13)', () => {
     resolveFirstQuery();
     await run1;
   });
+
+  it('khởi động interval khi onModuleInit ở chế độ local và dừng khi onModuleDestroy', async () => {
+    jest.useFakeTimers();
+    repository.findDueEventsForEscalation.mockResolvedValue([]);
+
+    service.onModuleInit();
+    await Promise.resolve();
+    jest.advanceTimersByTime(10000);
+    await Promise.resolve();
+    service.onModuleDestroy();
+
+    expect(repository.findDueEventsForEscalation).toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
+  it('xử lý sự kiện có escalation_deadline_at null và rollback an toàn khi lỗi DB', async () => {
+    repository.findDueEventsForEscalation.mockResolvedValueOnce([
+      {
+        id: 'evt-null-dl',
+        event_type: 'FALL_DETECTED' as const,
+        status: 'NOTIFIED' as const,
+        priority: 'P1' as const,
+        confidence: '0.65',
+        ai_label: 'fall',
+        ai_results: [],
+        version: 1,
+        detected_at: new Date(),
+        escalation_deadline_at: null,
+        notified_at: new Date(),
+        escalated_at: null,
+        resolved_at: null,
+        closed_at: null,
+        rule_snapshot: null,
+        triggering_results: [],
+      },
+    ]);
+    expect(await service.scanAndProcessDueDeadlines()).toBe(1);
+
+    repository.findDueEventsForEscalation.mockRejectedValueOnce(new Error('DB failure'));
+    mockClient.query.mockImplementation(async (sql: string) => {
+      if (sql === 'ROLLBACK') throw new Error('Rollback error');
+      return { rows: [] };
+    });
+    expect(await service.scanAndProcessDueDeadlines()).toBe(0);
+    expect(mockClient.release).toHaveBeenCalled();
+  });
 });

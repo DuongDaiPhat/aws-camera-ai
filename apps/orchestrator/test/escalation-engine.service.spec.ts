@@ -1,9 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { EscalationEngineService } from '../src/escalation/escalation-engine.service';
 import { EscalationRepository } from '../src/escalation/escalation.repository';
 import { EscalationRulesRepository } from '../src/escalation-rules/escalation-rules.repository';
 import type { EscalationRuleRecord } from '../src/escalation-rules/escalation-rules.repository';
+import { DeadlineRepository } from '../src/escalation/deadline.repository';
+import { DeadlineStepFunctionsService } from '../src/escalation/deadline-stepfunctions.service';
 
 describe('EscalationEngineService (US-13)', () => {
   let service: EscalationEngineService;
@@ -423,6 +430,403 @@ describe('EscalationEngineService (US-13)', () => {
           note: 'Xong',
         }),
       ).rejects.toThrow(ConflictException);
+    });
+
+    it('xử lý NotFoundException, WELLNESS_TIMEOUT scope check, và lỗi rollback trong closeEmergency', async () => {
+      repository.findEventForUpdate.mockResolvedValueOnce(null);
+      await expect(service.closeEmergency('evt-missing', 'user-admin', {})).rejects.toThrow(
+        NotFoundException,
+      );
+
+      const wellnessEscalated = {
+        ...mockEscalatedEvent,
+        event_type: 'WELLNESS_TIMEOUT' as const,
+      };
+      repository.findEventForUpdate.mockResolvedValueOnce(wellnessEscalated);
+      mockClient.query.mockImplementation(async (sql: string) => {
+        if (sql.includes('shares_camera_household')) return { rows: [] };
+        if (sql === 'ROLLBACK') throw new Error('rollback failed');
+        return { rows: [] };
+      });
+      await expect(service.closeEmergency('evt-esc', 'user-stranger', {})).rejects.toThrow(
+        ForbiddenException,
+      );
+
+      mockClient.query.mockImplementation(async (sql: string) => {
+        if (sql.includes('shares_camera_household')) return { rows: [{ '?column?': 1 }] };
+        return { rows: [] };
+      });
+      repository.findEventForUpdate.mockResolvedValueOnce(wellnessEscalated);
+      repository.findAuthoritativeConfirmation.mockResolvedValueOnce(null);
+      repository.createConfirmation.mockResolvedValueOnce({
+        id: 'conf-well',
+        event_id: 'evt-esc',
+        user_id: 'user-caregiver',
+        emergency_contact_id: null,
+        channel: 'TELEGRAM',
+        response: 'ACKNOWLEDGED',
+        phase: 'EMERGENCY',
+        is_authoritative: true,
+        note: null,
+        responded_at: new Date(),
+      });
+      const res = await service.closeEmergency('evt-esc', 'user-caregiver', {
+        channel: 'TELEGRAM',
+        commandId: 'cmd-1',
+      });
+      expect(res.resultingStatus).toBe('CLOSED');
+      expect(res.confirmedByName).toBeNull();
+    });
+  });
+
+  describe('StepFunctions deadline integration, outbox idempotency, and Telegram replay', () => {
+    it('enqueues Step Functions deadline dispatch and wakes service on NOTIFIED transition', async () => {
+      const deadlineRepo = {
+        enqueueDispatch: jest.fn().mockResolvedValue({ command_id: 'cmd-1' }),
+        cancelPendingDispatchesForEvent: jest.fn().mockResolvedValue(1),
+      } as unknown as jest.Mocked<DeadlineRepository>;
+      const sfnService = {
+        isStepFunctionsEnabled: jest.fn().mockReturnValue(true),
+        getStateMachineArn: jest
+          .fn()
+          .mockReturnValue('arn:aws:states:ap-southeast-1:123456789012:stateMachine:dl'),
+        wake: jest.fn(),
+      } as unknown as jest.Mocked<DeadlineStepFunctionsService>;
+
+      const wired = new EscalationEngineService(
+        repository,
+        {
+          findAll: jest.fn().mockResolvedValue(defaultRules),
+        } as unknown as EscalationRulesRepository,
+        deadlineRepo,
+        sfnService,
+      );
+
+      const detectedAt = new Date('2026-09-25T12:00:00Z');
+      const mockEvent = {
+        id: 'evt-sfn',
+        event_type: 'FALL_DETECTED' as const,
+        status: 'DETECTED' as const,
+        priority: 'P0' as const,
+        confidence: '0.65',
+        ai_label: 'fall',
+        ai_results: [],
+        version: 1,
+        detected_at: detectedAt,
+        escalation_deadline_at: null,
+        notified_at: null,
+        escalated_at: null,
+        resolved_at: null,
+        closed_at: null,
+        rule_snapshot: null,
+        triggering_results: [],
+      };
+      repository.findEventForUpdate.mockResolvedValueOnce(mockEvent);
+      repository.updateEventStatus.mockResolvedValueOnce({
+        ...mockEvent,
+        status: 'NOTIFIED',
+        version: 2,
+      });
+
+      await wired.evaluateAndTransition('evt-sfn', {
+        eventType: 'FALL_DETECTED',
+        confidence: 0.65,
+        detectedAt,
+      });
+
+      expect(deadlineRepo.enqueueDispatch).toHaveBeenCalledWith(
+        mockClient,
+        expect.objectContaining({
+          eventId: 'evt-sfn',
+          deadlineVersion: 2,
+          stateMachineArn: 'arn:aws:states:ap-southeast-1:123456789012:stateMachine:dl',
+        }),
+      );
+      expect(sfnService.wake).toHaveBeenCalled();
+
+      // confirmInitial cancels pending dispatches via deadlineRepository
+      repository.findEventForUpdate.mockResolvedValueOnce({
+        ...mockEvent,
+        status: 'NOTIFIED',
+        escalation_deadline_at: new Date(),
+      });
+      repository.findAuthoritativeConfirmation.mockResolvedValueOnce(null);
+      repository.createConfirmation.mockResolvedValueOnce({
+        id: 'conf-cancel',
+        event_id: 'evt-sfn',
+        user_id: 'user-1',
+        emergency_contact_id: null,
+        channel: 'DASHBOARD',
+        response: 'IM_OK',
+        phase: 'INITIAL',
+        is_authoritative: true,
+        note: null,
+        responded_at: new Date(),
+      });
+      await wired.confirmInitial('evt-sfn', 'user-1', { response: 'IM_OK', commandId: 'cmd-c' });
+      expect(deadlineRepo.cancelPendingDispatchesForEvent).toHaveBeenCalledWith(
+        mockClient,
+        'evt-sfn',
+      );
+    });
+
+    it('handles outboxMessageId idempotency, stable decision, and invalid transition branches', async () => {
+      const detectedAt = new Date('2026-09-25T12:00:00Z');
+      const notifiedEvent = {
+        id: 'evt-outbox',
+        event_type: 'FALL_DETECTED' as const,
+        status: 'NOTIFIED' as const,
+        priority: 'P1' as const,
+        confidence: '0.65',
+        ai_label: 'fall',
+        ai_results: [],
+        version: 1,
+        detected_at: detectedAt,
+        escalation_deadline_at: new Date(),
+        notified_at: new Date(),
+        escalated_at: null,
+        resolved_at: null,
+        closed_at: null,
+        rule_snapshot: null,
+        triggering_results: [],
+      };
+
+      // 1. Outbox message missing -> NotFoundException
+      repository.findEventForUpdate.mockResolvedValueOnce(notifiedEvent);
+      mockClient.query.mockImplementation(async (sql: string) => {
+        if (sql.includes('FROM outbox_messages')) return { rows: [] };
+        return { rows: [] };
+      });
+      await expect(
+        service.evaluateAndTransition(
+          'evt-outbox',
+          { eventType: 'FALL_DETECTED', confidence: 0.65, detectedAt },
+          'msg-missing',
+        ),
+      ).rejects.toThrow(NotFoundException);
+
+      // 2. Outbox already PROCESSED -> returns event immediately
+      repository.findEventForUpdate.mockResolvedValueOnce(notifiedEvent);
+      mockClient.query.mockImplementation(async (sql: string) => {
+        if (sql.includes('FROM outbox_messages'))
+          return { rows: [{ status: 'PROCESSED', aggregate_version: '1' }] };
+        return { rows: [] };
+      });
+      await service.evaluateAndTransition(
+        'evt-outbox',
+        { eventType: 'FALL_DETECTED', confidence: 0.65, detectedAt },
+        'msg-done',
+      );
+      expect(repository.updateEventStatus).not.toHaveBeenCalled();
+
+      // 3. Aggregate version advanced -> marks processed and returns
+      repository.findEventForUpdate.mockResolvedValueOnce(notifiedEvent);
+      mockClient.query.mockImplementation(async (sql: string) => {
+        if (sql.includes('FROM outbox_messages'))
+          return { rows: [{ status: 'PENDING', aggregate_version: '1' }] };
+        if (sql.includes('SELECT aggregate_version FROM events'))
+          return { rows: [{ aggregate_version: '2' }] };
+        return { rows: [] };
+      });
+      await service.evaluateAndTransition(
+        'evt-outbox',
+        { eventType: 'FALL_DETECTED', confidence: 0.65, detectedAt },
+        'msg-stale',
+      );
+      expect(mockClient.query).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE outbox_messages'),
+        ['msg-stale'],
+      );
+
+      // 4. Stable decision (status === targetStatus && status !== DETECTED) with and without outboxMessageId
+      repository.findEventForUpdate.mockResolvedValueOnce(notifiedEvent);
+      mockClient.query.mockImplementation(async (sql: string) => {
+        if (sql.includes('FROM outbox_messages'))
+          return { rows: [{ status: 'PENDING', aggregate_version: '2' }] };
+        if (sql.includes('SELECT aggregate_version FROM events'))
+          return { rows: [{ aggregate_version: '2' }] };
+        return { rows: [] };
+      });
+      await service.evaluateAndTransition(
+        'evt-outbox',
+        { eventType: 'FALL_DETECTED', confidence: 0.65, detectedAt },
+        'msg-stable',
+      );
+      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+
+      repository.findEventForUpdate.mockResolvedValueOnce(notifiedEvent);
+      mockClient.query.mockResolvedValue({ rows: [] });
+      await service.evaluateAndTransition('evt-outbox', {
+        eventType: 'FALL_DETECTED',
+        confidence: 0.65,
+        detectedAt,
+      });
+      expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
+
+      // 5. Invalid transition with outboxMessageId
+      repository.findEventForUpdate.mockResolvedValueOnce({
+        ...notifiedEvent,
+        status: 'RESOLVED',
+      });
+      mockClient.query.mockImplementation(async (sql: string) => {
+        if (sql.includes('FROM outbox_messages'))
+          return { rows: [{ status: 'PENDING', aggregate_version: '1' }] };
+        if (sql.includes('SELECT aggregate_version FROM events'))
+          return { rows: [{ aggregate_version: '1' }] };
+        return { rows: [] };
+      });
+      await service.evaluateAndTransition(
+        'evt-outbox',
+        { eventType: 'FALL_DETECTED', confidence: 0.65, detectedAt },
+        'msg-invalid',
+      );
+      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+    });
+
+    it('handles confirmInitial edge cases: NotFound, WELLNESS_TIMEOUT, Telegram authorization & replay, rollback error', async () => {
+      // NotFound + rollback error
+      repository.findEventForUpdate.mockResolvedValueOnce(null);
+      mockClient.query.mockImplementation(async (sql: string) => {
+        if (sql === 'ROLLBACK') throw new Error('rollback failed');
+        return { rows: [] };
+      });
+      await expect(
+        service.confirmInitial('evt-missing', 'user-1', { response: 'IM_OK' }),
+      ).rejects.toThrow(NotFoundException);
+
+      mockClient.query.mockResolvedValue({ rows: [] });
+
+      // WELLNESS_TIMEOUT
+      const wellnessEvent = {
+        id: 'evt-well',
+        event_type: 'WELLNESS_TIMEOUT' as const,
+        status: 'NOTIFIED' as const,
+        priority: 'P1' as const,
+        confidence: null,
+        ai_label: null,
+        ai_results: [],
+        version: 1,
+        detected_at: new Date(),
+        escalation_deadline_at: new Date(),
+        notified_at: new Date(),
+        escalated_at: null,
+        resolved_at: null,
+        closed_at: null,
+        rule_snapshot: null,
+        triggering_results: [],
+      };
+      repository.findEventForUpdate.mockResolvedValueOnce(wellnessEvent);
+      await expect(
+        service.confirmInitial('evt-well', 'user-1', { response: 'IM_OK' }),
+      ).rejects.toThrow(ConflictException);
+
+      const fallEvent = { ...wellnessEvent, id: 'evt-tg', event_type: 'FALL_DETECTED' as const };
+      const tgParams = {
+        response: 'IM_OK' as const,
+        channel: 'TELEGRAM' as const,
+        notificationId: 'notif-1',
+        sourceMessageId: 'msg-1',
+        sourceUpdateId: 'upd-1',
+        telegramSource: {
+          notificationId: 'notif-1',
+          telegramUserId: 'tg-u-1',
+          chatId: 'chat-1',
+          messageId: 'msg-1',
+          ttlSeconds: 3600,
+        },
+      };
+
+      // Unauthorized Telegram confirmation
+      (repository as any).authorizeTelegramConfirmation = jest.fn().mockResolvedValueOnce(false);
+      (repository as any).findTelegramReplay = jest.fn();
+      repository.findEventForUpdate.mockResolvedValueOnce(fallEvent);
+      await expect(service.confirmInitial('evt-tg', 'user-1', tgParams)).rejects.toThrow(
+        ForbiddenException,
+      );
+
+      // Replay mismatch -> SOURCE_UPDATE_CONFLICT
+      repository.findEventForUpdate.mockResolvedValueOnce(fallEvent);
+      (repository as any).authorizeTelegramConfirmation.mockResolvedValueOnce(true);
+      (repository as any).findTelegramReplay.mockResolvedValueOnce({
+        id: 'conf-r1',
+        event_id: 'evt-other',
+        user_id: 'user-1',
+        notification_id: 'notif-1',
+        source_message_id: 'msg-1',
+        response: 'IM_OK',
+        phase: 'INITIAL',
+        is_authoritative: true,
+        channel: 'TELEGRAM',
+        note: null,
+        responded_at: new Date(),
+      });
+      await expect(service.confirmInitial('evt-tg', 'user-1', tgParams)).rejects.toThrow(
+        ConflictException,
+      );
+
+      // Non-authoritative replay -> ALREADY_CONFIRMED
+      repository.findEventForUpdate.mockResolvedValueOnce(fallEvent);
+      (repository as any).authorizeTelegramConfirmation.mockResolvedValueOnce(true);
+      (repository as any).findTelegramReplay.mockResolvedValueOnce({
+        id: 'conf-r2',
+        event_id: 'evt-tg',
+        user_id: 'user-1',
+        notification_id: 'notif-1',
+        source_message_id: 'msg-1',
+        response: 'IM_OK',
+        phase: 'INITIAL',
+        is_authoritative: false,
+        channel: 'TELEGRAM',
+        note: null,
+        responded_at: new Date(),
+      });
+      await expect(service.confirmInitial('evt-tg', 'user-1', tgParams)).rejects.toThrow(
+        ConflictException,
+      );
+
+      // Authoritative replay -> returns cached DTO
+      repository.findEventForUpdate.mockResolvedValueOnce(fallEvent);
+      (repository as any).authorizeTelegramConfirmation.mockResolvedValueOnce(true);
+      (repository as any).findTelegramReplay.mockResolvedValueOnce({
+        id: 'conf-r3',
+        event_id: 'evt-tg',
+        user_id: 'user-1',
+        notification_id: 'notif-1',
+        source_message_id: 'msg-1',
+        response: 'IM_OK',
+        phase: 'INITIAL',
+        is_authoritative: true,
+        channel: 'TELEGRAM',
+        note: null,
+        responded_at: new Date('2026-11-05T03:00:00Z'),
+      });
+      const replayRes = await service.confirmInitial('evt-tg', 'user-1', tgParams);
+      expect(replayRes.resultingStatus).toBe('RESOLVED');
+      expect(replayRes.confirmedByName).toBeNull();
+
+      // Authoritative NEED_HELP replay -> ESCALATED
+      repository.findEventForUpdate.mockResolvedValueOnce(fallEvent);
+      (repository as any).authorizeTelegramConfirmation.mockResolvedValueOnce(true);
+      (repository as any).findTelegramReplay.mockResolvedValueOnce({
+        id: 'conf-r4',
+        event_id: 'evt-tg',
+        user_id: 'user-1',
+        notification_id: 'notif-1',
+        source_message_id: 'msg-1',
+        response: 'NEED_HELP',
+        phase: 'INITIAL',
+        is_authoritative: true,
+        channel: 'TELEGRAM',
+        note: 'help',
+        responded_at: new Date('2026-11-05T03:00:00Z'),
+        confirmed_by_name: 'Alice',
+      });
+      const helpReplay = await service.confirmInitial('evt-tg', 'user-1', {
+        ...tgParams,
+        response: 'NEED_HELP',
+      });
+      expect(helpReplay.resultingStatus).toBe('ESCALATED');
+      expect(helpReplay.confirmedByName).toBe('Alice');
     });
   });
 });

@@ -1,5 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { deriveExecutionArn, readDeadlineConfig } from '../src/escalation/deadline-config';
+import { buildDeadlineCommandPayload } from '../src/escalation/dto/deadline-command.dto';
 
 describe('readDeadlineConfig (US-13 / AWS-06)', () => {
   const validArn =
@@ -87,5 +88,35 @@ describe('readDeadlineConfig (US-13 / AWS-06)', () => {
     expect(deriveExecutionArn(validArn, 'deadline-00000000-0000-4000-8000-000000000010')).toBe(
       'arn:aws:states:ap-southeast-1:926883321040:execution:argusai-staging-deadline:deadline-00000000-0000-4000-8000-000000000010',
     );
+  });
+
+  it('rejects non-integer or non-positive poll/attempt overrides and builds string payloads', () => {
+    for (const badValue of ['0', '-5', '1.5', 'not-a-number']) {
+      expect(() =>
+        readDeadlineConfig(
+          new ConfigService({
+            DEADLINE_DRIVER: 'stepfunctions',
+            AWS_REGION: 'ap-southeast-1',
+            DEADLINE_STATE_MACHINE_ARN: validArn,
+            DEADLINE_DISPATCH_POLL_MS: badValue,
+          }),
+        ),
+      ).toThrow('DEADLINE_DISPATCH_POLL_MS must be a positive integer');
+    }
+
+    expect(
+      buildDeadlineCommandPayload({
+        commandId: '00000000-0000-4000-8000-000000000010',
+        eventId: '00000000-0000-4000-8000-000000000003',
+        deadlineVersion: 1,
+        expectedDeadlineAt: '2026-11-05T03:01:00Z',
+      }),
+    ).toEqual({
+      schemaVersion: 1,
+      commandId: '00000000-0000-4000-8000-000000000010',
+      eventId: '00000000-0000-4000-8000-000000000003',
+      deadlineVersion: 1,
+      expectedDeadlineAt: '2026-11-05T03:01:00Z',
+    });
   });
 });

@@ -120,8 +120,14 @@ describe('DeadlineCommandService & DeadlineController (US-13 / AWS-06)', () => {
         [EVENT_ID, { ...validCommand(), eventId: '00000000-0000-4000-8000-000000000099' }],
         [EVENT_ID, { ...validCommand(), deadlineVersion: 0 }],
         [EVENT_ID, { ...validCommand(), deadlineVersion: 1.5 }],
+        [EVENT_ID, { ...validCommand(), eventId: 123 }],
+        [EVENT_ID, { ...validCommand(), expectedDeadlineAt: 12345 }],
         [EVENT_ID, { ...validCommand(), expectedDeadlineAt: '2026-11-05T03:01:00+07:00' }],
         [EVENT_ID, { ...validCommand(), expectedDeadlineAt: '2026-02-30T03:01:00Z' }],
+        [EVENT_ID, { ...validCommand(), expectedDeadlineAt: '2026-13-01T00:00:00Z' }],
+        [EVENT_ID, { ...validCommand(), expectedDeadlineAt: '2026-11-05T24:00:00Z' }],
+        [EVENT_ID, { ...validCommand(), expectedDeadlineAt: '2026-11-05T03:60:00Z' }],
+        [EVENT_ID, []],
       ];
 
       for (const [pathEventId, payload] of invalidCases) {
@@ -370,6 +376,96 @@ describe('DeadlineCommandService & DeadlineController (US-13 / AWS-06)', () => {
         });
       }
       expect(escalationRepo.updateEventStatus).not.toHaveBeenCalled();
+    });
+
+    it('returns stored decision when concurrent transaction wins receipt race after row lock', async () => {
+      const cmd = validCommand();
+      const locked = makeLockedEvent();
+      deadlineRepo.findReceiptByCommandId.mockResolvedValueOnce(null).mockResolvedValueOnce({
+        command_id: COMMAND_ID,
+        event_id: EVENT_ID,
+        deadline_version: 1,
+        expected_deadline_at: new Date(DEADLINE_ISO),
+        payload_hash: hashDeadlineCommand(cmd),
+        payload: cmd,
+        disposition: 'NO_OP',
+        reason: 'ALREADY_APPLIED',
+        aggregate_version: 2,
+        notification_id: null,
+        processed_at: new Date(),
+      });
+      deadlineRepo.findEventForUpdateWithClock.mockResolvedValueOnce(locked);
+
+      const res = await service.applyCommand(EVENT_ID, cmd);
+
+      expect(res).toEqual({
+        commandId: COMMAND_ID,
+        disposition: 'NO_OP',
+        reason: 'ALREADY_APPLIED',
+        aggregateVersion: 2,
+      });
+      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+      expect(mockClient.release).toHaveBeenCalled();
+    });
+
+    it('resolves existing receipt on unique violation (23505) and handles rollback errors or non-matching errors', async () => {
+      const cmd = validCommand();
+      const locked = makeLockedEvent();
+      deadlineRepo.findEventForUpdateWithClock.mockResolvedValueOnce(locked);
+      escalationRepo.updateEventStatus.mockResolvedValueOnce({
+        ...locked,
+        status: 'ESCALATED',
+        version: 3,
+      });
+      escalationRepo.createNotificationIntent.mockResolvedValueOnce('notif-1');
+      deadlineRepo.insertReceipt.mockRejectedValueOnce({
+        code: '23505',
+        constraint: 'deadline_command_receipts_pkey',
+      });
+      mockClient.query.mockImplementation(async (sql: string) => {
+        if (sql === 'ROLLBACK') {
+          throw new Error('rollback failed');
+        }
+        return { rows: [] };
+      });
+      deadlineRepo.findReceiptByCommandIdReadOnly.mockResolvedValueOnce({
+        command_id: COMMAND_ID,
+        event_id: EVENT_ID,
+        deadline_version: 1,
+        expected_deadline_at: new Date(DEADLINE_ISO),
+        payload_hash: hashDeadlineCommand(cmd),
+        payload: cmd,
+        disposition: 'APPLIED',
+        reason: 'ESCALATED',
+        aggregate_version: 3,
+        notification_id: 'notif-1',
+        processed_at: new Date(),
+      });
+
+      const res = await service.applyCommand(EVENT_ID, cmd);
+      expect(res.disposition).toBe('APPLIED');
+      expect(mockClient.release).toHaveBeenCalled();
+
+      // Non-receipt unique violation or missing concurrent receipt rethrows
+      mockClient.query.mockResolvedValue({ rows: [] });
+      deadlineRepo.findEventForUpdateWithClock.mockResolvedValueOnce(locked);
+      escalationRepo.updateEventStatus.mockRejectedValueOnce({
+        code: '23505',
+        constraint: 'other_table_pkey',
+      });
+      await expect(service.applyCommand(EVENT_ID, cmd)).rejects.toEqual({
+        code: '23505',
+        constraint: 'other_table_pkey',
+      });
+
+      deadlineRepo.findEventForUpdateWithClock.mockResolvedValueOnce(locked);
+      escalationRepo.updateEventStatus.mockRejectedValueOnce('primitive-error');
+      await expect(service.applyCommand(EVENT_ID, cmd)).rejects.toBe('primitive-error');
+
+      deadlineRepo.findEventForUpdateWithClock.mockResolvedValueOnce(locked);
+      escalationRepo.updateEventStatus.mockRejectedValueOnce({ code: '23505' });
+      deadlineRepo.findReceiptByCommandIdReadOnly.mockResolvedValueOnce(null);
+      await expect(service.applyCommand(EVENT_ID, cmd)).rejects.toEqual({ code: '23505' });
     });
   });
 });
