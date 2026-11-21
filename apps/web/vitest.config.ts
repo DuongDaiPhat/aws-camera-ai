@@ -13,6 +13,12 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
-    coverage: { reporter: ['text', 'lcov'] },
+    coverage: {
+      provider: 'v8',
+      all: true,
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.{test,spec}.{ts,tsx}', 'src/**/__tests__/**'],
+      reporter: ['text', 'html', 'lcov', 'json-summary'],
+    },
   },
 });

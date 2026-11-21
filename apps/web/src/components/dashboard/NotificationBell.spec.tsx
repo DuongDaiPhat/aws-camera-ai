@@ -31,6 +31,7 @@ beforeEach(() => {
 afterEach(async () => {
   await act(async () => root.unmount());
   host.remove();
+  vi.restoreAllMocks();
 });
 const button = (text: string) =>
   Array.from(document.querySelectorAll<HTMLButtonElement>('button')).find(
@@ -122,4 +123,69 @@ it('promotes P0 only while within three hours and reorders on expiry without mar
 
   await render({ events: notifications, now: expiresAt, readIds: new Set([p0.id]) });
   expect(document.querySelectorAll('li button')[1]?.hasAttribute('data-unread')).toBe(false);
+});
+
+it('renders loading and errors without offering an unavailable retry callback', async () => {
+  await render({ isLoading: true });
+  await click('Thông báo mới nhất');
+  expect(document.querySelector('[role=status]')).not.toBeNull();
+  await render({ error: 'Offline', isLoading: false, onRetry: undefined });
+  expect(document.querySelector('[role=alert]')?.textContent).toContain('Offline');
+  expect(button('Thử lại')).toBeUndefined();
+  await click('Đóng thông báo');
+  expect(document.querySelector('[role=dialog]')).toBeNull();
+  expect(document.activeElement).toBe(button('Thông báo mới nhất'));
+});
+it('caps large counts, handles thumbnail failures and distinguishes read/escalated notifications', async () => {
+  const many = Array.from({ length: 105 }, (_, index) => ({
+    ...events[1]!,
+    id: `many-${index}`,
+    status: index === 104 ? ('ESCALATED' as const) : ('NOTIFIED' as const),
+    thumbnailUrl: '/image.jpg',
+  }));
+  await render({ events: many, readIds: new Set(many.map((item) => item.id)) });
+  expect(host.textContent).toContain('99+');
+  await click('Thông báo mới nhất');
+  expect(document.querySelector('[role=dialog]')?.textContent).toContain('99+ cần xử lý');
+  expect(document.querySelector('li button')?.hasAttribute('data-unread')).toBe(false);
+  const image = document.querySelector('li img')! as HTMLImageElement;
+  await act(async () => image.dispatchEvent(new Event('error')));
+  expect(image.style.display).toBe('none');
+});
+it('keeps the popover in the viewport and reacts to resize and inside/outside pointer interactions', async () => {
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+    top: 600,
+    bottom: 640,
+    right: 1200,
+    left: 1160,
+    width: 40,
+    height: 40,
+  } as DOMRect);
+  await render();
+  await click('Thông báo mới nhất');
+  let dialog = document.querySelector('[role=dialog]') as HTMLElement;
+  expect(parseFloat(dialog.style.left)).toBeLessThan(window.innerWidth);
+  expect(parseFloat(dialog.style.top)).toBeLessThan(600);
+  await act(async () => {
+    dialog.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    window.dispatchEvent(new Event('resize'));
+    window.dispatchEvent(new Event('scroll'));
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+  });
+  expect(document.querySelector('[role=dialog]')).not.toBeNull();
+  vi.mocked(HTMLElement.prototype.getBoundingClientRect).mockReturnValue({
+    top: 0,
+    bottom: 20,
+    right: 20,
+    left: 0,
+    width: 20,
+    height: 20,
+  } as DOMRect);
+  await act(async () => window.dispatchEvent(new Event('resize')));
+  dialog = document.querySelector('[role=dialog]') as HTMLElement;
+  expect(dialog.style.left).toBe('12px');
+  await act(async () =>
+    document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })),
+  );
+  expect(document.querySelector('[role=dialog]')).toBeNull();
 });

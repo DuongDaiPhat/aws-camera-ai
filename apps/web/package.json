@@ -10,17 +10,18 @@
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests",
-    "test:cov": "vitest run --coverage"
+    "test": "vitest run",
+    "test:cov": "vitest run --coverage",
+    "test:ci": "vitest run --coverage --reporter=default --reporter=json --outputFile=coverage/tests.json"
   },
   "dependencies": {
     "@cam/contracts": "workspace:*",
-    "next": "^15.5.24",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "oidc-client-ts": "3.5.0",
     "lucide-react": "1.72.0",
     "motion": "14.12.0",
+    "next": "^15.5.24",
+    "oidc-client-ts": "3.5.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "three": "0.185.1"
   },
   "devDependencies": {
@@ -28,10 +29,11 @@
     "@types/node": "^22.7.4",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
+    "@types/three": "0.185.0",
     "@vitejs/plugin-react": "^4.3.2",
+    "@vitest/coverage-v8": "2.1.9",
     "jsdom": "^25.0.1",
     "typescript": "^5.6.2",
-    "vitest": "^2.1.2",
-    "@types/three": "0.185.0"
+    "vitest": "^2.1.2"
   }
 }

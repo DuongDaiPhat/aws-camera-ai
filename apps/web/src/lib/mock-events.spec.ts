@@ -34,4 +34,37 @@ describe('mock-events', () => {
     expect(detail.statusHistory?.[0]?.toStatus).toBe('DETECTED');
     expect(detail.statusHistory?.[0]?.actorType).toBe('SYSTEM');
   });
+
+  it.each(['NOTIFIED', 'ESCALATED', 'RESOLVED', 'CLOSED'] as const)(
+    'preserves status-specific timestamps in mock detail %s',
+    (status) => {
+      const event = {
+        ...INITIAL_MOCK_EVENTS[0]!,
+        eventType: 'WELLNESS_TIMEOUT' as const,
+        status,
+        confidence: undefined,
+        zone: null,
+      };
+      const detail = getMockEventDetail(event);
+      expect(detail.source).toBe('SCHEDULER');
+      expect(detail.notifiedAt).toBe(status === 'NOTIFIED' ? event.detectedAt : null);
+      expect(detail.escalationDeadlineAt).toBe(
+        status === 'NOTIFIED'
+          ? new Date(Date.parse(event.detectedAt) + 120000).toISOString()
+          : null,
+      );
+      expect(detail.escalatedAt).toBe(status === 'ESCALATED' ? event.detectedAt : null);
+      expect(detail.resolvedAt).toBe(status === 'RESOLVED' ? event.detectedAt : null);
+      expect(detail.closedAt).toBe(status === 'CLOSED' ? event.detectedAt : null);
+      expect(detail.aiResults?.[0].confidence).toBe(0.85);
+      expect(detail.aiResults?.[1].label).toBe('Khu vực chính');
+      expect(detail.statusHistory?.[1].actorType).toBe(status === 'RESOLVED' ? 'USER' : 'SYSTEM');
+    },
+  );
+
+  it('uses the fire model result for fire mock details', () => {
+    const event = { ...INITIAL_MOCK_EVENTS[0]!, eventType: 'FIRE_SMOKE_DETECTED' as const };
+    expect(getMockEventDetail(event).aiResults?.[0].module).toBe('M3_FIRE');
+    expect(getMockEventDetail(event).source).toBe('FRIGATE');
+  });
 });

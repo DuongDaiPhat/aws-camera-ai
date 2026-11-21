@@ -52,6 +52,44 @@ const options = [
   { value: '4', label: '4 camera' },
   { value: 'custom', label: 'Tùy chỉnh' },
 ];
+it('opens upward near the viewport edge and handles reverse, Home, Tab and blur navigation', async () => {
+  const change = vi.fn();
+  await act(async () =>
+    root.render(
+      <SelectMenu label="Layout" options={options} value="2" onChange={change} tone="violet" />,
+    ),
+  );
+  const trigger = host.querySelector('button')!;
+  vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
+    top: innerHeight - 40,
+    bottom: innerHeight - 10,
+    left: 100,
+    width: 100,
+  } as DOMRect);
+  const press = async (key: string) =>
+    act(async () => trigger.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true })));
+  await press('ArrowUp');
+  const menu = document.querySelector<HTMLElement>('[role="listbox"]')!;
+  expect(parseFloat(menu.style.top)).toBeLessThan(innerHeight - 40);
+  await press('Home');
+  await press(' ');
+  expect(change).toHaveBeenLastCalledWith('2');
+  await press('ArrowUp');
+  await press('ArrowUp');
+  await press('Enter');
+  expect(change).toHaveBeenLastCalledWith('4');
+  await act(async () => trigger.click());
+  await press('Tab');
+  expect(document.querySelector('[role="listbox"]')).toBeNull();
+  await act(async () => trigger.click());
+  await act(async () =>
+    trigger.dispatchEvent(
+      new FocusEvent('focusout', { bubbles: true, relatedTarget: document.body }),
+    ),
+  );
+  expect(document.querySelector('[role="listbox"]')).toBeNull();
+  vi.restoreAllMocks();
+});
 it('opens a custom list and selects using keyboard, restoring its collapsed state', async () => {
   const change = vi.fn();
   await act(async () =>

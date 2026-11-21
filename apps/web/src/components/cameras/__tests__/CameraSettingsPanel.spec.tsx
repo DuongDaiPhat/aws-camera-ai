@@ -4,7 +4,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Camera } from '@/types';
-import { updateCamera } from '@/lib/cameras-client';
+import { retryFrigateSync, updateCamera } from '@/lib/cameras-client';
 import { CameraSettingsPanel } from '../CameraSettingsPanel';
 
 vi.mock('@/lib/cameras-client', () => ({ updateCamera: vi.fn(), retryFrigateSync: vi.fn() }));
@@ -214,4 +214,76 @@ describe('CameraSettingsPanel editing and persistence', () => {
     expect(container.textContent).toContain('Đã lưu cấu hình');
     expect(container.textContent).not.toContain('Đã lưu và đồng bộ cấu hình Frigate.');
   });
+
+  it('shows safe editing defaults for a partial legacy configuration response', () => {
+    render({
+      ...camera,
+      detectionEnabled: undefined,
+      frigateSettings: {},
+      frigateSync: { ...camera.frigateSync, appliedVersion: null, errorMessage: 'Sync pending' },
+    } as unknown as Camera);
+    expect(input('Chiều rộng detect').value).toBe('1280');
+    expect(input('Chiều cao detect').value).toBe('720');
+    expect(input('FPS detect').value).toBe('5');
+    expect(input('Minimum score').value).toBe('0.5');
+    expect(input('Threshold').value).toBe('0.7');
+    expect(input('Minimum area').value).toBe('1500');
+    expect(input('Minimum initialized frames').value).toBe('5');
+    expect(input('Maximum disappeared frames').value).toBe('25');
+    expect(container.textContent).toContain('Sync pending');
+    expect(
+      [...container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')].every(
+        (node) => node.checked,
+      ),
+    ).toBe(true);
+    expect(container.textContent).toContain('v0');
+  });
+
+  it('shows pending retry state and reports an unapplied configuration', async () => {
+    let done!: (value: Awaited<ReturnType<typeof retryFrigateSync>>) => void;
+    vi.mocked(retryFrigateSync).mockReturnValue(
+      new Promise((resolve) => {
+        done = resolve;
+      }),
+    );
+    render();
+    await act(async () =>
+      [...container.querySelectorAll('button')]
+        .find((node) => node.textContent === 'Thử đồng bộ lại')!
+        .click(),
+    );
+    expect(container.textContent).toContain('Đang thử lại...');
+    expect(input('Minimum score').disabled).toBe(true);
+    await act(async () => done({ syncStatus: 'FAILED', configVersion: 2 } as never));
+    expect(container.textContent).toContain('Frigate chưa áp dụng');
+    expect(input('Minimum score').disabled).toBe(false);
+    vi.mocked(retryFrigateSync).mockResolvedValue({
+      syncStatus: 'SYNCED',
+      configVersion: 3,
+    } as never);
+    await act(async () =>
+      [...container.querySelectorAll('button')]
+        .find((node) => node.textContent === 'Thử đồng bộ lại')!
+        .click(),
+    );
+    expect(container.textContent).toContain('Đồng bộ Frigate thành công ở phiên bản v3');
+    expect(onSynced).toHaveBeenCalledOnce();
+  });
+
+  it.each([new Error('Offline'), 'bad'])(
+    'keeps the settings editable after retry failure',
+    async (error) => {
+      vi.mocked(retryFrigateSync).mockRejectedValue(error);
+      render();
+      await act(async () =>
+        [...container.querySelectorAll('button')]
+          .find((node) => node.textContent === 'Thử đồng bộ lại')!
+          .click(),
+      );
+      expect(container.textContent).toContain(
+        error instanceof Error ? 'Offline' : 'Không thể đồng bộ Frigate',
+      );
+      expect(input('Minimum score').disabled).toBe(false);
+    },
+  );
 });

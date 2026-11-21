@@ -194,3 +194,103 @@ it('selects both history dates inside the period popup and excludes today', asyn
   expect(listQuery().get('from')).toBe(local(8).toISOString());
   expect(listQuery().get('to')).toBe(atEndOfDay(10));
 });
+
+it('preserves previously loaded rows and counts during a failed refresh and retries', async () => {
+  fetchPage.mockRejectedValue(new Error('offline'));
+  await act(async () =>
+    root.render(
+      <NotificationInbox recentEvents={[]} actionVersion={1} onViewDetail={openDetail} />,
+    ),
+  );
+  expect(host.querySelector('[role=alert]')?.textContent).toContain('Chưa tải được');
+  expect(host.querySelector('li button')).not.toBeNull();
+  expect([...host.querySelectorAll('dd')].map((node) => node.textContent)).toEqual([
+    '40',
+    '6',
+    '25',
+    '9',
+  ]);
+  fetchPage.mockResolvedValue({ events: [], total: 0 });
+  await act(async () => button('Thử lại').click());
+  expect(host.querySelector('[role=alert]')).toBeNull();
+  expect(host.textContent).toContain('Hôm nay chưa có thông báo');
+});
+it('shows unavailable counters after an initial failure and ignores completions after unmount', async () => {
+  await act(async () => root.render(<div />));
+  fetchPage.mockRejectedValue(new Error('offline'));
+  await act(async () =>
+    root.render(
+      <NotificationInbox recentEvents={[]} actionVersion={0} onViewDetail={openDetail} />,
+    ),
+  );
+  expect([...host.querySelectorAll('dd')].every((node) => node.textContent === '—')).toBe(true);
+  expect(host.textContent).toContain('Chưa tải được');
+  let resolve: (value: { events: (typeof event)[]; total: number }) => void = () => {};
+  fetchPage.mockReturnValue(
+    new Promise((done) => {
+      resolve = done;
+    }),
+  );
+  await act(async () =>
+    root.render(
+      <NotificationInbox recentEvents={[]} actionVersion={2} onViewDetail={openDetail} />,
+    ),
+  );
+  await act(async () => root.render(<div>Left inbox</div>));
+  await act(async () => resolve({ events: [event], total: 10 }));
+  expect(host.textContent).toBe('Left inbox');
+});
+it('shows empty history and filtered results, hides broken images and honors read state', async () => {
+  const active = {
+    ...event,
+    id: 'active',
+    status: 'NOTIFIED' as const,
+    priority: 'P1' as const,
+    eventType: 'FALL_DETECTED' as const,
+    thumbnailUrl: '/image',
+    camera: undefined,
+    wellnessResidentName: 'Lan',
+    zone: { name: 'Door' },
+    detectedAt: local(12, 15).toISOString(),
+  };
+  fetchPage.mockResolvedValue({ events: [active], total: 1 });
+  await act(async () =>
+    root.render(
+      <NotificationInbox
+        recentEvents={[active]}
+        actionVersion={1}
+        onViewDetail={openDetail}
+        readIds={new Set([active.id])}
+      />,
+    ),
+  );
+  expect(host.querySelector('li button')?.hasAttribute('data-unread')).toBe(false);
+  expect(host.textContent).toContain('Lan · Door');
+  const image = host.querySelector('li img')!;
+  await act(async () => image.dispatchEvent(new Event('error')));
+  expect(host.querySelector('li img')).toBeNull();
+  fetchPage.mockResolvedValue({ events: [], total: 0 });
+  await act(async () => button('Lịch sử').click());
+  expect(host.textContent).toContain('Chưa có thông báo trước hôm nay');
+  await choose('Loại thông báo', 'Té ngã');
+  expect(host.textContent).toContain('Không có thông báo phù hợp');
+});
+it('renders distant pagination gaps and returns to a valid page after the total shrinks', async () => {
+  fetchPage.mockResolvedValue({ events: [event], total: 101 });
+  await act(async () =>
+    root.render(
+      <NotificationInbox recentEvents={[]} actionVersion={3} onViewDetail={openDetail} />,
+    ),
+  );
+  expect(host.querySelector('[aria-label="Trang thông báo"]')?.textContent).toContain('…');
+  const last = host.querySelector<HTMLButtonElement>('[aria-label="Trang 11"]')!;
+  await act(async () => last.click());
+  expect(listQuery().get('page')).toBe('11');
+  fetchPage.mockResolvedValue({ events: [event], total: 1 });
+  await act(async () =>
+    root.render(
+      <NotificationInbox recentEvents={[]} actionVersion={4} onViewDetail={openDetail} />,
+    ),
+  );
+  expect(listQuery().get('page')).toBe('1');
+});

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React, { act, useState } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, expect, it } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { TimeField } from './TimeField';
 let host: HTMLDivElement, root: Root;
 beforeEach(() => {
@@ -58,4 +58,53 @@ it('supports keyboard selection and Escape without committing a cancelled edit',
   );
   expect(host.querySelector('input')!.value).toBe('23:59:59');
   expect(document.activeElement).toBe(trigger);
+});
+
+it.each(['bad', '24:00:00', '12:60:00', '12:00:60'])(
+  'identifies invalid time %s and starts the picker at midnight',
+  async (value) => {
+    await act(async () =>
+      root.render(
+        <TimeField label="Từ" value={value} onChange={vi.fn()} hideLabel tone="dark" compact />,
+      ),
+    );
+    expect(host.querySelector('input')!.getAttribute('aria-invalid')).toBe('true');
+    expect(host.textContent).toContain('Nhập giờ 24 giờ');
+    await act(async () => host.querySelector('button')!.click());
+    expect(document.querySelector('output')!.textContent).toBe('00:00:00');
+    await act(async () =>
+      document.body.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true })),
+    );
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+  },
+);
+
+it('normalizes a typed value on blur and supports every picker navigation key', async () => {
+  const change = vi.fn();
+  await act(async () => root.render(<TimeField label="Từ" value="1:2:3" onChange={change} />));
+  await act(async () =>
+    host.querySelector('input')!.dispatchEvent(new FocusEvent('focusout', { bubbles: true })),
+  );
+  expect(change).toHaveBeenCalledWith('01:02:03');
+  await act(async () => host.querySelector('button')!.click());
+  const press = async (key: string) =>
+    act(async () =>
+      document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true })),
+    );
+  await press('Home');
+  expect(document.activeElement?.getAttribute('data-value')).toBe('0');
+  await press('ArrowUp');
+  expect(document.activeElement?.getAttribute('data-value')).toBe('23');
+  await press('End');
+  expect(document.activeElement?.getAttribute('data-value')).toBe('23');
+  await press('Enter');
+  expect(document.querySelector('output')!.textContent).toBe('23:02:03');
+  await act(async () => {
+    window.dispatchEvent(new Event('resize'));
+    window.dispatchEvent(new Event('scroll'));
+  });
+  await act(async () =>
+    document.querySelector<HTMLButtonElement>('[aria-label="Đóng bộ chọn giờ"]')!.click(),
+  );
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
 });
