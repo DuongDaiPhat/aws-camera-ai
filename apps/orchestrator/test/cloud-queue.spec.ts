@@ -1,4 +1,6 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ReceiveMessageCommand, SendMessageCommand } from '@aws-sdk/client-sqs';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { CloudQueueService } from '../src/cloud-queue/cloud-queue.service';
@@ -258,5 +260,380 @@ describe('cloud queue safety', () => {
     await queues.consumeOnce();
     expect(send).toHaveBeenCalledTimes(2);
     expect(apply.mock.invocationCallOrder[0]).toBeLessThan(send.mock.invocationCallOrder[1]!);
+  });
+
+  it('validates all readCloudConfig branches including transport, consumer flag, URL rules, and storage provider', () => {
+    expect(() => readCloudConfig(new ConfigService({ FACE_JOB_TRANSPORT: 'kafka' }))).toThrow(
+      'FACE_JOB_TRANSPORT must be bullmq or sqs',
+    );
+    expect(
+      readCloudConfig(
+        new ConfigService({
+          FACE_JOB_TRANSPORT: 'bullmq',
+          FACE_PROVIDER: 'rekognition',
+          AWS_REGION: 'ap-southeast-1',
+          REKOGNITION_COLLECTION_PREFIX: 'argusai-staging-owner-',
+        }),
+      ),
+    ).toEqual({ mode: 'bullmq', faceProvider: 'rekognition' });
+
+    expect(() =>
+      readCloudConfig(
+        new ConfigService({ ...cloud, APPLICATION_RESULTS_CONSUMER_ENABLED: 'maybe' }),
+      ),
+    ).toThrow('APPLICATION_RESULTS_CONSUMER_ENABLED must be true or false');
+
+    expect(() =>
+      readCloudConfig(
+        new ConfigService({
+          ...cloud,
+          FACE_JOBS_QUEUE_URL: 'http://sqs.ap-southeast-1.amazonaws.com/123456789012/face',
+        }),
+      ),
+    ).toThrow('Cloud queues must be standard AWS SQS HTTPS URLs in AWS_REGION');
+
+    expect(() =>
+      readCloudConfig(
+        new ConfigService({
+          ...cloud,
+          FACE_JOBS_QUEUE_URL: 'https://sqs.ap-southeast-1.amazonaws.com/123456789012/face.fifo',
+        }),
+      ),
+    ).toThrow('Cloud queues must be standard AWS SQS HTTPS URLs in AWS_REGION');
+
+    expect(() =>
+      readCloudConfig(new ConfigService({ ...cloud, STORAGE_PROVIDER: 'minio' })),
+    ).toThrow('SQS requires STORAGE_PROVIDER=s3');
+
+    expect(
+      readCloudConfig(
+        new ConfigService({ ...cloud, APPLICATION_RESULTS_CONSUMER_ENABLED: 'false' }),
+      ),
+    ).toMatchObject({
+      mode: 'sqs',
+      consumerEnabled: false,
+      rekognitionCollectionPrefix: 'camerai-s4-dev-owner-',
+    });
+  });
+
+  it('runs lifecycle init/loop/destroy safely and logs sanitized error codes', async () => {
+    jest.useFakeTimers();
+    try {
+      const query = jest.fn().mockResolvedValue({ rows: [{ mode: 'sqs' }] });
+      const { queues } = service(query);
+      const dispatchSpy = jest
+        .spyOn(queues, 'dispatchOne')
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(Object.assign(new Error('boom'), { code: 'ECONNRESET' }))
+        .mockResolvedValue(undefined);
+      const consumeSpy = jest
+        .spyOn(queues, 'consumeOnce')
+        .mockRejectedValueOnce('non-error')
+        .mockResolvedValue(undefined);
+      const destroySpy = jest.fn();
+      Object.assign(queues, { sqs: { send: jest.fn(), destroy: destroySpy } });
+
+      await queues.onModuleInit();
+      await Promise.resolve();
+      await jest.advanceTimersByTimeAsync(1000);
+      await queues.onModuleDestroy();
+
+      expect(dispatchSpy).toHaveBeenCalledTimes(2);
+      expect(consumeSpy).toHaveBeenCalledTimes(1);
+      expect(destroySpy).toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+
+    const bullmqQueues = new CloudQueueService(
+      new ConfigService({ FACE_JOB_TRANSPORT: 'bullmq' }),
+      {
+        query: jest.fn().mockResolvedValue({ rows: [{ mode: 'bullmq' }] }),
+      } as unknown as DatabaseService,
+      {} as FrigateMediaAdapter,
+      {} as IStorageService,
+      {} as AiResultsService,
+    );
+    await bullmqQueues.onModuleInit();
+    await bullmqQueues.dispatchOne();
+    await bullmqQueues.consumeOnce();
+    await bullmqQueues.onModuleDestroy();
+  });
+
+  it('handles dispatchOne failure reasons, existing envelopes (face & notification), and retry updates', async () => {
+    const owner = '11111111-1111-4111-8111-111111111111';
+    const baseRow = {
+      id: '44444444-4444-4444-8444-444444444444',
+      result_id: '55555555-5555-4555-8555-555555555555',
+      event_id: '33333333-3333-4333-8333-333333333333',
+      kind: 'face.job',
+      owner_user_id: owner,
+      camera_id: '22222222-2222-4222-8222-222222222222',
+      track_id: 'track-1',
+      detected_at: new Date('2026-11-20T00:00:00Z'),
+      created_at: new Date('2026-11-20T00:00:00Z'),
+      camera_slug: 'cam_front',
+      collection_id: `camerai-s4-dev-owner-${owner}`,
+      version: 1,
+      retain: false,
+      envelope: null,
+    };
+
+    const runDispatch = async (
+      row: Record<string, unknown> | undefined,
+      crop: Buffer | null = Buffer.from([1, 2]),
+      uploadBucket = 'test',
+      sqsSend = jest.fn().mockResolvedValue({}),
+    ) => {
+      const query = jest
+        .fn()
+        .mockResolvedValueOnce({ rows: row ? [row] : [] })
+        .mockResolvedValue({ rows: [] });
+      const client = { query };
+      const db = { query, transaction: jest.fn(async (w) => w(client)) };
+      const media = { getCroppedSnapshot: jest.fn().mockResolvedValue(crop) };
+      const storage = { upload: jest.fn().mockResolvedValue({ bucket: uploadBucket, key: 'k' }) };
+      const queues = new CloudQueueService(
+        new ConfigService(cloud),
+        db as unknown as DatabaseService,
+        media as unknown as FrigateMediaAdapter,
+        storage as unknown as IStorageService,
+        {} as AiResultsService,
+      );
+      Object.assign(queues, { sqs: { send: sqsSend } });
+      await queues.dispatchOne();
+      return { query, sqsSend };
+    };
+
+    // No job selected
+    expect((await runDispatch(undefined)).query).toHaveBeenCalledTimes(1);
+
+    // Missing collection registry
+    const missingCol = await runDispatch({ ...baseRow, collection_id: null });
+    expect(missingCol.query.mock.calls[1]![1]).toEqual([
+      baseRow.id,
+      'Face collection registry missing',
+    ]);
+
+    // Prefix mismatch
+    const wrongPrefix = await runDispatch({
+      ...baseRow,
+      collection_id: `argusai-staging-owner-${owner}`,
+    });
+    expect(wrongPrefix.query.mock.calls[1]![1]).toEqual([
+      baseRow.id,
+      'Face collection prefix mismatch',
+    ]);
+
+    // Missing crop
+    const noCrop = await runDispatch(baseRow, null);
+    expect(noCrop.query.mock.calls[1]![1]).toEqual([baseRow.id, 'Face crop unavailable']);
+
+    // Unexpected bucket
+    const badBucket = await runDispatch(baseRow, Buffer.from([1]), 'other-bucket');
+    expect(badBucket.query.mock.calls[1]![1]).toEqual([baseRow.id, 'Unexpected upload bucket']);
+
+    // Prepared face.job envelope sends to faceQueue
+    const sentFace = await runDispatch({ ...baseRow, envelope: { type: 'face.job' } });
+    expect(sentFace.sqsSend).toHaveBeenCalledWith(expect.any(SendMessageCommand));
+    expect((sentFace.sqsSend.mock.calls[0]![0] as SendMessageCommand).input.QueueUrl).toBe(
+      cloud.FACE_JOBS_QUEUE_URL,
+    );
+
+    // Prepared notification.job envelope sends to notificationQueue
+    const sentNotif = await runDispatch({
+      ...baseRow,
+      kind: 'notification.job',
+      envelope: { type: 'notification.job' },
+    });
+    expect((sentNotif.sqsSend.mock.calls[0]![0] as SendMessageCommand).input.QueueUrl).toBe(
+      cloud.NOTIFICATION_JOBS_QUEUE_URL,
+    );
+
+    // Unknown error maps to PREPARE_OR_SEND_FAILED
+    const sqsFail = await runDispatch(
+      { ...baseRow, envelope: { type: 'face.job' } },
+      null,
+      'test',
+      jest.fn().mockRejectedValue(new Error('sqs down')),
+    );
+    expect(sqsFail.query.mock.calls[1]![1]).toEqual([baseRow.id, 'PREPARE_OR_SEND_FAILED']);
+  });
+
+  it('handles consumeOnce disabled/empty, applyResult validations, notification outcome, enqueueNotification, faceContext, and cacheFaceResult', async () => {
+    // consumeOnce skips when consumerEnabled=false
+    const disabledConsumer = new CloudQueueService(
+      new ConfigService({ ...cloud, APPLICATION_RESULTS_CONSUMER_ENABLED: 'false' }),
+      { query: jest.fn(), transaction: jest.fn() } as unknown as DatabaseService,
+      {} as FrigateMediaAdapter,
+      {} as IStorageService,
+      {} as AiResultsService,
+    );
+    const disabledSend = jest.fn();
+    Object.assign(disabledConsumer, { sqs: { send: disabledSend } });
+    await disabledConsumer.consumeOnce();
+    expect(disabledSend).not.toHaveBeenCalled();
+
+    // consumeOnce handles empty Messages array
+    const { queues } = service();
+    const emptySend = jest.fn().mockResolvedValue({});
+    Object.assign(queues, { sqs: { send: emptySend } });
+    await queues.consumeOnce();
+    expect(emptySend).toHaveBeenCalledWith(expect.any(ReceiveMessageCommand));
+
+    // Unexpected type in applyResult
+    await expect(queues.applyResult(parseEnvelope(fixture('face-job.valid.json')))).rejects.toThrow(
+      'Unexpected Results type',
+    );
+
+    // Face result mismatch & durable worker result mismatch
+    const faceRes = parseEnvelope(fixture('face-result-unknown.valid.json'));
+    if (faceRes.type !== 'face.result') throw new Error('bad fixture');
+    const validJob = {
+      id: faceRes.payload.jobId,
+      kind: 'face.job',
+      event_id: faceRes.correlationId,
+      owner_user_id: faceRes.payload.ownerScopeId,
+      current_owner: faceRes.payload.ownerScopeId,
+      result_id: faceRes.payload.body.resultId,
+      camera_id: faceRes.payload.cameraId,
+      current_collection_version: faceRes.payload.body.collectionVersion,
+      envelope: {
+        payload: {
+          observationId: faceRes.payload.body.observationId,
+          revision: faceRes.payload.body.revision,
+          collectionVersion: faceRes.payload.body.collectionVersion,
+        },
+      },
+    };
+    const mismatchSvc = service(
+      jest
+        .fn()
+        .mockResolvedValueOnce({ rows: [{ ...validJob, kind: 'notification.job' }] })
+        .mockResolvedValueOnce({ rows: [] }),
+    ).queues;
+    await expect(mismatchSvc.applyResult(faceRes)).rejects.toThrow(
+      'Face result job/version mismatch',
+    );
+
+    const nonDurableSvc = service(
+      jest
+        .fn()
+        .mockResolvedValueOnce({ rows: [validJob] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [{ identical: false }] }),
+    ).queues;
+    await expect(nonDurableSvc.applyResult(faceRes)).rejects.toThrow(
+      'Result differs from durable worker result',
+    );
+
+    // Notification outcome success & kind mismatch
+    const notifOutcome = parseEnvelope(fixture('notification-outcome.valid.json'));
+    if (notifOutcome.type !== 'notification.outcome') throw new Error('bad fixture');
+    const notifJob = {
+      id: notifOutcome.payload.notificationId,
+      kind: 'notification.job',
+      event_id: notifOutcome.correlationId,
+      owner_user_id: notifOutcome.payload.ownerScopeId,
+      current_owner: notifOutcome.payload.ownerScopeId,
+    };
+    const notifQuery = jest
+      .fn()
+      .mockResolvedValueOnce({ rows: [notifJob] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValue({ rows: [] });
+    await service(notifQuery).queues.applyResult(notifOutcome);
+    expect(notifQuery).toHaveBeenCalledTimes(4);
+
+    const notifWrongKind = service(
+      jest
+        .fn()
+        .mockResolvedValueOnce({ rows: [{ ...notifJob, kind: 'face.job' }] })
+        .mockResolvedValueOnce({ rows: [] }),
+    ).queues;
+    await expect(notifWrongKind.applyResult(notifOutcome)).rejects.toThrow(
+      'Notification job mismatch',
+    );
+
+    // enqueueNotification branches
+    const bullmqSvc = new CloudQueueService(
+      new ConfigService({ FACE_JOB_TRANSPORT: 'bullmq' }),
+      { query: jest.fn() } as unknown as DatabaseService,
+      {} as FrigateMediaAdapter,
+      {} as IStorageService,
+      {} as AiResultsService,
+    );
+    await expect(
+      bullmqSvc.enqueueNotification({ query: jest.fn() } as never, {
+        notificationId: '11111111-1111-4111-8111-111111111111',
+        eventId: '22222222-2222-4222-8222-222222222222',
+        ownerScopeId: '33333333-3333-4333-8333-333333333333',
+        expectedEventVersion: 1,
+        channel: 'SNS_EMAIL',
+      }),
+    ).rejects.toThrow('Notification SQS transport not enabled');
+
+    const clientQuery = jest
+      .fn()
+      .mockResolvedValueOnce({ rows: [{ id: '11111111-1111-4111-8111-111111111111' }] })
+      .mockResolvedValueOnce({ rows: [] });
+    await queues.enqueueNotification({ query: clientQuery } as never, {
+      notificationId: '11111111-1111-4111-8111-111111111111',
+      eventId: '22222222-2222-4222-8222-222222222222',
+      ownerScopeId: '33333333-3333-4333-8333-333333333333',
+      expectedEventVersion: 1,
+      channel: 'SNS_EMAIL',
+    });
+    await expect(
+      queues.enqueueNotification({ query: clientQuery } as never, {
+        notificationId: '11111111-1111-4111-8111-111111111111',
+        eventId: '22222222-2222-4222-8222-222222222222',
+        ownerScopeId: '33333333-3333-4333-8333-333333333333',
+        expectedEventVersion: 1,
+        channel: 'SNS_EMAIL',
+      }),
+    ).rejects.toThrow('Notification intent duplicate or ownership/version mismatch');
+
+    // faceContext & cacheFaceResult
+    const jobEnv = parseEnvelope(fixture('face-job.valid.json'));
+    if (jobEnv.type !== 'face.job') throw new Error('bad fixture');
+    const missingCtx = service(jest.fn().mockResolvedValueOnce({ rows: [] })).queues;
+    await expect(missingCtx.faceContext(jobEnv.payload.jobId)).rejects.toThrow(NotFoundException);
+
+    const ctxQuery = jest
+      .fn()
+      .mockResolvedValueOnce({ rows: [{ envelope: jobEnv, cached_result: null }] })
+      .mockResolvedValueOnce({ rows: [{ face_id: 'f1', known_face_id: 'kf1' }] });
+    const ctx = await service(ctxQuery).queues.faceContext(jobEnv.payload.jobId);
+    expect(ctx.mappings).toEqual({ f1: 'kf1' });
+
+    await expect(queues.cacheFaceResult(jobEnv.payload.jobId, { bad: true })).rejects.toThrow(
+      BadRequestException,
+    );
+
+    const mismatchedWorkerResult = parseEnvelope(fixture('face-result-unknown.valid.json'));
+    if (mismatchedWorkerResult.type !== 'face.result') throw new Error('bad');
+    mismatchedWorkerResult.payload.body.revision = 99;
+    const cacheMismatchSvc = service(
+      jest
+        .fn()
+        .mockResolvedValueOnce({ rows: [{ envelope: jobEnv, cached_result: null }] })
+        .mockResolvedValueOnce({ rows: [] }),
+    ).queues;
+    await expect(
+      cacheMismatchSvc.cacheFaceResult(jobEnv.payload.jobId, mismatchedWorkerResult),
+    ).rejects.toThrow('Worker result mismatch');
+
+    const validWorkerResult = parseEnvelope(fixture('face-result-unknown.valid.json'));
+    const cacheOkSvc = service(
+      jest
+        .fn()
+        .mockResolvedValueOnce({ rows: [{ envelope: jobEnv, cached_result: null }] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [{ cached_result: validWorkerResult }] }),
+    ).queues;
+    await expect(
+      cacheOkSvc.cacheFaceResult(jobEnv.payload.jobId, validWorkerResult),
+    ).resolves.toEqual(validWorkerResult);
   });
 });

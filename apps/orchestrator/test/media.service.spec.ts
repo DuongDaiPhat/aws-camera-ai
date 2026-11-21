@@ -428,5 +428,130 @@ describe('MediaService (US-04)', () => {
         { retain: true },
       );
     });
+
+    it('xu ly loi va cac nhanh edge-case cho snapshot, clip va listEventMediaWithUrls', async () => {
+      const fakeBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0]);
+      storageService.upload.mockRejectedValueOnce(new Error('s3 down'));
+      await expect(
+        service.storeCameraSnapshot(
+          'evt-err',
+          new Date('2026-10-17T15:00:00Z'),
+          fakeBuffer,
+          640,
+          480,
+        ),
+      ).resolves.toBeNull();
+
+      storageService.upload.mockRejectedValueOnce('non-error-failure');
+      await expect(
+        service.storeCameraSnapshot(
+          'evt-err-2',
+          new Date('2026-10-17T15:00:00Z'),
+          fakeBuffer,
+          640,
+          480,
+        ),
+      ).resolves.toBeNull();
+
+      jest.spyOn(global, 'fetch').mockRejectedValueOnce(new Error('network error'));
+      await expect(
+        service.downloadAndStoreSnapshot('evt-err', 'track-1', new Date('2026-10-17T15:00:00Z')),
+      ).resolves.toBeNull();
+
+      storageService.upload.mockRejectedValueOnce(new Error('upload failed'));
+      await expect(
+        service.storeBufferSnapshot('evt-err', fakeBuffer, new Date('2026-10-17T15:00:00Z')),
+      ).resolves.toBeNull();
+
+      const existingClip = {
+        id: 'clip-existing',
+        event_id: 'evt-clip',
+        media_type: 'CLIP' as const,
+        storage_provider: 'MINIO',
+        bucket: 'camerai-media',
+        object_key: 'events/2026/10/17/evt-clip/clip.mp4',
+        content_type: 'video/mp4',
+        size_bytes: 12,
+        width: null,
+        height: null,
+        duration_ms: 10000,
+        checksum_sha256: null,
+        expires_at: null,
+        created_at: new Date(),
+      };
+      eventMediaRepository.findMediaByEventIdAndType.mockResolvedValueOnce(existingClip);
+      await expect(
+        service.downloadAndStoreClip('evt-clip', 'track-1', new Date('2026-10-17T15:00:00Z')),
+      ).resolves.toBe(existingClip);
+
+      jest.spyOn(global, 'fetch').mockResolvedValueOnce({ ok: false, status: 500 } as Response);
+      await expect(
+        service.downloadAndStoreClip('evt-clip', 'track-1', new Date('2026-10-17T15:00:00Z')),
+      ).resolves.toBeNull();
+
+      jest.spyOn(global, 'fetch').mockRejectedValueOnce(new Error('clip fetch error'));
+      await expect(
+        service.downloadAndStoreClip('evt-clip', 'track-1', new Date('2026-10-17T15:00:00Z')),
+      ).resolves.toBeNull();
+
+      jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        arrayBuffer: async () => new Uint8Array([1, 2, 3, 4]).buffer,
+      } as Response);
+      storageService.upload.mockResolvedValueOnce({
+        bucket: 'camerai-media',
+        key: 'events/2026/10/17/evt-clip/clip.mp4',
+        sizeBytes: 4,
+        contentType: 'video/mp4',
+      });
+      eventMediaRepository.createEventMedia.mockResolvedValueOnce(existingClip);
+      await service.downloadAndStoreClip('evt-clip', 'track-1', new Date('2026-10-17T15:00:00Z'));
+      expect(eventMediaRepository.createEventMedia).toHaveBeenLastCalledWith(
+        expect.objectContaining({ durationMs: 10000 }),
+      );
+
+      eventMediaRepository.findEventById.mockResolvedValueOnce({ id: 'evt-100' } as never);
+      eventMediaRepository.findMediaByEventId.mockResolvedValueOnce([
+        {
+          id: 'm-null',
+          event_id: 'evt-100',
+          media_type: 'SNAPSHOT',
+          storage_provider: 'MINIO',
+          bucket: 'camerai-media',
+          object_key: 'k1',
+          content_type: 'image/jpeg',
+          size_bytes: null,
+          width: null,
+          height: null,
+          duration_ms: null,
+          checksum_sha256: null,
+          expires_at: null,
+          created_at: new Date('2026-09-18T10:00:00Z'),
+        },
+        {
+          id: 'm-nan',
+          event_id: 'evt-100',
+          media_type: 'CLIP',
+          storage_provider: 'MINIO',
+          bucket: 'camerai-media',
+          object_key: 'k2',
+          content_type: 'video/mp4',
+          size_bytes: 'not-a-number' as unknown as number,
+          width: null,
+          height: null,
+          duration_ms: 5000,
+          checksum_sha256: null,
+          expires_at: null,
+          created_at: new Date('2026-09-18T10:00:00Z'),
+        },
+      ]);
+      storageService.getPresignedUrl.mockResolvedValue({
+        url: 'http://localhost:9000/signed',
+        expiresAt: new Date('2026-09-18T10:15:00Z'),
+      });
+      const listed = await service.listEventMediaWithUrls('evt-100');
+      expect(listed[0]?.sizeBytes).toBeNull();
+      expect(listed[1]?.sizeBytes).toBeNull();
+    });
   });
 });

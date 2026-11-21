@@ -89,6 +89,12 @@ describe('US-24 face config validation', () => {
     expect(() => validateRekognitionCollectionPrefix('', { allowDefault: true })).toThrow(
       'Missing cloud configuration: REKOGNITION_COLLECTION_PREFIX',
     );
+    expect(validateRekognitionCollectionPrefix(undefined, { allowDefault: true })).toBe(
+      'camerai-s4-dev-owner-',
+    );
+    expect(validateRekognitionCollectionPrefix('camerai-s4-dev-owner-')).toBe(
+      'camerai-s4-dev-owner-',
+    );
   });
 });
 
@@ -220,6 +226,115 @@ describe('US-24 RekognitionFaceEnrollmentService', () => {
     });
     expect(send.mock.calls[1]?.[0]).toBeInstanceOf(IndexFacesCommand);
     await expect(service.deleteFaces(indexed.collectionId, ['face-a'])).resolves.toEqual([]);
+  });
+
+  it('covers constructor guard, owned client destroy, error mapping, empty/missing FaceId, and cleanup failures', async () => {
+    expect(
+      () => new RekognitionFaceEnrollmentService(new ConfigService({ FACE_PROVIDER: 'local' })),
+    ).toThrow('RekognitionFaceEnrollmentService requires FACE_PROVIDER=rekognition');
+
+    // Owned client destroy when no client passed
+    const owned = new RekognitionFaceEnrollmentService(rekognitionConfig());
+    owned.onModuleDestroy();
+
+    // Non-ResourceAlreadyExistsException on ensureCollection
+    const send = jest
+      .fn()
+      .mockRejectedValueOnce('raw-string-error') // ensureCollection -> UnknownError -> 503
+      .mockResolvedValueOnce({ FaceDetails: [{ BoundingBox: {} }] }) // validateSingleFaces valid 1 face
+      .mockResolvedValueOnce({ FaceDetails: undefined }) // validateSingleFaces undefined FaceDetails -> NO_FACE_DETECTED
+      .mockResolvedValueOnce({
+        FaceDetails: [{ BoundingBox: undefined }, { BoundingBox: { Left: NaN } }],
+      }) // validateSingleFaces MULTIPLE_FACES only
+      .mockRejectedValueOnce(
+        Object.assign(new Error('bad img'), { name: 'InvalidImageFormatException' }),
+      )
+      .mockRejectedValueOnce(Object.assign(new Error('big'), { name: 'ImageTooLargeException' }))
+      .mockRejectedValueOnce(
+        Object.assign(new Error('throttled'), { name: 'ThrottlingException' }),
+      );
+
+    const service = new RekognitionFaceEnrollmentService(rekognitionConfig(), {
+      send,
+    } as unknown as RekognitionClient);
+    service.onModuleDestroy(); // does not throw for external client
+
+    await expect(service.ensureCollection(OWNER_ID)).rejects.toMatchObject({
+      status: 503,
+      response: { error: { code: 'FACE_PROVIDER_UNAVAILABLE' } },
+    });
+    await expect(service.validateSingleFaces([jpegUpload()])).resolves.toBeUndefined();
+    await expect(service.validateSingleFaces([jpegUpload()])).rejects.toMatchObject({
+      status: 422,
+      response: { error: { code: 'NO_FACE_DETECTED' } },
+    });
+    await expect(service.validateSingleFaces([jpegUpload()])).rejects.toMatchObject({
+      status: 422,
+      response: { error: { code: 'MULTIPLE_FACES' } },
+    });
+    await expect(service.validateSingleFaces([jpegUpload()])).rejects.toMatchObject({
+      status: 400,
+      response: { error: { code: 'INVALID_IMAGE' } },
+    });
+    await expect(service.validateSingleFaces([jpegUpload()])).rejects.toMatchObject({
+      status: 413,
+      response: { error: { code: 'IMAGE_TOO_LARGE' } },
+    });
+    await expect(service.validateSingleFaces([jpegUpload()])).rejects.toMatchObject({
+      status: 503,
+      response: { error: { code: 'FACE_PROVIDER_UNAVAILABLE' } },
+    });
+
+    // indexFaces edge cases: 0 records -> 422 NO_FACE_DETECTED; missing FaceId -> 503; AWS error mid-batch + cleanup error
+    const idxSend = jest
+      .fn()
+      // Call 1: 0 records
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ FaceRecords: [] })
+      // Call 2: 1 record without FaceId
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ FaceRecords: [{ Face: {} }] })
+      // Call 3: 1st image succeeds (no FaceModelVersion), 2nd image throws AWS error, cleanup DeleteFaces also fails
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ FaceRecords: [{ Face: { FaceId: 'f-ok' } }] })
+      .mockRejectedValueOnce(
+        Object.assign(new Error('invalid'), { name: 'InvalidImageFormatException' }),
+      )
+      .mockRejectedValueOnce(Object.assign(new Error('cleanup fail'), { name: 'InternalError' }));
+
+    const idxSvc = new RekognitionFaceEnrollmentService(rekognitionConfig(), {
+      send: idxSend,
+    } as unknown as RekognitionClient);
+
+    await expect(idxSvc.indexFaces(OWNER_ID, [jpegUpload()])).rejects.toMatchObject({
+      status: 422,
+      response: { error: { code: 'NO_FACE_DETECTED' } },
+    });
+    await expect(idxSvc.indexFaces(OWNER_ID, [jpegUpload()])).rejects.toMatchObject({
+      status: 503,
+      response: { error: { code: 'FACE_PROVIDER_UNAVAILABLE' } },
+    });
+    await expect(
+      idxSvc.indexFaces(OWNER_ID, [jpegUpload(), jpegUpload()], 'owner/1@bad'),
+    ).rejects.toMatchObject({
+      status: 400,
+      response: { error: { code: 'INVALID_IMAGE' } },
+    });
+
+    // deleteFaces empty, undefined DeletedFaces, and non-ResourceNotFoundException error
+    const delSend = jest
+      .fn()
+      .mockResolvedValueOnce({})
+      .mockRejectedValueOnce(Object.assign(new Error('access denied'), { name: 'AccessDenied' }));
+    const delSvc = new RekognitionFaceEnrollmentService(rekognitionConfig(), {
+      send: delSend,
+    } as unknown as RekognitionClient);
+    await expect(delSvc.deleteFaces('col', [' ', ''])).resolves.toEqual([]);
+    await expect(delSvc.deleteFaces('col', ['f1', 'f1'])).resolves.toEqual([]);
+    await expect(delSvc.deleteFaces('col', ['f1'])).rejects.toMatchObject({
+      status: 503,
+      response: { error: { code: 'FACE_PROVIDER_UNAVAILABLE' } },
+    });
   });
 });
 
@@ -420,6 +535,312 @@ describe('US-24 KnownFacesService Rekognition orchestration & reconciliation', (
     await expect(sync.sync(OWNER_ID)).resolves.toBe(true);
     expect(snapshotsSpy).not.toHaveBeenCalled();
     sync.onModuleDestroy();
+  });
+
+  it('covers KnownFacesService error, fallback, update, deactivate, remove, and local branches', async () => {
+    // Constructor requires rekognitionEnrollment when FACE_PROVIDER=rekognition
+    expect(() => new KnownFacesService(repository, inference, sync, rekognitionConfig())).toThrow(
+      'Rekognition enrollment service is required when FACE_PROVIDER=rekognition',
+    );
+
+    // list()
+    jest.spyOn(repository, 'list').mockResolvedValue([]);
+    await expect(service.list(OWNER_ID)).resolves.toEqual({ data: [] });
+
+    // createWithRekognition: missing record after insert -> 503
+    jest.spyOn(repository, 'precheckCreate').mockResolvedValue(undefined);
+    jest.spyOn(repository, 'createRekognition').mockResolvedValue(FACE_ROW_ID);
+    await expect(
+      service.create(OWNER_ID, { personName: 'Missing' }, [jpegUpload()]),
+    ).rejects.toMatchObject({
+      status: 503,
+    });
+
+    // compensateDeleteFaces catches cleanup errors & tests safeErrorCode variants
+    jest
+      .spyOn(repository, 'createRekognition')
+      .mockRejectedValueOnce(new Error('db err 1'))
+      .mockRejectedValueOnce(new Error('db err 2'))
+      .mockRejectedValueOnce(new Error('db err 3'));
+    rekognition.deleteFaces
+      .mockRejectedValueOnce({ code: 'AWS_ERR' })
+      .mockRejectedValueOnce({ name: 'AwsNameErr' })
+      .mockRejectedValueOnce('raw');
+    await expect(
+      service.create(OWNER_ID, { personName: 'CompFail1' }, [jpegUpload()]),
+    ).rejects.toThrow('db err 1');
+    await expect(
+      service.create(OWNER_ID, { personName: 'CompFail2' }, [jpegUpload()]),
+    ).rejects.toThrow('db err 2');
+    await expect(
+      service.create(OWNER_ID, { personName: 'CompFail3' }, [jpegUpload()]),
+    ).rejects.toThrow('db err 3');
+
+    // update() in rekognition mode: success, 23505 duplicate, other error, 404
+    const updatedFace = {
+      id: FACE_ROW_ID,
+      personName: 'Updated',
+      provider: 'REKOGNITION' as const,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      recognitionStatus: 'READY' as const,
+    };
+    jest.spyOn(repository, 'update').mockResolvedValueOnce(undefined);
+    jest.spyOn(repository, 'list').mockResolvedValueOnce([updatedFace]);
+    await expect(service.update(OWNER_ID, FACE_ROW_ID, { personName: 'Updated' })).resolves.toEqual(
+      updatedFace,
+    );
+    jest
+      .spyOn(repository, 'update')
+      .mockRejectedValueOnce(Object.assign(new Error('dup'), { code: '23505' }))
+      .mockRejectedValueOnce(new Error('other'))
+      .mockResolvedValueOnce(undefined);
+    await expect(
+      service.update(OWNER_ID, FACE_ROW_ID, { personName: 'Dup' }),
+    ).rejects.toMatchObject({ status: 409 });
+    await expect(service.update(OWNER_ID, FACE_ROW_ID, { personName: 'Err' })).rejects.toThrow(
+      'other',
+    );
+    jest.spyOn(repository, 'list').mockResolvedValueOnce([]);
+    await expect(
+      service.update(OWNER_ID, FACE_ROW_ID, { personName: 'Missing' }),
+    ).rejects.toMatchObject({ status: 404 });
+
+    // replacePhotos() error branches
+    jest
+      .spyOn(repository, 'findRekognitionTarget')
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: FACE_ROW_ID,
+        provider: 'LOCAL',
+        collectionId: null,
+        faceIds: [],
+      })
+      .mockResolvedValueOnce({
+        id: FACE_ROW_ID,
+        provider: 'REKOGNITION',
+        collectionId: `${STAGING_PREFIX}${OWNER_ID}`,
+        faceIds: [],
+      });
+    await expect(
+      service.replacePhotos(OWNER_ID, FACE_ROW_ID, [jpegUpload()]),
+    ).rejects.toMatchObject({
+      status: 404,
+    });
+    await expect(
+      service.replacePhotos(OWNER_ID, FACE_ROW_ID, [jpegUpload()]),
+    ).rejects.toMatchObject({
+      status: 503,
+    });
+    jest.spyOn(repository, 'replaceRekognitionFaces').mockResolvedValueOnce({
+      previousCollectionId: `${STAGING_PREFIX}${OWNER_ID}`,
+      previousFaceIds: [],
+    });
+    jest.spyOn(repository, 'list').mockResolvedValueOnce([]);
+    await expect(
+      service.replacePhotos(OWNER_ID, FACE_ROW_ID, [jpegUpload()]),
+    ).rejects.toMatchObject({
+      status: 404,
+    });
+
+    // deactivate() error branches & collectionId fallback
+    jest
+      .spyOn(repository, 'findRekognitionTarget')
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: FACE_ROW_ID,
+        provider: 'LOCAL',
+        collectionId: null,
+        faceIds: [],
+      })
+      .mockResolvedValueOnce({
+        id: FACE_ROW_ID,
+        provider: 'REKOGNITION',
+        collectionId: null,
+        faceIds: ['f1'],
+      })
+      .mockResolvedValueOnce({
+        id: FACE_ROW_ID,
+        provider: 'REKOGNITION',
+        collectionId: null,
+        faceIds: ['f1'],
+      });
+    await expect(service.deactivate(OWNER_ID, FACE_ROW_ID)).rejects.toMatchObject({ status: 404 });
+    await expect(service.deactivate(OWNER_ID, FACE_ROW_ID)).rejects.toMatchObject({ status: 503 });
+    jest
+      .spyOn(repository, 'deactivateRekognition')
+      .mockRejectedValueOnce({ name: 'DeadlockDetected' })
+      .mockResolvedValueOnce(undefined);
+    await expect(service.deactivate(OWNER_ID, FACE_ROW_ID)).rejects.toEqual({
+      name: 'DeadlockDetected',
+    });
+    jest.spyOn(repository, 'list').mockResolvedValueOnce([]);
+    await expect(service.deactivate(OWNER_ID, FACE_ROW_ID)).rejects.toMatchObject({ status: 404 });
+
+    // remove() rekognition branches: 404, LOCAL target, null collectionId + DB failure
+    jest
+      .spyOn(repository, 'findRekognitionTarget')
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: FACE_ROW_ID,
+        provider: 'LOCAL',
+        collectionId: null,
+        faceIds: [],
+      })
+      .mockResolvedValueOnce({
+        id: FACE_ROW_ID,
+        provider: 'REKOGNITION',
+        collectionId: null,
+        faceIds: ['f1'],
+      });
+    jest.spyOn(repository, 'remove').mockResolvedValueOnce(undefined);
+    jest
+      .spyOn(repository, 'removeRekognition')
+      .mockRejectedValueOnce(Object.assign(new Error('db fail'), { code: '57014' }));
+    await expect(service.remove(OWNER_ID, FACE_ROW_ID, null, null)).rejects.toMatchObject({
+      status: 404,
+    });
+    await expect(service.remove(OWNER_ID, FACE_ROW_ID, null, null)).resolves.toBe(true);
+    await expect(service.remove(OWNER_ID, FACE_ROW_ID, '1.2.3.4', 'ua')).rejects.toThrow('db fail');
+
+    // Local mode KnownFacesService & FaceCollectionSyncService branches
+    jest.useFakeTimers();
+    try {
+      const localCfg = new ConfigService({ FACE_PROVIDER: 'local', FACE_SYNC_INTERVAL_MS: '50' });
+      const localSync = new FaceCollectionSyncService(repository, inference, localCfg);
+      const localService = new KnownFacesService(repository, inference, localSync, localCfg);
+
+      // Sync init/tick/destroy + snapshots error + per-snapshot error + success
+      const snapshotsMock = jest
+        .spyOn(repository, 'snapshots')
+        .mockRejectedValueOnce(new Error('db down')) // initial tick()
+        .mockResolvedValueOnce([
+          {
+            ownerScopeId: OWNER_ID,
+            modelVersion: 'm1',
+            embeddingDim: 2,
+            version: 1,
+            faces: [],
+          },
+        ])
+        .mockResolvedValue([
+          {
+            ownerScopeId: OWNER_ID,
+            modelVersion: 'm1',
+            embeddingDim: 2,
+            version: 2,
+            faces: [],
+          },
+        ]);
+      inference.sync.mockRejectedValueOnce(new Error('ai down')).mockResolvedValue(undefined);
+      jest.spyOn(repository, 'markSynced').mockResolvedValue(undefined);
+      jest.spyOn(repository, 'isReady').mockResolvedValue(true);
+
+      localSync.onModuleInit();
+      await Promise.resolve();
+      // Advance interval timer so setInterval callback (line 31) executes
+      await jest.advanceTimersByTimeAsync(50);
+      // Guard while running
+      Object.assign(localSync, { running: true });
+      await (localSync as unknown as { tick: () => Promise<void> }).tick();
+      Object.assign(localSync, { running: false });
+
+      await expect(localSync.sync()).resolves.toBe(true);
+      await expect(localSync.sync(OWNER_ID)).resolves.toBe(true);
+      expect(snapshotsMock).toHaveBeenCalled();
+      localSync.onModuleDestroy();
+
+      // Local replacePhotos / deactivate rejected
+      await expect(
+        localService.replacePhotos(OWNER_ID, FACE_ROW_ID, [jpegUpload()]),
+      ).rejects.toMatchObject({
+        status: 503,
+      });
+      await expect(localService.deactivate(OWNER_ID, FACE_ROW_ID)).rejects.toMatchObject({
+        status: 503,
+      });
+
+      // Local update & remove
+      jest.spyOn(repository, 'update').mockResolvedValueOnce(undefined);
+      jest.spyOn(localSync, 'sync').mockResolvedValue(true);
+      jest.spyOn(repository, 'list').mockResolvedValueOnce([updatedFace]);
+      await expect(
+        localService.update(OWNER_ID, FACE_ROW_ID, { personName: 'LocalUpdated' }),
+      ).resolves.toEqual(updatedFace);
+
+      jest.spyOn(repository, 'remove').mockResolvedValueOnce(undefined);
+      await expect(localService.remove(OWNER_ID, FACE_ROW_ID, null, null)).resolves.toBe(true);
+
+      // Local create checkResults error branches & missing record 503
+      inference.embed.mockResolvedValueOnce({
+        embeddingBase64: null,
+        embeddingDim: 2,
+        modelVersion: 'm1',
+        provider: 'local',
+        selectedFaceIndex: null,
+        faces: [],
+        error: { code: 'PROVIDER_UNAVAILABLE', message: 'down' },
+      });
+      await expect(
+        localService.create(OWNER_ID, { personName: 'A' }, [jpegUpload()]),
+      ).rejects.toMatchObject({ status: 503 });
+
+      inference.embed.mockResolvedValueOnce({
+        embeddingBase64: null,
+        embeddingDim: 2,
+        modelVersion: 'm1',
+        provider: 'local',
+        selectedFaceIndex: null,
+        faces: [],
+        error: { code: 'IMAGE_DECODE_FAILED', message: 'bad' },
+      });
+      await expect(
+        localService.create(OWNER_ID, { personName: 'A' }, [jpegUpload()]),
+      ).rejects.toMatchObject({ status: 400 });
+
+      inference.embed
+        .mockResolvedValueOnce({
+          embeddingBase64: null,
+          embeddingDim: 2,
+          modelVersion: 'm1',
+          provider: 'local',
+          selectedFaceIndex: null,
+          faces: [],
+          error: { code: 'INVALID_FACE_SELECTION', message: 'bad sel' },
+        })
+        .mockResolvedValueOnce({
+          embeddingBase64: null,
+          embeddingDim: 2,
+          modelVersion: 'm1',
+          provider: 'local',
+          selectedFaceIndex: null,
+          faces: [],
+          error: { code: 'NO_FACE_DETECTED', message: 'none' },
+        });
+      await expect(
+        localService.create(OWNER_ID, { personName: 'A' }, [jpegUpload(), jpegUpload()]),
+      ).rejects.toMatchObject({ status: 422, response: { error: { code: 'NO_FACE_DETECTED' } } });
+
+      const bytes = Buffer.alloc(8);
+      bytes.writeFloatLE(1, 0);
+      bytes.writeFloatLE(0, 4);
+      inference.embed.mockResolvedValueOnce({
+        embeddingBase64: bytes.toString('base64'),
+        embeddingDim: 2,
+        modelVersion: 'm1',
+        provider: 'local',
+        selectedFaceIndex: 0,
+        faces: [{ x: 0, y: 0, width: 1, height: 1 }],
+        error: null,
+      });
+      jest.spyOn(repository, 'create').mockResolvedValueOnce(FACE_ROW_ID);
+      jest.spyOn(repository, 'list').mockResolvedValueOnce([]);
+      await expect(
+        localService.create(OWNER_ID, { personName: 'MissingAfterCreate' }, [jpegUpload()]),
+      ).rejects.toMatchObject({ status: 503 });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
 

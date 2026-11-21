@@ -1,8 +1,18 @@
 import { ConfigService } from '@nestjs/config';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import * as presigner from '@aws-sdk/s3-request-presigner';
 import { MinioStorageService } from '../src/storage/minio-storage.service';
 import { S3StorageService, buildS3Tagging } from '../src/storage/s3-storage.service';
 import { S3_EXPIRE_7D_TAG } from '../src/storage/storage.interface';
+
+jest.mock('@aws-sdk/s3-request-presigner', () => ({
+  getSignedUrl: jest.fn(),
+}));
 
 describe('S3StorageService tagging (US-23)', () => {
   afterEach(() => {
@@ -98,5 +108,75 @@ describe('S3StorageService tagging (US-23)', () => {
     expect(result.bucket).toBe('camerai-media');
     const command = sendSpy.mock.calls[0]?.[0] as PutObjectCommand;
     expect(command.input.Tagging).toBeUndefined();
+  });
+
+  it('handles buildS3Tagging edge cases with blank keys/values or custom tags', () => {
+    expect(buildS3Tagging({})).toBeUndefined();
+    expect(buildS3Tagging({ tags: { ' ': 'v', k: '  ' } })).toBeUndefined();
+    expect(buildS3Tagging({ retain: false, tags: { env: 'staging' } })).toBe('env=staging');
+  });
+
+  it('supports download, getPresignedUrl, and delete on S3StorageService', async () => {
+    const payload = new Uint8Array([1, 2, 3]);
+    const sendSpy = jest
+      .spyOn(S3Client.prototype, 'send')
+      .mockResolvedValueOnce({ Body: { transformToByteArray: async () => payload } } as never)
+      .mockResolvedValueOnce({} as never)
+      .mockResolvedValueOnce({} as never);
+    jest.mocked(presigner.getSignedUrl).mockResolvedValueOnce('https://s3.example.com/signed-obj');
+
+    const service = new S3StorageService(
+      new ConfigService({ AWS_REGION: 'ap-southeast-1', S3_BUCKET: 'argusai-staging-media' }),
+    );
+
+    await expect(service.download('k1')).resolves.toEqual(Buffer.from(payload));
+    await expect(service.download('k1')).rejects.toThrow('Snapshot không có dữ liệu.');
+
+    const presigned = await service.getPresignedUrl('k1', 120);
+    expect(presigned.url).toBe('https://s3.example.com/signed-obj');
+    expect(presigned.expiresAt).toBeInstanceOf(Date);
+    await service.getPresignedUrl('k1');
+    expect(presigner.getSignedUrl).toHaveBeenCalledWith(
+      expect.any(S3Client),
+      expect.any(GetObjectCommand),
+      { expiresIn: 900 },
+    );
+
+    await service.delete('k1');
+    expect(sendSpy).toHaveBeenLastCalledWith(expect.any(DeleteObjectCommand));
+  });
+
+  it('supports download, getPresignedUrl (with public endpoint), and delete on MinioStorageService', async () => {
+    const payload = new Uint8Array([9, 8, 7]);
+    const sendSpy = jest
+      .spyOn(S3Client.prototype, 'send')
+      .mockResolvedValueOnce({ Body: { transformToByteArray: async () => payload } } as never)
+      .mockResolvedValueOnce({} as never)
+      .mockResolvedValueOnce({} as never);
+    jest
+      .mocked(presigner.getSignedUrl)
+      .mockResolvedValueOnce('http://localhost:9000/camerai-media/k1?sig=1');
+
+    const service = new MinioStorageService(
+      new ConfigService({
+        STORAGE_BUCKET: 'camerai-media',
+        MINIO_ENDPOINT: 'http://minio:9000',
+        MINIO_PUBLIC_ENDPOINT: 'http://localhost:9000',
+      }),
+    );
+
+    await expect(service.download('k1')).resolves.toEqual(Buffer.from(payload));
+    await expect(service.download('k1')).rejects.toThrow('Snapshot không có dữ liệu.');
+
+    const presigned = await service.getPresignedUrl('k1');
+    expect(presigned.url).toBe('http://localhost:9000/camerai-media/k1?sig=1');
+    expect(presigner.getSignedUrl).toHaveBeenCalledWith(
+      expect.any(S3Client),
+      expect.any(GetObjectCommand),
+      { expiresIn: 900 },
+    );
+
+    await service.delete('k1');
+    expect(sendSpy).toHaveBeenLastCalledWith(expect.any(DeleteObjectCommand));
   });
 });
