@@ -192,6 +192,84 @@ class DeadlineWorkerTests(unittest.TestCase):
                 None, None, 302, "Found", {}, "https://other"
             )
 
+    def test_post_deadline_200_success_reads_and_parses_json(self):
+        payload = {
+            "commandId": self.command["commandId"],
+            "disposition": "APPLIED",
+            "reason": "ESCALATED",
+            "aggregateVersion": 4,
+        }
+        response = Mock()
+        response.status = 200
+        response.read.return_value = json.dumps(payload).encode("utf-8")
+        cm = Mock()
+        cm.__enter__ = Mock(return_value=response)
+        cm.__exit__ = Mock(return_value=False)
+        opener = Mock()
+        opener.open.return_value = cm
+
+        with patch.object(handler, "build_opener", return_value=opener):
+            self.assertEqual(handler.lambda_handler(self.command, None), payload)
+
+        req = opener.open.call_args.args[0]
+        self.assertEqual(
+            req.full_url,
+            f"https://example.test/api/v1/internal/events/{self.command['eventId']}/deadline",
+        )
+        self.assertEqual(req.get_method(), "POST")
+
+    def test_invalid_json_or_non_utf8_backend_response_is_terminal(self):
+        for bad_bytes in (b"not-json", b"\xff\xfe"):
+            response = Mock()
+            response.status = 200
+            response.read.return_value = bad_bytes
+            cm = Mock()
+            cm.__enter__ = Mock(return_value=response)
+            cm.__exit__ = Mock(return_value=False)
+            opener = Mock()
+            opener.open.return_value = cm
+            with (
+                patch.object(handler, "build_opener", return_value=opener),
+                self.assertRaises(handler.DeadlineTerminalError),
+            ):
+                handler.lambda_handler(self.command, None)
+
+    def test_non_dict_event_non_dict_200_and_unexpected_status_are_terminal(self):
+        for non_dict_event in (None, ["not-an-object"], "str"):
+            with self.assertRaises(handler.DeadlineTerminalError):
+                handler.lambda_handler(non_dict_event, None)
+
+        with (
+            patch.object(handler, "post_deadline", return_value=(200, ["not-an-object"])),
+            self.assertRaises(handler.DeadlineTerminalError),
+        ):
+            handler.lambda_handler(self.command, None)
+
+        for status, body in ((201, {}), (409, ["not-an-object"])):
+            with (
+                patch.object(handler, "post_deadline", return_value=(status, body)),
+                self.assertRaises(handler.DeadlineTerminalError),
+            ):
+                handler.lambda_handler(self.command, None)
+
+    def test_validation_helpers_and_defense_in_depth_guards(self):
+        self.assertFalse(handler._is_valid_uuid(123))
+        self.assertFalse(handler._is_valid_uuid("not-a-uuid"))
+        self.assertFalse(handler._is_valid_utc_timestamp("not-a-timestampZ"))
+
+        bad_date = copy.deepcopy(self.command)
+        bad_date["expectedDeadlineAt"] = "2026-99-99T00:00:00Z"
+        with self.assertRaises(handler.DeadlineTerminalError):
+            handler.lambda_handler(bad_date, None)
+
+        bad_uuid = copy.deepcopy(self.command)
+        bad_uuid["eventId"] = "not-a-uuid"
+        with (
+            patch.object(handler, "VALIDATOR", Mock()),
+            self.assertRaises(handler.DeadlineTerminalError),
+        ):
+            handler.lambda_handler(bad_uuid, None)
+
 
 if __name__ == "__main__":
     unittest.main()
