@@ -9,6 +9,7 @@ import { MediaService } from '../src/media/media.service';
 import { FrigateDetectionTrackerService } from '../src/frigate/frigate-detection-tracker.service';
 import { ZoneResultProducerService } from '../src/ingestion/zone-result-producer.service';
 import { AiResultsService } from '../src/ai-results/ai-results.service';
+import { FaceRecognitionCoordinatorService } from '../src/face-recognition/face-recognition-coordinator.service';
 
 function createEvent(overrides: Partial<EventRecord> = {}): EventRecord {
   return {
@@ -616,6 +617,94 @@ describe('MqttConsumerService (US-03, US-04)', () => {
       'track-clip',
       restrictedEvent.detected_at,
       15_000,
+    );
+  });
+
+  it('forwards new/update/end person events to FaceRecognitionCoordinatorService when present', async () => {
+    const handleTrackEvent = jest.fn().mockResolvedValue(undefined);
+    const coordinator = { handleTrackEvent } as unknown as FaceRecognitionCoordinatorService;
+    const camera = {
+      id: 'cam-uuid-1',
+      name: 'Phong khach',
+      slug: 'cam_living_room',
+      owner_user_id: 'owner-uuid-1',
+    };
+    const event = createEvent({ track_id: 'track-coord' });
+    const mockEventsRepo = {
+      findCameraBySlug: jest.fn().mockResolvedValue(camera),
+      findEligibleZones: jest.fn(),
+      findZoneByCameraAndSlug: jest.fn(),
+      createEvent: jest.fn().mockResolvedValue(event),
+      findEventByDedupKey: jest.fn().mockResolvedValue(event),
+      updateEvent: jest.fn().mockResolvedValue(event),
+      findEventSummaryById: jest.fn().mockResolvedValue(null),
+    };
+    const moduleWithCoordinator: TestingModule = await Test.createTestingModule({
+      providers: [
+        MqttConsumerService,
+        ZoneResultProducerService,
+        { provide: AiResultsService, useValue: { submit: jest.fn() } },
+        { provide: EventsRepository, useValue: mockEventsRepo },
+        {
+          provide: MediaService,
+          useValue: { downloadAndStoreSnapshot: jest.fn(), downloadAndStoreClip: jest.fn() },
+        },
+        {
+          provide: EventMediaRepository,
+          useValue: { findMediaByEventIdAndType: jest.fn().mockResolvedValue(null) },
+        },
+        { provide: EventsService, useValue: { toEventSummary: jest.fn(), emitEvent: jest.fn() } },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn((_k: string, d?: unknown) => d) },
+        },
+        { provide: FrigateDetectionTrackerService, useValue: { track: jest.fn() } },
+        { provide: FaceRecognitionCoordinatorService, useValue: coordinator },
+      ],
+    }).compile();
+
+    const consumerWithCoord = moduleWithCoordinator.get(MqttConsumerService);
+    await consumerWithCoord.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'new',
+          after: {
+            id: 'track-coord',
+            camera: 'cam_living_room',
+            frame_time: 1_726_387_200,
+            label: 'person',
+            score: 0.9,
+            current_zones: [],
+          },
+        }),
+      ),
+    );
+    await consumerWithCoord.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'end',
+          after: {
+            id: 'track-coord',
+            camera: 'cam_living_room',
+            frame_time: 1_726_387_205,
+            label: 'person',
+            score: 0.9,
+            current_zones: [],
+          },
+        }),
+      ),
+    );
+
+    expect(handleTrackEvent).toHaveBeenCalledTimes(2);
+    expect(handleTrackEvent).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ messageType: 'new', isCreated: true, camera }),
+    );
+    expect(handleTrackEvent).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ messageType: 'end', isCreated: false, camera }),
     );
   });
 });

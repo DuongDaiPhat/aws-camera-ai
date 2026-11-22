@@ -78,14 +78,22 @@ export class FrigateConfigService {
       existingZones[zone.slug] = this.toFrigateZone(zone);
     }
     const streamUrl = this.resolveStreamUrl(camera, mediamtxRtspBaseUrl);
+    const existingDetect = (existingCamera.detect as Record<string, unknown> | undefined) ?? {};
+    const existingStationary =
+      (existingDetect.stationary as Record<string, unknown> | undefined) ?? {};
     const detect = {
-      ...((existingCamera.detect as Record<string, unknown> | undefined) ?? {}),
+      ...existingDetect,
       width: settings?.detect_width ?? camera.detect_width ?? 1280,
       height: settings?.detect_height ?? camera.detect_height ?? 720,
       fps: settings?.detect_fps ?? camera.fps ?? 5,
       enabled: camera.detection_enabled,
       min_initialized: Math.max(2, settings?.min_initialized_frames ?? 2),
-      max_disappeared: settings?.max_disappeared_frames ?? 25,
+      max_disappeared: settings?.max_disappeared_frames ?? 75,
+      stationary: {
+        ...existingStationary,
+        interval: 50,
+        threshold: 50,
+      },
     };
     const existingObjects = (existingCamera.objects as Record<string, unknown> | undefined) ?? {};
     const existingFilters = (existingObjects.filters as Record<string, unknown> | undefined) ?? {};
@@ -203,6 +211,8 @@ export class FrigateConfigService {
       'detect.fps',
       'detect.min_initialized',
       'detect.max_disappeared',
+      'detect.stationary.interval',
+      'detect.stationary.threshold',
       'objects.filters.person.min_score',
       'objects.filters.person.threshold',
       'objects.filters.person.min_area',

@@ -560,6 +560,7 @@ describe('cloud queue safety', () => {
       .mockResolvedValueOnce({ rows: [{ face_id: 'f1', known_face_id: 'kf1' }] });
     const ctx = await service(ctxQuery).queues.faceContext(jobEnv.payload.jobId);
     expect(ctx.mappings).toEqual({ f1: 'kf1' });
+    expect(ctx.collection_face_count).toBe(1);
 
     await expect(queues.cacheFaceResult(jobEnv.payload.jobId, { bad: true })).rejects.toThrow(
       BadRequestException,
@@ -607,5 +608,190 @@ describe('cloud queue safety', () => {
     if (message.type !== 'notification.job') throw new Error('fixture type');
     await queues.enqueueNotification(client as never, message.payload);
     expect(notifications.enqueueNotification).toHaveBeenCalledWith(client, message.payload);
+  });
+
+  it('enqueueFaceJob uploads best-shot with collection prefix/retention checks, dispatches job.revision, and notifies coordinator on applyResult', async () => {
+    const owner = '11111111-1111-4111-8111-111111111111';
+    const camera = '22222222-2222-4222-8222-222222222222';
+    const event = '33333333-3333-4333-8333-333333333333';
+    const jobId = '44444444-4444-4444-8444-444444444444';
+    const resultId = '55555555-5555-4555-8555-555555555555';
+
+    const query = jest
+      .fn()
+      .mockResolvedValueOnce({
+        rows: [{ id: jobId, result_id: resultId, created_at: new Date('2026-11-22T00:00:00Z') }],
+      })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            collection_id: `argusai-staging-owner-${owner}`,
+            version: 3,
+            retain: false,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] }); // duplicate no-op
+
+    const storage = {
+      upload: jest.fn().mockResolvedValue({
+        bucket: 'test',
+        key: `owners/${owner}/cameras/${camera}/events/${event}/face/${jobId}.jpg`,
+        sizeBytes: 3,
+        contentType: 'image/jpeg',
+      }),
+    };
+    const db = { query, transaction: jest.fn(async (w) => w({ query })) };
+    const coordinator = { onRecognitionResult: jest.fn() };
+    const queues = new CloudQueueService(
+      new ConfigService({
+        ...cloud,
+        FACE_PROVIDER: 'rekognition',
+        REKOGNITION_COLLECTION_PREFIX: 'argusai-staging-owner-',
+      }),
+      db as unknown as DatabaseService,
+      {} as FrigateMediaAdapter,
+      storage as unknown as IStorageService,
+      {
+        submit: jest.fn().mockResolvedValue({ disposition: 'ACCEPTED' }),
+      } as unknown as AiResultsService,
+      coordinator,
+    );
+
+    const created = await queues.enqueueFaceJob({
+      eventId: event,
+      cameraId: camera,
+      ownerScopeId: owner,
+      trackId: 'track-9',
+      sourceSessionId: 'cam_front:1700000000.000000',
+      revision: 2,
+      imageBuffer: Buffer.from([1, 2, 3]),
+    });
+    expect(created).toEqual({ created: true, jobId, status: 'PENDING' });
+    expect(storage.upload).toHaveBeenCalledWith(
+      `owners/${owner}/cameras/${camera}/events/${event}/face/${jobId}.jpg`,
+      expect.any(Buffer),
+      'image/jpeg',
+      { tags: { retention: 'expire-7d' } },
+    );
+    const persistedEnvelope = JSON.parse(query.mock.calls[2]![1][1] as string);
+    expect(persistedEnvelope.payload.revision).toBe(2);
+    expect(persistedEnvelope.payload.collectionVersion).toBe(3);
+
+    const dup = await queues.enqueueFaceJob({
+      eventId: event,
+      cameraId: camera,
+      ownerScopeId: owner,
+      trackId: 'track-9',
+      sourceSessionId: 'cam_front:1700000000.000000',
+      revision: 2,
+      imageBuffer: Buffer.from([1, 2, 3]),
+    });
+    expect(dup).toEqual({ created: false, jobId: null, status: null });
+
+    // dispatchOne uses job.revision (not hardcoded 1)
+    const dispatchQuery = jest
+      .fn()
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            id: jobId,
+            result_id: resultId,
+            event_id: event,
+            kind: 'face.job',
+            owner_user_id: owner,
+            camera_id: camera,
+            track_id: 'track-9',
+            revision: 2,
+            detected_at: new Date('2026-11-22T00:00:00Z'),
+            created_at: new Date('2026-11-22T00:00:00Z'),
+            camera_slug: 'cam_front',
+            collection_id: `argusai-staging-owner-${owner}`,
+            version: 3,
+            retain: true,
+            envelope: null,
+          },
+        ],
+      })
+      .mockResolvedValue({ rows: [] });
+    const dispatchQueues = new CloudQueueService(
+      new ConfigService({
+        ...cloud,
+        FACE_PROVIDER: 'rekognition',
+        REKOGNITION_COLLECTION_PREFIX: 'argusai-staging-owner-',
+      }),
+      {
+        query: dispatchQuery,
+        transaction: jest.fn(async (w) => w({ query: dispatchQuery })),
+      } as unknown as DatabaseService,
+      {
+        getCroppedSnapshot: jest.fn().mockResolvedValue(Buffer.from([9, 8])),
+      } as unknown as FrigateMediaAdapter,
+      storage as unknown as IStorageService,
+      {} as AiResultsService,
+    );
+    await dispatchQueues.dispatchOne();
+    const dispatchedEnv = JSON.parse(dispatchQuery.mock.calls[1]![1][1] as string);
+    expect(dispatchedEnv.payload.revision).toBe(2);
+
+    // applyResult notifies coordinator after commit
+    const knownRes = parseEnvelope(fixture('face-result-known.valid.json'));
+    if (knownRes.type !== 'face.result') throw new Error('bad fixture');
+    const kp = knownRes.payload;
+    const applyQuery = jest
+      .fn()
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            id: kp.jobId,
+            kind: 'face.job',
+            event_id: knownRes.correlationId,
+            owner_user_id: kp.ownerScopeId,
+            current_owner: kp.ownerScopeId,
+            result_id: kp.body.resultId,
+            camera_id: kp.cameraId,
+            camera_slug: 'cam_front',
+            current_collection_version: kp.body.collectionVersion,
+            envelope: {
+              payload: {
+                trackId: 'track-1',
+                sourceSessionId: 'cam_front:1700000000.000000',
+                observationId: kp.body.observationId,
+                revision: kp.body.revision,
+                collectionVersion: kp.body.collectionVersion,
+              },
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ identical: true }] })
+      .mockResolvedValue({ rows: [] });
+    const applyDb = {
+      query: applyQuery,
+      transaction: jest.fn(async (w) => w({ query: applyQuery })),
+    };
+    const applyQueues = new CloudQueueService(
+      new ConfigService(cloud),
+      applyDb as unknown as DatabaseService,
+      {} as FrigateMediaAdapter,
+      {} as IStorageService,
+      {
+        submit: jest.fn().mockResolvedValue({ disposition: 'ACCEPTED' }),
+      } as unknown as AiResultsService,
+      coordinator,
+    );
+    await applyQueues.applyResult(knownRes);
+    expect(coordinator.onRecognitionResult).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventId: kp.body.eventId,
+        cameraSlug: 'cam_front',
+        trackId: 'track-1',
+        personStatus: kp.body.personStatus,
+        matchedKnownFaceId: kp.body.matchedKnownFaceId,
+        disposition: 'ACCEPTED',
+      }),
+    );
   });
 });

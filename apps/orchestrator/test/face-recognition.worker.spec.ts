@@ -181,4 +181,66 @@ describe('FaceRecognitionWorker (US-10 -> US-11)', () => {
       },
     ]);
   });
+
+  it('uses optional revision and imageBase64 from MatchFaceJob and notifies coordinator on result', async () => {
+    const onRecognitionResult = jest.fn();
+    const coordWorker = new FaceRecognitionWorker(
+      { getCroppedSnapshot } as unknown as FrigateMediaAdapter,
+      { get: jest.fn((_key: string, fallback?: string) => fallback) } as unknown as ConfigService,
+      { submit } as unknown as AiResultsService,
+      { onRecognitionResult },
+    );
+
+    jest.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        requestId: '33333333-3333-4333-8333-333333333333',
+        collectionVersion: 7,
+        labelConfidence: 0.94,
+        confidencePolicyVersion: 'similarity-v1',
+        qualityReason: null,
+        personStatus: 'KNOWN',
+        matchedKnownFaceId: '44444444-4444-4444-8444-444444444444',
+        matchedPersonName: 'Alice',
+        similarity: 0.94,
+        thresholdUsed: 0.6,
+        boundingBox: { x: 0.1, y: 0.1, width: 0.3, height: 0.4 },
+        modelVersion: 'face-v1',
+        provider: 'local',
+        fellBackToLocal: false,
+        processedAt: '2026-09-28T05:00:00.000Z',
+        error: null,
+      }),
+    } as unknown as Response);
+
+    await coordWorker.process(
+      faceJob({
+        revision: 2,
+        imageBase64: Buffer.from('best-shot-bytes').toString('base64'),
+      }),
+    );
+
+    expect(getCroppedSnapshot).not.toHaveBeenCalled();
+    expect(submit).toHaveBeenCalledWith(
+      EVENT_ID,
+      expect.objectContaining({
+        revision: 2,
+        personStatus: 'KNOWN',
+        matchedKnownFaceId: '44444444-4444-4444-8444-444444444444',
+      }),
+    );
+    expect(onRecognitionResult).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventId: EVENT_ID,
+        trackId: 'track-1',
+        cameraSlug: 'front-door',
+        revision: 2,
+        personStatus: 'KNOWN',
+        matchedKnownFaceId: '44444444-4444-4444-8444-444444444444',
+        matchedPersonName: 'Alice',
+        similarity: 0.94,
+        disposition: 'ACCEPTED',
+      }),
+    );
+  });
 });

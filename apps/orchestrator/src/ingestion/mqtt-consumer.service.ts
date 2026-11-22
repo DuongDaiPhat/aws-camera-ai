@@ -25,6 +25,7 @@ import { FrigateDetectionTrackerService } from '../frigate/frigate-detection-tra
 import { ZoneScheduleService } from '../zones/zone-schedule.service';
 import { ZoneResultProducerService, ZoneResultContext } from './zone-result-producer.service';
 import { PoseFrameConsumer } from '../fall-detection/consumer/pose-frame.consumer';
+import { FaceRecognitionCoordinatorService } from '../face-recognition/face-recognition-coordinator.service';
 
 const DEFAULT_MQTT_CONNECT_TIMEOUT_MS = 10_000;
 const DEFAULT_MQTT_RECONNECT_PERIOD_MS = 3_000;
@@ -32,6 +33,7 @@ const DEFAULT_MQTT_RECONNECT_PERIOD_MS = 3_000;
 type FrigateMessageType = FrigateEventMessageDto['type'];
 
 interface EventContext {
+  camera: CameraRecord | null;
   cameraId: string | null;
   zoneId: string | null;
   zoneName: string | null;
@@ -46,6 +48,7 @@ interface SynchronizedEvent {
   event: EventRecord;
   isCreated: boolean;
   isPromoted: boolean;
+  camera: CameraRecord | null;
   zoneResultContext: ZoneResultContext | null;
 }
 
@@ -69,6 +72,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     @Optional() private readonly wellnessSource?: WellnessSourceAdapter,
     @Optional() private readonly poseFrameConsumer?: PoseFrameConsumer,
     @Optional() private readonly playbackFrames?: PlaybackFramesService,
+    @Optional() private readonly faceCoordinator?: FaceRecognitionCoordinatorService,
   ) {}
 
   onModuleInit(): void {
@@ -235,6 +239,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     const isRestrictedZone = zone !== undefined;
 
     return {
+      camera,
       cameraId,
       zoneId: zone?.id ?? null,
       zoneName: zone?.name ?? null,
@@ -358,7 +363,13 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
         : 'Da cap nhat su kien theo vong doi Frigate track',
     );
 
-    return { event, isCreated, isPromoted, zoneResultContext: context.zoneResultContext };
+    return {
+      event,
+      isCreated,
+      isPromoted,
+      camera: context.camera,
+      zoneResultContext: context.zoneResultContext,
+    };
   }
 
   /**
@@ -439,40 +450,50 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     this.detectionTracker.track(message.type, message.after);
 
     try {
-      const { event, isCreated, isPromoted, zoneResultContext } = await this.synchronizeEvent(
-        message.type,
-        message.after,
-      );
+      const { event, isCreated, isPromoted, camera, zoneResultContext } =
+        await this.synchronizeEvent(message.type, message.after);
       await this.zoneResultProducer.submit(event, message.after, zoneResultContext);
       const hasNewSnapshot = await this.synchronizeMedia(message.type, event, message.after);
 
       if (isCreated) {
         await this.emitEventToStream(event.id, 'event.created');
-        if (
-          this.configService.get<string>('FACE_JOB_TRANSPORT', 'bullmq') === 'bullmq' &&
-          this.faceQueue &&
-          (event.event_type === 'PERSON_DETECTED' || event.event_type === 'RESTRICTED_ZONE')
-        ) {
-          const camera = await this.eventsRepository.findCameraBySlug(message.after.camera);
-          const ownerScopeId = camera?.owner_user_id ?? '00000000-0000-0000-0000-000000000000';
-          const collectionVersion =
-            await this.eventsRepository.getSyncedFaceCollectionVersion(ownerScopeId);
-          await this.faceQueue.add('match_face', {
-            eventId: event.id,
-            trackId: message.after.id,
-            cameraSlug: message.after.camera,
-            ownerScopeId,
-            collectionVersion,
-            sourceSessionId:
-              typeof message.after.start_time === 'number'
-                ? message.after.camera + ':' + message.after.start_time.toFixed(6)
-                : undefined,
-          });
-        }
       } else if (isPromoted || hasNewSnapshot) {
         // Anh vua ve toi sau khi the su kien da hien tren dashboard: day ban cap nhat
         // de nguoi dung thay snapshot ma khong phai F5 (FR-DSH-02).
         await this.emitEventToStream(event.id, 'event.updated');
+      }
+
+      if (this.faceCoordinator) {
+        await this.faceCoordinator.handleTrackEvent({
+          messageType: message.type,
+          event,
+          after: message.after,
+          isCreated,
+          camera,
+        });
+      } else if (
+        isCreated &&
+        this.configService.get<string>('FACE_JOB_TRANSPORT', 'bullmq') === 'bullmq' &&
+        this.faceQueue &&
+        (event.event_type === 'PERSON_DETECTED' || event.event_type === 'RESTRICTED_ZONE')
+      ) {
+        const resolvedCamera =
+          camera ?? (await this.eventsRepository.findCameraBySlug(message.after.camera));
+        const ownerScopeId =
+          resolvedCamera?.owner_user_id ?? '00000000-0000-0000-0000-000000000000';
+        const collectionVersion =
+          await this.eventsRepository.getSyncedFaceCollectionVersion(ownerScopeId);
+        await this.faceQueue.add('match_face', {
+          eventId: event.id,
+          trackId: message.after.id,
+          cameraSlug: message.after.camera,
+          ownerScopeId,
+          collectionVersion,
+          sourceSessionId:
+            typeof message.after.start_time === 'number'
+              ? message.after.camera + ':' + message.after.start_time.toFixed(6)
+              : undefined,
+        });
       }
     } catch (error) {
       this.logger.error(

@@ -79,6 +79,11 @@ describe('FrigateConfigService', () => {
     expect(parsed.cameras.camera_cong_chinh.ffmpeg.inputs[0].path).toBe(mockCamera.rtsp_url);
     expect(parsed.cameras.camera_cong_chinh.detect.fps).toBe(5);
     expect(parsed.cameras.camera_cong_chinh.detect.min_initialized).toBeGreaterThanOrEqual(2);
+    expect(parsed.cameras.camera_cong_chinh.detect.max_disappeared).toBe(75);
+    expect(parsed.cameras.camera_cong_chinh.detect.stationary).toEqual({
+      interval: 50,
+      threshold: 50,
+    });
     expect(parsed.cameras.camera_cong_chinh.record.retain).toBeUndefined();
     expect(parsed.cameras.camera_cong_chinh.record.continuous.days).toBe(7);
     expect(parsed.cameras.camera_cong_chinh.record.detections.retain.days).toBe(7);
@@ -231,5 +236,31 @@ describe('FrigateConfigService', () => {
     expect(
       (service as any).hasAppliedSettings(JSON.stringify(running), expected, mockCamera.slug),
     ).toBe(true);
+  });
+
+  it('respects explicit settings.max_disappeared_frames and preserves extra stationary fields', () => {
+    const prior = YAML.stringify({
+      cameras: {
+        [mockCamera.slug]: {
+          detect: {
+            stationary: {
+              max_frames: { default: 3000 },
+            },
+          },
+        },
+      },
+    });
+    const parsed = YAML.parse(
+      service.generateUpdatedConfig(prior, {
+        camera: mockCamera,
+        settings: { max_disappeared_frames: 40 },
+      }),
+    );
+    expect(parsed.cameras[mockCamera.slug].detect.max_disappeared).toBe(40);
+    expect(parsed.cameras[mockCamera.slug].detect.stationary).toEqual({
+      max_frames: { default: 3000 },
+      interval: 50,
+      threshold: 50,
+    });
   });
 });
