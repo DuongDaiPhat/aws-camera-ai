@@ -9,6 +9,7 @@ import { EscalationRepository } from '../src/escalation/escalation.repository';
 import { EscalationEngineService } from '../src/escalation/escalation-engine.service';
 import { EscalationRulesRepository } from '../src/escalation-rules/escalation-rules.repository';
 import { NotificationCloudService } from '../src/notification-cloud/notification-cloud.service';
+import type { IStorageService } from '../src/storage/storage.interface';
 import type {
   ClaimRequest,
   OutcomeEnvelope,
@@ -184,7 +185,102 @@ describe('cloud notifications in PostgreSQL', () => {
     }
   });
 
-  function service(overrides: Record<string, string> = {}) {
+  it('returns detailed Vietnamese incident content for a verified REAL email claim', async () => {
+    await allow();
+    const cloud = service();
+    const job = await createJob(cloud);
+    await pool.query(
+      `UPDATE events SET event_type='RESTRICTED_ZONE',priority='P1',
+       detected_at='2026-11-22T09:38:00Z',zone_name='nguy hiểm',confidence=0.93 WHERE id=$1`,
+      [job.request.eventId],
+    );
+    const granted = await claimAttempt(cloud, job);
+    expect(granted.delivery.subject).toContain('Xâm nhập vùng cấm');
+    expect(granted.delivery.message).toContain('Fixture');
+    expect(granted.delivery.message).toContain('nguy hiểm');
+    expect(granted.delivery.message).toContain('22/11/2026');
+    expect(granted.delivery.message).toContain('93%');
+    expect(granted.delivery.message).toContain(job.request.eventId);
+    expect(granted.delivery.message).not.toContain('A new incident needs review');
+  });
+
+  it('signs only the current event snapshot in the configured private storage', async () => {
+    await allow();
+    const getPresignedUrl = jest.fn(async (key: string, ttl = 900) => ({
+      url: `https://evidence.example.test/${key}`,
+      expiresAt: new Date(Date.now() + ttl * 1000),
+    }));
+    const cloud = service(
+      { STORAGE_PROVIDER: 's3', S3_BUCKET: 'private-test' },
+      { getPresignedUrl },
+    );
+    const job = await createJob(cloud);
+    const other = await createJob(cloud);
+    await pool.query(
+      `INSERT INTO event_media(event_id,media_type,storage_provider,bucket,object_key,content_type,expires_at)
+       VALUES ($1,'SNAPSHOT','S3','private-test','current.jpg','image/jpeg',clock_timestamp()+interval '2 minutes'),
+       ($1,'THUMBNAIL','S3','private-test','thumb.jpg','image/jpeg',NULL),
+       ($1,'SNAPSHOT','S3','private-test','expired.jpg','image/jpeg',clock_timestamp()-interval '1 minute'),
+       ($1,'SNAPSHOT','S3','other-bucket','wrong-bucket.jpg','image/jpeg',NULL),
+       ($1,'SNAPSHOT','MINIO','private-test','wrong-provider.jpg','image/jpeg',NULL),
+       ($2,'SNAPSHOT','S3','private-test','other-event.jpg','image/jpeg',NULL)`,
+      [job.request.eventId, other.request.eventId],
+    );
+    const granted = await claimAttempt(cloud, job);
+    expect(granted.delivery.message).toContain('https://evidence.example.test/current.jpg');
+    for (const excluded of [
+      'thumb.jpg',
+      'expired.jpg',
+      'wrong-bucket.jpg',
+      'wrong-provider.jpg',
+      'other-event.jpg',
+    ]) {
+      expect(granted.delivery.message).not.toContain(excluded);
+    }
+    expect(getPresignedUrl).toHaveBeenCalledWith('current.jpg', expect.any(Number));
+    const ttl = getPresignedUrl.mock.calls[0][1];
+    expect(ttl).toBeGreaterThan(0);
+    expect(ttl).toBeLessThanOrEqual(120);
+    const persisted = (
+      await pool.query('SELECT envelope,cached_result FROM cloud_jobs WHERE id=$1', [job.id])
+    ).rows[0];
+    expect(JSON.stringify(persisted)).not.toContain('evidence.example.test');
+  });
+
+  it('does not substitute a person observation score for incident AI confidence', async () => {
+    await allow();
+    const cloud = service();
+    const job = await createJob(cloud);
+    await pool.query('UPDATE events SET confidence=NULL,detection_confidence=0.99 WHERE id=$1', [
+      job.request.eventId,
+    ]);
+    const granted = await claimAttempt(cloud, job);
+    expect(granted.delivery.message).toContain('Độ tin cậy nhận diện: Chưa xác định');
+    expect(granted.delivery.message).not.toContain('99%');
+  });
+
+  it.each(['dry', 'blocked', 'foreign-owner'] as const)(
+    'does not expose incident content or sign evidence for %s claims',
+    async (mode) => {
+      if (mode !== 'blocked') await allow();
+      const getPresignedUrl = jest.fn();
+      const cloud = service({ SENDER_DRY_RUN: String(mode === 'dry') }, { getPresignedUrl });
+      const job = await createJob(cloud);
+      if (mode === 'foreign-owner')
+        await pool.query(
+          "UPDATE cloud_jobs SET owner_user_id=$2::uuid,envelope=jsonb_set(envelope,'{payload,ownerScopeId}',to_jsonb($2::text)) WHERE id=$1",
+          [job.id, foreignUser],
+        );
+      const response = await cloud.claim(job.id, job.request);
+      expect(JSON.stringify(response)).not.toContain('Fixture');
+      expect(getPresignedUrl).not.toHaveBeenCalled();
+    },
+  );
+
+  function service(
+    overrides: Record<string, string> = {},
+    storage?: Pick<IStorageService, 'getPresignedUrl'>,
+  ) {
     return new NotificationCloudService(
       new ConfigService({
         NOTIFICATION_DRIVER: 'sqs',
@@ -194,6 +290,7 @@ describe('cloud notifications in PostgreSQL', () => {
         ...overrides,
       }),
       db,
+      storage,
     );
   }
 
@@ -474,7 +571,7 @@ describe('cloud notifications in PostgreSQL', () => {
     const granted = await claimAttempt(cloud, job);
     expect(granted).toMatchObject({
       mode: 'REAL',
-      delivery: { topicArn: topic, subject: '[ArgusAI][DEV] New incident' },
+      delivery: { topicArn: topic, subject: '[ArgusAI][DEV] Phát hiện người — Fixture' },
     });
     await expect(cloud.claim(job.id, job.request)).rejects.toMatchObject({
       status: 409,

@@ -2,6 +2,8 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Inject,
+  Optional,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -9,6 +11,8 @@ import { isDeepStrictEqual } from 'node:util';
 import type { PoolClient } from 'pg';
 import { type Envelope, type NotificationJob, parseEnvelope } from '../cloud-queue/queue-contract';
 import { DatabaseService } from '../database/database.service';
+import { STORAGE_SERVICE, type IStorageService } from '../storage/storage.interface';
+import type { NotificationEmailOptions } from './notification-email';
 import { claimNotification, matchesJob, notificationJobSelect } from './notification-claim';
 import { readNotificationConfig } from './notification-cloud.config';
 import type {
@@ -33,12 +37,26 @@ const mismatch = () =>
 @Injectable()
 export class NotificationCloudService {
   private readonly config;
+  private readonly emailOptions: NotificationEmailOptions;
 
   constructor(
     config: ConfigService,
     private readonly db: DatabaseService,
+    @Optional()
+    @Inject(STORAGE_SERVICE)
+    storage?: Pick<IStorageService, 'getPresignedUrl'>,
   ) {
     this.config = readNotificationConfig(config);
+    const provider = config.get<string>('STORAGE_PROVIDER', 'minio').toLowerCase();
+    this.emailOptions = {
+      storage,
+      storageProvider: provider === 's3' ? 'S3' : 'MINIO',
+      storageBucket: config.get<string>(
+        provider === 's3' ? 'S3_BUCKET' : 'STORAGE_BUCKET',
+        provider === 's3' ? 'camerai-media-prod' : 'camerai-media',
+      ),
+      webOrigin: config.get<string>('WEB_ORIGIN'),
+    };
   }
 
   async enqueueIntent(client: PoolClient, id: string, automaticContact = false): Promise<void> {
@@ -125,7 +143,9 @@ export class NotificationCloudService {
   }
 
   claim(id: string, request: ClaimRequest) {
-    return this.db.transaction((client) => claimNotification(client, this.config, id, request));
+    return this.db.transaction((client) =>
+      claimNotification(client, this.config, id, request, this.emailOptions),
+    );
   }
 
   async cacheResult(id: string, value: unknown): Promise<OutcomeEnvelope> {

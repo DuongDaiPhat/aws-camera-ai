@@ -11,6 +11,7 @@ import type {
   JobRow,
 } from './notification-cloud.types';
 import { dryRunDelivery, readDelivery } from './notification-delivery';
+import { enrichEmailDelivery, type NotificationEmailOptions } from './notification-email';
 
 const conflict = () => new ConflictException('Notification claim does not match its job');
 
@@ -36,6 +37,7 @@ export async function claimNotification(
   config: NotificationConfig,
   id: string,
   request: ClaimRequest,
+  emailOptions?: NotificationEmailOptions,
 ): Promise<ClaimResponse> {
   // Escalation already holds the event lock when it writes a notification.
   await client.query(
@@ -138,6 +140,10 @@ export async function claimNotification(
     if (limits.today >= config.cap) return noOp(client, id, 'CAP_EXCEEDED');
     if (limits.retry_at) throw busy(id, limits.retry_at);
   }
+  const authorizedDelivery =
+    mode === 'REAL' && delivery.channel === 'SNS_EMAIL'
+      ? await enrichEmailDelivery(client, job, config, delivery, emailOptions)
+      : delivery;
   const {
     rows: [created],
   } = await client.query<AttemptRow>(
@@ -160,7 +166,7 @@ export async function claimNotification(
     ],
   );
   if (!created) throw conflict();
-  return claimed(created, mode === 'REAL' ? delivery : dryRunDelivery(delivery));
+  return claimed(created, mode === 'REAL' ? authorizedDelivery : dryRunDelivery(delivery));
 }
 
 function claimed(attempt: AttemptRow, delivery: Delivery): ClaimResponse {
