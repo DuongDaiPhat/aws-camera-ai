@@ -43,6 +43,27 @@ describe('FrigateConfigService', () => {
     service = new FrigateConfigService(new ConfigService());
   });
 
+  it('bounds MediaMTX probing so short videos retain their opening recognition frames', () => {
+    const relayed = YAML.parse(
+      service.generateUpdatedConfig('', {
+        camera: { ...mockCamera, source_type_val: 'VIDEO_FILE' },
+        mediamtxRtspBaseUrl: 'rtsp://mediamtx:8554',
+      }),
+    ).cameras[mockCamera.slug].ffmpeg.inputs[0];
+    const args: string[] = relayed.input_args;
+    expect(
+      args.slice(args.indexOf('-analyzeduration'), args.indexOf('-analyzeduration') + 2),
+    ).toEqual(['-analyzeduration', '1000000']);
+    expect(args.slice(args.indexOf('-probesize'), args.indexOf('-probesize') + 2)).toEqual([
+      '-probesize',
+      '32768',
+    ]);
+    const direct = YAML.parse(service.generateUpdatedConfig('', { camera: mockCamera }));
+    expect(direct.cameras[mockCamera.slug].ffmpeg.inputs[0].input_args).toBe(
+      'preset-rtsp-restream-low-latency',
+    );
+  });
+
   it('keeps recording before a fire even without a person or motion trigger when M3 is enabled', () => {
     const fireService = new FrigateConfigService(new ConfigService({ M3_ENABLED: 'true' }));
     const config = YAML.parse(fireService.generateUpdatedConfig('', { camera: mockCamera }));

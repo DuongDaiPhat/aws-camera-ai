@@ -116,7 +116,7 @@ export class FrigateConfigService {
         inputs: [
           {
             path: streamUrl,
-            input_args: 'preset-rtsp-restream-low-latency',
+            input_args: this.streamInputArgs(streamUrl, mediamtxRtspBaseUrl),
             roles: ['detect', 'record'],
           },
         ],
@@ -235,6 +235,30 @@ export class FrigateConfigService {
 
   private maskStreamAuth(url: string): string {
     return url.replace(/^(rtsps?:\/\/)[^/@]+@/i, '$1***:***@');
+  }
+
+  private streamInputArgs(streamUrl: string, mediamtxRtspBaseUrl: string): string | string[] {
+    const stream = new URL(streamUrl);
+    const relay = new URL(mediamtxRtspBaseUrl);
+    if (stream.hostname !== relay.hostname || stream.port !== relay.port) {
+      return 'preset-rtsp-restream-low-latency';
+    }
+    // MediaMTX already supplies the stream format. Bound probing before enabling
+    // nobuffer, which otherwise discards the opening seconds of short replays.
+    return [
+      '-rtsp_transport',
+      'tcp',
+      '-timeout',
+      '10000000',
+      '-analyzeduration',
+      '1000000',
+      '-probesize',
+      '32768',
+      '-fflags',
+      'nobuffer',
+      '-flags',
+      'low_delay',
+    ];
   }
 
   private toFrigateZone(
