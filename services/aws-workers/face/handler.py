@@ -151,7 +151,13 @@ def _build_face_result(
 
 def _search_and_classify(rek, p, image, mappings, threshold, model):
     """Call Rekognition SearchFacesByImage once and classify match/quality outcomes."""
-    status, similarity, confidence, known_id, quality = "UNDETERMINED", None, None, None, None
+    status, similarity, confidence, known_id, quality = (
+        "UNDETERMINED",
+        None,
+        None,
+        None,
+        None,
+    )
     try:
         response = rek.search_faces_by_image(
             CollectionId=p["collectionId"],
@@ -160,7 +166,19 @@ def _search_and_classify(rek, p, image, mappings, threshold, model):
             MaxFaces=1,
             QualityFilter="NONE",
         )
+        LOGGER.info(
+            "Face provider jobId=%s operation=SearchFacesByImage awsRequestId=%s retryAttempts=%s",
+            p["jobId"],
+            response.get("ResponseMetadata", {}).get("RequestId"),
+            response.get("ResponseMetadata", {}).get("RetryAttempts", 0),
+        )
     except ClientError as exc:
+        LOGGER.info(
+            "Face provider jobId=%s operation=SearchFacesByImage awsRequestId=%s errorCode=%s",
+            p["jobId"],
+            exc.response.get("ResponseMetadata", {}).get("RequestId"),
+            exc.response.get("Error", {}).get("Code"),
+        )
         # Rekognition raises InvalidParameterException when the image contains no face;
         # treat it as an undetermined quality outcome instead of retrying via SQS.
         if exc.response.get("Error", {}).get("Code") == "InvalidParameterException":
@@ -193,7 +211,15 @@ def _recognize_legacy(p, image, mappings, threshold, collection_face_count):
     faces = rek.detect_faces(Image=image, Attributes=["DEFAULT"])["FaceDetails"]
     if len(faces) != 1:
         quality = "NO_FACE_DETECTED" if not faces else "MULTIPLE_FACES"
-        return "UNDETERMINED", None, None, None, "rekognition-normalized-v1", quality, "rekognition"
+        return (
+            "UNDETERMINED",
+            None,
+            None,
+            None,
+            "rekognition-normalized-v1",
+            quality,
+            "rekognition",
+        )
 
     model = "rekognition"
     if collection_face_count is None:
@@ -209,7 +235,15 @@ def _recognize_legacy(p, image, mappings, threshold, collection_face_count):
     status, similarity, confidence, known_id, quality, model = _search_and_classify(
         rek, p, image, mappings, threshold, model
     )
-    return status, similarity, confidence, known_id, "rekognition-normalized-v1", quality, model
+    return (
+        status,
+        similarity,
+        confidence,
+        known_id,
+        "rekognition-normalized-v1",
+        quality,
+        model,
+    )
 
 
 def recognize(p, mappings, collection_face_count=None):
@@ -226,6 +260,10 @@ def recognize(p, mappings, collection_face_count=None):
     elif collection_face_count == 0:
         status, similarity, confidence, known_id = "UNKNOWN", None, 1.0, None
         policy, quality, model = "empty-collection-v1", None, "rekognition"
+        LOGGER.info(
+            "Face provider jobId=%s operation=none reason=empty-collection-v1",
+            p["jobId"],
+        )
     else:
         rek = client("rekognition")
         policy = "rekognition-normalized-v1"
