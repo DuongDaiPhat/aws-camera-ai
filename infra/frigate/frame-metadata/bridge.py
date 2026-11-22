@@ -19,10 +19,11 @@ else:
 LOGGER = logging.getLogger(__name__)
 
 MAX_OBJECT_AGE_SECONDS = float(os.getenv("FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS", "0.25"))
+MAX_BRIDGE_FRAME_AGE_SECONDS = 2.0
 FRIGATE_POSE_FRAMES_ENABLED = os.getenv("FRIGATE_POSE_FRAMES_ENABLED", "false").lower() in (
     "true",
     "1",
-)
+) or os.getenv("FRIGATE_FACE_FRAMES_ENABLED", "true").lower() in ("true", "1")
 MQTT_TOPIC_POSE_FRAMES = os.getenv("MQTT_TOPIC_POSE_FRAMES", "frigate/camerai/pose/frames")
 MAX_POSE_FPS = float(os.getenv("FRIGATE_POSE_MAX_FPS", "5.0"))
 POSE_SAMPLING_JITTER_RATIO = 0.1
@@ -241,7 +242,7 @@ class PoseFramePublisher:
             except queue.Empty:
                 continue
             age = time.time() - metadata["frameTime"]
-            if age > 1.0 or age < -0.5:
+            if age > MAX_BRIDGE_FRAME_AGE_SECONDS or age < -0.5:
                 continue
             try:
                 image = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
@@ -264,7 +265,7 @@ class PoseFramePublisher:
                 if not ok:
                     LOGGER.warning("Pose JPEG encode failed")
                     continue
-                if time.time() - metadata["frameTime"] > 1.0:
+                if time.time() - metadata["frameTime"] > MAX_BRIDGE_FRAME_AGE_SECONDS:
                     continue
                 self.client.publish(
                     MQTT_TOPIC_POSE_FRAMES,
@@ -360,7 +361,7 @@ def main():
                 raw_payload = json.loads(message)
                 result = frame_payload(raw_payload)
                 frame_time = result["frameTime"]
-                if time.time() - frame_time > 1:
+                if time.time() - frame_time > MAX_BRIDGE_FRAME_AGE_SECONDS:
                     continue
                 client.publish(
                     os.getenv("MQTT_TOPIC_CAMERA_FRAMES", "frigate/camerai/frames"),
