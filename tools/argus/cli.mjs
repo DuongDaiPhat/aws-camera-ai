@@ -44,6 +44,7 @@ const queueKeys = [
   'APPLICATION_RESULTS_QUEUE_URL',
 ];
 const notificationMigration = '0025_notification_claim_outcome.sql';
+const notificationEmailMigration = '0025_notification_email_rules.sql';
 const cloudMigrations = new Map([
   ['0017_cognito_issuer.sql', "to_regclass('public.idx_users_cognito_identity') IS NOT NULL"],
   ['0018_aws_queue_pipeline.sql', "to_regclass('public.cloud_transport_mode') IS NOT NULL"],
@@ -61,6 +62,12 @@ const cloudMigrations = new Map([
       AND EXISTS (SELECT FROM pg_attribute
         WHERE attrelid = to_regclass('public.cloud_transport_mode')
           AND attname = 'notification_driver' AND NOT attisdropped)`,
+  ],
+  [
+    notificationEmailMigration,
+    `(SELECT count(*) FROM public.escalation_rules
+      WHERE event_type IN ('FIRE_SMOKE_DETECTED', 'FALL_DETECTED', 'RESTRICTED_ZONE', 'UNKNOWN_PERSON')
+        AND notify_channels ? 'SNS_EMAIL') = 4`,
   ],
 ]);
 
@@ -353,7 +360,9 @@ function switchMode(projectRoot, mode, openCompose) {
     const next = updateEnv(original, changes);
     const target = changes.FACE_JOB_TRANSPORT;
     const pending = cloudSchema(db);
-    const missingPrerequisites = pending.filter((file) => file !== notificationMigration);
+    const missingPrerequisites = pending.filter(
+      (file) => file !== notificationMigration && file !== notificationEmailMigration,
+    );
     if (mode === 'local' && missingPrerequisites.length) {
       throw new Error(`PostgreSQL dev thiếu migration nền: ${missingPrerequisites.join(', ')}.`);
     }

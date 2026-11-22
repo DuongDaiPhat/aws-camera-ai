@@ -84,6 +84,10 @@ function setup(t, source = localEnv) {
           assert.match(input, /ALTER TABLE cloud_transport_mode ADD COLUMN notification_driver/);
           assert.match(input, /CREATE TABLE cloud_notification_attempts/);
         }
+        if (state.pending.includes('0025_notification_email_rules.sql')) {
+          assert.match(input, /UPDATE escalation_rules/);
+          assert.match(input, /SNS_EMAIL/);
+        }
         assert.match(input, /COMMIT;\s*$/);
         state.commands.push('migrate');
         return '';
@@ -136,6 +140,21 @@ test('rejects missing cloud config before stopping services or updating .env', (
   assert.deepEqual(state.commands, ['config']);
   assert.equal(read(), source);
 });
+
+for (const mode of ['cloud', 'local']) {
+  test(`applies missing incident email rules before recreating services in ${mode} mode`, (t) => {
+    const { root, state, switchTo } = setup(t);
+    cpSync(new URL('../../../db/migrations', import.meta.url), join(root, 'db', 'migrations'), {
+      recursive: true,
+    });
+    state.pending = ['0025_notification_email_rules.sql'];
+    switchTo(mode);
+    const migration = state.commands.indexOf('migrate');
+    assert.ok(migration > state.commands.indexOf('stop'));
+    assert.ok(migration > state.commands.indexOf('backup'));
+    assert.ok(migration < state.commands.indexOf('up'));
+  });
+}
 
 test('applies the missing cloud migration before changing the DB mode', (t) => {
   const { root, state, switchTo } = setup(t);
