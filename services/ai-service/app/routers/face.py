@@ -9,10 +9,17 @@ from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Uploa
 from starlette.concurrency import run_in_threadpool
 
 from app.config import get_settings
-from app.models.face import EmbedResponse, MatchResponse, SyncRequest, SyncResponse
+from app.models.face import (
+    EmbedResponse,
+    FaceAssessResponse,
+    MatchResponse,
+    SyncRequest,
+    SyncResponse,
+)
 from app.services.face_collection import FaceCollection
 from app.services.face_embedder import FaceEmbedder
 from app.services.face_matcher import FaceMatcher
+from app.services.face_quality import FaceQualityAssessor
 
 
 def authenticate(x_internal_token: str = Header(default="")) -> None:
@@ -36,8 +43,30 @@ def get_matcher() -> FaceMatcher:
 
 
 @lru_cache
+def get_quality_assessor() -> FaceQualityAssessor:
+    return FaceQualityAssessor(get_settings())
+
+
+@lru_cache
 def get_slots() -> BoundedSemaphore:
     return BoundedSemaphore(get_settings().face_max_concurrent)
+
+
+@router.post("/assess", response_model=FaceAssessResponse)
+async def assess_face(
+    image: UploadFile = File(...),  # noqa: B008
+    include_embedding: bool = Form(default=True, alias="includeEmbedding"),  # noqa: B008
+) -> FaceAssessResponse:
+    slots = get_slots()
+    if not slots.acquire(blocking=False):
+        await image.close()
+        raise HTTPException(status_code=503, detail="PROVIDER_UNAVAILABLE")
+    try:
+        data = await image.read(get_settings().face_max_image_bytes + 1)
+        return await run_in_threadpool(get_quality_assessor().assess, data, include_embedding)
+    finally:
+        await image.close()
+        slots.release()
 
 
 @router.post("/embed", response_model=EmbedResponse)

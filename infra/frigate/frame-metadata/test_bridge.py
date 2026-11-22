@@ -1,10 +1,15 @@
+import os
 import unittest
 from unittest.mock import Mock, patch
 
-from bridge import frame_payload
+from bridge import frame_payload, reset_track_stabilizer
+from track_stabilizer import TrackStabilizer
 
 
 class FramePayloadTest(unittest.TestCase):
+    def setUp(self):
+        reset_track_stabilizer()
+
     def test_pose_sampling_keeps_five_fps_with_capture_timestamp_jitter(self):
         from bridge import offer_pose_capture
 
@@ -71,6 +76,7 @@ class FramePayloadTest(unittest.TestCase):
                         "observedAt": 123.4,
                         "isMoving": False,
                         "sourceSessionId": None,
+                        "canonicalTrackId": "p1",
                     }
                 ],
             },
@@ -93,9 +99,7 @@ class FramePayloadTest(unittest.TestCase):
             "false_positive": False,
             "frame_time": 123.35,  # age = 123.5 - 123.35 = 0.15s <= 0.25s
         }
-        result = frame_payload(
-            ["cam_test", "frame", 123.5, [stale_person, fresh_person], [], []]
-        )
+        result = frame_payload(["cam_test", "frame", 123.5, [stale_person, fresh_person], [], []])
         self.assertEqual(len(result["objects"]), 1)
         self.assertEqual(result["objects"][0]["id"], "p_fresh")
         self.assertEqual(result["objects"][0]["observedAt"], 123.35)
@@ -141,6 +145,7 @@ class FramePayloadTest(unittest.TestCase):
         self.assertEqual(
             frame_payload(["cam_test", "frame", 123.5, objects, [], []])["objects"], []
         )
+
     def test_wellness_motion_requires_explicit_metadata_and_stable_session(self):
         person = {
             "id": "p1",
@@ -153,9 +158,7 @@ class FramePayloadTest(unittest.TestCase):
             "motionless_count": 0,
             "stationary": False,
         }
-        moving = frame_payload(["cam_test", "frame", 123.5, [person], [], []])[
-            "objects"
-        ][0]
+        moving = frame_payload(["cam_test", "frame", 123.5, [person], [], []])["objects"][0]
         self.assertTrue(moving["isMoving"])
         self.assertEqual(moving["sourceSessionId"], "cam_test:120.123456")
         still = frame_payload(
@@ -267,6 +270,123 @@ class FramePayloadTest(unittest.TestCase):
         self.assertEqual(publisher.queue.get_nowait()[2], "1")
         self.assertEqual(publisher.queue.get_nowait()[2], "2")
         self.assertNotEqual(publisher.session_id, PoseFramePublisher(Mock()).session_id)
+
+    def test_track_stabilizer_preserves_canonical_id_across_brief_drop_and_id_switch(self):
+        def make_person(pid, box, score, t):
+            return {
+                "id": pid,
+                "label": "person",
+                "score": score,
+                "box": box,
+                "false_positive": False,
+                "frame_time": t,
+            }
+
+        res1 = frame_payload(
+            ["cam_lr", "f1", 100.0, [make_person("t1", [100, 100, 200, 350], 0.9, 100.0)], [], []]
+        )
+        self.assertEqual(res1["objects"][0]["canonicalTrackId"], "t1")
+
+        # Brief occlusion: person drops for 1s
+        res2 = frame_payload(["cam_lr", "f2", 101.0, [], [], []])
+        self.assertEqual(res2["objects"], [])
+
+        # Frigate re-detects same person with a new track id t2
+        res3 = frame_payload(
+            ["cam_lr", "f3", 101.5, [make_person("t2", [108, 102, 208, 352], 0.88, 101.5)], [], []]
+        )
+        self.assertEqual(res3["objects"][0]["id"], "t2")
+        self.assertEqual(res3["objects"][0]["canonicalTrackId"], "t1")
+
+        # Subsequent drop + low-score Stage 2 re-association
+        frame_payload(["cam_lr", "f4", 102.0, [], [], []])
+        res5 = frame_payload(
+            ["cam_lr", "f5", 102.4, [make_person("t3", [125, 108, 225, 358], 0.55, 102.4)], [], []]
+        )
+        self.assertEqual(res5["objects"][0]["id"], "t3")
+        self.assertEqual(res5["objects"][0]["canonicalTrackId"], "t1")
+
+    def test_track_stabilizer_handles_zero_gap_switch_and_expiry(self):
+        stabilizer = TrackStabilizer(max_lost_seconds=15.0)
+        p1 = [{"id": "a1", "box": [50, 50, 150, 300], "score": 0.9}]
+        self.assertEqual(stabilizer.update("cam1", 10.0, p1), ["a1"])
+
+        # Immediate ID switch with 0 empty frames in between
+        p2 = [{"id": "a2", "box": [55, 52, 155, 302], "score": 0.85}]
+        self.assertEqual(stabilizer.update("cam1", 10.2, p2), ["a1"])
+
+        # Disappears for > 15s -> expired, gets fresh canonicalTrackId
+        self.assertEqual(stabilizer.update("cam1", 11.0, []), [])
+        p3 = [{"id": "a3", "box": [55, 52, 155, 302], "score": 0.9}]
+        self.assertEqual(stabilizer.update("cam1", 27.0, p3), ["a3"])
+
+    def test_track_stabilizer_tailgating_and_camera_isolation(self):
+        stabilizer = TrackStabilizer()
+        # Person A is active; Person B enters close behind Person A -> must NOT steal A's canonical id
+        c1 = stabilizer.update(
+            "cam1",
+            10.0,
+            [{"id": "person_a", "box": [100, 50, 220, 350], "score": 0.92}],
+        )
+        self.assertEqual(c1, ["person_a"])
+
+        c2 = stabilizer.update(
+            "cam1",
+            10.2,
+            [
+                {"id": "person_a", "box": [102, 50, 222, 350], "score": 0.91},
+                {"id": "person_b", "box": [110, 55, 230, 355], "score": 0.89},
+            ],
+        )
+        self.assertEqual(c2, ["person_a", "person_b"])
+
+        # Different camera with same box is completely isolated
+        c_other_cam = stabilizer.update(
+            "cam2",
+            10.2,
+            [{"id": "cam2_p1", "box": [102, 50, 222, 350], "score": 0.91}],
+        )
+        self.assertEqual(c_other_cam, ["cam2_p1"])
+
+    def test_track_stabilizer_env_flag_can_disable_canonical_track_id(self):
+        person = {
+            "id": "p1",
+            "label": "person",
+            "score": 0.95,
+            "box": [10, 20, 100, 200],
+            "false_positive": False,
+            "frame_time": 123.4,
+        }
+        with patch.dict(os.environ, {"FRIGATE_TRACK_STABILIZER_ENABLED": "false"}):
+            result = frame_payload(["cam_test", "frame", 123.5, [person], [], []])
+        self.assertNotIn("canonicalTrackId", result["objects"][0])
+        self.assertEqual(result["objects"][0]["id"], "p1")
+
+    def test_track_stabilizer_two_disappeared_tracks_match_one_to_one(self):
+        stabilizer = TrackStabilizer()
+        first = stabilizer.update(
+            "cam1",
+            10.0,
+            [
+                {"id": "left", "box": [50, 50, 150, 300], "score": 0.9},
+                {"id": "right", "box": [500, 50, 600, 300], "score": 0.9},
+            ],
+        )
+        self.assertEqual(first, ["left", "right"])
+
+        # Both drop briefly
+        self.assertEqual(stabilizer.update("cam1", 10.5, []), [])
+
+        # Both return in reversed order with switched Frigate IDs
+        returned = stabilizer.update(
+            "cam1",
+            11.0,
+            [
+                {"id": "new_right", "box": [505, 52, 605, 302], "score": 0.88},
+                {"id": "new_left", "box": [54, 52, 154, 302], "score": 0.87},
+            ],
+        )
+        self.assertEqual(returned, ["right", "left"])
 
 
 if __name__ == "__main__":

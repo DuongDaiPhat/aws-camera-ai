@@ -90,6 +90,40 @@ paths:
         "401":
           description: Missing or invalid internal token
 
+  /face/assess:
+    post:
+      tags: [face]
+      summary: Danh gia chat luong khuon mat cuc bo va trich xuat embedding (Layer 2 Quality Gate)
+      description: |
+        Danh gia chat luong anh crop bang YuNet/SFace cuc bo (doc lap voi FACE_PROVIDER)
+        de loc anh quay lung, mo, qua nho hoac thieu mat truoc khi goi AWS Rekognition.
+      operationId: assessFace
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image]
+              properties:
+                image: { type: string, format: binary }
+                includeEmbedding:
+                  type: boolean
+                  default: true
+                  description: Khi true va dat nguong chat luong, trich xuat them vector SFace 128 chieu.
+      responses:
+        "200":
+          description: Ket qua danh gia chat luong khuon mat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FaceAssessResponse" }
+        "401":
+          description: Thieu hoac sai X-Internal-Token
+        "422":
+          description: Thieu truong bat buoc trong form-data
+        "503":
+          description: Het slot xu ly dong thoi (PROVIDER_UNAVAILABLE)
+
   /face/embed:
     post:
       tags: [face]
@@ -864,6 +898,56 @@ components:
           items: { $ref: "#/components/schemas/BoundingBox" }
         modelVersion: { type: string }
         error: { $ref: "#/components/schemas/InferenceError" }
+
+    FaceQualityMetrics:
+      type: object
+      additionalProperties: false
+      required: [faceWidthPx, faceHeightPx, detectionScore, sharpness, poseYawRatio, posePitchRatio]
+      properties:
+        faceWidthPx: { type: integer, minimum: 0 }
+        faceHeightPx: { type: integer, minimum: 0 }
+        detectionScore: { type: number, minimum: 0, maximum: 1 }
+        sharpness: { type: number, minimum: 0 }
+        poseYawRatio: { type: number, minimum: 0 }
+        posePitchRatio: { type: number, minimum: 0 }
+
+    FaceAssessResponse:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          passed,
+          qualityScore,
+          faceCount,
+          rejectionReason,
+          metrics,
+          boundingBox,
+          embeddingBase64,
+          embeddingDim,
+          modelVersion,
+          gateStatus,
+        ]
+      properties:
+        passed: { type: boolean }
+        qualityScore: { type: number, minimum: 0, maximum: 1 }
+        faceCount: { type: integer, minimum: 0 }
+        rejectionReason:
+          type: ["string", "null"]
+          description: E.g. NO_FACE_DETECTED, MULTIPLE_FACES, FACE_TOO_SMALL, LOW_DETECTION_SCORE, BLURRY, EXTREME_POSE, IMAGE_DECODE_FAILED, MODEL_UNAVAILABLE.
+        metrics:
+          oneOf:
+            - $ref: "#/components/schemas/FaceQualityMetrics"
+            - type: "null"
+        boundingBox:
+          oneOf:
+            - $ref: "#/components/schemas/BoundingBox"
+            - type: "null"
+        embeddingBase64:
+          type: ["string", "null"]
+          description: Normalized 128-dim SFace float32 vector encoded in base64 when passed=true and includeEmbedding=true.
+        embeddingDim: { type: ["integer", "null"] }
+        modelVersion: { type: string }
+        gateStatus: { type: string, enum: [READY, DISABLED, UNAVAILABLE] }
 
     MatchResponse:
       type: object
