@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { readPositiveConfigNumber } from '../config/env-config';
 import type { FrigateEventAfterDto } from '../ingestion/dto/frigate-event.dto';
 import { FrigateFrameBuffer } from './frigate-frame-buffer';
 
@@ -22,7 +23,7 @@ export class FrigateDetectionTrackerService {
     // Frigate gui heartbeat 1.0s cho nguoi thuc su da di chuyen.
     // TTL 8s bao dam giu nguyen box khi nguoi dung yen lau, dong thoi
     // tu dong don sach ghost box sau 8s neu webcam bi tat dot ngot.
-    this.ttlMs = Number(configService.get('CAMERA_DETECTION_TTL_MS', 8_000));
+    this.ttlMs = readPositiveConfigNumber(configService, 'CAMERA_DETECTION_TTL_MS', 8_000);
   }
 
   clearCamera(cameraSlug: string): void {

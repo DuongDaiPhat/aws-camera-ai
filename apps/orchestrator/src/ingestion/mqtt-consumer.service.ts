@@ -1,3 +1,4 @@
+import { readNonEmptyConfigString, readPositiveConfigNumber } from '../config/env-config';
 import { PlaybackFramesService } from '../playback/playback-frames.service';
 import { WellnessSourceAdapter } from '../wellness/wellness-source.adapter';
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit, Optional } from '@nestjs/common';
@@ -79,33 +80,42 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
   }
 
   connect(): void {
-    const mqttUrl = this.configService.get<string>('MQTT_URL', 'mqtt://localhost:1883');
-    const clientId = this.configService.get<string>(
+    const mqttUrl = readNonEmptyConfigString(
+      this.configService,
+      'MQTT_URL',
+      'mqtt://localhost:1883',
+    );
+    const clientId = readNonEmptyConfigString(
+      this.configService,
       'MQTT_CLIENT_ID',
       `orchestrator-${Math.random().toString(16).substring(2, 8)}`,
     );
     const username = this.configService.get<string>('MQTT_USERNAME');
     const password = this.configService.get<string>('MQTT_PASSWORD');
-    const topic = this.configService.get<string>('MQTT_TOPIC_FRIGATE', 'frigate/events');
-    const framesTopic = this.configService.get<string>(
+    const topic = readNonEmptyConfigString(
+      this.configService,
+      'MQTT_TOPIC_FRIGATE',
+      'frigate/events',
+    );
+    const framesTopic = readNonEmptyConfigString(
+      this.configService,
       'MQTT_TOPIC_CAMERA_FRAMES',
       'frigate/camerai/frames',
     );
-    const poseFramesTopic = this.configService.get<string>(
+    const poseFramesTopic = readNonEmptyConfigString(
+      this.configService,
       'MQTT_TOPIC_POSE_FRAMES',
       'frigate/camerai/pose/frames',
     );
-    const reconnectPeriodMs = Number(
-      this.configService.get<string | number>(
-        'MQTT_RECONNECT_PERIOD_MS',
-        DEFAULT_MQTT_RECONNECT_PERIOD_MS,
-      ),
+    const reconnectPeriodMs = readPositiveConfigNumber(
+      this.configService,
+      'MQTT_RECONNECT_PERIOD_MS',
+      DEFAULT_MQTT_RECONNECT_PERIOD_MS,
     );
-    const connectTimeoutMs = Number(
-      this.configService.get<string | number>(
-        'MQTT_CONNECT_TIMEOUT_MS',
-        DEFAULT_MQTT_CONNECT_TIMEOUT_MS,
-      ),
+    const connectTimeoutMs = readPositiveConfigNumber(
+      this.configService,
+      'MQTT_CONNECT_TIMEOUT_MS',
+      DEFAULT_MQTT_CONNECT_TIMEOUT_MS,
     );
 
     this.logger.log(`Dang ket noi MQTT Broker tai ${mqttUrl} (clientId: ${clientId})...`);

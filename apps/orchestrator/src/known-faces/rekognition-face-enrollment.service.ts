@@ -16,6 +16,8 @@ import {
   type RekognitionCollectionPrefix,
 } from './face-config';
 import { faceError } from './face-error';
+import { cropSelectedFace, normalizeFaceImage } from './face-image';
+import { readPositiveFaceNumber } from './face-config';
 
 export const FACE_ENROLLMENT = Symbol('FACE_ENROLLMENT');
 
@@ -29,7 +31,7 @@ export interface IRekognitionFaceEnrollment {
   readonly collectionPrefix: RekognitionCollectionPrefix;
   collectionIdForOwner(ownerUserId: string): string;
   ensureCollection(ownerUserId: string): Promise<string>;
-  validateSingleFaces(files: FaceUpload[]): Promise<void>;
+  validateSingleFaces(files: FaceUpload[], selectedIndexes?: (number | null)[]): Promise<void>;
   indexFaces(
     ownerUserId: string,
     files: FaceUpload[],
@@ -72,6 +74,7 @@ export class RekognitionFaceEnrollmentService
   private readonly client: RekognitionClient;
   private readonly ownsClient: boolean;
   readonly collectionPrefix: RekognitionCollectionPrefix;
+  private readonly maxPixels: number;
 
   constructor(config: ConfigService, client?: RekognitionClient) {
     const settings = readFaceConfig(config);
@@ -79,6 +82,7 @@ export class RekognitionFaceEnrollmentService
       throw new Error('RekognitionFaceEnrollmentService requires FACE_PROVIDER=rekognition');
     }
     this.collectionPrefix = settings.collectionPrefix;
+    this.maxPixels = readPositiveFaceNumber(config, 'FACE_MAX_PIXELS', 12000000);
     this.ownsClient = !client;
     this.client = client ?? new RekognitionClient({ region: settings.region, maxAttempts: 3 });
   }
@@ -116,9 +120,20 @@ export class RekognitionFaceEnrollmentService
     }
   }
 
-  async validateSingleFaces(files: FaceUpload[]): Promise<void> {
+  async validateSingleFaces(
+    files: FaceUpload[],
+    selectedIndexes?: (number | null)[],
+  ): Promise<void> {
     const images: components['schemas']['FaceSelectionDetails']['images'] = [];
     for (const [imageIndex, file] of files.entries()) {
+      const selected = selectedIndexes?.[imageIndex] ?? null;
+      const webp = file.buffer.toString('ascii', 0, 4) === 'RIFF';
+      if (selected !== null || webp) {
+        const normalized = await normalizeFaceImage(file.buffer, this.maxPixels);
+        file.buffer.fill(0);
+        file.buffer = normalized;
+        file.size = normalized.length;
+      }
       let faceDetails;
       try {
         const response = await this.client.send(
@@ -130,6 +145,31 @@ export class RekognitionFaceEnrollmentService
         faceDetails = response.FaceDetails ?? [];
       } catch (error: unknown) {
         this.throwMappedAwsImageError('rekognition_detect_faces_failed', error);
+      }
+      if (selected !== null) {
+        const target = faceDetails[selected];
+        if (!target?.BoundingBox) {
+          throw faceError(422, 'FACE_SELECTION_INVALID', 'Lựa chọn khuôn mặt không hợp lệ.');
+        }
+        const cropped = await cropSelectedFace(file.buffer, target.BoundingBox);
+        file.buffer.fill(0);
+        file.buffer = cropped;
+        file.size = cropped.length;
+        try {
+          const checked = await this.client.send(
+            new DetectFacesCommand({ Image: { Bytes: cropped }, Attributes: ['DEFAULT'] }),
+          );
+          faceDetails = checked.FaceDetails ?? [];
+        } catch (error: unknown) {
+          this.throwMappedAwsImageError('rekognition_selected_face_detection_failed', error);
+        }
+        if (faceDetails.length !== 1) {
+          throw faceError(
+            422,
+            'FACE_SELECTION_INVALID',
+            'Không tách được một khuôn mặt rõ ràng. Hãy dùng ảnh khác hoặc cắt ảnh trước khi tải lên.',
+          );
+        }
       }
       if (faceDetails.length === 0) {
         images.push({ imageIndex, code: 'NO_FACE_DETECTED', faces: [] });

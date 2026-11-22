@@ -1,6 +1,7 @@
 import { Injectable, type CanActivate, type ExecutionContext } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { AuthenticatedRequest } from '../auth/jwt-auth.guard';
+import { readPositiveFaceNumber } from './face-config';
 import { faceError } from './face-error';
 
 @Injectable()
@@ -18,9 +19,15 @@ export class KnownFacesGuard implements CanActivate {
     const now = Date.now();
     for (const [key, value] of this.attempts) if (value.expires <= now) this.attempts.delete(key);
     const attempt = this.attempts.get(request.auth.sub) ?? { count: 0, expires: now + 60000 };
-    if (attempt.count >= Number(this.config.get('FACE_REQUESTS_PER_MINUTE', 10)))
+    const maxRequestsPerMinute = readPositiveFaceNumber(
+      this.config,
+      'FACE_REQUESTS_PER_MINUTE',
+      10,
+    );
+    const maxConcurrent = readPositiveFaceNumber(this.config, 'FACE_MAX_CONCURRENT', 2);
+    if (attempt.count >= maxRequestsPerMinute)
       throw faceError(429, 'RATE_LIMITED', 'Bạn thao tác quá nhanh. Hãy thử lại sau.');
-    if (this.active >= Number(this.config.get('FACE_MAX_CONCURRENT', 2)))
+    if (this.active >= maxConcurrent)
       throw faceError(503, 'FACE_PROVIDER_UNAVAILABLE', 'Hệ thống đang xử lý ảnh. Hãy thử lại.');
     attempt.count++;
     this.attempts.set(request.auth.sub, attempt);

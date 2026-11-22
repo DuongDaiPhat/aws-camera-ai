@@ -397,7 +397,11 @@ describe('US-24 KnownFacesService Rekognition orchestration & reconciliation', (
     expect(inference.embed).not.toHaveBeenCalled();
     expect(inference.sync).not.toHaveBeenCalled();
     expect(rekognition.validateSingleFaces).toHaveBeenCalledWith(files);
-    expect(rekognition.indexFaces).toHaveBeenCalledWith(OWNER_ID, files);
+    expect(rekognition.indexFaces).toHaveBeenCalledWith(
+      OWNER_ID,
+      files,
+      expect.stringMatching(new RegExp(`^${OWNER_ID}:[0-9a-f-]{36}$`)),
+    );
     expect(createRek).toHaveBeenCalledWith(
       OWNER_ID,
       { personName: 'Ba Noi' },

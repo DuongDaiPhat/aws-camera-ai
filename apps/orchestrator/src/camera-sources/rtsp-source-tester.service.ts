@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { spawn } from 'child_process';
+import { readPositiveConfigNumber } from '../config/env-config';
 
 const MAX_PROBE_STDERR_BYTES = 2048;
 
@@ -20,7 +21,7 @@ export class RtspSourceTesterService {
   private readonly timeoutMs: number;
 
   constructor(configService: ConfigService) {
-    this.timeoutMs = Number(configService.get('CAMERA_RTSP_TEST_TIMEOUT_MS', 8000));
+    this.timeoutMs = readPositiveConfigNumber(configService, 'CAMERA_RTSP_TEST_TIMEOUT_MS', 8000);
   }
 
   async test(rtspUrl: string, transport: 'TCP' | 'UDP'): Promise<RtspConnectionTestResult> {

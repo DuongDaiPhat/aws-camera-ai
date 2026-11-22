@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import type { components } from '@cam/contracts';
 import {
@@ -11,7 +12,7 @@ import {
   FACE_ENROLLMENT,
   type IRekognitionFaceEnrollment,
 } from './rekognition-face-enrollment.service';
-import { readFaceConfig, type FaceConfig } from './face-config';
+import { readFaceConfig, readPositiveFaceNumber, type FaceConfig } from './face-config';
 import { KnownFacesRepository, type KnownFace } from './known-faces.repository';
 import { FaceCollectionSyncService } from './face-collection-sync.service';
 import type { UpdateKnownFaceDto } from './dto/update-known-face.dto';
@@ -68,8 +69,8 @@ export class KnownFacesService {
       owner = await this.repository.householdOwner(owner);
       validateImages(
         files,
-        Number(this.config.get('FACE_MAX_IMAGE_BYTES', 5242880)),
-        Number(this.config.get('FACE_MAX_REQUEST_BYTES', 26214400)),
+        readPositiveFaceNumber(this.config, 'FACE_MAX_IMAGE_BYTES', 5242880),
+        readPositiveFaceNumber(this.config, 'FACE_MAX_REQUEST_BYTES', 26214400),
       );
       this.logger.log(`Received ${files.length} images for registration`);
 
@@ -84,7 +85,7 @@ export class KnownFacesService {
       this.checkResults(results);
       const combined = aggregate(
         results,
-        Number(this.config.get('FACE_REGISTRATION_SIMILARITY', 0.6)),
+        readPositiveFaceNumber(this.config, 'FACE_REGISTRATION_SIMILARITY', 0.6),
       );
       const id = await this.repository.create(
         owner,
@@ -112,8 +113,15 @@ export class KnownFacesService {
   ): Promise<KnownFace> {
     const rekognition = this.requireRekognition();
     await this.repository.precheckCreate(owner, dto);
-    await rekognition.validateSingleFaces(files);
-    const indexed = await rekognition.indexFaces(owner, files);
+    const indexes = selections(dto.faceSelections, files.length);
+    if (indexes.some((index) => index !== null)) {
+      await rekognition.validateSingleFaces(files, indexes);
+    } else {
+      await rekognition.validateSingleFaces(files);
+    }
+    // Rekognition deduplicates identical bytes + ExternalImageId. Keep each operation
+    // distinct so compensating cleanup can never delete an older person's vectors.
+    const indexed = await rekognition.indexFaces(owner, files, `${owner}:${randomUUID()}`);
     let id: string;
     try {
       id = await this.repository.createRekognition(owner, dto, {
@@ -160,8 +168,8 @@ export class KnownFacesService {
       const owner = await this.repository.householdOwner(actor);
       validateImages(
         files,
-        Number(this.config.get('FACE_MAX_IMAGE_BYTES', 5242880)),
-        Number(this.config.get('FACE_MAX_REQUEST_BYTES', 26214400)),
+        readPositiveFaceNumber(this.config, 'FACE_MAX_IMAGE_BYTES', 5242880),
+        readPositiveFaceNumber(this.config, 'FACE_MAX_REQUEST_BYTES', 26214400),
       );
       if (this.faceConfig.provider !== 'rekognition') {
         throw faceError(
@@ -177,7 +185,7 @@ export class KnownFacesService {
         throw faceError(503, 'FACE_PROVIDER_UNAVAILABLE', 'Provider này không khớp Rekognition.');
       }
       await rekognition.validateSingleFaces(files);
-      const indexed = await rekognition.indexFaces(owner, files, `${owner}:${id}`);
+      const indexed = await rekognition.indexFaces(owner, files, `${owner}:${id}:${randomUUID()}`);
       let previous: { previousCollectionId: string; previousFaceIds: string[] };
       try {
         previous = await this.repository.replaceRekognitionFaces(owner, id, {

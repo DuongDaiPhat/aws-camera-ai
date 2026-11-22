@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 from urllib.request import HTTPRedirectHandler, Request, build_opener
@@ -16,6 +17,7 @@ VALIDATOR = Draft202012Validator(
     format_checker=FormatChecker(),
 )
 LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 _CLIENTS = {}
 DEFAULT_COLLECTION_PREFIX = "camerai-s4-dev-owner-"
 ALLOWED_COLLECTION_PREFIXES = (
@@ -162,6 +164,7 @@ def recognize(p, mappings):
 
 
 def process(message):
+    started = time.monotonic()
     VALIDATOR.validate(message)
     if message["type"] != "face.job":
         raise ValueError("Expected face.job")
@@ -170,6 +173,7 @@ def process(message):
     context = backend(path)
     validate_job(message, context)
     result = context["cached_result"]
+    cache_hit = result is not None
     if result is None:
         body = recognize(p, context["mappings"])
         result = {
@@ -193,6 +197,15 @@ def process(message):
         QueueUrl=os.environ["APPLICATION_RESULTS_QUEUE_URL"],
         MessageBody=json.dumps(result),
     )
+    body = result["payload"]["body"]
+    LOGGER.info(
+        "Face completed jobId=%s resultId=%s status=%s cacheHit=%s durationMs=%s",
+        p["jobId"],
+        body["resultId"],
+        body["personStatus"],
+        cache_hit,
+        round((time.monotonic() - started) * 1000),
+    )
 
 
 def lambda_handler(event, _context):
@@ -200,8 +213,12 @@ def lambda_handler(event, _context):
     for record in event["Records"]:
         try:
             process(json.loads(record["body"]))
-        except Exception:  # noqa: BLE001 - Report any record failure for SQS retry.
+        except Exception as error:  # noqa: BLE001 - Report any record failure for SQS retry.
             # Do not log images, tokens, response bodies or provider details.
-            LOGGER.warning("Face input failed messageId=%s", record["messageId"])
+            LOGGER.warning(
+                "Face input failed messageId=%s errorType=%s",
+                record["messageId"],
+                type(error).__name__,
+            )
             failures.append({"itemIdentifier": record["messageId"]})
     return {"batchItemFailures": failures}

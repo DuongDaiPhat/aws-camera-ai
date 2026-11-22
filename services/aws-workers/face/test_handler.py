@@ -211,10 +211,15 @@ class FaceWorkerTests(unittest.TestCase):
         self.assertEqual(second_req.get_method(), "PUT")
         self.assertEqual(json.loads(second_req.data.decode()), {"ok": True})
 
-    def test_recognize_rejects_invalid_threshold_and_handles_no_similarity_matches(self):
+    def test_recognize_rejects_invalid_threshold_and_handles_no_similarity_matches(
+        self,
+    ):
         rek = Mock()
         rek.detect_faces.return_value = {"FaceDetails": [{}]}
-        rek.describe_collection.return_value = {"FaceCount": 1, "FaceModelVersion": "7.0"}
+        rek.describe_collection.return_value = {
+            "FaceCount": 1,
+            "FaceModelVersion": "7.0",
+        }
         rek.search_faces_by_image.return_value = {"FaceMatches": []}
         with patch.object(handler, "client", return_value=rek):
             for bad in ("0", "-0.5", "1.1"):
@@ -232,6 +237,26 @@ class FaceWorkerTests(unittest.TestCase):
     def test_process_rejects_non_face_job_envelope(self):
         with self.assertRaises(ValueError):
             handler.process(self.result)
+
+    def test_logs_ids_status_cache_and_safe_error_type_without_exception_secrets(self):
+        context = {"envelope": self.job, "cached_result": self.result, "mappings": {}}
+        with (
+            patch.object(handler, "backend", return_value=context),
+            patch.object(handler, "client", return_value=Mock()),
+            self.assertLogs(handler.LOGGER, level="INFO") as captured,
+        ):
+            handler.process(self.job)
+        self.assertIn("cacheHit=True", captured.output[0])
+        self.assertIn(self.job["payload"]["jobId"], captured.output[0])
+        event = {"Records": [{"messageId": "safe-id", "body": "{}"}]}
+        with (
+            patch.object(handler, "process", side_effect=ValueError("secret-token-test")),
+            self.assertLogs(handler.LOGGER, level="WARNING") as captured,
+        ):
+            result = handler.lambda_handler(event, None)
+        self.assertEqual(result, {"batchItemFailures": [{"itemIdentifier": "safe-id"}]})
+        self.assertIn("errorType=ValueError", captured.output[0])
+        self.assertNotIn("secret-token-test", captured.output[0])
 
 
 if __name__ == "__main__":

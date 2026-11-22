@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FACE_INFERENCE, type IFaceInference } from './face-inference.interface';
-import { readFaceProvider } from './face-config';
+import { readFaceProvider, readPositiveFaceNumber } from './face-config';
 import { KnownFacesRepository } from './known-faces.repository';
 
 @Injectable()
@@ -30,7 +30,7 @@ export class FaceCollectionSyncService implements OnModuleInit, OnModuleDestroy 
       () => {
         void this.tick();
       },
-      Number(this.config.get('FACE_SYNC_INTERVAL_MS', 10000)),
+      readPositiveFaceNumber(this.config, 'FACE_SYNC_INTERVAL_MS', 10000),
     );
     this.timer.unref();
     void this.tick();

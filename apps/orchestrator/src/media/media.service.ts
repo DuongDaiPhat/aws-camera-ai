@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
+import { readNonEmptyConfigString, readPositiveConfigNumber } from '../config/env-config';
 import {
   IStorageService,
   S3_EXPIRE_7D_TAG,
@@ -35,28 +36,35 @@ export class MediaService {
     private readonly eventMediaRepository: EventMediaRepository,
     @Inject(STORAGE_SERVICE) private readonly storageService: IStorageService,
   ) {
-    this.frigateBaseUrl = this.configService.get<string>('FRIGATE_URL', 'http://localhost:5000');
-    this.storageProvider = this.configService
-      .get<string>('STORAGE_PROVIDER', 'MINIO')
-      .toUpperCase();
-    this.storageBucket = this.configService.get<string>('STORAGE_BUCKET', 'camerai-media');
-    this.defaultClipDurationMs = Number(
-      this.configService.get<string | number>(
-        'FRIGATE_DEFAULT_CLIP_DURATION_MS',
-        DEFAULT_CLIP_DURATION_MS,
-      ),
+    this.frigateBaseUrl = readNonEmptyConfigString(
+      this.configService,
+      'FRIGATE_URL',
+      'http://localhost:5000',
     );
-    this.presignedUrlTtlSeconds = Number(
-      this.configService.get<string | number>(
-        'STORAGE_PRESIGN_TTL_SECONDS',
-        PRESIGNED_URL_TTL_SECONDS,
-      ),
+    this.storageProvider = readNonEmptyConfigString(
+      this.configService,
+      'STORAGE_PROVIDER',
+      'MINIO',
+    ).toUpperCase();
+    this.storageBucket = readNonEmptyConfigString(
+      this.configService,
+      'STORAGE_BUCKET',
+      'camerai-media',
     );
-    this.eventMediaListLimit = Number(
-      this.configService.get<string | number>(
-        'EVENT_MEDIA_LIST_LIMIT',
-        DEFAULT_EVENT_MEDIA_LIST_LIMIT,
-      ),
+    this.defaultClipDurationMs = readPositiveConfigNumber(
+      this.configService,
+      'FRIGATE_DEFAULT_CLIP_DURATION_MS',
+      DEFAULT_CLIP_DURATION_MS,
+    );
+    this.presignedUrlTtlSeconds = readPositiveConfigNumber(
+      this.configService,
+      'STORAGE_PRESIGN_TTL_SECONDS',
+      PRESIGNED_URL_TTL_SECONDS,
+    );
+    this.eventMediaListLimit = readPositiveConfigNumber(
+      this.configService,
+      'EVENT_MEDIA_LIST_LIMIT',
+      DEFAULT_EVENT_MEDIA_LIST_LIMIT,
     );
   }
 

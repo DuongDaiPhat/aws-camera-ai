@@ -5,6 +5,7 @@ import type {
   EmbeddingResult,
   IFaceInference,
 } from './face-inference.interface';
+import { readPositiveFaceNumber } from './face-config';
 import { faceError } from './face-error';
 import { isEmbeddingResult, isSyncAcknowledgement } from './face-response';
 
@@ -38,18 +39,18 @@ export class AiFaceInferenceService implements IFaceInference {
     const token = this.config.get<string>('AI_INTERNAL_TOKEN', '');
     if (!token) throw faceError(503, 'FACE_PROVIDER_UNAVAILABLE', 'Chưa cấu hình kết nối AI.');
     try {
-      const response = await fetch(
-        `${this.config.get<string>('AI_SERVICE_URL', 'http://localhost:8000')}${path}`,
-        {
-          method: 'POST',
-          body,
-          headers: {
-            'X-Internal-Token': token,
-            ...(typeof body === 'string' ? { 'Content-Type': 'application/json' } : {}),
-          },
-          signal: AbortSignal.timeout(Number(this.config.get('AI_SERVICE_TIMEOUT_MS', 5000))),
+      const baseUrl = this.config.get<string>('AI_SERVICE_URL')?.trim() || 'http://localhost:8000';
+      const response = await fetch(`${baseUrl}${path}`, {
+        method: 'POST',
+        body,
+        headers: {
+          'X-Internal-Token': token,
+          ...(typeof body === 'string' ? { 'Content-Type': 'application/json' } : {}),
         },
-      );
+        signal: AbortSignal.timeout(
+          readPositiveFaceNumber(this.config, 'AI_SERVICE_TIMEOUT_MS', 5000),
+        ),
+      });
       if (!response.ok) throw new Error('AI response failed');
       return response;
     } catch {

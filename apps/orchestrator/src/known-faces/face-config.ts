@@ -1,4 +1,5 @@
 import { ConfigService } from '@nestjs/config';
+import { readPositiveConfigNumber } from '../config/env-config';
 
 export const DEFAULT_REKOGNITION_COLLECTION_PREFIX = 'camerai-s4-dev-owner-' as const;
 
@@ -73,6 +74,14 @@ export function readFaceConfig(config: ConfigService): FaceConfig {
     region,
     collectionPrefix,
   };
+}
+
+export function readPositiveFaceNumber(
+  config: ConfigService,
+  key: string,
+  fallback: number,
+): number {
+  return readPositiveConfigNumber(config, key, fallback);
 }
 
 export function buildRekognitionCollectionId(

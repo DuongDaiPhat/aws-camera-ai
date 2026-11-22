@@ -8,7 +8,7 @@ import { KnownFacesGuard } from './known-faces.guard';
 import { FaceCollectionSyncService } from './face-collection-sync.service';
 import { FACE_INFERENCE, type IFaceInference } from './face-inference.interface';
 import { AiFaceInferenceService } from './ai-face-inference.service';
-import { readFaceConfig } from './face-config';
+import { readFaceConfig, readPositiveFaceNumber } from './face-config';
 import {
   FACE_ENROLLMENT,
   RekognitionFaceEnrollmentService,
@@ -31,7 +31,7 @@ function disabledLocalInference(): IFaceInference {
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         limits: {
-          fileSize: Number(config.get('FACE_MAX_IMAGE_BYTES', 5242880)),
+          fileSize: readPositiveFaceNumber(config, 'FACE_MAX_IMAGE_BYTES', 5242880),
           files: 5,
           fields: 4,
           fieldSize: 1024,
