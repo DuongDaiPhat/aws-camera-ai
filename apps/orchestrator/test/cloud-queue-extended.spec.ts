@@ -199,6 +199,7 @@ describe('shared queue dispatch and receive', () => {
       payload.image.key,
       Buffer.from('crop'),
       'image/jpeg',
+      { tags: { retention: 'expire-7d' } },
     );
     expect(send).not.toHaveBeenCalled();
     const envelopeJSON = query.mock.calls[1]![1][1] as string;

@@ -360,6 +360,10 @@ describe('cloud queue safety', () => {
       {} as FrigateMediaAdapter,
       {} as IStorageService,
       {} as AiResultsService,
+      {
+        applyResult: jest.fn(),
+        enqueueNotification: jest.fn(),
+      } as unknown as NotificationCloudService,
     );
     await bullmqQueues.onModuleInit();
     await bullmqQueues.dispatchOne();
@@ -406,6 +410,10 @@ describe('cloud queue safety', () => {
         media as unknown as FrigateMediaAdapter,
         storage as unknown as IStorageService,
         {} as AiResultsService,
+        {
+          applyResult: jest.fn(),
+          enqueueNotification: jest.fn(),
+        } as unknown as NotificationCloudService,
       );
       Object.assign(queues, { sqs: { send: sqsSend } });
       await queues.dispatchOne();
@@ -467,7 +475,7 @@ describe('cloud queue safety', () => {
     expect(sqsFail.query.mock.calls[1]![1]).toEqual([baseRow.id, 'PREPARE_OR_SEND_FAILED']);
   });
 
-  it('handles consumeOnce disabled/empty, applyResult validations, notification outcome, enqueueNotification, faceContext, and cacheFaceResult', async () => {
+  it('handles consumeOnce disabled/empty, face result validations, faceContext, and cacheFaceResult', async () => {
     // consumeOnce skips when consumerEnabled=false
     const disabledConsumer = new CloudQueueService(
       new ConfigService({ ...cloud, APPLICATION_RESULTS_CONSUMER_ENABLED: 'false' }),
@@ -475,6 +483,10 @@ describe('cloud queue safety', () => {
       {} as FrigateMediaAdapter,
       {} as IStorageService,
       {} as AiResultsService,
+      {
+        applyResult: jest.fn(),
+        enqueueNotification: jest.fn(),
+      } as unknown as NotificationCloudService,
     );
     const disabledSend = jest.fn();
     Object.assign(disabledConsumer, { sqs: { send: disabledSend } });
@@ -534,73 +546,8 @@ describe('cloud queue safety', () => {
       'Result differs from durable worker result',
     );
 
-    // Notification outcome success & kind mismatch
-    const notifOutcome = parseEnvelope(fixture('notification-outcome.valid.json'));
-    if (notifOutcome.type !== 'notification.outcome') throw new Error('bad fixture');
-    const notifJob = {
-      id: notifOutcome.payload.notificationId,
-      kind: 'notification.job',
-      event_id: notifOutcome.correlationId,
-      owner_user_id: notifOutcome.payload.ownerScopeId,
-      current_owner: notifOutcome.payload.ownerScopeId,
-    };
-    const notifQuery = jest
-      .fn()
-      .mockResolvedValueOnce({ rows: [notifJob] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValue({ rows: [] });
-    await service(notifQuery).queues.applyResult(notifOutcome);
-    expect(notifQuery).toHaveBeenCalledTimes(4);
-
-    const notifWrongKind = service(
-      jest
-        .fn()
-        .mockResolvedValueOnce({ rows: [{ ...notifJob, kind: 'face.job' }] })
-        .mockResolvedValueOnce({ rows: [] }),
-    ).queues;
-    await expect(notifWrongKind.applyResult(notifOutcome)).rejects.toThrow(
-      'Notification job mismatch',
-    );
-
-    // enqueueNotification branches
-    const bullmqSvc = new CloudQueueService(
-      new ConfigService({ FACE_JOB_TRANSPORT: 'bullmq' }),
-      { query: jest.fn() } as unknown as DatabaseService,
-      {} as FrigateMediaAdapter,
-      {} as IStorageService,
-      {} as AiResultsService,
-    );
-    await expect(
-      bullmqSvc.enqueueNotification({ query: jest.fn() } as never, {
-        notificationId: '11111111-1111-4111-8111-111111111111',
-        eventId: '22222222-2222-4222-8222-222222222222',
-        ownerScopeId: '33333333-3333-4333-8333-333333333333',
-        expectedEventVersion: 1,
-        channel: 'SNS_EMAIL',
-      }),
-    ).rejects.toThrow('Notification SQS transport not enabled');
-
-    const clientQuery = jest
-      .fn()
-      .mockResolvedValueOnce({ rows: [{ id: '11111111-1111-4111-8111-111111111111' }] })
-      .mockResolvedValueOnce({ rows: [] });
-    await queues.enqueueNotification({ query: clientQuery } as never, {
-      notificationId: '11111111-1111-4111-8111-111111111111',
-      eventId: '22222222-2222-4222-8222-222222222222',
-      ownerScopeId: '33333333-3333-4333-8333-333333333333',
-      expectedEventVersion: 1,
-      channel: 'SNS_EMAIL',
-    });
-    await expect(
-      queues.enqueueNotification({ query: clientQuery } as never, {
-        notificationId: '11111111-1111-4111-8111-111111111111',
-        eventId: '22222222-2222-4222-8222-222222222222',
-        ownerScopeId: '33333333-3333-4333-8333-333333333333',
-        expectedEventVersion: 1,
-        channel: 'SNS_EMAIL',
-      }),
-    ).rejects.toThrow('Notification intent duplicate or ownership/version mismatch');
-
+    // Notification policy now lives in NotificationCloudService; delegation and rollback
+    // are covered below, with ownership/version checks in its PostgreSQL suite.
     // faceContext & cacheFaceResult
     const jobEnv = parseEnvelope(fixture('face-job.valid.json'));
     if (jobEnv.type !== 'face.job') throw new Error('bad fixture');
