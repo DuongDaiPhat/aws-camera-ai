@@ -2,6 +2,9 @@
 
 Updated: 22/11/2026. Assignment: [Person A](02_NGUOI_A_DANG_NHAP_THONG_BAO.md), contract: [G0](00_HOP_DONG_G0.md).
 
+Hướng dẫn thao tác để chạy lại trên máy/môi trường khác: [Setup và test notification](../../docs/NOTIFICATION_SETUP_TEST.md).
+Schema và ràng buộc: [ERD](../../docs/database/ERD.md). Các bằng chứng có ngày bên dưới là kết quả tại thời điểm ghi nhận.
+
 ## 1. Kết quả đã xác minh
 
 Đã bổ sung code cho luồng notification và kiểm thử email thật trên **AWS Dev**, với DB, Redis, hàng đợi và SNS topic riêng cho đợt test. Người dùng đã xác nhận nhận thư có tiền tố `[ArgusAI][DEV]` trong hộp thư. Bàn giao code trên nhánh `feat/us-25-auth-notifications`; chưa push hoặc deploy phần code mới lên Staging/Production.
