@@ -13,6 +13,7 @@ import { randomUUID } from 'crypto';
 import path from 'path';
 import fs from 'fs';
 
+import { readNonEmptyConfigString, readPositiveConfigNumber } from '../config/env-config';
 import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
 import { CamerasRepository } from './cameras.repository';
 import type {
@@ -607,7 +608,7 @@ export class CamerasService implements CameraConfigPortV1 {
     const ext = path.extname(file.originalname).toLowerCase();
     const fileUuid = `${randomUUID()}${ext}`;
     const storagePath = path.resolve(
-      this.configService.get('CAMERA_VIDEO_STORAGE_PATH', './storage/videos'),
+      readNonEmptyConfigString(this.configService, 'CAMERA_VIDEO_STORAGE_PATH', './storage/videos'),
     );
 
     if (!fs.existsSync(storagePath)) {
@@ -663,7 +664,11 @@ export class CamerasService implements CameraConfigPortV1 {
       });
     }
 
-    const maxBytes = Number(this.configService.get('CAMERA_VIDEO_MAX_BYTES', 524288000));
+    const maxBytes = readPositiveConfigNumber(
+      this.configService,
+      'CAMERA_VIDEO_MAX_BYTES',
+      524288000,
+    );
     if (file.size > maxBytes) {
       throw new BadRequestException({
         error: {
@@ -697,7 +702,11 @@ export class CamerasService implements CameraConfigPortV1 {
 
     if (camera.source_video_key) {
       const storagePath = path.resolve(
-        this.configService.get('CAMERA_VIDEO_STORAGE_PATH', './storage/videos'),
+        readNonEmptyConfigString(
+          this.configService,
+          'CAMERA_VIDEO_STORAGE_PATH',
+          './storage/videos',
+        ),
       );
       const targetPath = path.resolve(storagePath, path.basename(camera.source_video_key));
       if (fs.existsSync(targetPath)) {

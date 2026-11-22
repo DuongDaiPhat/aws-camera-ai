@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { isDeepStrictEqual } from 'node:util';
 import YAML from 'yaml';
+import { readNonEmptyConfigString } from '../config/env-config';
 import type { CameraAggregateRecord } from '../cameras/cameras.types';
 import type { CameraFrigateSettingsRecord } from '../cameras/cameras.types';
 
@@ -262,10 +263,14 @@ export class FrigateConfigService {
         if (url.hostname === internal.hostname && url.port === internal.port) {
           url.username =
             internal.username ||
-            this.config.get<string>('MEDIAMTX_PUBLISH_USERNAME', 'cam-internal');
+            readNonEmptyConfigString(this.config, 'MEDIAMTX_PUBLISH_USERNAME', 'cam-internal');
           url.password =
             internal.password ||
-            this.config.get<string>('MEDIAMTX_PUBLISH_PASSWORD', 'local-dev-password');
+            readNonEmptyConfigString(
+              this.config,
+              'MEDIAMTX_PUBLISH_PASSWORD',
+              'local-dev-password',
+            );
           return url.toString();
         }
         return rtspUrl;

@@ -1,7 +1,13 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
-import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
+import { readNonEmptyConfigString, readPositiveConfigNumber } from '../config/env-config';
+import {
+  IStorageService,
+  S3_EXPIRE_7D_TAG,
+  STORAGE_SERVICE,
+  UploadOptions,
+} from '../storage/storage.interface';
 import { EventMediaRecord, EventMediaRepository } from './event-media.repository';
 import { EventMediaResponseDto } from './dto/event-media-response.dto';
 
@@ -30,28 +36,35 @@ export class MediaService {
     private readonly eventMediaRepository: EventMediaRepository,
     @Inject(STORAGE_SERVICE) private readonly storageService: IStorageService,
   ) {
-    this.frigateBaseUrl = this.configService.get<string>('FRIGATE_URL', 'http://localhost:5000');
-    this.storageProvider = this.configService
-      .get<string>('STORAGE_PROVIDER', 'MINIO')
-      .toUpperCase();
-    this.storageBucket = this.configService.get<string>('STORAGE_BUCKET', 'camerai-media');
-    this.defaultClipDurationMs = Number(
-      this.configService.get<string | number>(
-        'FRIGATE_DEFAULT_CLIP_DURATION_MS',
-        DEFAULT_CLIP_DURATION_MS,
-      ),
+    this.frigateBaseUrl = readNonEmptyConfigString(
+      this.configService,
+      'FRIGATE_URL',
+      'http://localhost:5000',
     );
-    this.presignedUrlTtlSeconds = Number(
-      this.configService.get<string | number>(
-        'STORAGE_PRESIGN_TTL_SECONDS',
-        PRESIGNED_URL_TTL_SECONDS,
-      ),
+    this.storageProvider = readNonEmptyConfigString(
+      this.configService,
+      'STORAGE_PROVIDER',
+      'MINIO',
+    ).toUpperCase();
+    this.storageBucket = readNonEmptyConfigString(
+      this.configService,
+      'STORAGE_BUCKET',
+      'camerai-media',
     );
-    this.eventMediaListLimit = Number(
-      this.configService.get<string | number>(
-        'EVENT_MEDIA_LIST_LIMIT',
-        DEFAULT_EVENT_MEDIA_LIST_LIMIT,
-      ),
+    this.defaultClipDurationMs = readPositiveConfigNumber(
+      this.configService,
+      'FRIGATE_DEFAULT_CLIP_DURATION_MS',
+      DEFAULT_CLIP_DURATION_MS,
+    );
+    this.presignedUrlTtlSeconds = readPositiveConfigNumber(
+      this.configService,
+      'STORAGE_PRESIGN_TTL_SECONDS',
+      PRESIGNED_URL_TTL_SECONDS,
+    );
+    this.eventMediaListLimit = readPositiveConfigNumber(
+      this.configService,
+      'EVENT_MEDIA_LIST_LIMIT',
+      DEFAULT_EVENT_MEDIA_LIST_LIMIT,
     );
   }
 
@@ -65,6 +78,10 @@ export class MediaService {
     return `events/${yyyy}/${mm}/${dd}/${eventId}/${filename}`;
   }
 
+  private retentionUploadOptions(retain?: boolean): UploadOptions {
+    return retain ? { retain: true } : { tags: S3_EXPIRE_7D_TAG };
+  }
+
   /** Store the exact full-camera confirmation frame without a person track. */
   async storeCameraSnapshot(
     eventId: string,
@@ -72,10 +89,16 @@ export class MediaService {
     image: Buffer,
     width: number,
     height: number,
+    options?: { retain?: boolean },
   ): Promise<EventMediaRecord | null> {
     const objectKey = this.buildObjectKey(observedAt, eventId, 'snapshot.jpg');
     try {
-      await this.storageService.upload(objectKey, image, 'image/jpeg');
+      await this.storageService.upload(
+        objectKey,
+        image,
+        'image/jpeg',
+        this.retentionUploadOptions(options?.retain),
+      );
       return await this.eventMediaRepository.createEventMedia({
         eventId,
         mediaType: 'SNAPSHOT',
@@ -107,6 +130,7 @@ export class MediaService {
     eventId: string,
     trackId: string,
     eventDate: Date,
+    options?: { retain?: boolean },
   ): Promise<EventMediaRecord | null> {
     const existingMedia = await this.eventMediaRepository.findMediaByEventIdAndType(
       eventId,
@@ -129,7 +153,12 @@ export class MediaService {
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      await this.storageService.upload(objectKey, buffer, 'image/jpeg');
+      await this.storageService.upload(
+        objectKey,
+        buffer,
+        'image/jpeg',
+        this.retentionUploadOptions(options?.retain),
+      );
 
       return await this.eventMediaRepository.createEventMedia({
         eventId,
@@ -155,6 +184,7 @@ export class MediaService {
     buffer: Buffer,
     eventDate: Date,
     filename = 'snapshot.jpg',
+    options?: { retain?: boolean },
   ): Promise<EventMediaRecord | null> {
     const existingMedia = await this.eventMediaRepository.findMediaByEventIdAndType(
       eventId,
@@ -167,7 +197,12 @@ export class MediaService {
     const objectKey = this.buildObjectKey(eventDate, eventId, filename);
 
     try {
-      await this.storageService.upload(objectKey, buffer, 'image/jpeg');
+      await this.storageService.upload(
+        objectKey,
+        buffer,
+        'image/jpeg',
+        this.retentionUploadOptions(options?.retain),
+      );
 
       return await this.eventMediaRepository.createEventMedia({
         eventId,
@@ -192,6 +227,7 @@ export class MediaService {
     trackId: string,
     eventDate: Date,
     durationMs?: number,
+    options?: { retain?: boolean },
   ): Promise<EventMediaRecord | null> {
     const existingMedia = await this.eventMediaRepository.findMediaByEventIdAndType(
       eventId,
@@ -214,7 +250,12 @@ export class MediaService {
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      await this.storageService.upload(objectKey, buffer, 'video/mp4');
+      await this.storageService.upload(
+        objectKey,
+        buffer,
+        'video/mp4',
+        this.retentionUploadOptions(options?.retain),
+      );
 
       return await this.eventMediaRepository.createEventMedia({
         eventId,

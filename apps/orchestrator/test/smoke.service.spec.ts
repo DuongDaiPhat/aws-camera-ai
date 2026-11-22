@@ -161,6 +161,92 @@ describe('SmokeService', () => {
     expect(result.checks.cloudQueue.status).toBe('error');
     expect(storage.delete).toHaveBeenCalledWith('_smoke/orchestrator-smoke.txt');
   });
+
+  it('xử lý các nhánh lỗi JWT_SECRET thiếu, Cognito JWKS rỗng, lỗi non-Error và transport mismatch', async () => {
+    const prevVersion = process.env.APP_VERSION;
+    process.env.APP_VERSION = '1.2.3';
+    try {
+      jest.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ keys: [] }),
+      } as globalThis.Response);
+
+      const db = {
+        query: jest.fn(async (sql: string) => {
+          if (sql.includes('SELECT 1')) return { rows: [{ ok: 1 }] };
+          if (sql.includes('cloud_transport_mode')) return { rows: [{ mode: 'sqs' }] };
+          return { rows: [{ total: 0 }] };
+        }),
+      } as unknown as DatabaseService;
+
+      const storageNoDelete = {
+        upload: jest.fn().mockRejectedValue('raw string failure'),
+        download: jest.fn(),
+        getPresignedUrl: jest.fn(),
+      } as unknown as IStorageService;
+
+      const service1 = new SmokeService(
+        new ConfigService({
+          AUTH_PROVIDER: 'jwt',
+          STORAGE_PROVIDER: 'minio',
+          FACE_JOB_TRANSPORT: 'bullmq',
+        }),
+        db,
+        storageNoDelete,
+      );
+      const res1 = await service1.check();
+      expect(res1.version).toBe('1.2.3');
+      expect(res1.checks.auth).toEqual({ status: 'error', reason: 'JWT_SECRET is missing' });
+      expect(res1.checks.storage).toEqual({ status: 'error', reason: 'UnknownError' });
+      expect(res1.checks.cloudQueue).toEqual({
+        status: 'error',
+        reason: 'Transport mismatch env=bullmq db=sqs',
+      });
+
+      const service2 = new SmokeService(
+        new ConfigService({
+          AUTH_PROVIDER: 'cognito',
+          COGNITO_USER_POOL_ID: 'ap-southeast-1_4WQxu8bnB',
+          COGNITO_CLIENT_ID: '5p3hgqnkmjrdc5ktb99ur46hjr',
+          COGNITO_DOMAIN: 'https://example.auth.ap-southeast-1.amazoncognito.com',
+          FACE_JOB_TRANSPORT: 'bullmq',
+        }),
+        createDatabaseMock('bullmq', 0),
+        storageNoDelete,
+      );
+      const res2 = await service2.check();
+      expect(res2.checks.auth).toEqual({
+        status: 'error',
+        reason: 'Cognito JWKS returned no keys',
+      });
+
+      jest.spyOn(globalThis, 'fetch').mockRejectedValueOnce(new Error('x'.repeat(100)));
+      const res3 = await service2.check();
+      expect(res3.checks.auth).toEqual({ status: 'error', reason: 'Error' });
+
+      const dbEmptyMode = {
+        query: jest.fn().mockResolvedValue({ rows: [] }),
+      } as unknown as DatabaseService;
+      const service4 = new SmokeService(
+        new ConfigService({
+          AUTH_PROVIDER: 'jwt',
+          JWT_SECRET: 'secret',
+          FACE_JOB_TRANSPORT: 'bullmq',
+        }),
+        dbEmptyMode,
+        createStorageMock({ delete: undefined }),
+      );
+      const res4 = await service4.check();
+      expect(res4.checks.cloudQueue).toEqual({
+        status: 'error',
+        reason: 'Transport mismatch env=bullmq db=missing',
+      });
+      expect(res4.checks.storage.status).toBe('ok');
+    } finally {
+      if (prevVersion === undefined) delete process.env.APP_VERSION;
+      else process.env.APP_VERSION = prevVersion;
+    }
+  });
 });
 
 describe('SmokeController', () => {

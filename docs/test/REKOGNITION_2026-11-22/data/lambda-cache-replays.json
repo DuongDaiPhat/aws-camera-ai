@@ -1,0 +1,33 @@
+[
+  {
+    "phase": "invalid-image",
+    "requestId": "b30c7c2b-a128-4f1d-941b-426f1ff6628f",
+    "payload": {
+      "batchItemFailures": []
+    },
+    "log": "START RequestId: b30c7c2b-a128-4f1d-941b-426f1ff6628f Version: $LATEST\n[INFO]\t2026-11-22T00:18:42.665Z\tb30c7c2b-a128-4f1d-941b-426f1ff6628f\tFace completed jobId=7e3238ca-59ab-4859-9c70-f15346ed034f resultId=32e0e38a-d7ff-487d-9dc9-b3677f529cf4 status=KNOWN cacheHit=True durationMs=1350\nEND RequestId: b30c7c2b-a128-4f1d-941b-426f1ff6628f\nREPORT RequestId: b30c7c2b-a128-4f1d-941b-426f1ff6628f\tDuration: 1352.80 ms\tBilled Duration: 2243 ms\tMemory Size: 512 MB\tMax Memory Used: 87 MB\tInit Duration: 889.25 ms\t\n"
+  },
+  {
+    "phase": "retry-fixed-image",
+    "requestId": "8d052aba-baea-45df-a6a6-24c10dfbc170",
+    "payload": {
+      "batchItemFailures": []
+    },
+    "log": "START RequestId: 8d052aba-baea-45df-a6a6-24c10dfbc170 Version: $LATEST\n[INFO]\t2026-11-22T00:18:43.919Z\t8d052aba-baea-45df-a6a6-24c10dfbc170\tFace completed jobId=7e3238ca-59ab-4859-9c70-f15346ed034f resultId=32e0e38a-d7ff-487d-9dc9-b3677f529cf4 status=KNOWN cacheHit=True durationMs=175\nEND RequestId: 8d052aba-baea-45df-a6a6-24c10dfbc170\nREPORT RequestId: 8d052aba-baea-45df-a6a6-24c10dfbc170\tDuration: 177.05 ms\tBilled Duration: 178 ms\tMemory Size: 512 MB\tMax Memory Used: 88 MB\t\n"
+  },
+  {
+    "phase": "cached-replay",
+    "requestId": "853e5f16-ef7c-4bb5-94e3-71edbd08e02c",
+    "payload": {
+      "batchItemFailures": []
+    },
+    "log": "START RequestId: 853e5f16-ef7c-4bb5-94e3-71edbd08e02c Version: $LATEST\n[INFO]\t2026-11-22T00:18:44.152Z\t853e5f16-ef7c-4bb5-94e3-71edbd08e02c\tFace completed jobId=7e3238ca-59ab-4859-9c70-f15346ed034f resultId=32e0e38a-d7ff-487d-9dc9-b3677f529cf4 status=KNOWN cacheHit=True durationMs=175\nEND RequestId: 853e5f16-ef7c-4bb5-94e3-71edbd08e02c\nREPORT RequestId: 853e5f16-ef7c-4bb5-94e3-71edbd08e02c\tDuration: 180.42 ms\tBilled Duration: 181 ms\tMemory Size: 512 MB\tMax Memory Used: 89 MB\t\n"
+  },
+  {
+    "phase": "queued-known-duplicate",
+    "payload": {
+      "batchItemFailures": []
+    },
+    "log": "START RequestId: 157ba3b9-ae7d-4488-b2f4-f58d33f3bb21 Version: $LATEST\n[INFO]\t2026-11-22T00:18:44.549Z\t157ba3b9-ae7d-4488-b2f4-f58d33f3bb21\tFace completed jobId=e98c1a24-003d-407c-bbac-240ebc74f68f resultId=96c07313-42c4-4054-8162-3db5c7ef51fd status=KNOWN cacheHit=True durationMs=348\nEND RequestId: 157ba3b9-ae7d-4488-b2f4-f58d33f3bb21\nREPORT RequestId: 157ba3b9-ae7d-4488-b2f4-f58d33f3bb21\tDuration: 349.67 ms\tBilled Duration: 350 ms\tMemory Size: 512 MB\tMax Memory Used: 91 MB\t\n"
+  }
+]

@@ -1,0 +1,43 @@
+[
+  {
+    "name": "known-no-glasses",
+    "expected": "KNOWN",
+    "path": "artifacts\\rekognition-eval-2026-11-22\\crops\\has_known_face_no_glasses__008__f0.jpg"
+  },
+  {
+    "name": "known-glasses",
+    "expected": "KNOWN",
+    "path": "artifacts\\rekognition-eval-2026-11-22\\crops\\has_known_face_with_glasses__007__f0.jpg"
+  },
+  {
+    "name": "known-crowd-crop",
+    "expected": "KNOWN",
+    "path": "artifacts\\rekognition-eval-2026-11-22\\crops\\has_known_face_with_many_stranger_faces__000__f4.jpg"
+  },
+  {
+    "name": "stranger",
+    "expected": "UNKNOWN",
+    "path": "artifacts\\rekognition-eval-2026-11-22\\crops\\no_known_face__000__f0.jpg"
+  },
+  {
+    "name": "false-face-hand",
+    "expected": "UNDETERMINED",
+    "path": "artifacts\\rekognition-eval-2026-11-22\\crops\\has_known_face_no_glasses__038__f1.jpg"
+  },
+  {
+    "name": "no-face",
+    "expected": "UNDETERMINED",
+    "path": "artifacts\\rekognition-eval-2026-11-22\\blank.jpg"
+  },
+  {
+    "name": "whole-multiple-faces",
+    "expected": "UNDETERMINED",
+    "path": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__000.jpg"
+  },
+  {
+    "name": "provider-error-and-retry",
+    "expected": "KNOWN",
+    "path": "artifacts\\rekognition-eval-2026-11-22\\corrupt.jpg",
+    "delivery": "direct"
+  }
+]

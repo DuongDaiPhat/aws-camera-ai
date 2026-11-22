@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CamerasRepository } from '../cameras/cameras.repository';
+import { readNonEmptyConfigString, readPositiveConfigNumber } from '../config/env-config';
 import { FrigateClientService, type FrigateRuntimeState } from './frigate-client.service';
 import { FrigateConfigService } from './frigate-config.service';
 
@@ -28,19 +29,23 @@ export class FrigateSyncService {
     private readonly frigateClient: FrigateClientService,
     private readonly frigateConfig: FrigateConfigService,
   ) {
-    this.mediamtxRtspBaseUrl = this.configService.get<string>(
+    this.mediamtxRtspBaseUrl = readNonEmptyConfigString(
+      this.configService,
       'MEDIAMTX_RTSP_URL',
       'rtsp://localhost:8554',
     );
-    this.frigateInstanceKey = this.configService.get<string>(
+    this.frigateInstanceKey = readNonEmptyConfigString(
+      this.configService,
       'FRIGATE_URL',
       'http://localhost:5000',
     );
-    this.mediaMtxPublishUsername = this.configService.get<string>(
+    this.mediaMtxPublishUsername = readNonEmptyConfigString(
+      this.configService,
       'MEDIAMTX_PUBLISH_USERNAME',
       'cam-internal',
     );
-    this.mediaMtxPublishPassword = this.configService.get<string>(
+    this.mediaMtxPublishPassword = readNonEmptyConfigString(
+      this.configService,
       'MEDIAMTX_PUBLISH_PASSWORD',
       'local-dev-password',
     );
@@ -67,7 +72,11 @@ export class FrigateSyncService {
   }
 
   async waitForCameraFrames(slug: string): Promise<boolean> {
-    const timeoutMs = Number(this.configService.get('CAMERA_SOURCE_START_TIMEOUT_MS', 10000));
+    const timeoutMs = readPositiveConfigNumber(
+      this.configService,
+      'CAMERA_SOURCE_START_TIMEOUT_MS',
+      10000,
+    );
     const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
       try {

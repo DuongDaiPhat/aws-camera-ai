@@ -1,0 +1,1505 @@
+[
+  {
+    "case": "baseline",
+    "faceCount": 1,
+    "requestId": "4c1f378c-b355-4a66-8068-33fff678a63f",
+    "matches": [
+      {
+        "Similarity": 99.99747467041016,
+        "Face": {
+          "FaceId": "6b14dba4-e3b8-4e3e-9cdd-09ae9a402c4d",
+          "BoundingBox": {
+            "Width": 0.47327500581741333,
+            "Height": 0.4859519898891449,
+            "Left": 0.2663919925689697,
+            "Top": 0.31958499550819397
+          },
+          "ImageId": "e16bcafc-5b85-366c-85e8-64f2029452eb",
+          "ExternalImageId": "normalized-mirror-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.9967041015625,
+        "Face": {
+          "FaceId": "35fe19e6-9a3d-4291-a743-96db21b76eb8",
+          "BoundingBox": {
+            "Width": 0.574865996837616,
+            "Height": 0.66109699010849,
+            "Left": 0.20883800089359283,
+            "Top": 0.252685010433197
+          },
+          "ImageId": "d0b4b2b1-3e98-3f58-a323-6b6ec1e48f2a",
+          "ExternalImageId": "normalized-mirror-2:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99549102783203,
+        "Face": {
+          "FaceId": "fbce425a-638a-4166-a471-57c2c02e2753",
+          "BoundingBox": {
+            "Width": 0.4577459990978241,
+            "Height": 0.48097100853919983,
+            "Left": 0.27704501152038574,
+            "Top": 0.3158020079135895
+          },
+          "ImageId": "8652286f-33d1-3051-a8c4-c2a4e297a7ce",
+          "ExternalImageId": "normalized-original-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99453735351562,
+        "Face": {
+          "FaceId": "0b017b11-8d59-41ec-9128-558cee145c96",
+          "BoundingBox": {
+            "Width": 0.5787400007247925,
+            "Height": 0.6493170261383057,
+            "Left": 0.21743500232696533,
+            "Top": 0.24784499406814575
+          },
+          "ImageId": "92b561d2-af7b-364f-a3f2-e67dd52cfc64",
+          "ExternalImageId": "normalized-original-2:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99381256103516,
+        "Face": {
+          "FaceId": "ce69b9a2-4528-47b1-9315-3e2210109b2b",
+          "BoundingBox": {
+            "Width": 0.6814219951629639,
+            "Height": 0.7105910181999207,
+            "Left": 0.16833800077438354,
+            "Top": 0.18881599605083466
+          },
+          "ImageId": "921ef083-7d95-3222-a6bd-46557e8b2ef5",
+          "ExternalImageId": "normalized-original-1:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99376678466797,
+        "Face": {
+          "FaceId": "3a45115e-d8c3-4ee6-aac3-f11143428a81",
+          "BoundingBox": {
+            "Width": 0.6530129909515381,
+            "Height": 0.6776310205459595,
+            "Left": 0.2199230045080185,
+            "Top": 0.18049199879169464
+          },
+          "ImageId": "3926bbed-d1bb-3d39-8bce-9e0532fb489b",
+          "ExternalImageId": "normalized-mirror-1:0",
+          "Confidence": 99.99960327148438,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.87834167480469,
+        "Face": {
+          "FaceId": "48d7e48b-5787-4fcd-88fa-1f30dcf97695",
+          "BoundingBox": {
+            "Width": 0.5159919857978821,
+            "Height": 0.5604109764099121,
+            "Left": 0.21254900097846985,
+            "Top": 0.2468699961900711
+          },
+          "ImageId": "b9e0d011-05ba-3154-a4fd-a3638e522a71",
+          "ExternalImageId": "normalized-mirror-3:0",
+          "Confidence": 99.99909973144531,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.81713104248047,
+        "Face": {
+          "FaceId": "829e5967-8709-45eb-98c5-41cf8512f0a6",
+          "BoundingBox": {
+            "Width": 0.45412400364875793,
+            "Height": 0.553534984588623,
+            "Left": 0.16120700538158417,
+            "Top": 0.24377700686454773
+          },
+          "ImageId": "9f552356-7930-3c8d-8e95-a41917373006",
+          "ExternalImageId": "normalized-mirror-4:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.73912811279297,
+        "Face": {
+          "FaceId": "17f40743-3af8-4a3c-8bcb-534cc4d81945",
+          "BoundingBox": {
+            "Width": 0.5092679858207703,
+            "Height": 0.587037980556488,
+            "Left": 0.26557299494743347,
+            "Top": 0.22998900711536407
+          },
+          "ImageId": "18482969-280a-3afc-84ac-a61a7d9cbb27",
+          "ExternalImageId": "normalized-original-3:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.65693664550781,
+        "Face": {
+          "FaceId": "8be381d0-6603-492a-8842-677750eeada9",
+          "BoundingBox": {
+            "Width": 0.47170498967170715,
+            "Height": 0.5557439923286438,
+            "Left": 0.35910001397132874,
+            "Top": 0.25559499859809875
+          },
+          "ImageId": "6c1948c2-d3fa-3f7a-bc9b-c726b314609b",
+          "ExternalImageId": "normalized-original-4:0",
+          "Confidence": 99.9990005493164,
+          "IndexFacesModelVersion": "7.0"
+        }
+      }
+    ]
+  },
+  {
+    "case": "horizontal-flip",
+    "faceCount": 1,
+    "requestId": "53684539-6eab-4fd8-ae7d-a06c0eb07385",
+    "matches": [
+      {
+        "Similarity": 99.99746704101562,
+        "Face": {
+          "FaceId": "6b14dba4-e3b8-4e3e-9cdd-09ae9a402c4d",
+          "BoundingBox": {
+            "Width": 0.47327500581741333,
+            "Height": 0.4859519898891449,
+            "Left": 0.2663919925689697,
+            "Top": 0.31958499550819397
+          },
+          "ImageId": "e16bcafc-5b85-366c-85e8-64f2029452eb",
+          "ExternalImageId": "normalized-mirror-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99718475341797,
+        "Face": {
+          "FaceId": "35fe19e6-9a3d-4291-a743-96db21b76eb8",
+          "BoundingBox": {
+            "Width": 0.574865996837616,
+            "Height": 0.66109699010849,
+            "Left": 0.20883800089359283,
+            "Top": 0.252685010433197
+          },
+          "ImageId": "d0b4b2b1-3e98-3f58-a323-6b6ec1e48f2a",
+          "ExternalImageId": "normalized-mirror-2:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99584197998047,
+        "Face": {
+          "FaceId": "fbce425a-638a-4166-a471-57c2c02e2753",
+          "BoundingBox": {
+            "Width": 0.4577459990978241,
+            "Height": 0.48097100853919983,
+            "Left": 0.27704501152038574,
+            "Top": 0.3158020079135895
+          },
+          "ImageId": "8652286f-33d1-3051-a8c4-c2a4e297a7ce",
+          "ExternalImageId": "normalized-original-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99549865722656,
+        "Face": {
+          "FaceId": "0b017b11-8d59-41ec-9128-558cee145c96",
+          "BoundingBox": {
+            "Width": 0.5787400007247925,
+            "Height": 0.6493170261383057,
+            "Left": 0.21743500232696533,
+            "Top": 0.24784499406814575
+          },
+          "ImageId": "92b561d2-af7b-364f-a3f2-e67dd52cfc64",
+          "ExternalImageId": "normalized-original-2:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99420928955078,
+        "Face": {
+          "FaceId": "ce69b9a2-4528-47b1-9315-3e2210109b2b",
+          "BoundingBox": {
+            "Width": 0.6814219951629639,
+            "Height": 0.7105910181999207,
+            "Left": 0.16833800077438354,
+            "Top": 0.18881599605083466
+          },
+          "ImageId": "921ef083-7d95-3222-a6bd-46557e8b2ef5",
+          "ExternalImageId": "normalized-original-1:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99400329589844,
+        "Face": {
+          "FaceId": "3a45115e-d8c3-4ee6-aac3-f11143428a81",
+          "BoundingBox": {
+            "Width": 0.6530129909515381,
+            "Height": 0.6776310205459595,
+            "Left": 0.2199230045080185,
+            "Top": 0.18049199879169464
+          },
+          "ImageId": "3926bbed-d1bb-3d39-8bce-9e0532fb489b",
+          "ExternalImageId": "normalized-mirror-1:0",
+          "Confidence": 99.99960327148438,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.89205932617188,
+        "Face": {
+          "FaceId": "48d7e48b-5787-4fcd-88fa-1f30dcf97695",
+          "BoundingBox": {
+            "Width": 0.5159919857978821,
+            "Height": 0.5604109764099121,
+            "Left": 0.21254900097846985,
+            "Top": 0.2468699961900711
+          },
+          "ImageId": "b9e0d011-05ba-3154-a4fd-a3638e522a71",
+          "ExternalImageId": "normalized-mirror-3:0",
+          "Confidence": 99.99909973144531,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.85176086425781,
+        "Face": {
+          "FaceId": "829e5967-8709-45eb-98c5-41cf8512f0a6",
+          "BoundingBox": {
+            "Width": 0.45412400364875793,
+            "Height": 0.553534984588623,
+            "Left": 0.16120700538158417,
+            "Top": 0.24377700686454773
+          },
+          "ImageId": "9f552356-7930-3c8d-8e95-a41917373006",
+          "ExternalImageId": "normalized-mirror-4:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.79344940185547,
+        "Face": {
+          "FaceId": "17f40743-3af8-4a3c-8bcb-534cc4d81945",
+          "BoundingBox": {
+            "Width": 0.5092679858207703,
+            "Height": 0.587037980556488,
+            "Left": 0.26557299494743347,
+            "Top": 0.22998900711536407
+          },
+          "ImageId": "18482969-280a-3afc-84ac-a61a7d9cbb27",
+          "ExternalImageId": "normalized-original-3:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.73371887207031,
+        "Face": {
+          "FaceId": "8be381d0-6603-492a-8842-677750eeada9",
+          "BoundingBox": {
+            "Width": 0.47170498967170715,
+            "Height": 0.5557439923286438,
+            "Left": 0.35910001397132874,
+            "Top": 0.25559499859809875
+          },
+          "ImageId": "6c1948c2-d3fa-3f7a-bc9b-c726b314609b",
+          "ExternalImageId": "normalized-original-4:0",
+          "Confidence": 99.9990005493164,
+          "IndexFacesModelVersion": "7.0"
+        }
+      }
+    ]
+  },
+  {
+    "case": "rotate-180",
+    "faceCount": 1,
+    "requestId": "6647e4c4-a126-4cd1-abdd-bd88bec7f956",
+    "matches": [
+      {
+        "Similarity": 99.9975357055664,
+        "Face": {
+          "FaceId": "6b14dba4-e3b8-4e3e-9cdd-09ae9a402c4d",
+          "BoundingBox": {
+            "Width": 0.47327500581741333,
+            "Height": 0.4859519898891449,
+            "Left": 0.2663919925689697,
+            "Top": 0.31958499550819397
+          },
+          "ImageId": "e16bcafc-5b85-366c-85e8-64f2029452eb",
+          "ExternalImageId": "normalized-mirror-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99702453613281,
+        "Face": {
+          "FaceId": "35fe19e6-9a3d-4291-a743-96db21b76eb8",
+          "BoundingBox": {
+            "Width": 0.574865996837616,
+            "Height": 0.66109699010849,
+            "Left": 0.20883800089359283,
+            "Top": 0.252685010433197
+          },
+          "ImageId": "d0b4b2b1-3e98-3f58-a323-6b6ec1e48f2a",
+          "ExternalImageId": "normalized-mirror-2:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99597930908203,
+        "Face": {
+          "FaceId": "fbce425a-638a-4166-a471-57c2c02e2753",
+          "BoundingBox": {
+            "Width": 0.4577459990978241,
+            "Height": 0.48097100853919983,
+            "Left": 0.27704501152038574,
+            "Top": 0.3158020079135895
+          },
+          "ImageId": "8652286f-33d1-3051-a8c4-c2a4e297a7ce",
+          "ExternalImageId": "normalized-original-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99502563476562,
+        "Face": {
+          "FaceId": "0b017b11-8d59-41ec-9128-558cee145c96",
+          "BoundingBox": {
+            "Width": 0.5787400007247925,
+            "Height": 0.6493170261383057,
+            "Left": 0.21743500232696533,
+            "Top": 0.24784499406814575
+          },
+          "ImageId": "92b561d2-af7b-364f-a3f2-e67dd52cfc64",
+          "ExternalImageId": "normalized-original-2:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99227905273438,
+        "Face": {
+          "FaceId": "ce69b9a2-4528-47b1-9315-3e2210109b2b",
+          "BoundingBox": {
+            "Width": 0.6814219951629639,
+            "Height": 0.7105910181999207,
+            "Left": 0.16833800077438354,
+            "Top": 0.18881599605083466
+          },
+          "ImageId": "921ef083-7d95-3222-a6bd-46557e8b2ef5",
+          "ExternalImageId": "normalized-original-1:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99217987060547,
+        "Face": {
+          "FaceId": "3a45115e-d8c3-4ee6-aac3-f11143428a81",
+          "BoundingBox": {
+            "Width": 0.6530129909515381,
+            "Height": 0.6776310205459595,
+            "Left": 0.2199230045080185,
+            "Top": 0.18049199879169464
+          },
+          "ImageId": "3926bbed-d1bb-3d39-8bce-9e0532fb489b",
+          "ExternalImageId": "normalized-mirror-1:0",
+          "Confidence": 99.99960327148438,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.8698959350586,
+        "Face": {
+          "FaceId": "48d7e48b-5787-4fcd-88fa-1f30dcf97695",
+          "BoundingBox": {
+            "Width": 0.5159919857978821,
+            "Height": 0.5604109764099121,
+            "Left": 0.21254900097846985,
+            "Top": 0.2468699961900711
+          },
+          "ImageId": "b9e0d011-05ba-3154-a4fd-a3638e522a71",
+          "ExternalImageId": "normalized-mirror-3:0",
+          "Confidence": 99.99909973144531,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.82721710205078,
+        "Face": {
+          "FaceId": "829e5967-8709-45eb-98c5-41cf8512f0a6",
+          "BoundingBox": {
+            "Width": 0.45412400364875793,
+            "Height": 0.553534984588623,
+            "Left": 0.16120700538158417,
+            "Top": 0.24377700686454773
+          },
+          "ImageId": "9f552356-7930-3c8d-8e95-a41917373006",
+          "ExternalImageId": "normalized-mirror-4:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.73687744140625,
+        "Face": {
+          "FaceId": "17f40743-3af8-4a3c-8bcb-534cc4d81945",
+          "BoundingBox": {
+            "Width": 0.5092679858207703,
+            "Height": 0.587037980556488,
+            "Left": 0.26557299494743347,
+            "Top": 0.22998900711536407
+          },
+          "ImageId": "18482969-280a-3afc-84ac-a61a7d9cbb27",
+          "ExternalImageId": "normalized-original-3:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.64048767089844,
+        "Face": {
+          "FaceId": "8be381d0-6603-492a-8842-677750eeada9",
+          "BoundingBox": {
+            "Width": 0.47170498967170715,
+            "Height": 0.5557439923286438,
+            "Left": 0.35910001397132874,
+            "Top": 0.25559499859809875
+          },
+          "ImageId": "6c1948c2-d3fa-3f7a-bc9b-c726b314609b",
+          "ExternalImageId": "normalized-original-4:0",
+          "Confidence": 99.9990005493164,
+          "IndexFacesModelVersion": "7.0"
+        }
+      }
+    ]
+  },
+  {
+    "case": "rotate-90",
+    "faceCount": 1,
+    "requestId": "8e655c26-9705-4207-bd06-8e4b91da49c5",
+    "matches": [
+      {
+        "Similarity": 99.99500274658203,
+        "Face": {
+          "FaceId": "35fe19e6-9a3d-4291-a743-96db21b76eb8",
+          "BoundingBox": {
+            "Width": 0.574865996837616,
+            "Height": 0.66109699010849,
+            "Left": 0.20883800089359283,
+            "Top": 0.252685010433197
+          },
+          "ImageId": "d0b4b2b1-3e98-3f58-a323-6b6ec1e48f2a",
+          "ExternalImageId": "normalized-mirror-2:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99484252929688,
+        "Face": {
+          "FaceId": "6b14dba4-e3b8-4e3e-9cdd-09ae9a402c4d",
+          "BoundingBox": {
+            "Width": 0.47327500581741333,
+            "Height": 0.4859519898891449,
+            "Left": 0.2663919925689697,
+            "Top": 0.31958499550819397
+          },
+          "ImageId": "e16bcafc-5b85-366c-85e8-64f2029452eb",
+          "ExternalImageId": "normalized-mirror-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99230194091797,
+        "Face": {
+          "FaceId": "fbce425a-638a-4166-a471-57c2c02e2753",
+          "BoundingBox": {
+            "Width": 0.4577459990978241,
+            "Height": 0.48097100853919983,
+            "Left": 0.27704501152038574,
+            "Top": 0.3158020079135895
+          },
+          "ImageId": "8652286f-33d1-3051-a8c4-c2a4e297a7ce",
+          "ExternalImageId": "normalized-original-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99199676513672,
+        "Face": {
+          "FaceId": "0b017b11-8d59-41ec-9128-558cee145c96",
+          "BoundingBox": {
+            "Width": 0.5787400007247925,
+            "Height": 0.6493170261383057,
+            "Left": 0.21743500232696533,
+            "Top": 0.24784499406814575
+          },
+          "ImageId": "92b561d2-af7b-364f-a3f2-e67dd52cfc64",
+          "ExternalImageId": "normalized-original-2:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.98889923095703,
+        "Face": {
+          "FaceId": "3a45115e-d8c3-4ee6-aac3-f11143428a81",
+          "BoundingBox": {
+            "Width": 0.6530129909515381,
+            "Height": 0.6776310205459595,
+            "Left": 0.2199230045080185,
+            "Top": 0.18049199879169464
+          },
+          "ImageId": "3926bbed-d1bb-3d39-8bce-9e0532fb489b",
+          "ExternalImageId": "normalized-mirror-1:0",
+          "Confidence": 99.99960327148438,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.98785400390625,
+        "Face": {
+          "FaceId": "ce69b9a2-4528-47b1-9315-3e2210109b2b",
+          "BoundingBox": {
+            "Width": 0.6814219951629639,
+            "Height": 0.7105910181999207,
+            "Left": 0.16833800077438354,
+            "Top": 0.18881599605083466
+          },
+          "ImageId": "921ef083-7d95-3222-a6bd-46557e8b2ef5",
+          "ExternalImageId": "normalized-original-1:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.90816497802734,
+        "Face": {
+          "FaceId": "48d7e48b-5787-4fcd-88fa-1f30dcf97695",
+          "BoundingBox": {
+            "Width": 0.5159919857978821,
+            "Height": 0.5604109764099121,
+            "Left": 0.21254900097846985,
+            "Top": 0.2468699961900711
+          },
+          "ImageId": "b9e0d011-05ba-3154-a4fd-a3638e522a71",
+          "ExternalImageId": "normalized-mirror-3:0",
+          "Confidence": 99.99909973144531,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.7970199584961,
+        "Face": {
+          "FaceId": "829e5967-8709-45eb-98c5-41cf8512f0a6",
+          "BoundingBox": {
+            "Width": 0.45412400364875793,
+            "Height": 0.553534984588623,
+            "Left": 0.16120700538158417,
+            "Top": 0.24377700686454773
+          },
+          "ImageId": "9f552356-7930-3c8d-8e95-a41917373006",
+          "ExternalImageId": "normalized-mirror-4:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.78311920166016,
+        "Face": {
+          "FaceId": "17f40743-3af8-4a3c-8bcb-534cc4d81945",
+          "BoundingBox": {
+            "Width": 0.5092679858207703,
+            "Height": 0.587037980556488,
+            "Left": 0.26557299494743347,
+            "Top": 0.22998900711536407
+          },
+          "ImageId": "18482969-280a-3afc-84ac-a61a7d9cbb27",
+          "ExternalImageId": "normalized-original-3:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.6299057006836,
+        "Face": {
+          "FaceId": "8be381d0-6603-492a-8842-677750eeada9",
+          "BoundingBox": {
+            "Width": 0.47170498967170715,
+            "Height": 0.5557439923286438,
+            "Left": 0.35910001397132874,
+            "Top": 0.25559499859809875
+          },
+          "ImageId": "6c1948c2-d3fa-3f7a-bc9b-c726b314609b",
+          "ExternalImageId": "normalized-original-4:0",
+          "Confidence": 99.9990005493164,
+          "IndexFacesModelVersion": "7.0"
+        }
+      }
+    ]
+  },
+  {
+    "case": "dark-25pct",
+    "faceCount": 1,
+    "requestId": "c5909058-4b8a-4836-af36-694ef789762b",
+    "matches": [
+      {
+        "Similarity": 99.99614715576172,
+        "Face": {
+          "FaceId": "6b14dba4-e3b8-4e3e-9cdd-09ae9a402c4d",
+          "BoundingBox": {
+            "Width": 0.47327500581741333,
+            "Height": 0.4859519898891449,
+            "Left": 0.2663919925689697,
+            "Top": 0.31958499550819397
+          },
+          "ImageId": "e16bcafc-5b85-366c-85e8-64f2029452eb",
+          "ExternalImageId": "normalized-mirror-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99393463134766,
+        "Face": {
+          "FaceId": "fbce425a-638a-4166-a471-57c2c02e2753",
+          "BoundingBox": {
+            "Width": 0.4577459990978241,
+            "Height": 0.48097100853919983,
+            "Left": 0.27704501152038574,
+            "Top": 0.3158020079135895
+          },
+          "ImageId": "8652286f-33d1-3051-a8c4-c2a4e297a7ce",
+          "ExternalImageId": "normalized-original-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99360656738281,
+        "Face": {
+          "FaceId": "35fe19e6-9a3d-4291-a743-96db21b76eb8",
+          "BoundingBox": {
+            "Width": 0.574865996837616,
+            "Height": 0.66109699010849,
+            "Left": 0.20883800089359283,
+            "Top": 0.252685010433197
+          },
+          "ImageId": "d0b4b2b1-3e98-3f58-a323-6b6ec1e48f2a",
+          "ExternalImageId": "normalized-mirror-2:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.98866271972656,
+        "Face": {
+          "FaceId": "0b017b11-8d59-41ec-9128-558cee145c96",
+          "BoundingBox": {
+            "Width": 0.5787400007247925,
+            "Height": 0.6493170261383057,
+            "Left": 0.21743500232696533,
+            "Top": 0.24784499406814575
+          },
+          "ImageId": "92b561d2-af7b-364f-a3f2-e67dd52cfc64",
+          "ExternalImageId": "normalized-original-2:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.984375,
+        "Face": {
+          "FaceId": "3a45115e-d8c3-4ee6-aac3-f11143428a81",
+          "BoundingBox": {
+            "Width": 0.6530129909515381,
+            "Height": 0.6776310205459595,
+            "Left": 0.2199230045080185,
+            "Top": 0.18049199879169464
+          },
+          "ImageId": "3926bbed-d1bb-3d39-8bce-9e0532fb489b",
+          "ExternalImageId": "normalized-mirror-1:0",
+          "Confidence": 99.99960327148438,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.98332214355469,
+        "Face": {
+          "FaceId": "ce69b9a2-4528-47b1-9315-3e2210109b2b",
+          "BoundingBox": {
+            "Width": 0.6814219951629639,
+            "Height": 0.7105910181999207,
+            "Left": 0.16833800077438354,
+            "Top": 0.18881599605083466
+          },
+          "ImageId": "921ef083-7d95-3222-a6bd-46557e8b2ef5",
+          "ExternalImageId": "normalized-original-1:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.86029815673828,
+        "Face": {
+          "FaceId": "829e5967-8709-45eb-98c5-41cf8512f0a6",
+          "BoundingBox": {
+            "Width": 0.45412400364875793,
+            "Height": 0.553534984588623,
+            "Left": 0.16120700538158417,
+            "Top": 0.24377700686454773
+          },
+          "ImageId": "9f552356-7930-3c8d-8e95-a41917373006",
+          "ExternalImageId": "normalized-mirror-4:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.84391784667969,
+        "Face": {
+          "FaceId": "48d7e48b-5787-4fcd-88fa-1f30dcf97695",
+          "BoundingBox": {
+            "Width": 0.5159919857978821,
+            "Height": 0.5604109764099121,
+            "Left": 0.21254900097846985,
+            "Top": 0.2468699961900711
+          },
+          "ImageId": "b9e0d011-05ba-3154-a4fd-a3638e522a71",
+          "ExternalImageId": "normalized-mirror-3:0",
+          "Confidence": 99.99909973144531,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.78916931152344,
+        "Face": {
+          "FaceId": "8be381d0-6603-492a-8842-677750eeada9",
+          "BoundingBox": {
+            "Width": 0.47170498967170715,
+            "Height": 0.5557439923286438,
+            "Left": 0.35910001397132874,
+            "Top": 0.25559499859809875
+          },
+          "ImageId": "6c1948c2-d3fa-3f7a-bc9b-c726b314609b",
+          "ExternalImageId": "normalized-original-4:0",
+          "Confidence": 99.9990005493164,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.73884582519531,
+        "Face": {
+          "FaceId": "17f40743-3af8-4a3c-8bcb-534cc4d81945",
+          "BoundingBox": {
+            "Width": 0.5092679858207703,
+            "Height": 0.587037980556488,
+            "Left": 0.26557299494743347,
+            "Top": 0.22998900711536407
+          },
+          "ImageId": "18482969-280a-3afc-84ac-a61a7d9cbb27",
+          "ExternalImageId": "normalized-original-3:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      }
+    ]
+  },
+  {
+    "case": "bright-2x",
+    "faceCount": 1,
+    "requestId": "244d11ca-aace-4078-a050-a36a768bf642",
+    "matches": [
+      {
+        "Similarity": 99.99758911132812,
+        "Face": {
+          "FaceId": "6b14dba4-e3b8-4e3e-9cdd-09ae9a402c4d",
+          "BoundingBox": {
+            "Width": 0.47327500581741333,
+            "Height": 0.4859519898891449,
+            "Left": 0.2663919925689697,
+            "Top": 0.31958499550819397
+          },
+          "ImageId": "e16bcafc-5b85-366c-85e8-64f2029452eb",
+          "ExternalImageId": "normalized-mirror-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99720764160156,
+        "Face": {
+          "FaceId": "35fe19e6-9a3d-4291-a743-96db21b76eb8",
+          "BoundingBox": {
+            "Width": 0.574865996837616,
+            "Height": 0.66109699010849,
+            "Left": 0.20883800089359283,
+            "Top": 0.252685010433197
+          },
+          "ImageId": "d0b4b2b1-3e98-3f58-a323-6b6ec1e48f2a",
+          "ExternalImageId": "normalized-mirror-2:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99551391601562,
+        "Face": {
+          "FaceId": "fbce425a-638a-4166-a471-57c2c02e2753",
+          "BoundingBox": {
+            "Width": 0.4577459990978241,
+            "Height": 0.48097100853919983,
+            "Left": 0.27704501152038574,
+            "Top": 0.3158020079135895
+          },
+          "ImageId": "8652286f-33d1-3051-a8c4-c2a4e297a7ce",
+          "ExternalImageId": "normalized-original-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99513244628906,
+        "Face": {
+          "FaceId": "0b017b11-8d59-41ec-9128-558cee145c96",
+          "BoundingBox": {
+            "Width": 0.5787400007247925,
+            "Height": 0.6493170261383057,
+            "Left": 0.21743500232696533,
+            "Top": 0.24784499406814575
+          },
+          "ImageId": "92b561d2-af7b-364f-a3f2-e67dd52cfc64",
+          "ExternalImageId": "normalized-original-2:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99195098876953,
+        "Face": {
+          "FaceId": "ce69b9a2-4528-47b1-9315-3e2210109b2b",
+          "BoundingBox": {
+            "Width": 0.6814219951629639,
+            "Height": 0.7105910181999207,
+            "Left": 0.16833800077438354,
+            "Top": 0.18881599605083466
+          },
+          "ImageId": "921ef083-7d95-3222-a6bd-46557e8b2ef5",
+          "ExternalImageId": "normalized-original-1:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.99095153808594,
+        "Face": {
+          "FaceId": "3a45115e-d8c3-4ee6-aac3-f11143428a81",
+          "BoundingBox": {
+            "Width": 0.6530129909515381,
+            "Height": 0.6776310205459595,
+            "Left": 0.2199230045080185,
+            "Top": 0.18049199879169464
+          },
+          "ImageId": "3926bbed-d1bb-3d39-8bce-9e0532fb489b",
+          "ExternalImageId": "normalized-mirror-1:0",
+          "Confidence": 99.99960327148438,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.9088363647461,
+        "Face": {
+          "FaceId": "48d7e48b-5787-4fcd-88fa-1f30dcf97695",
+          "BoundingBox": {
+            "Width": 0.5159919857978821,
+            "Height": 0.5604109764099121,
+            "Left": 0.21254900097846985,
+            "Top": 0.2468699961900711
+          },
+          "ImageId": "b9e0d011-05ba-3154-a4fd-a3638e522a71",
+          "ExternalImageId": "normalized-mirror-3:0",
+          "Confidence": 99.99909973144531,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.86900329589844,
+        "Face": {
+          "FaceId": "829e5967-8709-45eb-98c5-41cf8512f0a6",
+          "BoundingBox": {
+            "Width": 0.45412400364875793,
+            "Height": 0.553534984588623,
+            "Left": 0.16120700538158417,
+            "Top": 0.24377700686454773
+          },
+          "ImageId": "9f552356-7930-3c8d-8e95-a41917373006",
+          "ExternalImageId": "normalized-mirror-4:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.84902954101562,
+        "Face": {
+          "FaceId": "17f40743-3af8-4a3c-8bcb-534cc4d81945",
+          "BoundingBox": {
+            "Width": 0.5092679858207703,
+            "Height": 0.587037980556488,
+            "Left": 0.26557299494743347,
+            "Top": 0.22998900711536407
+          },
+          "ImageId": "18482969-280a-3afc-84ac-a61a7d9cbb27",
+          "ExternalImageId": "normalized-original-3:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.76622772216797,
+        "Face": {
+          "FaceId": "8be381d0-6603-492a-8842-677750eeada9",
+          "BoundingBox": {
+            "Width": 0.47170498967170715,
+            "Height": 0.5557439923286438,
+            "Left": 0.35910001397132874,
+            "Top": 0.25559499859809875
+          },
+          "ImageId": "6c1948c2-d3fa-3f7a-bc9b-c726b314609b",
+          "ExternalImageId": "normalized-original-4:0",
+          "Confidence": 99.9990005493164,
+          "IndexFacesModelVersion": "7.0"
+        }
+      }
+    ]
+  },
+  {
+    "case": "blur-radius-5",
+    "faceCount": 1,
+    "requestId": "d1a97ee9-3ec1-4567-8c06-ca220690368f",
+    "matches": [
+      {
+        "Similarity": 99.88648986816406,
+        "Face": {
+          "FaceId": "17f40743-3af8-4a3c-8bcb-534cc4d81945",
+          "BoundingBox": {
+            "Width": 0.5092679858207703,
+            "Height": 0.587037980556488,
+            "Left": 0.26557299494743347,
+            "Top": 0.22998900711536407
+          },
+          "ImageId": "18482969-280a-3afc-84ac-a61a7d9cbb27",
+          "ExternalImageId": "normalized-original-3:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.82649230957031,
+        "Face": {
+          "FaceId": "3a45115e-d8c3-4ee6-aac3-f11143428a81",
+          "BoundingBox": {
+            "Width": 0.6530129909515381,
+            "Height": 0.6776310205459595,
+            "Left": 0.2199230045080185,
+            "Top": 0.18049199879169464
+          },
+          "ImageId": "3926bbed-d1bb-3d39-8bce-9e0532fb489b",
+          "ExternalImageId": "normalized-mirror-1:0",
+          "Confidence": 99.99960327148438,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.7891616821289,
+        "Face": {
+          "FaceId": "35fe19e6-9a3d-4291-a743-96db21b76eb8",
+          "BoundingBox": {
+            "Width": 0.574865996837616,
+            "Height": 0.66109699010849,
+            "Left": 0.20883800089359283,
+            "Top": 0.252685010433197
+          },
+          "ImageId": "d0b4b2b1-3e98-3f58-a323-6b6ec1e48f2a",
+          "ExternalImageId": "normalized-mirror-2:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.76000213623047,
+        "Face": {
+          "FaceId": "ce69b9a2-4528-47b1-9315-3e2210109b2b",
+          "BoundingBox": {
+            "Width": 0.6814219951629639,
+            "Height": 0.7105910181999207,
+            "Left": 0.16833800077438354,
+            "Top": 0.18881599605083466
+          },
+          "ImageId": "921ef083-7d95-3222-a6bd-46557e8b2ef5",
+          "ExternalImageId": "normalized-original-1:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.72372436523438,
+        "Face": {
+          "FaceId": "48d7e48b-5787-4fcd-88fa-1f30dcf97695",
+          "BoundingBox": {
+            "Width": 0.5159919857978821,
+            "Height": 0.5604109764099121,
+            "Left": 0.21254900097846985,
+            "Top": 0.2468699961900711
+          },
+          "ImageId": "b9e0d011-05ba-3154-a4fd-a3638e522a71",
+          "ExternalImageId": "normalized-mirror-3:0",
+          "Confidence": 99.99909973144531,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.51373291015625,
+        "Face": {
+          "FaceId": "0b017b11-8d59-41ec-9128-558cee145c96",
+          "BoundingBox": {
+            "Width": 0.5787400007247925,
+            "Height": 0.6493170261383057,
+            "Left": 0.21743500232696533,
+            "Top": 0.24784499406814575
+          },
+          "ImageId": "92b561d2-af7b-364f-a3f2-e67dd52cfc64",
+          "ExternalImageId": "normalized-original-2:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.46568298339844,
+        "Face": {
+          "FaceId": "fbce425a-638a-4166-a471-57c2c02e2753",
+          "BoundingBox": {
+            "Width": 0.4577459990978241,
+            "Height": 0.48097100853919983,
+            "Left": 0.27704501152038574,
+            "Top": 0.3158020079135895
+          },
+          "ImageId": "8652286f-33d1-3051-a8c4-c2a4e297a7ce",
+          "ExternalImageId": "normalized-original-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.42742919921875,
+        "Face": {
+          "FaceId": "6b14dba4-e3b8-4e3e-9cdd-09ae9a402c4d",
+          "BoundingBox": {
+            "Width": 0.47327500581741333,
+            "Height": 0.4859519898891449,
+            "Left": 0.2663919925689697,
+            "Top": 0.31958499550819397
+          },
+          "ImageId": "e16bcafc-5b85-366c-85e8-64f2029452eb",
+          "ExternalImageId": "normalized-mirror-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 99.09901428222656,
+        "Face": {
+          "FaceId": "829e5967-8709-45eb-98c5-41cf8512f0a6",
+          "BoundingBox": {
+            "Width": 0.45412400364875793,
+            "Height": 0.553534984588623,
+            "Left": 0.16120700538158417,
+            "Top": 0.24377700686454773
+          },
+          "ImageId": "9f552356-7930-3c8d-8e95-a41917373006",
+          "ExternalImageId": "normalized-mirror-4:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 98.52869415283203,
+        "Face": {
+          "FaceId": "8be381d0-6603-492a-8842-677750eeada9",
+          "BoundingBox": {
+            "Width": 0.47170498967170715,
+            "Height": 0.5557439923286438,
+            "Left": 0.35910001397132874,
+            "Top": 0.25559499859809875
+          },
+          "ImageId": "6c1948c2-d3fa-3f7a-bc9b-c726b314609b",
+          "ExternalImageId": "normalized-original-4:0",
+          "Confidence": 99.9990005493164,
+          "IndexFacesModelVersion": "7.0"
+        }
+      }
+    ]
+  },
+  {
+    "case": "tiny-40px",
+    "faceCount": 1,
+    "requestId": "43735c66-e59d-4321-b152-01f93871275b",
+    "matches": [
+      {
+        "Similarity": 97.16580200195312,
+        "Face": {
+          "FaceId": "17f40743-3af8-4a3c-8bcb-534cc4d81945",
+          "BoundingBox": {
+            "Width": 0.5092679858207703,
+            "Height": 0.587037980556488,
+            "Left": 0.26557299494743347,
+            "Top": 0.22998900711536407
+          },
+          "ImageId": "18482969-280a-3afc-84ac-a61a7d9cbb27",
+          "ExternalImageId": "normalized-original-3:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 97.13508605957031,
+        "Face": {
+          "FaceId": "35fe19e6-9a3d-4291-a743-96db21b76eb8",
+          "BoundingBox": {
+            "Width": 0.574865996837616,
+            "Height": 0.66109699010849,
+            "Left": 0.20883800089359283,
+            "Top": 0.252685010433197
+          },
+          "ImageId": "d0b4b2b1-3e98-3f58-a323-6b6ec1e48f2a",
+          "ExternalImageId": "normalized-mirror-2:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 96.91875457763672,
+        "Face": {
+          "FaceId": "48d7e48b-5787-4fcd-88fa-1f30dcf97695",
+          "BoundingBox": {
+            "Width": 0.5159919857978821,
+            "Height": 0.5604109764099121,
+            "Left": 0.21254900097846985,
+            "Top": 0.2468699961900711
+          },
+          "ImageId": "b9e0d011-05ba-3154-a4fd-a3638e522a71",
+          "ExternalImageId": "normalized-mirror-3:0",
+          "Confidence": 99.99909973144531,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 96.3394546508789,
+        "Face": {
+          "FaceId": "3a45115e-d8c3-4ee6-aac3-f11143428a81",
+          "BoundingBox": {
+            "Width": 0.6530129909515381,
+            "Height": 0.6776310205459595,
+            "Left": 0.2199230045080185,
+            "Top": 0.18049199879169464
+          },
+          "ImageId": "3926bbed-d1bb-3d39-8bce-9e0532fb489b",
+          "ExternalImageId": "normalized-mirror-1:0",
+          "Confidence": 99.99960327148438,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 95.33262634277344,
+        "Face": {
+          "FaceId": "fbce425a-638a-4166-a471-57c2c02e2753",
+          "BoundingBox": {
+            "Width": 0.4577459990978241,
+            "Height": 0.48097100853919983,
+            "Left": 0.27704501152038574,
+            "Top": 0.3158020079135895
+          },
+          "ImageId": "8652286f-33d1-3051-a8c4-c2a4e297a7ce",
+          "ExternalImageId": "normalized-original-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 95.13055419921875,
+        "Face": {
+          "FaceId": "ce69b9a2-4528-47b1-9315-3e2210109b2b",
+          "BoundingBox": {
+            "Width": 0.6814219951629639,
+            "Height": 0.7105910181999207,
+            "Left": 0.16833800077438354,
+            "Top": 0.18881599605083466
+          },
+          "ImageId": "921ef083-7d95-3222-a6bd-46557e8b2ef5",
+          "ExternalImageId": "normalized-original-1:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 95.03614044189453,
+        "Face": {
+          "FaceId": "6b14dba4-e3b8-4e3e-9cdd-09ae9a402c4d",
+          "BoundingBox": {
+            "Width": 0.47327500581741333,
+            "Height": 0.4859519898891449,
+            "Left": 0.2663919925689697,
+            "Top": 0.31958499550819397
+          },
+          "ImageId": "e16bcafc-5b85-366c-85e8-64f2029452eb",
+          "ExternalImageId": "normalized-mirror-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 94.6164779663086,
+        "Face": {
+          "FaceId": "0b017b11-8d59-41ec-9128-558cee145c96",
+          "BoundingBox": {
+            "Width": 0.5787400007247925,
+            "Height": 0.6493170261383057,
+            "Left": 0.21743500232696533,
+            "Top": 0.24784499406814575
+          },
+          "ImageId": "92b561d2-af7b-364f-a3f2-e67dd52cfc64",
+          "ExternalImageId": "normalized-original-2:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 91.1976547241211,
+        "Face": {
+          "FaceId": "829e5967-8709-45eb-98c5-41cf8512f0a6",
+          "BoundingBox": {
+            "Width": 0.45412400364875793,
+            "Height": 0.553534984588623,
+            "Left": 0.16120700538158417,
+            "Top": 0.24377700686454773
+          },
+          "ImageId": "9f552356-7930-3c8d-8e95-a41917373006",
+          "ExternalImageId": "normalized-mirror-4:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 88.51669311523438,
+        "Face": {
+          "FaceId": "8be381d0-6603-492a-8842-677750eeada9",
+          "BoundingBox": {
+            "Width": 0.47170498967170715,
+            "Height": 0.5557439923286438,
+            "Left": 0.35910001397132874,
+            "Top": 0.25559499859809875
+          },
+          "ImageId": "6c1948c2-d3fa-3f7a-bc9b-c726b314609b",
+          "ExternalImageId": "normalized-original-4:0",
+          "Confidence": 99.9990005493164,
+          "IndexFacesModelVersion": "7.0"
+        }
+      }
+    ]
+  },
+  {
+    "case": "lower-half-covered",
+    "faceCount": 1,
+    "requestId": "5234f9e9-fa1f-4e2f-a722-86534faa1962",
+    "matches": [
+      {
+        "Similarity": 98.71148681640625,
+        "Face": {
+          "FaceId": "48d7e48b-5787-4fcd-88fa-1f30dcf97695",
+          "BoundingBox": {
+            "Width": 0.5159919857978821,
+            "Height": 0.5604109764099121,
+            "Left": 0.21254900097846985,
+            "Top": 0.2468699961900711
+          },
+          "ImageId": "b9e0d011-05ba-3154-a4fd-a3638e522a71",
+          "ExternalImageId": "normalized-mirror-3:0",
+          "Confidence": 99.99909973144531,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 98.64720916748047,
+        "Face": {
+          "FaceId": "35fe19e6-9a3d-4291-a743-96db21b76eb8",
+          "BoundingBox": {
+            "Width": 0.574865996837616,
+            "Height": 0.66109699010849,
+            "Left": 0.20883800089359283,
+            "Top": 0.252685010433197
+          },
+          "ImageId": "d0b4b2b1-3e98-3f58-a323-6b6ec1e48f2a",
+          "ExternalImageId": "normalized-mirror-2:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 98.02783203125,
+        "Face": {
+          "FaceId": "0b017b11-8d59-41ec-9128-558cee145c96",
+          "BoundingBox": {
+            "Width": 0.5787400007247925,
+            "Height": 0.6493170261383057,
+            "Left": 0.21743500232696533,
+            "Top": 0.24784499406814575
+          },
+          "ImageId": "92b561d2-af7b-364f-a3f2-e67dd52cfc64",
+          "ExternalImageId": "normalized-original-2:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 97.41133117675781,
+        "Face": {
+          "FaceId": "17f40743-3af8-4a3c-8bcb-534cc4d81945",
+          "BoundingBox": {
+            "Width": 0.5092679858207703,
+            "Height": 0.587037980556488,
+            "Left": 0.26557299494743347,
+            "Top": 0.22998900711536407
+          },
+          "ImageId": "18482969-280a-3afc-84ac-a61a7d9cbb27",
+          "ExternalImageId": "normalized-original-3:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 97.28926849365234,
+        "Face": {
+          "FaceId": "3a45115e-d8c3-4ee6-aac3-f11143428a81",
+          "BoundingBox": {
+            "Width": 0.6530129909515381,
+            "Height": 0.6776310205459595,
+            "Left": 0.2199230045080185,
+            "Top": 0.18049199879169464
+          },
+          "ImageId": "3926bbed-d1bb-3d39-8bce-9e0532fb489b",
+          "ExternalImageId": "normalized-mirror-1:0",
+          "Confidence": 99.99960327148438,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 97.00811767578125,
+        "Face": {
+          "FaceId": "ce69b9a2-4528-47b1-9315-3e2210109b2b",
+          "BoundingBox": {
+            "Width": 0.6814219951629639,
+            "Height": 0.7105910181999207,
+            "Left": 0.16833800077438354,
+            "Top": 0.18881599605083466
+          },
+          "ImageId": "921ef083-7d95-3222-a6bd-46557e8b2ef5",
+          "ExternalImageId": "normalized-original-1:0",
+          "Confidence": 99.99970245361328,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 96.35450744628906,
+        "Face": {
+          "FaceId": "6b14dba4-e3b8-4e3e-9cdd-09ae9a402c4d",
+          "BoundingBox": {
+            "Width": 0.47327500581741333,
+            "Height": 0.4859519898891449,
+            "Left": 0.2663919925689697,
+            "Top": 0.31958499550819397
+          },
+          "ImageId": "e16bcafc-5b85-366c-85e8-64f2029452eb",
+          "ExternalImageId": "normalized-mirror-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 96.28026580810547,
+        "Face": {
+          "FaceId": "fbce425a-638a-4166-a471-57c2c02e2753",
+          "BoundingBox": {
+            "Width": 0.4577459990978241,
+            "Height": 0.48097100853919983,
+            "Left": 0.27704501152038574,
+            "Top": 0.3158020079135895
+          },
+          "ImageId": "8652286f-33d1-3051-a8c4-c2a4e297a7ce",
+          "ExternalImageId": "normalized-original-0:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 91.63185119628906,
+        "Face": {
+          "FaceId": "829e5967-8709-45eb-98c5-41cf8512f0a6",
+          "BoundingBox": {
+            "Width": 0.45412400364875793,
+            "Height": 0.553534984588623,
+            "Left": 0.16120700538158417,
+            "Top": 0.24377700686454773
+          },
+          "ImageId": "9f552356-7930-3c8d-8e95-a41917373006",
+          "ExternalImageId": "normalized-mirror-4:0",
+          "Confidence": 99.99979400634766,
+          "IndexFacesModelVersion": "7.0"
+        }
+      },
+      {
+        "Similarity": 88.5851821899414,
+        "Face": {
+          "FaceId": "8be381d0-6603-492a-8842-677750eeada9",
+          "BoundingBox": {
+            "Width": 0.47170498967170715,
+            "Height": 0.5557439923286438,
+            "Left": 0.35910001397132874,
+            "Top": 0.25559499859809875
+          },
+          "ImageId": "6c1948c2-d3fa-3f7a-bc9b-c726b314609b",
+          "ExternalImageId": "normalized-original-4:0",
+          "Confidence": 99.9990005493164,
+          "IndexFacesModelVersion": "7.0"
+        }
+      }
+    ]
+  }
+]

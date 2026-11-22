@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-22",
+  "timezone": "Asia/Bangkok",
+  "branch": "feat/us-23-us-24-s3-face-enrollment",
+  "commit": "41ffbe55557fc39652a573f8218030e94933935e",
+  "region": "ap-southeast-1",
+  "faceProvider": "rekognition",
+  "transport": "sqs",
+  "bucket": "camerai-s4-dev-media-093206112026",
+  "functionName": "camerai-s4-dev-face",
+  "callbackUrl": "https://park-allowing-desired-submissions.trycloudflare.com/api/v1",
+  "threshold": 0.9,
+  "ui": "http://localhost:3002",
+  "uiAuth": "isolated local JWT fixture",
+  "mainAuth": "cognito"
+}

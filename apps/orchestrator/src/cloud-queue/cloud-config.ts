@@ -1,15 +1,25 @@
 import { ConfigService } from '@nestjs/config';
+import {
+  readFaceConfig,
+  readFaceProvider,
+  validateRekognitionCollectionPrefix,
+} from '../known-faces/face-config';
 
 export function readCloudConfig(config: ConfigService) {
   const mode = config.get<string>('FACE_JOB_TRANSPORT', 'bullmq');
   if (!['bullmq', 'sqs'].includes(mode))
     throw new Error('FACE_JOB_TRANSPORT must be bullmq or sqs');
+  const faceProvider = readFaceProvider(config);
+  if (faceProvider === 'rekognition') {
+    // Validate cloud face enrollment configuration eagerly on startup.
+    readFaceConfig(config);
+  }
   const required = (key: string) => {
     const value = config.get<string>(key)?.trim();
     if (!value) throw new Error(`Missing cloud configuration: ${key}`);
     return value;
   };
-  if (mode === 'bullmq') return { mode } as const;
+  if (mode === 'bullmq') return { mode, faceProvider } as const;
   const region = required('AWS_REGION');
   const consumerEnabled = required('APPLICATION_RESULTS_CONSUMER_ENABLED');
   if (!['true', 'false'].includes(consumerEnabled))
@@ -32,13 +42,19 @@ export function readCloudConfig(config: ConfigService) {
   }
   if (new Set(queues).size !== 3) throw new Error('Cloud queues must be separate');
   if (required('STORAGE_PROVIDER') !== 's3') throw new Error('SQS requires STORAGE_PROVIDER=s3');
+  const rekognitionCollectionPrefix = validateRekognitionCollectionPrefix(
+    config.get<string>('REKOGNITION_COLLECTION_PREFIX'),
+    { allowDefault: faceProvider !== 'rekognition' },
+  );
   return {
     mode,
+    faceProvider,
     region,
     consumerEnabled: consumerEnabled === 'true',
     faceQueue: queues[0]!,
     notificationQueue: queues[1]!,
     resultsQueue: queues[2]!,
     bucket: required('S3_BUCKET'),
+    rekognitionCollectionPrefix,
   } as const;
 }

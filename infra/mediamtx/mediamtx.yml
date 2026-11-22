@@ -18,6 +18,8 @@ authHTTPExclude:
   - action: pprof
 
 paths:
+  all_others:
+    source: publisher
   cam_living_room:
     source: publisher
   cam_kitchen:

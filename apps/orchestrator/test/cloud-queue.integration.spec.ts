@@ -3,6 +3,8 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { Pool } from 'pg';
 import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
+import { DatabaseService } from '../src/database/database.service';
+import { KnownFacesRepository } from '../src/known-faces/known-faces.repository';
 
 jest.setTimeout(180000);
 describe('cloud queue PostgreSQL migration and atomic intent', () => {
@@ -97,5 +99,96 @@ describe('cloud queue PostgreSQL migration and atomic intent', () => {
     } finally {
       client.release();
     }
+  });
+
+  it('0023 migration allows valid environment collection prefixes and enforces per-owner scope', async () => {
+    for (const prefix of [
+      'camerai-s4-dev-owner-',
+      'argusai-staging-owner-',
+      'argusai-production-owner-',
+    ]) {
+      await pool.query(
+        `INSERT INTO cloud_face_collections (owner_user_id, collection_id, version)
+         VALUES ($1, $2, 1)
+         ON CONFLICT (owner_user_id) DO UPDATE SET collection_id = EXCLUDED.collection_id, version = cloud_face_collections.version + 1`,
+        [owner, `${prefix}${owner}`],
+      );
+    }
+
+    await expect(
+      pool.query(`UPDATE cloud_face_collections SET collection_id = $2 WHERE owner_user_id = $1`, [
+        owner,
+        `invalid-prefix-${owner}`,
+      ]),
+    ).rejects.toThrow();
+
+    await expect(
+      pool.query(`UPDATE cloud_face_collections SET collection_id = $2 WHERE owner_user_id = $1`, [
+        owner,
+        `argusai-staging-owner-${randomUUID()}`,
+      ]),
+    ).rejects.toThrow();
+  });
+
+  it('persists Rekognition enrollment mappings and increments collection version on create/update/remove', async () => {
+    const repo = new KnownFacesRepository(new DatabaseService(pool));
+    const collectionId = `argusai-staging-owner-${owner}`;
+    const before = await pool.query<{ version: number }>(
+      'SELECT version FROM cloud_face_collections WHERE owner_user_id = $1',
+      [owner],
+    );
+    const startVersion = before.rows[0]?.version ?? 0;
+
+    const knownFaceId = await repo.createRekognition(
+      owner,
+      { personName: 'Staging Member', relationship: 'Family' },
+      {
+        collectionId,
+        faceIds: ['rek-int-face-1', 'rek-int-face-2'],
+        modelVersion: 'rekognition-7.0',
+        sourceImageCount: 2,
+      },
+    );
+
+    const listed = await repo.list(owner);
+    const created = listed.find((item) => item.id === knownFaceId);
+    expect(created).toMatchObject({
+      provider: 'REKOGNITION',
+      recognitionStatus: 'READY',
+      sourceImageCount: 2,
+    });
+
+    const afterCreate = await pool.query<{ version: number }>(
+      'SELECT version FROM cloud_face_collections WHERE owner_user_id = $1',
+      [owner],
+    );
+    expect(afterCreate.rows[0]?.version).toBe(startVersion + 1);
+
+    const mappings = await pool.query<{ face_id: string }>(
+      'SELECT face_id FROM cloud_face_mappings WHERE owner_user_id = $1 AND known_face_id = $2 ORDER BY face_id',
+      [owner, knownFaceId],
+    );
+    expect(mappings.rows.map((row) => row.face_id)).toEqual(['rek-int-face-1', 'rek-int-face-2']);
+
+    await repo.update(owner, knownFaceId, { personName: 'Staging Member Renamed' }, owner);
+    const afterUpdate = await pool.query<{ version: number }>(
+      'SELECT version FROM cloud_face_collections WHERE owner_user_id = $1',
+      [owner],
+    );
+    expect(afterUpdate.rows[0]?.version).toBe(startVersion + 2);
+
+    await repo.removeRekognition(owner, knownFaceId, collectionId, '127.0.0.1', 'jest');
+    const afterDelete = await pool.query<{ version: number }>(
+      'SELECT version FROM cloud_face_collections WHERE owner_user_id = $1',
+      [owner],
+    );
+    expect(afterDelete.rows[0]?.version).toBe(startVersion + 3);
+    expect(
+      (
+        await pool.query('SELECT * FROM cloud_face_mappings WHERE known_face_id = $1', [
+          knownFaceId,
+        ])
+      ).rows,
+    ).toHaveLength(0);
   });
 });

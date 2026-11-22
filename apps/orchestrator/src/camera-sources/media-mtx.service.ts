@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
+import { readNonEmptyConfigString } from '../config/env-config';
 
 export const SLUG_REGEX = /^[a-z][a-z0-9_]{2,63}$/;
 
@@ -38,16 +39,23 @@ export class MediaMtxService {
   private readonly readTokenMap = new Map<string, ActiveSessionEntry>();
 
   constructor(private readonly configService: ConfigService) {
-    this.webrtcBaseUrl = this.configService.get<string>(
+    this.webrtcBaseUrl = readNonEmptyConfigString(
+      this.configService,
       'MEDIAMTX_WEBRTC_URL',
       'http://localhost:8889',
     );
-    this.rtspBaseUrl = this.configService.get<string>('MEDIAMTX_RTSP_URL', 'rtsp://localhost:8554');
-    this.publishUsername = this.configService.get<string>(
+    this.rtspBaseUrl = readNonEmptyConfigString(
+      this.configService,
+      'MEDIAMTX_RTSP_URL',
+      'rtsp://localhost:8554',
+    );
+    this.publishUsername = readNonEmptyConfigString(
+      this.configService,
       'MEDIAMTX_PUBLISH_USERNAME',
       'cam-internal',
     );
-    this.publishPassword = this.configService.get<string>(
+    this.publishPassword = readNonEmptyConfigString(
+      this.configService,
       'MEDIAMTX_PUBLISH_PASSWORD',
       'local-dev-password',
     );
