@@ -2,6 +2,8 @@
 
 Ngày kiểm thử: **22/11/2026**, múi giờ **Asia/Bangkok (UTC+7)**. Logs AWS dùng UTC. Nhánh: `feat/us-23-us-24-s3-face-enrollment`. Thông tin commit và môi trường: [environment.json](data/environment.json).
 
+**Lưu ý khi review trên GitHub:** thư mục `logs/` được giữ local theo `.gitignore`, không nằm trong PR. Các liên kết `logs/` bên dưới chỉ dùng được tại workspace kiểm thử. Reviewer có thể kiểm tra dữ liệu đã lưu trong `data/` và ảnh trong `screenshots/`; kết quả kiểm thử đã tổng hợp tại [validation-summary.json](data/validation-summary.json). Không xem các log local là bằng chứng đã được đính kèm trên GitHub.
+
 ## 1. Kết luận theo yêu cầu
 
 | Câu hỏi                                                           | Kết quả thực nghiệm                                                                                                                                                                                                                        |
