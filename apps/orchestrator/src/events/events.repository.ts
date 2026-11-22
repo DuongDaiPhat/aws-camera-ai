@@ -231,6 +231,8 @@ export interface CameraRecord {
   zone_config_version?: number;
   rtsp_url?: string;
   owner_user_id?: string;
+  detect_width?: number;
+  detect_height?: number;
 }
 
 export interface ZoneRecord {
@@ -322,7 +324,9 @@ export class EventsRepository {
    */
   async findCameraBySlug(slug: string): Promise<CameraRecord | null> {
     const query = `
-      SELECT c.id, c.name, c.slug, c.timezone, d.owner_user_id,
+        SELECT c.id, c.name, c.slug, c.timezone, d.owner_user_id,
+               COALESCE(f.detect_width, c.detect_width) AS detect_width,
+               COALESCE(f.detect_height, c.detect_height) AS detect_height,
              COALESCE(f.sync_status = 'SYNCED' AND f.applied_version = f.config_version, false)
                AS zone_config_applied,
              f.applied_version AS zone_config_version
