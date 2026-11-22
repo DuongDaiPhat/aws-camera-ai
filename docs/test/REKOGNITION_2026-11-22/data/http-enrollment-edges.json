@@ -1,0 +1,120 @@
+[
+  {
+    "case": "blank",
+    "httpStatus": 422,
+    "response": {
+      "error": {
+        "code": "NO_FACE_DETECTED",
+        "message": "Mỗi ảnh đăng ký phải chứa đúng một khuôn mặt.",
+        "details": {
+          "images": [
+            {
+              "imageIndex": 0,
+              "code": "NO_FACE_DETECTED",
+              "faces": []
+            }
+          ]
+        },
+        "traceId": "eac5a047-bb73-4b46-a73d-cf6189b52a6e"
+      }
+    },
+    "expectedCode": "NO_FACE_DETECTED",
+    "passed": true
+  },
+  {
+    "case": "fake-png",
+    "httpStatus": 400,
+    "response": {
+      "error": {
+        "code": "INVALID_IMAGE",
+        "message": "Chỉ nhận ảnh JPEG, PNG hoặc WebP hợp lệ.",
+        "traceId": "9aed5a04-36f2-430a-b933-bc181b6a76b4"
+      }
+    },
+    "expectedCode": "INVALID_IMAGE",
+    "passed": true
+  },
+  {
+    "case": "truncated-jpeg",
+    "httpStatus": 400,
+    "response": {
+      "error": {
+        "code": "INVALID_IMAGE",
+        "message": "Ảnh không hợp lệ cho Rekognition (chỉ hỗ trợ JPEG/PNG).",
+        "traceId": "b4662328-3e0d-45d7-b806-0bb7d9ac2f1e"
+      }
+    },
+    "expectedCode": "INVALID_IMAGE",
+    "passed": true
+  },
+  {
+    "case": "six-images",
+    "httpStatus": 400,
+    "response": {
+      "error": {
+        "code": "INVALID_IMAGE",
+        "message": "Dữ liệu đăng ký không hợp lệ.",
+        "traceId": "fc83f9c8-4b79-45e5-b116-754d557d1224"
+      }
+    },
+    "expectedCode": "INVALID_IMAGE",
+    "passed": true
+  },
+  {
+    "case": "oversized",
+    "httpStatus": 413,
+    "response": {
+      "error": {
+        "code": "IMAGE_TOO_LARGE",
+        "message": "Ảnh vượt giới hạn dung lượng.",
+        "traceId": "012807bb-cb88-4e0a-b4dc-3e58bf417fec"
+      }
+    },
+    "expectedCode": "IMAGE_TOO_LARGE",
+    "passed": true
+  },
+  {
+    "case": "duplicate-name",
+    "httpStatus": 409,
+    "response": {
+      "error": {
+        "code": "KNOWN_FACE_NAME_EXISTS",
+        "message": "Tên người quen đã tồn tại.",
+        "traceId": "4ddc074d-4b12-4148-b838-897f61946f09"
+      }
+    },
+    "expectedCode": "KNOWN_FACE_NAME_EXISTS",
+    "passed": true
+  },
+  {
+    "case": "invalid-selection-json",
+    "httpStatus": 422,
+    "response": {
+      "error": {
+        "code": "FACE_SELECTION_INVALID",
+        "message": "Lựa chọn khuôn mặt không hợp lệ.",
+        "traceId": "380749c1-4002-42b2-9804-a5987a335161"
+      }
+    },
+    "expectedCode": "FACE_SELECTION_INVALID",
+    "passed": true
+  },
+  {
+    "case": "webp",
+    "httpStatus": 201,
+    "response": {
+      "id": "f6b88874-52fe-4d16-9409-3520d43d7b7e",
+      "personName": "HTTP webp fe89ee",
+      "relationship": null,
+      "linkedUserId": null,
+      "provider": "REKOGNITION",
+      "modelVersion": "rekognition-7.0",
+      "sourceImageCount": 1,
+      "isActive": true,
+      "createdAt": "2026-11-22T00:33:26.798Z",
+      "recognitionStatus": "READY"
+    },
+    "expectedCode": null,
+    "passed": true
+  }
+]

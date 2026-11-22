@@ -1,0 +1,1858 @@
+[
+  {
+    "variant": "original",
+    "angles": [0],
+    "n": 1,
+    "tp": 56,
+    "fn": 30,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 26,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6511627906976745,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 30,
+        "fn": 14,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 15,
+        "fn": 4,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 1],
+    "n": 2,
+    "tp": 57,
+    "fn": 29,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 25,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6627906976744186,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 30,
+        "fn": 14,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 16,
+        "fn": 3,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 2],
+    "n": 2,
+    "tp": 58,
+    "fn": 28,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 24,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6744186046511628,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 31,
+        "fn": 13,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 16,
+        "fn": 3,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 3],
+    "n": 2,
+    "tp": 61,
+    "fn": 25,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 21,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.7093023255813954,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 30,
+        "fn": 14,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 13,
+        "fn": 10,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 18,
+        "fn": 1,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 4],
+    "n": 2,
+    "tp": 60,
+    "fn": 26,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 22,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6976744186046512,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 32,
+        "fn": 12,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 1, 2],
+    "n": 3,
+    "tp": 58,
+    "fn": 28,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 24,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6744186046511628,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 31,
+        "fn": 13,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 16,
+        "fn": 3,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 1, 3],
+    "n": 3,
+    "tp": 61,
+    "fn": 25,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 21,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.7093023255813954,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 30,
+        "fn": 14,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 13,
+        "fn": 10,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 18,
+        "fn": 1,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 1, 4],
+    "n": 3,
+    "tp": 60,
+    "fn": 26,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 22,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6976744186046512,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 32,
+        "fn": 12,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 2, 3],
+    "n": 3,
+    "tp": 62,
+    "fn": 24,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 20,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.7209302325581395,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 31,
+        "fn": 13,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 13,
+        "fn": 10,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 18,
+        "fn": 1,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 2, 4],
+    "n": 3,
+    "tp": 60,
+    "fn": 26,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 22,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6976744186046512,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 32,
+        "fn": 12,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 3, 4],
+    "n": 3,
+    "tp": 63,
+    "fn": 23,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 19,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.7325581395348837,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 32,
+        "fn": 12,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 13,
+        "fn": 10,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 18,
+        "fn": 1,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 1, 2, 3],
+    "n": 4,
+    "tp": 62,
+    "fn": 24,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 20,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.7209302325581395,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 31,
+        "fn": 13,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 13,
+        "fn": 10,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 18,
+        "fn": 1,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 1, 2, 4],
+    "n": 4,
+    "tp": 60,
+    "fn": 26,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 22,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6976744186046512,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 32,
+        "fn": 12,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 1, 3, 4],
+    "n": 4,
+    "tp": 63,
+    "fn": 23,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 19,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.7325581395348837,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 32,
+        "fn": 12,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 13,
+        "fn": 10,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 18,
+        "fn": 1,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 2, 3, 4],
+    "n": 4,
+    "tp": 63,
+    "fn": 23,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 19,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.7325581395348837,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 32,
+        "fn": 12,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 13,
+        "fn": 10,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 18,
+        "fn": 1,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "original",
+    "angles": [0, 1, 2, 3, 4],
+    "n": 5,
+    "tp": 63,
+    "fn": 23,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 19,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.7325581395348837,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 32,
+        "fn": 12,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 13,
+        "fn": 10,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 18,
+        "fn": 1,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0],
+    "n": 1,
+    "tp": 52,
+    "fn": 34,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 30,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6046511627906976,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 27,
+        "fn": 17,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 9,
+        "fn": 14,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 16,
+        "fn": 3,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 1],
+    "n": 2,
+    "tp": 56,
+    "fn": 30,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 26,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6511627906976745,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 30,
+        "fn": 14,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 9,
+        "fn": 14,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 2],
+    "n": 2,
+    "tp": 58,
+    "fn": 28,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 24,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6744186046511628,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 30,
+        "fn": 14,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 3],
+    "n": 2,
+    "tp": 55,
+    "fn": 31,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 27,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6395348837209303,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 29,
+        "fn": 15,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 10,
+        "fn": 13,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 16,
+        "fn": 3,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 4],
+    "n": 2,
+    "tp": 58,
+    "fn": 28,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 24,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6744186046511628,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 31,
+        "fn": 13,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 10,
+        "fn": 13,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 1, 2],
+    "n": 3,
+    "tp": 59,
+    "fn": 27,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 23,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.686046511627907,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 31,
+        "fn": 13,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 1, 3],
+    "n": 3,
+    "tp": 58,
+    "fn": 28,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 24,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6744186046511628,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 31,
+        "fn": 13,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 10,
+        "fn": 13,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 1, 4],
+    "n": 3,
+    "tp": 59,
+    "fn": 27,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 23,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.686046511627907,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 32,
+        "fn": 12,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 10,
+        "fn": 13,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 2, 3],
+    "n": 3,
+    "tp": 60,
+    "fn": 26,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 22,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6976744186046512,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 32,
+        "fn": 12,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 2, 4],
+    "n": 3,
+    "tp": 61,
+    "fn": 25,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 21,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.7093023255813954,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 33,
+        "fn": 11,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 3, 4],
+    "n": 3,
+    "tp": 59,
+    "fn": 27,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 23,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.686046511627907,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 32,
+        "fn": 12,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 10,
+        "fn": 13,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 1, 2, 3],
+    "n": 4,
+    "tp": 60,
+    "fn": 26,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 22,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6976744186046512,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 32,
+        "fn": 12,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 1, 2, 4],
+    "n": 4,
+    "tp": 61,
+    "fn": 25,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 21,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.7093023255813954,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 33,
+        "fn": 11,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 1, 3, 4],
+    "n": 4,
+    "tp": 60,
+    "fn": 26,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 22,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.6976744186046512,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 33,
+        "fn": 11,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 10,
+        "fn": 13,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 2, 3, 4],
+    "n": 4,
+    "tp": 62,
+    "fn": 24,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 20,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.7209302325581395,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 34,
+        "fn": 10,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  },
+  {
+    "variant": "mirror",
+    "angles": [0, 1, 2, 3, 4],
+    "n": 5,
+    "tp": 62,
+    "fn": 24,
+    "fp": 0,
+    "tn": 324,
+    "abstain": 29,
+    "positiveAbstain": 4,
+    "negativeAbstain": 25,
+    "fnClassifiedUnknown": 20,
+    "tnClassifiedUnknown": 299,
+    "recall": 0.7209302325581395,
+    "fpr": 0.0,
+    "videos": [
+      {
+        "video": "has_known_face_no_glasses.mp4",
+        "tp": 34,
+        "fn": 10,
+        "fp": 0,
+        "tn": 1,
+        "abstain": 3,
+        "positiveAbstain": 2,
+        "negativeAbstain": 1
+      },
+      {
+        "video": "has_known_face_with_glasses.mp4",
+        "tp": 11,
+        "fn": 12,
+        "fp": 0,
+        "tn": 0,
+        "abstain": 2,
+        "positiveAbstain": 2,
+        "negativeAbstain": 0
+      },
+      {
+        "video": "has_known_face_with_many_stranger_faces.mp4",
+        "tp": 17,
+        "fn": 2,
+        "fp": 0,
+        "tn": 238,
+        "abstain": 15,
+        "positiveAbstain": 0,
+        "negativeAbstain": 15
+      },
+      {
+        "video": "no_known_face.mp4",
+        "tp": 0,
+        "fn": 0,
+        "fp": 0,
+        "tn": 85,
+        "abstain": 9,
+        "positiveAbstain": 0,
+        "negativeAbstain": 9
+      }
+    ]
+  }
+]

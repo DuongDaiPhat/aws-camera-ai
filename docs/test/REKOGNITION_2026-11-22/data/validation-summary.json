@@ -1,0 +1,35 @@
+{
+  "status": "passed",
+  "orchestrator": {
+    "suites": 5,
+    "tests": 50,
+    "log": "logs/orchestrator-tests.txt"
+  },
+  "lambda": {
+    "tests": 12,
+    "log": "logs/lambda-tests.txt"
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "scope": "orchestrator including tests"
+  },
+  "build": {
+    "exitCode": 0,
+    "scope": "orchestrator"
+  },
+  "eslint": {
+    "exitCode": 0,
+    "errors": 0,
+    "warnings": 10
+  },
+  "ruff": {
+    "exitCode": 0
+  },
+  "gitDiffCheck": {
+    "exitCode": 0
+  },
+  "secretScan": {
+    "status": "passed",
+    "logs": ["logs/secret-scan.txt", "logs/evidence-secret-scan.txt"]
+  }
+}

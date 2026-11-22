@@ -1,0 +1,758 @@
+[
+  {
+    "sampleId": "has_known_face_no_glasses__000",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__000.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__001",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 2,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__001.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__002",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 4,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__002.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__003",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 6,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__003.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__004",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 8,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__004.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__005",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 10,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__005.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__006",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 12,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__006.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__007",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 14,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__007.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__008",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 16,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__008.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__009",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 18,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__009.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__010",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 20,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__010.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__011",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 22,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__011.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__012",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 24,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__012.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__013",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 26,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__013.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__014",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 28,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__014.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__015",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 30,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__015.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__016",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 32,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__016.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__017",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 34,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__017.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__018",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 36,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__018.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__019",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 38,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__019.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__020",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 40,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__020.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__021",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 42,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__021.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__022",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 44,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__022.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__023",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 46,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__023.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__024",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 48,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__024.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__025",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 50,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__025.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__026",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 52,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__026.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__027",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 54,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__027.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__028",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 56,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__028.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__029",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 58,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__029.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__030",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 60,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__030.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__031",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 62,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__031.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__032",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 64,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__032.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__033",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 66,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__033.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__034",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 68,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__034.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__035",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 70,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__035.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__036",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 72,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__036.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__037",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 74,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__037.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__038",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 76,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__038.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__039",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 78,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__039.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__040",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 80,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__040.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__041",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 82,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__041.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__042",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 84,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__042.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__043",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 86,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__043.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__044",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 88,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__044.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__045",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 90,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__045.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__046",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 92,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__046.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__047",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 94,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__047.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__048",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 96,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__048.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__049",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 98,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__049.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__050",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 100,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__050.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__051",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 102,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__051.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__052",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 104,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__052.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__053",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 106,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__053.jpg"
+  },
+  {
+    "sampleId": "has_known_face_no_glasses__054",
+    "video": "has_known_face_no_glasses.mp4",
+    "time": 108,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_no_glasses__054.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__000",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__000.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__001",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 2,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__001.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__002",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 4,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__002.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__003",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 6,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__003.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__004",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 8,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__004.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__005",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 10,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__005.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__006",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 12,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__006.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__007",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 14,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__007.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__008",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 16,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__008.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__009",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 18,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__009.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__010",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 20,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__010.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__011",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 22,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__011.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__012",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 24,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__012.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__013",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 26,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__013.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__014",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 28,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__014.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__015",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 30,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__015.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__016",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 32,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__016.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__017",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 34,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__017.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__018",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 36,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__018.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__019",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 38,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__019.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__020",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 40,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__020.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__021",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 42,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__021.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__022",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 44,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__022.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__023",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 46,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__023.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__024",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 48,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__024.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__025",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 50,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__025.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__026",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 52,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__026.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__027",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 54,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__027.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__028",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 56,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__028.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__029",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 58,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__029.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__030",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 60,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__030.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__031",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 62,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__031.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__032",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 64,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__032.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__033",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 66,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__033.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__034",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 68,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__034.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__035",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 70,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__035.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_glasses__036",
+    "video": "has_known_face_with_glasses.mp4",
+    "time": 72,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_glasses__036.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__000",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 0.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__000.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__001",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 0.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__001.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__002",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 1.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__002.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__003",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 1.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__003.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__004",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 2.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__004.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__005",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 2.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__005.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__006",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 3.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__006.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__007",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 3.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__007.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__008",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 4.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__008.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__009",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 4.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__009.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__010",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 5.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__010.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__011",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 5.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__011.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__012",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 6.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__012.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__013",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 6.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__013.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__014",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 7.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__014.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__015",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 7.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__015.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__016",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 8.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__016.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__017",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 8.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__017.jpg"
+  },
+  {
+    "sampleId": "has_known_face_with_many_stranger_faces__018",
+    "video": "has_known_face_with_many_stranger_faces.mp4",
+    "time": 9.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\has_known_face_with_many_stranger_faces__018.jpg"
+  },
+  {
+    "sampleId": "no_known_face__000",
+    "video": "no_known_face.mp4",
+    "time": 0.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__000.jpg"
+  },
+  {
+    "sampleId": "no_known_face__001",
+    "video": "no_known_face.mp4",
+    "time": 0.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__001.jpg"
+  },
+  {
+    "sampleId": "no_known_face__002",
+    "video": "no_known_face.mp4",
+    "time": 1.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__002.jpg"
+  },
+  {
+    "sampleId": "no_known_face__003",
+    "video": "no_known_face.mp4",
+    "time": 1.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__003.jpg"
+  },
+  {
+    "sampleId": "no_known_face__004",
+    "video": "no_known_face.mp4",
+    "time": 2.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__004.jpg"
+  },
+  {
+    "sampleId": "no_known_face__005",
+    "video": "no_known_face.mp4",
+    "time": 2.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__005.jpg"
+  },
+  {
+    "sampleId": "no_known_face__006",
+    "video": "no_known_face.mp4",
+    "time": 3.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__006.jpg"
+  },
+  {
+    "sampleId": "no_known_face__007",
+    "video": "no_known_face.mp4",
+    "time": 3.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__007.jpg"
+  },
+  {
+    "sampleId": "no_known_face__008",
+    "video": "no_known_face.mp4",
+    "time": 4.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__008.jpg"
+  },
+  {
+    "sampleId": "no_known_face__009",
+    "video": "no_known_face.mp4",
+    "time": 4.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__009.jpg"
+  },
+  {
+    "sampleId": "no_known_face__010",
+    "video": "no_known_face.mp4",
+    "time": 5.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__010.jpg"
+  },
+  {
+    "sampleId": "no_known_face__011",
+    "video": "no_known_face.mp4",
+    "time": 5.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__011.jpg"
+  },
+  {
+    "sampleId": "no_known_face__012",
+    "video": "no_known_face.mp4",
+    "time": 6.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__012.jpg"
+  },
+  {
+    "sampleId": "no_known_face__013",
+    "video": "no_known_face.mp4",
+    "time": 6.5,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__013.jpg"
+  },
+  {
+    "sampleId": "no_known_face__014",
+    "video": "no_known_face.mp4",
+    "time": 7.0,
+    "framePath": "artifacts\\rekognition-eval-2026-11-22\\frames\\no_known_face__014.jpg"
+  }
+]
