@@ -28,3 +28,6 @@ paths:
     source: publisher
   cam_study_room:
     source: publisher
+  # Camera slugs created in the app are authorized by the HTTP callback above.
+  all_others:
+    source: publisher
