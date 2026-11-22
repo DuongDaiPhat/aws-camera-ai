@@ -11,6 +11,7 @@ import { DatabaseService } from '../src/database/database.service';
 import { FrigateMediaAdapter } from '../src/media/frigate-media.adapter';
 import { IStorageService } from '../src/storage/storage.interface';
 import { AiResultsService } from '../src/ai-results/ai-results.service';
+import { NotificationCloudService } from '../src/notification-cloud/notification-cloud.service';
 
 const fixture = (name: string) =>
   JSON.parse(
@@ -30,14 +31,16 @@ function service(query = jest.fn()) {
   const client = { query };
   const db = { query, transaction: jest.fn(async (work) => work(client)) };
   const ai = { submit: jest.fn() };
+  const notifications = { applyResult: jest.fn(), enqueueNotification: jest.fn() };
   const queues = new CloudQueueService(
     new ConfigService(cloud),
     db as unknown as DatabaseService,
     {} as FrigateMediaAdapter,
     {} as IStorageService,
     ai as unknown as AiResultsService,
+    notifications as unknown as NotificationCloudService,
   );
-  return { queues, query, ai, client };
+  return { queues, query, ai, client, notifications };
 }
 describe('cloud queue safety', () => {
   it('ships the same canonical contract for backend and Python worker', () => {
@@ -178,6 +181,10 @@ describe('cloud queue safety', () => {
         media as unknown as FrigateMediaAdapter,
         storage as unknown as IStorageService,
         { submit: jest.fn() } as unknown as AiResultsService,
+        {
+          applyResult: jest.fn(),
+          enqueueNotification: jest.fn(),
+        } as unknown as NotificationCloudService,
       );
 
       await queues.dispatchOne();
@@ -275,7 +282,7 @@ describe('cloud queue safety', () => {
           REKOGNITION_COLLECTION_PREFIX: 'argusai-staging-owner-',
         }),
       ),
-    ).toEqual({ mode: 'bullmq', faceProvider: 'rekognition' });
+    ).toMatchObject({ mode: 'bullmq', faceProvider: 'rekognition', enabled: false });
 
     expect(() =>
       readCloudConfig(
@@ -303,7 +310,7 @@ describe('cloud queue safety', () => {
 
     expect(() =>
       readCloudConfig(new ConfigService({ ...cloud, STORAGE_PROVIDER: 'minio' })),
-    ).toThrow('SQS requires STORAGE_PROVIDER=s3');
+    ).toThrow('Face SQS requires STORAGE_PROVIDER=s3');
 
     expect(
       readCloudConfig(
@@ -635,5 +642,23 @@ describe('cloud queue safety', () => {
     await expect(
       cacheOkSvc.cacheFaceResult(jobEnv.payload.jobId, validWorkerResult),
     ).resolves.toEqual(validWorkerResult);
+  });
+
+  it('uses the notification outcome transaction before acknowledging Results', async () => {
+    const { queues, notifications, query } = service();
+    const message = parseEnvelope(fixture('notification-outcome.valid.json'));
+    await queues.applyResult(message);
+    expect(notifications.applyResult).toHaveBeenCalledWith(message);
+    expect(query).not.toHaveBeenCalled();
+    notifications.applyResult.mockRejectedValueOnce(new Error('Outcome rollback'));
+    await expect(queues.applyResult(message)).rejects.toThrow('Outcome rollback');
+  });
+
+  it('delegates notification enqueueing using the caller transaction', async () => {
+    const { queues, notifications, client } = service();
+    const message = parseEnvelope(fixture('notification-job.valid.json'));
+    if (message.type !== 'notification.job') throw new Error('fixture type');
+    await queues.enqueueNotification(client as never, message.payload);
+    expect(notifications.enqueueNotification).toHaveBeenCalledWith(client, message.payload);
   });
 });
