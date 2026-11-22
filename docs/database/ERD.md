@@ -1155,9 +1155,12 @@ không có FK tới bảng khác. Không đổi driver khi còn instance/consume
 
 Các bảng nền từ migration 0018, không phải bảng mới của task Sender. Collection có
 `owner_user_id` làm PK/FK tới users, `collection_id` UNIQUE và version dương. DDL của
-nhánh này yêu cầu prefix `camerai-s4-dev-owner-<owner UUID>`. Mapping có PK ghép
+nhánh này đã có [migration 0023](../../db/migrations/0023_rekognition_collection_prefix.sql):
+collection ID phải bằng một trong ba prefix `camerai-s4-dev-owner-`,
+`argusai-staging-owner-`, `argusai-production-owner-` nối với owner UUID. Mapping có PK ghép
 `(owner_user_id,face_id)`; owner tham chiếu collection, `known_face_id` tham chiếu known_faces.
-Không tự giả định prefix này đã được chuyển sang Staging/Production chỉ từ ERD.
+Cấu hình `REKOGNITION_COLLECTION_PREFIX` của từng môi trường phải khớp registry;
+ERD không xác nhận việc triển khai runtime trên từng môi trường.
 
 ### 3.24 `cloud_jobs`
 
