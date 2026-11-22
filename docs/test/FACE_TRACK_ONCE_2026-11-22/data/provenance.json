@@ -1,0 +1,31 @@
+{
+  "at": "2026-11-22T16:42:56.194Z",
+  "branch": "feat/face-track-once-optimization",
+  "baseline": "cc9e5e1d7bce97fbc78c0e45cbe59241d9c87b4b",
+  "node": "v22.20.0",
+  "sourceHashes": {
+    ".env.example": "86364c8c786707b9697291499cf2e3ba8bb68b85d82489c241921ee7ad158e1d",
+    "apps/orchestrator/src/events/events.repository.ts": "7286b5cde0a156223ddbdcbd6614f0ad4174de69d3a0ed876da5ec7ed463f610",
+    "apps/orchestrator/src/face-recognition/face-recognition-coordinator.service.ts": "180d8eb43dddafc176550506863fdf8ea6e5075764cd6dd7f99ae10f9cfb5b06",
+    "apps/orchestrator/src/face-recognition/track-identity-state.service.ts": "b38a118e9f67bb5b4c2872f78f7df813876791ab182478f864dfa4a6fa47e570",
+    "apps/orchestrator/src/frigate/frigate-config.service.ts": "3c4661a76ecd02d643beb764d4eb0ea21f31ac5d2939963b373bcbab9cbca6c3",
+    "apps/orchestrator/src/ingestion/mqtt-consumer.service.ts": "975cf9479b7e0d3404343319402e70f0638ef9737298448535bbb0e1f61bc54c",
+    "apps/orchestrator/src/media/frigate-media.adapter.ts": "6d3a72e4114753474b415537aa45548c4f024667da590d18197bdd83922cd8c3",
+    "apps/orchestrator/test/face-recognition-coordinator.service.spec.ts": "71220555e2777a827ac8937dcb2a050cbd3eeac1fcfe4009f2fe5368fccb8ec0",
+    "apps/orchestrator/test/frigate-config.service.spec.ts": "ca20f8f8a9695db099e769a3d80148fbbdf5bf7dac0c295bca2772b03508bb48",
+    "apps/orchestrator/test/mqtt-consumer.service.spec.ts": "5599bba6c3856cd6975a3937d8c3d2e92d2e3ef0105ce6117aeb4c5f0a8fb0f5",
+    "docker-compose.yml": "541dbb00dccf8b3c9b7d30bdf5b04efc42a576db1937eda13c84f040247fa3ea",
+    "docs/reports/FACE_TRACK_ONCE_OPTIMIZATION_REPORT.md": "6d12ec98953e6c27cfd1b20791e2f443b0aac312aff4d8f0f2e5094436530f32",
+    "infra/frigate/frame-metadata/bridge.py": "6268fe9c365218f200b4073b8ea83f3f43ed1e713137b4db883f5e6401377e54",
+    "services/aws-workers/face/handler.py": "b65e24af0ee871d0935840b9736d060b8061496719b7679c3e826dcb454d6b02",
+    "apps/orchestrator/test/frigate-media.adapter.spec.ts": "08bae674e2dd59f0f10544f67a3874ed74ffbf7353ac61d797871ca6465f48f2",
+    "tools/scripts/face-track-once-eval.mjs": "f6ef854241f43490691d1580e9e93880d77c563e99847220bb7f00ef77b17018",
+    "tools/scripts/face-track-once-suite.mjs": "fe7aa32f12b17fb757d7eac5263e7efe21cf4f4269bb981bbe38b3d2c686a6ae",
+    "tools/scripts/face-track-once-aligned.mjs": "868979f129cf7af5cd7f3332d25cd1d4e61a8f9683dec7d8124f5d7bca4ab1bd",
+    "tools/scripts/face-track-once-summary.py": "2dfd3b529fa3f53082de91d6d3752d9144cc734946ce56579cc53b5b6ad68a8d"
+  },
+  "models": {
+    "face_detection_yunet_2023mar.onnx": "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4",
+    "face_recognition_sface_2021dec.onnx": "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79"
+  }
+}

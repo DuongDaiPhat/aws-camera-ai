@@ -1,0 +1,34 @@
+[Nest] 9688  - 01/01/1970, 07.00.10    WARN [FrigateMediaAdapter] Current person frame unavailable camera=cam_front
+FAIL test/frigate-media.adapter.spec.ts (31.816 s)
+  FrigateMediaAdapter current person sampling
+    × reads the latest frame and scales the person box to the returned image (34 ms)
+    √ rejects stale or invalid boxes before reading a camera frame (2 ms)
+    √ rejects offline preview images even if an object message is recent (9 ms)
+
+  ● FrigateMediaAdapter current person sampling › reads the latest frame and scales the person box to the returned image
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: StringContaining "/api/cam_front/latest.jpg?height=80", Any<Object>
+    Received: "http://frigate:5000/api/cam_front/latest.jpg?h=80&quality=100&bbox=0&timestamp=0", {"signal": {Symbol(kEvents): Map {}, Symbol(events.maxEventTargetListeners): 0, Symbol(events.maxEventTargetListenersWarned): false, Symbol(kHandlers): Map {}, Symbol(kAborted): false, Symbol(kReason): undefined, Symbol(kComposite): false, Symbol(kTimeout): true}}
+
+    Number of calls: 1
+
+      26 |     );
+      27 |     const crop = await media.getCurrentPersonCrop('cam_front', [40, 20, 120, 60], 160, 80, 10);
+    > 28 |     expect(fetchMock).toHaveBeenCalledWith(
+         |                       ^
+      29 |       expect.stringContaining('/api/cam_front/latest.jpg?height=80'),
+      30 |       expect.any(Object),
+      31 |     );
+
+      at Object.<anonymous> (test/frigate-media.adapter.spec.ts:28:23)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 2 passed, 3 total
+Snapshots:   0 total
+Time:        33.812 s
+Ran all test suites within paths "test/frigate-media.adapter.spec.ts".
+undefined
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command "jest" not found

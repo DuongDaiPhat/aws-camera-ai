@@ -1,0 +1,7 @@
+{"case":"TC01-head-down-final","events":[{"id":"47df6020-f3bc-4a38-97b3-e15ce621bab6","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC01-back-final","events":[{"id":"ffb59fde-3331-4834-a0c4-50e86d4852a4","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC02-no-glasses-final","events":[{"id":"dd4fef3b-8215-44de-bb2f-572b716f6ff1","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC02-glasses-final","events":[{"id":"a5d3f443-a5b2-4d64-bbd2-035d3830c719","status":"UNKNOWN","type":"UNKNOWN_PERSON","name":null}],"jobs":[{"id":"4e7c712a-06ff-46c5-8dbb-ea79dbc1815e","status":"SENT","revision":1}]}
+{"case":"TC03-no-glasses-final","events":[{"id":"76d05afe-7bce-4802-8392-2d73dce85b17","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC03-glasses-final","events":[{"id":"64c4eb07-1661-48b4-a1bf-860a4f56887e","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC04-no-glasses-final","events":[{"id":"41e38470-c536-4e9c-b70d-2595f86df691","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}

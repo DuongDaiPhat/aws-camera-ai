@@ -4,6 +4,8 @@
 - **Ngày báo cáo:** 22/11/2026
 - **Phạm vi:** Edge Frigate + AI Service (`POST /face/assess`) + Orchestrator (Layers 1–4 & `CloudQueueService`) + PostgreSQL (`0024_face_track_once_pipeline.sql`) + AWS Face Lambda (`services/aws-workers/face/handler.py`)
 
+> **Đối chiếu thực nghiệm 22/11/2026:** Báo cáo này mô tả thiết kế ban đầu. Kết quả chạy video/AWS, ảnh giao diện và giới hạn còn lại nằm trong [báo cáo kiểm thử](../test/FACE_TRACK_ONCE_2026-11-22/REPORT.md). Code sau kiểm thử lấy crop từ frame hiện tại với box mới, chạy lấy mẫu song song với lưu media, tính cửa sổ Best-Shot từ mẫu hợp lệ đầu tiên, và đánh giá Quality Gate trước Spatial Re-ID. Khi có mặt rõ, Spatial Re-ID phải vượt thêm kiểm tra SFace với khuôn mặt đã cache. Các con số “0/1 call” bên dưới là mục tiêu thiết kế, không thay thế bằng chứng E2E của từng video.
+
 ---
 
 ## 1. Tóm tắt & Bối cảnh

@@ -1,0 +1,25 @@
+{
+  "case": "TC06-embedding-first-supplement,TC06-embedding-return-supplement",
+  "analysisAt": "2026-11-22T16:28:27.330Z",
+  "method": "Re-assess the exact dispatch crop on the same local AI service; no AWS request",
+  "samples": [
+    {
+      "trackId": "1795364491.823046-4pxn5q",
+      "imageSha256": "18f1021a05df2cc6d655a169e3cb56f47060b2bcfa7b593572de1d1bd4ec6b84",
+      "qualityScore": 0.8826
+    },
+    {
+      "trackId": "1795364535.680491-t9ixij",
+      "imageSha256": "dc9a5a64f39e200e0bdd7e6e6e3ece8c8e6cd1310ecb4ebeaba2a98fedbe3e5d",
+      "qualityScore": 0.8733
+    }
+  ],
+  "pairs": [
+    {
+      "firstTrackId": "1795364491.823046-4pxn5q",
+      "secondTrackId": "1795364535.680491-t9ixij",
+      "sfaceCosine": 0.6248859901017846,
+      "appearanceCosine": 0.9497841662117019
+    }
+  ]
+}

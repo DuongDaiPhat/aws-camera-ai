@@ -1,0 +1,17 @@
+{
+  "case": "TC10-empty",
+  "video": "known_face_vid_2.mp4",
+  "startedAt": "2026-11-22T14:26:44.914Z",
+  "endedAt": "2026-11-22T14:27:24.697Z",
+  "ffmpegExitCode": 0,
+  "before": {
+    "case": "TC10-empty",
+    "tracks": []
+  },
+  "after": {
+    "case": "TC10-empty",
+    "tracks": []
+  },
+  "events": [],
+  "jobs": []
+}

@@ -1,0 +1,60 @@
+FAIL test/face-recognition-coordinator.service.spec.ts (29.99 s)
+  FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)
+    × does not borrow a recently ended identity for different-face despite matching clothes (114 ms)
+    × does not borrow a recently ended identity for multiple-faces despite matching clothes (25 ms)
+    ○ skipped produces 0 AWS calls when person shows back of head / no face through entire track
+    ○ skipped starts the Best-Shot window at the first accepted face after rejected distant frames
+    ○ skipped selects the highest quality Best-Shot within window and freezes KNOWN across updates
+    ○ skipped hits local embedding session cache on track drop with 0 AWS calls, while calling AWS for tailgating stranger
+    ○ skipped invalidates cached identity when collectionVersion increments, forcing fresh AWS recognition
+    ○ skipped allows single UNKNOWN recheck only on >= 0.15 quality jump
+    ○ skipped allows bounded UNDETERMINED retries after cooldown on improved quality only up to maxRetries
+    ○ skipped falls back cleanly to legacy immediate dispatch on isCreated when FACE_TRACK_OPTIMIZATION_ENABLED=false
+    ○ skipped matches spatial+appearance Re-ID on track drop with 0 quality-gate/AWS calls and flushes pending bestShot on end
+
+  ● FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration) › does not borrow a recently ended identity for different-face despite matching clothes
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: "11111111-1111-4111-8111-111111111111", {"collectionVersion": 1, "error": null, "eventId": "11111111-1111-4111-8111-111111111111", "matchedKnownFaceId": "55555555-5555-4555-8555-555555555555", "modelVersion": "local-session-cache-v1", "module": "M1_FACE", "observationId": "track:track-1:face", "personStatus": "KNOWN", "processedAt": "1970-01-01T00:00:30.000Z", "requestId": "a0fd3e0a-c1b1-5e03-a65b-00aa68c07a4e", "resultId": "a0fd3e0a-c1b1-5e03-a65b-00aa68c07a4e", "results": [{"boundingBox": null, "confidence": 1, "label": "KNOWN", "metadata": {"cacheHit": true, "collectionVersion": 1, "confidencePolicyVersion": "local-session-cache-v1", "matchMethod": "spatial-appearance", "matchedPersonName": "Alice", "provider": "local-session-cache", "similarity": 1, "sourceSessionId": "cam_front:1795305600.000000"}, "module": "M1_FACE"}], "revision": 1, "schemaVersion": 1}
+
+      531 |       : { passed: false, faceCount: 2, rejectionReason: 'MULTIPLE_FACES', embeddingBase64: null, embeddingDim: null }));
+      532 |     await h.coordinator.handleTrackEvent({ messageType: 'new', event: makeEvent(), after: { id: 'track-1', camera: camera.slug, frame_time: 30, label: 'person', score: 0.9, box: [100, 100, 220, 340] }, isCreated: true, camera });
+    > 533 |     expect(h.submitAiResult).not.toHaveBeenCalled();
+          |                                  ^
+      534 |     expect(h.stateService.getMetrics().spatialReidHits).toBe(0);
+      535 |     expect(h.enqueueFaceJob).toHaveBeenCalledTimes(scenario === 'different-face' ? 1 : 0);
+      536 |     h.coordinator.onModuleDestroy();
+
+      at test/face-recognition-coordinator.service.spec.ts:533:34
+
+  ● FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration) › does not borrow a recently ended identity for multiple-faces despite matching clothes
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: "11111111-1111-4111-8111-111111111111", {"collectionVersion": 1, "error": null, "eventId": "11111111-1111-4111-8111-111111111111", "matchedKnownFaceId": "55555555-5555-4555-8555-555555555555", "modelVersion": "local-session-cache-v1", "module": "M1_FACE", "observationId": "track:track-1:face", "personStatus": "KNOWN", "processedAt": "1970-01-01T00:00:30.000Z", "requestId": "a0fd3e0a-c1b1-5e03-a65b-00aa68c07a4e", "resultId": "a0fd3e0a-c1b1-5e03-a65b-00aa68c07a4e", "results": [{"boundingBox": null, "confidence": 1, "label": "KNOWN", "metadata": {"cacheHit": true, "collectionVersion": 1, "confidencePolicyVersion": "local-session-cache-v1", "matchMethod": "spatial-appearance", "matchedPersonName": "Alice", "provider": "local-session-cache", "similarity": 1, "sourceSessionId": "cam_front:1795305600.000000"}, "module": "M1_FACE"}], "revision": 1, "schemaVersion": 1}
+
+      531 |       : { passed: false, faceCount: 2, rejectionReason: 'MULTIPLE_FACES', embeddingBase64: null, embeddingDim: null }));
+      532 |     await h.coordinator.handleTrackEvent({ messageType: 'new', event: makeEvent(), after: { id: 'track-1', camera: camera.slug, frame_time: 30, label: 'person', score: 0.9, box: [100, 100, 220, 340] }, isCreated: true, camera });
+    > 533 |     expect(h.submitAiResult).not.toHaveBeenCalled();
+          |                                  ^
+      534 |     expect(h.stateService.getMetrics().spatialReidHits).toBe(0);
+      535 |     expect(h.enqueueFaceJob).toHaveBeenCalledTimes(scenario === 'different-face' ? 1 : 0);
+      536 |     h.coordinator.onModuleDestroy();
+
+      at test/face-recognition-coordinator.service.spec.ts:533:34
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 9 skipped, 11 total
+Snapshots:   0 total
+Time:        30.806 s
+Ran all test suites within paths "test/face-recognition-coordinator.service.spec.ts".
+undefined
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command "jest" not found

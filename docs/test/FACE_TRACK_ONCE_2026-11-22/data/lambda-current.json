@@ -1,0 +1,8 @@
+{
+  "FunctionName": "camerai-s4-dev-face",
+  "LastUpdateStatus": "Successful",
+  "State": "Active",
+  "CodeSha256": "jvbQM/IYD3yTXIYurQRCGHzcyUBMbeUyNKbglbDsURU=",
+  "Callback": "https://four-wishlist-waves-now.trycloudflare.com/api/v1",
+  "SkipDetectFaces": "true"
+}

@@ -1,0 +1,17 @@
+[
+  {
+    "url": "http://127.0.0.1:18080/",
+    "status": 404,
+    "checkedAt": "2026-11-22T16:19:44.6385656Z"
+  },
+  {
+    "url": "https://four-wishlist-waves-now.trycloudflare.com/api/v1/internal/cloud/face-jobs/00000000-0000-4000-8000-000000000000",
+    "status": 401,
+    "checkedAt": "2026-11-22T16:19:45.3256356Z"
+  },
+  {
+    "url": "https://four-wishlist-waves-now.trycloudflare.com/",
+    "status": 404,
+    "checkedAt": "2026-11-22T16:19:45.8231895Z"
+  }
+]
