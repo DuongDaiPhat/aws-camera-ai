@@ -1,0 +1,54 @@
+name: Notification tests
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: notification-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  notification:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    env:
+      AWS_EC2_METADATA_DISABLED: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install workspace and build contracts
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @cam/contracts build
+      - name: Backend notification coverage and PostgreSQL 16 integration
+        run: pnpm test:notification
+      - name: Web notification coverage
+        run: pnpm --filter @cam/web test:notification
+      - name: Sender line and branch coverage
+        run: |
+          python -m pip install -r services/aws-workers/sender/requirements.txt coverage
+          python services/aws-workers/verify_sender.py
+      - name: Sender deployment script regression tests
+        run: bash tools/cd/deploy-sender.test.sh
+      - name: Upload scoped coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notification-coverage
+          if-no-files-found: warn
+          path: |
+            apps/orchestrator/coverage/notification/
+            apps/web/coverage/notification/
+            services/aws-workers/.build/sender-coverage.json
