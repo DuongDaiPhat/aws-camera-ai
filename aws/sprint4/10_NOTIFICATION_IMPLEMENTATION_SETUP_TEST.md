@@ -309,3 +309,30 @@ git status
 ```
 
 Chưa push hoặc mở PR trong đợt tạo commit này. Kích thước thay đổi cần được tách thành các PR phù hợp rule khi chuyển sang bước review, không coi nhiều commit trên một nhánh là đã tự đáp ứng giới hạn kích thước PR.
+
+## 11. Email SNS chi tiết và liên kết ảnh — cập nhật 22/11/2026
+
+Theo lựa chọn của người dùng, tiếp tục dùng SNS email dạng văn bản, không thêm SES. Nội dung gửi thật được lấy từ đúng event khi claim đã qua kiểm tra owner, người nhận, phiên bản, hạn mức và cooldown.
+
+Email mới gồm:
+
+- Tiêu đề `[ArgusAI][DEV|STAGING|PRODUCTION] <loại sự kiện> — <tên camera>`.
+- Loại sự kiện, mức độ P0–P3, thời gian theo timezone của camera, tên camera, khu vực, độ tin cậy AI nếu có và mã sự kiện.
+- Link ký số tới snapshot/thumbnail của đúng sự kiện, cùng kho và bucket đang cấu hình. Link có hạn tối đa 15 phút và không vượt hạn lưu ảnh.
+- Nếu chưa có ảnh hoặc tạo link lỗi/quá 500 ms, vẫn gửi thông báo với dòng ảnh chưa sẵn sàng. Link ảnh không đi vào job/outcome/receipt hoặc log ứng dụng.
+- Link mở ứng dụng lấy từ `WEB_ORIGIN`; localhost được ghi rõ chỉ mở trên máy chạy dự án. Link ảnh MinIO localhost trong môi trường khác cũng chỉ dùng được trên máy đó; ca Dev này đã xác minh ảnh S3 qua HTTPS.
+
+Giữ nguyên nội dung DRY_RUN không chứa chi tiết sự kiện. Điểm quan sát người từ Frigate không được thay thế điểm AI của sự cố. Không thêm xử lý video, hạ độ phân giải hoặc thay đổi luồng xem trực tiếp.
+
+Lưu ý người nhận: SNS gửi tới mọi subscription của topic. Chỉ bật nội dung/ảnh chi tiết trên topic riêng đã kiểm tra đúng người nhận; không dùng topic chung nhiều household. Link ký số là quyền truy cập tạm thời: người có link có thể mở ảnh trước khi hết hạn.
+
+Kết quả kiểm tra mới:
+
+- Notification gate: 163/163 tests; lines 100%, branches 98.71%; module email lines/branches 100%.
+- Toàn bộ unit test backend: 664/664, 81 suites.
+- TypeScript, ESLint (0 errors, còn warnings), Prettier và secret scan kiểm tra riêng trong log của đợt chạy.
+- Backend Dev đã recreate và health OK. Topic riêng household A có đúng 1 subscription email đã xác nhận; Sender alias `live` version 11 được bật lại với REAL, gửi tới email đã cấu hình `anhnksss7@gmail.com`.
+- Kiểm tra đọc trên một sự kiện thật có sẵn: dựng mẫu mới, ký và tải ảnh S3 thành công HTTP 200, image/jpeg, 54456 bytes. Đây là kiểm tra đọc, không tạo claim/job và không gửi lại sự kiện cũ.
+- Người dùng đã duyệt mẫu cảnh báo mới ngày 22/11/2026. Chưa có xác nhận riêng về việc mở link ảnh từ một email mới; không coi preview là bằng chứng đã nhận email mới.
+
+Bằng chứng đã ẩn link ảnh nằm trong `artifacts/notification-webcam-real-2026-11-22/email-preview-redacted.log`; log test cùng thư mục bị Git ignore. Người dùng đã yêu cầu chia nhỏ và commit các thay đổi trên nhánh `feat/us-25-auth-notifications`; chưa push hoặc triển khai Staging/Production.
