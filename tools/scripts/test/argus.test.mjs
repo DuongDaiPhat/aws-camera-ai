@@ -70,12 +70,20 @@ function setup(t, source = localEnv) {
         return state.mode;
       }
       if (input.startsWith('SELECT mode ')) return state.mode;
-      if (input.startsWith("SELECT '0017_cognito_issuer.sql'")) return state.pending.join('\n');
+      if (input.startsWith("SELECT '0017_cognito_issuer.sql'")) {
+        return state.pending.filter((file) => input.includes(`'${file}'`)).join('\n');
+      }
       if (input.startsWith("SELECT to_regclass('public.schema_migrations')")) return 'f';
       if (input.startsWith('SELECT to_regclass(')) return 't';
       if (input.startsWith('BEGIN;')) {
         assert.equal((input.match(/\bBEGIN;/g) ?? []).length, 1);
-        assert.match(input, /CREATE TABLE cloud_transport_mode/);
+        if (state.pending.includes('0018_aws_queue_pipeline.sql')) {
+          assert.match(input, /CREATE TABLE cloud_transport_mode/);
+        }
+        if (state.pending.includes('0025_notification_claim_outcome.sql')) {
+          assert.match(input, /ALTER TABLE cloud_transport_mode ADD COLUMN notification_driver/);
+          assert.match(input, /CREATE TABLE cloud_notification_attempts/);
+        }
         assert.match(input, /COMMIT;\s*$/);
         state.commands.push('migrate');
         return '';
@@ -139,6 +147,32 @@ test('applies the missing cloud migration before changing the DB mode', (t) => {
   assert.ok(state.commands.indexOf('backup') < state.commands.indexOf('migrate'));
   assert.ok(state.commands.indexOf('stop') < state.commands.indexOf('migrate'));
   assert.ok(state.commands.indexOf('migrate') < state.commands.indexOf('mode:sqs'));
+});
+
+for (const mode of ['cloud', 'local']) {
+  test(`migrates a schema at 0019 before recreating Orchestrator in ${mode} mode`, (t) => {
+    const source = localEnv + 'NOTIFICATION_DRIVER=local\n';
+    const { root, state, read, switchTo } = setup(t, source);
+    cpSync(new URL('../../../db/migrations', import.meta.url), join(root, 'db', 'migrations'), {
+      recursive: true,
+    });
+    state.pending = ['0025_notification_claim_outcome.sql'];
+    switchTo(mode);
+    const migration = state.commands.indexOf('migrate');
+    assert.ok(
+      migration > state.commands.indexOf('backup') && migration > state.commands.indexOf('stop'),
+    );
+    assert.ok(migration < state.commands.indexOf('up'));
+    assert.equal(parseEnv(read()).NOTIFICATION_DRIVER, 'local');
+    assert.equal(state.mode, mode === 'cloud' ? 'sqs' : 'bullmq');
+  });
+}
+
+test('local mode rejects an old schema before stopping services', (t) => {
+  const { state, switchTo } = setup(t);
+  state.pending = ['0019_household_access.sql', '0025_notification_claim_outcome.sql'];
+  assert.throws(() => switchTo('local'), /0019_household_access/);
+  assert.ok(!state.commands.includes('stop'));
 });
 
 test('restores .env and database mode after a failed startup', (t) => {
