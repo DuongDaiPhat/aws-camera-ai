@@ -1,7 +1,10 @@
 # Plan US-10 — Crop person và so khớp người quen (M1)
 
+> [!NOTE]
+> **Cập nhật kiến trúc (`feat/face-track-once-optimization`):** Bản thiết kế Sprint 2 dưới đây được giữ lại làm tài liệu tham chiếu lịch sử. Luồng nhận diện khuôn mặt M1 hiện đã được tối ưu theo kiến trúc 5 lớp **"Recognize Once, Track Continuously"** (gồm `TrackStabilizer`, `TrackIdentityStateService`, `FaceRecognitionCoordinatorService`, Local Quality Gate `POST /face/assess`, `FaceSessionCacheService` chống tailgating, bỏ trigger DB `cloud_face_intent` qua migration `0024_face_track_once_pipeline.sql`, và Face Lambda 0/1-call fast path). Xem chi tiết tại [Báo cáo tối ưu hóa Face Track-Once](../reports/FACE_TRACK_ONCE_OPTIMIZATION_REPORT.md) và [Luồng dữ liệu hiện hành](../architecture/DATA_FLOW.md).
+
 > Phần giao với US-09, US-11, shared jobs, contract và migration tuân theo [kế hoạch tích hợp 5 thành viên](PLAN_AGILE_5_MEMBER_EXECUTION.md).
-> Trạng thái: kế hoạch thực thi, chưa phải tính năng đã triển khai.
+> Trạng thái: kế hoạch thực thi lịch sử (Sprint 2), phần điều phối nhận diện khuôn mặt đã được thay thế/nâng cấp ở các nhánh Sprint 4 sau đó.
 > Mục tiêu: phân loại KNOWN / UNKNOWN / UNDETERMINED từ ảnh person của Frigate; lỗi AI không làm mất sự kiện.
 
 ## 1. Phạm vi và nguồn chuẩn
