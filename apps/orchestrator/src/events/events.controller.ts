@@ -10,6 +10,7 @@ import {
   Sse,
   UseGuards,
   MessageEvent,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -123,6 +124,19 @@ export class EventsController {
     return req
       ? this.eventsService.getEvent(eventId, req.auth)
       : this.eventsService.getEvent(eventId);
+  }
+
+  @Get(':eventId/notifications')
+  @ApiOperation({ summary: 'Trạng thái thông báo của sự kiện' })
+  @ApiParam({ name: 'eventId', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Danh sách thông báo' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy sự kiện' })
+  listEventNotifications(
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    if (!req.auth) throw new UnauthorizedException();
+    return this.eventsService.listEventNotifications(eventId, req.auth);
   }
 
   @Post(':eventId/confirm')

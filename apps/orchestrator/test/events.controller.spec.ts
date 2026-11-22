@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { UnauthorizedException } from '@nestjs/common';
+import type { AuthenticatedRequest } from '../src/auth/jwt-auth.guard';
 import { of } from 'rxjs';
 import { EventsController } from '../src/events/events.controller';
 import { EventsService } from '../src/events/events.service';
@@ -12,6 +14,7 @@ describe('EventsController (US-06)', () => {
       listEvents: jest.fn(),
       streamEvents: jest.fn(),
       getEvent: jest.fn(),
+      listEventNotifications: jest.fn(),
       getStats: jest.fn(),
       confirmEvent: jest.fn(),
       closeEvent: jest.fn(),
@@ -38,6 +41,18 @@ describe('EventsController (US-06)', () => {
 
     expect(service.listEvents).toHaveBeenCalledWith(query);
     expect(result).toBe(mockResponse);
+  });
+
+  it('delegates authenticated notification reads and rejects absent claims', async () => {
+    const request = { auth: { sub: 'user-1' } } as AuthenticatedRequest;
+    service.listEventNotifications.mockResolvedValueOnce({ data: [] });
+    await expect(controller.listEventNotifications('event-1', request)).resolves.toEqual({
+      data: [],
+    });
+    expect(service.listEventNotifications).toHaveBeenCalledWith('event-1', request.auth);
+    expect(() => controller.listEventNotifications('event-1', {} as AuthenticatedRequest)).toThrow(
+      UnauthorizedException,
+    );
   });
 
   it('streamEvents goi service streamEvents va tra ve observable', async () => {

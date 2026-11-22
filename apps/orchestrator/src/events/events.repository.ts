@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_POOL } from '../database/database.module';
 import { eventVisibilityPredicate } from '../auth/resource-access.guard';
+import type { components } from '@cam/contracts';
 import { EventType, EventStatus, PriorityLevel, PersonStatus } from '@cam/contracts';
 
 export interface ListEventsFilters {
@@ -571,6 +572,28 @@ export class EventsRepository {
   /**
    * Tra cuu day du mot su kien de dung cho man hinh chi tiet (US-21).
    */
+  async listEventNotifications(
+    eventId: string,
+    actorId: string | null,
+  ): Promise<{ data: components['schemas']['Notification'][] } | null> {
+    const { rows } = await this.pool.query<{ data: components['schemas']['Notification'][] }>(
+      `SELECT COALESCE((
+         SELECT jsonb_agg(jsonb_build_object(
+           'id', n.id, 'channel', n.channel, 'status', n.status,
+           'escalationLevel', n.escalation_level, 'attemptCount', n.attempt_count,
+           'errorCode', n.error_code, 'sentAt', n.sent_at, 'confirmedAt', n.confirmed_at,
+           'createdAt', n.created_at
+         ) ORDER BY n.created_at DESC, n.id)
+         FROM notifications n
+         WHERE n.event_id = e.id
+       ), '[]'::jsonb) AS data
+       FROM events e
+       WHERE e.id = $1 AND ($2::uuid IS NULL OR ${eventVisibilityPredicate('$2')})`,
+      [eventId, actorId],
+    );
+    return rows[0] ?? null;
+  }
+
   async findEventDetailById(id: string): Promise<EventDetailRecord | null> {
     const query = `
       SELECT ${EVENT_SUMMARY_PROJECTION},
