@@ -10,6 +10,7 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 import boto3
 from botocore.config import Config
+from botocore.exceptions import ClientError
 from jsonschema import Draft202012Validator, FormatChecker
 
 VALIDATOR = Draft202012Validator(
@@ -33,6 +34,16 @@ def collection_prefix():
     if prefix not in ALLOWED_COLLECTION_PREFIXES:
         raise ValueError("Invalid REKOGNITION_COLLECTION_PREFIX")
     return prefix
+
+
+def skip_detect_faces():
+    raw = os.environ.get("REKOGNITION_SKIP_DETECT_FACES")
+    value = (raw or "").strip().lower() or "true"
+    if value in ("true", "1", "yes"):
+        return True
+    if value in ("false", "0", "no"):
+        return False
+    raise ValueError("Invalid REKOGNITION_SKIP_DETECT_FACES")
 
 
 def client(service):
@@ -90,44 +101,20 @@ def validate_job(message, context):
         raise ValueError("Face job scope mismatch")
 
 
-def recognize(p, mappings):
-    rek = client("rekognition")
-    image = {"S3Object": {"Bucket": p["image"]["bucket"], "Name": p["image"]["key"]}}
-    faces = rek.detect_faces(Image=image, Attributes=["DEFAULT"])["FaceDetails"]
-    threshold = float(os.environ.get("REKOGNITION_MATCH_THRESHOLD", "0.90"))
-    if not 0 < threshold <= 1:
-        raise ValueError("Threshold must be in (0,1]")
-    status, similarity, confidence, known_id = "UNDETERMINED", None, None, None
-    policy, quality, model = "rekognition-normalized-v1", None, "rekognition"
-    if len(faces) != 1:
-        quality = "NO_FACE_DETECTED" if not faces else "MULTIPLE_FACES"
-    else:
-        collection = rek.describe_collection(CollectionId=p["collectionId"])
-        model = "rekognition-" + collection["FaceModelVersion"]
-        if collection["FaceCount"] == 0:
-            status, confidence, policy = "UNKNOWN", 1.0, "empty-collection-v1"
-        else:
-            response = rek.search_faces_by_image(
-                CollectionId=p["collectionId"],
-                Image=image,
-                FaceMatchThreshold=0,
-                MaxFaces=1,
-                QualityFilter="NONE",
-            )
-            matches = response["FaceMatches"]
-            if not matches:
-                quality = "NO_SIMILARITY_SCORE"
-            else:
-                best = matches[0]
-                similarity = best["Similarity"] / 100.0
-                if similarity >= threshold:
-                    known_id = mappings.get(best["Face"]["FaceId"])
-                    if not known_id:
-                        raise ValueError("Rekognition FaceId has no active owner mapping")
-                    status, confidence = "KNOWN", similarity
-                else:
-                    status, confidence = "UNKNOWN", 1 - similarity
-    body = {
+def _build_face_result(
+    p,
+    *,
+    status,
+    similarity,
+    confidence,
+    known_id,
+    policy,
+    quality,
+    model,
+    threshold,
+):
+    """Build a queue-v1 compliant M1_FACE result body."""
+    return {
         "schemaVersion": 1,
         "resultId": p["resultId"],
         "requestId": p["jobId"],
@@ -160,7 +147,103 @@ def recognize(p, mappings):
             }
         ],
     }
-    return body
+
+
+def _search_and_classify(rek, p, image, mappings, threshold, model):
+    """Call Rekognition SearchFacesByImage once and classify match/quality outcomes."""
+    status, similarity, confidence, known_id, quality = "UNDETERMINED", None, None, None, None
+    try:
+        response = rek.search_faces_by_image(
+            CollectionId=p["collectionId"],
+            Image=image,
+            FaceMatchThreshold=0,
+            MaxFaces=1,
+            QualityFilter="NONE",
+        )
+    except ClientError as exc:
+        # Rekognition raises InvalidParameterException when the image contains no face;
+        # treat it as an undetermined quality outcome instead of retrying via SQS.
+        if exc.response.get("Error", {}).get("Code") == "InvalidParameterException":
+            return status, similarity, confidence, known_id, "NO_FACE_DETECTED", model
+        raise
+
+    face_model_version = response.get("FaceModelVersion")
+    if face_model_version:
+        model = "rekognition-" + face_model_version
+
+    matches = response.get("FaceMatches") or []
+    if not matches:
+        quality = "NO_SIMILARITY_SCORE"
+    else:
+        best = matches[0]
+        similarity = best["Similarity"] / 100.0
+        if similarity >= threshold:
+            known_id = mappings.get(best["Face"]["FaceId"])
+            if not known_id:
+                raise ValueError("Rekognition FaceId has no active owner mapping")
+            status, confidence = "KNOWN", similarity
+        else:
+            status, confidence = "UNKNOWN", 1 - similarity
+    return status, similarity, confidence, known_id, quality, model
+
+
+def _recognize_legacy(p, image, mappings, threshold, collection_face_count):
+    """Legacy multi-call Rekognition flow guarded by REKOGNITION_SKIP_DETECT_FACES=false."""
+    rek = client("rekognition")
+    faces = rek.detect_faces(Image=image, Attributes=["DEFAULT"])["FaceDetails"]
+    if len(faces) != 1:
+        quality = "NO_FACE_DETECTED" if not faces else "MULTIPLE_FACES"
+        return "UNDETERMINED", None, None, None, "rekognition-normalized-v1", quality, "rekognition"
+
+    model = "rekognition"
+    if collection_face_count is None:
+        collection = rek.describe_collection(CollectionId=p["collectionId"])
+        model = "rekognition-" + collection["FaceModelVersion"]
+        face_count = collection["FaceCount"]
+    else:
+        face_count = collection_face_count
+
+    if face_count == 0:
+        return "UNKNOWN", None, 1.0, None, "empty-collection-v1", None, model
+
+    status, similarity, confidence, known_id, quality, model = _search_and_classify(
+        rek, p, image, mappings, threshold, model
+    )
+    return status, similarity, confidence, known_id, "rekognition-normalized-v1", quality, model
+
+
+def recognize(p, mappings, collection_face_count=None):
+    threshold = float(os.environ.get("REKOGNITION_MATCH_THRESHOLD", "0.90"))
+    if not 0 < threshold <= 1:
+        raise ValueError("Threshold must be in (0,1]")
+
+    image = {"S3Object": {"Bucket": p["image"]["bucket"], "Name": p["image"]["key"]}}
+
+    if not skip_detect_faces():
+        status, similarity, confidence, known_id, policy, quality, model = _recognize_legacy(
+            p, image, mappings, threshold, collection_face_count
+        )
+    elif collection_face_count == 0:
+        status, similarity, confidence, known_id = "UNKNOWN", None, 1.0, None
+        policy, quality, model = "empty-collection-v1", None, "rekognition"
+    else:
+        rek = client("rekognition")
+        policy = "rekognition-normalized-v1"
+        status, similarity, confidence, known_id, quality, model = _search_and_classify(
+            rek, p, image, mappings, threshold, "rekognition"
+        )
+
+    return _build_face_result(
+        p,
+        status=status,
+        similarity=similarity,
+        confidence=confidence,
+        known_id=known_id,
+        policy=policy,
+        quality=quality,
+        model=model,
+        threshold=threshold,
+    )
 
 
 def process(message):
@@ -175,7 +258,8 @@ def process(message):
     result = context["cached_result"]
     cache_hit = result is not None
     if result is None:
-        body = recognize(p, context["mappings"])
+        collection_face_count = context.get("collection_face_count")
+        body = recognize(p, context["mappings"], collection_face_count=collection_face_count)
         result = {
             "schemaVersion": 1,
             "type": "face.result",
