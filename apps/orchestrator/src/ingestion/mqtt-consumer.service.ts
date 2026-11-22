@@ -26,6 +26,7 @@ import { ZoneScheduleService } from '../zones/zone-schedule.service';
 import { ZoneResultProducerService, ZoneResultContext } from './zone-result-producer.service';
 import { PoseFrameConsumer } from '../fall-detection/consumer/pose-frame.consumer';
 import { FaceRecognitionCoordinatorService } from '../face-recognition/face-recognition-coordinator.service';
+import { FrigateMediaAdapter } from '../media/frigate-media.adapter';
 
 const DEFAULT_MQTT_CONNECT_TIMEOUT_MS = 10_000;
 const DEFAULT_MQTT_RECONNECT_PERIOD_MS = 3_000;
@@ -73,6 +74,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     @Optional() private readonly poseFrameConsumer?: PoseFrameConsumer,
     @Optional() private readonly playbackFrames?: PlaybackFramesService,
     @Optional() private readonly faceCoordinator?: FaceRecognitionCoordinatorService,
+    @Optional() private readonly frigateMedia?: FrigateMediaAdapter,
   ) {}
 
   onModuleInit(): void {
@@ -152,6 +154,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     this.client.on('message', (receivedTopic, buffer) => {
       // Pose frame binary stream handling (US-16, US-17)
       if (receivedTopic === poseFramesTopic) {
+        this.frigateMedia?.acceptTimestampedFrame(buffer);
         if (this.poseFrameConsumer) {
           this.poseFrameConsumer.handlePoseFrame(buffer).catch((error: unknown) => {
             this.logger.warn(
@@ -453,7 +456,18 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       const { event, isCreated, isPromoted, camera, zoneResultContext } =
         await this.synchronizeEvent(message.type, message.after);
       await this.zoneResultProducer.submit(event, message.after, zoneResultContext);
-      const hasNewSnapshot = await this.synchronizeMedia(message.type, event, message.after);
+      // Face sampling must start before snapshot/S3 synchronization can make
+      // the event box stale. Both operations use the already persisted event.
+      const [hasNewSnapshot] = await Promise.all([
+        this.synchronizeMedia(message.type, event, message.after),
+        this.faceCoordinator?.handleTrackEvent({
+          messageType: message.type,
+          event,
+          after: message.after,
+          isCreated,
+          camera,
+        }),
+      ]);
 
       if (isCreated) {
         await this.emitEventToStream(event.id, 'event.created');
@@ -463,15 +477,8 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
         await this.emitEventToStream(event.id, 'event.updated');
       }
 
-      if (this.faceCoordinator) {
-        await this.faceCoordinator.handleTrackEvent({
-          messageType: message.type,
-          event,
-          after: message.after,
-          isCreated,
-          camera,
-        });
-      } else if (
+      if (
+        !this.faceCoordinator &&
         isCreated &&
         this.configService.get<string>('FACE_JOB_TRANSPORT', 'bullmq') === 'bullmq' &&
         this.faceQueue &&

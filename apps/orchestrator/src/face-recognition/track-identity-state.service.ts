@@ -35,6 +35,7 @@ export interface TrackRecord {
   currentRevision: number;
   pendingRevision: number | null;
   firstSeenAt: number;
+  bestShotWindowStartedAt: number | null;
   lastUpdatedAt: number;
   lastSampleAttemptAt: number | null;
   samplesCollected: number;
@@ -137,6 +138,7 @@ export class TrackIdentityStateService {
       currentRevision: 0,
       pendingRevision: null,
       firstSeenAt: now,
+      bestShotWindowStartedAt: null,
       lastUpdatedAt: now,
       lastSampleAttemptAt: null,
       samplesCollected: 0,
@@ -195,6 +197,7 @@ export class TrackIdentityStateService {
   }
 
   updateBestShot(record: TrackRecord, candidate: BestShotCandidate, now = Date.now()): void {
+    record.bestShotWindowStartedAt ??= now;
     record.samplesCollected += 1;
     record.lastUpdatedAt = now;
     if (

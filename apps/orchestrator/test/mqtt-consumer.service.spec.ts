@@ -132,6 +132,37 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     expect(service).toBeDefined();
   });
 
+  it('starts face sampling while snapshot storage is still pending', async () => {
+    const event = createEvent();
+    eventsRepository.findCameraBySlug.mockResolvedValue({
+      id: 'cam-uuid-1',
+      name: 'Room',
+      slug: 'cam_living_room',
+    });
+    eventsRepository.createEvent.mockResolvedValue(event);
+    let releaseMedia!: (value: null) => void;
+    let startedMedia!: () => void;
+    const mediaStarted = new Promise<void>((resolve) => {
+      startedMedia = resolve;
+    });
+    mediaService.downloadAndStoreSnapshot.mockImplementation(() => {
+      startedMedia();
+      return new Promise((resolve) => {
+        releaseMedia = resolve;
+      });
+    });
+    const handleTrackEvent = jest.fn().mockResolvedValue(undefined);
+    Object.assign(service, { faceCoordinator: { handleTrackEvent } });
+    const handling = service.handleMessage(
+      'frigate/events',
+      buildSnapshotUpdateMessage('track-101'),
+    );
+    await mediaStarted;
+    expect(handleTrackEvent).toHaveBeenCalledTimes(1);
+    releaseMedia(null);
+    await handling;
+  });
+
   it('tạo một PERSON_DETECTED P3 với dedup key ổn định theo Frigate track', async () => {
     const event = createEvent();
     eventsRepository.findCameraBySlug.mockResolvedValueOnce({

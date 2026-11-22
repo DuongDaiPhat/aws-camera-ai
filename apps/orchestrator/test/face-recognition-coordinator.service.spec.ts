@@ -10,9 +10,13 @@ import {
   type FaceQualityGateResult,
 } from '../src/face-recognition/face-quality-gate.client';
 import { FaceRecognitionCoordinatorService } from '../src/face-recognition/face-recognition-coordinator.service';
-import { FaceSessionCacheService } from '../src/face-recognition/face-session-cache.service';
+import {
+  computeAppearanceSignature,
+  FaceSessionCacheService,
+} from '../src/face-recognition/face-session-cache.service';
 import { TrackIdentityStateService } from '../src/face-recognition/track-identity-state.service';
 import type { FrigateMediaAdapter } from '../src/media/frigate-media.adapter';
+import type { FrigateDetectionTrackerService } from '../src/frigate/frigate-detection-tracker.service';
 
 function encodeVector(values: number[]): string {
   const buf = Buffer.alloc(values.length * 4);
@@ -95,7 +99,10 @@ function makeGateResult(overrides: Partial<FaceQualityGateResult> = {}): FaceQua
 describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () => {
   const aliceId = '55555555-5555-4555-8555-555555555555';
 
-  function buildHarness(envOverrides: Record<string, string> = {}) {
+  function buildHarness(
+    envOverrides: Record<string, string> = {},
+    detectionTracker?: FrigateDetectionTrackerService,
+  ) {
     const config = new ConfigService({
       FACE_JOB_TRANSPORT: 'sqs',
       FACE_TRACK_OPTIMIZATION_ENABLED: 'true',
@@ -114,7 +121,12 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
     const assess = jest.fn<Promise<FaceQualityGateResult>, [Buffer]>();
     const qualityGateClient = { assess } as unknown as FaceQualityGateClient;
     const getCroppedSnapshot = jest.fn<Promise<Buffer | null>, [string]>();
-    const frigateMedia = { getCroppedSnapshot } as unknown as FrigateMediaAdapter;
+    const getTimestampedPersonCrop = jest.fn().mockResolvedValue(null);
+    const frigateMedia = {
+      getCroppedSnapshot,
+      getCurrentPersonCrop: getCroppedSnapshot,
+      getTimestampedPersonCrop,
+    } as unknown as FrigateMediaAdapter;
     const submitAiResult = jest.fn().mockResolvedValue({
       resultId: '66666666-6666-4666-8666-666666666666',
       disposition: 'ACCEPTED',
@@ -159,6 +171,7 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
       databaseService,
       cloudQueue,
       faceQueue,
+      detectionTracker,
     );
 
     return {
@@ -167,6 +180,7 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
       sessionCache,
       assess,
       getCroppedSnapshot,
+      getTimestampedPersonCrop,
       submitAiResult,
       enqueueFaceJob,
       faceQueueAdd,
@@ -178,6 +192,84 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it('requires the matching timestamped track crop when several people are present', async () => {
+    jest.spyOn(Date, 'now').mockReturnValue(30_000);
+    const tracker = {
+      frames: {
+        get: () => [
+          {
+            frameTime: 29950,
+            objects: [
+              { id: 'track-1', box: [0, 0, 100, 200], observedAt: 29950 },
+              { id: 'track-2', box: [30, 0, 130, 200], observedAt: 29950 },
+            ],
+          },
+        ],
+      },
+      getCanonicalTrackId: () => undefined,
+    } as unknown as FrigateDetectionTrackerService;
+    const h = buildHarness({}, tracker);
+    h.getCroppedSnapshot.mockResolvedValue(Buffer.from('wrong-latest-person'));
+    h.assess.mockResolvedValue(makeGateResult());
+    const input = {
+      messageType: 'new' as const,
+      event: makeEvent(),
+      after: {
+        id: 'track-1',
+        camera: 'cam_front',
+        frame_time: 29.95,
+        label: 'person',
+        score: 0.9,
+        box: [0, 0, 100, 200],
+      },
+      isCreated: true,
+      camera: makeCamera(),
+    };
+    await h.coordinator.handleTrackEvent(input);
+    expect(h.getCroppedSnapshot).not.toHaveBeenCalled();
+    expect(h.assess).not.toHaveBeenCalled();
+    expect(h.enqueueFaceJob).not.toHaveBeenCalled();
+    h.getTimestampedPersonCrop.mockResolvedValue(Buffer.from('paired-track-1'));
+    jest.spyOn(Date, 'now').mockReturnValue(30_400);
+    await h.coordinator.handleTrackEvent(input);
+    expect(h.assess).toHaveBeenCalledWith(Buffer.from('paired-track-1'));
+    expect(h.enqueueFaceJob).toHaveBeenCalledTimes(1);
+    h.coordinator.onModuleDestroy();
+  });
+
+  it('uses fresh frame telemetry when a person event was delayed by media synchronization', async () => {
+    jest.spyOn(Date, 'now').mockReturnValue(30_000);
+    const latestBox = [220, 100, 420, 600];
+    const tracker = {
+      frames: {
+        get: () => [
+          { frameTime: 29_950, objects: [{ id: 'track-1', box: latestBox, observedAt: 29_950 }] },
+        ],
+      },
+      getCanonicalTrackId: () => undefined,
+    } as unknown as FrigateDetectionTrackerService;
+    const h = buildHarness({}, tracker);
+    h.getCroppedSnapshot.mockResolvedValue(Buffer.from('current-person'));
+    h.assess.mockResolvedValue(makeGateResult());
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: makeEvent(),
+      after: {
+        id: 'track-1',
+        camera: 'cam_front',
+        frame_time: 20,
+        label: 'person',
+        score: 0.9,
+        box: [10, 10, 20, 40],
+      },
+      isCreated: true,
+      camera: makeCamera(),
+    });
+    expect(h.getCroppedSnapshot).toHaveBeenCalledWith('cam_front', latestBox, 1280, 720, 29.95);
+    expect(h.enqueueFaceJob).toHaveBeenCalledTimes(1);
+    h.coordinator.onModuleDestroy();
   });
 
   it('produces 0 AWS calls when person shows back of head / no face through entire track', async () => {
@@ -227,6 +319,45 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
     expect(h.faceQueueAdd).not.toHaveBeenCalled();
     expect(h.stateService.getMetrics().gateRejected).toBe(2);
     h.coordinator.onModuleDestroy();
+  });
+
+  it('starts the Best-Shot window at the first accepted face after rejected distant frames', async () => {
+    jest.useFakeTimers();
+    try {
+      const h = buildHarness();
+      jest.setSystemTime(10_000);
+      h.getCroppedSnapshot.mockResolvedValue(Buffer.from('distant-person'));
+      h.assess.mockResolvedValue(
+        makeGateResult({ passed: false, rejectionReason: 'FACE_TOO_SMALL' }),
+      );
+      const input = {
+        messageType: 'new' as const,
+        event: makeEvent(),
+        after: { id: 'track-1', camera: 'cam_front', frame_time: 10, label: 'person', score: 0.9 },
+        isCreated: true,
+        camera: makeCamera(),
+      };
+      await h.coordinator.handleTrackEvent(input);
+      jest.setSystemTime(15_000);
+      h.getCroppedSnapshot.mockResolvedValue(Buffer.from('first-acceptable-face'));
+      h.assess.mockResolvedValue(makeGateResult({ qualityScore: 0.65 }));
+      await h.coordinator.handleTrackEvent({ ...input, messageType: 'update', isCreated: false });
+      expect(h.enqueueFaceJob).not.toHaveBeenCalled();
+      await jest.advanceTimersByTimeAsync(400);
+      h.getCroppedSnapshot.mockResolvedValue(Buffer.from('better-face'));
+      h.assess.mockResolvedValue(makeGateResult({ qualityScore: 0.78 }));
+      await h.coordinator.handleTrackEvent({ ...input, messageType: 'update', isCreated: false });
+      await jest.advanceTimersByTimeAsync(799);
+      expect(h.enqueueFaceJob).not.toHaveBeenCalled();
+      await jest.advanceTimersByTimeAsync(1);
+      expect(h.enqueueFaceJob).toHaveBeenCalledTimes(1);
+      expect(h.enqueueFaceJob).toHaveBeenCalledWith(
+        expect.objectContaining({ imageBuffer: Buffer.from('better-face') }),
+      );
+      h.coordinator.onModuleDestroy();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('selects the highest quality Best-Shot within window and freezes KNOWN across updates', async () => {
@@ -472,6 +603,62 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
     );
     h.coordinator.onModuleDestroy();
   });
+
+  it.each(['different-face', 'multiple-faces'])(
+    'does not borrow a recently ended identity for %s despite matching clothes',
+    async (scenario) => {
+      const h = buildHarness();
+      jest.spyOn(Date, 'now').mockReturnValue(30_000);
+      const camera = makeCamera();
+      const crop = await solidJpeg({ r: 20, g: 20, b: 20 }, { r: 30, g: 30, b: 30 });
+      h.sessionCache.upsertKnown(
+        { ownerScopeId: camera.owner_user_id!, cameraSlug: camera.slug, collectionVersion: 1 },
+        {
+          knownFaceId: aliceId,
+          personName: 'Alice',
+          trackId: 'ended-alice',
+          embedding: new Float32Array([1, 0, 0, 0]),
+          appearanceSignature: await computeAppearanceSignature(crop),
+          lastBox: [100, 100, 220, 340],
+          confirmedAt: 28_000,
+          endedAt: 29_000,
+        },
+        29_000,
+      );
+      h.getCroppedSnapshot.mockResolvedValue(crop);
+      h.assess.mockResolvedValue(
+        makeGateResult(
+          scenario === 'different-face'
+            ? { embeddingBase64: encodeVector([0, 1, 0, 0]) }
+            : {
+                passed: false,
+                faceCount: 2,
+                rejectionReason: 'MULTIPLE_FACES',
+                embeddingBase64: null,
+                embeddingDim: null,
+              },
+        ),
+      );
+      await h.coordinator.handleTrackEvent({
+        messageType: 'new',
+        event: makeEvent(),
+        after: {
+          id: 'track-1',
+          camera: camera.slug,
+          frame_time: 30,
+          label: 'person',
+          score: 0.9,
+          box: [100, 100, 220, 340],
+        },
+        isCreated: true,
+        camera,
+      });
+      expect(h.submitAiResult).not.toHaveBeenCalled();
+      expect(h.stateService.getMetrics().spatialReidHits).toBe(0);
+      expect(h.enqueueFaceJob).toHaveBeenCalledTimes(scenario === 'different-face' ? 1 : 0);
+      h.coordinator.onModuleDestroy();
+    },
+  );
 
   it('invalidates cached identity when collectionVersion increments, forcing fresh AWS recognition', async () => {
     const h = buildHarness();
@@ -764,7 +951,7 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
     h.coordinator.onModuleDestroy();
   });
 
-  it('matches spatial+appearance Re-ID on track drop with 0 quality-gate/AWS calls and flushes pending bestShot on end', async () => {
+  it('checks face ambiguity before spatial Re-ID, keeps 0 additional AWS calls and flushes bestShot on end', async () => {
     const h = buildHarness();
     let now = 70_000;
     jest.spyOn(Date, 'now').mockImplementation(() => now);
@@ -826,10 +1013,19 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
       disposition: 'ACCEPTED',
     });
 
-    // Track 2 appears 1s later at nearby box with same appearance -> spatial-appearance Re-ID hits BEFORE quality gate!
+    // Track 2 returns facing away; the local gate checks for ambiguity before Re-ID.
     now += 1_000;
     const event2 = makeEvent({ id: '11111111-1111-4111-8111-111111111142', track_id: 't-reid-2' });
     h.getCroppedSnapshot.mockResolvedValueOnce(personCrop2);
+    h.assess.mockResolvedValueOnce(
+      makeGateResult({
+        passed: false,
+        faceCount: 0,
+        rejectionReason: 'NO_FACE_DETECTED',
+        embeddingBase64: null,
+        embeddingDim: null,
+      }),
+    );
     await h.coordinator.handleTrackEvent({
       messageType: 'new',
       event: event2,
@@ -845,7 +1041,7 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
       camera,
     });
 
-    expect(h.assess).toHaveBeenCalledTimes(1); // NOT called for t-reid-2!
+    expect(h.assess).toHaveBeenCalledTimes(2);
     expect(h.enqueueFaceJob).toHaveBeenCalledTimes(1); // 0 AWS calls!
     expect(h.stateService.getMetrics().spatialReidHits).toBe(1);
     expect(h.submitAiResult).toHaveBeenCalledWith(

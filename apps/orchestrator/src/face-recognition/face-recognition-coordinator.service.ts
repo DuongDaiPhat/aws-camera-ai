@@ -16,9 +16,14 @@ import { FrigateDetectionTrackerService } from '../frigate/frigate-detection-tra
 import type { FrigateEventAfterDto } from '../ingestion/dto/frigate-event.dto';
 import { readFaceProvider } from '../known-faces/face-config';
 import { FrigateMediaAdapter } from '../media/frigate-media.adapter';
-import { type FaceAssessBoundingBox, FaceQualityGateClient } from './face-quality-gate.client';
+import {
+  type FaceAssessBoundingBox,
+  type FaceQualityGateResult,
+  FaceQualityGateClient,
+} from './face-quality-gate.client';
 import {
   computeAppearanceSignature,
+  cosineSimilarity,
   decodeEmbeddingBase64,
   type FaceSessionScope,
   FaceSessionCacheService,
@@ -121,18 +126,56 @@ export class FaceRecognitionCoordinatorService
     }
 
     record.lastSampleAttemptAt = now;
-    const cropBuffer = await this.frigateMedia.getCroppedSnapshot(record.trackId);
+    // Event delivery can wait behind media uploads. Frame telemetry bypasses
+    // that queue, so align a current image with the most recent live person box.
+    const latestFrame = this.detectionTracker?.frames.get(record.cameraSlug, now).at(-1);
+    const liveObject = latestFrame?.objects.find((object) => object.id === record.trackId);
+    const freshObject =
+      liveObject && isValidBox(liveObject.box) && Math.abs(now - liveObject.observedAt) <= 2000
+        ? liveObject
+        : null;
+    const sampleBox = freshObject?.box ?? input.after.box;
+    const sampleTime = freshObject ? freshObject.observedAt / 1000 : input.after.frame_time;
+    if (freshObject) record.lastBox = [...freshObject.box];
+    const otherPeople =
+      (latestFrame?.objects.some(
+        (object) => object.id !== record.trackId && Math.abs(now - object.observedAt) <= 2000,
+      ) ??
+        false) ||
+      (this.detectionTracker
+        ?.getActiveDetections?.(record.cameraSlug)
+        .some((object) => object.id !== record.trackId) ??
+        false);
+    // With several people, a box from t and latest.jpg from t+1 can put A's face
+    // on B's track. Require a timestamp-bound JPEG/box pair in that situation.
+    const pairedCrop = await this.frigateMedia.getTimestampedPersonCrop(
+      record.cameraSlug,
+      record.trackId,
+      now,
+    );
+    const cropBuffer =
+      pairedCrop ??
+      (otherPeople
+        ? null
+        : isValidBox(sampleBox)
+          ? await this.frigateMedia.getCurrentPersonCrop(
+              record.cameraSlug,
+              sampleBox,
+              input.camera?.detect_width ?? 1280,
+              input.camera?.detect_height ?? 720,
+              sampleTime,
+            )
+          : await this.frigateMedia.getCroppedSnapshot(record.trackId));
     if (!cropBuffer || cropBuffer.length === 0 || this.isTrackLocked(record)) {
       return;
     }
 
     const appearanceSignature = await computeAppearanceSignature(cropBuffer);
-    if (await this.trySpatialAppearanceReid(record, scope, appearanceSignature, now)) {
-      return;
-    }
-
     const gateResult = await this.qualityGateClient.assess(cropBuffer);
     if (this.isTrackLocked(record)) {
+      return;
+    }
+    if (await this.trySpatialAppearanceReid(record, scope, appearanceSignature, gateResult, now)) {
       return;
     }
     if (!gateResult.passed) {
@@ -268,11 +311,15 @@ export class FaceRecognitionCoordinatorService
     record: TrackRecord,
     scope: FaceSessionScope,
     appearanceSignature: Float32Array | null,
+    gateResult: FaceQualityGateResult,
     now: number,
   ): Promise<boolean> {
     if (
       record.state !== 'COLLECTING' ||
       !this.optConfig.spatialReidEnabled ||
+      gateResult.gateStatus !== 'READY' ||
+      gateResult.failOpenApplied ||
+      gateResult.faceCount > 1 ||
       !isValidBox(record.lastBox) ||
       !this.sessionCache.hasRecentlyEndedKnownTrack(scope, now)
     ) {
@@ -286,6 +333,21 @@ export class FaceRecognitionCoordinatorService
     );
     if (!reidMatch) {
       return false;
+    }
+    // Clothing and proximity cannot override a clearly different face. A
+    // back-facing return can still use appearance when no face is assessable.
+    if (gateResult.passed) {
+      const embedding = gateResult.embeddingBase64
+        ? decodeEmbeddingBase64(gateResult.embeddingBase64, gateResult.embeddingDim)
+        : null;
+      if (
+        !embedding ||
+        !reidMatch.entry.embedding ||
+        cosineSimilarity(embedding, reidMatch.entry.embedding) <
+          this.optConfig.sessionCacheSimilarityThreshold
+      ) {
+        return false;
+      }
     }
     this.stateService.recordSpatialReidHit();
     await this.applyLocalCacheHit(record, scope, {
@@ -369,7 +431,7 @@ export class FaceRecognitionCoordinatorService
     }
 
     this.stateService.updateBestShot(record, candidate, now);
-    const elapsed = now - record.firstSeenAt;
+    const elapsed = now - (record.bestShotWindowStartedAt ?? now);
     const shouldDispatchNow =
       candidate.qualityScore >= this.optConfig.bestShotEarlyDispatchScore ||
       record.samplesCollected >= this.optConfig.bestShotMaxSamples ||
@@ -663,7 +725,10 @@ export class FaceRecognitionCoordinatorService
 
   private ensureWindowTimer(record: TrackRecord, now: number): void {
     if (this.windowTimers.has(record.key)) return;
-    const remainingMs = Math.max(1, record.firstSeenAt + this.optConfig.bestShotWindowMs - now);
+    const remainingMs = Math.max(
+      1,
+      (record.bestShotWindowStartedAt ?? now) + this.optConfig.bestShotWindowMs - now,
+    );
     const timer = setTimeout(() => {
       this.windowTimers.delete(record.key);
       const current = this.stateService.get(record.cameraSlug, record.trackId);
