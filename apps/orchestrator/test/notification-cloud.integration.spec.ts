@@ -6,6 +6,8 @@ import { Pool } from 'pg';
 import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
 import { DatabaseService } from '../src/database/database.service';
 import { EscalationRepository } from '../src/escalation/escalation.repository';
+import { EscalationEngineService } from '../src/escalation/escalation-engine.service';
+import { EscalationRulesRepository } from '../src/escalation-rules/escalation-rules.repository';
 import { NotificationCloudService } from '../src/notification-cloud/notification-cloud.service';
 import type {
   ClaimRequest,
@@ -93,6 +95,93 @@ describe('cloud notifications in PostgreSQL', () => {
       await fixtureAdmin.end();
     }
     await container?.stop();
+  });
+
+  it.each(['FIRE_SMOKE_DETECTED', 'FALL_DETECTED', 'RESTRICTED_ZONE', 'UNKNOWN_PERSON'] as const)(
+    'creates an email rule job for a qualified %s event',
+    async (eventType) => {
+      const eventId = randomUUID();
+      const detectedAt = new Date();
+      await pool.query(
+        `INSERT INTO events(id,camera_id,event_type,status,priority,detected_at)
+       VALUES ($1,$2,$3,'DETECTED','P3',$4)`,
+        [eventId, camera, eventType, detectedAt],
+      );
+      const engine = new EscalationEngineService(
+        new EscalationRepository(pool, service()),
+        new EscalationRulesRepository(pool),
+      );
+      const decision = await engine.evaluateAndTransition(eventId, {
+        eventType,
+        detectedAt,
+        confidence: 0.99,
+      });
+      expect(decision.status).toBe('NOTIFIED');
+      const { rows } = await pool.query(
+        `SELECT j.envelope,n.recipient_user_id FROM cloud_jobs j
+       JOIN notifications n ON n.id=j.id
+       WHERE j.event_id=$1 AND j.kind='notification.job' AND n.channel='SNS_EMAIL'`,
+        [eventId],
+      );
+      expect(rows).toHaveLength(1);
+      expect(rows[0].recipient_user_id).toBe(owner);
+      expect(rows[0].envelope.payload).toMatchObject({
+        notificationId: expect.any(String),
+        eventId,
+        ownerScopeId: owner,
+        expectedEventVersion: decision.version,
+        channel: 'SNS_EMAIL',
+      });
+    },
+  );
+
+  it('upgrades email rule channels once without changing other channels or thresholds', async () => {
+    const client = await pool.connect();
+    const migration = readFileSync(
+      resolve(__dirname, '../../../db/migrations/0025_notification_email_rules.sql'),
+      'utf8',
+    );
+    const riskTypes = ['FIRE_SMOKE_DETECTED', 'FALL_DETECTED', 'RESTRICTED_ZONE', 'UNKNOWN_PERSON'];
+    const snapshot = `SELECT event_type,notify_channels,escalate_channels,t_low,t_high,
+      t_wait_seconds,version,updated_at FROM escalation_rules ORDER BY event_type`;
+    try {
+      await client.query(
+        'CREATE TEMP TABLE escalation_rules (LIKE public.escalation_rules INCLUDING ALL)',
+      );
+      await client.query(
+        'INSERT INTO pg_temp.escalation_rules SELECT * FROM public.escalation_rules',
+      );
+      await client.query(
+        `UPDATE pg_temp.escalation_rules SET version=10,
+         notify_channels=CASE WHEN event_type='FIRE_SMOKE_DETECTED'
+           THEN '["TELEGRAM","SNS_SMS"]'::jsonb ELSE '["TELEGRAM"]'::jsonb END
+         WHERE event_type=ANY($1::event_type[])`,
+        [riskTypes],
+      );
+      const before = (await client.query(snapshot)).rows;
+      await client.query(migration);
+      const after = (await client.query(snapshot)).rows;
+      for (const [index, row] of after.entries()) {
+        const previous = before[index];
+        if (riskTypes.includes(row.event_type)) {
+          expect(row.notify_channels).toEqual([...previous.notify_channels, 'SNS_EMAIL']);
+          expect(row.version).toBe(11);
+          expect(row.escalate_channels).toEqual(previous.escalate_channels);
+          expect([row.t_low, row.t_high, row.t_wait_seconds]).toEqual([
+            previous.t_low,
+            previous.t_high,
+            previous.t_wait_seconds,
+          ]);
+        } else {
+          expect(row).toEqual(previous);
+        }
+      }
+      await client.query(migration);
+      expect((await client.query(snapshot)).rows).toEqual(after);
+    } finally {
+      await client.query('DROP TABLE IF EXISTS pg_temp.escalation_rules');
+      client.release();
+    }
   });
 
   function service(overrides: Record<string, string> = {}) {
