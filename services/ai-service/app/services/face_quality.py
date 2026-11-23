@@ -27,6 +27,24 @@ class FaceQualityAssessor:
         self._lock = threading.Lock()
         self._detector: cv2.FaceDetectorYN | None = None
         self._recognizer: cv2.FaceRecognizerSF | None = None
+        self._warmed = False
+
+    def warmup(self) -> bool:
+        """Prime model execution before the first live face consumes its deadline."""
+        if not self.settings.face_quality_gate_enabled:
+            return True
+        try:
+            with self._lock:
+                if not self._warmed:
+                    self._load()
+                    self._detect_faces(np.zeros((320, 320, 3), dtype=np.uint8))
+                    assert self._recognizer is not None
+                    self._recognizer.feature(np.zeros((112, 112, 3), dtype=np.uint8))
+                    self._warmed = True
+            return True
+        except (FileNotFoundError, cv2.error, OSError):
+            LOGGER.warning("Face quality warmup unavailable; gate remains fail-closed")
+            return False
 
     def _load(self, *, require_recognizer: bool = True) -> None:
         # Load local ONNX models regardless of settings.face_provider so the
@@ -104,6 +122,24 @@ class FaceQualityAssessor:
         return float(cv2.Laplacian(gray, cv2.CV_64F).var())
 
     @staticmethod
+    def _compute_normalized_sharpness(image: np.ndarray, face: np.ndarray) -> float:
+        """Compare face detail at a fixed scale with pixel/JPEG noise attenuated."""
+        height, width = image.shape[:2]
+        x, y, w, h = (float(v) for v in face[:4])
+        roi = image[
+            max(0, math.floor(y)) : min(height, math.ceil(y + h)),
+            max(0, math.floor(x)) : min(width, math.ceil(x + w)),
+        ]
+        if roi.size == 0:
+            return 0.0
+        interpolation = cv2.INTER_AREA if min(roi.shape[:2]) >= 112 else cv2.INTER_LINEAR
+        gray = cv2.cvtColor(
+            cv2.resize(roi, (112, 112), interpolation=interpolation), cv2.COLOR_BGR2GRAY
+        )
+        gray = cv2.GaussianBlur(gray, (3, 3), 0.8)
+        return float(cv2.Laplacian(gray, cv2.CV_64F).var())
+
+    @staticmethod
     def _compute_pose_ratios(face: np.ndarray) -> tuple[float, float]:
         if len(face) < 14:
             return 1.0, 1.0
@@ -144,12 +180,13 @@ class FaceQualityAssessor:
 
     def _compute_quality_score(self, metrics: FaceQualityMetrics) -> float:
         det_score = float(np.clip(metrics.detection_score, 0.0, 1.0))
-        target_px = max(float(self.settings.face_gate_min_face_px) * 2.0, 120.0)
+        target_px = max(float(self.settings.face_gate_min_face_px) * 2.0, 160.0)
         size_score = float(
             np.clip(min(metrics.face_width_px, metrics.face_height_px) / target_px, 0.0, 1.0)
         )
-        target_sharp = max(float(self.settings.face_gate_min_sharpness) * 3.0, 135.0)
-        sharp_score = float(np.clip(metrics.sharpness / target_sharp, 0.0, 1.0))
+        # Smooth response instead of saturating on hair, glasses or JPEG edges.
+        detail = metrics.normalized_sharpness
+        sharp_score = detail / (detail + 30.0)
 
         yaw_scale = max(float(self.settings.face_gate_max_yaw_ratio) * 1.5, 1e-6)
         pitch_scale = max(float(self.settings.face_gate_max_pitch_ratio) * 1.5, 1e-6)
@@ -157,7 +194,9 @@ class FaceQualityAssessor:
         pitch_score = float(np.clip(1.0 - metrics.pose_pitch_ratio / pitch_scale, 0.0, 1.0))
         pose_score = 0.5 * (yaw_score + pitch_score)
 
-        composite = 0.30 * det_score + 0.20 * size_score + 0.25 * sharp_score + 0.25 * pose_score
+        composite = (0.15 * det_score + 0.40 * sharp_score + 0.45 * pose_score) * math.sqrt(
+            size_score
+        )
         return round(float(np.clip(composite, 0.0, 1.0)), 4)
 
     def _evaluate_checks(self, metrics: FaceQualityMetrics) -> str | None:
@@ -170,6 +209,8 @@ class FaceQualityAssessor:
             return "LOW_DETECTION_SCORE"
         if metrics.sharpness < self.settings.face_gate_min_sharpness:
             return "BLURRY"
+        if metrics.normalized_sharpness < self.settings.face_gate_min_normalized_sharpness:
+            return "BLURRY_NORMALIZED"
         if (
             metrics.pose_yaw_ratio > self.settings.face_gate_max_yaw_ratio
             or metrics.pose_pitch_ratio > self.settings.face_gate_max_pitch_ratio
@@ -220,6 +261,7 @@ class FaceQualityAssessor:
             face_height_px=face_height_px,
             detection_score=round(detection_score, 4),
             sharpness=round(sharpness, 4),
+            normalized_sharpness=round(self._compute_normalized_sharpness(image, face), 4),
             pose_yaw_ratio=round(yaw_ratio, 4),
             pose_pitch_ratio=round(pitch_ratio, 4),
         )

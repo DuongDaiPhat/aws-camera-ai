@@ -132,6 +132,30 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     expect(service).toBeDefined();
   });
 
+  it('retains the original incident key for a coordinator-verified continuation', async () => {
+    const event = createEvent();
+    eventsRepository.findCameraBySlug.mockResolvedValue({
+      id: 'cam-uuid-1',
+      name: 'Room',
+      slug: 'cam_living_room',
+    });
+    const resolveContinuationDedupKey = jest
+      .fn()
+      .mockResolvedValue('frigate:cam_living_room:track-101');
+    Object.assign(service, {
+      faceCoordinator: { resolveContinuationDedupKey, handleTrackEvent: jest.fn() },
+    });
+    eventsRepository.findEventByDedupKey.mockResolvedValue(event);
+    eventsRepository.updateEvent.mockResolvedValue(event);
+    await service.handleMessage('frigate/events', buildSnapshotUpdateMessage('new-raw-id'));
+    await service.handleMessage('frigate/events', buildSnapshotUpdateMessage('new-raw-id'));
+    expect(eventsRepository.createEvent).not.toHaveBeenCalled();
+    expect(eventsRepository.findEventByDedupKey).toHaveBeenCalledWith(
+      'frigate:cam_living_room:track-101',
+    );
+    expect(resolveContinuationDedupKey).toHaveBeenCalledTimes(1);
+  });
+
   it('starts face sampling while snapshot storage is still pending', async () => {
     const event = createEvent();
     eventsRepository.findCameraBySlug.mockResolvedValue({

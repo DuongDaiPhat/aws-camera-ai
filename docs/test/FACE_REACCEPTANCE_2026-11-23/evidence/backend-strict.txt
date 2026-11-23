@@ -1,0 +1,889 @@
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [NestFactory] Starting Nest application...
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] AppModule dependencies initialized +38ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] ConfigHostModule dependencies initialized +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] DiscoveryModule dependencies initialized +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] ConfigModule dependencies initialized +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [MinioStorageService] Khoi tao MinIO Storage Adapter (endpoint: http://minio:9000, presign: http://localhost:9000, bucket: camerai-s4-dev-media-093206112026)
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [S3StorageService] Khoi tao AWS S3 Storage Adapter (region: ap-southeast-1, bucket: camerai-s4-dev-media-093206112026)
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] BullModule dependencies initialized +17ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] BullModule dependencies initialized +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] MulterModule dependencies initialized +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] DatabaseModule dependencies initialized +2ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] StorageModule dependencies initialized +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] FrigateModule dependencies initialized +265ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] EscalationModule dependencies initialized +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] BullModule dependencies initialized +2ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] BullModule dependencies initialized +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] CameraSourcesModule dependencies initialized +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] MediaModule dependencies initialized +2ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] EscalationRulesModule dependencies initialized +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] HealthModule dependencies initialized +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] WellnessModule dependencies initialized +8ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] AdminModule dependencies initialized +2ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] EventsModule dependencies initialized +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] PlaybackModule dependencies initialized +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] KnownFacesModule dependencies initialized +2ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] AuthModule dependencies initialized +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] ZonesModule dependencies initialized +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] FallDetectionModule dependencies initialized +3ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] CamerasModule dependencies initialized +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] HouseholdModule dependencies initialized +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] NotificationsModule dependencies initialized +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] AiResultsModule dependencies initialized +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] FaceRecognitionModule dependencies initialized +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] IngestionModule dependencies initialized +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] CloudQueueModule dependencies initialized +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [InstanceLoader] FireModule dependencies initialized +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] HouseholdController {/api/v1/household}: +96ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/household/escalation-rules, GET} route +3ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/household/escalation-rules/:eventType, PUT} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/household, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/household/members, POST} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/household/members/:memberId/cameras, PUT} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/household/members/:memberId, DELETE} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/household/contacts, POST} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/household/contacts/:contactId, PUT} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/household/contacts/:contactId, DELETE} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/household/settings, PUT} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/household/cameras, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] AccountController {/api/v1/account}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/account, GET} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/account/profile, PATCH} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/account/preferences, PUT} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/account/password, POST} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] CamerasController {/api/v1/cameras}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId, GET} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId, PATCH} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId, DELETE} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/snapshot, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/state, PUT} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/runtime-status, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/source, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/source, PUT} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/source/test, POST} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/source/video, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/source/video, DELETE} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/source/start, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/source/stop, POST} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/source/browser-session, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/source/browser-session, DELETE} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/debug-stream, GET} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/frigate-sync/retry, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] MediaMtxAuthController {/api/v1/mediamtx}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/mediamtx/authorize, POST} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] EscalationRulesController {/api/v1/escalation-rules}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/escalation-rules, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/escalation-rules/:eventType, GET} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/escalation-rules/:eventType, PATCH} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/escalation-rules/:eventType, PUT} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] PlaybackController {/api/v1/playback/cameras}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/playback/cameras, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/playback/cameras/:id/recordings, GET} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/playback/cameras/:id/metadata, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/playback/cameras/:id/clip, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] CloudQueueController {/api/v1/internal/cloud/face-jobs}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/internal/cloud/face-jobs/:id, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/internal/cloud/face-jobs/:id/result, PUT} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] MediaController {/api/v1/events}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/events/:eventId/media, GET} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] AiResultsController {/api/v1/internal/events}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/internal/events/:eventId/ai-result, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] EventsController {/api/v1/events}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/events, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/events/stats, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/events/stream, GET} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/events/sos, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/events/:eventId, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/events/:eventId/confirm, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/events/:eventId/close, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] AuthController {/api/v1/auth}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/auth/config, GET} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/auth/login, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/auth/refresh, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/auth/logout, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/auth/me, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] UsersController {/api/v1/users}: +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/users, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/users/:userId/role, PATCH} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/users, POST} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] WellnessController {/api/v1}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/wellness-schedules, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/wellness-schedules, POST} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/wellness-schedules/:scheduleId, PATCH} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/wellness-schedules/:scheduleId, DELETE} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/wellness-checks, GET} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/wellness-checks/:checkId/confirm, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/internal/wellness-observations, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] KnownFacesController {/api/v1/known-faces}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/known-faces, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/known-faces, POST} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/known-faces/:knownFaceId, PATCH} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/known-faces/:knownFaceId, DELETE} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] TelegramLinkController {/api/v1/auth/telegram}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/auth/telegram/link, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] TelegramWebhookController {/api/v1/webhooks/telegram}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/webhooks/telegram, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] ZonesController {/api/v1}: +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/zones, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/cameras/:cameraId/zones, POST} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/zones/:zoneId, PATCH} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/zones/:zoneId, DELETE} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] HealthController {/api/v1/health}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/health, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] SmokeController {/api/v1/internal/smoke}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/internal/smoke, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] FireHealthController {/api/v1/internal/fire}: +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/internal/fire/health, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RoutesResolver] AdminController {/api/v1/admin}: +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/admin/overview, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/admin/households, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/admin/users/:userId/status, PATCH} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/admin/households/:ownerId/quota, PATCH} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/admin/services, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/admin/resources, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/admin/resources, PATCH} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/admin/audit-logs, GET} route +1ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/admin/settings, GET} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [RouterExplorer] Mapped {/api/v1/admin/settings, PATCH} route +0ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [EscalationDeadlineWorkerService] Khởi động EscalationDeadlineWorker (quét mỗi 5000ms, tối đa 10 events/lần)
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://127.0.0.1:1883 (clientId: face-track-once-qa)...
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [NestApplication] Nest application successfully started +5ms
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [Bootstrap] Orchestrator dang chay tai http://localhost:3001/api/v1
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [Bootstrap] Swagger UI dang chay tai http://localhost:3001/api/docs
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events, frigate/camerai/frames, frigate/camerai/pose/frames
+[Nest] 1800  - 23/11/2026, 07.53.58     LOG [MqttConsumerService] Da subscribe cac topic MQTT.
+[Nest] 1800  - 23/11/2026, 07.53.59    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.54.09    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.54.19    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.54.29    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.54.39    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.54.39    WARN [MediaMtxAuthController] MediaMTX auth denied action=publish protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.54.49    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395290812 observedAt=1795395290812 receivedAt=1795395291665 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.54.51     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395290.642862-853a2z",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.54.51     LOG [MqttConsumerService] Da ghi nhan su kien moi vao bang events
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395291190 observedAt=1795395291190 receivedAt=1795395291936 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395291373 observedAt=1795395291373 receivedAt=1795395292045 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395291608 observedAt=1795395291608 receivedAt=1795395292095 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395291819 observedAt=1795395291819 receivedAt=1795395292278 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.54.52     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395290.642862-853a2z",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.54.52     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395291979 observedAt=1795395291979 receivedAt=1795395292473 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395292234 observedAt=1795395292234 receivedAt=1795395292656 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395292401 observedAt=1795395292401 receivedAt=1795395292849 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.54.52     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395290.642862-853a2z",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.54.52     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395292576 observedAt=1795395292576 receivedAt=1795395292953 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395292774 observedAt=1795395292774 receivedAt=1795395293194 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395292970 observedAt=1795395292970 receivedAt=1795395293373 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395293171 observedAt=1795395293171 receivedAt=1795395293500 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395293377 observedAt=1795395293377 receivedAt=1795395293686 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395293556 observedAt=1795395293556 receivedAt=1795395293852 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395293759 observedAt=1795395293759 receivedAt=1795395294070 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395293990 observedAt=1795395293990 receivedAt=1795395294210 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.54.54     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395290.642862-853a2z",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.54.54     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395294161 observedAt=1795395294161 receivedAt=1795395294466 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395294361 observedAt=1795395294361 receivedAt=1795395294707 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.54.54     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395290.642862-853a2z",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.54.54     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395294560 observedAt=1795395294560 receivedAt=1795395294908 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.54.54     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395290.642862-853a2z",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.54.54     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395294762 observedAt=1795395294762 receivedAt=1795395295275 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395294970 observedAt=1795395294970 receivedAt=1795395295735 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.54.55     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395290.642862-853a2z",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.54.55     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395295200 observedAt=1795395295200 receivedAt=1795395296125 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395295422 observedAt=1795395295422 receivedAt=1795395296464 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.54.56     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395290.642862-853a2z",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.54.56     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395295649 observedAt=1795395295649 receivedAt=1795395296772 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395296043 observedAt=1795395296043 receivedAt=1795395297020 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.54.57     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395290.642862-853a2z",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.54.57     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395296389 observedAt=1795395296043 receivedAt=1795395297277 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395296584 observedAt=1795395296043 receivedAt=1795395297408 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395296995 observedAt=1795395296043 receivedAt=1795395297612 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395297201 observedAt=1795395296043 receivedAt=1795395297809 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395297389 observedAt=1795395296043 receivedAt=1795395297983 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395297575 observedAt=1795395296043 receivedAt=1795395298443 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395297777 observedAt=1795395296043 receivedAt=1795395298863 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395290.642862-853a2z frameTime=1795395297991 observedAt=1795395296043 receivedAt=1795395299164 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.00     LOG [AiResultsService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "resultId": "31823e88-df5d-484d-94c9-25999f559336",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.00     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 1800  - 23/11/2026, 07.55.04     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395290.642862-853a2z",
+  "messageType": "end",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.04     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395309778 observedAt=1795395309778 receivedAt=1795395310278 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.10     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "2e1345a6-f191-4149-998a-7e86ef8587dd",
+  "eventId": "cae916d1-dd92-4aac-b16a-42fcc38099eb",
+  "trackId": "1795395309.559642-9u1lqp",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395309.559642-9u1lqp"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.10     LOG [MqttConsumerService] Da ghi nhan su kien moi vao bang events
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395310002 observedAt=1795395310002 receivedAt=1795395310643 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395310252 observedAt=1795395310252 receivedAt=1795395310994 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.11     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "2e1345a6-f191-4149-998a-7e86ef8587dd",
+  "eventId": "cae916d1-dd92-4aac-b16a-42fcc38099eb",
+  "trackId": "1795395309.559642-9u1lqp",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395309.559642-9u1lqp"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.11     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395310483 observedAt=1795395310483 receivedAt=1795395311186 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.11     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395309.559642-9u1lqp",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.11     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395310685 observedAt=1795395310685 receivedAt=1795395311362 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395310852 observedAt=1795395310852 receivedAt=1795395311434 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.11     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395309.559642-9u1lqp",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.11     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395311036 observedAt=1795395311036 receivedAt=1795395311602 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.11     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395309.559642-9u1lqp",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.11     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395311215 observedAt=1795395311215 receivedAt=1795395311823 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395311446 observedAt=1795395311446 receivedAt=1795395311971 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395311621 observedAt=1795395311621 receivedAt=1795395312198 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395311841 observedAt=1795395311841 receivedAt=1795395312321 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395311970 observedAt=1795395311970 receivedAt=1795395312547 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395312193 observedAt=1795395312193 receivedAt=1795395312804 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395312387 observedAt=1795395312387 receivedAt=1795395313027 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.13     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395309.559642-9u1lqp",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.13     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395312637 observedAt=1795395312637 receivedAt=1795395313298 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.13     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395309.559642-9u1lqp",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.13     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395312771 observedAt=1795395312771 receivedAt=1795395313696 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395312986 observedAt=1795395312986 receivedAt=1795395314050 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.14     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395309.559642-9u1lqp",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.14     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395313221 observedAt=1795395313221 receivedAt=1795395314345 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395313610 observedAt=1795395313610 receivedAt=1795395314527 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.14     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395309.559642-9u1lqp",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.14     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395314002 observedAt=1795395314002 receivedAt=1795395314673 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395314205 observedAt=1795395314205 receivedAt=1795395314869 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395314418 observedAt=1795395314418 receivedAt=1795395315024 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395314610 observedAt=1795395314610 receivedAt=1795395315187 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.15     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395309.559642-9u1lqp",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.15     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395314785 observedAt=1795395314785 receivedAt=1795395315361 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395314966 observedAt=1795395314966 receivedAt=1795395315510 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.15     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395309.559642-9u1lqp",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.15     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395315188 observedAt=1795395315188 receivedAt=1795395315597 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395315398 observedAt=1795395315398 receivedAt=1795395315694 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.15     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395309.559642-9u1lqp",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.15     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395315598 observedAt=1795395315598 receivedAt=1795395315914 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.16     LOG [AiResultsService] Object:
+{
+  "correlationId": "2e1345a6-f191-4149-998a-7e86ef8587dd",
+  "eventId": "cae916d1-dd92-4aac-b16a-42fcc38099eb",
+  "resultId": "15df5659-3847-5d69-bfc2-20e368726e16",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.16     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395315768 observedAt=1795395315768 receivedAt=1795395316110 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395315950 observedAt=1795395315768 receivedAt=1795395316237 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395316142 observedAt=1795395315768 receivedAt=1795395316387 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395316339 observedAt=1795395315768 receivedAt=1795395316588 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395316541 observedAt=1795395315768 receivedAt=1795395316799 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395316756 observedAt=1795395315768 receivedAt=1795395316985 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395316941 observedAt=1795395315768 receivedAt=1795395317192 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395317139 observedAt=1795395315768 receivedAt=1795395317401 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395317341 observedAt=1795395315768 receivedAt=1795395317594 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395317542 observedAt=1795395315768 receivedAt=1795395317813 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395309.559642-9u1lqp frameTime=1795395317758 observedAt=1795395315768 receivedAt=1795395317993 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.55.22     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "f66ec4dd-9f68-4c9f-be17-f7c22a396e69",
+  "eventId": "094924f5-538a-455f-a599-556235b47054",
+  "trackId": "1795395309.559642-9u1lqp",
+  "messageType": "end",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395290.642862-853a2z"
+}
+
+[Nest] 1800  - 23/11/2026, 07.55.22     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 1800  - 23/11/2026, 07.55.36    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.55.46    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.55.56    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.56.06    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.56.16    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.56.26    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.56.35    WARN [MediaMtxAuthController] MediaMTX auth denied action=publish protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.56.36    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395405858 observedAt=1795395405858 receivedAt=1795395406118 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.56.46     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "296ca1d1-85bb-41b5-b1bd-66aa94d9725b",
+  "eventId": "ef7335f8-11d4-43b0-b6e9-45414346d82e",
+  "trackId": "1795395405.660975-7lkqpg",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395405.660975-7lkqpg"
+}
+
+[Nest] 1800  - 23/11/2026, 07.56.46     LOG [MqttConsumerService] Da ghi nhan su kien moi vao bang events
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395406047 observedAt=1795395406047 receivedAt=1795395406338 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.56.46     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "296ca1d1-85bb-41b5-b1bd-66aa94d9725b",
+  "eventId": "ef7335f8-11d4-43b0-b6e9-45414346d82e",
+  "trackId": "1795395405.660975-7lkqpg",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395405.660975-7lkqpg"
+}
+
+[Nest] 1800  - 23/11/2026, 07.56.46     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395406247 observedAt=1795395406247 receivedAt=1795395406555 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395406446 observedAt=1795395406446 receivedAt=1795395406755 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395406651 observedAt=1795395406651 receivedAt=1795395406961 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395406853 observedAt=1795395406853 receivedAt=1795395407182 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395407048 observedAt=1795395407048 receivedAt=1795395407377 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395407244 observedAt=1795395407244 receivedAt=1795395407571 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395407450 observedAt=1795395407450 receivedAt=1795395407735 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395407651 observedAt=1795395407651 receivedAt=1795395407945 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395407854 observedAt=1795395407854 receivedAt=1795395408215 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395408058 observedAt=1795395408058 receivedAt=1795395408380 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395408256 observedAt=1795395408256 receivedAt=1795395408574 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395408461 observedAt=1795395408461 receivedAt=1795395408766 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395408660 observedAt=1795395408660 receivedAt=1795395409005 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395408859 observedAt=1795395408859 receivedAt=1795395409238 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395409059 observedAt=1795395409059 receivedAt=1795395409407 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.56.49     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "296ca1d1-85bb-41b5-b1bd-66aa94d9725b",
+  "eventId": "ef7335f8-11d4-43b0-b6e9-45414346d82e",
+  "trackId": "1795395405.660975-7lkqpg",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395405.660975-7lkqpg"
+}
+
+[Nest] 1800  - 23/11/2026, 07.56.49     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395409261 observedAt=1795395409261 receivedAt=1795395409621 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395409473 observedAt=1795395409473 receivedAt=1795395410090 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395409663 observedAt=1795395409663 receivedAt=1795395410545 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395409946 observedAt=1795395409946 receivedAt=1795395411000 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395410174 observedAt=1795395410174 receivedAt=1795395411221 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395410393 observedAt=1795395410393 receivedAt=1795395411664 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.56.51     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "296ca1d1-85bb-41b5-b1bd-66aa94d9725b",
+  "eventId": "ef7335f8-11d4-43b0-b6e9-45414346d82e",
+  "trackId": "1795395405.660975-7lkqpg",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395405.660975-7lkqpg"
+}
+
+[Nest] 1800  - 23/11/2026, 07.56.51     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395410817 observedAt=1795395410817 receivedAt=1795395411903 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.56.51     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "296ca1d1-85bb-41b5-b1bd-66aa94d9725b",
+  "eventId": "ef7335f8-11d4-43b0-b6e9-45414346d82e",
+  "trackId": "1795395405.660975-7lkqpg",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395405.660975-7lkqpg"
+}
+
+[Nest] 1800  - 23/11/2026, 07.56.51     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395411142 observedAt=1795395411142 receivedAt=1795395412299 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.56.52     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "296ca1d1-85bb-41b5-b1bd-66aa94d9725b",
+  "eventId": "ef7335f8-11d4-43b0-b6e9-45414346d82e",
+  "trackId": "1795395405.660975-7lkqpg",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395405.660975-7lkqpg"
+}
+
+[Nest] 1800  - 23/11/2026, 07.56.52     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395411535 observedAt=1795395411535 receivedAt=1795395412499 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.56.52     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "296ca1d1-85bb-41b5-b1bd-66aa94d9725b",
+  "eventId": "ef7335f8-11d4-43b0-b6e9-45414346d82e",
+  "trackId": "1795395405.660975-7lkqpg",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395405.660975-7lkqpg"
+}
+
+[Nest] 1800  - 23/11/2026, 07.56.52     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395411705 observedAt=1795395411535 receivedAt=1795395412610 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395412141 observedAt=1795395411535 receivedAt=1795395412802 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395412460 observedAt=1795395411535 receivedAt=1795395412984 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395412663 observedAt=1795395411535 receivedAt=1795395413152 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395412866 observedAt=1795395411535 receivedAt=1795395413369 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395413066 observedAt=1795395411535 receivedAt=1795395413661 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395413268 observedAt=1795395411535 receivedAt=1795395413956 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395405.660975-7lkqpg frameTime=1795395413468 observedAt=1795395411535 receivedAt=1795395414290 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.56.55     LOG [AiResultsService] Object:
+{
+  "correlationId": "296ca1d1-85bb-41b5-b1bd-66aa94d9725b",
+  "eventId": "ef7335f8-11d4-43b0-b6e9-45414346d82e",
+  "resultId": "b8d8ab68-e2ec-4022-8141-cc682667e4e4",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 1800  - 23/11/2026, 07.56.55     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 1800  - 23/11/2026, 07.56.58     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "296ca1d1-85bb-41b5-b1bd-66aa94d9725b",
+  "eventId": "ef7335f8-11d4-43b0-b6e9-45414346d82e",
+  "trackId": "1795395405.660975-7lkqpg",
+  "messageType": "end",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395405.660975-7lkqpg"
+}
+
+[Nest] 1800  - 23/11/2026, 07.56.58     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 1800  - 23/11/2026, 07.57.03     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6e972170-dfdb-49d1-a261-240a761dd0db",
+  "eventId": "c2cb0a94-9fc7-4141-a3bd-c395c6059fef",
+  "trackId": "1795395422.882314-t3ozx4",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395422.882314-t3ozx4"
+}
+
+[Nest] 1800  - 23/11/2026, 07.57.03     LOG [MqttConsumerService] Da ghi nhan su kien moi vao bang events
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395422963 observedAt=1795395422963 receivedAt=1795395423587 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395423063 observedAt=1795395423063 receivedAt=1795395423848 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395423264 observedAt=1795395423264 receivedAt=1795395424041 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.57.04     LOG [AiResultsService] Object:
+{
+  "correlationId": "6e972170-dfdb-49d1-a261-240a761dd0db",
+  "eventId": "c2cb0a94-9fc7-4141-a3bd-c395c6059fef",
+  "resultId": "2b198354-a2d6-5e92-a299-c281e19fce03",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 1800  - 23/11/2026, 07.57.04     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395423493 observedAt=1795395423493 receivedAt=1795395424179 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.57.04     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6e972170-dfdb-49d1-a261-240a761dd0db",
+  "eventId": "c2cb0a94-9fc7-4141-a3bd-c395c6059fef",
+  "trackId": "1795395422.882314-t3ozx4",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395422.882314-t3ozx4"
+}
+
+[Nest] 1800  - 23/11/2026, 07.57.04     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395423722 observedAt=1795395423722 receivedAt=1795395424340 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.57.04     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6e972170-dfdb-49d1-a261-240a761dd0db",
+  "eventId": "c2cb0a94-9fc7-4141-a3bd-c395c6059fef",
+  "trackId": "1795395422.882314-t3ozx4",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395422.882314-t3ozx4"
+}
+
+[Nest] 1800  - 23/11/2026, 07.57.04     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395423893 observedAt=1795395423893 receivedAt=1795395424503 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.57.04     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6e972170-dfdb-49d1-a261-240a761dd0db",
+  "eventId": "c2cb0a94-9fc7-4141-a3bd-c395c6059fef",
+  "trackId": "1795395422.882314-t3ozx4",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395422.882314-t3ozx4"
+}
+
+[Nest] 1800  - 23/11/2026, 07.57.04     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395424110 observedAt=1795395424110 receivedAt=1795395424808 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395424529 observedAt=1795395424529 receivedAt=1795395425047 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395424667 observedAt=1795395424667 receivedAt=1795395425326 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.57.05     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6e972170-dfdb-49d1-a261-240a761dd0db",
+  "eventId": "c2cb0a94-9fc7-4141-a3bd-c395c6059fef",
+  "trackId": "1795395422.882314-t3ozx4",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395422.882314-t3ozx4"
+}
+
+[Nest] 1800  - 23/11/2026, 07.57.05     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395424994 observedAt=1795395424994 receivedAt=1795395425560 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395425115 observedAt=1795395425115 receivedAt=1795395425667 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395425306 observedAt=1795395425306 receivedAt=1795395425767 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395425533 observedAt=1795395425533 receivedAt=1795395426123 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.57.06     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6e972170-dfdb-49d1-a261-240a761dd0db",
+  "eventId": "c2cb0a94-9fc7-4141-a3bd-c395c6059fef",
+  "trackId": "1795395422.882314-t3ozx4",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395422.882314-t3ozx4"
+}
+
+[Nest] 1800  - 23/11/2026, 07.57.06     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395425969 observedAt=1795395425969 receivedAt=1795395426341 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395426070 observedAt=1795395426070 receivedAt=1795395426500 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395426172 observedAt=1795395426172 receivedAt=1795395426619 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395426286 observedAt=1795395426286 receivedAt=1795395426762 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395426468 observedAt=1795395426468 receivedAt=1795395426918 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395426676 observedAt=1795395426676 receivedAt=1795395427146 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395426866 observedAt=1795395426866 receivedAt=1795395427515 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395427368 observedAt=1795395427368 receivedAt=1795395428024 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395427771 observedAt=1795395427771 receivedAt=1795395428313 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395427868 observedAt=1795395427868 receivedAt=1795395428549 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395427947 observedAt=1795395427947 receivedAt=1795395428701 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.57.08     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6e972170-dfdb-49d1-a261-240a761dd0db",
+  "eventId": "c2cb0a94-9fc7-4141-a3bd-c395c6059fef",
+  "trackId": "1795395422.882314-t3ozx4",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395422.882314-t3ozx4"
+}
+
+[Nest] 1800  - 23/11/2026, 07.57.08     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395428268 observedAt=1795395428268 receivedAt=1795395429009 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.57.09     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6e972170-dfdb-49d1-a261-240a761dd0db",
+  "eventId": "c2cb0a94-9fc7-4141-a3bd-c395c6059fef",
+  "trackId": "1795395422.882314-t3ozx4",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395422.882314-t3ozx4"
+}
+
+[Nest] 1800  - 23/11/2026, 07.57.09     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395428467 observedAt=1795395428467 receivedAt=1795395429321 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395428664 observedAt=1795395428664 receivedAt=1795395429490 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395428903 observedAt=1795395428903 receivedAt=1795395429691 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.57.09     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6e972170-dfdb-49d1-a261-240a761dd0db",
+  "eventId": "c2cb0a94-9fc7-4141-a3bd-c395c6059fef",
+  "trackId": "1795395422.882314-t3ozx4",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395422.882314-t3ozx4"
+}
+
+[Nest] 1800  - 23/11/2026, 07.57.09     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395429275 observedAt=1795395429275 receivedAt=1795395430153 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395429461 observedAt=1795395429461 receivedAt=1795395430559 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395429707 observedAt=1795395429707 receivedAt=1795395430943 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395430094 observedAt=1795395430094 receivedAt=1795395431271 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.57.11     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6e972170-dfdb-49d1-a261-240a761dd0db",
+  "eventId": "c2cb0a94-9fc7-4141-a3bd-c395c6059fef",
+  "trackId": "1795395422.882314-t3ozx4",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395422.882314-t3ozx4"
+}
+
+[Nest] 1800  - 23/11/2026, 07.57.11     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395430547 observedAt=1795395430547 receivedAt=1795395431542 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395431012 observedAt=1795395431012 receivedAt=1795395432106 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395431929 observedAt=1795395431929 receivedAt=1795395432373 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395432256 observedAt=1795395432256 receivedAt=1795395432532 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395432353 observedAt=1795395432353 receivedAt=1795395432751 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395432429 observedAt=1795395432429 receivedAt=1795395433048 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395432824 observedAt=1795395432824 receivedAt=1795395433187 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.57.13     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6e972170-dfdb-49d1-a261-240a761dd0db",
+  "eventId": "c2cb0a94-9fc7-4141-a3bd-c395c6059fef",
+  "trackId": "1795395422.882314-t3ozx4",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395422.882314-t3ozx4"
+}
+
+[Nest] 1800  - 23/11/2026, 07.57.13     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395432912 observedAt=1795395432912 receivedAt=1795395433452 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395432975 observedAt=1795395432912 receivedAt=1795395433664 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395433076 observedAt=1795395432912 receivedAt=1795395433861 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395433268 observedAt=1795395432912 receivedAt=1795395434013 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395433650 observedAt=1795395432912 receivedAt=1795395434354 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395433848 observedAt=1795395432912 receivedAt=1795395434548 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395434014 observedAt=1795395432912 receivedAt=1795395434699 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395434223 observedAt=1795395432912 receivedAt=1795395434852 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395434404 observedAt=1795395432912 receivedAt=1795395435026 action=ACCEPT
+[PERSON_DEBUG][BUFFER_RECEIVE] camera=face_reacceptance_20261123 objectId=1795395422.882314-t3ozx4 frameTime=1795395434591 observedAt=1795395432912 receivedAt=1795395435207 action=ACCEPT
+[Nest] 1800  - 23/11/2026, 07.57.21     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "6e972170-dfdb-49d1-a261-240a761dd0db",
+  "eventId": "c2cb0a94-9fc7-4141-a3bd-c395c6059fef",
+  "trackId": "1795395422.882314-t3ozx4",
+  "messageType": "end",
+  "eventType": "PERSON_DETECTED",
+  "camera": "face_reacceptance_20261123",
+  "dedupKey": "frigate:face_reacceptance_20261123:1795395422.882314-t3ozx4"
+}
+
+[Nest] 1800  - 23/11/2026, 07.57.21     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 1800  - 23/11/2026, 07.57.32    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.57.42    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.57.52    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.58.02    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.58.12    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.58.23    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.58.33    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false
+[Nest] 1800  - 23/11/2026, 07.58.43    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=rtsp path=face_reacceptance_20261123 hasToken=false hasQuery=false

@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+import { randomUUID } from 'node:crypto';
+import { imageFormat } from '../media/image-format';
+>>>>>>> 6c194e8 (fix(orchestrator): improve face best-shot and validate recognition retries)
 import type { PoolClient } from 'pg';
 import {
   BadRequestException,
@@ -188,11 +193,13 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
     if (input.collectionId !== expectedCollectionId) {
       throw new Error('Face collection prefix mismatch');
     }
+    const format = imageFormat(input.crop);
+    // The queue contract fixes this key suffix; MIME describes the actual bytes.
     const key = `owners/${input.ownerScopeId}/cameras/${input.cameraId}/events/${input.eventId}/face/${input.jobId}.jpg`;
     const image = await this.storage.upload(
       key,
       input.crop,
-      'image/jpeg',
+      format.contentType,
       input.retain ? { retain: true } : { tags: S3_EXPIRE_7D_TAG },
     );
     if (image.bucket !== settings.bucket) throw new Error('Unexpected upload bucket');

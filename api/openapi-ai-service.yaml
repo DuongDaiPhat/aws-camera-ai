@@ -908,6 +908,12 @@ components:
         faceHeightPx: { type: integer, minimum: 0 }
         detectionScore: { type: number, minimum: 0, maximum: 1 }
         sharpness: { type: number, minimum: 0 }
+        normalizedSharpness:
+          {
+            type: number,
+            minimum: 0,
+            description: "Laplacian variance on a denoised 112x112 face ROI",
+          }
         poseYawRatio: { type: number, minimum: 0 }
         posePitchRatio: { type: number, minimum: 0 }
 

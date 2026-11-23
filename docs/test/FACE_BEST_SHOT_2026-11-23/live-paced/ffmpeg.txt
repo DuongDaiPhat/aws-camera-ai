@@ -1,0 +1,8 @@
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000018acaa87680] Unknown cover type: 0x1.
+[swscaler @ 0000018acad18ec0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000018acd2fe2c0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000016cd3ee3e00] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000022f825a7700] Unknown cover type: 0x1.
+[swscaler @ 0000022f867ca900] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000022f867d7940] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001c9567a3b40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s

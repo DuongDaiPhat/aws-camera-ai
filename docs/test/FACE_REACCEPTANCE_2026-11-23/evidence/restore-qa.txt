@@ -1,0 +1,1 @@
+Restored temporary callback/configuration and disabled only the QA camera.

@@ -78,6 +78,7 @@ class FaceQualityMetrics(FaceModel):
     face_height_px: int = Field(ge=0, alias="faceHeightPx")
     detection_score: float = Field(ge=0.0, le=1.0, alias="detectionScore")
     sharpness: float = Field(ge=0.0)
+    normalized_sharpness: float = Field(default=0.0, ge=0.0, alias="normalizedSharpness")
     pose_yaw_ratio: float = Field(ge=0.0, alias="poseYawRatio")
     pose_pitch_ratio: float = Field(ge=0.0, alias="posePitchRatio")
 

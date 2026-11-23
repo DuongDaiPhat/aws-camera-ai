@@ -1,0 +1,1 @@
+Saved 356 CloudWatch log records; CLI automatic pagination enabled.

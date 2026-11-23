@@ -2,13 +2,13 @@
 import { createRequire } from 'node:module';
 import { randomUUID, randomBytes, createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, appendFileSync, existsSync, mkdirSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { resolve, relative } from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { createServer } from 'node:http';
 const req = createRequire(resolve('apps/orchestrator/package.json'));
 const root = process.cwd();
-const out = resolve('docs/test/FACE_TRACK_ONCE_2026-11-22');
-const priv = resolve('artifacts/face-track-once-2026-11-22');
+const out = resolve(process.env.FACE_EVAL_OUTPUT_DIR || 'docs/test/FACE_TRACK_ONCE_2026-11-22');
+const priv = resolve(process.env.FACE_EVAL_PRIVATE_DIR || 'artifacts/face-track-once-2026-11-22');
 for (const d of [out, priv, `${out}/data`, `${out}/evidence`, `${out}/screenshots`])
   mkdirSync(d, { recursive: true });
 const save = (p, v) => writeFileSync(p, JSON.stringify(v, null, 2));
@@ -24,7 +24,7 @@ const fixture = existsSync(fixturePath)
       owner: randomUUID(),
       device: randomUUID(),
       camera: randomUUID(),
-      slug: 'face_track_once_20261122',
+      slug: process.env.FACE_EVAL_CAMERA_SLUG || 'face_track_once_20261122',
       email: `track-once-${randomUUID()}@example.test`,
       password: randomBytes(24).toString('base64url'),
       jwtSecret: randomBytes(48).toString('base64url'),
@@ -193,6 +193,7 @@ if (action === 'setup') {
   });
   req('./dist/main.js');
 } else if (action === 'runtime') {
+  let qaDeleteImage = false;
   Object.assign(process.env, {
     AUTH_PROVIDER: 'jwt',
     JWT_SECRET: fixture.jwtSecret,
@@ -245,7 +246,7 @@ if (action === 'setup') {
       const result = send.call(this, command, ...args);
       if (!input || !result?.then) return result;
       return result.then(
-        (response) => {
+        async (response) => {
           log('aws-sdk', {
             operation: command.constructor.name,
             ...input,
@@ -253,6 +254,24 @@ if (action === 'setup') {
             httpStatus: response.$metadata?.httpStatusCode,
             attempts: response.$metadata?.attempts,
           });
+          if (
+            qaDeleteImage &&
+            command.constructor.name === 'PutObjectCommand' &&
+            command.input.Key?.startsWith(`owners/${fixture.owner}/`) &&
+            command.input.Key.includes('/face/')
+          ) {
+            const { DeleteObjectCommand } = req('@aws-sdk/client-s3');
+            const deleted = await send.call(
+              this,
+              new DeleteObjectCommand({ Bucket: command.input.Bucket, Key: command.input.Key }),
+            );
+            log('qa-s3-image-unavailable', {
+              bucket: command.input.Bucket,
+              key: command.input.Key,
+              requestId: deleted.$metadata?.requestId,
+              scope: fixture.slug,
+            });
+          }
           return response;
         },
         (error) => {
@@ -299,7 +318,18 @@ if (action === 'setup') {
   );
   const { AsyncLocalStorage } = await import('node:async_hooks');
   const context = new AsyncLocalStorage();
+  const normalAiUrl = process.env.AI_SERVICE_URL;
+  let qaAiUnavailable = false,
+    qaFailOpen;
   const { FrigateMediaAdapter } = req('./dist/media/frigate-media.adapter.js');
+  const association = req('./dist/face-recognition/face-person-association.js');
+  const ownsFace = association.faceBelongsToPerson;
+  association.faceBelongsToPerson = function (frame, face) {
+    const owns = ownsFace(frame, face);
+    if (!owns && context.getStore())
+      log('face-owner-rejected', { ...context.getStore(), frame, face });
+    return owns;
+  };
   const pairedCrop = FrigateMediaAdapter.prototype.getTimestampedPersonCrop;
   FrigateMediaAdapter.prototype.getTimestampedPersonCrop = async function (...args) {
     const buffer = await pairedCrop.apply(this, args);
@@ -316,6 +346,33 @@ if (action === 'setup') {
     coordinator,
     currentCase = 'setup';
   const handle = C.prototype.handleTrackEvent;
+  const sample = C.prototype.sampleTrack;
+  C.prototype.sampleTrack = function (input, record, scope, now) {
+    if (record.cameraSlug !== fixture.slug) return sample.call(this, input, record, scope, now);
+    return context.run({ case: currentCase, trackId: record.trackId }, () =>
+      sample.call(this, input, record, scope, now),
+    );
+  };
+  const continuation = C.prototype.resolveContinuationDedupKey;
+  C.prototype.resolveContinuationDedupKey = function (after, camera, waitForFrameMs) {
+    if (after.camera !== fixture.slug)
+      return continuation.call(this, after, camera, waitForFrameMs);
+    return context.run({ case: currentCase, trackId: after.id }, async () => {
+      const key = await continuation.call(this, after, camera, waitForFrameMs);
+      const canonical = this.detectionTracker?.getCanonicalTrackId(after.camera, after.id);
+      if (canonical && canonical !== after.id)
+        log('continuation-check', {
+          case: currentCase,
+          trackId: after.id,
+          canonicalTrackId: canonical,
+          previous: safeTrack(this.stateService.get(after.camera, canonical)),
+          dedupKey: key,
+        });
+      if (key)
+        log('verified-continuation', { case: currentCase, trackId: after.id, dedupKey: key });
+      return key;
+    });
+  };
   C.prototype.handleTrackEvent = async function (input) {
     if (input.after.camera !== fixture.slug) return handle.call(this, input);
     state = this.stateService;
@@ -336,6 +393,13 @@ if (action === 'setup') {
   };
   const assess = FaceQualityGateClient.prototype.assess;
   FaceQualityGateClient.prototype.assess = async function (buffer) {
+    if (context.getStore() && typeof qaFailOpen === 'boolean') {
+      this.optConfig.qualityGateFailOpen = qaFailOpen;
+      this.configService.set(
+        'AI_SERVICE_URL',
+        qaAiUnavailable ? 'http://127.0.0.1:1' : normalAiUrl,
+      );
+    }
     const result = await assess.call(this, buffer);
     const { embeddingBase64, ...safe } = result;
     log('assess', {
@@ -349,7 +413,7 @@ if (action === 'setup') {
       writeFileSync(`${priv}/${id}.jpg`, buffer);
       log('crop', {
         ...context.getStore(),
-        path: `artifacts/face-track-once-2026-11-22/${id}.jpg`,
+        path: relative(root, `${priv}/${id}.jpg`).replaceAll('\\', '/'),
       });
     }
     return result;
@@ -361,6 +425,10 @@ if (action === 'setup') {
   };
   const dispatch = C.prototype.dispatchBestShot;
   C.prototype.dispatchBestShot = async function (r, c, retry, now) {
+    const extension = c.imageBuffer[0] === 137 ? 'png' : 'jpg';
+    const cropFile = `evidence/crops/${currentCase}-${r.trackId}-r${r.currentRevision + 1}.${extension}`;
+    mkdirSync(`${out}/evidence/crops`, { recursive: true });
+    writeFileSync(`${out}/${cropFile}`, c.imageBuffer);
     log('dispatch', {
       case: currentCase,
       trackId: r.trackId,
@@ -369,6 +437,9 @@ if (action === 'setup') {
       capturedAt: c.capturedAt,
       firstSeenAt: r.firstSeenAt,
       retry,
+      samplesCollected: r.samplesCollected,
+      cropFile,
+      imageSha256: createHash('sha256').update(c.imageBuffer).digest('hex'),
     });
     return dispatch.call(this, r, c, retry, now);
   };
@@ -381,6 +452,19 @@ if (action === 'setup') {
     for await (const c of request) data += c;
     const command = JSON.parse(data || '{}');
     if (command.case) currentCase = command.case;
+    if (typeof command.imageUnavailable === 'boolean') {
+      qaDeleteImage = command.imageUnavailable;
+      log('qa-storage-fault-control', { imageUnavailable: qaDeleteImage, scope: fixture.slug });
+    }
+    if (typeof command.aiUnavailable === 'boolean') {
+      qaAiUnavailable = command.aiUnavailable;
+      qaFailOpen = command.failOpen === true;
+      log('qa-fault-control', {
+        aiUnavailable: qaAiUnavailable,
+        failOpen: qaFailOpen,
+        scope: fixture.slug,
+      });
+    }
     if (command.reset && state) {
       state.tracks.clear();
       state.eventIdToKey.clear();
@@ -468,7 +552,7 @@ if (action === 'setup') {
     await sleep(1000);
   const name = process.argv[3],
     label = process.argv[4] || name;
-  const video = resolve('local_image/Dataset_2/Videos', name);
+  const video = resolve(process.env.FACE_EVAL_VIDEO_DIR || 'local_image/Dataset_2/Videos', name);
   if (!existsSync(video)) throw Error('Video missing');
   const reset = process.argv[5] !== 'keep-cache';
   const before = await fetch('http://127.0.0.1:18081', {
@@ -494,18 +578,26 @@ if (action === 'setup') {
   rtsp.username = process.env.MEDIAMTX_PUBLISH_USERNAME || 'cam-internal';
   rtsp.password = process.env.MEDIAMTX_PUBLISH_PASSWORD || 'local-dev-password';
   const background = resolve(priv, 'background-empty.jpg');
-  const normalize = `scale=${profile.width}:${profile.height},setsar=1,fps=15,format=yuv420p,setpts=PTS-STARTPTS`;
-  const graph = `[0:v]${normalize}[pre];[1:v]${normalize}[video];[2:v]${normalize}[post];[pre][video][post]concat=n=3:v=1:a=0,realtime[replay]`;
+  const replayFps = Number(process.env.FACE_EVAL_REPLAY_FPS || 30);
+  const replayCrf = Number(process.env.FACE_EVAL_REPLAY_CRF || 12);
+  if (![15, 30].includes(replayFps)) throw Error('Unsupported replay FPS');
+  if (!Number.isInteger(replayCrf) || replayCrf < 0 || replayCrf > 18)
+    throw Error('Unsupported replay CRF');
+  const normalize = `scale=${profile.width}:${profile.height},setsar=1,fps=${replayFps},format=yuv420p,setpts=PTS-STARTPTS`;
+  const paced = process.env.FACE_EVAL_PACED === 'true';
+  const replayFile = resolve(priv, `${label.replace(/[^\w-]/g, '_')}.mkv`);
+  const graph = `[0:v]${normalize}[pre];[1:v]${normalize}[video];[2:v]${normalize}[post];[pre][video][post]concat=n=3:v=1:a=0${paced ? '' : ',realtime'}[replay]`;
   const child = spawn(
     'ffmpeg',
     [
       '-hide_banner',
       '-loglevel',
       'warning',
+      '-y',
       '-loop',
       '1',
       '-framerate',
-      '15',
+      String(replayFps),
       '-t',
       String(preRollSeconds),
       '-i',
@@ -515,7 +607,7 @@ if (action === 'setup') {
       '-loop',
       '1',
       '-framerate',
-      '15',
+      String(replayFps),
       '-t',
       '20',
       '-i',
@@ -530,9 +622,9 @@ if (action === 'setup') {
       '-c:v',
       'libx264',
       '-preset',
-      'ultrafast',
+      paced ? 'veryfast' : 'ultrafast',
       '-crf',
-      '18',
+      String(replayCrf),
       '-tune',
       'zerolatency',
       '-threads',
@@ -540,12 +632,8 @@ if (action === 'setup') {
       '-pix_fmt',
       'yuv420p',
       '-g',
-      '15',
-      '-f',
-      'rtsp',
-      '-rtsp_transport',
-      'tcp',
-      rtsp.toString(),
+      String(replayFps),
+      ...(paced ? [replayFile] : ['-f', 'rtsp', '-rtsp_transport', 'tcp', rtsp.toString()]),
     ],
     { windowsHide: true, stdio: ['ignore', 'ignore', 'pipe'] },
   );
@@ -556,6 +644,81 @@ if (action === 'setup') {
     ),
   );
   const code = await new Promise((r) => child.on('exit', r));
+  if (code !== 0) throw Error(`Replay encoding failed (${code})`);
+  if (paced) {
+    const imageUnavailable = process.env.FACE_EVAL_IMAGE_UNAVAILABLE === 'true';
+    const setImageFault = (enabled) =>
+      fetch('http://127.0.0.1:18081', {
+        method: 'POST',
+        body: JSON.stringify({ imageUnavailable: enabled }),
+      }).then((response) => {
+        if (!response.ok) throw Error('QA image fault control failed');
+      });
+    if (imageUnavailable) await setImageFault(true);
+    const faultSeconds = Number(process.env.FACE_EVAL_AI_FAULT_SECONDS || 0);
+    let faultTimer;
+    const setFault = (aiUnavailable) =>
+      fetch('http://127.0.0.1:18081', {
+        method: 'POST',
+        body: JSON.stringify({ aiUnavailable, failOpen: aiUnavailable }),
+      }).then((response) => {
+        if (!response.ok) throw Error('QA fault control failed');
+      });
+    if (faultSeconds > 0) {
+      await setFault(true);
+      faultTimer = setTimeout(
+        () => {
+          void setFault(false).catch((error) =>
+            log('qa-control-error', { message: error.message }),
+          );
+        },
+        (preRollSeconds + faultSeconds) * 1000,
+      );
+    }
+    log('publish-start', { case: label, preRollSeconds, video: name, faultSeconds });
+    const publisher = spawn(
+      'ffmpeg',
+      [
+        '-hide_banner',
+        '-loglevel',
+        'warning',
+        '-re',
+        '-i',
+        replayFile,
+        '-map',
+        '0:v:0',
+        '-an',
+        '-c:v',
+        'copy',
+        '-f',
+        'rtsp',
+        '-rtsp_transport',
+        'tcp',
+        rtsp.toString(),
+      ],
+      { windowsHide: true, stdio: ['ignore', 'ignore', 'pipe'] },
+    );
+    publisher.stderr.on('data', (b) =>
+      appendFileSync(
+        `${out}/evidence/ffmpeg.txt`,
+        b.toString().replaceAll(rtsp.toString(), '<qa-rtsp>'),
+      ),
+    );
+    let exitCode;
+    try {
+      exitCode = await new Promise((r, reject) => {
+        publisher.on('exit', r);
+        publisher.on('error', reject);
+      });
+    } finally {
+      if (faultTimer) {
+        clearTimeout(faultTimer);
+        await setFault(false);
+      }
+      if (imageUnavailable) await setImageFault(false);
+    }
+    if (exitCode !== 0) throw Error(`RTSP publish failed (${exitCode})`);
+  }
   // A real room background avoids black-to-scene motion recalibration at clip boundaries.
   await sleep(3000);
   const after = await fetch('http://127.0.0.1:18081', { method: 'POST', body: '{}' }).then((r) =>
@@ -640,6 +803,58 @@ if (action === 'setup') {
   console.log(
     'Preserved Lambda configuration/package and updated HTTPS callback (all other variables retained).',
   );
+} else if (action === 'restore-qa') {
+  const name = 'camerai-s4-dev-face';
+  const current = aws(['lambda', 'get-function-configuration', '--function-name', name]);
+  const before = JSON.parse(readFileSync(`${priv}/lambda-config-before.json`, 'utf8'));
+  const expected = JSON.parse(readFileSync(`${out}/data/lambda-config.json`, 'utf8'));
+  if (current.Environment.Variables.INTERNAL_API_BASE_URL !== expected.url)
+    throw Error('Callback changed outside QA; refusing to overwrite');
+  const variables = { ...current.Environment.Variables };
+  for (const key of ['INTERNAL_API_BASE_URL', 'REKOGNITION_SKIP_DETECT_FACES']) {
+    if (before.Environment.Variables[key] === undefined) delete variables[key];
+    else variables[key] = before.Environment.Variables[key];
+  }
+  save(`${priv}/lambda-restore.json`, {
+    FunctionName: name,
+    RevisionId: current.RevisionId,
+    Environment: { Variables: variables },
+  });
+  aws([
+    'lambda',
+    'update-function-configuration',
+    '--cli-input-json',
+    `file://${priv}/lambda-restore.json`,
+  ]);
+  aws(['lambda', 'wait', 'function-updated-v2', '--function-name', name]);
+  const YAML = req('yaml');
+  const config = YAML.parse(readFileSync('infra/frigate/config.yml', 'utf8'));
+  if (Object.keys(config.cameras).length !== 1 || !config.cameras[fixture.slug])
+    throw Error('Frigate camera configuration changed outside QA');
+  config.cameras[fixture.slug].ffmpeg.inputs[0].path =
+    `rtsp://<internal>@mediamtx:8554/${fixture.slug}`;
+  if (
+    YAML.stringify(config).trim() !==
+    readFileSync(`${out}/data/frigate-test-config.yml`, 'utf8').trim()
+  )
+    throw Error('Frigate configuration changed outside QA; refusing to overwrite');
+  writeFileSync('infra/frigate/config.yml', readFileSync(`${priv}/frigate-before.yml`));
+  const p = pool();
+  await p.query('UPDATE cameras SET is_enabled=false WHERE id=$1 AND slug=$2', [
+    fixture.camera,
+    fixture.slug,
+  ]);
+  await p.end();
+  save(`${out}/data/restore-qa.json`, {
+    at: new Date().toISOString(),
+    callbackRestored: true,
+    previousUrl: expected.previousUrl,
+    otherLambdaVariablesPreserved: true,
+    devHandlerRetained: true,
+    frigateConfigRestored: true,
+    qaCameraDisabled: true,
+  });
+  console.log('Restored temporary callback/configuration and disabled only the QA camera.');
 } else if (action === 'aws-deploy') {
   const name = 'camerai-s4-dev-face';
   const r = aws([

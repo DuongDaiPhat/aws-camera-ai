@@ -6,6 +6,7 @@ import * as crypto from 'crypto';
 import { AiComponents } from '@cam/contracts';
 
 import { FrigateMediaAdapter } from '../media/frigate-media.adapter';
+import { imageFormat } from '../media/image-format';
 import { AiResultsService } from '../ai-results/ai-results.service';
 import type { SubmitAiResultDto } from '../ai-results/dto/submit-ai-result.dto';
 import type { FaceRecognitionResultListener } from '../cloud-queue/cloud-queue.service';
@@ -184,7 +185,12 @@ export class FaceRecognitionWorker extends WorkerHost {
     imageBuffer: Buffer,
   ): Promise<MatchResponse> {
     const formData = new FormData();
-    formData.append('image', new Blob([new Uint8Array(imageBuffer)]), 'crop.jpg');
+    const format = imageFormat(imageBuffer);
+    formData.append(
+      'image',
+      new Blob([new Uint8Array(imageBuffer)], { type: format.contentType }),
+      `crop.${format.extension}`,
+    );
     formData.append('eventId', eventId);
     formData.append('requestId', crypto.randomUUID());
     formData.append('ownerScopeId', ownerScopeId);

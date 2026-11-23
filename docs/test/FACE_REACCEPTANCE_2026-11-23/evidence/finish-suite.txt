@@ -1,0 +1,3 @@
+{"case":"TC05-no-glasses-continuity","events":[{"id":"312ddd83-2b32-4fd9-abb2-8833ef0e4fe3","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"874760a8-7144-4cd2-b821-6cd134c295cc","status":"SENT","revision":1}]}
+{"case":"TC05-glasses-continuity","events":[{"id":"bc08da5e-e5ad-4032-8e80-b1ba6945b5fe","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"241297b9-6ee5-4355-b8bd-5ac3041c69cb","status":"SENT","revision":1}]}
+{"case":"TC02-glasses-replay","events":[{"id":"ce9d8243-0668-4abc-b129-00b3c65c507b","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"31c1a559-ee2b-4dba-99ea-40514c06c335","status":"SENT","revision":1}]}

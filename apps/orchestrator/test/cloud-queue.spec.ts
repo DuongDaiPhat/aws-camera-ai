@@ -134,7 +134,11 @@ describe('cloud queue safety', () => {
     const jobId = '44444444-4444-4444-8444-444444444444';
     const resultId = '55555555-5555-4555-8555-555555555555';
 
-    for (const retain of [false, true]) {
+    for (const [retain, crop, contentType] of [
+      [false, Buffer.from([0xff, 0xd8, 0xff]), 'image/jpeg'],
+      [true, Buffer.from([0xff, 0xd8, 0xff]), 'image/jpeg'],
+      [false, Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), 'image/png'],
+    ] as const) {
       const query = jest
         .fn()
         .mockResolvedValueOnce({
@@ -161,14 +165,14 @@ describe('cloud queue safety', () => {
       const client = { query };
       const db = { query, transaction: jest.fn(async (work) => work(client)) };
       const media = {
-        getCroppedSnapshot: jest.fn().mockResolvedValue(Buffer.from([0xff, 0xd8, 0xff])),
+        getCroppedSnapshot: jest.fn().mockResolvedValue(crop),
       };
       const storage = {
         upload: jest.fn().mockResolvedValue({
           bucket: 'test',
           key: `owners/${owner}/cameras/${camera}/events/${event}/face/${jobId}.jpg`,
           sizeBytes: 3,
-          contentType: 'image/jpeg',
+          contentType,
         }),
       };
       const queues = new CloudQueueService(
@@ -192,7 +196,7 @@ describe('cloud queue safety', () => {
       expect(storage.upload).toHaveBeenCalledWith(
         `owners/${owner}/cameras/${camera}/events/${event}/face/${jobId}.jpg`,
         expect.any(Buffer),
-        'image/jpeg',
+        contentType,
         retain ? { retain: true } : { tags: { retention: 'expire-7d' } },
       );
     }

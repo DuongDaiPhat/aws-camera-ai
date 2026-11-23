@@ -1,0 +1,7 @@
+PASS test/face-recognition-coordinator.service.spec.ts (30.551 s)
+PASS test/frigate-media.adapter.spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       23 passed, 23 total
+Snapshots:   0 total
+Time:        35.165 s

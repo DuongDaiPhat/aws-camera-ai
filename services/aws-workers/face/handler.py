@@ -172,18 +172,24 @@ def _search_and_classify(rek, p, image, mappings, threshold, model):
             response.get("ResponseMetadata", {}).get("RequestId"),
             response.get("ResponseMetadata", {}).get("RetryAttempts", 0),
         )
-    except ClientError as exc:
+    except (
+        rek.exceptions.InvalidParameterException,
+        rek.exceptions.InvalidS3ObjectException,
+    ) as exc:
         LOGGER.info(
             "Face provider jobId=%s operation=SearchFacesByImage awsRequestId=%s errorCode=%s",
             p["jobId"],
             exc.response.get("ResponseMetadata", {}).get("RequestId"),
             exc.response.get("Error", {}).get("Code"),
         )
-        # Rekognition raises InvalidParameterException when the image contains no face;
-        # treat it as an undetermined quality outcome instead of retrying via SQS.
-        if exc.response.get("Error", {}).get("Code") == "InvalidParameterException":
-            return status, similarity, confidence, known_id, "NO_FACE_DETECTED", model
-        raise
+        # Re-delivering the same job cannot fix a missing/invalid image. Return an
+        # explicit outcome so the coordinator can upload a fresh, improved shot.
+        quality = (
+            "NO_FACE_DETECTED"
+            if isinstance(exc, rek.exceptions.InvalidParameterException)
+            else "IMAGE_UNAVAILABLE"
+        )
+        return status, similarity, confidence, known_id, quality, model
 
     face_model_version = response.get("FaceModelVersion")
     if face_model_version:
@@ -336,6 +342,13 @@ def lambda_handler(event, _context):
         try:
             process(json.loads(record["body"]))
         except Exception as error:  # noqa: BLE001 - Report any record failure for SQS retry.
+            if isinstance(error, ClientError):
+                LOGGER.info(
+                    "Face provider operation=%s awsRequestId=%s errorCode=%s",
+                    error.operation_name,
+                    error.response.get("ResponseMetadata", {}).get("RequestId"),
+                    error.response.get("Error", {}).get("Code"),
+                )
             # Do not log images, tokens, response bodies or provider details.
             LOGGER.warning(
                 "Face input failed messageId=%s errorType=%s",

@@ -1,0 +1,28 @@
+{
+  "selectedReplays": [
+    "TC02-no-glasses-verified",
+    "TC02-glasses-replay",
+    "TC02-lock-no-glasses-verified",
+    "TC02-lock-glasses-verified",
+    "TC05-no-glasses-continuity",
+    "TC05-glasses-continuity",
+    "TC08-no-glasses-verified",
+    "TC08-glasses-verified",
+    "TC09-known-filename-verified",
+    "TC09-stranger-verified",
+    "TC09-undetermined-retry-verified",
+    "TC09-undetermined-cap-verified",
+    "TC09-unknown-cap",
+    "TC10-cache-prime",
+    "TC10-cache-hit",
+    "TC10-after-delete"
+  ],
+  "count": 16,
+  "totals": {
+    "events": 19,
+    "jobs": 21,
+    "putObject": 21,
+    "sendMessage": 21,
+    "searchFacesByImage": 21
+  }
+}

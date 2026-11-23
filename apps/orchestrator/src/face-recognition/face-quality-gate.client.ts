@@ -1,5 +1,6 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { imageFormat } from '../media/image-format';
 import {
   type FaceTrackOptimizationConfig,
   readFaceTrackOptimizationConfig,
@@ -10,6 +11,7 @@ export interface FaceQualityMetrics {
   faceHeightPx: number;
   detectionScore: number;
   sharpness: number;
+  normalizedSharpness?: number;
   poseYawRatio: number;
   posePitchRatio: number;
 }
@@ -89,6 +91,10 @@ function parseMetrics(raw: unknown): FaceQualityMetrics | null {
     faceHeightPx: candidate.faceHeightPx as number,
     detectionScore: candidate.detectionScore as number,
     sharpness: candidate.sharpness as number,
+    ...(typeof candidate.normalizedSharpness === 'number' &&
+    Number.isFinite(candidate.normalizedSharpness)
+      ? { normalizedSharpness: candidate.normalizedSharpness }
+      : {}),
     poseYawRatio: candidate.poseYawRatio as number,
     posePitchRatio: candidate.posePitchRatio as number,
   };
@@ -148,8 +154,8 @@ export class FaceQualityGateClient {
       const formData = new FormData();
       formData.append(
         'image',
-        new Blob([new Uint8Array(imageBuffer)], { type: 'image/jpeg' }),
-        'crop.jpg',
+        new Blob([new Uint8Array(imageBuffer)], { type: imageFormat(imageBuffer).contentType }),
+        `crop.${imageFormat(imageBuffer).extension}`,
       );
       formData.append('includeEmbedding', 'true');
 

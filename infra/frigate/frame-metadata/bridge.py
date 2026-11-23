@@ -261,7 +261,7 @@ class PoseFramePublisher:
                     self.session_id,
                 )
                 header["frameId"] = f"{frame_name}:{metadata['frameTime']}"
-                ok, jpeg = cv2.imencode(".jpg", image)
+                ok, jpeg = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 98])
                 if not ok:
                     LOGGER.warning("Pose JPEG encode failed")
                     continue

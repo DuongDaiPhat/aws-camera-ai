@@ -58,6 +58,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(MqttConsumerService.name);
   private client: MqttClient | null = null;
   private processingQueue: Promise<void> = Promise.resolve();
+  private readonly continuationKeys = new Map<string, { dedupKey: string; expiresAt: number }>();
 
   constructor(
     private readonly configService: ConfigService,
@@ -154,7 +155,19 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     this.client.on('message', (receivedTopic, buffer) => {
       // Pose frame binary stream handling (US-16, US-17)
       if (receivedTopic === poseFramesTopic) {
-        this.frigateMedia?.acceptTimestampedFrame(buffer);
+        const faceFrame = this.frigateMedia?.acceptTimestampedFrame(buffer);
+        if (faceFrame) {
+          void this.faceCoordinator
+            ?.sampleAvailableFrame(
+              faceFrame.header.cameraSlug,
+              faceFrame.header.persons.map((person) => person.trackId),
+            )
+            .catch((error: unknown) => {
+              this.logger.warn(
+                `Face frame sampling error: ${error instanceof Error ? error.message : String(error)}`,
+              );
+            });
+        }
         if (this.poseFrameConsumer) {
           this.poseFrameConsumer.handlePoseFrame(buffer).catch((error: unknown) => {
             this.logger.warn(
@@ -232,6 +245,24 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     const cameraId = camera?.id ?? null;
     const activeZones = await this.findActiveZones(camera, after);
     const zone = activeZones[0];
+    const rawKey = `frigate:${after.camera}:${after.id}`;
+    const now = Date.now();
+    const existing = this.continuationKeys.get(rawKey);
+    let dedupKey = existing && existing.expiresAt > now ? existing.dedupKey : rawKey;
+    if (dedupKey === rawKey) {
+      const verified = await this.faceCoordinator?.resolveContinuationDedupKey?.(
+        after,
+        camera,
+        1500,
+      );
+      if (verified) dedupKey = verified;
+    }
+    if (dedupKey !== rawKey) {
+      this.continuationKeys.delete(rawKey);
+      this.continuationKeys.set(rawKey, { dedupKey, expiresAt: now + 120_000 });
+      while (this.continuationKeys.size > 5000)
+        this.continuationKeys.delete(this.continuationKeys.keys().next().value!);
+    } else if (existing) this.continuationKeys.delete(rawKey);
 
     if (!camera) {
       this.logger.warn(
@@ -248,7 +279,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       zoneName: zone?.name ?? null,
       eventType: isRestrictedZone ? 'RESTRICTED_ZONE' : 'PERSON_DETECTED',
       priority: isRestrictedZone ? 'P1' : 'P3',
-      dedupKey: `frigate:${after.camera}:${after.id}`,
+      dedupKey,
       detectedAt: new Date((after.start_time ?? after.frame_time) * 1_000),
       zoneResultContext: camera ? { camera, zones: activeZones } : null,
     };

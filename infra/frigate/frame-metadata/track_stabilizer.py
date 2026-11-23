@@ -82,7 +82,7 @@ class TrackStabilizer:
     def __init__(
         self,
         *,
-        max_lost_seconds: float = 15.0,
+        max_lost_seconds: float = 20.0,
         high_score_threshold: float = 0.70,
         high_iou_threshold: float = 0.30,
         low_iou_threshold: float = 0.15,

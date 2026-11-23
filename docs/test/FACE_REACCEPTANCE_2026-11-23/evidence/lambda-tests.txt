@@ -1,0 +1,5 @@
+Face input failed messageId=a errorType=ValueError
+----------------------------------------------------------------------
+Ran 19 tests in 0.280s
+
+OK

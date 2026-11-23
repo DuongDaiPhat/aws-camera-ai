@@ -5,6 +5,23 @@ import { FrigateMediaAdapter } from '../src/media/frigate-media.adapter';
 describe('FrigateMediaAdapter current person sampling', () => {
   afterEach(() => jest.restoreAllMocks());
 
+  it('extracts a native head region without resampling the pixels', async () => {
+    const bytes = Buffer.alloc(240 * 720 * 3);
+    for (let i = 0; i < bytes.length; i++) bytes[i] = i % 251;
+    const full = await sharp(bytes, { raw: { width: 240, height: 720, channels: 3 } })
+      .png()
+      .toBuffer();
+    const media = new FrigateMediaAdapter(new ConfigService());
+    const head = await media.getRecognitionHead(full);
+    const { data, info } = await sharp(head.imageBuffer)
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    expect(info.width).toBe(240);
+    expect(info.height).toBe(252);
+    expect(head.heightFraction).toBe(0.35);
+    expect(data).toEqual(bytes.subarray(0, 240 * 252 * 3));
+  });
+
   it('crops each track from its matching JPEG and expires stale paired frames', async () => {
     jest.spyOn(Date, 'now').mockReturnValue(10_000);
     const blue = await sharp({
@@ -46,6 +63,11 @@ describe('FrigateMediaAdapter current person sampling', () => {
     const media = new FrigateMediaAdapter(new ConfigService());
     media.acceptTimestampedFrame(Buffer.concat([prefix, header, jpeg]), 10_000);
     const crop = await media.getTimestampedPersonCrop('cam_front', 'right-person', 10_000);
+    expect((await sharp(crop!).metadata()).format).toBe('png');
+    expect(media.getTimestampedFrameTime('cam_front')).toBe(10_000);
+    await expect(
+      media.getTimestampedPersonCrop('cam_front', 'right-person', 10_000, 10_000),
+    ).resolves.toBeNull();
     const { data, info } = await sharp(crop!).raw().toBuffer({ resolveWithObject: true });
     const center =
       (Math.floor(info.height / 2) * info.width + Math.floor(info.width / 2)) * info.channels;

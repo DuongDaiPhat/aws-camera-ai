@@ -1,0 +1,2 @@
+{"case":"TC09-known-filename-verified","events":[{"id":"92457930-f248-4ea3-a190-be3272c0b82e","status":"UNKNOWN","type":"UNKNOWN_PERSON","name":null}],"jobs":[{"id":"226ffd5d-e3eb-4280-8b14-567ccdecf413","status":"SENT","revision":1}]}
+{"case":"TC09-stranger-verified","events":[{"id":"ffabd606-0705-4907-a7c6-160140aa2e7a","status":"UNKNOWN","type":"UNKNOWN_PERSON","name":null}],"jobs":[{"id":"cc2d9325-7fb1-492f-87fa-76efee6765f7","status":"SENT","revision":1}]}

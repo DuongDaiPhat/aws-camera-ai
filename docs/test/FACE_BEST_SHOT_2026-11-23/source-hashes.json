@@ -1,0 +1,8 @@
+{
+  "apps/orchestrator/src/face-recognition/face-recognition-coordinator.service.ts": "3710da7ffb7f014bdc031b6f4a49c65240d7eb011bb34a21b32a65e6dcf28565",
+  "apps/orchestrator/src/face-recognition/face-track-optimization.config.ts": "a749299affff7d94011d1000ead5a5819f45ed258921858af4694123e125baab",
+  "apps/orchestrator/src/media/frigate-media.adapter.ts": "704b7f3d3151c0ced0588a34867d62ab264bb9ba767e0fa0f6ac34e5faff2fc8",
+  "apps/orchestrator/src/ingestion/mqtt-consumer.service.ts": "70c8bae3b8ebe94e13d8f531a99b800db7b2a4d7c02aac1a0efdaf2b50e1b153",
+  "services/ai-service/app/services/face_quality.py": "61596ef7a7af43e7e296872661ee65469ac7b7798d8e3f22a23b32b1613c752d",
+  "infra/frigate/frame-metadata/bridge.py": "193e0acaa0099880135ef198cf76855238f1c0e8439dc4fb02a2d6e456d5db7c"
+}

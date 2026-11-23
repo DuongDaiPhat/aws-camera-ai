@@ -110,6 +110,8 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
       FACE_BEST_SHOT_WINDOW_MS: '1200',
       FACE_BEST_SHOT_MAX_SAMPLES: '4',
       FACE_BEST_SHOT_EARLY_DISPATCH_SCORE: '0.82',
+      FACE_BEST_SHOT_EARLY_DISPATCH_ENABLED: 'true',
+      FACE_REQUIRE_TIMESTAMPED_FRAME: 'false',
       FACE_UNDETERMINED_MAX_RETRIES: '2',
       FACE_UNDETERMINED_RETRY_COOLDOWN_MS: '4000',
       FACE_UNKNOWN_ALLOW_SINGLE_RECHECK: 'true',
@@ -122,10 +124,12 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
     const qualityGateClient = { assess } as unknown as FaceQualityGateClient;
     const getCroppedSnapshot = jest.fn<Promise<Buffer | null>, [string]>();
     const getTimestampedPersonCrop = jest.fn().mockResolvedValue(null);
+    const getTimestampedFrameTime = jest.fn().mockReturnValue(null);
     const frigateMedia = {
       getCroppedSnapshot,
       getCurrentPersonCrop: getCroppedSnapshot,
       getTimestampedPersonCrop,
+      getTimestampedFrameTime,
     } as unknown as FrigateMediaAdapter;
     const submitAiResult = jest.fn().mockResolvedValue({
       resultId: '66666666-6666-4666-8666-666666666666',
@@ -181,6 +185,7 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
       assess,
       getCroppedSnapshot,
       getTimestampedPersonCrop,
+      getTimestampedFrameTime,
       submitAiResult,
       enqueueFaceJob,
       faceQueueAdd,
@@ -192,6 +197,243 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it('reuses a canonical incident only after ended-track Re-ID, and rejects a different clear face', async () => {
+    jest.spyOn(Date, 'now').mockReturnValue(4000);
+    const tracker = {
+      getCanonicalTrackId: () => 'track-old',
+    } as unknown as FrigateDetectionTrackerService;
+    const h = buildHarness({}, tracker);
+    const camera = makeCamera();
+    const box = [100, 100, 220, 340];
+    const crop = await solidJpeg({ r: 20, g: 40, b: 220 }, { r: 30, g: 30, b: 30 });
+    const { record } = h.stateService.getOrCreate(
+      {
+        cameraSlug: 'cam_front',
+        trackId: 'track-old',
+        eventId: makeEvent().id,
+        cameraId: camera.id,
+        ownerScopeId: camera.owner_user_id!,
+        collectionVersion: 1,
+        sourceSessionId: 'old-source',
+      },
+      1000,
+    );
+    h.stateService.markKnownFromLocalCache(record, aliceId, 'Alice', 1, box, 1000);
+    record.endedAt = 2000;
+    h.sessionCache.upsertKnown(
+      { ownerScopeId: camera.owner_user_id!, cameraSlug: 'cam_front', collectionVersion: 1 },
+      {
+        knownFaceId: aliceId,
+        personName: 'Alice',
+        trackId: 'track-old',
+        embedding: new Float32Array([1, 0, 0, 0]),
+        appearanceSignature: await computeAppearanceSignature(crop),
+        lastBox: box,
+        endedAt: 2000,
+      },
+      1000,
+    );
+    h.getTimestampedPersonCrop.mockResolvedValue(crop);
+    const after = {
+      id: 'track-new',
+      camera: 'cam_front',
+      frame_time: 4,
+      label: 'person',
+      score: 0.9,
+      box,
+    };
+    h.assess.mockResolvedValue(makeGateResult());
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBe(
+      'frigate:cam_front:track-old',
+    );
+    h.getTimestampedPersonCrop.mockResolvedValueOnce(null);
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera, 250)).resolves.toBe(
+      'frigate:cam_front:track-old',
+    );
+    jest
+      .spyOn(tracker, 'getCanonicalTrackId')
+      .mockReturnValueOnce('track-new')
+      .mockReturnValueOnce('track-new')
+      .mockReturnValue('track-old');
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera, 250)).resolves.toBe(
+      'frigate:cam_front:track-old',
+    );
+    h.assess.mockResolvedValue(makeGateResult({ embeddingBase64: encodeVector([0, 1, 0, 0]) }));
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBeNull();
+    h.assess.mockResolvedValue(
+      makeGateResult({ passed: false, faceCount: 2, rejectionReason: 'MULTIPLE_FACES' }),
+    );
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBeNull();
+    h.assess.mockResolvedValue(
+      makeGateResult({ passed: false, faceCount: 0, rejectionReason: 'NO_FACE_DETECTED' }),
+    );
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBe(
+      'frigate:cam_front:track-old',
+    );
+    h.assess.mockResolvedValue(
+      makeGateResult({ passed: false, faceCount: 1, rejectionReason: 'FACE_TOO_SMALL' }),
+    );
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBe(
+      'frigate:cam_front:track-old',
+    );
+    h.assess.mockResolvedValue(
+      makeGateResult({ gateStatus: 'UNAVAILABLE', failOpenApplied: true }),
+    );
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBeNull();
+    record.endedAt = null;
+    h.assess.mockResolvedValue(makeGateResult());
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBeNull();
+    h.coordinator.onModuleDestroy();
+  });
+
+  it('observes the full window despite a 0.99 first sample or a full sample budget', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(10_000);
+      const h = buildHarness({
+        FACE_BEST_SHOT_EARLY_DISPATCH_ENABLED: 'false',
+        FACE_BEST_SHOT_WINDOW_MS: '4000',
+        FACE_BEST_SHOT_MAX_SAMPLES: '2',
+      });
+      const input = {
+        messageType: 'new' as const,
+        event: makeEvent(),
+        after: { id: 'track-1', camera: 'cam_front', frame_time: 10, label: 'person', score: 0.9 },
+        isCreated: true,
+        camera: makeCamera(),
+      };
+      h.getCroppedSnapshot.mockResolvedValue(Buffer.from('first'));
+      h.assess.mockResolvedValue(makeGateResult({ qualityScore: 0.99 }));
+      await h.coordinator.handleTrackEvent(input);
+      expect(h.enqueueFaceJob).not.toHaveBeenCalled();
+      await jest.advanceTimersByTimeAsync(400);
+      h.getCroppedSnapshot.mockResolvedValue(Buffer.from('best'));
+      h.assess.mockResolvedValue(makeGateResult({ qualityScore: 1 }));
+      await h.coordinator.handleTrackEvent({ ...input, messageType: 'update', isCreated: false });
+      expect(h.enqueueFaceJob).not.toHaveBeenCalled();
+      await jest.advanceTimersByTimeAsync(3599);
+      expect(h.enqueueFaceJob).not.toHaveBeenCalled();
+      await jest.advanceTimersByTimeAsync(1);
+      expect(h.enqueueFaceJob).toHaveBeenCalledWith(
+        expect.objectContaining({ imageBuffer: Buffer.from('best') }),
+      );
+      expect(h.enqueueFaceJob).toHaveBeenCalledTimes(1);
+      h.coordinator.onModuleDestroy();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('requires paired pixels even for one person in strict mode', async () => {
+    const h = buildHarness({ FACE_REQUIRE_TIMESTAMPED_FRAME: 'true' });
+    h.getCroppedSnapshot.mockResolvedValue(Buffer.from('unpaired'));
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: makeEvent(),
+      after: {
+        id: 'track-1',
+        camera: 'cam_front',
+        frame_time: Date.now() / 1000,
+        label: 'person',
+        score: 0.9,
+      },
+      isCreated: true,
+      camera: makeCamera(),
+    });
+    expect(h.getCroppedSnapshot).not.toHaveBeenCalled();
+    expect(h.assess).not.toHaveBeenCalled();
+    h.coordinator.onModuleDestroy();
+  });
+
+  it('includes a better assessment in flight when the track ends', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(10_000);
+      const h = buildHarness({ FACE_BEST_SHOT_EARLY_DISPATCH_ENABLED: 'false' });
+      const input = {
+        messageType: 'new' as const,
+        event: makeEvent(),
+        after: { id: 'track-1', camera: 'cam_front', frame_time: 10, label: 'person', score: 0.9 },
+        isCreated: true,
+        camera: makeCamera(),
+      };
+      h.getCroppedSnapshot.mockResolvedValue(Buffer.from('first'));
+      h.assess.mockResolvedValue(makeGateResult({ qualityScore: 0.6 }));
+      await h.coordinator.handleTrackEvent(input);
+      await jest.advanceTimersByTimeAsync(400);
+      let complete!: (value: FaceQualityGateResult) => void;
+      let entered!: () => void;
+      const assessmentStarted = new Promise<void>((resolve) => {
+        entered = resolve;
+      });
+      h.getCroppedSnapshot.mockResolvedValue(Buffer.from('best'));
+      h.assess.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            complete = resolve;
+            entered();
+          }),
+      );
+      const sampling = h.coordinator.handleTrackEvent({
+        ...input,
+        messageType: 'update',
+        isCreated: false,
+      });
+      await assessmentStarted;
+      await h.coordinator.handleTrackEvent({ ...input, messageType: 'end', isCreated: false });
+      expect(h.enqueueFaceJob).not.toHaveBeenCalled();
+      complete(makeGateResult({ qualityScore: 0.8 }));
+      await sampling;
+      expect(h.enqueueFaceJob).toHaveBeenCalledWith(
+        expect.objectContaining({ imageBuffer: Buffer.from('best') }),
+      );
+      expect(h.enqueueFaceJob).toHaveBeenCalledTimes(1);
+      h.coordinator.onModuleDestroy();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('collects timestamped frame updates without another Frigate event', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(10_000);
+      const h = buildHarness({
+        FACE_REQUIRE_TIMESTAMPED_FRAME: 'true',
+        FACE_BEST_SHOT_EARLY_DISPATCH_ENABLED: 'false',
+      });
+      h.getTimestampedFrameTime.mockReturnValue(10_000);
+      h.getTimestampedPersonCrop.mockResolvedValue(Buffer.from('first'));
+      h.assess.mockResolvedValue(makeGateResult({ qualityScore: 0.6 }));
+      await h.coordinator.handleTrackEvent({
+        messageType: 'new',
+        event: makeEvent(),
+        after: { id: 'track-1', camera: 'cam_front', frame_time: 10, label: 'person', score: 0.9 },
+        isCreated: true,
+        camera: makeCamera(),
+      });
+      await jest.advanceTimersByTimeAsync(400);
+      h.getTimestampedFrameTime.mockReturnValue(10_400);
+      h.getTimestampedPersonCrop.mockResolvedValue(Buffer.from('better-frame'));
+      h.assess.mockResolvedValue(makeGateResult({ qualityScore: 0.8 }));
+      await h.coordinator.sampleAvailableFrame('cam_front', ['track-1']);
+      expect(h.getTimestampedPersonCrop).toHaveBeenLastCalledWith(
+        'cam_front',
+        'track-1',
+        10_400,
+        10_000,
+      );
+      expect(h.getCroppedSnapshot).not.toHaveBeenCalled();
+      await jest.advanceTimersByTimeAsync(800);
+      expect(h.enqueueFaceJob).toHaveBeenCalledWith(
+        expect.objectContaining({ imageBuffer: Buffer.from('better-frame') }),
+      );
+      h.coordinator.onModuleDestroy();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('requires the matching timestamped track crop when several people are present', async () => {
@@ -771,6 +1013,23 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
       messageType: 'update',
       event: evUnknown,
       after: { id: 't-unk', camera: 'cam_front', frame_time: 54, label: 'person', score: 0.9 },
+      isCreated: false,
+      camera,
+    });
+    // An improved UNKNOWN sample opens its own Best-Shot window.
+    expect(h.enqueueFaceJob).toHaveBeenCalledTimes(1);
+    now += 1200;
+    h.assess.mockResolvedValueOnce(makeGateResult({ qualityScore: 0.8, embeddingBase64: emb }));
+    await h.coordinator.handleTrackEvent({
+      messageType: 'update',
+      event: evUnknown,
+      after: {
+        id: 't-unk',
+        camera: 'cam_front',
+        frame_time: now / 1000,
+        label: 'person',
+        score: 0.9,
+      },
       isCreated: false,
       camera,
     });

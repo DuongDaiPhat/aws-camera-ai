@@ -10,6 +10,7 @@ import pytest
 from PIL import Image
 
 from app.config import Settings, get_settings
+from app.models.face import FaceQualityMetrics
 from app.services.embedding_codec import decode
 from app.services.face_quality import FaceQualityAssessor
 
@@ -69,8 +70,9 @@ def _fake_assessor(
 def test_face_quality_gate_defaults_and_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
     defaults = Settings(_env_file=None)
     assert defaults.face_quality_gate_enabled is True
-    assert defaults.face_gate_min_face_px == 60
-    assert defaults.face_gate_min_detection_score == 0.75
+    assert defaults.face_gate_min_face_px == 80
+    assert defaults.face_gate_min_normalized_sharpness == 12.0
+    assert defaults.face_gate_min_detection_score == 0.90
     assert defaults.face_gate_min_sharpness == 45.0
     assert defaults.face_gate_max_yaw_ratio == 0.45
     assert defaults.face_gate_max_pitch_ratio == 0.45
@@ -131,6 +133,21 @@ def test_missing_models_degrades_gracefully_to_unavailable(tmp_path: Path) -> No
     assert result.quality_score == 0.0
     assert result.face_count == 0
     assert result.embedding_base64 is None
+
+
+def test_warmup_primes_both_models_once_and_preserves_missing_model_fallback(
+    tmp_path: Path,
+) -> None:
+    assessor = _fake_assessor([])
+    assert assessor.warmup() is True
+    assert assessor.warmup() is True
+    assert assessor._detector.detect.call_count == 1
+    assert assessor._recognizer.feature.call_count == 1
+    missing = FaceQualityAssessor(
+        Settings(_env_file=None, face_detector_path=str(tmp_path / "missing.onnx"))
+    )
+    assert missing.warmup() is False
+    assert missing.assess(_sharp_picture()).passed is False
 
 
 def test_opencv_runtime_error_degrades_to_unavailable() -> None:
@@ -227,6 +244,39 @@ def test_blurry_face_roi_rejected() -> None:
     assert res.embedding_base64 is None
 
 
+def test_pixel_noise_does_not_make_a_soft_face_a_best_shot() -> None:
+    assessor = _fake_assessor([_yunet_face()])
+    gray = np.random.default_rng(7).normal(128, 3, (240, 240)).clip(0, 255).astype(np.uint8)
+    output = io.BytesIO()
+    Image.fromarray(gray).convert("RGB").save(output, format="PNG")
+    result = assessor.assess(output.getvalue(), include_embedding=False)
+    assert result.metrics is not None
+    assert result.metrics.sharpness > 135
+    assert result.metrics.normalized_sharpness < 12
+    assert result.rejection_reason == "BLURRY_NORMALIZED"
+
+
+def test_small_noisy_face_cannot_outscore_large_detailed_face() -> None:
+    assessor = FaceQualityAssessor(Settings(_env_file=None))
+
+    def score(size, detail):
+        return assessor._compute_quality_score(
+            FaceQualityMetrics(
+                face_width_px=size,
+                face_height_px=size,
+                detection_score=0.95,
+                sharpness=200,
+                normalized_sharpness=detail,
+                pose_yaw_ratio=0.1,
+                pose_pitch_ratio=0.1,
+            )
+        )
+
+    assert score(61, 10) < score(120, 45)
+    assert score(80, 1000) < 0.82
+    assert score(120, 150) < score(120, 300)
+
+
 def test_extreme_yaw_and_pitch_rejected() -> None:
     # Eyes at x=40+36=76 and x=40+84=124 (mid=100, dist=48); nose at 125 -> yaw_ratio > 0.50 > 0.45
     yaw_face = _yunet_face(nose_x=125.0)
@@ -269,7 +319,7 @@ def test_passing_face_embedding_toggle_scaling_and_score_ordering() -> None:
     assert passed_with_emb.embedding_base64 is not None
     assert 0.8 <= passed_with_emb.quality_score <= 1.0
 
-    assessor_no_emb = _fake_assessor([_yunet_face(w=70.0, h=70.0, score=0.77, nose_x=82.0)])
+    assessor_no_emb = _fake_assessor([_yunet_face(w=85.0, h=85.0, score=0.91)])
     borderline = assessor_no_emb.assess(_sharp_picture(), include_embedding=False)
     assert borderline.passed is True
     assert borderline.embedding_base64 is None

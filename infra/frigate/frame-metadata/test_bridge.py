@@ -46,7 +46,11 @@ class FramePayloadTest(unittest.TestCase):
                     publisher,
                     Mock(),
                     config,
-                    {"camera": "cam", "frameTime": 1000 + i * 0.1, "objects": [{"id": "p"}]},
+                    {
+                        "camera": "cam",
+                        "frameTime": 1000 + i * 0.1,
+                        "objects": [{"id": "p"}],
+                    },
                     str(i),
                     schedule,
                 )
@@ -214,7 +218,14 @@ class FramePayloadTest(unittest.TestCase):
             unpack_pose_frame_envelope,
         )
 
-        people = [{"id": "track-1", "score": 0.9, "box": [10, 20, 100, 200], "observedAt": 123.4}]
+        people = [
+            {
+                "id": "track-1",
+                "score": 0.9,
+                "box": [10, 20, 100, 200],
+                "observedAt": 123.4,
+            }
+        ]
         header = build_pose_frame_header("cam_living_room", 123.5, people)
         self.assertEqual(header["schemaVersion"], 1)
         self.assertEqual(header["cameraSlug"], "cam_living_room")
@@ -271,7 +282,9 @@ class FramePayloadTest(unittest.TestCase):
         self.assertEqual(publisher.queue.get_nowait()[2], "2")
         self.assertNotEqual(publisher.session_id, PoseFramePublisher(Mock()).session_id)
 
-    def test_track_stabilizer_preserves_canonical_id_across_brief_drop_and_id_switch(self):
+    def test_track_stabilizer_preserves_canonical_id_across_brief_drop_and_id_switch(
+        self,
+    ):
         def make_person(pid, box, score, t):
             return {
                 "id": pid,
@@ -283,7 +296,14 @@ class FramePayloadTest(unittest.TestCase):
             }
 
         res1 = frame_payload(
-            ["cam_lr", "f1", 100.0, [make_person("t1", [100, 100, 200, 350], 0.9, 100.0)], [], []]
+            [
+                "cam_lr",
+                "f1",
+                100.0,
+                [make_person("t1", [100, 100, 200, 350], 0.9, 100.0)],
+                [],
+                [],
+            ]
         )
         self.assertEqual(res1["objects"][0]["canonicalTrackId"], "t1")
 
@@ -293,7 +313,14 @@ class FramePayloadTest(unittest.TestCase):
 
         # Frigate re-detects same person with a new track id t2
         res3 = frame_payload(
-            ["cam_lr", "f3", 101.5, [make_person("t2", [108, 102, 208, 352], 0.88, 101.5)], [], []]
+            [
+                "cam_lr",
+                "f3",
+                101.5,
+                [make_person("t2", [108, 102, 208, 352], 0.88, 101.5)],
+                [],
+                [],
+            ]
         )
         self.assertEqual(res3["objects"][0]["id"], "t2")
         self.assertEqual(res3["objects"][0]["canonicalTrackId"], "t1")
@@ -301,7 +328,14 @@ class FramePayloadTest(unittest.TestCase):
         # Subsequent drop + low-score Stage 2 re-association
         frame_payload(["cam_lr", "f4", 102.0, [], [], []])
         res5 = frame_payload(
-            ["cam_lr", "f5", 102.4, [make_person("t3", [125, 108, 225, 358], 0.55, 102.4)], [], []]
+            [
+                "cam_lr",
+                "f5",
+                102.4,
+                [make_person("t3", [125, 108, 225, 358], 0.55, 102.4)],
+                [],
+                [],
+            ]
         )
         self.assertEqual(res5["objects"][0]["id"], "t3")
         self.assertEqual(res5["objects"][0]["canonicalTrackId"], "t1")
@@ -319,6 +353,18 @@ class FramePayloadTest(unittest.TestCase):
         self.assertEqual(stabilizer.update("cam1", 11.0, []), [])
         p3 = [{"id": "a3", "box": [55, 52, 155, 302], "score": 0.9}]
         self.assertEqual(stabilizer.update("cam1", 27.0, p3), ["a3"])
+
+    def test_default_stabilizer_gap_matches_twenty_second_spatial_reid_window(self):
+        stabilizer = TrackStabilizer()
+
+        def person(key):
+            return [{"id": key, "box": [50, 50, 150, 300], "score": 0.9}]
+
+        self.assertEqual(stabilizer.update("cam1", 10, person("a")), ["a"])
+        stabilizer.update("cam1", 11, [])
+        self.assertEqual(stabilizer.update("cam1", 29.9, person("b")), ["a"])
+        stabilizer.update("cam1", 30, [])
+        self.assertEqual(stabilizer.update("cam1", 50, person("c")), ["c"])
 
     def test_track_stabilizer_tailgating_and_camera_isolation(self):
         stabilizer = TrackStabilizer()

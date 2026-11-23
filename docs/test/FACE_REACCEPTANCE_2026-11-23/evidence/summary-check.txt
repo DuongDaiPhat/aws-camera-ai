@@ -1,0 +1,184 @@
+[
+  {
+    "case": "TC02-glasses-verified",
+    "events": 1,
+    "eventStatuses": {
+      "NOT_ANALYZED": 1
+    },
+    "jobs": 0,
+    "searchFacesByImage": 0,
+    "knownObservedSecondsAfterResult": 0
+  },
+  {
+    "case": "TC02-lock-glasses-verified",
+    "events": 1,
+    "eventStatuses": {
+      "KNOWN": 1
+    },
+    "jobs": 1,
+    "searchFacesByImage": 1,
+    "knownObservedSecondsAfterResult": 21.096
+  },
+  {
+    "case": "TC02-lock-no-glasses-verified",
+    "events": 1,
+    "eventStatuses": {
+      "KNOWN": 1
+    },
+    "jobs": 1,
+    "searchFacesByImage": 1,
+    "knownObservedSecondsAfterResult": 21.253
+  },
+  {
+    "case": "TC02-no-glasses-verified",
+    "events": 1,
+    "eventStatuses": {
+      "KNOWN": 1
+    },
+    "jobs": 1,
+    "searchFacesByImage": 1,
+    "knownObservedSecondsAfterResult": 4.907
+  },
+  {
+    "case": "TC05-glasses-continuity",
+    "events": 1,
+    "eventStatuses": {
+      "KNOWN": 1
+    },
+    "jobs": 1,
+    "searchFacesByImage": 1,
+    "knownObservedSecondsAfterResult": 6.342
+  },
+  {
+    "case": "TC05-glasses-verified",
+    "events": 2,
+    "eventStatuses": {
+      "KNOWN": 2
+    },
+    "jobs": 1,
+    "searchFacesByImage": 1,
+    "knownObservedSecondsAfterResult": 15.965
+  },
+  {
+    "case": "TC05-no-glasses-continuity",
+    "events": 1,
+    "eventStatuses": {
+      "KNOWN": 1
+    },
+    "jobs": 1,
+    "searchFacesByImage": 1,
+    "knownObservedSecondsAfterResult": 2.298
+  },
+  {
+    "case": "TC05-no-glasses-verified",
+    "events": 2,
+    "eventStatuses": {
+      "KNOWN": 2
+    },
+    "jobs": 1,
+    "searchFacesByImage": 1,
+    "knownObservedSecondsAfterResult": -0.95
+  },
+  {
+    "case": "TC08-glasses-verified",
+    "events": 2,
+    "eventStatuses": {
+      "KNOWN": 1,
+      "UNKNOWN": 1
+    },
+    "jobs": 2,
+    "searchFacesByImage": 2,
+    "knownObservedSecondsAfterResult": 10.279
+  },
+  {
+    "case": "TC08-no-glasses-verified",
+    "events": 3,
+    "eventStatuses": {
+      "KNOWN": 2,
+      "UNKNOWN": 1
+    },
+    "jobs": 2,
+    "searchFacesByImage": 2,
+    "knownObservedSecondsAfterResult": 16.45
+  },
+  {
+    "case": "TC09-known-filename-verified",
+    "events": 1,
+    "eventStatuses": {
+      "UNKNOWN": 1
+    },
+    "jobs": 1,
+    "searchFacesByImage": 1,
+    "knownObservedSecondsAfterResult": 0
+  },
+  {
+    "case": "TC09-stranger-verified",
+    "events": 1,
+    "eventStatuses": {
+      "UNKNOWN": 1
+    },
+    "jobs": 1,
+    "searchFacesByImage": 1,
+    "knownObservedSecondsAfterResult": 0
+  },
+  {
+    "case": "TC09-undetermined-cap-verified",
+    "events": 1,
+    "eventStatuses": {
+      "UNDETERMINED": 1
+    },
+    "jobs": 3,
+    "searchFacesByImage": 3,
+    "knownObservedSecondsAfterResult": 0
+  },
+  {
+    "case": "TC09-undetermined-retry-verified",
+    "events": 1,
+    "eventStatuses": {
+      "KNOWN": 1
+    },
+    "jobs": 2,
+    "searchFacesByImage": 2,
+    "knownObservedSecondsAfterResult": 9.864
+  },
+  {
+    "case": "TC09-unknown-cap",
+    "events": 1,
+    "eventStatuses": {
+      "UNKNOWN": 1
+    },
+    "jobs": 2,
+    "searchFacesByImage": 2,
+    "knownObservedSecondsAfterResult": 0
+  },
+  {
+    "case": "TC10-after-delete",
+    "events": 1,
+    "eventStatuses": {
+      "UNKNOWN": 1
+    },
+    "jobs": 1,
+    "searchFacesByImage": 1,
+    "knownObservedSecondsAfterResult": 0
+  },
+  {
+    "case": "TC10-cache-hit",
+    "events": 1,
+    "eventStatuses": {
+      "KNOWN": 1
+    },
+    "jobs": 0,
+    "searchFacesByImage": 0,
+    "knownObservedSecondsAfterResult": 28.574
+  },
+  {
+    "case": "TC10-cache-prime",
+    "events": 1,
+    "eventStatuses": {
+      "KNOWN": 1
+    },
+    "jobs": 1,
+    "searchFacesByImage": 1,
+    "knownObservedSecondsAfterResult": 20.552
+  }
+]

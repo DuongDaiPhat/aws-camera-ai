@@ -38,6 +38,7 @@ export interface TrackRecord {
   bestShotWindowStartedAt: number | null;
   lastUpdatedAt: number;
   lastSampleAttemptAt: number | null;
+  lastSampleCapturedAt: number | null;
   samplesCollected: number;
   bestShot: BestShotCandidate | null;
   dispatchedQualityScore: number | null;
@@ -141,6 +142,7 @@ export class TrackIdentityStateService {
       bestShotWindowStartedAt: null,
       lastUpdatedAt: now,
       lastSampleAttemptAt: null,
+      lastSampleCapturedAt: null,
       samplesCollected: 0,
       bestShot: null,
       dispatchedQualityScore: null,
@@ -167,6 +169,24 @@ export class TrackIdentityStateService {
   get(cameraSlug: string, trackId: string, now = Date.now()): TrackRecord | null {
     this.cleanup(now);
     return this.tracks.get(TrackIdentityStateService.makeKey(cameraSlug, trackId)) ?? null;
+  }
+
+  hasRecentEndedKnown(
+    cameraSlug: string,
+    ownerScopeId: string,
+    maxGapMs: number,
+    now = Date.now(),
+  ): boolean {
+    this.cleanup(now);
+    return [...this.tracks.values()].some(
+      (record) =>
+        record.cameraSlug === cameraSlug &&
+        record.ownerScopeId === ownerScopeId &&
+        record.state === 'KNOWN' &&
+        record.endedAt !== null &&
+        now >= record.endedAt &&
+        now - record.endedAt <= maxGapMs,
+    );
   }
 
   findByEventId(eventId: string, now = Date.now()): TrackRecord | null {

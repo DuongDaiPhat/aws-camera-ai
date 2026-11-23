@@ -6,9 +6,14 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 import handler
+from botocore.errorfactory import ClientExceptionsFactory
 from botocore.exceptions import ClientError
+from botocore.session import get_session
 
 FIXTURES = Path(__file__).resolve().parents[3] / "aws/sprint4/contracts/fixtures"
+REK_EXCEPTIONS = ClientExceptionsFactory().create_client_exceptions(
+    get_session().get_service_model("rekognition")
+)
 
 
 class FaceWorkerTests(unittest.TestCase):
@@ -139,8 +144,10 @@ class FaceWorkerTests(unittest.TestCase):
             ):
                 handler.skip_detect_faces()
 
-    def test_fast_path_calls_search_once_for_known_and_unknown_without_detect_or_describe(self):
-        rek = Mock()
+    def test_fast_path_calls_search_once_for_known_and_unknown_without_detect_or_describe(
+        self,
+    ):
+        rek = Mock(exceptions=REK_EXCEPTIONS)
         rek.search_faces_by_image.return_value = {
             "FaceModelVersion": "7.0",
             "FaceMatches": [{"Similarity": 95, "Face": {"FaceId": "face"}}],
@@ -197,15 +204,23 @@ class FaceWorkerTests(unittest.TestCase):
         self.assertEqual(body["results"][0]["confidence"], 1.0)
         self.assertIsNone(body["results"][0]["metadata"]["similarity"])
         self.assertEqual(
-            body["results"][0]["metadata"]["confidencePolicyVersion"], "empty-collection-v1"
+            body["results"][0]["metadata"]["confidencePolicyVersion"],
+            "empty-collection-v1",
         )
         self.assertIsNone(body["results"][0]["metadata"]["qualityReason"])
         handler.VALIDATOR.validate(self._wrap_result(body))
 
-    def test_fast_path_invalid_parameter_exception_maps_to_undetermined_without_retry(self):
-        rek = Mock()
-        rek.search_faces_by_image.side_effect = ClientError(
-            {"Error": {"Code": "InvalidParameterException", "Message": "No face in image"}},
+    def test_fast_path_invalid_parameter_exception_maps_to_undetermined_without_retry(
+        self,
+    ):
+        rek = Mock(exceptions=REK_EXCEPTIONS)
+        rek.search_faces_by_image.side_effect = REK_EXCEPTIONS.InvalidParameterException(
+            {
+                "Error": {
+                    "Code": "InvalidParameterException",
+                    "Message": "No face in image",
+                }
+            },
             "SearchFacesByImage",
         )
         with patch.object(handler, "client", return_value=rek):
@@ -251,7 +266,7 @@ class FaceWorkerTests(unittest.TestCase):
         sqs.send_message.assert_called_once()
 
     def test_fast_path_other_client_error_reraises_for_sqs_retry(self):
-        rek = Mock()
+        rek = Mock(exceptions=REK_EXCEPTIONS)
         rek.search_faces_by_image.side_effect = ClientError(
             {"Error": {"Code": "ThrottlingException", "Message": "Rate exceeded"}},
             "SearchFacesByImage",
@@ -287,6 +302,25 @@ class FaceWorkerTests(unittest.TestCase):
         self.assertIn("errorType=ClientError", captured.output[0])
         sqs.send_message.assert_not_called()
 
+    def test_unavailable_s3_image_is_undetermined_without_turning_it_into_unknown(self):
+        rek = Mock(exceptions=REK_EXCEPTIONS)
+        rek.search_faces_by_image.side_effect = REK_EXCEPTIONS.InvalidS3ObjectException(
+            {
+                "Error": {
+                    "Code": "InvalidS3ObjectException",
+                    "Message": "Image unavailable",
+                },
+                "ResponseMetadata": {"RequestId": "s3-image-request"},
+            },
+            "SearchFacesByImage",
+        )
+        with patch.object(handler, "client", return_value=rek):
+            result = handler.recognize(self.job["payload"], {}, collection_face_count=1)
+        self.assertEqual(result["personStatus"], "UNDETERMINED")
+        self.assertIsNone(result["matchedKnownFaceId"])
+        self.assertEqual(result["results"][0]["metadata"]["qualityReason"], "IMAGE_UNAVAILABLE")
+        handler.VALIDATOR.validate(self._wrap_result(result))
+
     def test_process_forwards_collection_face_count_and_handles_missing_count(self):
         sqs = Mock()
         backend = Mock(
@@ -317,7 +351,7 @@ class FaceWorkerTests(unittest.TestCase):
         )
         sqs.send_message.assert_called_once()
 
-        rek = Mock()
+        rek = Mock(exceptions=REK_EXCEPTIONS)
         rek.search_faces_by_image.return_value = {
             "FaceModelVersion": "7.0",
             "FaceMatches": [{"Similarity": 60, "Face": {"FaceId": "face"}}],
@@ -341,8 +375,10 @@ class FaceWorkerTests(unittest.TestCase):
         rek.detect_faces.assert_not_called()
         rek.describe_collection.assert_not_called()
 
-    def test_legacy_mode_known_unknown_no_face_multiple_empty_and_collection_count(self):
-        rek = Mock()
+    def test_legacy_mode_known_unknown_no_face_multiple_empty_and_collection_count(
+        self,
+    ):
+        rek = Mock(exceptions=REK_EXCEPTIONS)
         rek.detect_faces.return_value = {"FaceDetails": [{}]}
         rek.describe_collection.return_value = {
             "FaceCount": 1,
@@ -406,7 +442,10 @@ class FaceWorkerTests(unittest.TestCase):
             rek.describe_collection.assert_not_called()
             rek.search_faces_by_image.assert_called_once()
 
-            for faces, expected_reason in [([], "NO_FACE_DETECTED"), ([{}, {}], "MULTIPLE_FACES")]:
+            for faces, expected_reason in [
+                ([], "NO_FACE_DETECTED"),
+                ([{}, {}], "MULTIPLE_FACES"),
+            ]:
                 rek.reset_mock()
                 rek.detect_faces.return_value = {"FaceDetails": faces}
                 body = handler.recognize(self.job["payload"], {})
@@ -493,7 +532,7 @@ class FaceWorkerTests(unittest.TestCase):
     def test_recognize_rejects_invalid_threshold_and_handles_no_similarity_matches(
         self,
     ):
-        rek = Mock()
+        rek = Mock(exceptions=REK_EXCEPTIONS)
         rek.search_faces_by_image.return_value = {"FaceMatches": []}
         with patch.object(handler, "client", return_value=rek) as client_factory:
             for bad in ("0", "-0.5", "1.1"):

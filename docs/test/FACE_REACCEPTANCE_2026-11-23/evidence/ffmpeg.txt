@@ -1,0 +1,196 @@
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001da37e4c480] Unknown cover type: 0x1.
+[swscaler @ 000001da37ecccc0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001da3bf300c0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000020e877f5b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002e00cc38b40] Unknown cover type: 0x1.
+[swscaler @ 000002e011382bc0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002e00e35e2c0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000023127171c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000024f880cc480] Unknown cover type: 0x1.
+[swscaler @ 0000024f8c6f18c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000024f8c717040] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001650fda5b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000020772da8b40] Unknown cover type: 0x1.
+[swscaler @ 0000020777b81500] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000020777355f00] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001380a041c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000216b693c480] Unknown cover type: 0x1.
+[swscaler @ 00000216b97b2080] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000216b69a87c0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 00000179f5235b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000022d99628b40] Unknown cover type: 0x1.
+[swscaler @ 0000022d9c0f4840] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000022d9c911b80] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001ef756d1c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000017bb8498bc0] Unknown cover type: 0x1.
+[swscaler @ 0000017bbc64aa80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000017bbcaed200] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000017f1a571c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001de4f2b8bc0] Unknown cover type: 0x1.
+[swscaler @ 000001de524691c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001de4fa84000] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001ee7c3b1c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001dc05e97f00] Unknown cover type: 0x1.
+[swscaler @ 000001dc07f68400] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001dc0dc13240] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001ab5daf1c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000214dec9c480] Unknown cover type: 0x1.
+[swscaler @ 00000214e2c85580] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000214e3026940] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000002c576961c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000027c5647c480] Unknown cover type: 0x1.
+[swscaler @ 0000027c5ae690c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000027c566300c0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001b640691c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001a3119e8b40] Unknown cover type: 0x1.
+[swscaler @ 000001a3117f00c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001a3144d5ac0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000002170d5d1c00] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000025d8e90c480] Unknown cover type: 0x1.
+[swscaler @ 0000025d8f3b2e00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000025d935bb2c0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000023601b41c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000256c8fa8b40] Unknown cover type: 0x1.
+[swscaler @ 00000256c92fa900] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000256c9799dc0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001ca6b9c1c00] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001ffdb36c480] Unknown cover type: 0x1.
+[swscaler @ 000001ffde5fc900] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001ffde1c7600] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001a529331c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002059f088b40] Unknown cover type: 0x1.
+[swscaler @ 00000205a2381880] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000205a34c9940] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 00000196ae771c00] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000021617b08bc0] Unknown cover type: 0x1.
+[swscaler @ 00000216179246c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002161c05d980] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001e47fa21c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002ad5131a900] Unknown cover type: 0x1.
+[swscaler @ 000002ad55b20a00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002ad5621ddc0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000002766b885b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000252451ac480] Unknown cover type: 0x1.
+[swscaler @ 000002524b23c840] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000025249158a00] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001c1985c5b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001f971fbc480] Unknown cover type: 0x1.
+[swscaler @ 000001f972a5ae40] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001f973ba8c40] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 00000153846c1c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001d7dc9fc480] Unknown cover type: 0x1.
+[swscaler @ 000001d7e0e71200] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001d7df848800] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000019cadf55b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000256e9ea8b40] Unknown cover type: 0x1.
+[swscaler @ 00000256ea699e00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000256edf88200] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000021d0ded1c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000020cc8438bc0] Unknown cover type: 0x1.
+[swscaler @ 0000020cccbdb440] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000020cc86b6a80] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000027176441c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001f9623f8bc0] Unknown cover type: 0x1.
+[swscaler @ 000001f966958a80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001f9671acb40] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001cd8cee1c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001fe6e418b80] Unknown cover type: 0x1.
+[swscaler @ 000001fe72970480] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001fe70fdabc0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000017ad93c5b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002b2313a8b40] Unknown cover type: 0x1.
+[swscaler @ 000002b233eacac0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002b23609f000] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001731f991c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000023919c3c480] Unknown cover type: 0x1.
+[swscaler @ 000002391cae9540] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002391d205c00] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001cdb7345b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002536f608b40] Unknown cover type: 0x1.
+[swscaler @ 00000253728d08c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000025373b2fe40] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001bfca9a1c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001e5a9737f00] Unknown cover type: 0x1.
+[swscaler @ 000001e5ae24ff00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001e5acd973c0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000002c4e9961c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001db22c38b80] Unknown cover type: 0x1.
+[swscaler @ 000001db273ccc80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001db27b83300] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001f4fef75b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000029ad67fc480] Unknown cover type: 0x1.
+[swscaler @ 0000029adc625e80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000029adcd96380] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001818f941c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001c3d6db8b40] Unknown cover type: 0x1.
+[swscaler @ 000001c3dba88000] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001c3db324e40] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 00000240cfed1c40] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001e55590ca80] Unknown cover type: 0x1.
+[swscaler @ 000001e558b2f300] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001e55a36e940] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000025ccf695b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002939ebec740] Unknown cover type: 0x1.
+[swscaler @ 00000293a0af8f00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002939f2c9c80] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001cee23f5b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001eaba6cca80] Unknown cover type: 0x1.
+[swscaler @ 000001eabbd5d340] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001eabc5cdf80] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000016f719a5b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000151b49cc740] Unknown cover type: 0x1.
+[swscaler @ 00000151b9a26240] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000151b92f3f40] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 00000206bc5b5b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001938d11ca80] Unknown cover type: 0x1.
+[swscaler @ 000001938fe95d00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000193906c9b00] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000002ccb8085b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000029c7c9bc740] Unknown cover type: 0x1.
+[swscaler @ 0000029c01700500] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000029c7ea6b3c0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 00000282a96f5b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[swscaler @ 00000193ab7abf80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000193ab8b8180] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000002a2eeb2ed00] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[swscaler @ 0000020c5a2dd3c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000020c5201f640] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000027f2390ed00] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[swscaler @ 000001c02766a4c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001c0277766c0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001fc8e48ecc0] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[swscaler @ 00000203833b21c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000203f89eaa00] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000001794ee9ed00] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001734b217b80] Unknown cover type: 0x1.
+[swscaler @ 000001734fc0fb00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001735045dc80] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000002849c363f80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000026241eac740] Unknown cover type: 0x1.
+[swscaler @ 0000026247fd6900] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000026244ea0e40] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000002afc6435b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001f14538c740] Unknown cover type: 0x1.
+[swscaler @ 000001f1481a5b00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001f147194bc0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000013374fc5b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[swscaler @ 000001aeb36c0100] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001aeb36cf000] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000027756c11cc0] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[swscaler @ 0000026468dccc40] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002646abe8e80] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000019c77799040] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[swscaler @ 000001f09b2be880] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001f09b3c8b80] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 000002cf05211cc0] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[swscaler @ 0000022932a6f900] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002293b227000] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 00000279e2161cc0] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000029b17697b80] Unknown cover type: 0x1.
+[swscaler @ 0000029b1beb8f80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000029b1ac16240] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000018fe14a3f80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000021e40deca80] Unknown cover type: 0x1.
+[swscaler @ 0000021e44089bc0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000021e43e48dc0] deprecated pixel format used, make sure you did set range correctly
+[vist#0:0/h264 @ 0000022234af5b80] Resumed reading at pts 0.000 with rate 1.050 after a lag of 0.500s

@@ -8,6 +8,8 @@ export interface FaceTrackOptimizationConfig {
   bestShotWindowMs: number;
   bestShotMaxSamples: number;
   bestShotEarlyDispatchScore: number;
+  bestShotEarlyDispatchEnabled: boolean;
+  requireTimestampedFrame: boolean;
   minSampleIntervalMs: number;
   undeterminedMaxRetries: number;
   undeterminedRetryCooldownMs: number;
@@ -26,12 +28,14 @@ export interface FaceTrackOptimizationConfig {
 export const DEFAULT_FACE_TRACK_OPTIMIZATION_CONFIG: FaceTrackOptimizationConfig = {
   enabled: true,
   qualityGateEnabled: true,
-  qualityGateFailOpen: true,
+  qualityGateFailOpen: false,
   qualityGateTimeoutMs: 2000,
-  bestShotWindowMs: 1200,
-  bestShotMaxSamples: 4,
-  bestShotEarlyDispatchScore: 0.82,
-  minSampleIntervalMs: 350,
+  bestShotWindowMs: 4000,
+  bestShotMaxSamples: 32,
+  bestShotEarlyDispatchScore: 0.95,
+  bestShotEarlyDispatchEnabled: false,
+  requireTimestampedFrame: true,
+  minSampleIntervalMs: 150,
   undeterminedMaxRetries: 2,
   undeterminedRetryCooldownMs: 4000,
   unknownAllowSingleRecheck: true,
@@ -131,6 +135,16 @@ export function readFaceTrackOptimizationConfig(
     ),
     bestShotWindowMs: readNonNegativeNumber(config, 'FACE_BEST_SHOT_WINDOW_MS', d.bestShotWindowMs),
     bestShotMaxSamples: readPositiveInt(config, 'FACE_BEST_SHOT_MAX_SAMPLES', d.bestShotMaxSamples),
+    bestShotEarlyDispatchEnabled: readBoolean(
+      config,
+      'FACE_BEST_SHOT_EARLY_DISPATCH_ENABLED',
+      d.bestShotEarlyDispatchEnabled,
+    ),
+    requireTimestampedFrame: readBoolean(
+      config,
+      'FACE_REQUIRE_TIMESTAMPED_FRAME',
+      d.requireTimestampedFrame,
+    ),
     bestShotEarlyDispatchScore: readUnitNumber(
       config,
       'FACE_BEST_SHOT_EARLY_DISPATCH_SCORE',

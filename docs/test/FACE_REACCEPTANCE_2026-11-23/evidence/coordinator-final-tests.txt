@@ -1,0 +1,7 @@
+PASS test/face-recognition-coordinator.service.spec.ts (81.518 s)
+PASS test/track-identity-state.service.spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       23 passed, 23 total
+Snapshots:   0 total
+Time:        88.64 s
