@@ -248,6 +248,11 @@ describe('US20 real PostgreSQL + HTTP delivery + API acceptance', () => {
         [foreignDevice],
       )
     ).id;
+    // Viewers created after migration 0021 need an explicit camera grant.
+    await pool.query(
+      'INSERT INTO camera_access_grants(user_id,camera_id,can_live,can_playback) VALUES($1,$2,TRUE,TRUE)',
+      [other, foreignCamera],
+    );
     face = (
       await row(
         "INSERT INTO known_faces(owner_user_id,linked_user_id,person_name,embedding,embedding_dim) VALUES($1,$2,'Resident QA',decode('01','hex'),1) RETURNING id",
@@ -1093,6 +1098,11 @@ describe('US20 real PostgreSQL + HTTP delivery + API acceptance', () => {
     const a = (await scopedEvents.streamEvents(resident)).subscribe((m) => own.push(m)),
       b = (await scopedEvents.streamEvents(other)).subscribe((m) => foreign.push(m));
     await scopedEvents.publishCommittedUpdate(check.event_id!);
+    // SSE now authorizes each event asynchronously against PostgreSQL.
+    const deadline = Date.now() + 3000;
+    while (own.length === 0 && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
     expect(own).toHaveLength(1);
     expect(foreign).toHaveLength(0);
     a.unsubscribe();
