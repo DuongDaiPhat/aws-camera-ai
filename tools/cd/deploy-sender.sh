@@ -6,10 +6,14 @@ case "${DEPLOY_ENVIRONMENT:-}" in
   *) echo "Sender deployment requires staging or production." >&2; exit 1 ;;
 esac
 
-function_name="${SENDER_FUNCTION_NAME:?Sender function is required}"
+function_name="${SENDER_FUNCTION_NAME:?Set SENDER_FUNCTION_NAME in the GitHub deployment environment}"
 if [[ "$function_name" != "argusai-$DEPLOY_ENVIRONMENT-sender" ]]; then
   echo "Sender function does not match deployment environment." >&2
   exit 1
+fi
+
+if [[ "${1:-}" == "--check-config" ]]; then
+  exit 0
 fi
 
 alias_name="${SENDER_FUNCTION_ALIAS:-live}"

@@ -71,6 +71,20 @@ assert_no_call() {
 }
 
 reset_calls
+if SENDER_FUNCTION_NAME= bash "$deploy_script" --check-config; then
+  echo "Expected missing Sender name to fail preflight." >&2
+  exit 1
+fi
+if SENDER_FUNCTION_NAME=argusai-production-sender bash "$deploy_script" --check-config; then
+  echo "Expected a Sender from another environment to fail preflight." >&2
+  exit 1
+fi
+bash "$deploy_script" --check-config
+DEPLOY_ENVIRONMENT=production SENDER_FUNCTION_NAME=argusai-production-sender \
+  bash "$deploy_script" --check-config
+test ! -s "$MOCK_CALLS"
+
+reset_calls
 MOCK_HANDLER=index.handler bash "$deploy_script"
 grep -q 'lambda update-function-configuration.*--handler handler.lambda_handler' "$MOCK_CALLS"
 grep -q 'lambda update-alias.*--function-version 43' "$MOCK_CALLS"

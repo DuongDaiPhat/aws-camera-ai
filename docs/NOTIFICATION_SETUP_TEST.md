@@ -329,6 +329,7 @@ hoặc link ảnh ký số. Một ca vùng cấm đạt không thay thế mọi 
 2. Repo Owner xác nhận GitHub Environment variables: staging dùng
    `SENDER_FUNCTION_NAME=argusai-staging-sender`, production dùng
    `SENDER_FUNCTION_NAME=argusai-production-sender`, cả hai alias `live`.
+   Workflow dừng trước khi deploy backend nếu tên hàm thiếu hoặc không khớp môi trường.
 3. Phối hợp C cấp CD role quyền GetFunction/GetFunctionConfiguration/UpdateFunctionCode/
    **UpdateFunctionConfiguration**/PublishVersion/GetAlias/CreateAlias/UpdateAlias/InvokeFunction
    đúng ARN Sender; cấp quyền đọc release artifact. Không đổi role dùng chung mà chưa phối hợp.
@@ -341,6 +342,13 @@ hoặc link ảnh ký số. Một ca vùng cấm đạt không thay thế mọi 
    giữ DRY_RUN/BLOCKED_PROVIDER, ghi rõ phần chưa nghiệm thu.
 
 ## 10. Chẩn đoán nhanh và kết thúc ca test
+
+`pnpm argus local` giữ Results consumer hoạt động nếu `NOTIFICATION_DRIVER=sqs`.
+Dispatcher dừng tự thử lại sau lần lỗi thứ năm. Nếu mọi lần gửi đều bị SQS từ chối
+rõ ràng và Sender chưa nhận quyền gửi, Web báo gửi thất bại. Hãy sửa cấu hình
+SQS rồi tạo một sự kiện mới để kiểm tra luồng gửi. Nếu Web báo cần đối soát, hãy
+đối chiếu notification ID với log của Sender và kết quả gửi trước khi gửi lại.
+Kết quả hợp lệ đến muộn vẫn có thể cập nhật trạng thái.
 
 | Hiện tượng                                    | Kiểm tra                                                                                                       |
 | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
