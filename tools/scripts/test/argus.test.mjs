@@ -141,6 +141,15 @@ test('rejects missing cloud config before stopping services or updating .env', (
   assert.equal(read(), source);
 });
 
+test('keeps Results enabled in local mode when notifications still use SQS', (t) => {
+  const { read, state, switchTo } = setup(t, localEnv + 'NOTIFICATION_DRIVER=sqs\n');
+  switchTo('local');
+  const env = parseEnv(read());
+  assert.equal(state.mode, 'bullmq');
+  assert.equal(env.NOTIFICATION_DRIVER, 'sqs');
+  assert.equal(env.APPLICATION_RESULTS_CONSUMER_ENABLED, 'true');
+});
+
 for (const mode of ['cloud', 'local']) {
   test(`applies missing incident email rules before recreating services in ${mode} mode`, (t) => {
     const { root, state, switchTo } = setup(t);

@@ -101,6 +101,9 @@ function makeChanges(mode, env) {
   }
   if (mode === 'local') {
     changes.STORAGE_BUCKET = localBucket;
+    if (env.NOTIFICATION_DRIVER?.trim() === 'sqs') {
+      changes.APPLICATION_RESULTS_CONSUMER_ENABLED = 'true';
+    }
     if (!env.JWT_SECRET?.trim()) changes.JWT_SECRET = randomBytes(48).toString('base64url');
     return changes;
   }
