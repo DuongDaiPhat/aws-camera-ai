@@ -12,6 +12,7 @@ from PIL import Image
 from app.config import Settings, get_settings
 from app.models.face import FaceQualityMetrics
 from app.services.embedding_codec import decode
+from app.services.face_arcface import ARCFACE_DST, ArcFaceOnnxRecognizer, umeyama_similarity
 from app.services.face_quality import FaceQualityAssessor
 
 
@@ -407,3 +408,103 @@ def test_degenerate_landmarks_out_of_bounds_roi_and_zero_embedding(
     res_lazy = assessor_missing_emb.assess(_sharp_picture(), include_embedding=True)
     assert res_lazy.passed is True
     assert res_lazy.embedding_dim == 128
+
+
+def test_arcface_onnx_gate_alignment_sha256_and_512d_embedding(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    model_file = tmp_path / "w600k_r50.onnx"
+    model_bytes = b"fake-arcface-onnx-weights"
+    model_file.write_bytes(model_bytes)
+    import hashlib
+
+    valid_sha = hashlib.sha256(model_bytes).hexdigest()
+
+    # Exact Umeyama transform recovers identity mapping on ARCFACE_DST landmarks
+    matrix = umeyama_similarity(ARCFACE_DST, ARCFACE_DST)
+    assert matrix is not None
+    assert np.allclose(matrix, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]], atol=1e-5)
+
+    captured_blobs: list[np.ndarray] = []
+
+    class FakeInput:
+        name = "input.1"
+        shape: list[object] = [1, 3, 112, 112]
+
+    class FakeOutput:
+        name = "683"
+        shape: list[object] = [1, 512]
+
+    class FakeSession:
+        def get_inputs(self):
+            return [FakeInput()]
+
+        def get_outputs(self):
+            return [FakeOutput()]
+
+        def run(self, _output_names, feed):
+            blob = feed["input.1"]
+            captured_blobs.append(blob)
+            vec = np.zeros((1, 512), dtype=np.float32)
+            vec[0, 0] = 3.0
+            vec[0, 1] = 4.0
+            return [vec]
+
+    class FakeSessionOptions:
+        intra_op_num_threads = 1
+        inter_op_num_threads = 1
+        log_severity_level = 0
+
+    fake_ort = Mock()
+    fake_ort.SessionOptions.return_value = FakeSessionOptions()
+    fake_ort.InferenceSession.return_value = FakeSession()
+    monkeypatch.setattr("app.services.face_arcface.importlib.import_module", lambda _name: fake_ort)
+
+    # Checksum mismatch degrades cleanly to MODEL_UNAVAILABLE
+    bad_settings = Settings(
+        _env_file=None,
+        face_provider="rekognition",
+        face_detector_path=str(model_file),
+        face_gate_embedder_path=str(model_file),
+        face_gate_embedder_backend="auto",
+        face_gate_embedder_sha256="0" * 64,
+        face_gate_model_version="yunet-2023mar-w600k-r50",
+    )
+    bad_assessor = FaceQualityAssessor(bad_settings)
+    bad_assessor._detector = Mock()
+    bad_assessor._detector.detect.return_value = (1, np.asarray([_yunet_face()], dtype=np.float32))
+    assert bad_assessor.warmup() is False
+    bad_res = bad_assessor.assess(_sharp_picture(), include_embedding=True)
+    assert bad_res.passed is False
+    assert bad_res.gate_status == "UNAVAILABLE"
+    assert bad_res.rejection_reason == "MODEL_UNAVAILABLE"
+    assert bad_res.model_version == "yunet-2023mar-w600k-r50"
+
+    # Valid SHA-256 + auto backend selects ArcFaceOnnxRecognizer and outputs normalized 512-d vector
+    good_settings = Settings(
+        _env_file=None,
+        face_provider="rekognition",
+        face_detector_path=str(model_file),
+        face_gate_embedder_path=str(model_file),
+        face_gate_embedder_backend="auto",
+        face_gate_embedder_sha256=valid_sha,
+        face_gate_model_version="yunet-2023mar-w600k-r50",
+    )
+    good_assessor = FaceQualityAssessor(good_settings)
+    good_assessor._detector = Mock()
+    good_assessor._detector.detect.return_value = (1, np.asarray([_yunet_face()], dtype=np.float32))
+    assert good_assessor.warmup() is True
+    assert isinstance(good_assessor._recognizer, ArcFaceOnnxRecognizer)
+
+    res = good_assessor.assess(_sharp_picture(), include_embedding=True)
+    assert res.passed is True
+    assert res.gate_status == "READY"
+    assert res.model_version == "yunet-2023mar-w600k-r50"
+    assert res.embedding_dim == 512
+    assert res.embedding_base64 is not None
+    decoded = decode(res.embedding_base64, 512)
+    assert len(decoded) == 512
+    assert np.isclose(decoded[0], 0.6, atol=1e-5)
+    assert np.isclose(decoded[1], 0.8, atol=1e-5)
+    assert captured_blobs[-1].shape == (1, 3, 112, 112)
+    assert float(captured_blobs[-1].min()) >= -1.0 and float(captured_blobs[-1].max()) <= 1.0

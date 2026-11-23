@@ -1,10 +1,11 @@
-"""Local YuNet/SFace face quality gate, independent of face_provider."""
+"""Local YuNet + SFace/ArcFace quality gate, independent of face_provider."""
 
 import io
 import logging
 import math
 import threading
 from pathlib import Path
+from typing import Any
 
 import cv2
 import numpy as np
@@ -13,6 +14,7 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from app.config import Settings
 from app.models.face import BoundingBox, FaceAssessResponse, FaceQualityMetrics
 from app.services.embedding_codec import encode
+from app.services.face_arcface import ArcFaceOnnxRecognizer
 
 LOGGER = logging.getLogger(__name__)
 _MAX_DETECT_DIM = 640.0
@@ -20,14 +22,42 @@ _SUPPORTED_FORMATS = {"JPEG", "PNG", "WEBP"}
 
 
 class FaceQualityAssessor:
-    """Assess single-face crop quality using local YuNet + SFace models."""
+    """Assess single-face crop quality using local YuNet + SFace/ArcFace models."""
 
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self._lock = threading.Lock()
         self._detector: cv2.FaceDetectorYN | None = None
-        self._recognizer: cv2.FaceRecognizerSF | None = None
+        self._recognizer: Any = None
         self._warmed = False
+
+    def _model_version(self) -> str:
+        return self.settings.face_gate_model_version.strip() or self.settings.face_model_version
+
+    def _resolve_embedder_config(self) -> tuple[str, str]:
+        gate_path = self.settings.face_gate_embedder_path.strip()
+        embedder_path = gate_path or self.settings.face_embedder_path
+        backend = self.settings.face_gate_embedder_backend
+        if backend == "auto":
+            name = Path(embedder_path).name.lower()
+            if gate_path:
+                backend = "sface" if "sface" in name else "arcface_onnx"
+            elif any(token in name for token in ("w600k", "arcface", "glint")):
+                backend = "arcface_onnx"
+            else:
+                backend = "sface"
+        return embedder_path, backend
+
+    def _create_recognizer(self, embedder_path: str, backend: str) -> Any:
+        if backend == "arcface_onnx":
+            return ArcFaceOnnxRecognizer(
+                embedder_path,
+                expected_sha256=self.settings.face_gate_embedder_sha256,
+                cpu_threads=self.settings.face_cpu_threads,
+            )
+        if not Path(embedder_path).is_file():
+            raise FileNotFoundError("Face embedder model not configured")
+        return cv2.FaceRecognizerSF.create(embedder_path, "")
 
     def warmup(self) -> bool:
         """Prime model execution before the first live face consumes its deadline."""
@@ -49,10 +79,10 @@ class FaceQualityAssessor:
     def _load(self, *, require_recognizer: bool = True) -> None:
         # Load local ONNX models regardless of settings.face_provider so the
         # edge quality gate remains active even when FACE_PROVIDER=rekognition.
+        embedder_path, backend = self._resolve_embedder_config()
         if self._detector is None:
             if not all(
-                Path(path).is_file()
-                for path in (self.settings.face_detector_path, self.settings.face_embedder_path)
+                Path(path).is_file() for path in (self.settings.face_detector_path, embedder_path)
             ):
                 raise FileNotFoundError("Face quality models not configured")
             score_threshold = max(
@@ -64,11 +94,9 @@ class FaceQualityAssessor:
                 (320, 320),
                 score_threshold,
             )
-            self._recognizer = cv2.FaceRecognizerSF.create(self.settings.face_embedder_path, "")
+            self._recognizer = self._create_recognizer(embedder_path, backend)
         elif require_recognizer and self._recognizer is None:
-            if not Path(self.settings.face_embedder_path).is_file():
-                raise FileNotFoundError("Face embedder model not configured")
-            self._recognizer = cv2.FaceRecognizerSF.create(self.settings.face_embedder_path, "")
+            self._recognizer = self._create_recognizer(embedder_path, backend)
 
     def _decode_image(self, data: bytes) -> np.ndarray:
         if not data or len(data) > self.settings.face_max_image_bytes:
@@ -227,6 +255,7 @@ class FaceQualityAssessor:
         return BoundingBox(x=bx, y=by, width=bw, height=bh)
 
     def _assess_image(self, image: np.ndarray, include_embedding: bool) -> FaceAssessResponse:
+        model_version = self._model_version()
         faces = self._detect_faces(image)
         face_count = len(faces)
         if face_count == 0:
@@ -235,7 +264,7 @@ class FaceQualityAssessor:
                 quality_score=0.0,
                 face_count=0,
                 rejection_reason="NO_FACE_DETECTED",
-                model_version=self.settings.face_model_version,
+                model_version=model_version,
                 gate_status="READY",
             )
         if face_count > 1:
@@ -244,7 +273,7 @@ class FaceQualityAssessor:
                 quality_score=0.0,
                 face_count=face_count,
                 rejection_reason="MULTIPLE_FACES",
-                model_version=self.settings.face_model_version,
+                model_version=model_version,
                 gate_status="READY",
             )
 
@@ -277,7 +306,7 @@ class FaceQualityAssessor:
                 rejection_reason=rejection_reason,
                 metrics=metrics,
                 bounding_box=bounding_box,
-                model_version=self.settings.face_model_version,
+                model_version=model_version,
                 gate_status="READY",
             )
 
@@ -285,13 +314,16 @@ class FaceQualityAssessor:
         embedding_dim: int | None = None
         if include_embedding:
             assert self._recognizer is not None
-            aligned = self._recognizer.alignCrop(image, face)
+            if hasattr(self._recognizer, "align_crop"):
+                aligned = self._recognizer.align_crop(image, face)
+            else:
+                aligned = self._recognizer.alignCrop(image, face)
             vector = np.asarray(self._recognizer.feature(aligned).flatten(), dtype=np.float32)
             try:
                 embedding_base64 = encode(vector)
                 embedding_dim = len(vector)
             except ValueError:
-                LOGGER.warning("SFace returned invalid embedding vector")
+                LOGGER.warning("Face embedder returned invalid embedding vector")
 
         return FaceAssessResponse(
             passed=True,
@@ -302,19 +334,20 @@ class FaceQualityAssessor:
             bounding_box=bounding_box,
             embedding_base64=embedding_base64,
             embedding_dim=embedding_dim,
-            model_version=self.settings.face_model_version,
+            model_version=model_version,
             gate_status="READY",
         )
 
     def assess(self, data: bytes, include_embedding: bool = True) -> FaceAssessResponse:
-        """Evaluate face quality metrics and optionally extract an SFace embedding."""
+        """Evaluate face quality metrics and optionally extract a face embedding."""
+        model_version = self._model_version()
         if not self.settings.face_quality_gate_enabled:
             return FaceAssessResponse(
                 passed=True,
                 quality_score=0.0,
                 face_count=0,
                 rejection_reason=None,
-                model_version=self.settings.face_model_version,
+                model_version=model_version,
                 gate_status="DISABLED",
             )
         try:
@@ -325,7 +358,7 @@ class FaceQualityAssessor:
                 quality_score=0.0,
                 face_count=0,
                 rejection_reason="IMAGE_DECODE_FAILED",
-                model_version=self.settings.face_model_version,
+                model_version=model_version,
                 gate_status="READY",
             )
         try:
@@ -338,6 +371,6 @@ class FaceQualityAssessor:
                 quality_score=0.0,
                 face_count=0,
                 rejection_reason="MODEL_UNAVAILABLE",
-                model_version=self.settings.face_model_version,
+                model_version=model_version,
                 gate_status="UNAVAILABLE",
             )

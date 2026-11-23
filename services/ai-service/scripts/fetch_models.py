@@ -2,9 +2,19 @@
 
 import argparse
 import hashlib
+import io
 import json
 import urllib.request
+import zipfile
 from pathlib import Path
+
+
+def _extract_member(content: bytes, member_name: str) -> bytes:
+    with zipfile.ZipFile(io.BytesIO(content)) as archive:
+        for candidate in archive.namelist():
+            if candidate == member_name or candidate.endswith(f"/{member_name}"):
+                return archive.read(candidate)
+    raise FileNotFoundError(f"Archive member not found: {member_name}")
 
 
 def main() -> None:
@@ -19,6 +29,8 @@ def main() -> None:
             continue
         with urllib.request.urlopen(item["url"], timeout=120) as response:
             content = response.read()
+        if item.get("archiveMember"):
+            content = _extract_member(content, item["archiveMember"])
         if hashlib.sha256(content).hexdigest() != item["sha256"]:
             raise ValueError(f"Model checksum mismatch: {item['name']}")
         path.write_bytes(content)

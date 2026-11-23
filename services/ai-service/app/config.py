@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     face_detector_path: str = "models/face_detection_yunet_2023mar.onnx"
     face_embedder_path: str = "models/face_recognition_sface_2021dec.onnx"
     face_model_version: str = "yunet-2023mar-sface-2021dec"
+    face_gate_embedder_path: str = ""
+    face_gate_embedder_backend: Literal["auto", "sface", "arcface_onnx"] = "auto"
+    face_gate_embedder_sha256: str = ""
+    face_gate_model_version: str = ""
     face_max_image_bytes: int = 5 * 1024 * 1024
     face_max_pixels: int = 12_000_000
     face_detection_threshold: float = 0.9
