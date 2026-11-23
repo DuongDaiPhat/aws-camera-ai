@@ -1,0 +1,98 @@
+
+> aws-camera-ai@0.0.1 check:all D:\hoc tap\project 1\aws-camera-ai
+> pnpm check:secrets && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm test:tools && pnpm api:lint && pnpm check:ai
+
+
+> aws-camera-ai@0.0.1 check:secrets D:\hoc tap\project 1\aws-camera-ai
+> node tools/scripts/check-secrets.mjs
+
+
+🔒 [Secret-Scan] Bắt đầu quét kiểm tra rò rỉ AWS credentials & file nhạy cảm...
+✅ [Secret-Scan] HOÀN TOÀN SẠCH: Không phát hiện file nhạy cảm hoặc chuỗi khóa AWS nào.
+
+
+> aws-camera-ai@0.0.1 format:check D:\hoc tap\project 1\aws-camera-ai
+> node tools/scripts/format.mjs --check
+
+Checking formatting...
+[warn] docs/test/FACE_BRANCH_2026-11-23/evidence/ai-coverage.json
+[warn] docs/test/FACE_BRANCH_2026-11-23/evidence/ai-final-coverage.json
+[warn] docs/test/FACE_BRANCH_2026-11-23/evidence/backend-results.json
+[warn] docs/test/FACE_BRANCH_2026-11-23/evidence/cache-boundaries.json
+[warn] docs/test/FACE_BRANCH_2026-11-23/evidence/face-coverage/coverage-summary.json
+[warn] docs/test/FACE_BRANCH_2026-11-23/evidence/face-coverage/lcov-report/block-navigation.js
+[warn] docs/test/FACE_BRANCH_2026-11-23/evidence/face-coverage/lcov-report/prettify.js
+[warn] docs/test/FACE_BRANCH_2026-11-23/evidence/face-coverage/lcov-report/sorter.js
+[warn] docs/test/FACE_BRANCH_2026-11-23/evidence/integration-results.json
+[warn] docs/test/FACE_BRANCH_2026-11-23/evidence/integration-retest-results.json
+[warn] docs/test/FACE_BRANCH_2026-11-23/evidence/k6-summary.json
+[warn] docs/test/FACE_TEST6_2026-11-23/REPORT.md
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC02-no-glasses-final.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC02-no-glasses-regression.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC05-no-glasses-final.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC05-no-glasses-regression.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC06-glasses-baseline-local-analysis.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC06-glasses-baseline.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC06-glasses-final.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC06-glasses-upgraded.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC06-no-glasses-baseline-local-analysis.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC06-no-glasses-baseline.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC06-no-glasses-final.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC06-no-glasses-upgraded.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC08-glasses-final.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC08-glasses-regression.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC08-no-glasses-final.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/TC08-no-glasses-regression.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/audit-summary.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/cleanup.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/cloud-schema.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/collection-current.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/collection.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/embedder-ablation.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/embedder-benchmark.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/events-current.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/fixture.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/known-faces-current.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/lambda-config.json
+[warn] docs/test/FACE_TEST6_2026-11-23/data/restore-qa.json
+[warn] docs/test/FACE_TEST6_2026-11-23/evidence/cloudwatch.json
+[warn] tools/testing/face/assess.k6.js
+[warn] Code style issues found in 42 files. Run Prettier with --write to fix.
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+[warn] apps/orchestrator/test/face-recognition-coordinator.service.spec.ts
+[warn] apps/orchestrator/test/face-session-cache.service.spec.ts
+[warn] Code style issues found in 2 files. Run Prettier with --write to fix.
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+ ELIFECYCLE  Command failed with exit code 1.
+ ELIFECYCLE  Command failed with exit code 1.

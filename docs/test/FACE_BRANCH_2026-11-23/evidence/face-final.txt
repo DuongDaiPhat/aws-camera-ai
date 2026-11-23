@@ -1,0 +1,128 @@
+PASS test/face-recognition-coordinator.service.spec.ts (21.632 s)
+PASS test/track-identity-state.service.spec.ts
+PASS test/face-recognition.worker.spec.ts
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 30848  - 23/11/2026, 15.43.54    WARN [FaceRecognitionWorker] Không lấy được ảnh crop cho track track-1
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "48e58678-3dbc-49ea-8b89-9f6cf03182d9",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNKNOWN",
+  "hasError": false
+}
+
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "KNOWN",
+  "hasError": false
+}
+
+[Nest] 30848  - 23/11/2026, 15.43.54     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+PASS test/face-session-cache.service.spec.ts
+PASS test/face-quality-gate.client.spec.ts
+[Nest] 30848  - 23/11/2026, 15.43.56    WARN [FaceQualityGateClient] Object:
+{
+  "reason": "QUALITY_GATE_TIMEOUT",
+  "failOpen": true
+}
+
+[Nest] 30848  - 23/11/2026, 15.43.56    WARN [FaceQualityGateClient] Face quality gate request failed
+[Nest] 30848  - 23/11/2026, 15.43.56    WARN [FaceQualityGateClient] Object:
+{
+  "reason": "QUALITY_GATE_TIMEOUT",
+  "failOpen": false
+}
+
+[Nest] 30848  - 23/11/2026, 15.43.56    WARN [FaceQualityGateClient] Face quality gate request failed
+PASS test/face-track-optimization.config.spec.ts
+PASS test/face-person-association.spec.ts
+-----------------------------------------|---------|----------|---------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------
+File                                     | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                                                                                                        
+-----------------------------------------|---------|----------|---------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------
+All files                                |   87.28 |    73.27 |      95 |   91.55 |                                                                                                                                                          
+ face-person-association.ts              |   94.73 |    88.88 |     100 |     100 | 22                                                                                                                                                       
+ face-quality-gate.client.ts             |   83.33 |    63.33 |      90 |   91.22 | 63,87,170,175,179                                                                                                                                        
+ face-recognition-coordinator.service.ts |   85.25 |    74.67 |   96.96 |    87.1 | 100,115-116,171,209,236,255,293,352-358,361,405,412,458-459,480,532-538,639,677,689,701,745,752-761,807-816,830-855,971,994-995,1013,1029,1036-1039,1054 
+ face-recognition.worker.ts              |   90.76 |    67.34 |      90 |    91.8 | 119,170-171,217,281                                                                                                                                      
+ face-session-cache.service.ts           |   91.07 |    74.65 |     100 |   98.33 | 86,243,364,394                                                                                                                                           
+ face-track-optimization.config.ts       |    87.5 |    80.88 |     100 |   97.67 | 66                                                                                                                                                       
+ track-identity-state.service.ts         |   84.66 |     69.3 |   90.32 |   88.43 | 276-277,343-346,395,403-404,467-468,473-478                                                                                                              
+-----------------------------------------|---------|----------|---------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Test Suites: 7 passed, 7 total
+Tests:       48 passed, 48 total
+Snapshots:   0 total
+Time:        30.135 s, estimated 202 s
+Ran all test suites within paths "test/face-session-cache.service.spec.ts", "test/face-recognition-coordinator.service.spec.ts", "test/track-identity-state.service.spec.ts", "test/face-track-optimization.config.spec.ts", "test/face-person-association.spec.ts", "test/face-quality-gate.client.spec.ts", "test/face-recognition.worker.spec.ts".

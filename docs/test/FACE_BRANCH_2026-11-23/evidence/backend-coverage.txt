@@ -1,0 +1,4 @@
+Error:   × resolve pnpm@9.12.0
+  ╰─▶ Failed to fetch metadata from https://registry.npmjs.org/pnpm: error
+      sending request for url (https://registry.npmjs.org/pnpm)
+
