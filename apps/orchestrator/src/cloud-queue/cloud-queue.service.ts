@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-=======
-import { randomUUID } from 'node:crypto';
 import { imageFormat } from '../media/image-format';
->>>>>>> 6c194e8 (fix(orchestrator): improve face best-shot and validate recognition retries)
 import type { PoolClient } from 'pg';
 import {
   BadRequestException,
@@ -181,7 +177,8 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
     createdAt: Date;
     crop: Buffer;
   }): Promise<FaceJobEnvelope> {
-    if (this.settings.mode !== 'sqs') throw new Error('Face SQS transport not enabled');
+    if (!this.settings.enabled || this.settings.mode !== 'sqs')
+      throw new Error('Face SQS transport not enabled');
     const settings = this.settings;
     if (!input.collectionId) {
       throw new Error('Face collection registry missing');
@@ -502,8 +499,8 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
       faceNotification = {
         eventId: body.eventId,
         cameraSlug: typeof job.camera_slug === 'string' ? job.camera_slug : cameraSlugFromSession,
-        cameraId: facePayload.cameraId,
-        ownerScopeId: facePayload.ownerScopeId,
+        cameraId: p.cameraId,
+        ownerScopeId: p.ownerScopeId,
         trackId: typeof sent.trackId === 'string' && sent.trackId ? sent.trackId : trackIdFromObs,
         collectionVersion: body.collectionVersion ?? sent.collectionVersion,
         revision: body.revision,

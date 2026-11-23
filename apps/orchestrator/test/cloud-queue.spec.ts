@@ -660,6 +660,7 @@ describe('cloud queue safety', () => {
       {
         submit: jest.fn().mockResolvedValue({ disposition: 'ACCEPTED' }),
       } as unknown as AiResultsService,
+      {} as NotificationCloudService,
       coordinator,
     );
 
@@ -734,6 +735,7 @@ describe('cloud queue safety', () => {
       } as unknown as FrigateMediaAdapter,
       storage as unknown as IStorageService,
       {} as AiResultsService,
+      {} as NotificationCloudService,
     );
     await dispatchQueues.dispatchOne();
     const dispatchedEnv = JSON.parse(dispatchQuery.mock.calls[1]![1][1] as string);
@@ -784,6 +786,7 @@ describe('cloud queue safety', () => {
       {
         submit: jest.fn().mockResolvedValue({ disposition: 'ACCEPTED' }),
       } as unknown as AiResultsService,
+      {} as NotificationCloudService,
       coordinator,
     );
     await applyQueues.applyResult(knownRes);

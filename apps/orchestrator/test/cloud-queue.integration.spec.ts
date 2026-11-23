@@ -6,6 +6,7 @@ import { Pool } from 'pg';
 import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
 import { AiResultsService } from '../src/ai-results/ai-results.service';
 import { CloudQueueService } from '../src/cloud-queue/cloud-queue.service';
+import { NotificationCloudService } from '../src/notification-cloud/notification-cloud.service';
 import { DatabaseService } from '../src/database/database.service';
 import { KnownFacesRepository } from '../src/known-faces/known-faces.repository';
 import { FrigateMediaAdapter } from '../src/media/frigate-media.adapter';
@@ -115,6 +116,7 @@ describe('cloud queue PostgreSQL migration and atomic intent', () => {
       {} as FrigateMediaAdapter,
       storage as unknown as IStorageService,
       { submit: jest.fn() } as unknown as AiResultsService,
+      {} as NotificationCloudService,
     );
 
     const rev1 = await queues.enqueueFaceJob({
