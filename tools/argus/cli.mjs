@@ -43,6 +43,8 @@ const queueKeys = [
   'NOTIFICATION_JOBS_QUEUE_URL',
   'APPLICATION_RESULTS_QUEUE_URL',
 ];
+const notificationMigration = '0025_notification_claim_outcome.sql';
+const notificationEmailMigration = '0025_notification_email_rules.sql';
 const cloudMigrations = new Map([
   ['0017_cognito_issuer.sql', "to_regclass('public.idx_users_cognito_identity') IS NOT NULL"],
   ['0018_aws_queue_pipeline.sql', "to_regclass('public.cloud_transport_mode') IS NOT NULL"],
@@ -53,6 +55,19 @@ const cloudMigrations = new Map([
   [
     '0019_household_access.sql',
     "to_regprocedure('public.shares_camera_household(uuid, uuid)') IS NOT NULL",
+  ],
+  [
+    notificationMigration,
+    `to_regclass('public.cloud_notification_attempts') IS NOT NULL
+      AND EXISTS (SELECT FROM pg_attribute
+        WHERE attrelid = to_regclass('public.cloud_transport_mode')
+          AND attname = 'notification_driver' AND NOT attisdropped)`,
+  ],
+  [
+    notificationEmailMigration,
+    `(SELECT count(*) FROM public.escalation_rules
+      WHERE event_type IN ('FIRE_SMOKE_DETECTED', 'FALL_DETECTED', 'RESTRICTED_ZONE', 'UNKNOWN_PERSON')
+        AND notify_channels ? 'SNS_EMAIL') = 4`,
   ],
 ]);
 
@@ -86,6 +101,9 @@ function makeChanges(mode, env) {
   }
   if (mode === 'local') {
     changes.STORAGE_BUCKET = localBucket;
+    if (env.NOTIFICATION_DRIVER?.trim() === 'sqs') {
+      changes.APPLICATION_RESULTS_CONSUMER_ENABLED = 'true';
+    }
     if (!env.JWT_SECRET?.trim()) changes.JWT_SECRET = randomBytes(48).toString('base64url');
     return changes;
   }
@@ -237,11 +255,11 @@ function postgres(compose) {
   };
 }
 
-function backup(projectRoot, db) {
+function backup(projectRoot, db, mode) {
   console.log('Đang sao lưu PostgreSQL dev…');
   const directory = join(projectRoot, 'artifacts', 'argus');
   mkdirSync(directory, { recursive: true });
-  const name = `before-cloud-${new Date().toISOString().replace(/[:.]/g, '-')}.dump`;
+  const name = `before-${mode}-${new Date().toISOString().replace(/[:.]/g, '-')}.dump`;
   const file = join(directory, name);
   try {
     const fd = openSync(file, 'wx', 0o600);
@@ -276,7 +294,7 @@ function cloudSchema(db) {
   const missingQuery = [...cloudMigrations]
     .map(([file, applied]) => `SELECT '${file}' WHERE NOT (${applied})`)
     .join('\nUNION ALL\n');
-  const pending = new Set(db.query('Kiểm tra schema Dev Cloud', `${missingQuery};`).split(/\r?\n/));
+  const pending = new Set(db.query('Kiểm tra schema dev', `${missingQuery};`).split(/\r?\n/));
   return [...cloudMigrations.keys()].filter((file) => pending.has(file));
 }
 
@@ -298,7 +316,7 @@ function applyCloudMigrations(projectRoot, db, pending) {
     history === 't'
       ? `INSERT INTO public.schema_migrations (filename) VALUES ${pending.map((file) => `('${file}')`).join(', ')} ON CONFLICT DO NOTHING;`
       : '';
-  db.query('Chạy migration Dev Cloud', ['BEGIN;', ...migrations, record, 'COMMIT;'].join('\n'));
+  db.query('Chạy migration dev', ['BEGIN;', ...migrations, record, 'COMMIT;'].join('\n'));
   console.log(`Đã áp dụng migration: ${pending.join(', ')}.`);
 }
 
@@ -344,7 +362,13 @@ function switchMode(projectRoot, mode, openCompose) {
     const changes = makeChanges(mode, db.env);
     const next = updateEnv(original, changes);
     const target = changes.FACE_JOB_TRANSPORT;
-    const pending = mode === 'cloud' ? cloudSchema(db) : [];
+    const pending = cloudSchema(db);
+    const missingPrerequisites = pending.filter(
+      (file) => file !== notificationMigration && file !== notificationEmailMigration,
+    );
+    if (mode === 'local' && missingPrerequisites.length) {
+      throw new Error(`PostgreSQL dev thiếu migration nền: ${missingPrerequisites.join(', ')}.`);
+    }
     if (
       pending.length &&
       db.query(
@@ -364,7 +388,7 @@ function switchMode(projectRoot, mode, openCompose) {
       '--services',
     ]).split(/\r?\n/);
 
-    if (mode === 'cloud' && (previous !== target || pending.length)) backup(projectRoot, db);
+    if (pending.length || (mode === 'cloud' && previous !== target)) backup(projectRoot, db, mode);
 
     let envChanged = false;
     let dbChanged = false;

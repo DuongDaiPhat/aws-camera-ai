@@ -13,7 +13,8 @@
     "test": "jest --passWithNoTests",
     "test:integration": "jest --runInBand --testRegex \".*\\.integration\\.spec\\.ts$\"",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage"
+    "test:cov": "jest --coverage",
+    "test:notification": "jest --config jest.notification.config.js --runInBand"
   },
   "dependencies": {
     "@aws-sdk/client-rekognition": "^3.1173.0",

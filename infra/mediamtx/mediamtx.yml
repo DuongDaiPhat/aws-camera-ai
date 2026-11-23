@@ -18,6 +18,7 @@ authHTTPExclude:
   - action: pprof
 
 paths:
+  # Camera slugs created in the app are authorized by the HTTP callback above.
   all_others:
     source: publisher
   cam_living_room:

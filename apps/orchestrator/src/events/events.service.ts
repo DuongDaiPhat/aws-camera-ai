@@ -143,6 +143,15 @@ export class EventsService {
     };
   }
 
+  async listEventNotifications(eventId: string, actor: TokenClaims) {
+    const response = await this.eventsRepository.listEventNotifications(
+      eventId,
+      isSystemAdmin(actor) ? null : actor.sub,
+    );
+    if (!response) throw new NotFoundException('Không tìm thấy sự kiện.');
+    return response;
+  }
+
   /**
    * Lấy chi tiết một sự kiện kèm media, kết quả AI và lịch sử trạng thái (US-21).
    */

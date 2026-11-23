@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import type { PoolClient } from 'pg';
 import {
   BadRequestException,
@@ -12,6 +11,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import {
   SQSClient,
+  SQSServiceException,
   SendMessageCommand,
   ReceiveMessageCommand,
   DeleteMessageCommand,
@@ -24,6 +24,20 @@ import { AiResultsService } from '../ai-results/ai-results.service';
 import { SubmitAiResultDto } from '../ai-results/dto/submit-ai-result.dto';
 import { readCloudConfig } from './cloud-config';
 import { Envelope, FaceJobEnvelope, parseEnvelope } from './queue-contract';
+import { NotificationCloudService } from '../notification-cloud/notification-cloud.service';
+
+const SQS_SEND_REJECTED = 'SQS_SEND_REJECTED';
+
+function isDefiniteSqsRejection(error: unknown): boolean {
+  // A final denial after SDK retries does not rule out acceptance of an earlier request.
+  return (
+    error instanceof SQSServiceException &&
+    error.$fault === 'client' &&
+    error.$metadata.attempts === 1 &&
+    [400, 403].includes(error.$metadata.httpStatusCode ?? 0) &&
+    ['AccessDenied', 'AccessDeniedException'].includes(error.name)
+  );
+}
 
 @Injectable()
 export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
@@ -40,16 +54,23 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
     private readonly media: FrigateMediaAdapter,
     @Inject(STORAGE_SERVICE) private readonly storage: IStorageService,
     private readonly ai: AiResultsService,
+    private readonly notifications: NotificationCloudService,
   ) {
     this.settings = readCloudConfig(config);
-    if (this.settings.mode === 'sqs')
+    if (this.settings.enabled)
       this.sqs = new SQSClient({ region: this.settings.region, maxAttempts: 3 });
   }
   async onModuleInit() {
-    const result = await this.db.query('SELECT mode FROM cloud_transport_mode WHERE singleton');
+    const result = await this.db.query(
+      'SELECT mode, notification_driver FROM cloud_transport_mode WHERE singleton',
+    );
     if (result.rows[0]?.mode !== this.settings.mode)
       throw new Error(
         'FACE_JOB_TRANSPORT differs from DB cloud_transport_mode; stop all instances before changing transport',
+      );
+    if ((result.rows[0]?.notification_driver ?? 'local') !== this.settings.notificationDriver)
+      throw new Error(
+        'NOTIFICATION_DRIVER differs from DB cloud_transport_mode; stop all instances before changing transport',
       );
     if (this.sqs) this.running = this.loop();
   }
@@ -84,16 +105,19 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
     }
   }
   async dispatchOne() {
-    if (!this.sqs || this.settings.mode !== 'sqs') return;
+    if (!this.sqs || !this.settings.enabled) return;
     const settings = this.settings;
     await this.db.transaction(async (client) => {
-      const selected =
-        await client.query(`SELECT j.*, e.track_id, e.detected_at, e.retain, camera.slug AS camera_slug, c.collection_id, c.version
+      const selected = await client.query(
+        `SELECT j.*, e.track_id, e.detected_at, e.retain, camera.slug AS camera_slug, c.collection_id, c.version
     FROM cloud_jobs j JOIN events e ON e.id=j.event_id
     JOIN cameras camera ON camera.id=e.camera_id
     LEFT JOIN cloud_face_collections c ON c.owner_user_id=j.owner_user_id
     WHERE j.status IN ('PREPARING','PENDING') AND j.available_at <= now()
-    ORDER BY j.created_at LIMIT 1 FOR UPDATE OF j SKIP LOCKED`);
+      AND ((j.kind='face.job' AND $1::boolean) OR (j.kind='notification.job' AND $2::boolean))
+    ORDER BY j.created_at LIMIT 1 FOR UPDATE OF j SKIP LOCKED`,
+        [settings.mode === 'sqs', settings.notificationDriver === 'sqs'],
+      );
       const job = selected.rows[0];
       if (!job) return;
       try {
@@ -161,21 +185,47 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
           'Face crop unavailable',
           'Unexpected upload bucket',
         ];
-        const reason =
-          error instanceof Error && knownReasons.includes(error.message)
-            ? error.message
-            : 'PREPARE_OR_SEND_FAILED';
-        this.logger.warn({ jobId: job.id, reason }, 'Cloud job retained for retry');
-        await client.query(
+        const rejected =
+          job.kind === 'notification.job' &&
+          (job.attempts === 0 || job.last_error === SQS_SEND_REJECTED) &&
+          isDefiniteSqsRejection(error);
+        let reason = 'PREPARE_OR_SEND_FAILED';
+        if (error instanceof Error && knownReasons.includes(error.message)) reason = error.message;
+        if (rejected) reason = SQS_SEND_REJECTED;
+        const updated = await client.query<{ status: string }>(
           `UPDATE cloud_jobs SET attempts=attempts+1,status=CASE WHEN attempts>=4 THEN 'FAILED' ELSE status END,
-     last_error=$2,available_at=now()+interval '30 seconds' WHERE id=$1`,
+     last_error=$2,available_at=now()+interval '30 seconds' WHERE id=$1 RETURNING status`,
           [job.id, reason],
+        );
+        const exhausted = updated.rows[0]?.status === 'FAILED';
+        if (exhausted && job.kind === 'notification.job') {
+          // A worker that already claimed the job may still report its outcome.
+          await client.query(
+            `WITH delivery AS (
+               SELECT $2::boolean AND NOT EXISTS (
+                 SELECT 1 FROM cloud_notification_attempts WHERE notification_id = $1
+               ) AS rejected
+             )
+             UPDATE notifications n
+             SET status = CASE WHEN delivery.rejected THEN 'FAILED' ELSE 'PENDING' END::notification_status,
+                 error_code = CASE WHEN delivery.rejected THEN 'SQS_SEND_REJECTED' ELSE 'UNCERTAIN' END,
+                 failed_at = CASE WHEN delivery.rejected THEN clock_timestamp() ELSE NULL END,
+                 next_retry_at = NULL
+             FROM delivery
+             WHERE n.id = $1 AND n.delivery_driver = 'sqs'
+               AND n.status = 'PENDING' AND n.error_code IS NULL`,
+            [job.id, rejected],
+          );
+        }
+        this.logger.warn(
+          { jobId: job.id, reason },
+          exhausted ? 'Cloud job exhausted dispatch retries' : 'Cloud job retained for retry',
         );
       }
     });
   }
   async consumeOnce() {
-    if (!this.sqs || this.settings.mode !== 'sqs' || !this.settings.consumerEnabled) return;
+    if (!this.sqs || !this.settings.enabled || !this.settings.consumerEnabled) return;
     const response = await this.sqs.send(
       new ReceiveMessageCommand({
         QueueUrl: this.settings.resultsQueue,
@@ -199,12 +249,14 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
     }
   }
   async applyResult(message: Envelope) {
-    if (message.type !== 'face.result' && message.type !== 'notification.outcome')
-      throw new Error('Unexpected Results type');
+    if (message.type === 'notification.outcome') {
+      await this.notifications.applyResult(message);
+      return;
+    }
+    if (message.type !== 'face.result') throw new Error('Unexpected Results type');
     await this.db.transaction(async (client) => {
       const p = message.payload;
-      const jobId =
-        message.type === 'face.result' ? message.payload.jobId : message.payload.notificationId;
+      const jobId = message.payload.jobId;
       const found = await client.query(
         `SELECT j.*, d.owner_user_id AS current_owner, c.version AS current_collection_version
     FROM cloud_jobs j JOIN events e ON e.id=j.event_id
@@ -229,53 +281,34 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
         if (!receipt.rows[0].identical) throw new Error('Result ID payload conflict');
         return;
       }
-      let disposition = 'PROCESSED';
-      if (message.type === 'face.result') {
-        const p = message.payload;
-        const body = p.body as SubmitAiResultDto;
-        const sent = job.envelope?.payload;
-        if (
-          job.kind !== 'face.job' ||
-          !sent ||
-          job.result_id !== body.resultId ||
-          job.camera_id !== p.cameraId ||
-          body.eventId !== job.event_id ||
-          body.observationId !== sent.observationId ||
-          body.revision !== sent.revision ||
-          body.collectionVersion !== sent.collectionVersion
-        )
-          throw new Error('Face result job/version mismatch');
-        // Require the durable, first-writer-wins worker result; blocks envelope tampering.
-        const same = await client.query(
-          'SELECT cached_result=$2::jsonb AS identical FROM cloud_jobs WHERE id=$1',
-          [job.id, JSON.stringify(message)],
-        );
-        if (!same.rows[0]?.identical) throw new Error('Result differs from durable worker result');
-        disposition =
-          body.collectionVersion === job.current_collection_version
-            ? (await this.ai.submit(body.eventId, body, client)).disposition
-            : 'STALE';
-      } else if (job.kind !== 'notification.job') throw new Error('Notification job mismatch');
+
+      const body = p.body as SubmitAiResultDto;
+      const sent = job.envelope?.payload;
+      if (
+        job.kind !== 'face.job' ||
+        !sent ||
+        job.result_id !== body.resultId ||
+        job.camera_id !== p.cameraId ||
+        body.eventId !== job.event_id ||
+        body.observationId !== sent.observationId ||
+        body.revision !== sent.revision ||
+        body.collectionVersion !== sent.collectionVersion
+      )
+        throw new Error('Face result job/version mismatch');
+      // Require the durable, first-writer-wins worker result; blocks envelope tampering.
+      const same = await client.query(
+        'SELECT cached_result=$2::jsonb AS identical FROM cloud_jobs WHERE id=$1',
+        [job.id, JSON.stringify(message)],
+      );
+      if (!same.rows[0]?.identical) throw new Error('Result differs from durable worker result');
+      const disposition =
+        body.collectionVersion === job.current_collection_version
+          ? (await this.ai.submit(body.eventId, body, client)).disposition
+          : 'STALE';
       await client.query(
         'INSERT INTO cloud_result_receipts(id,job_id,envelope,disposition) VALUES($1,$2,$3,$4)',
         [message.messageId, job.id, JSON.stringify(message), disposition],
       );
-      if (message.type === 'notification.outcome') {
-        const p = message.payload;
-        await client.query(
-          `INSERT INTO cloud_notification_outcomes(outcome_id,notification_id,attempt_id,status,provider_called,provider_id,reason)
-     VALUES($1,$2,$3,$4,$5,$6,$7)`,
-          [
-            p.outcomeId,
-            p.notificationId,
-            p.attemptId,
-            p.status,
-            p.providerCalled,
-            p.providerId,
-            p.reason,
-          ],
-        );
-      }
     });
   }
   // Call inside the transaction creating the notification intent. The caller owns
@@ -290,32 +323,7 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
       channel: 'SNS_EMAIL' | 'SNS_SMS' | 'CONNECT_CALL';
     },
   ) {
-    if (this.settings.mode !== 'sqs') throw new Error('Notification SQS transport not enabled');
-    const envelope = parseEnvelope({
-      schemaVersion: 1,
-      type: 'notification.job',
-      messageId: input.notificationId,
-      correlationId: input.eventId,
-      occurredAt: new Date().toISOString(),
-      payload: input,
-    });
-    const result = await client.query(
-      `INSERT INTO cloud_jobs(id,result_id,event_id,kind,owner_user_id,camera_id,envelope,status)
-   SELECT $1,$2,e.id,'notification.job',$3,e.camera_id,$4,'PENDING'
-   FROM events e JOIN cameras c ON c.id=e.camera_id JOIN devices d ON d.id=c.device_id
-   WHERE e.id=$5 AND d.owner_user_id=$3 AND e.aggregate_version=$6
-   ON CONFLICT(id) DO NOTHING RETURNING id`,
-      [
-        input.notificationId,
-        randomUUID(),
-        input.ownerScopeId,
-        JSON.stringify(envelope),
-        input.eventId,
-        input.expectedEventVersion,
-      ],
-    );
-    if (!result.rows.length)
-      throw new Error('Notification intent duplicate or ownership/version mismatch');
+    await this.notifications.enqueueNotification(client, input);
   }
   async faceContext(id: string) {
     const result = await this.db.query(

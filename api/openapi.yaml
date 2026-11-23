@@ -1818,8 +1818,8 @@ paths:
       - $ref: "#/components/parameters/EventId"
     get:
       tags: [events]
-      summary: Danh sach thong bao da gui cho su kien
-      description: FR-NOT-04 — theo doi kenh nao gui thanh cong, kenh nao that bai.
+      summary: Danh sach trang thai thong bao cua su kien
+      description: FR-NOT-04 — xem trang thai gui, chay thu va ket qua can doi soat.
       operationId: listEventNotifications
       responses:
         "200":
@@ -1828,11 +1828,13 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     type: array
                     items: { $ref: "#/components/schemas/Notification" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /media/{mediaId}/url:
@@ -2578,6 +2580,123 @@ paths:
           description: Invalid internal service token
         "404":
           description: Job missing or stale
+
+  /internal/notifications/{notificationId}:
+    parameters:
+      - name: notificationId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [internal]
+      summary: Read canonical notification job and cached outcome
+      operationId: getCloudNotificationJobContext
+      security:
+        - internalToken: []
+      responses:
+        "200":
+          description: Read canonical notification job and cached outcome
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationJobContext" }
+        "401": { description: Invalid internal service token }
+        "404": { description: Notification job missing }
+  /internal/notifications/{notificationId}/claim:
+    parameters:
+      - name: notificationId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      tags: [internal]
+      summary: Claim notification delivery
+      operationId: claimCloudNotificationJob
+      security:
+        - internalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NotificationClaimRequest" }
+      responses:
+        "200":
+          description: Claim notification delivery
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationClaimResponse" }
+        "401": { description: Invalid internal service token }
+        "404": { description: Notification job missing }
+        "400": { description: Invalid request }
+        "409":
+          description: Request conflicts with the notification or its attempt
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/NotificationClaimBusy"
+                  - $ref: "#/components/schemas/NotificationConflict"
+  /internal/notifications/{notificationId}/result:
+    parameters:
+      - name: notificationId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    put:
+      tags: [internal]
+      summary: Cache the first valid outcome before publication
+      operationId: cacheCloudNotificationJobResult
+      security:
+        - internalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NotificationOutcomeEnvelope" }
+      responses:
+        "200":
+          description: Cache the first valid outcome before publication
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationOutcomeEnvelope" }
+        "401": { description: Invalid internal service token }
+        "404": { description: Notification job missing }
+        "400": { description: Invalid request }
+        "409":
+          description: Request conflicts with the notification or its attempt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationConflict" }
+  /internal/notifications/{notificationId}/outcome:
+    parameters:
+      - name: notificationId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      tags: [internal]
+      summary: Apply an outcome idempotently
+      operationId: applyCloudNotificationOutcome
+      security:
+        - internalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NotificationOutcomePayload" }
+      responses:
+        "202":
+          description: Apply an outcome idempotently
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationOutcomeReceipt" }
+        "401": { description: Invalid internal service token }
+        "404": { description: Notification job missing }
+        "400": { description: Invalid request }
+        "409":
+          description: Request conflicts with the notification or its attempt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationConflict" }
 
 components:
   securitySchemes:
@@ -4003,6 +4122,169 @@ components:
                         - $ref: "#/components/schemas/Confirmation"
                         - type: "null"
 
+    NotificationJobPayload:
+      type: object
+      additionalProperties: false
+      required: [notificationId, eventId, ownerScopeId, expectedEventVersion, channel]
+      properties:
+        notificationId: { type: string, format: uuid }
+        eventId: { type: string, format: uuid }
+        ownerScopeId: { type: string, format: uuid }
+        expectedEventVersion: { type: integer, minimum: 1 }
+        channel: { type: string, enum: [SNS_EMAIL, SNS_SMS, CONNECT_CALL] }
+
+    NotificationOutcomePayload:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          outcomeId,
+          notificationId,
+          eventId,
+          ownerScopeId,
+          attemptId,
+          status,
+          providerCalled,
+          providerId,
+          reason,
+        ]
+      properties:
+        outcomeId: { type: string, format: uuid }
+        notificationId: { type: string, format: uuid }
+        eventId: { type: string, format: uuid }
+        ownerScopeId: { type: string, format: uuid }
+        attemptId: { type: string, format: uuid }
+        status: { type: string, enum: [DRY_RUN, PROVIDER_ACCEPTED, FAILED, UNCERTAIN] }
+        providerCalled: { type: boolean }
+        providerId: { type: ["string", "null"] }
+        reason: { type: ["string", "null"] }
+      allOf:
+        - if:
+            properties:
+              status: { const: DRY_RUN }
+          then:
+            properties:
+              providerCalled: { const: false }
+              providerId: { type: "null" }
+        - if:
+            properties:
+              status: { const: PROVIDER_ACCEPTED }
+          then:
+            properties:
+              providerCalled: { const: true }
+              providerId: { type: string, minLength: 1 }
+
+    NotificationJobEnvelope:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, type, messageId, correlationId, occurredAt, payload]
+      properties:
+        schemaVersion: { type: integer, const: 1 }
+        type: { type: string, const: notification.job }
+        messageId: { type: string, format: uuid }
+        correlationId: { type: string, format: uuid }
+        occurredAt: { type: string, format: date-time, pattern: "Z$" }
+        payload: { $ref: "#/components/schemas/NotificationJobPayload" }
+
+    NotificationOutcomeEnvelope:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, type, messageId, correlationId, occurredAt, payload]
+      properties:
+        schemaVersion: { type: integer, const: 1 }
+        type: { type: string, const: notification.outcome }
+        messageId: { type: string, format: uuid }
+        correlationId: { type: string, format: uuid }
+        occurredAt: { type: string, format: date-time, pattern: "Z$" }
+        payload: { $ref: "#/components/schemas/NotificationOutcomePayload" }
+
+    NotificationJobContext:
+      type: object
+      required: [envelope, cached_result]
+      properties:
+        envelope: { $ref: "#/components/schemas/NotificationJobEnvelope" }
+        cached_result:
+          {
+            anyOf: [{ $ref: "#/components/schemas/NotificationOutcomeEnvelope" }, { type: "null" }],
+          }
+
+    NotificationClaimRequest:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, claimId, eventId, expectedEventVersion]
+      properties:
+        schemaVersion: { type: integer, const: 1 }
+        claimId: { type: string, format: uuid }
+        eventId: { type: string, format: uuid }
+        expectedEventVersion: { type: integer, minimum: 1 }
+
+    NotificationDelivery:
+      type: object
+      required: [channel, recipientRef, message]
+      properties:
+        channel: { type: string, enum: [SNS_EMAIL, SNS_SMS, CONNECT_CALL] }
+        recipientRef: { type: string }
+        message: { type: string }
+        topicArn: { type: string }
+        destination: { type: string }
+        subject: { type: string }
+        instanceId: { type: string }
+        contactFlowId: { type: string }
+        sourcePhoneNumber: { type: string }
+
+    NotificationClaimed:
+      type: object
+      required: [notificationId, disposition, attemptId, leaseUntil, mode, delivery]
+      properties:
+        notificationId: { type: string, format: uuid }
+        disposition: { type: string, const: CLAIMED }
+        attemptId: { type: string, format: uuid }
+        leaseUntil: { type: string, format: date-time }
+        mode: { type: string, enum: [DRY_RUN, REAL] }
+        delivery: { $ref: "#/components/schemas/NotificationDelivery" }
+        reason: { type: string, const: BLOCKED_PROVIDER }
+
+    NotificationClaimNoOp:
+      type: object
+      required: [notificationId, disposition, reason]
+      properties:
+        notificationId: { type: string, format: uuid }
+        disposition: { type: string, const: NO_OP }
+        reason:
+          {
+            type: string,
+            enum:
+              [ALREADY_SENT, RESOLVED, STALE_VERSION, EXPIRED, CAP_EXCEEDED, CANCELLED, UNCERTAIN],
+          }
+
+    NotificationClaimBusy:
+      type: object
+      required: [notificationId, disposition, retryAt]
+      properties:
+        notificationId: { type: string, format: uuid }
+        disposition: { type: string, const: BUSY }
+        retryAt: { type: string, format: date-time }
+
+    NotificationConflict:
+      type: object
+      required: [statusCode, message]
+      properties:
+        statusCode: { type: integer, const: 409 }
+        message: { type: string }
+        error: { type: string }
+
+    NotificationOutcomeReceipt:
+      type: object
+      required: [outcomeId, disposition]
+      properties:
+        outcomeId: { type: string, format: uuid }
+        disposition: { type: string, enum: [ACCEPTED, DUPLICATE] }
+
+    NotificationClaimResponse:
+      oneOf:
+        - { $ref: "#/components/schemas/NotificationClaimed" }
+        - { $ref: "#/components/schemas/NotificationClaimNoOp" }
+
     Notification:
       type: object
       required: [id, channel, status, escalationLevel, createdAt]
@@ -4015,7 +4297,13 @@ components:
           description: 0 = caregiver, 1..3 = lien he khan cap theo thu tu.
         recipientName: { type: ["string", "null"] }
         attemptCount: { type: integer }
-        errorCode: { type: ["string", "null"] }
+        errorCode:
+          type: ["string", "null"]
+          description: >
+            Optional delivery reason. Notification outcomes may expose controlled codes
+            such as BLOCKED_PROVIDER, DRY_RUN, LAB_DRY_RUN, SENDER_DRY_RUN,
+            LEASE_EXPIRED, LAMBDA_TIME_BUDGET and UNCERTAIN. Clients use the
+            base status label for unrecognized codes.
         errorMessage: { type: ["string", "null"] }
         sentAt: { type: ["string", "null"], format: date-time }
         confirmedAt: { type: ["string", "null"], format: date-time }

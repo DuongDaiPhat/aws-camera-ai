@@ -7,6 +7,8 @@
 > Callback/recovery US-14: [`0011_telegram_confirmation_delivery.sql`](../../db/migrations/0011_telegram_confirmation_delivery.sql).
 > Thời gian nhánh cao nhập tay: [`0012_configurable_high_wait.sql`](../../db/migrations/0012_configurable_high_wait.sql).
 > Sprint 3 contract/DDL: [0013 M2a](../../db/migrations/0013_fall_incidents.sql), [0014 M3](../../db/migrations/0014_fire_incidents.sql), [0015 M5](../../db/migrations/0015_wellness_check_runtime.sql). Chưa tự apply DB; runtime thực hiện theo các plan.
+> Sprint 4 / cập nhật 22/11/2026: [0016 nguồn wellness](../../db/migrations/0016_wellness_source_evidence.sql), [0017 Cognito issuer](../../db/migrations/0017_cognito_issuer.sql), [0018 Cognito email](../../db/migrations/0018_cognito_email.sql), [0018 cloud pipeline](../../db/migrations/0018_aws_queue_pipeline.sql), [0019 household](../../db/migrations/0019_household_access.sql), [0020 playback](../../db/migrations/0020_playback_frames.sql), [0021 caregiver households](../../db/migrations/0021_caregiver_households.sql), [0022 system settings](../../db/migrations/0022_admin_system_settings.sql), [0025 claim/outcome](../../db/migrations/0025_notification_claim_outcome.sql), [0025 email rules](../../db/migrations/0025_notification_email_rules.sql).
+> Setup/test luồng thông báo: [NOTIFICATION_SETUP_TEST.md](../NOTIFICATION_SETUP_TEST.md).
 
 ## Mục lục
 
@@ -22,8 +24,11 @@
 
 ## 1. Sơ đồ tổng thể
 
-Sơ đồ hiện mô tả **29 bảng**, bao gồm các bảng nghiệp vụ ban đầu và các bảng bổ trợ
-cho xác thực, camera, đồng bộ khuôn mặt/vùng, kết quả AI, outbox và Telegram.
+Sơ đồ hiện mô tả **46 bảng ứng dụng** được khai báo trong các migration của nhánh này,
+bao gồm xác thực/household, camera, kết quả AI, Telegram, cloud transport và notification.
+Không tính bảng lịch sử do công cụ migration tạo. Đây là thiết kế theo DDL, không phải
+xác nhận mọi môi trường đã áp dụng đủ migration. Các cột trong sơ đồ được lược chọn;
+khóa ghép, CHECK, partial index và trạng thái validate được giải thích bên dưới.
 
 ```mermaid
 erDiagram
@@ -51,9 +56,9 @@ erDiagram
     wellness_schedules ||--o{ wellness_check_runs : "daily occurrences"
     users ||--o{ wellness_check_runs : "resident và owner"
     events |o--o| wellness_check_runs : "timeout alert"
-    users ||--o{ confirmations : "xác nhận"
-    users ||--o{ notifications : "nhận"
-    users ||--o{ audit_logs : "thực hiện"
+    users |o--o{ confirmations : "xác nhận"
+    users |o--o{ notifications : "nhận"
+    users |o--o{ audit_logs : "thực hiện"
     users ||--o{ auth_refresh_tokens : "sở hữu"
     users ||--o{ telegram_link_requests : "tạo mã liên kết"
     users ||--o{ face_collection_sync : "sở hữu"
@@ -64,10 +69,10 @@ erDiagram
     cameras ||--o| camera_frigate_settings : "cấu hình Frigate"
     cameras ||--o| frigate_config_sync_jobs : "chờ đồng bộ zone"
     cameras ||--o{ zones : "được chia thành"
-    cameras ||--o{ events : "sinh ra"
-    zones   ||--o{ events : "xảy ra trong"
+    cameras |o--o{ events : "sinh ra"
+    zones   |o--o{ events : "xảy ra trong"
 
-    known_faces ||--o{ events : "khớp với"
+    known_faces |o--o{ events : "khớp với"
 
     escalation_rules ||--o{ events : "chi phối"
 
@@ -78,15 +83,44 @@ erDiagram
     events ||--o{ event_ai_result_receipts : "nhận kết quả AI"
     events ||--o{ outbox_messages : "phát thay đổi"
 
-    notifications ||--o{ confirmations : "được trả lời qua"
+    notifications |o--o{ confirmations : "được trả lời qua"
     notifications ||--o| telegram_message_edits : "sửa tin sau xác nhận"
-    emergency_contacts ||--o{ notifications : "nhận"
+    emergency_contacts |o--o{ notifications : "nhận"
+
+
+    users |o--o{ users : "household_owner_id"
+    users ||--o| cloud_face_collections : "owner_user_id"
+    cloud_face_collections ||--o{ cloud_face_mappings : "owner_user_id"
+    known_faces ||--o{ cloud_face_mappings : "known_face_id"
+    events ||--o{ cloud_jobs : "event_id"
+    users ||--o{ cloud_jobs : "owner_user_id"
+    cameras |o--o{ cloud_jobs : "camera_id nullable"
+    cloud_jobs ||--o{ cloud_result_receipts : "job_id"
+    cloud_result_receipts ||--o| cloud_notification_outcomes : "outcome_id"
+    cloud_jobs ||--o{ cloud_notification_outcomes : "notification_id FK to cloud_jobs"
+    cloud_notification_attempts ||--o{ cloud_notification_outcomes : "attempt_id FK NOT VALID"
+    users ||--o{ cloud_notification_routes : "owner_user_id"
+    notifications ||--o| cloud_notification_attempts : "notification_id unique"
+    users ||--o{ cloud_notification_attempts : "owner_user_id"
+    notifications ||--o| cloud_notification_claim_decisions : "notification_id PK"
+    notifications ||..o| cloud_jobs : "cung id cho notification.job - khong FK"
+    cameras ||--o{ playback_frames : "camera_id"
+    users ||--o| household_settings : "owner_user_id"
+    users ||--o{ camera_access_grants : "user_id"
+    cameras ||--o{ camera_access_grants : "camera_id"
+    users ||--o| user_notification_preferences : "user_id"
+    users ||--o{ household_escalation_rules : "owner_user_id"
+    users |o--o{ household_escalation_rules : "updated_by_user_id nullable"
+    users |o--o| system_settings : "updated_by singleton"
 
     users {
         uuid id PK
         citext email UK
         text password_hash "NULL khi dùng Cognito"
         text cognito_sub UK
+        text cognito_issuer
+        text cognito_email
+        uuid household_owner_id FK
         text full_name
         user_role role
         text phone_e164
@@ -255,6 +289,7 @@ erDiagram
         uuid recipient_user_id FK
         uuid emergency_contact_id FK
         notification_channel channel
+        text delivery_driver "local | sqs"
         notification_status status
         smallint escalation_level
         smallint attempt_count
@@ -264,6 +299,11 @@ erDiagram
         text provider_message_id
         uuid lease_token
         timestamptz lease_until
+        text error_code
+        timestamptz sent_at
+        timestamptz failed_at
+        timestamptz confirmed_at
+        jsonb payload
     }
 
     confirmations {
@@ -290,6 +330,7 @@ erDiagram
     emergency_contacts {
         uuid id PK
         uuid owner_user_id FK
+        citext email
         text name
         text phone_e164
         smallint priority_order
@@ -464,9 +505,178 @@ erDiagram
         uuid lease_token
         timestamptz leased_until
     }
+
+    resident_wellness_track_links {
+        uuid camera_id PK,FK
+        text source_session_id PK
+        text track_id PK
+        uuid owner_user_id FK
+        uuid resident_user_id FK
+        uuid known_face_id FK
+        uuid identity_event_id FK
+        timestamptz observed_at
+        timestamptz valid_until
+    }
+
+    resident_wellness_source_evidence {
+        uuid observation_id PK
+        uuid camera_id FK
+        text source_session_id
+        text track_id
+        text kind
+        timestamptz observed_at
+        timestamptz received_at
+        jsonb evidence
+    }
+
+    cloud_transport_mode {
+        boolean singleton PK
+        text mode
+        text notification_driver
+    }
+
+    cloud_face_collections {
+        uuid owner_user_id PK,FK
+        text collection_id UK
+        integer version
+    }
+
+    cloud_face_mappings {
+        uuid owner_user_id PK,FK
+        text face_id PK
+        uuid known_face_id FK
+    }
+
+    cloud_jobs {
+        uuid id PK
+        uuid result_id UK
+        uuid event_id FK
+        text kind
+        uuid owner_user_id FK
+        uuid camera_id FK
+        jsonb envelope
+        jsonb cached_result
+        text status
+        integer attempts
+        timestamptz available_at
+        timestamptz created_at
+        text last_error
+    }
+
+    cloud_result_receipts {
+        uuid id PK
+        uuid job_id FK
+        jsonb envelope
+        text disposition
+        timestamptz received_at
+    }
+
+    cloud_notification_outcomes {
+        uuid outcome_id PK,FK
+        uuid notification_id FK
+        uuid attempt_id FK
+        text status
+        boolean provider_called
+        text provider_id
+        text reason
+    }
+
+    playback_frames {
+        uuid camera_id PK,FK
+        timestamptz observed_at PK
+        jsonb boxes
+    }
+
+    household_settings {
+        uuid owner_user_id PK,FK
+        integer retention_days
+        integer storage_quota_gb
+        timestamptz updated_at
+        integer max_cameras
+        text service_plan
+    }
+
+    camera_access_grants {
+        uuid user_id PK,FK
+        uuid camera_id PK,FK
+        boolean can_live
+        boolean can_playback
+    }
+
+    user_notification_preferences {
+        uuid user_id PK,FK
+        boolean in_app_alerts
+        boolean sound_alerts
+        boolean telegram_alerts
+    }
+
+    household_escalation_rules {
+        uuid owner_user_id PK,FK
+        event_type event_type PK
+        numeric t_low
+        numeric t_high
+        integer t_wait_seconds
+        integer high_wait_seconds
+        integer version
+        timestamptz updated_at
+        uuid updated_by_user_id FK
+    }
+
+    system_settings {
+        integer id PK
+        integer default_max_cameras
+        integer default_storage_quota_gb
+        integer_array allowed_retention_days
+        integer default_retention_days
+        integer session_timeout_minutes
+        boolean require_mfa_for_admin
+        boolean allow_self_signup
+        integer max_login_attempts
+        numeric ai_confidence_floor
+        integer max_upload_mb
+        timestamptz updated_at
+        uuid updated_by_user_id FK
+    }
+
+    cloud_notification_routes {
+        uuid owner_user_id PK,FK
+        text recipient_ref PK
+        notification_channel channel PK
+        text destination
+        text topic_arn UK
+        boolean enabled
+        timestamptz verified_at
+    }
+
+    cloud_notification_attempts {
+        uuid attempt_id PK
+        uuid claim_id UK
+        uuid notification_id FK,UK
+        uuid owner_user_id FK
+        text recipient_ref
+        notification_channel channel
+        text mode
+        boolean blocked_provider
+        text recipient_key
+        timestamptz claimed_at
+        timestamptz lease_until
+        timestamptz uncertain_at
+    }
+
+    cloud_notification_claim_decisions {
+        uuid notification_id PK,FK
+        text reason
+        timestamptz decided_at
+    }
 ```
 
 ### Vai trò của một số bảng bổ trợ
+
+Các đường nối cloud dùng tên cột khóa ngoại để đối chiếu DDL. Riêng đường nét đứt
+`notifications` → `cloud_jobs` mô tả quy ước ứng dụng: job loại `notification.job` dùng
+`cloud_jobs.id = notifications.id`; **không có FK SQL giữa hai cột này**. Tương tự,
+`recipient_ref` là định danh dạng `user:<uuid>` hoặc `contact:<uuid>`, không phải khóa ngoại.
+`escalation_rules` → `events` là quan hệ chi phối nghiệp vụ/snapshot, không phải FK trực tiếp.
 
 US-14 lưu `confirmations.source_update_id` với unique index `(channel, source_update_id)`
 khi giá trị khác NULL: callback replay không tạo thêm confirmation/audit.
@@ -552,16 +762,22 @@ Soft-delete ở bảng này là vi phạm nguyên tắc riêng tư đã cam kế
 
 Tài khoản đăng nhập. Ba vai trò: `ADMIN`, `CAREGIVER`, `VIEWER` (FR-AUT-05).
 
-| Cột                                   | Ghi chú                                                 |
-| ------------------------------------- | ------------------------------------------------------- |
-| `email`                               | Kiểu `CITEXT` — `Lan@x.com` và `lan@x.com` là một người |
-| `password_hash`                       | bcrypt/argon2. **NULL** khi tài khoản dùng Cognito      |
-| `cognito_sub`                         | Ánh xạ sang Cognito User Pool khi migrate ở US-25       |
-| `failed_login_count` + `locked_until` | FR-AUT-03: 5 lần sai → khóa 15 phút                     |
-| `telegram_chat_id`                    | Đích để bot gửi cảnh báo (US-14)                        |
+| Cột                                   | Ghi chú                                                                                    |
+| ------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `email`                               | Kiểu `CITEXT` — `Lan@x.com` và `lan@x.com` là một người                                    |
+| `password_hash`                       | bcrypt/argon2. **NULL** khi tài khoản dùng Cognito                                         |
+| `cognito_sub`                         | Ánh xạ sang Cognito User Pool khi migrate ở US-25                                          |
+| `cognito_issuer` / `cognito_email`    | Issuer cùng subject xác định identity; email Cognito là metadata, không thay khóa xác thực |
+| `household_owner_id`                  | FK nullable tới `users.id`; root của hộ là `COALESCE(household_owner_id,id)`               |
+| `failed_login_count` + `locked_until` | FR-AUT-03: 5 lần sai → khóa 15 phút                                                        |
+| `telegram_chat_id`                    | Đích để bot gửi cảnh báo (US-14)                                                           |
 
 Ràng buộc `users_co_it_nhat_mot_cach_dang_nhap` đảm bảo không tạo được tài khoản
 vừa không có mật khẩu vừa không có Cognito — tài khoản "ma" không ai đăng nhập được.
+
+`idx_users_cognito_identity` bảo đảm duy nhất `(cognito_issuer,cognito_sub)` khi cả hai
+khác NULL. Ràng buộc UNIQUE riêng trên `cognito_sub` từ migration 0001 vẫn tồn tại;
+migration 0017 không xóa nó. FK `household_owner_id` dùng `ON DELETE RESTRICT`.
 
 **Vì sao tách `linked_user_id` trong `known_faces` thay vì gộp vào `users`:** bà Hoa cần
 được nhận diện nhưng không cần tài khoản đăng nhập. Người quen ≠ người dùng.
@@ -791,17 +1007,29 @@ FR-NOT-06 yêu cầu ghi log rõ lý do thất bại, không im lặng bỏ qua.
 
 ### 3.12 `notifications`
 
-Mỗi lần gửi là một bản ghi, kể cả gửi lại (FR-NOT-04).
+Mỗi intent gửi tới một người nhận/kênh là một bản ghi. Retry của cùng intent giữ nguyên
+`notifications.id`; với sender SQS, claim/attempt được lưu riêng để không gửi lặp.
 
-| Cột                                                | Mục đích                                                               |
-| -------------------------------------------------- | ---------------------------------------------------------------------- |
-| `escalation_level`                                 | 0 = caregiver, 1–3 = liên hệ khẩn theo thứ tự                          |
-| `attempt_count` / `max_attempts` / `next_retry_at` | Retry backoff 2s/4s/8s (FR-NOT-03)                                     |
-| `provider_message_id`                              | **Quan trọng:** ánh xạ callback Telegram/Connect về đúng notification  |
-| `payload` JSONB                                    | Lưu đúng nội dung đã gửi — cần khi gỡ lỗi "tại sao tin nhắn thiếu ảnh" |
+| Cột                                                | Mục đích                                                                                                         |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `escalation_level`                                 | 0 = caregiver, 1–3 = liên hệ khẩn theo thứ tự                                                                    |
+| `attempt_count` / `max_attempts` / `next_retry_at` | Retry backoff 2s/4s/8s (FR-NOT-03)                                                                               |
+| `provider_message_id`                              | **Quan trọng:** ánh xạ callback Telegram/Connect về đúng notification                                            |
+| `payload` JSONB                                    | Ngữ cảnh intent; nội dung email chi tiết và URL ảnh ký số được dựng khi cấp claim, không lưu URL vào job/outcome |
+| `delivery_driver`                                  | `local` hoặc `sqs`, mặc định `local`; tách quyền xử lý của sender cho từng intent                                |
 
 Ràng buộc `notifications_co_nguoi_nhan`: phải có ít nhất một trong `recipient_user_id`
 hoặc `emergency_contact_id`.
+
+`notifications.status` là kết quả gửi nghiệp vụ, khác `cloud_jobs.status` là trạng thái
+transport. `DRY_RUN` → `SKIPPED`, `PROVIDER_ACCEPTED` → `SENT`, `FAILED` → `FAILED`;
+`UNCERTAIN` giữ `PENDING` và khóa tự gửi lại để đối soát. `SENT` nghĩa là provider đã
+tiếp nhận; muốn xác nhận thư đến cần kiểm tra hộp thư. Lease Telegram trên `notifications`
+khác lease REAL trong `cloud_notification_attempts`.
+
+Migration `0025_notification_email_rules.sql` chỉ cập nhật dữ liệu `escalation_rules`:
+thêm `SNS_EMAIL` cho lửa/khói, té/ngã, vùng cấm và người lạ nếu chưa có, tăng version
+một lần, giữ các kênh/threshold còn lại. Không tạo bảng/cột/ENUM mới và không gửi lại intent cũ.
 
 ### 3.13 `confirmations`
 
@@ -916,6 +1144,108 @@ First successful resident dispatch lưu request_sent_at, deadline = request_sent
 
 Lịch thêm nullable owner cho legacy, version, activation_started_at, last_materialized_at và deleted_at. Backfill chỉ resident có đúng một active registered owner; ambiguous không đoán. DELETE soft-delete vì run FK RESTRICT; partial unique resident/checkAt chỉ các lịch chưa xóa, nên tạo lại cùng giờ không xóa lịch sử. Admission cursor tách last_checked_at. Events thêm optional wellness owner/resident và partial unique chỉ WELLNESS_TIMEOUT DETECTED/NOTIFIED/ESCALATED để không có nhiều check active của cùng resident/hộ. Role/event enums và seed rules cũ giữ nguyên.
 
+### 3.22 `cloud_transport_mode`
+
+Một hàng duy nhất, PK boolean `singleton` có CHECK phải TRUE. `mode` chọn transport
+Face (`bullmq|sqs`); `notification_driver` chọn riêng notification (`local|sqs`, mặc định
+`local`). Hai biến là độc lập; backend đối chiếu cấu hình với DB khi khởi động. Bảng này
+không có FK tới bảng khác. Không đổi driver khi còn instance/consumer dùng mode cũ.
+
+### 3.23 `cloud_face_collections` và `cloud_face_mappings`
+
+Các bảng nền từ migration 0018, không phải bảng mới của task Sender. Collection có
+`owner_user_id` làm PK/FK tới users, `collection_id` UNIQUE và version dương. DDL của
+nhánh này đã có [migration 0023](../../db/migrations/0023_rekognition_collection_prefix.sql):
+collection ID phải bằng một trong ba prefix `camerai-s4-dev-owner-`,
+`argusai-staging-owner-`, `argusai-production-owner-` nối với owner UUID. Mapping có PK ghép
+`(owner_user_id,face_id)`; owner tham chiếu collection, `known_face_id` tham chiếu known_faces.
+Cấu hình `REKOGNITION_COLLECTION_PREFIX` của từng môi trường phải khớp registry;
+ERD không xác nhận việc triển khai runtime trên từng môi trường.
+
+### 3.24 `cloud_jobs`
+
+Outbox cloud dùng chung cho `face.job` và `notification.job`: PK `id`, `result_id` UNIQUE,
+FK tới event/owner và camera nullable. Xóa event cascade xuống job; `envelope` chỉ nhận
+JSON object hoặc NULL. `cached_result` lưu canonical outcome để retry không gọi provider lại.
+`status` là CHECK TEXT `PREPARING|PENDING|SENT|FAILED`; `attempts >= 0` và `available_at`
+phục vụ dispatcher. Unique partial index `cloud_one_face_job` chỉ áp dụng với Face.
+
+Job notification dùng cùng UUID với intent theo quy ước ứng dụng, **không có FK tới
+notifications**. Backend kiểm event/owner/camera/channel/driver/version trước claim.
+
+### 3.25 `cloud_result_receipts` và `cloud_notification_outcomes`
+
+- Receipt có PK `id` là outcome/result ID và FK `job_id` tới `cloud_jobs` (cascade).
+  Lưu envelope, thời điểm nhận và disposition `ACCEPTED|DUPLICATE|STALE|PROCESSED`.
+- Outcome có PK/FK `outcome_id` tới receipt (cascade); `notification_id` thực tế FK tới
+  **`cloud_jobs.id`**, không phải FK trực tiếp tới `notifications.id`.
+- UNIQUE `(notification_id,attempt_id)` chặn hai outcome cho cùng cặp. CHECK của
+  `DRY_RUN` yêu cầu không gọi provider và không có provider ID; `PROVIDER_ACCEPTED`
+  yêu cầu đã gọi provider và có provider ID. Trạng thái còn lại là `FAILED|UNCERTAIN`.
+- Migration 0025 thêm FK `attempt_id` tới `cloud_notification_attempts` (cascade),
+  khai báo **`NOT VALID`**: hàng mới/cập nhật vẫn bị kiểm tra, hàng cũ chưa được validate
+  toàn bộ. Không ghi nhận FK này đã được validate trên mọi môi trường.
+- FK không tự đảm bảo outcome, job và attempt đều cùng notification/owner; backend
+  kiểm các quan hệ đó trong transaction trước khi cache/apply. Cardinality trên sơ đồ
+  thể hiện ràng buộc FK/UNIQUE trong DDL, không thay thế kiểm tra nghiệp vụ này.
+
+### 3.26 `cloud_notification_routes`
+
+Policy người nhận với PK ghép `(owner_user_id,recipient_ref,channel)`; owner FK tới users
+và cascade khi xóa. Kênh chỉ gồm `SNS_EMAIL|SNS_SMS|CONNECT_CALL`. `recipient_ref`
+phải đúng dạng `user:<uuid>` hoặc `contact:<uuid>`, nhưng không có FK đa hình.
+
+`destination` không rỗng; `topic_arn` UNIQUE và có giá trị **khi và chỉ khi** kênh là
+`SNS_EMAIL`. `enabled` mặc định FALSE; `verified_at` nullable. Khi claim, ứng dụng còn
+kiểm thời điểm xác minh, email/số điện thoại hiện tại, trạng thái user/contact, owner
+và quyền camera. DB không kiểm được SNS topic có đúng subscriber: provisioning phải
+đối chiếu trước khi bật route. Route không chứa mật khẩu, AWS credential hay internal token.
+
+### 3.27 `cloud_notification_attempts`
+
+Một hàng giữ quyền gửi cho một notification: PK `attempt_id`, UNIQUE `claim_id`,
+UNIQUE FK `notification_id` tới notifications (cascade), FK owner tới users. `mode`
+là CHECK TEXT `DRY_RUN|REAL`, không phải ENUM mới. `lease_until > claimed_at`.
+
+`recipient_key` là hash SHA-256 dạng 64 ký tự hex để tính cap/cooldown theo đích/kênh;
+CHECK yêu cầu có hash khi và chỉ khi REAL. `blocked_provider` đánh dấu provider chưa sẵn sàng;
+`uncertain_at` ghi nhận lần gửi có thể đã tới provider nhưng chưa rõ kết quả. Đây là
+claim/attempt ledger, không phải bảng mỗi lần retry vận chuyển. Sender không tự cấp
+REAL attempt mới khi lease cũ hết hạn.
+
+### 3.28 `cloud_notification_claim_decisions`
+
+PK đồng thời FK `notification_id` tới notifications, cascade khi xóa. Lưu quyết định
+NO_OP với reason `ALREADY_SENT|RESOLVED|STALE_VERSION|EXPIRED|CAP_EXCEEDED|CANCELLED|UNCERTAIN`
+và `decided_at`; một notification có tối đa một hàng quyết định. `BUSY` là phản hồi
+tranh chấp lease, không thuộc danh sách reason lưu trong bảng này.
+
+### 3.29 Các bảng household và cài đặt
+
+Các bảng đã có trong migration 0021/0022, bổ sung vào sơ đồ để thể hiện đúng scope người nhận:
+
+| Bảng                            | Khóa và vai trò                                                                                                            |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `household_settings`            | PK/FK owner tới users, RESTRICT; retention, quota, max_cameras và service_plan của hộ                                      |
+| `camera_access_grants`          | PK ghép `(user_id,camera_id)`, hai FK cascade; quyền live/playback cho Viewer                                              |
+| `user_notification_preferences` | PK/FK user cascade; các cờ in-app, sound, Telegram; chưa có cờ SNS email trong DDL này                                     |
+| `household_escalation_rules`    | PK ghép `(owner_user_id,event_type)`; owner RESTRICT, updated_by nullable FK users; override threshold/deadline và version |
+| `system_settings`               | Singleton `id=1`, các mặc định toàn hệ thống và updated_by nullable FK users                                               |
+
+### 3.30 `playback_frames`
+
+PK ghép `(camera_id,observed_at)`, FK camera cascade; `boxes` phải là JSON array.
+Array rỗng nghĩa là frame đã phân tích nhưng không có box; không có hàng nghĩa là
+không có metadata. Retention độc lập theo `PLAYBACK_METADATA_RETENTION_DAYS`.
+
+### 3.31 `resident_wellness_track_links` và `resident_wellness_source_evidence`
+
+Migration 0016 đã được nối quan hệ trong sơ đồ cũ nhưng thiếu khai báo entity. Track
+link có PK ghép `(camera_id,source_session_id,track_id)`, FK tới camera, owner/resident,
+known_face và identity_event, cùng CHECK `valid_until > observed_at`. Source evidence
+có PK observation ID, FK camera, kind `MOTION|ARRIVAL|DEPARTURE` và JSON object evidence.
+Đây là metadata chứng minh nguồn/identity, không lưu ảnh hoặc kết luận chuyển động chỉ từ face match.
+
 ## 4. Danh sách ENUM
 
 | ENUM                    | Giá trị                                                                                                | Dùng ở                            |
@@ -940,6 +1270,10 @@ Lịch thêm nullable owner cho legacy, version, activation_started_at, last_mat
 > **Thêm giá trị vào ENUM có sẵn:** `ALTER TYPE event_type ADD VALUE 'X';` trong migration mới.
 > Postgres **không** cho xóa giá trị khỏi ENUM — cân nhắc kỹ trước khi thêm.
 
+Các cột `mode`, `notification_driver`, `delivery_driver`, trạng thái/reason của bảng
+cloud dùng TEXT + CHECK như mô tả ở mục 3, không phải PostgreSQL ENUM mới. Hai migration
+0025 tái sử dụng `notification_channel` và `notification_status` hiện có.
+
 ---
 
 ## 5. Chỉ mục và lý do
@@ -947,23 +1281,30 @@ Lịch thêm nullable owner cho legacy, version, activation_started_at, last_mat
 Index không miễn phí: mỗi cái làm `INSERT` chậm đi một chút. Danh sách dưới đây đều có
 truy vấn cụ thể biện minh.
 
-| Index                                | Phục vụ truy vấn                                            | US/FR            |
-| ------------------------------------ | ----------------------------------------------------------- | ---------------- |
-| `uq_events_dedup_key`                | Chống trùng lặp khi ghi                                     | FR-ING-07        |
-| `idx_events_detected_at_desc`        | "20 sự kiện mới nhất" — trang chủ                           | US-06            |
-| `idx_events_camera_detected`         | Lọc theo camera + thời gian                                 | US-21            |
-| `idx_events_type_detected`           | Lọc theo loại + thời gian                                   | US-21            |
-| `idx_events_status`                  | Đếm sự kiện theo trạng thái                                 | US-21            |
-| `idx_events_dang_cho_escalate`       | **Quét timer mỗi 10 giây** (partial — chỉ vài chục dòng)    | FR-ESC-07        |
-| `idx_events_correlation`             | Truy vết một sự kiện xuyên service                          | FR-LOG-02        |
-| `idx_events_ai_results_gin`          | Tìm sự kiện theo nhãn AI cụ thể                             | US-22            |
-| `uq_confirmations_lan_dau_tien`      | Chỉ lần xác nhận đầu tiên có hiệu lực                       | US-14            |
-| `idx_notifications_can_retry`        | Tìm thông báo cần gửi lại (partial)                         | FR-NOT-03        |
-| `idx_notifications_provider_msg`     | Ánh xạ callback Telegram về notification                    | US-14            |
-| `idx_event_media_het_han`            | Dọn media quá hạn                                           | FR-DAT-01        |
-| `idx_known_faces_owner`              | Nạp danh sách người quen cho AI service                     | US-10            |
-| `auth_refresh_tokens_token_hash_key` | Chống trùng lặp và tra cứu O(1) theo SHA-256                | US-05            |
-| `idx_auth_refresh_tokens_active`     | **Tìm token hợp lệ còn sống** (partial: revoked_at IS NULL) | US-05, FR-AUT-02 |
+| Index                                      | Phục vụ truy vấn                                                                | US/FR            |
+| ------------------------------------------ | ------------------------------------------------------------------------------- | ---------------- |
+| `uq_events_dedup_key`                      | Chống trùng lặp khi ghi                                                         | FR-ING-07        |
+| `idx_events_detected_at_desc`              | "20 sự kiện mới nhất" — trang chủ                                               | US-06            |
+| `idx_events_camera_detected`               | Lọc theo camera + thời gian                                                     | US-21            |
+| `idx_events_type_detected`                 | Lọc theo loại + thời gian                                                       | US-21            |
+| `idx_events_status`                        | Đếm sự kiện theo trạng thái                                                     | US-21            |
+| `idx_events_dang_cho_escalate`             | **Quét timer mỗi 10 giây** (partial — chỉ vài chục dòng)                        | FR-ESC-07        |
+| `idx_events_correlation`                   | Truy vết một sự kiện xuyên service                                              | FR-LOG-02        |
+| `idx_events_ai_results_gin`                | Tìm sự kiện theo nhãn AI cụ thể                                                 | US-22            |
+| `uq_confirmations_lan_dau_tien`            | Chỉ lần xác nhận đầu tiên có hiệu lực                                           | US-14            |
+| `idx_notifications_can_retry`              | Tìm thông báo cần gửi lại (partial)                                             | FR-NOT-03        |
+| `idx_notifications_provider_msg`           | Ánh xạ callback Telegram về notification                                        | US-14            |
+| `idx_event_media_het_han`                  | Dọn media quá hạn                                                               | FR-DAT-01        |
+| `idx_known_faces_owner`                    | Nạp danh sách người quen cho AI service                                         | US-10            |
+| `auth_refresh_tokens_token_hash_key`       | Chống trùng lặp và tra cứu O(1) theo SHA-256                                    | US-05            |
+| `idx_auth_refresh_tokens_active`           | **Tìm token hợp lệ còn sống** (partial: revoked_at IS NULL)                     | US-05, FR-AUT-02 |
+| `idx_users_cognito_identity`               | Unique partial `(cognito_issuer,cognito_sub)` khi cả hai khác NULL              | US-25            |
+| `cloud_jobs_pending`                       | Dispatcher lấy job `PREPARING/PENDING` theo available_at                        | Cloud transport  |
+| `cloud_one_face_job`                       | Unique event_id riêng cho kind face.job                                         | US-29            |
+| `cloud_notification_attempts_limit_idx`    | Tra cap/cooldown theo recipient_key/channel/claimed_at, chỉ REAL                | US-26            |
+| `cloud_notification_cached_outcome_id_idx` | Tra outcome ID trong cached_result của job notification; index này không UNIQUE | US-26            |
+| `cloud_notification_routes_topic_arn_key`  | UNIQUE topic, không chia sẻ topic giữa nhiều route có topic ARN                 | US-26            |
+| `idx_playback_frames_expiry`               | Dọn metadata khung hình theo observed_at                                        | Camera playback  |
 
 ---
 
@@ -1081,6 +1422,12 @@ WHERE id = $1 AND revoked_at IS NULL;
 ---
 
 ### Quy tắc bất di bất dịch
+
+Hai file `0025_notification_claim_outcome.sql` và `0025_notification_email_rules.sql`
+dùng cùng prefix theo yêu cầu task; công cụ migration của dự án theo dõi bằng tên file
+đầy đủ và chạy theo thứ tự tên. Không sửa tên/nội dung file đã áp dụng; khi tích hợp
+nhánh cần đối chiếu migration của cả nhóm trước khi chốt thứ tự. Việc cập nhật ERD
+không tự apply SQL lên Dev/Staging/Production.
 
 1. **Không bao giờ sửa file migration đã merge vào `main`.** Máy người khác đã chạy nó rồi —
    sửa file cũ làm hai máy có schema khác nhau mà không ai biết.
