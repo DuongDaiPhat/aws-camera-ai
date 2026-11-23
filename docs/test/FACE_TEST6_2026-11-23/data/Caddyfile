@@ -1,0 +1,12 @@
+http://:18080 {
+	bind 127.0.0.1
+
+	@faceJobs path /api/v1/internal/cloud/face-jobs/*
+	handle @faceJobs {
+		reverse_proxy 127.0.0.1:3001
+	}
+
+	handle {
+		respond 404
+	}
+}
