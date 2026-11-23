@@ -41,6 +41,27 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/face/assess': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Danh gia chat luong khuon mat cuc bo va trich xuat embedding (Layer 2 Quality Gate)
+     * @description Danh gia chat luong anh crop bang YuNet/SFace cuc bo (doc lap voi FACE_PROVIDER)
+     *     de loc anh quay lung, mo, qua nho hoac thieu mat truoc khi goi AWS Rekognition.
+     */
+    post: operations['assessFace'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/face/embed': {
     parameters: {
       query?: never;
@@ -243,6 +264,31 @@ export interface components {
       faces: components['schemas']['BoundingBox'][];
       modelVersion: string;
       error: components['schemas']['InferenceError'];
+    };
+    FaceQualityMetrics: {
+      faceWidthPx: number;
+      faceHeightPx: number;
+      detectionScore: number;
+      sharpness: number;
+      /** @description Laplacian variance on a denoised 112x112 face ROI */
+      normalizedSharpness?: number;
+      poseYawRatio: number;
+      posePitchRatio: number;
+    };
+    FaceAssessResponse: {
+      passed: boolean;
+      qualityScore: number;
+      faceCount: number;
+      /** @description E.g. NO_FACE_DETECTED, MULTIPLE_FACES, FACE_TOO_SMALL, LOW_DETECTION_SCORE, BLURRY, EXTREME_POSE, IMAGE_DECODE_FAILED, MODEL_UNAVAILABLE. */
+      rejectionReason: string | null;
+      metrics: components['schemas']['FaceQualityMetrics'] | null;
+      boundingBox: components['schemas']['BoundingBox'] | null;
+      /** @description Normalized 128-dim SFace float32 vector encoded in base64 when passed=true and includeEmbedding=true. */
+      embeddingBase64: string | null;
+      embeddingDim: number | null;
+      modelVersion: string;
+      /** @enum {string} */
+      gateStatus: 'READY' | 'DISABLED' | 'UNAVAILABLE';
     };
     /** @description Technical error has null personStatus and score. No-face/poor quality is UNDETERMINED with error=null. Loaded empty collection is UNKNOWN with similarity=null and labelConfidence=1 under empty-collection-v1; collection unavailable is a technical error. */
     MatchResponse: {
@@ -479,6 +525,59 @@ export interface operations {
       };
       /** @description Missing or invalid internal token */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  assessFace: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          image: string;
+          /**
+           * @description Khi true va dat nguong chat luong, trich xuat them vector SFace 128 chieu.
+           * @default true
+           */
+          includeEmbedding?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ket qua danh gia chat luong khuon mat */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FaceAssessResponse'];
+        };
+      };
+      /** @description Thieu hoac sai X-Internal-Token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Thieu truong bat buoc trong form-data */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Het slot xu ly dong thoi (PROVIDER_UNAVAILABLE) */
+      503: {
         headers: {
           [name: string]: unknown;
         };

@@ -35,12 +35,24 @@ class Settings(BaseSettings):
     face_detector_path: str = "models/face_detection_yunet_2023mar.onnx"
     face_embedder_path: str = "models/face_recognition_sface_2021dec.onnx"
     face_model_version: str = "yunet-2023mar-sface-2021dec"
+    face_gate_embedder_path: str = ""
+    face_gate_embedder_backend: Literal["auto", "sface", "arcface_onnx"] = "auto"
+    face_gate_embedder_sha256: str = ""
+    face_gate_model_version: str = ""
     face_max_image_bytes: int = 5 * 1024 * 1024
     face_max_pixels: int = 12_000_000
     face_detection_threshold: float = 0.9
     face_max_concurrent: int = 2
+    face_cpu_threads: int = Field(default=2, ge=1, le=64)
     aws_region: str = "ap-southeast-1"
     rekognition_collection_id: str = "camerai-known-faces"
+    face_quality_gate_enabled: bool = True
+    face_gate_min_face_px: int = Field(default=80, ge=0)
+    face_gate_min_detection_score: float = Field(default=0.90, ge=0.0, le=1.0, allow_inf_nan=False)
+    face_gate_min_sharpness: float = Field(default=45.0, ge=0.0, allow_inf_nan=False)
+    face_gate_min_normalized_sharpness: float = Field(default=12.0, ge=0.0, allow_inf_nan=False)
+    face_gate_max_yaw_ratio: float = Field(default=0.45, ge=0.0, allow_inf_nan=False)
+    face_gate_max_pitch_ratio: float = Field(default=0.45, ge=0.0, allow_inf_nan=False)
 
     # Module 2a — te nga
     m2a_enabled: bool = False

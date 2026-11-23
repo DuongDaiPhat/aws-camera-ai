@@ -71,3 +71,26 @@ class MatchResponse(FaceModel):
     provider: Literal["local"] = "local"
     bounding_box: BoundingBox | None = Field(default=None, alias="boundingBox")
     error: InferenceError | None = None
+
+
+class FaceQualityMetrics(FaceModel):
+    face_width_px: int = Field(ge=0, alias="faceWidthPx")
+    face_height_px: int = Field(ge=0, alias="faceHeightPx")
+    detection_score: float = Field(ge=0.0, le=1.0, alias="detectionScore")
+    sharpness: float = Field(ge=0.0)
+    normalized_sharpness: float = Field(default=0.0, ge=0.0, alias="normalizedSharpness")
+    pose_yaw_ratio: float = Field(ge=0.0, alias="poseYawRatio")
+    pose_pitch_ratio: float = Field(ge=0.0, alias="posePitchRatio")
+
+
+class FaceAssessResponse(FaceModel):
+    passed: bool
+    quality_score: float = Field(default=0.0, ge=0.0, le=1.0, alias="qualityScore")
+    face_count: int = Field(default=0, ge=0, alias="faceCount")
+    rejection_reason: str | None = Field(default=None, alias="rejectionReason")
+    metrics: FaceQualityMetrics | None = None
+    bounding_box: BoundingBox | None = Field(default=None, alias="boundingBox")
+    embedding_base64: str | None = Field(default=None, alias="embeddingBase64")
+    embedding_dim: int | None = Field(default=None, alias="embeddingDim")
+    model_version: str = Field(alias="modelVersion")
+    gate_status: Literal["READY", "DISABLED", "UNAVAILABLE"] = Field(alias="gateStatus")

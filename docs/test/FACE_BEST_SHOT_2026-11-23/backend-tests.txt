@@ -1,0 +1,159 @@
+PASS test/face-recognition-coordinator.service.spec.ts (23.694 s)
+[Nest] 41372  - 23/11/2026, 00.42.41   ERROR [CloudQueueService] Cloud queue iteration failed (receive-results, unknown); retrying without acknowledging input
+[Nest] 41372  - 23/11/2026, 00.42.42   ERROR [CloudQueueService] Cloud queue iteration failed (dispatch, ECONNRESET); retrying without acknowledging input
+PASS test/cloud-queue.spec.ts
+[Nest] 41372  - 23/11/2026, 00.42.41    WARN [CloudQueueService] Object:
+{
+  "messageId": "id"
+}
+
+[Nest] 41372  - 23/11/2026, 00.42.41    WARN [CloudQueueService] Results input retained for retry/redrive
+[Nest] 41372  - 23/11/2026, 00.42.41    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Face collection registry missing"
+}
+
+[Nest] 41372  - 23/11/2026, 00.42.41    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 41372  - 23/11/2026, 00.42.41    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Face collection prefix mismatch"
+}
+
+[Nest] 41372  - 23/11/2026, 00.42.41    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 41372  - 23/11/2026, 00.42.41    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Face crop unavailable"
+}
+
+[Nest] 41372  - 23/11/2026, 00.42.41    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 41372  - 23/11/2026, 00.42.41    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Unexpected upload bucket"
+}
+
+[Nest] 41372  - 23/11/2026, 00.42.41    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 41372  - 23/11/2026, 00.42.41    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 41372  - 23/11/2026, 00.42.41    WARN [CloudQueueService] Cloud job retained for retry
+PASS test/mqtt-consumer.service.spec.ts (9.25 s)
+PASS test/face-recognition.worker.spec.ts (7.179 s)
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 41372  - 23/11/2026, 00.42.57    WARN [FaceRecognitionWorker] Không lấy được ảnh crop cho track track-1
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "89b269ee-df9b-4fbd-b69e-a3acea336d6c",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNKNOWN",
+  "hasError": false
+}
+
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "KNOWN",
+  "hasError": false
+}
+
+[Nest] 41372  - 23/11/2026, 00.42.57     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+PASS test/face-session-cache.service.spec.ts
+PASS test/track-identity-state.service.spec.ts
+PASS test/frigate-media.adapter.spec.ts
+PASS test/face-quality-gate.client.spec.ts
+
+Test Suites: 8 passed, 8 total
+Tests:       73 passed, 73 total
+Snapshots:   0 total
+Time:        56.445 s
+[Nest] 41372  - 23/11/2026, 00.43.10    WARN [FaceQualityGateClient] Object:
+{
+  "reason": "QUALITY_GATE_TIMEOUT",
+  "failOpen": true
+}
+
+[Nest] 41372  - 23/11/2026, 00.43.10    WARN [FaceQualityGateClient] Face quality gate request failed
+[Nest] 41372  - 23/11/2026, 00.43.10    WARN [FaceQualityGateClient] Object:
+{
+  "reason": "QUALITY_GATE_TIMEOUT",
+  "failOpen": false
+}
+
+[Nest] 41372  - 23/11/2026, 00.43.10    WARN [FaceQualityGateClient] Face quality gate request failed

@@ -11,6 +11,9 @@ export default defineConfig({
     },
   },
   test: {
+    // Avoid CPU/memory contention with the backend and integration gate.
+    minWorkers: 1,
+    maxWorkers: 2,
     environment: 'node',
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     coverage: { reporter: ['text', 'lcov'] },

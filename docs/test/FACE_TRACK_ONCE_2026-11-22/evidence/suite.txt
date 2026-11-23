@@ -1,0 +1,70 @@
+{"case":"TC01-head-down-retest","events":[],"jobs":[]}
+{"case":"TC01-back","events":[],"jobs":[]}
+{"case":"TC02-glasses-retest","events":[{"id":"a95642e1-5349-4df8-bec5-e9d0580ff0ed","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC03-no-glasses","events":[],"jobs":[]}
+{"case":"TC03-glasses","events":[{"id":"6e170b18-d8c0-4024-984e-a476528aee5d","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC04-no-glasses","events":[{"id":"f7676991-6d34-4905-8cfb-dc216e31a713","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC04-glasses","events":[{"id":"ecb416bc-6cd2-4958-aff5-0dbd19ed0503","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"9994d1e3-688e-462e-8f0b-fc5b11d8fcd7","status":"SENT","revision":1}]}
+{"case":"TC05-no-glasses","events":[{"id":"744ca6da-d8fb-4870-9911-d60cba08cfbf","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"69567404-231c-4594-82f4-d483a8d11591","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"4a5099d0-d705-4632-b8c6-c660ae22e00d","status":"SENT","revision":1}]}
+{"case":"TC05-glasses","events":[{"id":"debfcefe-6cdb-42ae-959e-508e4bbbb0b3","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"2f065fad-10ee-4f3f-b9a8-f4527efaebdf","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"927d4357-ae20-4919-a78a-53138b464ad6","status":"SENT","revision":1}]}
+{"case":"TC06-no-glasses","events":[{"id":"1de3d696-8a4a-411f-ab60-07f1ac9cac7e","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"c7051a65-e078-468a-8c72-2a7d11ba57d8","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"699be9ad-de6c-4a70-8349-6bcd8308126e","status":"SENT","revision":1}]}
+{"case":"TC06-glasses","events":[{"id":"1bbe6105-b892-4468-bb40-4acdd30324da","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"2375be3a-e470-4edb-a4e8-e55fe910a52c","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"ec1c7020-1dc9-476f-bdd7-bb1431edc696","status":"SENT","revision":1}]}
+{"case":"TC08-no-glasses","events":[{"id":"320d1d10-8158-4d33-b77a-b37173bcb83f","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"bfe83d88-34d8-4d5d-902d-accc1ee45e89","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"f1939e0d-ab23-40bd-b14b-f7727c3009b2","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[{"id":"bf35e9d6-bb10-4bdd-a03a-c5183b4c2ac8","status":"SENT","revision":1}]}
+{"case":"TC08-glasses","events":[{"id":"1b63102a-1632-4ec4-b64e-86c89fb24e85","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"6ad08d20-e831-4203-8ea2-a7a37186becf","status":null,"type":"PERSON_DETECTED","name":null},{"id":"89bd2277-71e9-4377-970f-514937108ca6","status":null,"type":"PERSON_DETECTED","name":null},{"id":"27f8ec80-9f82-4c10-a9a7-bd670fdc05e0","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[{"id":"5431ebb4-2670-4d5a-b951-a2960d4f4931","status":"SENT","revision":1}]}
+{"case":"TC09-known-filename","events":[{"id":"7ca87775-7018-43a6-a7dd-182999aead07","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC09-stranger","events":[{"id":"d0b9d5e8-8174-4e7e-81eb-613f6ab76957","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC01-head-down-retest-native","events":[{"id":"75df2088-30a1-41bc-b437-2972351fbba3","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC01-back-native","events":[{"id":"b62f2c5f-ea4b-49a9-a1e7-a50cfae0db8d","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC02-no-glasses-native","events":[{"id":"514a8c0f-c033-4487-91b8-5dfdc449a5c1","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC02-glasses-retest-native","events":[{"id":"6398b70e-7244-4881-af26-c2d16d2fed21","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC03-no-glasses-native","events":[{"id":"30555731-828e-4275-86ec-21bfe0e3ce8f","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC03-glasses-native","events":[{"id":"cd32314c-c331-4962-b8e2-7a54d4702a52","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC01-head-down-retest-validated","events":[{"id":"fa75bab2-21a7-44d9-9824-89be122c33cc","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC01-back-validated","events":[{"id":"1b5fa9bf-a0e8-4665-83b9-f6ef46bd2b1f","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC02-no-glasses-validated","events":[{"id":"55e7432b-769b-41de-93ea-4c3de1f34660","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC02-glasses-retest-validated","events":[{"id":"9fb47128-58d4-4cdc-9872-bc99ccf8e95d","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC03-no-glasses-validated","events":[{"id":"def5c324-68d3-4590-9a1e-904e3853ebdf","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC03-glasses-validated","events":[{"id":"b1c228d9-f1ae-4ff5-bb82-4bbc763aae94","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC04-no-glasses-validated","events":[{"id":"3ef73189-c749-4c04-a6d6-efb3d2ea5937","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"b5ec81b1-6132-489d-9a55-5549e867b88f","status":"SENT","revision":1}]}
+node:internal/deps/undici/undici:13510
+      Error.captureStackTrace(err);
+            ^
+
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:13510:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/hoc%20tap/project%201/aws-camera-ai/tools/scripts/face-track-once-eval.mjs:413:18 {
+  [cause]: Error: connect ECONNREFUSED 127.0.0.1:18081
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+    errno: -4078,
+    code: 'ECONNREFUSED',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 18081
+  }
+}
+
+Node.js v22.20.0
+{"case":"TC01-head-down-retest-acceptance","events":[],"jobs":[]}
+{"case":"TC01-back-acceptance","events":[{"id":"f7c2b7a1-01c8-4a09-9025-7d7615cca931","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC02-no-glasses-acceptance","events":[{"id":"43ddb864-dd84-4b74-a409-877e3f9635cc","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC02-glasses-retest-acceptance","events":[{"id":"51081dd7-cbf1-441c-9166-f7d7622ecd1d","status":"UNKNOWN","type":"UNKNOWN_PERSON","name":null}],"jobs":[{"id":"e7a271bc-9520-4b91-946f-69146d192e8d","status":"SENT","revision":1}]}
+{"case":"TC03-no-glasses-acceptance","events":[{"id":"04ef63b5-991b-4511-9fc6-2478f52023c0","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"325a2f72-a11e-44e1-91a5-094f25df9530","status":"SENT","revision":1}]}
+{"case":"TC03-glasses-acceptance","events":[{"id":"bd7be909-8488-4a60-9dda-6fe7eed24629","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"efa05014-cc3b-4c7f-898a-649866672f88","status":"SENT","revision":1}]}
+{"case":"TC04-no-glasses-acceptance","events":[{"id":"8644e03f-12d9-4c07-8de6-15d624c49138","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"f7a99e01-b597-4db7-a949-a09f7eda4132","status":"SENT","revision":1}]}
+{"case":"TC04-glasses-acceptance","events":[{"id":"bff14ce5-bdf4-4c7e-8f29-5576b9d9b163","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"497ce403-6cf0-4df2-a1ad-48b82e03af9a","status":"SENT","revision":1}]}
+{"case":"TC05-no-glasses-acceptance","events":[{"id":"616ce851-9539-4ad4-b316-8307b9e26e72","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"e6f816bf-2422-41d0-87be-b9ea2f882192","status":null,"type":"PERSON_DETECTED","name":null},{"id":"5a4c0367-87f1-489b-acce-31c8e97f68f7","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"8e9c37ad-838b-4f0b-8dc4-bdaebe8319b4","status":"SENT","revision":1}]}
+{"case":"TC05-glasses-acceptance","events":[{"id":"e5fcf2b8-1b8a-4be7-ae3a-c635e81bc591","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"7805f61f-955a-4459-ba4e-570ec9ad0509","status":"SENT","revision":1}]}
+{"case":"TC06-no-glasses-acceptance","events":[{"id":"5d418ea6-8e8b-4671-9a09-1df6f39bd9e2","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"55bc4192-098d-4a62-91e1-a9d0287aa7e4","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"0aee1f6c-8d96-40cd-861c-9c63f5fd6fda","status":"SENT","revision":1},{"id":"b7e66b54-0583-4c4e-b0e5-cb84d109e1c1","status":"SENT","revision":1}]}
+{"case":"TC06-glasses-acceptance","events":[{"id":"4bdef03e-cf48-4958-bf0d-2153a8f73067","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"63804338-cafc-4380-8b1f-56e2292278b6","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"558bc7e8-55c6-4eba-8bef-606b5b5da4e7","status":"SENT","revision":1},{"id":"835140c7-6755-4df5-9a73-97d1639f23cb","status":"SENT","revision":1}]}
+{"case":"TC08-no-glasses-acceptance","events":[{"id":"fbefd055-cf45-4037-8b1c-4ff40fe5bc90","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"c03a3b53-d4cf-4334-84e0-ba258a4b44e0","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"04dd45bf-718a-41ab-ab37-4e5af814a0e2","status":"UNKNOWN","type":"UNKNOWN_PERSON","name":null}],"jobs":[{"id":"5ef70391-4e40-4bcc-bed3-5f94bca2c445","status":"SENT","revision":1},{"id":"f94624d4-47c7-4541-ba15-39a1a7b58d70","status":"SENT","revision":1}]}
+{"case":"TC08-glasses-acceptance","events":[{"id":"d70d61ba-5b6c-4cae-a2ac-27f3892f557a","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"793c3cbb-9b3e-4783-aef9-5d40f9a4c70c","status":"UNKNOWN","type":"UNKNOWN_PERSON","name":null},{"id":"e2c085e8-fc97-4cd3-8889-a02f8bc3220c","status":"UNDETERMINED","type":"PERSON_DETECTED","name":null}],"jobs":[{"id":"6fe0b09a-f727-4024-a678-ebd227e7cf64","status":"SENT","revision":1},{"id":"a258c4ab-372d-4587-94f5-447bd6b7ac50","status":"SENT","revision":1},{"id":"39a5cea7-94a2-48ad-bb91-22a3e914499b","status":"SENT","revision":1}]}
+{"case":"TC09-known-filename-acceptance","events":[{"id":"476cccb5-e319-4870-a634-af4de79f20c1","status":"UNKNOWN","type":"UNKNOWN_PERSON","name":null}],"jobs":[{"id":"5b9a10bc-40df-4efb-8f47-453d076c4a8a","status":"SENT","revision":1}]}
+{"case":"TC09-stranger-acceptance","events":[{"id":"a193f2e0-9ec8-418f-9448-5cfff2c40860","status":"UNKNOWN","type":"UNKNOWN_PERSON","name":null}],"jobs":[{"id":"d430a16f-38dc-4e6e-9d62-14133a9ca091","status":"SENT","revision":1}]}
+{"case":"TC08-extra-no-glasses-acceptance","events":[{"id":"d922ed40-b35d-48c3-9a7f-4d73ce88d25c","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"2e49f7eb-2943-44ed-9a9a-079b3498531c","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"f16f26b0-21b6-448c-9211-2e7bd46bfb72","status":"SENT","revision":1},{"id":"49724289-1ea0-4c70-b879-3b46dbe36f5b","status":"SENT","revision":1}]}
+{"case":"TC08-extra-glasses-acceptance","events":[{"id":"4827c4cf-7439-431d-96ab-1dfec8381521","status":null,"type":"PERSON_DETECTED","name":null},{"id":"b8d13d2f-f94d-4e53-8a1f-bbe9712ddfac","status":null,"type":"PERSON_DETECTED","name":null},{"id":"908e8987-b0e3-4af5-b37d-6d0424d783af","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"0aec2362-5688-498f-8180-6b68f2bc64c0","status":null,"type":"PERSON_DETECTED","name":null},{"id":"2c15efa1-ef4d-436e-b811-11aaf33f5019","status":null,"type":"PERSON_DETECTED","name":null},{"id":"4fb56368-b648-4d50-aa9d-9ea8839fab62","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"cf3ad662-4edf-4c7a-8411-b0111ce23386","status":"UNKNOWN","type":"UNKNOWN_PERSON","name":null},{"id":"502efbf9-c18b-4bbb-8a06-4fe401b497ec","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"ef57efdb-c7c2-492d-b034-7b1b380808b9","status":"SENT","revision":1},{"id":"c9addcd8-e2cb-40cd-a8cf-0b3dbb012971","status":"SENT","revision":1},{"id":"ccfa8621-0cfc-46b5-a028-496ff09651cd","status":"SENT","revision":1}]}
+[Nest] 27108  - 22/11/2026, 23.05.50     LOG [KnownFacesService] Received 4 images for registration
+{"id":"1441f8ee-9420-4a71-b985-fb723757a3bb","personName":"Person B QA","relationship":"Dataset 2 acceptance test","linkedUserId":null,"provider":"REKOGNITION","modelVersion":"rekognition-7.0","sourceImageCount":4,"isActive":true,"createdAt":"2026-11-22T16:05:57.692Z","recognitionStatus":"READY"}
+{"case":"TC07-close-acceptance","events":[{"id":"27bb1128-8a11-4e0b-96ea-61820831456a","status":null,"type":"PERSON_DETECTED","name":null},{"id":"ac7ecebb-f2e4-4aba-8a25-5448c778bea7","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[]}
+{"case":"TC07-close-glasses-acceptance","events":[{"id":"46d2f5f6-cd02-480f-9a46-0a6770f5504e","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"},{"id":"8802f46d-870c-40f2-9acc-c849ac81b01d","status":null,"type":"PERSON_DETECTED","name":null}],"jobs":[{"id":"38443cdf-dd73-457e-ad50-95e046f3b04b","status":"SENT","revision":1}]}
+{"case":"TC07-separated-acceptance","events":[{"id":"5d7511e3-bf2e-48eb-a5f9-e6734b2bfc04","status":"KNOWN","type":"PERSON_DETECTED","name":"Person B QA"},{"id":"a849e704-06fb-4aaf-b5ae-ebe40efaaa03","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"880876d8-efe4-4d88-a6c7-38ee4091d989","status":"SENT","revision":1},{"id":"fd2bc831-dcd6-4a7e-b9e3-4fc6efb9e975","status":"SENT","revision":1}]}

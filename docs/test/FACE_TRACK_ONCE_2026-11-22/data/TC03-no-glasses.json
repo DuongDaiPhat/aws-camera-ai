@@ -1,0 +1,37 @@
+{
+  "case": "TC03-no-glasses",
+  "video": "known_face_vid3.mp4",
+  "startedAt": "2026-11-22T14:37:00.420Z",
+  "endedAt": "2026-11-22T14:37:36.163Z",
+  "ffmpegExitCode": 0,
+  "before": {
+    "case": "TC03-no-glasses",
+    "metrics": {
+      "tracksCreated": 4,
+      "gateRejected": 36,
+      "sessionCacheHits": 0,
+      "spatialReidHits": 0,
+      "dispatched": 2,
+      "frozenKnownSkips": 18,
+      "pendingSkips": 11,
+      "retriesDispatched": 0
+    },
+    "tracks": []
+  },
+  "after": {
+    "case": "TC03-no-glasses",
+    "metrics": {
+      "tracksCreated": 4,
+      "gateRejected": 36,
+      "sessionCacheHits": 0,
+      "spatialReidHits": 0,
+      "dispatched": 2,
+      "frozenKnownSkips": 18,
+      "pendingSkips": 11,
+      "retriesDispatched": 0
+    },
+    "tracks": []
+  },
+  "events": [],
+  "jobs": []
+}

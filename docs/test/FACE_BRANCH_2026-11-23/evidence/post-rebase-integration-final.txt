@@ -1,0 +1,538 @@
+[Nest] 31804  - 23/11/2026, 16.18.23     LOG [MinioStorageService] Khoi tao MinIO Storage Adapter (endpoint: http://localhost:32818, presign: http://localhost:32818, bucket: fall-evidence)
+[Nest] 31804  - 23/11/2026, 16.18.24    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track person camera fall_qa ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [FallIncidentRepository] Đã tạo incident té ngã (event: 535628c5-3ae6-410f-b2e9-47906fb1bea4, incident: 5f2bf04a-0d91-49d4-af91-aacf0651c4b2, episode: 33b4587d-6207-4e5c-8dd7-837a8f634f90)
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [AiResultsService] Object:
+{
+  "correlationId": "5fb93c20-959d-4833-ae7b-345b08a7ead0",
+  "eventId": "535628c5-3ae6-410f-b2e9-47906fb1bea4",
+  "resultId": "41126d98-d56b-4359-86c0-d456791a2b72",
+  "module": "M2A_FALL",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera fall_qa (track: person, event: 535628c5-3ae6-410f-b2e9-47906fb1bea4)
+[Nest] 31804  - 23/11/2026, 16.18.24    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track person camera fall_qa ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 31804  - 23/11/2026, 16.18.24   DEBUG [FallIncidentCoordinator] Incident té ngã episode 33b4587d-6207-4e5c-8dd7-837a8f634f90 đã được xử lý trước đó (deduped)
+[Nest] 31804  - 23/11/2026, 16.18.24    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track person camera fall_qa ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [FallIncidentRepository] Đã tạo incident té ngã (event: 7077ba63-eef0-4310-9924-6623313e3add, incident: 562ed491-0ee3-408c-8b33-93278ae68564, episode: 9af7fe7b-7cbf-4320-8e17-d06734b308e5)
+[Nest] 31804  - 23/11/2026, 16.18.24   ERROR [FallIncidentCoordinator] Lỗi khi submit kết quả AI té ngã cho event 7077ba63-eef0-4310-9924-6623313e3add: Transient submit failure
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [AiResultsService] Object:
+{
+  "correlationId": "ad0fdff0-5260-4532-bc01-d8b0e220f21e",
+  "eventId": "7077ba63-eef0-4310-9924-6623313e3add",
+  "resultId": "440fc9c6-7eef-4314-872b-db01a3b896c5",
+  "module": "M2A_FALL",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.18.24    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track person camera fall_qa ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 31804  - 23/11/2026, 16.18.24    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track person camera fall_qa ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [FallIncidentRepository] Đã tạo incident té ngã (event: 9e29d76f-09f2-4c68-907d-0abae45454bd, incident: 6382ba48-9835-43fc-b86e-17761a0e9d23, episode: e0feb2a3-35ac-4b46-b630-cef1c775c5cc)
+[Nest] 31804  - 23/11/2026, 16.18.24    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track person camera fall_qa ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [AiResultsService] Object:
+{
+  "correlationId": "2cf38e82-b21e-43f8-b28a-c83584ba939b",
+  "eventId": "9e29d76f-09f2-4c68-907d-0abae45454bd",
+  "resultId": "6031ae09-50bc-404f-a625-9a131e33bc44",
+  "module": "M2A_FALL",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [AiResultsService] Object:
+{
+  "correlationId": "2cf38e82-b21e-43f8-b28a-c83584ba939b",
+  "eventId": "9e29d76f-09f2-4c68-907d-0abae45454bd",
+  "resultId": "6031ae09-50bc-404f-a625-9a131e33bc44",
+  "module": "M2A_FALL",
+  "disposition": "DUPLICATE"
+}
+
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera fall_qa (track: person, event: 9e29d76f-09f2-4c68-907d-0abae45454bd)
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [AiResultsService] Object:
+{
+  "correlationId": "2cf38e82-b21e-43f8-b28a-c83584ba939b",
+  "eventId": "9e29d76f-09f2-4c68-907d-0abae45454bd",
+  "resultId": "6031ae09-50bc-404f-a625-9a131e33bc44",
+  "module": "M2A_FALL",
+  "disposition": "DUPLICATE"
+}
+
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera fall_qa (track: person, event: 9e29d76f-09f2-4c68-907d-0abae45454bd)
+[Nest] 31804  - 23/11/2026, 16.18.24     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera fall_qa (track: person, event: 9e29d76f-09f2-4c68-907d-0abae45454bd)
+[Nest] 31804  - 23/11/2026, 16.18.24    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track person camera fall_qa ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 31804  - 23/11/2026, 16.18.25     LOG [FallIncidentRepository] Đã tạo incident té ngã (event: cc4c518d-43af-4445-8e5f-66a381ae6d50, incident: 2e9c6c2c-3926-4642-8ebd-7850dc3904d7, episode: 6bdd3ff3-f1f8-443e-9bbb-5c337a9ad437)
+[Nest] 31804  - 23/11/2026, 16.18.25   ERROR [FallIncidentCoordinator] Lỗi khi submit kết quả AI té ngã cho event cc4c518d-43af-4445-8e5f-66a381ae6d50: Interrupted
+[Nest] 31804  - 23/11/2026, 16.18.25     LOG [AiResultsService] Object:
+{
+  "correlationId": "03ae5753-a48b-473b-be3e-8eaa2044072d",
+  "eventId": "cc4c518d-43af-4445-8e5f-66a381ae6d50",
+  "resultId": "649ba69a-174b-4669-8d7d-79b792da667d",
+  "module": "M2A_FALL",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.18.25     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+PASS test/fall-runtime.integration.spec.ts (42.446 s)
+[Nest] 31804  - 23/11/2026, 16.19.28     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-us11, eventId=bb334604-594f-4eaf-909d-78e227653f25
+[Nest] 31804  - 23/11/2026, 16.19.28     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "bb334604-594f-4eaf-909d-78e227653f25",
+  "trackId": "track-us11",
+  "requestId": "b860f731-c462-4792-9c22-572d48c32fe6",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.28     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 31804  - 23/11/2026, 16.19.28     LOG [AiResultsService] Object:
+{
+  "correlationId": "e01deefb-36b7-40fe-a739-139d7abf0355",
+  "eventId": "bb334604-594f-4eaf-909d-78e227653f25",
+  "resultId": "b860f731-c462-4792-9c22-572d48c32fe6",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.28     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.19.28     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-us11, eventId=b435ae9a-94ef-4c9b-96b1-18ac7dcbc654
+[Nest] 31804  - 23/11/2026, 16.19.28     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "b435ae9a-94ef-4c9b-96b1-18ac7dcbc654",
+  "trackId": "track-us11",
+  "requestId": "2005ba4b-3d41-475d-94f4-eba27819814e",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.28     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 31804  - 23/11/2026, 16.19.28     LOG [AiResultsService] Object:
+{
+  "correlationId": "3c07182f-3dd5-458d-a49e-7b939679e790",
+  "eventId": "b435ae9a-94ef-4c9b-96b1-18ac7dcbc654",
+  "resultId": "2005ba4b-3d41-475d-94f4-eba27819814e",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.28     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.19.28     LOG [AiResultsService] Object:
+{
+  "correlationId": "b9b3713e-0f91-45f3-bfcd-30af792bb717",
+  "eventId": "dc7ff254-9f40-4249-a9d5-f9d7b3eca8e4",
+  "resultId": "09b56d9a-0e0a-466d-a84d-29c5896f181e",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.28     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.19.29     LOG [AiResultsService] Object:
+{
+  "correlationId": "71f340be-19b0-47ba-8843-f79d60db5e26",
+  "eventId": "29e81ef7-8ec0-4a8f-8c98-f64002e82c6f",
+  "resultId": "faeb187e-3833-46f3-8961-a9df35b7d367",
+  "module": "M1_FACE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.29     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.19.29     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "8e1bab68-d83c-4ef2-98a6-2c5e9ba9b768",
+  "eventId": "de2f3b51-b8d5-4e65-b34c-5d1d8bdd43ba",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.29     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 31804  - 23/11/2026, 16.19.29     LOG [AiResultsService] Object:
+{
+  "correlationId": "8e1bab68-d83c-4ef2-98a6-2c5e9ba9b768",
+  "eventId": "de2f3b51-b8d5-4e65-b34c-5d1d8bdd43ba",
+  "resultId": "f4182c74-53f1-506e-8990-62f2f35fb224",
+  "module": "M4_ZONE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.29     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.19.29     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "8e1bab68-d83c-4ef2-98a6-2c5e9ba9b768",
+  "eventId": "de2f3b51-b8d5-4e65-b34c-5d1d8bdd43ba",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.29     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 31804  - 23/11/2026, 16.19.29     LOG [AiResultsService] Object:
+{
+  "correlationId": "8e1bab68-d83c-4ef2-98a6-2c5e9ba9b768",
+  "eventId": "de2f3b51-b8d5-4e65-b34c-5d1d8bdd43ba",
+  "resultId": "f4182c74-53f1-506e-8990-62f2f35fb224",
+  "module": "M4_ZONE",
+  "disposition": "DUPLICATE"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.29     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "ad534be7-83b9-4079-b38d-a8475468a966",
+  "eventId": "81a3da8a-1d56-402e-97b3-6729b387a2f0",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [AiResultsService] Object:
+{
+  "correlationId": "ad534be7-83b9-4079-b38d-a8475468a966",
+  "eventId": "81a3da8a-1d56-402e-97b3-6729b387a2f0",
+  "resultId": "5782c5ce-c3e3-5623-9b7f-c96c76156bd6",
+  "module": "M4_ZONE",
+  "disposition": "ACCEPTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "ad534be7-83b9-4079-b38d-a8475468a966",
+  "eventId": "81a3da8a-1d56-402e-97b3-6729b387a2f0",
+  "trackId": "track-us11",
+  "messageType": "update",
+  "eventType": "RESTRICTED_ZONE",
+  "camera": "cam_us11",
+  "dedupKey": "frigate:cam_us11:track-us11"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [AiResultsService] Object:
+{
+  "correlationId": "ad534be7-83b9-4079-b38d-a8475468a966",
+  "eventId": "81a3da8a-1d56-402e-97b3-6729b387a2f0",
+  "resultId": "5782c5ce-c3e3-5623-9b7f-c96c76156bd6",
+  "module": "M4_ZONE",
+  "disposition": "DUPLICATE"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [AiResultsService] Object:
+{
+  "correlationId": "3d7b99f0-e38d-4a69-aaf2-a2a3af7c667e",
+  "eventId": "594a5c3a-d277-4681-a7a6-788aa0d9f7d8",
+  "resultId": "d054bfba-d926-56eb-85a2-f11df31201af",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [AiResultsService] Object:
+{
+  "correlationId": "8d77731b-93b9-4a85-a79c-a70980301a02",
+  "eventId": "4575aba0-729e-422f-bf18-713a1e9c3433",
+  "resultId": "25f2b9b6-7237-5af8-8326-693583f14bb4",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [AiResultsService] Object:
+{
+  "correlationId": "35e0ecf5-610d-4415-962d-ed5de4ba63b5",
+  "eventId": "1585be79-9b00-4b42-9fc4-f40ed3535431",
+  "resultId": "fac6703c-8f7a-582c-814c-9c4278f52478",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [AiResultsService] Object:
+{
+  "correlationId": "4b2ee739-c964-4eaa-b12e-c7a8a6f7af79",
+  "eventId": "ac03af48-dba0-47b9-9e52-99f246e43f48",
+  "resultId": "6758883e-23b9-5d20-bbab-3e0e96e9dfea",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.30     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+[Nest] 31804  - 23/11/2026, 16.19.31     LOG [AiResultsService] Object:
+{
+  "correlationId": "08b3f6d9-0437-4f2b-ae50-47decd90ad12",
+  "eventId": "d3732786-c7ae-4dcb-8650-e1dc9e149c44",
+  "resultId": "be9fe4e9-5c15-5229-aff9-b57a6544cc3e",
+  "module": "M4_ZONE",
+  "disposition": "STALE"
+}
+
+[Nest] 31804  - 23/11/2026, 16.19.31     LOG [AiResultsService] Đã tiếp nhận kết quả AI
+PASS test/ai-results-db.integration.spec.ts (64.561 s)
+PASS test/wellness-db.integration.spec.ts (75.716 s)
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Object:
+{
+  "jobId": "3ea86cb9-1ba6-4145-9853-5d821ebaee3e",
+  "reason": "SQS_SEND_REJECTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Object:
+{
+  "jobId": "3ea86cb9-1ba6-4145-9853-5d821ebaee3e",
+  "reason": "SQS_SEND_REJECTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Object:
+{
+  "jobId": "3ea86cb9-1ba6-4145-9853-5d821ebaee3e",
+  "reason": "SQS_SEND_REJECTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Object:
+{
+  "jobId": "3ea86cb9-1ba6-4145-9853-5d821ebaee3e",
+  "reason": "SQS_SEND_REJECTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Object:
+{
+  "jobId": "3ea86cb9-1ba6-4145-9853-5d821ebaee3e",
+  "reason": "SQS_SEND_REJECTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Cloud job exhausted dispatch retries
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Object:
+{
+  "jobId": "b05d37ff-a5b3-4907-b6aa-84dc5ce1b2fb",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Object:
+{
+  "jobId": "b05d37ff-a5b3-4907-b6aa-84dc5ce1b2fb",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Object:
+{
+  "jobId": "b05d37ff-a5b3-4907-b6aa-84dc5ce1b2fb",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Object:
+{
+  "jobId": "b05d37ff-a5b3-4907-b6aa-84dc5ce1b2fb",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Object:
+{
+  "jobId": "b05d37ff-a5b3-4907-b6aa-84dc5ce1b2fb",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.27    WARN [CloudQueueService] Cloud job exhausted dispatch retries
+[Nest] 31804  - 23/11/2026, 16.22.28    WARN [CloudQueueService] Object:
+{
+  "jobId": "17a65c72-091d-4fa3-961b-7baa644d209d",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.28    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.28    WARN [CloudQueueService] Object:
+{
+  "jobId": "17a65c72-091d-4fa3-961b-7baa644d209d",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.28    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.28    WARN [CloudQueueService] Object:
+{
+  "jobId": "17a65c72-091d-4fa3-961b-7baa644d209d",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.28    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.28    WARN [CloudQueueService] Object:
+{
+  "jobId": "17a65c72-091d-4fa3-961b-7baa644d209d",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.28    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.28    WARN [CloudQueueService] Object:
+{
+  "jobId": "17a65c72-091d-4fa3-961b-7baa644d209d",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.28    WARN [CloudQueueService] Cloud job exhausted dispatch retries
+[Nest] 31804  - 23/11/2026, 16.22.29    WARN [CloudQueueService] Object:
+{
+  "jobId": "1ccb27c7-21c1-47f5-b7c0-0525a64cdab4",
+  "reason": "SQS_SEND_REJECTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.29    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.29    WARN [CloudQueueService] Object:
+{
+  "jobId": "1ccb27c7-21c1-47f5-b7c0-0525a64cdab4",
+  "reason": "SQS_SEND_REJECTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.29    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.29    WARN [CloudQueueService] Object:
+{
+  "jobId": "1ccb27c7-21c1-47f5-b7c0-0525a64cdab4",
+  "reason": "SQS_SEND_REJECTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.29    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.30    WARN [CloudQueueService] Object:
+{
+  "jobId": "1ccb27c7-21c1-47f5-b7c0-0525a64cdab4",
+  "reason": "SQS_SEND_REJECTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.30    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 31804  - 23/11/2026, 16.22.30    WARN [CloudQueueService] Object:
+{
+  "jobId": "1ccb27c7-21c1-47f5-b7c0-0525a64cdab4",
+  "reason": "SQS_SEND_REJECTED"
+}
+
+[Nest] 31804  - 23/11/2026, 16.22.30    WARN [CloudQueueService] Cloud job exhausted dispatch retries
+PASS test/notification-cloud.integration.spec.ts (54.747 s)
+[Nest] 31804  - 23/11/2026, 16.23.18     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32823 (clientId: us08-consumer-fbb00e08-283c-4a27-b10e-fe138f66aa6e)...
+[Nest] 31804  - 23/11/2026, 16.23.18     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events, frigate/camerai/frames, frigate/camerai/pose/frames
+[Nest] 31804  - 23/11/2026, 16.23.18     LOG [MqttConsumerService] Da subscribe cac topic MQTT.
+[Nest] 31804  - 23/11/2026, 16.23.18     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "690f5ea1-6ed7-4aab-b469-c0e723b83c90",
+  "eventId": "a04eaccd-52ca-4737-8810-fec1dc121d68",
+  "trackId": "us08-track-98982210-58e8-4611-b006-fd627b803bb5",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-track-98982210-58e8-4611-b006-fd627b803bb5"
+}
+
+[Nest] 31804  - 23/11/2026, 16.23.18     LOG [MqttConsumerService] Da ghi nhan su kien moi vao bang events
+[Nest] 31804  - 23/11/2026, 16.23.18     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "690f5ea1-6ed7-4aab-b469-c0e723b83c90",
+  "eventId": "a04eaccd-52ca-4737-8810-fec1dc121d68",
+  "trackId": "us08-track-98982210-58e8-4611-b006-fd627b803bb5",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-track-98982210-58e8-4611-b006-fd627b803bb5"
+}
+
+[Nest] 31804  - 23/11/2026, 16.23.18     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 31804  - 23/11/2026, 16.23.18     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32823 (clientId: us08-consumer-4af2c11d-c12c-4159-beb1-76a96dda4a2c)...
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events, frigate/camerai/frames, frigate/camerai/pose/frames
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Da subscribe cac topic MQTT.
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "dfa5c364-0604-402d-82a7-47fdca29e646",
+  "eventId": "6c531444-5d83-41c8-9dec-38b454453e36",
+  "trackId": "us08-lifecycle-3c3d656b-8c2c-49a2-a71c-7ca2a43eb990",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-lifecycle-3c3d656b-8c2c-49a2-a71c-7ca2a43eb990"
+}
+
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Da ghi nhan su kien moi vao bang events
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "dfa5c364-0604-402d-82a7-47fdca29e646",
+  "eventId": "6c531444-5d83-41c8-9dec-38b454453e36",
+  "trackId": "us08-lifecycle-3c3d656b-8c2c-49a2-a71c-7ca2a43eb990",
+  "messageType": "update",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-lifecycle-3c3d656b-8c2c-49a2-a71c-7ca2a43eb990"
+}
+
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "dfa5c364-0604-402d-82a7-47fdca29e646",
+  "eventId": "6c531444-5d83-41c8-9dec-38b454453e36",
+  "trackId": "us08-lifecycle-3c3d656b-8c2c-49a2-a71c-7ca2a43eb990",
+  "messageType": "end",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-lifecycle-3c3d656b-8c2c-49a2-a71c-7ca2a43eb990"
+}
+
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Da cap nhat su kien theo vong doi Frigate track
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Dang ket noi MQTT Broker tai mqtt://localhost:32823 (clientId: us08-consumer-010e7290-1ae4-4517-a8a0-3505d302a0a4)...
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Da ket noi MQTT Broker thanh cong. Dang subscribe topic: frigate/events, frigate/camerai/frames, frigate/camerai/pose/frames
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Da subscribe cac topic MQTT.
+[Nest] 31804  - 23/11/2026, 16.23.19    WARN [MqttConsumerService] Object:
+{
+  "rawContent": "{\"type\":\"new\",\"after\":",
+  "err": "Unexpected end of JSON input"
+}
+
+[Nest] 31804  - 23/11/2026, 16.23.19    WARN [MqttConsumerService] Dead-letter: Message MQTT khong phai la JSON hop le
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Object:
+{
+  "correlationId": "5c130b0b-891c-4291-8230-16028da3e145",
+  "eventId": "de5774e1-573e-4148-b7ee-b7bfcf3172d7",
+  "trackId": "us08-recovery-6bd43b87-999b-470a-a507-ea7c2b6e9e80",
+  "messageType": "new",
+  "eventType": "PERSON_DETECTED",
+  "camera": "cam_living_room",
+  "dedupKey": "frigate:cam_living_room:us08-recovery-6bd43b87-999b-470a-a507-ea7c2b6e9e80"
+}
+
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Da ghi nhan su kien moi vao bang events
+[Nest] 31804  - 23/11/2026, 16.23.19     LOG [MqttConsumerService] Ngat ket noi MQTT Client...
+PASS test/mqtt-db.integration.spec.ts (19.515 s)
+PASS test/cloud-queue.integration.spec.ts (14.118 s)
+[Nest] 31804  - 23/11/2026, 16.23.46    WARN [TelegramWorkWorker] Sửa tin Telegram lỗi notificationId=7d0396e0-93db-41d7-bba9-03dd4fc09c7c code=TELEGRAM_NETWORK
+[Nest] 31804  - 23/11/2026, 16.23.46    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=87414df8-7828-4f08-ba6d-2a71bf00287f correlationId=4ccdd2af-3a17-4e99-8ce1-a5b4027992fb
+[Nest] 31804  - 23/11/2026, 16.23.46    WARN [NotificationRetryWorker] Telegram delivery failed eventId=87414df8-7828-4f08-ba6d-2a71bf00287f correlationId=4ccdd2af-3a17-4e99-8ce1-a5b4027992fb attempt=1 code=TELEGRAM_503
+[Nest] 31804  - 23/11/2026, 16.23.46    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=87414df8-7828-4f08-ba6d-2a71bf00287f correlationId=4ccdd2af-3a17-4e99-8ce1-a5b4027992fb
+[Nest] 31804  - 23/11/2026, 16.23.46    WARN [NotificationRetryWorker] Telegram delivery failed eventId=87414df8-7828-4f08-ba6d-2a71bf00287f correlationId=4ccdd2af-3a17-4e99-8ce1-a5b4027992fb attempt=2 code=TELEGRAM_503
+[Nest] 31804  - 23/11/2026, 16.23.46    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=87414df8-7828-4f08-ba6d-2a71bf00287f correlationId=4ccdd2af-3a17-4e99-8ce1-a5b4027992fb
+[Nest] 31804  - 23/11/2026, 16.23.46    WARN [NotificationRetryWorker] Telegram delivery failed eventId=87414df8-7828-4f08-ba6d-2a71bf00287f correlationId=4ccdd2af-3a17-4e99-8ce1-a5b4027992fb attempt=3 code=TELEGRAM_503
+[Nest] 31804  - 23/11/2026, 16.23.47    WARN [NotificationRetryWorker] Gửi cảnh báo không có ảnh eventId=87414df8-7828-4f08-ba6d-2a71bf00287f correlationId=4ccdd2af-3a17-4e99-8ce1-a5b4027992fb
+[Nest] 31804  - 23/11/2026, 16.23.47    WARN [NotificationRetryWorker] Telegram delivery failed eventId=87414df8-7828-4f08-ba6d-2a71bf00287f correlationId=4ccdd2af-3a17-4e99-8ce1-a5b4027992fb attempt=4 code=TELEGRAM_503
+[Nest] 31804  - 23/11/2026, 16.23.47    WARN [EscalationDeadlineWorkerService] Sự kiện 87414df8-7828-4f08-ba6d-2a71bf00287f (UNKNOWN_PERSON, P3) đã hết thời gian chờ (trễ 1007ms). Tự động chuyển sang ESCALATED
+[Nest] 31804  - 23/11/2026, 16.23.47    WARN [EscalationDeadlineWorkerService] Sự kiện 87414df8-7828-4f08-ba6d-2a71bf00287f (UNKNOWN_PERSON, P3) đã hết thời gian chờ (trễ 1009ms). Tự động chuyển sang ESCALATED
+PASS test/telegram-db.integration.spec.ts (13.39 s)
+PASS test/camera-state.repository.integration.spec.ts (11.459 s)
+PASS test/escalation-high-wait-db.integration.spec.ts (10.746 s)
+PASS test/escalation-rules.repository.integration.spec.ts
+
+Test Suites: 2 skipped, 10 passed, 10 of 12 total
+Tests:       6 skipped, 150 passed, 156 total
+Snapshots:   0 total
+Time:        386.502 s, estimated 428 s
+Ran all test suites.
+Test results written to: ..\..\docs\test\FACE_BRANCH_2026-11-23\evidence\post-rebase-integration-final.json

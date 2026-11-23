@@ -1,0 +1,37 @@
+{
+  "case": "TC01-back",
+  "video": "known_face_turning_back.mp4",
+  "startedAt": "2026-11-22T14:35:32.996Z",
+  "endedAt": "2026-11-22T14:36:09.943Z",
+  "ffmpegExitCode": 0,
+  "before": {
+    "case": "TC01-back",
+    "metrics": {
+      "tracksCreated": 3,
+      "gateRejected": 33,
+      "sessionCacheHits": 0,
+      "spatialReidHits": 0,
+      "dispatched": 2,
+      "frozenKnownSkips": 18,
+      "pendingSkips": 11,
+      "retriesDispatched": 0
+    },
+    "tracks": []
+  },
+  "after": {
+    "case": "TC01-back",
+    "metrics": {
+      "tracksCreated": 3,
+      "gateRejected": 33,
+      "sessionCacheHits": 0,
+      "spatialReidHits": 0,
+      "dispatched": 2,
+      "frozenKnownSkips": 18,
+      "pendingSkips": 11,
+      "retriesDispatched": 0
+    },
+    "tracks": []
+  },
+  "events": [],
+  "jobs": []
+}

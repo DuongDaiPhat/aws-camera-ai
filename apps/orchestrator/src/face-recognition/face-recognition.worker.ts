@@ -1,13 +1,15 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Logger } from '@nestjs/common';
+import { Logger, Optional } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { AiComponents } from '@cam/contracts';
 
 import { FrigateMediaAdapter } from '../media/frigate-media.adapter';
+import { imageFormat } from '../media/image-format';
 import { AiResultsService } from '../ai-results/ai-results.service';
 import type { SubmitAiResultDto } from '../ai-results/dto/submit-ai-result.dto';
+import type { FaceRecognitionResultListener } from '../cloud-queue/cloud-queue.service';
 
 const AI_SERVICE_TIMEOUT_MS = 5_000;
 
@@ -18,6 +20,8 @@ export interface MatchFaceJob {
   ownerScopeId: string;
   collectionVersion: number;
   sourceSessionId?: string;
+  revision?: number;
+  imageBase64?: string;
 }
 
 type MatchResponse = AiComponents['schemas']['MatchResponse'];
@@ -49,6 +53,7 @@ function toSubmitAiResultDto(
   trackId: string,
   result: MatchResponse,
   sourceSessionId?: string,
+  revision = 1,
 ): SubmitAiResultDto {
   const hasTechnicalError = result.error !== null;
 
@@ -58,7 +63,7 @@ function toSubmitAiResultDto(
     requestId: result.requestId,
     eventId,
     observationId: `track:${trackId}:face`,
-    revision: 1,
+    revision,
     module: 'M1_FACE',
     modelVersion: result.modelVersion,
     processedAt: result.processedAt,
@@ -89,6 +94,13 @@ function toSubmitAiResultDto(
   };
 }
 
+interface WorkerResultContext {
+  cameraSlug: string;
+  ownerScopeId: string;
+  collectionVersion: number;
+  revision: number;
+}
+
 @Processor('face-recognition')
 export class FaceRecognitionWorker extends WorkerHost {
   private readonly logger = new Logger(FaceRecognitionWorker.name);
@@ -97,6 +109,7 @@ export class FaceRecognitionWorker extends WorkerHost {
     private readonly frigateAdapter: FrigateMediaAdapter,
     private readonly config: ConfigService,
     private readonly aiResultsService: AiResultsService,
+    @Optional() private readonly coordinator?: FaceRecognitionResultListener,
   ) {
     super();
   }
@@ -105,14 +118,32 @@ export class FaceRecognitionWorker extends WorkerHost {
     if (this.config.get<string>('FACE_JOB_TRANSPORT', 'bullmq') !== 'bullmq') {
       throw new Error('BullMQ face processing disabled in SQS mode');
     }
-    const { eventId, trackId, ownerScopeId, collectionVersion, sourceSessionId } = job.data;
+    const {
+      eventId,
+      trackId,
+      cameraSlug,
+      ownerScopeId,
+      collectionVersion,
+      sourceSessionId,
+      revision = 1,
+      imageBase64,
+    } = job.data;
 
     this.logger.log(
       `Đang xử lý job nhận diện khuôn mặt cho trackId=${trackId}, eventId=${eventId}`,
     );
 
-    const imageBuffer = await this.frigateAdapter.getCroppedSnapshot(trackId);
-    if (!imageBuffer) {
+    const imageBuffer = imageBase64
+      ? Buffer.from(imageBase64, 'base64')
+      : await this.frigateAdapter.getCroppedSnapshot(trackId);
+    const ctx: WorkerResultContext = {
+      cameraSlug,
+      ownerScopeId,
+      collectionVersion,
+      revision,
+    };
+
+    if (!imageBuffer || imageBuffer.length === 0) {
       this.logger.warn(`Không lấy được ảnh crop cho track ${trackId}`);
       return this.handleAiResult(
         eventId,
@@ -122,6 +153,8 @@ export class FaceRecognitionWorker extends WorkerHost {
           'Không lấy được ảnh từ Frigate',
         ),
         trackId,
+        sourceSessionId,
+        ctx,
       );
     }
 
@@ -132,13 +165,15 @@ export class FaceRecognitionWorker extends WorkerHost {
         collectionVersion,
         imageBuffer,
       );
-      return await this.handleAiResult(eventId, result, trackId, sourceSessionId);
+      return await this.handleAiResult(eventId, result, trackId, sourceSessionId, ctx);
     } catch (err) {
       this.logger.error(`Lỗi gọi AI service cho event ${eventId}`, err);
       return this.handleAiResult(
         eventId,
         this.technicalError(collectionVersion, 'TIMEOUT', 'Lỗi kết nối AI hoặc quá giờ'),
         trackId,
+        sourceSessionId,
+        ctx,
       );
     }
   }
@@ -150,7 +185,12 @@ export class FaceRecognitionWorker extends WorkerHost {
     imageBuffer: Buffer,
   ): Promise<MatchResponse> {
     const formData = new FormData();
-    formData.append('image', new Blob([new Uint8Array(imageBuffer)]), 'crop.jpg');
+    const format = imageFormat(imageBuffer);
+    formData.append(
+      'image',
+      new Blob([new Uint8Array(imageBuffer)], { type: format.contentType }),
+      `crop.${format.extension}`,
+    );
     formData.append('eventId', eventId);
     formData.append('requestId', crypto.randomUUID());
     formData.append('ownerScopeId', ownerScopeId);
@@ -203,7 +243,8 @@ export class FaceRecognitionWorker extends WorkerHost {
     eventId: string,
     response: MatchResponse,
     trackId: string,
-    sourceSessionId?: string,
+    sourceSessionId: string | undefined,
+    ctx: WorkerResultContext,
   ): Promise<void> {
     const result = normalizeMatchResponse(response);
     this.logger.log(
@@ -216,9 +257,32 @@ export class FaceRecognitionWorker extends WorkerHost {
       },
       'Đã nhận kết quả M1 từ AI service',
     );
-    await this.aiResultsService.submit(
+    const accepted = await this.aiResultsService.submit(
       eventId,
-      toSubmitAiResultDto(eventId, trackId, result, sourceSessionId),
+      toSubmitAiResultDto(eventId, trackId, result, sourceSessionId, ctx.revision),
     );
+    if (this.coordinator) {
+      try {
+        await this.coordinator.onRecognitionResult({
+          eventId,
+          cameraSlug: ctx.cameraSlug,
+          ownerScopeId: ctx.ownerScopeId,
+          trackId,
+          collectionVersion: result.collectionVersion ?? ctx.collectionVersion,
+          revision: ctx.revision,
+          personStatus: result.error ? 'UNDETERMINED' : (result.personStatus ?? 'UNDETERMINED'),
+          matchedKnownFaceId: result.error ? null : (result.matchedKnownFaceId ?? null),
+          matchedPersonName: result.error ? null : (result.matchedPersonName ?? null),
+          similarity: result.error ? null : (result.similarity ?? null),
+          errorCode: result.error?.code ?? null,
+          disposition: accepted?.disposition,
+        });
+      } catch (error) {
+        this.logger.warn(
+          { eventId, trackId, error: error instanceof Error ? error.message : 'unknown' },
+          'Failed to notify face coordinator from worker',
+        );
+      }
+    }
   }
 }

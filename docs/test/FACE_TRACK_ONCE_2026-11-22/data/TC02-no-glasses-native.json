@@ -1,0 +1,98 @@
+{
+  "case": "TC02-no-glasses-native",
+  "video": "known_face_vid_2.mp4",
+  "startedAt": "2026-11-22T15:06:41.900Z",
+  "endedAt": "2026-11-22T15:07:32.599Z",
+  "ffmpegExitCode": 0,
+  "before": {
+    "case": "TC02-no-glasses-native",
+    "metrics": {
+      "tracksCreated": 3,
+      "gateRejected": 45,
+      "sessionCacheHits": 0,
+      "spatialReidHits": 0,
+      "dispatched": 0,
+      "frozenKnownSkips": 0,
+      "pendingSkips": 0,
+      "retriesDispatched": 0
+    },
+    "tracks": []
+  },
+  "after": {
+    "case": "TC02-no-glasses-native",
+    "metrics": {
+      "tracksCreated": 4,
+      "gateRejected": 69,
+      "sessionCacheHits": 0,
+      "spatialReidHits": 0,
+      "dispatched": 0,
+      "frozenKnownSkips": 0,
+      "pendingSkips": 0,
+      "retriesDispatched": 0
+    },
+    "tracks": [
+      {
+        "trackId": "1795360012.807207-9gz4wr",
+        "canonicalTrackId": "1795360012.807207-9gz4wr",
+        "eventId": "514a8c0f-c033-4487-91b8-5dfdc449a5c1",
+        "state": "COLLECTING",
+        "collectionVersion": 2,
+        "currentRevision": 0,
+        "pendingRevision": null,
+        "firstSeenAt": 1795360014163,
+        "bestShotWindowStartedAt": null,
+        "lastUpdatedAt": 1795360039745,
+        "samplesCollected": 0,
+        "dispatchedQualityScore": null,
+        "dispatchedAt": null,
+        "lastResultAt": null,
+        "unknownRecheckUsed": false,
+        "undeterminedRetriesUsed": 0,
+        "matchedKnownFaceId": null,
+        "matchedPersonName": null,
+        "endedAt": 1795360039745
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": "514a8c0f-c033-4487-91b8-5dfdc449a5c1",
+      "camera_id": "eb6ebdcb-3eba-42cf-987e-bff1a4c7d004",
+      "zone_id": null,
+      "event_type": "PERSON_DETECTED",
+      "status": "DETECTED",
+      "priority": "P3",
+      "source": "FRIGATE",
+      "track_id": "1795360012.807207-9gz4wr",
+      "dedup_key": "frigate:face_track_once_20261122:1795360012.807207-9gz4wr",
+      "confidence": null,
+      "ai_label": null,
+      "ai_model_version": null,
+      "ai_results": [],
+      "person_status": null,
+      "matched_known_face_id": null,
+      "is_false_alarm": false,
+      "retain": false,
+      "correlation_id": "3044ee07-79bd-4802-ad14-074e9a0c1bb2",
+      "detected_at": "2026-11-22T15:06:52.807Z",
+      "ai_processed_at": null,
+      "notified_at": null,
+      "escalation_deadline_at": null,
+      "escalated_at": null,
+      "resolved_at": null,
+      "closed_at": null,
+      "created_at": "2026-11-22T15:06:54.141Z",
+      "updated_at": "2026-11-22T15:07:19.730Z",
+      "version": 1,
+      "rule_snapshot": null,
+      "triggering_results": [],
+      "zone_name": null,
+      "detection_confidence": "0.995",
+      "aggregate_version": "0",
+      "wellness_owner_user_id": null,
+      "wellness_resident_user_id": null,
+      "person_name": null
+    }
+  ],
+  "jobs": []
+}

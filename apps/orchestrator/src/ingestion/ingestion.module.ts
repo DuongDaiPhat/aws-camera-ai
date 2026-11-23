@@ -10,6 +10,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { AiResultsModule } from '../ai-results/ai-results.module';
 import { ZoneResultProducerService } from './zone-result-producer.service';
 import { FallDetectionModule } from '../fall-detection/fall-detection.module';
+import { FaceRecognitionModule } from '../face-recognition/face-recognition.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { FallDetectionModule } from '../fall-detection/fall-detection.module';
     ZonesModule,
     AiResultsModule,
     FallDetectionModule,
+    FaceRecognitionModule,
     BullModule.registerQueue({ name: 'face-recognition' }),
   ],
   providers: [MqttConsumerService, ZoneResultProducerService],

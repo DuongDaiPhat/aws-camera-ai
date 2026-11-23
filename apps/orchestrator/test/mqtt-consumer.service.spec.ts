@@ -9,6 +9,7 @@ import { MediaService } from '../src/media/media.service';
 import { FrigateDetectionTrackerService } from '../src/frigate/frigate-detection-tracker.service';
 import { ZoneResultProducerService } from '../src/ingestion/zone-result-producer.service';
 import { AiResultsService } from '../src/ai-results/ai-results.service';
+import { FaceRecognitionCoordinatorService } from '../src/face-recognition/face-recognition-coordinator.service';
 
 function createEvent(overrides: Partial<EventRecord> = {}): EventRecord {
   return {
@@ -129,6 +130,61 @@ describe('MqttConsumerService (US-03, US-04)', () => {
 
   it('khởi tạo thành công', () => {
     expect(service).toBeDefined();
+  });
+
+  it('retains the original incident key for a coordinator-verified continuation', async () => {
+    const event = createEvent();
+    eventsRepository.findCameraBySlug.mockResolvedValue({
+      id: 'cam-uuid-1',
+      name: 'Room',
+      slug: 'cam_living_room',
+    });
+    const resolveContinuationDedupKey = jest
+      .fn()
+      .mockResolvedValue('frigate:cam_living_room:track-101');
+    Object.assign(service, {
+      faceCoordinator: { resolveContinuationDedupKey, handleTrackEvent: jest.fn() },
+    });
+    eventsRepository.findEventByDedupKey.mockResolvedValue(event);
+    eventsRepository.updateEvent.mockResolvedValue(event);
+    await service.handleMessage('frigate/events', buildSnapshotUpdateMessage('new-raw-id'));
+    await service.handleMessage('frigate/events', buildSnapshotUpdateMessage('new-raw-id'));
+    expect(eventsRepository.createEvent).not.toHaveBeenCalled();
+    expect(eventsRepository.findEventByDedupKey).toHaveBeenCalledWith(
+      'frigate:cam_living_room:track-101',
+    );
+    expect(resolveContinuationDedupKey).toHaveBeenCalledTimes(1);
+  });
+
+  it('starts face sampling while snapshot storage is still pending', async () => {
+    const event = createEvent();
+    eventsRepository.findCameraBySlug.mockResolvedValue({
+      id: 'cam-uuid-1',
+      name: 'Room',
+      slug: 'cam_living_room',
+    });
+    eventsRepository.createEvent.mockResolvedValue(event);
+    let releaseMedia!: (value: null) => void;
+    let startedMedia!: () => void;
+    const mediaStarted = new Promise<void>((resolve) => {
+      startedMedia = resolve;
+    });
+    mediaService.downloadAndStoreSnapshot.mockImplementation(() => {
+      startedMedia();
+      return new Promise((resolve) => {
+        releaseMedia = resolve;
+      });
+    });
+    const handleTrackEvent = jest.fn().mockResolvedValue(undefined);
+    Object.assign(service, { faceCoordinator: { handleTrackEvent } });
+    const handling = service.handleMessage(
+      'frigate/events',
+      buildSnapshotUpdateMessage('track-101'),
+    );
+    await mediaStarted;
+    expect(handleTrackEvent).toHaveBeenCalledTimes(1);
+    releaseMedia(null);
+    await handling;
   });
 
   it('tạo một PERSON_DETECTED P3 với dedup key ổn định theo Frigate track', async () => {
@@ -616,6 +672,94 @@ describe('MqttConsumerService (US-03, US-04)', () => {
       'track-clip',
       restrictedEvent.detected_at,
       15_000,
+    );
+  });
+
+  it('forwards new/update/end person events to FaceRecognitionCoordinatorService when present', async () => {
+    const handleTrackEvent = jest.fn().mockResolvedValue(undefined);
+    const coordinator = { handleTrackEvent } as unknown as FaceRecognitionCoordinatorService;
+    const camera = {
+      id: 'cam-uuid-1',
+      name: 'Phong khach',
+      slug: 'cam_living_room',
+      owner_user_id: 'owner-uuid-1',
+    };
+    const event = createEvent({ track_id: 'track-coord' });
+    const mockEventsRepo = {
+      findCameraBySlug: jest.fn().mockResolvedValue(camera),
+      findEligibleZones: jest.fn(),
+      findZoneByCameraAndSlug: jest.fn(),
+      createEvent: jest.fn().mockResolvedValue(event),
+      findEventByDedupKey: jest.fn().mockResolvedValue(event),
+      updateEvent: jest.fn().mockResolvedValue(event),
+      findEventSummaryById: jest.fn().mockResolvedValue(null),
+    };
+    const moduleWithCoordinator: TestingModule = await Test.createTestingModule({
+      providers: [
+        MqttConsumerService,
+        ZoneResultProducerService,
+        { provide: AiResultsService, useValue: { submit: jest.fn() } },
+        { provide: EventsRepository, useValue: mockEventsRepo },
+        {
+          provide: MediaService,
+          useValue: { downloadAndStoreSnapshot: jest.fn(), downloadAndStoreClip: jest.fn() },
+        },
+        {
+          provide: EventMediaRepository,
+          useValue: { findMediaByEventIdAndType: jest.fn().mockResolvedValue(null) },
+        },
+        { provide: EventsService, useValue: { toEventSummary: jest.fn(), emitEvent: jest.fn() } },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn((_k: string, d?: unknown) => d) },
+        },
+        { provide: FrigateDetectionTrackerService, useValue: { track: jest.fn() } },
+        { provide: FaceRecognitionCoordinatorService, useValue: coordinator },
+      ],
+    }).compile();
+
+    const consumerWithCoord = moduleWithCoordinator.get(MqttConsumerService);
+    await consumerWithCoord.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'new',
+          after: {
+            id: 'track-coord',
+            camera: 'cam_living_room',
+            frame_time: 1_726_387_200,
+            label: 'person',
+            score: 0.9,
+            current_zones: [],
+          },
+        }),
+      ),
+    );
+    await consumerWithCoord.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'end',
+          after: {
+            id: 'track-coord',
+            camera: 'cam_living_room',
+            frame_time: 1_726_387_205,
+            label: 'person',
+            score: 0.9,
+            current_zones: [],
+          },
+        }),
+      ),
+    );
+
+    expect(handleTrackEvent).toHaveBeenCalledTimes(2);
+    expect(handleTrackEvent).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ messageType: 'new', isCreated: true, camera }),
+    );
+    expect(handleTrackEvent).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ messageType: 'end', isCreated: false, camera }),
     );
   });
 });

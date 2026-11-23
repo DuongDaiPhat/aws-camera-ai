@@ -1,0 +1,90 @@
+[
+  {
+    "table_name": "cloud_face_collections",
+    "column_name": "owner_user_id"
+  },
+  {
+    "table_name": "cloud_face_collections",
+    "column_name": "collection_id"
+  },
+  {
+    "table_name": "cloud_face_collections",
+    "column_name": "version"
+  },
+  {
+    "table_name": "cloud_jobs",
+    "column_name": "id"
+  },
+  {
+    "table_name": "cloud_jobs",
+    "column_name": "result_id"
+  },
+  {
+    "table_name": "cloud_jobs",
+    "column_name": "event_id"
+  },
+  {
+    "table_name": "cloud_jobs",
+    "column_name": "kind"
+  },
+  {
+    "table_name": "cloud_jobs",
+    "column_name": "owner_user_id"
+  },
+  {
+    "table_name": "cloud_jobs",
+    "column_name": "camera_id"
+  },
+  {
+    "table_name": "cloud_jobs",
+    "column_name": "envelope"
+  },
+  {
+    "table_name": "cloud_jobs",
+    "column_name": "cached_result"
+  },
+  {
+    "table_name": "cloud_jobs",
+    "column_name": "status"
+  },
+  {
+    "table_name": "cloud_jobs",
+    "column_name": "attempts"
+  },
+  {
+    "table_name": "cloud_jobs",
+    "column_name": "available_at"
+  },
+  {
+    "table_name": "cloud_jobs",
+    "column_name": "created_at"
+  },
+  {
+    "table_name": "cloud_jobs",
+    "column_name": "last_error"
+  },
+  {
+    "table_name": "cloud_jobs",
+    "column_name": "revision"
+  },
+  {
+    "table_name": "cloud_result_receipts",
+    "column_name": "id"
+  },
+  {
+    "table_name": "cloud_result_receipts",
+    "column_name": "job_id"
+  },
+  {
+    "table_name": "cloud_result_receipts",
+    "column_name": "envelope"
+  },
+  {
+    "table_name": "cloud_result_receipts",
+    "column_name": "disposition"
+  },
+  {
+    "table_name": "cloud_result_receipts",
+    "column_name": "received_at"
+  }
+]

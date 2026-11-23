@@ -1,0 +1,1513 @@
+PASS test/face-recognition-coordinator.service.spec.ts (44.717 s)
+[Nest] 32092  - 23/11/2026, 15.32.58   ERROR [RekognitionFaceEnrollmentService] Object:
+{
+  "action": "rekognition_create_collection_failed",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "errorCode": "UnknownError"
+}
+
+Failed to ensure Rekognition collection
+[Nest] 32092  - 23/11/2026, 15.32.58   ERROR [RekognitionFaceEnrollmentService] Object:
+{
+  "action": "rekognition_detect_faces_failed",
+  "errorCode": "ThrottlingException"
+}
+
+AWS Rekognition enrollment call failed
+[Nest] 32092  - 23/11/2026, 15.32.58   ERROR [RekognitionFaceEnrollmentService] Object:
+{
+  "action": "rekognition_delete_faces_failed",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 1,
+  "errorCode": "InternalError"
+}
+
+Failed to delete faces from Rekognition collection
+[Nest] 32092  - 23/11/2026, 15.32.58   ERROR [RekognitionFaceEnrollmentService] Object:
+{
+  "action": "rekognition_compensating_cleanup_failed",
+  "reason": "index_batch_failure",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 1,
+  "errorCode": "HttpException"
+}
+
+Compensating DeleteFaces cleanup failed; manual reconciliation required
+[Nest] 32092  - 23/11/2026, 15.32.58   ERROR [RekognitionFaceEnrollmentService] Object:
+{
+  "action": "rekognition_delete_faces_failed",
+  "collectionId": "col",
+  "faceCount": 1,
+  "errorCode": "AccessDenied"
+}
+
+Failed to delete faces from Rekognition collection
+[Nest] 32092  - 23/11/2026, 15.32.58   ERROR [KnownFacesService] Object:
+{
+  "action": "rekognition_compensating_delete_failed",
+  "reason": "create_db_persistence_failed",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 2,
+  "errorCode": "AWS_ERR"
+}
+
+Compensating Rekognition DeleteFaces failed; reconciliation required
+[Nest] 32092  - 23/11/2026, 15.32.58   ERROR [KnownFacesService] Object:
+{
+  "action": "rekognition_compensating_delete_failed",
+  "reason": "create_db_persistence_failed",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 2,
+  "errorCode": "AwsNameErr"
+}
+
+Compensating Rekognition DeleteFaces failed; reconciliation required
+[Nest] 32092  - 23/11/2026, 15.32.58   ERROR [KnownFacesService] Object:
+{
+  "action": "rekognition_compensating_delete_failed",
+  "reason": "create_db_persistence_failed",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 2,
+  "errorCode": "unknown"
+}
+
+Compensating Rekognition DeleteFaces failed; reconciliation required
+[Nest] 32092  - 23/11/2026, 15.32.58   ERROR [KnownFacesService] Object:
+{
+  "action": "rekognition_deactivate_db_reconciliation_required",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "knownFaceId": "22222222-2222-4222-8222-222222222222",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "deletedFaceCount": 1,
+  "errorCode": "DeadlockDetected"
+}
+
+Rekognition DeleteFaces succeeded but DB deactivation failed; retry deactivate to reconcile
+[Nest] 32092  - 23/11/2026, 15.32.58   ERROR [KnownFacesService] Object:
+{
+  "action": "rekognition_delete_db_reconciliation_required",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "knownFaceId": "22222222-2222-4222-8222-222222222222",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "deletedFaceCount": 1,
+  "errorCode": "57014"
+}
+
+Rekognition DeleteFaces succeeded but DB deletion failed; retry delete to reconcile
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [RekognitionFaceEnrollmentService] Object:
+{
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111"
+}
+
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [RekognitionFaceEnrollmentService] Object:
+{
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111"
+}
+
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [RekognitionFaceEnrollmentService] Object:
+{
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111"
+}
+
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [RekognitionFaceEnrollmentService] Object:
+{
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111"
+}
+
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [RekognitionFaceEnrollmentService] Object:
+{
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111"
+}
+
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [RekognitionFaceEnrollmentService] Object:
+{
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111"
+}
+
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [KnownFacesService] Received 2 images for registration
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 32092  - 23/11/2026, 15.32.58    WARN [KnownFacesService] Object:
+{
+  "action": "rekognition_compensating_delete_completed",
+  "reason": "create_db_persistence_failed",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 2
+}
+
+[Nest] 32092  - 23/11/2026, 15.32.58    WARN [KnownFacesService] Compensating Rekognition DeleteFaces succeeded after persistence failure
+[Nest] 32092  - 23/11/2026, 15.32.58    WARN [KnownFacesService] Object:
+{
+  "action": "rekognition_compensating_delete_completed",
+  "reason": "replace_photos_prune_previous_faces",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 1
+}
+
+[Nest] 32092  - 23/11/2026, 15.32.58    WARN [KnownFacesService] Compensating Rekognition DeleteFaces succeeded after persistence failure
+[Nest] 32092  - 23/11/2026, 15.32.58    WARN [KnownFacesService] Object:
+{
+  "action": "rekognition_compensating_delete_completed",
+  "reason": "replace_photos_db_persistence_failed",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 2
+}
+
+[Nest] 32092  - 23/11/2026, 15.32.58    WARN [KnownFacesService] Compensating Rekognition DeleteFaces succeeded after persistence failure
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 32092  - 23/11/2026, 15.32.58    WARN [FaceCollectionSyncService] Object:
+{
+  "code": "FACE_SYNC_RETRY",
+  "message": "Collection sync chưa hoàn tất"
+}
+
+[Nest] 32092  - 23/11/2026, 15.32.58    WARN [FaceCollectionSyncService] Object:
+{
+  "code": "FACE_SYNC_PENDING",
+  "ownerScopeId": "11111111-1111-4111-8111-111111111111",
+  "version": 1
+}
+
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [KnownFacesService] Received 2 images for registration
+[Nest] 32092  - 23/11/2026, 15.32.58     LOG [KnownFacesService] Received 1 images for registration
+PASS test/rekognition-enrollment.spec.ts (9.285 s)
+[Nest] 32092  - 23/11/2026, 15.33.03   ERROR [CloudQueueService] Cloud queue iteration failed (receive-results, unknown); retrying without acknowledging input
+[Nest] 32092  - 23/11/2026, 15.33.04   ERROR [CloudQueueService] Cloud queue iteration failed (dispatch, ECONNRESET); retrying without acknowledging input
+[Nest] 32092  - 23/11/2026, 15.33.03    WARN [CloudQueueService] Object:
+{
+  "messageId": "id"
+}
+
+[Nest] 32092  - 23/11/2026, 15.33.03    WARN [CloudQueueService] Results input retained for retry/redrive
+[Nest] 32092  - 23/11/2026, 15.33.03    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Face collection registry missing"
+}
+
+[Nest] 32092  - 23/11/2026, 15.33.03    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 32092  - 23/11/2026, 15.33.03    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Face collection prefix mismatch"
+}
+
+[Nest] 32092  - 23/11/2026, 15.33.03    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 32092  - 23/11/2026, 15.33.03    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Face crop unavailable"
+}
+
+[Nest] 32092  - 23/11/2026, 15.33.03    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 32092  - 23/11/2026, 15.33.03    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Unexpected upload bucket"
+}
+
+[Nest] 32092  - 23/11/2026, 15.33.03    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 32092  - 23/11/2026, 15.33.03    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 32092  - 23/11/2026, 15.33.03    WARN [CloudQueueService] Cloud job retained for retry
+PASS test/cloud-queue.spec.ts
+PASS test/cameras.service.spec.ts
+  ● Console
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=camera_cong_chinh objectId=live-person frameTime=1795422787077 observedAt=1795422787077 receivedAt=1795422787077 action=ACCEPT
+
+      129 |     }
+      130 |
+    > 131 |     console.warn(
+          |             ^
+      132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+      133 |     );
+      134 |
+
+      at FrigateFrameBuffer.warn [as parseObject] (src/frigate/frigate-frame-buffer.ts:131:13)
+      at FrigateFrameBuffer.parseObject [as accept] (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/cameras.service.spec.ts:170:33)
+
+PASS test/mqtt-consumer.service.spec.ts (11.012 s)
+[Nest] 32092  - 23/11/2026, 15.33.25   ERROR [MediaService] Object:
+{
+  "eventId": "evt-err",
+  "error": "s3 down"
+}
+
+Camera snapshot storage failed; incident remains persisted
+[Nest] 32092  - 23/11/2026, 15.33.25   ERROR [MediaService] Object:
+{
+  "eventId": "evt-err-2",
+  "error": "Unknown snapshot storage error"
+}
+
+Camera snapshot storage failed; incident remains persisted
+[Nest] 32092  - 23/11/2026, 15.33.25   ERROR [MediaService] Loi khi tai/luu snapshot cho event evt-err
+[Nest] 32092  - 23/11/2026, 15.33.25   ERROR [MediaService] Error: network error
+[Nest] 32092  - 23/11/2026, 15.33.25   ERROR [MediaService] Loi khi luu buffer snapshot cho event evt-err
+[Nest] 32092  - 23/11/2026, 15.33.25   ERROR [MediaService] Error: upload failed
+[Nest] 32092  - 23/11/2026, 15.33.25   ERROR [MediaService] Loi khi tai/luu clip cho event evt-clip
+[Nest] 32092  - 23/11/2026, 15.33.25   ERROR [MediaService] Error: clip fetch error
+PASS test/media.service.spec.ts (6.704 s)
+PASS test/events.service.spec.ts (5.82 s)
+PASS test/known-faces.repository.spec.ts
+PASS test/wellness.service.spec.ts (5.468 s)
+PASS test/escalation-engine.service.spec.ts (6.4 s)
+[Nest] 32092  - 23/11/2026, 15.33.50   ERROR [FrigateSyncService] Đồng bộ Frigate thất bại cho camera camera_cong_chinh:
+fetch failed: ECONNREFUSED 127.0.0.1:5000
+PASS test/frigate-sync.service.spec.ts
+PASS test/ffmpeg-source-runner.spec.ts
+FAIL test/auth-provider.spec.ts (8.317 s)
+  ● Cognito account management over HTTP › rejects undefined before writing an account
+
+    TypeError: fetch failed
+
+      173 |     ['caregiver', 403],
+      174 |   ])('rejects %s before writing an account', async (token, status) => {
+    > 175 |     expect((await create({ ...input, role: 'ADMIN' }, token)).status).toBe(status);
+          |             ^
+      176 |     expect(query).not.toHaveBeenCalled();
+      177 |   });
+      178 |
+
+      at test/auth-provider.spec.ts:175:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects viewer before writing an account
+
+    TypeError: fetch failed
+
+      173 |     ['caregiver', 403],
+      174 |   ])('rejects %s before writing an account', async (token, status) => {
+    > 175 |     expect((await create({ ...input, role: 'ADMIN' }, token)).status).toBe(status);
+          |             ^
+      176 |     expect(query).not.toHaveBeenCalled();
+      177 |   });
+      178 |
+
+      at test/auth-provider.spec.ts:175:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects caregiver before writing an account
+
+    TypeError: fetch failed
+
+      173 |     ['caregiver', 403],
+      174 |   ])('rejects %s before writing an account', async (token, status) => {
+    > 175 |     expect((await create({ ...input, role: 'ADMIN' }, token)).status).toBe(status);
+          |             ^
+      176 |     expect(query).not.toHaveBeenCalled();
+      177 |   });
+      178 |
+
+      at test/auth-provider.spec.ts:175:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › allows an admin to create a VIEWER
+
+    TypeError: fetch failed
+
+      187 |     };
+      188 |     query.mockResolvedValue({ rows: [user] });
+    > 189 |     const response = await create({ ...input, role }, 'admin');
+          |                      ^
+      190 |     expect(response.status).toBe(201);
+      191 |     expect(await response.json()).toEqual(user);
+      192 |     expect(query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO audit_logs'), [
+
+      at test/auth-provider.spec.ts:189:22
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › allows an admin to create a CAREGIVER
+
+    TypeError: fetch failed
+
+      187 |     };
+      188 |     query.mockResolvedValue({ rows: [user] });
+    > 189 |     const response = await create({ ...input, role }, 'admin');
+          |                      ^
+      190 |     expect(response.status).toBe(201);
+      191 |     expect(await response.json()).toEqual(user);
+      192 |     expect(query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO audit_logs'), [
+
+      at test/auth-provider.spec.ts:189:22
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › allows an admin to create a ADMIN
+
+    TypeError: fetch failed
+
+      187 |     };
+      188 |     query.mockResolvedValue({ rows: [user] });
+    > 189 |     const response = await create({ ...input, role }, 'admin');
+          |                      ^
+      190 |     expect(response.status).toBe(201);
+      191 |     expect(await response.json()).toEqual(user);
+      192 |     expect(query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO audit_logs'), [
+
+      at test/auth-provider.spec.ts:189:22
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects invalid or unexpected fields before writing
+
+    TypeError: fetch failed
+
+      208 |     { cognitoIssuer: 'https://other.example.org' },
+      209 |   ])('rejects invalid or unexpected fields before writing', async (override) => {
+    > 210 |     expect((await create({ ...input, role: 'VIEWER', ...override }, 'admin')).status).toBe(400);
+          |             ^
+      211 |     expect(query).not.toHaveBeenCalled();
+      212 |   });
+      213 |
+
+      at test/auth-provider.spec.ts:210:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects invalid or unexpected fields before writing
+
+    TypeError: fetch failed
+
+      208 |     { cognitoIssuer: 'https://other.example.org' },
+      209 |   ])('rejects invalid or unexpected fields before writing', async (override) => {
+    > 210 |     expect((await create({ ...input, role: 'VIEWER', ...override }, 'admin')).status).toBe(400);
+          |             ^
+      211 |     expect(query).not.toHaveBeenCalled();
+      212 |   });
+      213 |
+
+      at test/auth-provider.spec.ts:210:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects invalid or unexpected fields before writing
+
+    TypeError: fetch failed
+
+      208 |     { cognitoIssuer: 'https://other.example.org' },
+      209 |   ])('rejects invalid or unexpected fields before writing', async (override) => {
+    > 210 |     expect((await create({ ...input, role: 'VIEWER', ...override }, 'admin')).status).toBe(400);
+          |             ^
+      211 |     expect(query).not.toHaveBeenCalled();
+      212 |   });
+      213 |
+
+      at test/auth-provider.spec.ts:210:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects invalid or unexpected fields before writing
+
+    TypeError: fetch failed
+
+      208 |     { cognitoIssuer: 'https://other.example.org' },
+      209 |   ])('rejects invalid or unexpected fields before writing', async (override) => {
+    > 210 |     expect((await create({ ...input, role: 'VIEWER', ...override }, 'admin')).status).toBe(400);
+          |             ^
+      211 |     expect(query).not.toHaveBeenCalled();
+      212 |   });
+      213 |
+
+      at test/auth-provider.spec.ts:210:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects invalid or unexpected fields before writing
+
+    TypeError: fetch failed
+
+      208 |     { cognitoIssuer: 'https://other.example.org' },
+      209 |   ])('rejects invalid or unexpected fields before writing', async (override) => {
+    > 210 |     expect((await create({ ...input, role: 'VIEWER', ...override }, 'admin')).status).toBe(400);
+          |             ^
+      211 |     expect(query).not.toHaveBeenCalled();
+      212 |   });
+      213 |
+
+      at test/auth-provider.spec.ts:210:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › reports a duplicate account as a conflict
+
+    TypeError: fetch failed
+
+      214 |   it('reports a duplicate account as a conflict', async () => {
+      215 |     query.mockResolvedValue({ rows: [] });
+    > 216 |     expect((await create({ ...input, role: 'VIEWER' }, 'admin')).status).toBe(409);
+          |             ^
+      217 |   });
+      218 |
+      219 |   function list(token: string): Promise<Response> {
+
+      at Object.<anonymous> (test/auth-provider.spec.ts:216:13)
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › denies listing and role changes for viewer
+
+    TypeError: fetch failed
+
+      232 |
+      233 |   it.each(['viewer', 'caregiver'])('denies listing and role changes for %s', async (token) => {
+    > 234 |     expect((await list(token)).status).toBe(403);
+          |             ^
+      235 |     expect((await changeRole(target.id, { role: 'ADMIN' }, token)).status).toBe(403);
+      236 |     expect(query).not.toHaveBeenCalled();
+      237 |   });
+
+      at test/auth-provider.spec.ts:234:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › denies listing and role changes for caregiver
+
+    TypeError: fetch failed
+
+      232 |
+      233 |   it.each(['viewer', 'caregiver'])('denies listing and role changes for %s', async (token) => {
+    > 234 |     expect((await list(token)).status).toBe(403);
+          |             ^
+      235 |     expect((await changeRole(target.id, { role: 'ADMIN' }, token)).status).toBe(403);
+      236 |     expect(query).not.toHaveBeenCalled();
+      237 |   });
+
+      at test/auth-provider.spec.ts:234:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › returns a paginated list to the admin
+
+    TypeError: fetch failed
+
+      239 |   it('returns a paginated list to the admin', async () => {
+      240 |     query.mockResolvedValue({ rows: [{ data: [target], total: 11 }] });
+    > 241 |     const response = await list('admin');
+          |                      ^
+      242 |     expect(response.status).toBe(200);
+      243 |     expect(await response.json()).toEqual({
+      244 |       data: [target],
+
+      at Object.<anonymous> (test/auth-provider.spec.ts:241:22)
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › allows a different user to be updated and audits the actual role transition
+
+    TypeError: fetch failed
+
+      252 |       .mockResolvedValueOnce({ rows: [actor, target] })
+      253 |       .mockResolvedValueOnce({ rows: [updated] });
+    > 254 |     const response = await changeRole(target.id, { role: 'CAREGIVER' });
+          |                      ^
+      255 |     expect(response.status).toBe(200);
+      256 |     expect(await response.json()).toEqual(updated);
+      257 |     expect(query).toHaveBeenLastCalledWith(expect.stringContaining('INSERT INTO audit_logs'), [
+
+      at Object.<anonymous> (test/auth-provider.spec.ts:254:22)
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects self changes and unexpected fields before writing
+
+    TypeError: fetch failed
+
+      264 |
+      265 |   it('rejects self changes and unexpected fields before writing', async () => {
+    > 266 |     expect((await changeRole(actorId, { role: 'VIEWER' })).status).toBe(409);
+          |             ^
+      267 |     expect((await changeRole(target.id, { role: 'ADMIN', isActive: true })).status).toBe(400);
+      268 |     expect((await changeRole(target.id, { role: 'OWNER' })).status).toBe(400);
+      269 |     expect(query).not.toHaveBeenCalled();
+
+      at Object.<anonymous> (test/auth-provider.spec.ts:266:13)
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rechecks the acting admin under lock and handles an unknown target
+
+    TypeError: fetch failed
+
+      274 |       .mockResolvedValueOnce({ rows: [{ ...actor, role: 'VIEWER' }, target] })
+      275 |       .mockResolvedValueOnce({ rows: [actor] });
+    > 276 |     expect((await changeRole(target.id, { role: 'ADMIN' })).status).toBe(403);
+          |             ^
+      277 |     expect((await changeRole(target.id, { role: 'ADMIN' })).status).toBe(404);
+      278 |     expect(query).toHaveBeenCalledTimes(2);
+      279 |   });
+
+      at Object.<anonymous> (test/auth-provider.spec.ts:276:13)
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › prevents a household admin from editing users outside the household
+
+    TypeError: fetch failed
+
+      283 |       rows: [{ ...actor, email: 'household@example.org' }, target],
+      284 |     });
+    > 285 |     expect((await changeRole(target.id, { role: 'ADMIN' })).status).toBe(404);
+          |             ^
+      286 |     expect(query).toHaveBeenCalledTimes(1);
+      287 |   });
+      288 | });
+
+      at Object.<anonymous> (test/auth-provider.spec.ts:285:13)
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+PASS test/smoke.service.spec.ts (6.021 s)
+[Nest] 32092  - 23/11/2026, 15.34.15   ERROR [FrigateConfigService] Lỗi khi phân tích cú pháp YAML cấu hình Frigate:
+[Nest] 32092  - 23/11/2026, 15.34.15   ERROR [FrigateConfigService] YAMLParseError: Flow sequence in block collection must be sufficiently indented and end with a ] at line 1, column 23:
+
+invalid: [yaml: broken
+                      ^
+
+[Nest] 32092  - 23/11/2026, 15.34.09    WARN [SmokeService] Smoke check failed for database: Error
+[Nest] 32092  - 23/11/2026, 15.34.09    WARN [SmokeService] Smoke check failed for cloudQueue: Error
+[Nest] 32092  - 23/11/2026, 15.34.09    WARN [SmokeService] Smoke check failed for storage: UnknownError
+[Nest] 32092  - 23/11/2026, 15.34.09    WARN [SmokeService] Smoke check failed for storage: UnknownError
+[Nest] 32092  - 23/11/2026, 15.34.09    WARN [SmokeService] Smoke check failed for auth: Error
+[Nest] 32092  - 23/11/2026, 15.34.09    WARN [SmokeService] Smoke check failed for storage: UnknownError
+PASS test/frigate-config.service.spec.ts (8.009 s)
+FAIL test/cameras.controller.spec.ts
+  ● Test suite failed to run
+
+    EPERM: operation not permitted, open 'D:\hoc tap\project 1\aws-camera-ai\node_modules\.pnpm\source-map-support@0.5.13\node_modules\source-map-support\source-map-support.js'
+
+      at Runtime.readFileBuffer (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:2291:21)
+
+[Nest] 32092  - 23/11/2026, 15.34.36    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track track-1 camera cam-livingroom ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 32092  - 23/11/2026, 15.34.36     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera cam-livingroom (track: track-1, event: evt-111)
+[Nest] 32092  - 23/11/2026, 15.34.36   DEBUG [FallIncidentCoordinator] [M2A_CANDIDATE_CANCELLED] Track track-1 trên camera cam-livingroom đã hủy candidate (reason: RECOVERED)
+[Nest] 32092  - 23/11/2026, 15.34.36    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track track-1 camera cam-livingroom ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 32092  - 23/11/2026, 15.34.36   DEBUG [FallIncidentCoordinator] Incident té ngã episode 22222222-2222-4222-8222-222222222222 đã được xử lý trước đó (deduped)
+PASS src/fall-detection/coordinator/fall-incident.coordinator.spec.ts (16.106 s)
+PASS test/escalation-policy.spec.ts
+[Nest] 32092  - 23/11/2026, 15.34.41     LOG [KnownFacesService] Received 2 images for registration
+[Nest] 32092  - 23/11/2026, 15.34.41     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 32092  - 23/11/2026, 15.34.41     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 32092  - 23/11/2026, 15.34.41     LOG [KnownFacesService] Received 1 images for registration
+PASS test/known-faces.spec.ts
+[Nest] 32092  - 23/11/2026, 15.34.47   ERROR [EventsRepository] Lỗi khi ghi event vào PostgreSQL (dedupKey: dedup-1, trackId: track-1)
+[Nest] 32092  - 23/11/2026, 15.34.47   ERROR [EventsRepository] Error: DB Error
+PASS test/events.repository.spec.ts (5.931 s)
+PASS test/notification-retry-worker.spec.ts (15.051 s)
+PASS test/wellness-scheduler.service.spec.ts (9.413 s)
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+PASS test/face-recognition.worker.spec.ts (15.897 s)
+[Nest] 32092  - 23/11/2026, 15.35.27    WARN [FaceRecognitionWorker] Không lấy được ảnh crop cho track track-1
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "eed5df53-7e4a-4cc2-8fad-e3c82bef44b1",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNKNOWN",
+  "hasError": false
+}
+
+[Nest] 32092  - 23/11/2026, 15.35.27     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 32092  - 23/11/2026, 15.35.28     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 32092  - 23/11/2026, 15.35.28     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "KNOWN",
+  "hasError": false
+}
+
+[Nest] 32092  - 23/11/2026, 15.35.28     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+PASS test/face-session-cache.service.spec.ts (9.697 s)
+FAIL test/resource-ownership.spec.ts (26.781 s)
+  ● resource access over HTTP › authenticates before serving a camera list and scopes it to the current user
+
+    TypeError: fetch failed
+
+      161 |
+      162 |   it('authenticates before serving a camera list and scopes it to the current user', async () => {
+    > 163 |     expect((await get('/cameras')).status).toBe(401);
+          |             ^
+      164 |     expect((await get('/cameras', owner)).status).toBe(200);
+      165 |     expect(listCameras).toHaveBeenLastCalledWith({}, 'ADMIN', owner);
+      166 |     expect((await get('/cameras', 'admin')).status).toBe(200);
+
+      at Object.<anonymous> (test/resource-ownership.spec.ts:163:13)
+
+    Cause:
+    connect EACCES 127.0.0.1:50136
+
+
+
+  ● resource access over HTTP › denies direct snapshot and event media requests before generating their URLs
+
+    TypeError: fetch failed
+
+      173 |
+      174 |     for (const path of [snapshot, media]) {
+    > 175 |       const denied = await get(path, other);
+          |                      ^
+      176 |       expect(denied.status).toBe(403);
+      177 |       expect(await denied.text()).not.toContain(privateUrl);
+      178 |     }
+
+      at Object.<anonymous> (test/resource-ownership.spec.ts:175:22)
+
+    Cause:
+    connect EACCES 127.0.0.1:50136
+
+
+
+[Nest] 32092  - 23/11/2026, 15.36.17     LOG [S3StorageService] Khoi tao AWS S3 Storage Adapter (region: ap-southeast-1, bucket: argusai-staging-media)
+[Nest] 32092  - 23/11/2026, 15.36.17     LOG [S3StorageService] Khoi tao AWS S3 Storage Adapter (region: ap-southeast-1, bucket: argusai-staging-media)
+[Nest] 32092  - 23/11/2026, 15.36.17     LOG [S3StorageService] Khoi tao AWS S3 Storage Adapter (region: ap-southeast-1, bucket: argusai-staging-media)
+[Nest] 32092  - 23/11/2026, 15.36.17     LOG [MinioStorageService] Khoi tao MinIO Storage Adapter (endpoint: http://localhost:9000, presign: http://localhost:9000, bucket: camerai-media)
+[Nest] 32092  - 23/11/2026, 15.36.17     LOG [S3StorageService] Khoi tao AWS S3 Storage Adapter (region: ap-southeast-1, bucket: argusai-staging-media)
+[Nest] 32092  - 23/11/2026, 15.36.18     LOG [MinioStorageService] Khoi tao MinIO Storage Adapter (endpoint: http://minio:9000, presign: http://localhost:9000, bucket: camerai-media)
+PASS test/s3-storage.service.spec.ts (12.752 s)
+[Nest] 32092  - 23/11/2026, 15.36.35   ERROR [FireMediaService] Object:
+{
+  "err": {}
+}
+
+Fire media recovery failed
+PASS test/fire-media.spec.ts (17.251 s)
+PASS test/auth.service.spec.ts
+PASS test/fire.spec.ts (15.529 s)
+PASS test/ai-result.aggregator.spec.ts
+PASS test/fire-health.spec.ts (12.287 s)
+[Nest] 32092  - 23/11/2026, 15.37.15    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=webrtc path=cam_front hasToken=true hasQuery=false
+[Nest] 32092  - 23/11/2026, 15.37.15    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=webrtc path=cam_front hasToken=true hasQuery=false
+[Nest] 32092  - 23/11/2026, 15.37.15    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=webrtc path=cam_other hasToken=false hasQuery=true
+[Nest] 32092  - 23/11/2026, 15.37.15    WARN [MediaMtxAuthController] MediaMTX auth denied action=publish protocol=webrtc path=cam_front hasToken=true hasQuery=false
+[Nest] 32092  - 23/11/2026, 15.37.15    WARN [MediaMtxAuthController] MediaMTX auth denied action=publish protocol=webrtc path=cam_other hasToken=true hasQuery=false
+[Nest] 32092  - 23/11/2026, 15.37.15    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=webrtc path=cam_front hasToken=true hasQuery=false
+[Nest] 32092  - 23/11/2026, 15.37.15    WARN [MediaMtxAuthController] MediaMTX auth denied action=publish protocol=rtsp path=cam_front hasToken=true hasQuery=false
+PASS test/media-mtx-auth.controller.spec.ts
+PASS test/escalation-rules.service.spec.ts (5.268 s)
+[Nest] 32092  - 23/11/2026, 15.37.28   ERROR [RestAreaEvaluator] Lỗi khi kiểm tra REST_AREA cho camera 11111111-1111-4111-8111-111111111111: DB unavailable
+[Nest] 32092  - 23/11/2026, 15.37.28   ERROR [FallIncidentCoordinator] Fall processing failed for qa-camera/qa-track: DB unavailable
+[Nest] 32092  - 23/11/2026, 15.37.28   ERROR [FallIncidentCoordinator] Lỗi khi submit kết quả AI té ngã cho event event: temporary submit failure
+[Nest] 32092  - 23/11/2026, 15.37.28    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+[Nest] 32092  - 23/11/2026, 15.37.28    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+[Nest] 32092  - 23/11/2026, 15.37.28   DEBUG [PoseFrameConsumer] Bỏ qua pose frame cũ: delay 1.10s > 1s
+[Nest] 32092  - 23/11/2026, 15.37.28   DEBUG [PoseFrameConsumer] Bỏ qua pose frame cũ: delay -0.60s > 1s
+[Nest] 32092  - 23/11/2026, 15.37.28    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track qa-track camera qa-camera ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 32092  - 23/11/2026, 15.37.28    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track qa-track camera qa-camera ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 32092  - 23/11/2026, 15.37.28     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera qa-camera (track: qa-track, event: event)
+PASS test/qa-fall.spec.ts (7.4 s)
+PASS test/wellness-policy.spec.ts
+PASS test/track-identity-state.service.spec.ts
+[Nest] 32092  - 23/11/2026, 15.37.38   ERROR [FireProcessorService] Object:
+{
+  "frameId": "frame-1795423058793",
+  "error": "DB temporarily unavailable"
+}
+
+Fire confirmation persistence failed; evidence retained for retry
+PASS test/fire-recovery.spec.ts
+PASS test/escalation-rule-policy.spec.ts
+PASS test/frigate-media.adapter.spec.ts (5.362 s)
+PASS test/ai-result.validator.spec.ts
+PASS test/escalation-rules.repository.spec.ts
+PASS test/fire-incidents.repository.spec.ts
+PASS test/escalation-rules.controller.spec.ts (6.357 s)
+PASS src/playback/playback.service.spec.ts
+PASS test/zone-result-producer.service.spec.ts
+[Nest] 32092  - 23/11/2026, 15.38.07   ERROR [AiResultOutboxService] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "messageId": "22222222-2222-4222-8222-222222222222",
+  "err": "database unavailable"
+}
+
+Xử lý AI result outbox thất bại
+PASS test/ai-result-outbox.service.spec.ts
+PASS test/frigate-detection-tracker.service.spec.ts
+  ● Console
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=track-new-9 frameTime=1795423089386 observedAt=1795423089386 receivedAt=1795423089386 action=ACCEPT
+
+      129 |     }
+      130 |
+    > 131 |     console.warn(
+          |             ^
+      132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+      133 |     );
+      134 |
+
+      at CanonicalPreservingFrameBuffer.warn [as parseObject] (src/frigate/frigate-frame-buffer.ts:131:13)
+      at CanonicalPreservingFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:56:27)
+      at CanonicalPreservingFrameBuffer.accept (src/frigate/frigate-detection-tracker.service.ts:45:11)
+      at Object.<anonymous> (test/frigate-detection-tracker.service.spec.ts:116:20)
+
+[Nest] 32092  - 23/11/2026, 15.38.12   DEBUG [PoseFrameConsumer] Bỏ qua pose frame cũ: delay 5.00s > 1s
+PASS src/fall-detection/consumer/pose-frame.consumer.spec.ts
+PASS test/escalation-deadline-worker.service.spec.ts
+PASS test/auth.controller.spec.ts
+PASS test/media-mtx.service.spec.ts
+[Nest] 32092  - 23/11/2026, 15.38.22   ERROR [RestAreaEvaluator] Lỗi khi kiểm tra REST_AREA cho camera cam-1: Database offline
+PASS src/fall-detection/evaluator/rest-area.evaluator.spec.ts
+[Nest] 32092  - 23/11/2026, 15.38.22   DEBUG [RestAreaEvaluator] Người tại tâm (0.400, 0.400) nằm trong REST_AREA "Giường ngủ" (zone-1)
+PASS test/telegram-webhook.spec.ts
+PASS test/fire-image-evidence.spec.ts
+PASS src/fall-detection/envelope/pose-frame-envelope.spec.ts
+[Nest] 32092  - 23/11/2026, 15.38.33    WARN [PoseFrameEnvelope] Dữ liệu envelope quá ngắn (< 4 bytes)
+[Nest] 32092  - 23/11/2026, 15.38.33    WARN [PoseFrameEnvelope] Envelope vượt quá giới hạn cho phép (1048586 > 1048576 bytes)
+[Nest] 32092  - 23/11/2026, 15.38.33    WARN [PoseFrameEnvelope] Header length không hợp lệ: 33792 bytes
+[Nest] 32092  - 23/11/2026, 15.38.33    WARN [PoseFrameEnvelope] Header bị cắt xén (4 + 50 > 20)
+[Nest] 32092  - 23/11/2026, 15.38.33    WARN [PoseFrameEnvelope] Lỗi parse JSON header trong envelope: Unexpected token 'o', "not-json{" is not valid JSON
+[Nest] 32092  - 23/11/2026, 15.38.33    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+[Nest] 32092  - 23/11/2026, 15.38.33    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+PASS test/rekognition-selection.spec.ts
+PASS test/face-quality-gate.client.spec.ts
+[Nest] 32092  - 23/11/2026, 15.38.40    WARN [FaceQualityGateClient] Object:
+{
+  "reason": "QUALITY_GATE_TIMEOUT",
+  "failOpen": true
+}
+
+[Nest] 32092  - 23/11/2026, 15.38.40    WARN [FaceQualityGateClient] Face quality gate request failed
+[Nest] 32092  - 23/11/2026, 15.38.40    WARN [FaceQualityGateClient] Object:
+{
+  "reason": "QUALITY_GATE_TIMEOUT",
+  "failOpen": false
+}
+
+[Nest] 32092  - 23/11/2026, 15.38.40    WARN [FaceQualityGateClient] Face quality gate request failed
+PASS test/wellness.controller.spec.ts (7.035 s)
+PASS test/events.controller.spec.ts (5.485 s)
+[Nest] 32092  - 23/11/2026, 15.38.55   ERROR [PoseInferenceAdapter] Lỗi gọi AI Service /pose/fall: Network connection refused
+PASS src/fall-detection/adapter/pose-inference.adapter.spec.ts
+[Nest] 32092  - 23/11/2026, 15.38.55    WARN [PoseInferenceAdapter] AI Service /pose/fall trả về HTTP 500: Internal Server Error
+PASS test/cognito-verifier.spec.ts
+PASS test/frigate-frame-buffer.spec.ts
+  ● Console
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=a frameTime=10000 observedAt=9900 receivedAt=10100 action=ACCEPT
+
+      129 |     }
+      130 |
+    > 131 |     console.warn(
+          |             ^
+      132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+      133 |     );
+      134 |
+
+      at FrigateFrameBuffer.warn [as parseObject] (src/frigate/frigate-frame-buffer.ts:131:13)
+      at FrigateFrameBuffer.parseObject [as accept] (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:12:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test frameTime=10100 receivedAt=10300 action=DROP reason=out_of_order_or_duplicate
+
+      45 |     const frames = this.cameras.get(sample.camera) ?? [];
+      46 |     if (frames.length && frames[frames.length - 1].frameTime >= frameTime) {
+    > 47 |       console.warn(
+         |               ^
+      48 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${sample.camera} frameTime=${frameTime} receivedAt=${now} action=DROP reason=out_of_order_or_duplicate`,
+      49 |       );
+      50 |       return;
+
+      at FrigateFrameBuffer.warn [as accept] (src/frigate/frigate-frame-buffer.ts:47:15)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:17:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test frameTime=1000 receivedAt=10000 action=DROP reason=out_of_window
+
+      38 |     const frameTime = toMilliseconds(sample.frameTime);
+      39 |     if (frameTime < now - MAX_AGE_MS || frameTime > now + 1000) {
+    > 40 |       console.warn(
+         |               ^
+      41 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${sample.camera} frameTime=${frameTime} receivedAt=${now} action=DROP reason=out_of_window`,
+      42 |       );
+      43 |       return;
+
+      at FrigateFrameBuffer.warn [as accept] (src/frigate/frigate-frame-buffer.ts:40:15)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:25:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test frameTime=20000 receivedAt=10000 action=DROP reason=out_of_window
+
+      38 |     const frameTime = toMilliseconds(sample.frameTime);
+      39 |     if (frameTime < now - MAX_AGE_MS || frameTime > now + 1000) {
+    > 40 |       console.warn(
+         |               ^
+      41 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${sample.camera} frameTime=${frameTime} receivedAt=${now} action=DROP reason=out_of_window`,
+      42 |       );
+      43 |       return;
+
+      at FrigateFrameBuffer.warn [as accept] (src/frigate/frigate-frame-buffer.ts:40:15)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:26:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=a frameTime=10000 receivedAt=10000 action=DROP reason=malformed_geometry
+
+      100 |     ) {
+      101 |       if (label === 'person') {
+    > 102 |         console.warn(
+          |                 ^
+      103 |           `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id ?? 'unknown'} frameTime=${frameTimeMs} receivedAt=${now} action=DROP reason=malformed_geometry`,
+      104 |         );
+      105 |       }
+
+      at FrigateFrameBuffer.warn [as parseObject] (src/frigate/frigate-frame-buffer.ts:102:17)
+      at FrigateFrameBuffer.parseObject [as accept] (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:29:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=p1 frameTime=123500 observedAt=123400 receivedAt=124000 action=ACCEPT
+
+      129 |     }
+      130 |
+    > 131 |     console.warn(
+          |             ^
+      132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+      133 |     );
+      134 |
+
+      at FrigateFrameBuffer.warn [as parseObject] (src/frigate/frigate-frame-buffer.ts:131:13)
+      at FrigateFrameBuffer.parseObject [as accept] (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:47:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=p_no_obs frameTime=10000 receivedAt=10100 action=DROP reason=missing_observed_at
+
+      115 |
+      116 |     if (rawObserved === undefined || !Number.isFinite(rawObserved)) {
+    > 117 |       console.warn(
+          |               ^
+      118 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} receivedAt=${now} action=DROP reason=missing_observed_at`,
+      119 |       );
+      120 |       return null;
+
+      at FrigateFrameBuffer.warn [as parseObject] (src/frigate/frigate-frame-buffer.ts:117:15)
+      at FrigateFrameBuffer.parseObject [as accept] (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:71:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=p_future frameTime=10000 observedAt=10200 receivedAt=10100 action=DROP reason=future_observed_at
+
+      123 |     const observedAtMs = toMilliseconds(rawObserved);
+      124 |     if (observedAtMs > frameTimeMs + 50) {
+    > 125 |       console.warn(
+          |               ^
+      126 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=DROP reason=future_observed_at`,
+      127 |       );
+      128 |       return null;
+
+      at FrigateFrameBuffer.warn [as parseObject] (src/frigate/frigate-frame-buffer.ts:125:15)
+      at FrigateFrameBuffer.parseObject [as accept] (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:71:12)
+
+PASS test/jwt-auth.guard.spec.ts
+PASS test/fire-telegram-channel.spec.ts
+[Nest] 32092  - 23/11/2026, 15.39.08   ERROR [FireDeliveryService] Object:
+{
+  "eventId": "437c2e23-8e1c-4a7d-bdc9-cf44f62539e7",
+  "incidentId": "67dc0a11-f519-4c91-a6e7-e334f98d2fc9",
+  "error": "Temporary AI result DB failure"
+}
+
+Fire pending result delivery failed
+PASS test/fire-delivery.spec.ts (6.658 s)
+PASS test/telegram.adapter.spec.ts
+PASS test/frigate-client.service.spec.ts
+PASS src/playback/playback-frames.service.spec.ts
+PASS src/playback/playback-metadata.service.spec.ts
+PASS test/rtsp-source-tester.service.spec.ts
+PASS test/fire-ai-client.spec.ts
+PASS test/telegram-message-builder.spec.ts
+PASS test/jwt-token.service.spec.ts
+PASS test/media.controller.spec.ts
+PASS test/env-config.spec.ts
+PASS src/playback/playback.repository.spec.ts
+PASS test/telegram-link.service.spec.ts
+PASS test/face-person-association.spec.ts
+PASS test/telegram-delivery-scope.spec.ts
+PASS test/internal-token.guard.spec.ts
+PASS src/playback/playback-frame.codec.spec.ts
+PASS test/zone-schedule.service.spec.ts
+PASS test/frigate-playback.spec.ts
+PASS test/zone-geometry.validator.spec.ts
+PASS src/playback/playback-time.spec.ts
+PASS test/face-track-optimization.config.spec.ts
+PASS test/argon2-password-hasher.spec.ts
+PASS test/health.service.spec.ts
+Jest: "global" coverage threshold for functions (60%) not met: 58.66%
+
+Summary of all failing tests
+FAIL test/auth-provider.spec.ts (8.317 s)
+  ● Cognito account management over HTTP › rejects undefined before writing an account
+
+    TypeError: fetch failed
+
+      173 |     ['caregiver', 403],
+      174 |   ])('rejects %s before writing an account', async (token, status) => {
+    > 175 |     expect((await create({ ...input, role: 'ADMIN' }, token)).status).toBe(status);
+          |             ^
+      176 |     expect(query).not.toHaveBeenCalled();
+      177 |   });
+      178 |
+
+      at test/auth-provider.spec.ts:175:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects viewer before writing an account
+
+    TypeError: fetch failed
+
+      173 |     ['caregiver', 403],
+      174 |   ])('rejects %s before writing an account', async (token, status) => {
+    > 175 |     expect((await create({ ...input, role: 'ADMIN' }, token)).status).toBe(status);
+          |             ^
+      176 |     expect(query).not.toHaveBeenCalled();
+      177 |   });
+      178 |
+
+      at test/auth-provider.spec.ts:175:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects caregiver before writing an account
+
+    TypeError: fetch failed
+
+      173 |     ['caregiver', 403],
+      174 |   ])('rejects %s before writing an account', async (token, status) => {
+    > 175 |     expect((await create({ ...input, role: 'ADMIN' }, token)).status).toBe(status);
+          |             ^
+      176 |     expect(query).not.toHaveBeenCalled();
+      177 |   });
+      178 |
+
+      at test/auth-provider.spec.ts:175:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › allows an admin to create a VIEWER
+
+    TypeError: fetch failed
+
+      187 |     };
+      188 |     query.mockResolvedValue({ rows: [user] });
+    > 189 |     const response = await create({ ...input, role }, 'admin');
+          |                      ^
+      190 |     expect(response.status).toBe(201);
+      191 |     expect(await response.json()).toEqual(user);
+      192 |     expect(query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO audit_logs'), [
+
+      at test/auth-provider.spec.ts:189:22
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › allows an admin to create a CAREGIVER
+
+    TypeError: fetch failed
+
+      187 |     };
+      188 |     query.mockResolvedValue({ rows: [user] });
+    > 189 |     const response = await create({ ...input, role }, 'admin');
+          |                      ^
+      190 |     expect(response.status).toBe(201);
+      191 |     expect(await response.json()).toEqual(user);
+      192 |     expect(query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO audit_logs'), [
+
+      at test/auth-provider.spec.ts:189:22
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › allows an admin to create a ADMIN
+
+    TypeError: fetch failed
+
+      187 |     };
+      188 |     query.mockResolvedValue({ rows: [user] });
+    > 189 |     const response = await create({ ...input, role }, 'admin');
+          |                      ^
+      190 |     expect(response.status).toBe(201);
+      191 |     expect(await response.json()).toEqual(user);
+      192 |     expect(query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO audit_logs'), [
+
+      at test/auth-provider.spec.ts:189:22
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects invalid or unexpected fields before writing
+
+    TypeError: fetch failed
+
+      208 |     { cognitoIssuer: 'https://other.example.org' },
+      209 |   ])('rejects invalid or unexpected fields before writing', async (override) => {
+    > 210 |     expect((await create({ ...input, role: 'VIEWER', ...override }, 'admin')).status).toBe(400);
+          |             ^
+      211 |     expect(query).not.toHaveBeenCalled();
+      212 |   });
+      213 |
+
+      at test/auth-provider.spec.ts:210:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects invalid or unexpected fields before writing
+
+    TypeError: fetch failed
+
+      208 |     { cognitoIssuer: 'https://other.example.org' },
+      209 |   ])('rejects invalid or unexpected fields before writing', async (override) => {
+    > 210 |     expect((await create({ ...input, role: 'VIEWER', ...override }, 'admin')).status).toBe(400);
+          |             ^
+      211 |     expect(query).not.toHaveBeenCalled();
+      212 |   });
+      213 |
+
+      at test/auth-provider.spec.ts:210:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects invalid or unexpected fields before writing
+
+    TypeError: fetch failed
+
+      208 |     { cognitoIssuer: 'https://other.example.org' },
+      209 |   ])('rejects invalid or unexpected fields before writing', async (override) => {
+    > 210 |     expect((await create({ ...input, role: 'VIEWER', ...override }, 'admin')).status).toBe(400);
+          |             ^
+      211 |     expect(query).not.toHaveBeenCalled();
+      212 |   });
+      213 |
+
+      at test/auth-provider.spec.ts:210:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects invalid or unexpected fields before writing
+
+    TypeError: fetch failed
+
+      208 |     { cognitoIssuer: 'https://other.example.org' },
+      209 |   ])('rejects invalid or unexpected fields before writing', async (override) => {
+    > 210 |     expect((await create({ ...input, role: 'VIEWER', ...override }, 'admin')).status).toBe(400);
+          |             ^
+      211 |     expect(query).not.toHaveBeenCalled();
+      212 |   });
+      213 |
+
+      at test/auth-provider.spec.ts:210:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects invalid or unexpected fields before writing
+
+    TypeError: fetch failed
+
+      208 |     { cognitoIssuer: 'https://other.example.org' },
+      209 |   ])('rejects invalid or unexpected fields before writing', async (override) => {
+    > 210 |     expect((await create({ ...input, role: 'VIEWER', ...override }, 'admin')).status).toBe(400);
+          |             ^
+      211 |     expect(query).not.toHaveBeenCalled();
+      212 |   });
+      213 |
+
+      at test/auth-provider.spec.ts:210:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › reports a duplicate account as a conflict
+
+    TypeError: fetch failed
+
+      214 |   it('reports a duplicate account as a conflict', async () => {
+      215 |     query.mockResolvedValue({ rows: [] });
+    > 216 |     expect((await create({ ...input, role: 'VIEWER' }, 'admin')).status).toBe(409);
+          |             ^
+      217 |   });
+      218 |
+      219 |   function list(token: string): Promise<Response> {
+
+      at Object.<anonymous> (test/auth-provider.spec.ts:216:13)
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › denies listing and role changes for viewer
+
+    TypeError: fetch failed
+
+      232 |
+      233 |   it.each(['viewer', 'caregiver'])('denies listing and role changes for %s', async (token) => {
+    > 234 |     expect((await list(token)).status).toBe(403);
+          |             ^
+      235 |     expect((await changeRole(target.id, { role: 'ADMIN' }, token)).status).toBe(403);
+      236 |     expect(query).not.toHaveBeenCalled();
+      237 |   });
+
+      at test/auth-provider.spec.ts:234:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › denies listing and role changes for caregiver
+
+    TypeError: fetch failed
+
+      232 |
+      233 |   it.each(['viewer', 'caregiver'])('denies listing and role changes for %s', async (token) => {
+    > 234 |     expect((await list(token)).status).toBe(403);
+          |             ^
+      235 |     expect((await changeRole(target.id, { role: 'ADMIN' }, token)).status).toBe(403);
+      236 |     expect(query).not.toHaveBeenCalled();
+      237 |   });
+
+      at test/auth-provider.spec.ts:234:13
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › returns a paginated list to the admin
+
+    TypeError: fetch failed
+
+      239 |   it('returns a paginated list to the admin', async () => {
+      240 |     query.mockResolvedValue({ rows: [{ data: [target], total: 11 }] });
+    > 241 |     const response = await list('admin');
+          |                      ^
+      242 |     expect(response.status).toBe(200);
+      243 |     expect(await response.json()).toEqual({
+      244 |       data: [target],
+
+      at Object.<anonymous> (test/auth-provider.spec.ts:241:22)
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › allows a different user to be updated and audits the actual role transition
+
+    TypeError: fetch failed
+
+      252 |       .mockResolvedValueOnce({ rows: [actor, target] })
+      253 |       .mockResolvedValueOnce({ rows: [updated] });
+    > 254 |     const response = await changeRole(target.id, { role: 'CAREGIVER' });
+          |                      ^
+      255 |     expect(response.status).toBe(200);
+      256 |     expect(await response.json()).toEqual(updated);
+      257 |     expect(query).toHaveBeenLastCalledWith(expect.stringContaining('INSERT INTO audit_logs'), [
+
+      at Object.<anonymous> (test/auth-provider.spec.ts:254:22)
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rejects self changes and unexpected fields before writing
+
+    TypeError: fetch failed
+
+      264 |
+      265 |   it('rejects self changes and unexpected fields before writing', async () => {
+    > 266 |     expect((await changeRole(actorId, { role: 'VIEWER' })).status).toBe(409);
+          |             ^
+      267 |     expect((await changeRole(target.id, { role: 'ADMIN', isActive: true })).status).toBe(400);
+      268 |     expect((await changeRole(target.id, { role: 'OWNER' })).status).toBe(400);
+      269 |     expect(query).not.toHaveBeenCalled();
+
+      at Object.<anonymous> (test/auth-provider.spec.ts:266:13)
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › rechecks the acting admin under lock and handles an unknown target
+
+    TypeError: fetch failed
+
+      274 |       .mockResolvedValueOnce({ rows: [{ ...actor, role: 'VIEWER' }, target] })
+      275 |       .mockResolvedValueOnce({ rows: [actor] });
+    > 276 |     expect((await changeRole(target.id, { role: 'ADMIN' })).status).toBe(403);
+          |             ^
+      277 |     expect((await changeRole(target.id, { role: 'ADMIN' })).status).toBe(404);
+      278 |     expect(query).toHaveBeenCalledTimes(2);
+      279 |   });
+
+      at Object.<anonymous> (test/auth-provider.spec.ts:276:13)
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+  ● Cognito account management over HTTP › prevents a household admin from editing users outside the household
+
+    TypeError: fetch failed
+
+      283 |       rows: [{ ...actor, email: 'household@example.org' }, target],
+      284 |     });
+    > 285 |     expect((await changeRole(target.id, { role: 'ADMIN' })).status).toBe(404);
+          |             ^
+      286 |     expect(query).toHaveBeenCalledTimes(1);
+      287 |   });
+      288 | });
+
+      at Object.<anonymous> (test/auth-provider.spec.ts:285:13)
+
+    Cause:
+    connect EACCES 127.0.0.1:64911
+
+
+
+FAIL test/cameras.controller.spec.ts
+  ● Test suite failed to run
+
+    EPERM: operation not permitted, open 'D:\hoc tap\project 1\aws-camera-ai\node_modules\.pnpm\source-map-support@0.5.13\node_modules\source-map-support\source-map-support.js'
+
+      at Runtime.readFileBuffer (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:2291:21)
+
+FAIL test/resource-ownership.spec.ts (26.781 s)
+  ● resource access over HTTP › authenticates before serving a camera list and scopes it to the current user
+
+    TypeError: fetch failed
+
+      161 |
+      162 |   it('authenticates before serving a camera list and scopes it to the current user', async () => {
+    > 163 |     expect((await get('/cameras')).status).toBe(401);
+          |             ^
+      164 |     expect((await get('/cameras', owner)).status).toBe(200);
+      165 |     expect(listCameras).toHaveBeenLastCalledWith({}, 'ADMIN', owner);
+      166 |     expect((await get('/cameras', 'admin')).status).toBe(200);
+
+      at Object.<anonymous> (test/resource-ownership.spec.ts:163:13)
+
+    Cause:
+    connect EACCES 127.0.0.1:50136
+
+
+
+  ● resource access over HTTP › denies direct snapshot and event media requests before generating their URLs
+
+    TypeError: fetch failed
+
+      173 |
+      174 |     for (const path of [snapshot, media]) {
+    > 175 |       const denied = await get(path, other);
+          |                      ^
+      176 |       expect(denied.status).toBe(403);
+      177 |       expect(await denied.text()).not.toContain(privateUrl);
+      178 |     }
+
+      at Object.<anonymous> (test/resource-ownership.spec.ts:175:22)
+
+    Cause:
+    connect EACCES 127.0.0.1:50136
+
+
+
+
+Test Suites: 3 failed, 85 passed, 88 total
+Tests:       21 failed, 624 passed, 645 total
+Snapshots:   0 total
+Time:        482.689 s
+Ran all test suites.
+Test results written to: ..\..\docs\test\FACE_BRANCH_2026-11-23\evidence\backend-results.json

@@ -1,0 +1,271 @@
+newman
+
+Face branch real HTTP regression
+
+→ API-FACE-AUTH-assess: missing token
+  POST http://127.0.0.1:18082/face/assess [errored]
+     connect EACCES 127.0.0.1:18082
+  2. status 401
+  3. unauthorized body
+
+→ API-FACE-AUTH-embed: missing token
+  POST http://127.0.0.1:18082/face/embed [errored]
+     connect EACCES 127.0.0.1:18082
+  5. status 401
+  6. unauthorized body
+
+→ API-FACE-AUTH-match: missing token
+  POST http://127.0.0.1:18082/face/match [errored]
+     connect EACCES 127.0.0.1:18082
+  8. status 401
+  9. unauthorized body
+
+→ API-FACE-AUTH-collection/sync: missing token
+  POST http://127.0.0.1:18082/face/collection/sync [errored]
+     connect EACCES 127.0.0.1:18082
+ 11. status 401
+ 12. unauthorized body
+
+→ API-FACE-001: assess requires image
+  POST http://127.0.0.1:18082/face/assess [errored]
+     connect EACCES 127.0.0.1:18082
+ 14. status 422
+ 15. validation detail
+
+→ API-FACE-002: real R50 assessment
+(node:14760) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+  POST http://127.0.0.1:18082/face/assess [errored]
+     connect EACCES 127.0.0.1:18082
+ 17. status 200
+ 18. gate passes
+ 19. real R50 model
+ 20. gate ready
+ 21. normalized 512D embedding
+
+→ API-FACE-003: embedding opt-out
+  POST http://127.0.0.1:18082/face/assess [errored]
+     connect EACCES 127.0.0.1:18082
+ 23. status 200
+ 24. gate passes
+ 25. real R50 model
+ 26. gate ready
+ 27. no embedding
+
+→ API-FACE-004: SFace embed remains compatible
+  POST http://127.0.0.1:18082/face/embed [errored]
+     connect EACCES 127.0.0.1:18082
+ 29. status 200
+ 30. 128D contract
+
+→ API-FACE-BVA--0.01: threshold out of range
+  POST http://127.0.0.1:18082/face/match [errored]
+     connect EACCES 127.0.0.1:18082
+ 32. status 422
+ 33. threshold rejected
+
+→ API-FACE-BVA-1.01: threshold out of range
+  POST http://127.0.0.1:18082/face/match [errored]
+     connect EACCES 127.0.0.1:18082
+ 35. status 422
+ 36. threshold rejected
+
+┌─────────────────────────┬──────────┬──────────┐
+│                         │ executed │   failed │
+├─────────────────────────┼──────────┼──────────┤
+│              iterations │        1 │        0 │
+├─────────────────────────┼──────────┼──────────┤
+│                requests │       10 │       10 │
+├─────────────────────────┼──────────┼──────────┤
+│            test-scripts │       10 │        0 │
+├─────────────────────────┼──────────┼──────────┤
+│      prerequest-scripts │        0 │        0 │
+├─────────────────────────┼──────────┼──────────┤
+│              assertions │       26 │       26 │
+├─────────────────────────┴──────────┴──────────┤
+│ total run duration: 2.1s                      │
+├───────────────────────────────────────────────┤
+│ total data received: 0B (approx)              │
+└───────────────────────────────────────────────┘
+
+[31m   # [39m[31m failure        [39m[31m detail                                                   [39m
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 01.  Error                                                                    
+                      connect EACCES 127.0.0.1:18082                           
+                      at request                                               
+                      inside ""                                                
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 02.  AssertionError  status 401                                               
+                      expected PostmanResponse{ …(5) } to have property 'code' 
+                      at assertion:0 in test-script                            
+                      inside "API-FACE-AUTH-assess: missing token"             
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 03.  JSONError       unauthorized body                                        
+                      "undefined" is not valid JSON                            
+                      at assertion:1 in test-script                            
+                      inside "API-FACE-AUTH-assess: missing token"             
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 04.  Error                                                                    
+                      connect EACCES 127.0.0.1:18082                           
+                      at request                                               
+                      inside ""                                                
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 05.  AssertionError  status 401                                               
+                      expected PostmanResponse{ …(5) } to have property 'code' 
+                      at assertion:0 in test-script                            
+                      inside "API-FACE-AUTH-embed: missing token"              
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 06.  JSONError       unauthorized body                                        
+                      "undefined" is not valid JSON                            
+                      at assertion:1 in test-script                            
+                      inside "API-FACE-AUTH-embed: missing token"              
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 07.  Error                                                                    
+                      connect EACCES 127.0.0.1:18082                           
+                      at request                                               
+                      inside ""                                                
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 08.  AssertionError  status 401                                               
+                      expected PostmanResponse{ …(5) } to have property 'code' 
+                      at assertion:0 in test-script                            
+                      inside "API-FACE-AUTH-match: missing token"              
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 09.  JSONError       unauthorized body                                        
+                      "undefined" is not valid JSON                            
+                      at assertion:1 in test-script                            
+                      inside "API-FACE-AUTH-match: missing token"              
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 10.  Error                                                                    
+                      connect EACCES 127.0.0.1:18082                           
+                      at request                                               
+                      inside ""                                                
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 11.  AssertionError  status 401                                               
+                      expected PostmanResponse{ …(5) } to have property 'code' 
+                      at assertion:0 in test-script                            
+                      inside "API-FACE-AUTH-collection/sync: missing token"    
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 12.  JSONError       unauthorized body                                        
+                      "undefined" is not valid JSON                            
+                      at assertion:1 in test-script                            
+                      inside "API-FACE-AUTH-collection/sync: missing token"    
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 13.  Error                                                                    
+                      connect EACCES 127.0.0.1:18082                           
+                      at request                                               
+                      inside ""                                                
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 14.  AssertionError  status 422                                               
+                      expected PostmanResponse{ …(5) } to have property 'code' 
+                      at assertion:0 in test-script                            
+                      inside "API-FACE-001: assess requires image"             
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 15.  JSONError       validation detail                                        
+                      "undefined" is not valid JSON                            
+                      at assertion:1 in test-script                            
+                      inside "API-FACE-001: assess requires image"             
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 16.  Error                                                                    
+                      connect EACCES 127.0.0.1:18082                           
+                      at request                                               
+                      inside ""                                                
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 17.  AssertionError  status 200                                               
+                      expected PostmanResponse{ …(5) } to have property 'code' 
+                      at assertion:0 in test-script                            
+                      inside "API-FACE-002: real R50 assessment"               
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 18.  JSONError       gate passes                                              
+                      "undefined" is not valid JSON                            
+                      at assertion:1 in test-script                            
+                      inside "API-FACE-002: real R50 assessment"               
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 19.  JSONError       real R50 model                                           
+                      "undefined" is not valid JSON                            
+                      at assertion:2 in test-script                            
+                      inside "API-FACE-002: real R50 assessment"               
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 20.  JSONError       gate ready                                               
+                      "undefined" is not valid JSON                            
+                      at assertion:3 in test-script                            
+                      inside "API-FACE-002: real R50 assessment"               
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 21.  JSONError       normalized 512D embedding                                
+                      "undefined" is not valid JSON                            
+                      at assertion:4 in test-script                            
+                      inside "API-FACE-002: real R50 assessment"               
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 22.  Error                                                                    
+                      connect EACCES 127.0.0.1:18082                           
+                      at request                                               
+                      inside ""                                                
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 23.  AssertionError  status 200                                               
+                      expected PostmanResponse{ …(5) } to have property 'code' 
+                      at assertion:0 in test-script                            
+                      inside "API-FACE-003: embedding opt-out"                 
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 24.  JSONError       gate passes                                              
+                      "undefined" is not valid JSON                            
+                      at assertion:1 in test-script                            
+                      inside "API-FACE-003: embedding opt-out"                 
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 25.  JSONError       real R50 model                                           
+                      "undefined" is not valid JSON                            
+                      at assertion:2 in test-script                            
+                      inside "API-FACE-003: embedding opt-out"                 
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 26.  JSONError       gate ready                                               
+                      "undefined" is not valid JSON                            
+                      at assertion:3 in test-script                            
+                      inside "API-FACE-003: embedding opt-out"                 
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 27.  JSONError       no embedding                                             
+                      "undefined" is not valid JSON                            
+                      at assertion:4 in test-script                            
+                      inside "API-FACE-003: embedding opt-out"                 
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 28.  Error                                                                    
+                      connect EACCES 127.0.0.1:18082                           
+                      at request                                               
+                      inside ""                                                
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 29.  AssertionError  status 200                                               
+                      expected PostmanResponse{ …(5) } to have property 'code' 
+                      at assertion:0 in test-script                            
+                      inside "API-FACE-004: SFace embed remains compatible"    
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 30.  JSONError       128D contract                                            
+                      "undefined" is not valid JSON                            
+                      at assertion:1 in test-script                            
+                      inside "API-FACE-004: SFace embed remains compatible"    
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 31.  Error                                                                    
+                      connect EACCES 127.0.0.1:18082                           
+                      at request                                               
+                      inside ""                                                
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 32.  AssertionError  status 422                                               
+                      expected PostmanResponse{ …(5) } to have property 'code' 
+                      at assertion:0 in test-script                            
+                      inside "API-FACE-BVA--0.01: threshold out of range"      
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 33.  JSONError       threshold rejected                                       
+                      "undefined" is not valid JSON                            
+                      at assertion:1 in test-script                            
+                      inside "API-FACE-BVA--0.01: threshold out of range"      
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 34.  Error                                                                    
+                      connect EACCES 127.0.0.1:18082                           
+                      at request                                               
+                      inside ""                                                
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 35.  AssertionError  status 422                                               
+                      expected PostmanResponse{ …(5) } to have property 'code' 
+                      at assertion:0 in test-script                            
+                      inside "API-FACE-BVA-1.01: threshold out of range"       
+[90m     [39m[90m                [39m[90m                                                          [39m
+ 36.  JSONError       threshold rejected                                       
+                      "undefined" is not valid JSON                            
+                      at assertion:1 in test-script                            
+                      inside "API-FACE-BVA-1.01: threshold out of range"       

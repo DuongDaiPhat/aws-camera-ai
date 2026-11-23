@@ -1,0 +1,7 @@
+PASS test/face-recognition-coordinator.service.spec.ts (40.807 s)
+PASS test/mqtt-consumer.service.spec.ts (8.908 s)
+
+Test Suites: 2 passed, 2 total
+Tests:       37 passed, 37 total
+Snapshots:   0 total
+Time:        52.63 s

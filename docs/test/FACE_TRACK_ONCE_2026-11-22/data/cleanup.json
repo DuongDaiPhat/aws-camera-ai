@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-22T16:38:17.174Z",
+  "webQaStopped": true,
+  "nextGeneratedFilesRestored": true,
+  "frigateStopped": true,
+  "frigateOriginalConfigRestored": true,
+  "backendAndTunnelRetained": true,
+  "spatialReidRestored": true,
+  "backendMode": "review"
+}

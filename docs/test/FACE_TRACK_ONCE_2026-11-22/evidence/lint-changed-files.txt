@@ -1,0 +1,36 @@
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\events\events.repository.ts
+  445:3  warning  Async method 'updateEvent' has too many lines (81). Maximum allowed is 60     max-lines-per-function
+  776:3  warning  Async method 'createSosEvent' has too many lines (83). Maximum allowed is 60  max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\face-recognition-coordinator.service.ts
+  103:3  warning  Async method 'handleTrackEvent' has too many lines (85). Maximum allowed is 60         max-lines-per-function
+  103:3  warning  Async method 'handleTrackEvent' has a complexity of 27. Maximum allowed is 12          complexity
+  290:3  warning  Async method 'trySpatialAppearanceReid' has a complexity of 15. Maximum allowed is 12  complexity
+  427:3  warning  Async method 'onRecognitionResult' has a complexity of 30. Maximum allowed is 12       complexity
+  472:3  warning  Async method 'handleLegacyDispatch' has a complexity of 13. Maximum allowed is 12      complexity
+  510:3  warning  Async method 'dispatchBestShot' has too many lines (71). Maximum allowed is 60         max-lines-per-function
+  641:3  warning  Async method 'submitLocalCacheHit' has too many lines (62). Maximum allowed is 60      max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\track-identity-state.service.ts
+   99:3  warning  Method 'getOrCreate' has too many lines (65). Maximum allowed is 60            max-lines-per-function
+  267:3  warning  Method 'applyRecognitionResult' has a complexity of 14. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\frigate\frigate-config.service.ts
+  27:3  warning  Method 'continuousRecording' has a complexity of 13. Maximum allowed is 12      complexity
+  60:3  warning  Method 'generateUpdatedConfig' has too many lines (101). Maximum allowed is 60  max-lines-per-function
+  60:3  warning  Method 'generateUpdatedConfig' has a complexity of 58. Maximum allowed is 12    complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\ingestion\mqtt-consumer.service.ts
+   86:3  warning  Method 'connect' has too many lines (94). Maximum allowed is 60             max-lines-per-function
+  444:3  warning  Async method 'handleMessage' has a complexity of 19. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\media\frigate-media.adapter.ts
+  16:3  warning  Async method 'getCurrentPersonCrop' has a complexity of 23. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\face-recognition-coordinator.service.spec.ts
+  102:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  184:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+✖ 19 problems (0 errors, 19 warnings)
+

@@ -1,0 +1,7 @@
+{
+  "oldCosine": 0.20979666709899902,
+  "newCosine": 0.6655319929122925,
+  "threshold": 0.72,
+  "model": "yunet-2023mar-sface-2021dec",
+  "note": "Same local model, no AWS; does not prove a real cache hit"
+}

@@ -305,8 +305,10 @@ describe('US16/17 production pipeline with PostgreSQL16, MQTT and MinIO', () => 
     await coordinator.processFrame(input);
     await drainOutbox();
     expect(
-      (await pool.query('SELECT * FROM notifications WHERE event_id=$1', [event.id])).rows,
-    ).toHaveLength(1);
+      (await pool.query('SELECT channel FROM notifications WHERE event_id=$1', [event.id])).rows
+        .map((notification) => notification.channel)
+        .sort(),
+    ).toEqual(['SNS_EMAIL', 'TELEGRAM']);
     expect(
       (await pool.query('SELECT * FROM fall_incidents WHERE episode_id=$1', [response.episodeId]))
         .rows,

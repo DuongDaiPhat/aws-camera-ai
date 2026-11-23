@@ -1,0 +1,17 @@
+{
+  "case": "TC01-head-down-retest-acceptance",
+  "video": "known_face_head_tilt_down.mp4",
+  "startedAt": "2026-11-22T15:46:36.933Z",
+  "endedAt": "2026-11-22T15:47:23.229Z",
+  "ffmpegExitCode": 0,
+  "before": {
+    "case": "TC01-head-down-retest-acceptance",
+    "tracks": []
+  },
+  "after": {
+    "case": "TC01-head-down-retest-acceptance",
+    "tracks": []
+  },
+  "events": [],
+  "jobs": []
+}

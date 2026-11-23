@@ -1,0 +1,17 @@
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\face-recognition-coordinator.service.ts
+  173:3  warning  Async method 'sampleTrack' has too many lines (90). Maximum allowed is 60              max-lines-per-function
+  173:3  warning  Async method 'sampleTrack' has a complexity of 39. Maximum allowed is 12               complexity
+  374:3  warning  Async method 'trySpatialAppearanceReid' has a complexity of 15. Maximum allowed is 12  complexity
+  462:3  warning  Async method 'handleEvaluatedCandidate' has a complexity of 13. Maximum allowed is 12  complexity
+  534:3  warning  Async method 'onRecognitionResult' has a complexity of 30. Maximum allowed is 12       complexity
+  579:3  warning  Async method 'handleLegacyDispatch' has a complexity of 13. Maximum allowed is 12      complexity
+  617:3  warning  Async method 'dispatchBestShot' has too many lines (71). Maximum allowed is 60         max-lines-per-function
+  748:3  warning  Async method 'submitLocalCacheHit' has too many lines (62). Maximum allowed is 60      max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\face-recognition-coordinator.service.spec.ts
+  102:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  192:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+✖ 10 problems (0 errors, 10 warnings)
+

@@ -1,0 +1,57 @@
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001d31141c800] Unknown cover type: 0x1.
+[swscaler @ 000001d3141c8b40] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001d31574dbc0] deprecated pixel format used, make sure you did set range correctly
+[rtsp @ 000001d311447c80] method ANNOUNCE failed: 401 Unauthorized
+[out#0/rtsp @ 000001d31140af00] Could not write header (incorrect codec parameters ?): Server returned 401 Unauthorized (authorization failed)
+[fc#0 @ 000001d311419f00] Error sending frames to consumers: Server returned 401 Unauthorized (authorization failed)
+[fc#0 @ 000001d311419f00] Task finished with error code: -825242872 (Server returned 401 Unauthorized (authorization failed))
+[fc#0 @ 000001d311419f00] Terminating thread with return code -825242872 (Server returned 401 Unauthorized (authorization failed))
+[out#0/rtsp @ 000001d31140af00] Nothing was written into output file, because at least one of its streams received no packets.
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001dd711ec800] Unknown cover type: 0x1.
+[swscaler @ 000001dd758fa180] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001dd73dab400] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001b721938080] Unknown cover type: 0x1.
+[swscaler @ 000001b7264677c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001b724ac4680] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002115a42c980] Unknown cover type: 0x1.
+[swscaler @ 0000021160513340] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002115f326c80] deprecated pixel format used, make sure you did set range correctly
+[Parsed_realtime_16 @ 000002115c2d4680] time discontinuity detected: -2337097 us, resetting
+[Parsed_realtime_16 @ 000002115c2d4680] time discontinuity detected: -2145859 us, resetting
+[Parsed_realtime_16 @ 000002115c2d4680] time discontinuity detected: -2583336 us, resetting
+[Parsed_realtime_16 @ 000002115c2d4680] time discontinuity detected: -6557150 us, resetting
+[Parsed_realtime_16 @ 000002115c2d4680] time discontinuity detected: -2018990 us, resetting
+[Parsed_realtime_16 @ 000002115c2d4680] time discontinuity detected: -2011223 us, resetting
+[Parsed_realtime_16 @ 000002115c2d4680] time discontinuity detected: -2022171 us, resetting
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000021ac0f78080] Unknown cover type: 0x1.
+[swscaler @ 0000021ac2eedc80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000021ac3c39c80] deprecated pixel format used, make sure you did set range correctly
+[Parsed_realtime_16 @ 0000021ac1012700] time discontinuity detected: -2175567 us, resetting
+[Parsed_realtime_16 @ 0000021ac1012700] time discontinuity detected: -5910482 us, resetting
+[Parsed_realtime_16 @ 0000021ac1012700] time discontinuity detected: -2117595 us, resetting
+[Parsed_realtime_16 @ 0000021ac1012700] time discontinuity detected: -2165869 us, resetting
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001f7acc88080] Unknown cover type: 0x1.
+[swscaler @ 000001f7b21ad180] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001f7b3b02280] deprecated pixel format used, make sure you did set range correctly
+[Parsed_realtime_16 @ 000001f7ad6b1740] time discontinuity detected: -2002963 us, resetting
+[Parsed_realtime_16 @ 000001f7ad6b1740] time discontinuity detected: -2221876 us, resetting
+[Parsed_realtime_16 @ 000001f7ad6b1740] time discontinuity detected: -2565727 us, resetting
+[Parsed_realtime_16 @ 000001f7ad6b1740] time discontinuity detected: -2334968 us, resetting
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001e8c7a67840] Unknown cover type: 0x1.
+[swscaler @ 000001e8c7ab4f00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001e8cc191d80] deprecated pixel format used, make sure you did set range correctly
+[Parsed_realtime_16 @ 000001e8c9f32100] time discontinuity detected: -2004096 us, resetting
+[Parsed_realtime_16 @ 000001e8c9f32100] time discontinuity detected: -2006816 us, resetting
+[Parsed_realtime_16 @ 000001e8c9f32100] time discontinuity detected: -2004653 us, resetting
+[Parsed_realtime_16 @ 000001e8c9f32100] time discontinuity detected: -2031559 us, resetting
+[Parsed_realtime_16 @ 000001e8c9f32100] time discontinuity detected: -2033369 us, resetting
+[Parsed_realtime_16 @ 000001e8c9f32100] time discontinuity detected: -2016234 us, resetting
+[Parsed_realtime_16 @ 000001e8c9f32100] time discontinuity detected: -2023855 us, resetting
+[Parsed_realtime_16 @ 000001e8c9f32100] time discontinuity detected: -2128970 us, resetting
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001c1f4e0c980] Unknown cover type: 0x1.
+[swscaler @ 000001c1f9d16e40] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001c1f95b6d40] deprecated pixel format used, make sure you did set range correctly
+[Parsed_realtime_16 @ 000001c1fd155580] time discontinuity detected: -2140041 us, resetting
+[Parsed_realtime_16 @ 000001c1fd155580] time discontinuity detected: -2585501 us, resetting
+[Parsed_realtime_16 @ 000001c1fd155580] time discontinuity detected: -2105306 us, resetting
+[Parsed_realtime_16 @ 000001c1fd155580] time discontinuity detected: -2064843 us, resetting

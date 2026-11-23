@@ -1,0 +1,8 @@
+{
+  "at": "2026-11-22T17:57:02.021332+00:00",
+  "frigateStopped": true,
+  "frigateConfigRestoredSha256": "ae198aedb656100d1dfb56e676eeb439f993993238d52943b5b073db5b92aeb6",
+  "mediaMtxAuthorizeRestored": "http://orchestrator:3001/api/v1/mediamtx/authorize",
+  "awsRecognitionCalls": 0,
+  "originalReportUntouched": true
+}

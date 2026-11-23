@@ -1,0 +1,1380 @@
+{
+  "method": "native-video-face-runs-5fps-quality-only",
+  "awsCalls": 0,
+  "limitations": "Offline face-box association, not Frigate person tracks. No recognition or tailgating acceptance claims.",
+  "settings": {
+    "windowMs": 4000,
+    "minFacePx": 80,
+    "minNormalizedSharpness": 12
+  },
+  "results": [
+    {
+      "video": "known_face_vid_2.mp4",
+      "faceRun": 0,
+      "sampleCount": 31,
+      "first": 0.0,
+      "last": 6.4,
+      "old": {
+        "time": 1.8,
+        "frame": 54,
+        "qualityScore": 0.3878,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": true,
+        "oldScore": 0.8352,
+        "metrics": {
+          "faceWidthPx": 64,
+          "faceHeightPx": 74,
+          "detectionScore": 0.9219,
+          "sharpness": 127.0146,
+          "normalizedSharpness": 8.0693,
+          "poseYawRatio": 0.1297,
+          "posePitchRatio": 0.05
+        },
+        "file": "crops/known_face_vid_2-0-old.png",
+        "sha256": "43398c35a75882413c0d04956dba25a2e460aed6af38afb854e1b152c9ee19bb"
+      },
+      "new": {
+        "time": 4.6,
+        "frame": 138,
+        "qualityScore": 0.5798,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9272,
+        "metrics": {
+          "faceWidthPx": 93,
+          "faceHeightPx": 120,
+          "detectionScore": 0.9397,
+          "sharpness": 149.3599,
+          "normalizedSharpness": 26.3485,
+          "poseYawRatio": 0.0213,
+          "posePitchRatio": 0.0311
+        },
+        "file": "crops/known_face_vid_2-0-new.png",
+        "sha256": "faf4906d40c2243644703ba447789b28bc328c438b71e5f621d8622ab48835d2"
+      }
+    },
+    {
+      "video": "known_face_vid_2.mp4",
+      "faceRun": 1,
+      "sampleCount": 2,
+      "first": 8.4,
+      "last": 8.6,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid_2.mp4",
+      "faceRun": 2,
+      "sampleCount": 1,
+      "first": 8.8,
+      "last": 8.8,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid_2.mp4",
+      "faceRun": 3,
+      "sampleCount": 2,
+      "first": 9.0,
+      "last": 9.2,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid_2.mp4",
+      "faceRun": 4,
+      "sampleCount": 2,
+      "first": 9.4,
+      "last": 10.4,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid_2.mp4",
+      "faceRun": 5,
+      "sampleCount": 1,
+      "first": 10.6,
+      "last": 10.6,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid_2.mp4",
+      "faceRun": 6,
+      "sampleCount": 1,
+      "first": 10.8,
+      "last": 10.8,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid_2.mp4",
+      "faceRun": 7,
+      "sampleCount": 1,
+      "first": 11.0,
+      "last": 11.0,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid_2.mp4",
+      "faceRun": 8,
+      "sampleCount": 1,
+      "first": 11.2,
+      "last": 11.2,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid_2.mp4",
+      "faceRun": 9,
+      "sampleCount": 2,
+      "first": 11.4,
+      "last": 11.6,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid_2.mp4",
+      "faceRun": 10,
+      "sampleCount": 9,
+      "first": 11.8,
+      "last": 13.4,
+      "old": {
+        "time": 12.6,
+        "frame": 378,
+        "qualityScore": 0.5049,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9034,
+        "metrics": {
+          "faceWidthPx": 80,
+          "faceHeightPx": 97,
+          "detectionScore": 0.9406,
+          "sharpness": 174.9025,
+          "normalizedSharpness": 17.0344,
+          "poseYawRatio": 0.0199,
+          "posePitchRatio": 0.0457
+        },
+        "file": "crops/known_face_vid_2-10-old.png",
+        "sha256": "afad8d308815cd9fa983f638479a7641c190e8556e7c1688d25ef610f8dd0996"
+      },
+      "new": {
+        "time": 12.6,
+        "frame": 378,
+        "qualityScore": 0.5049,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9034,
+        "metrics": {
+          "faceWidthPx": 80,
+          "faceHeightPx": 97,
+          "detectionScore": 0.9406,
+          "sharpness": 174.9025,
+          "normalizedSharpness": 17.0344,
+          "poseYawRatio": 0.0199,
+          "posePitchRatio": 0.0457
+        },
+        "file": "crops/known_face_vid_2-10-new.png",
+        "sha256": "afad8d308815cd9fa983f638479a7641c190e8556e7c1688d25ef610f8dd0996"
+      }
+    },
+    {
+      "video": "known_face_vid_2.mp4",
+      "faceRun": 11,
+      "sampleCount": 1,
+      "first": 13.6,
+      "last": 13.6,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid_2.mp4",
+      "faceRun": 13,
+      "sampleCount": 1,
+      "first": 15.8,
+      "last": 15.8,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid2_with_glass.mp4",
+      "faceRun": 0,
+      "sampleCount": 37,
+      "first": 0.0,
+      "last": 7.2,
+      "old": {
+        "time": 2.4,
+        "frame": 72,
+        "qualityScore": 0.4334,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": true,
+        "oldScore": 0.8568,
+        "metrics": {
+          "faceWidthPx": 65,
+          "faceHeightPx": 81,
+          "detectionScore": 0.9069,
+          "sharpness": 239.0374,
+          "normalizedSharpness": 15.5219,
+          "poseYawRatio": 0.0256,
+          "posePitchRatio": 0.1018
+        },
+        "file": "crops/known_face_vid2_with_glass-0-old.png",
+        "sha256": "fa54e1dbfcc105df10f40708c4103712375b7bae022613d15599f084ac18742a"
+      },
+      "new": {
+        "time": 5.6,
+        "frame": 168,
+        "qualityScore": 0.6588,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9345,
+        "metrics": {
+          "faceWidthPx": 98,
+          "faceHeightPx": 120,
+          "detectionScore": 0.9201,
+          "sharpness": 276.9921,
+          "normalizedSharpness": 57.2423,
+          "poseYawRatio": 0.0137,
+          "posePitchRatio": 0.0123
+        },
+        "file": "crops/known_face_vid2_with_glass-0-new.png",
+        "sha256": "411362be97e32f30e02b467d7df55d39dd8df6abc51277c9cc1a5590796c71c7"
+      }
+    },
+    {
+      "video": "known_face_vid2_with_glass.mp4",
+      "faceRun": 1,
+      "sampleCount": 3,
+      "first": 9.0,
+      "last": 9.4,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid2_with_glass.mp4",
+      "faceRun": 2,
+      "sampleCount": 1,
+      "first": 9.6,
+      "last": 9.6,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid2_with_glass.mp4",
+      "faceRun": 3,
+      "sampleCount": 1,
+      "first": 9.8,
+      "last": 9.8,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid2_with_glass.mp4",
+      "faceRun": 4,
+      "sampleCount": 1,
+      "first": 10.0,
+      "last": 10.0,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid2_with_glass.mp4",
+      "faceRun": 5,
+      "sampleCount": 1,
+      "first": 10.2,
+      "last": 10.2,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid2_with_glass.mp4",
+      "faceRun": 6,
+      "sampleCount": 2,
+      "first": 11.6,
+      "last": 11.8,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid2_with_glass.mp4",
+      "faceRun": 7,
+      "sampleCount": 1,
+      "first": 12.0,
+      "last": 12.0,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid2_with_glass.mp4",
+      "faceRun": 8,
+      "sampleCount": 1,
+      "first": 12.2,
+      "last": 12.2,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid2_with_glass.mp4",
+      "faceRun": 9,
+      "sampleCount": 2,
+      "first": 12.4,
+      "last": 12.6,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid2_with_glass.mp4",
+      "faceRun": 10,
+      "sampleCount": 6,
+      "first": 14.0,
+      "last": 15.0,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid2_with_glass.mp4",
+      "faceRun": 11,
+      "sampleCount": 7,
+      "first": 15.2,
+      "last": 16.4,
+      "old": {
+        "time": 16.0,
+        "frame": 480,
+        "qualityScore": 0.5027,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8827,
+        "metrics": {
+          "faceWidthPx": 84,
+          "faceHeightPx": 93,
+          "detectionScore": 0.8363,
+          "sharpness": 164.4797,
+          "normalizedSharpness": 14.9607,
+          "poseYawRatio": 0.0025,
+          "posePitchRatio": 0.0419
+        },
+        "file": "crops/known_face_vid2_with_glass-11-old.png",
+        "sha256": "229a2330e9a02a770dc54b9ba4518fae5c09cd3f9b43927a1793685501b64dd8"
+      },
+      "new": {
+        "time": 16.4,
+        "frame": 492,
+        "qualityScore": 0.5223,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8664,
+        "metrics": {
+          "faceWidthPx": 102,
+          "faceHeightPx": 114,
+          "detectionScore": 0.8684,
+          "sharpness": 214.2485,
+          "normalizedSharpness": 26.9358,
+          "poseYawRatio": 0.2642,
+          "posePitchRatio": 0.082
+        },
+        "file": "crops/known_face_vid2_with_glass-11-new.png",
+        "sha256": "3662016437d81a5af6c0d589db8af0f6d2af4b7db631bb6c4bcd383cf03b23d1"
+      }
+    },
+    {
+      "video": "known_face_vid6.mp4",
+      "faceRun": 0,
+      "sampleCount": 27,
+      "first": 0.0,
+      "last": 5.2,
+      "old": {
+        "time": 0.0,
+        "frame": 0,
+        "qualityScore": 0.6076,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9372,
+        "metrics": {
+          "faceWidthPx": 110,
+          "faceHeightPx": 133,
+          "detectionScore": 0.9339,
+          "sharpness": 132.6615,
+          "normalizedSharpness": 25.0792,
+          "poseYawRatio": 0.0372,
+          "posePitchRatio": 0.0812
+        },
+        "file": "crops/known_face_vid6-0-old.png",
+        "sha256": "dcccb0549ee3850722817f7d572dd6e3b5225d3518982370b8255760aaab991e"
+      },
+      "new": {
+        "time": 1.6,
+        "frame": 48,
+        "qualityScore": 0.6601,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9516,
+        "metrics": {
+          "faceWidthPx": 110,
+          "faceHeightPx": 141,
+          "detectionScore": 0.9368,
+          "sharpness": 171.5093,
+          "normalizedSharpness": 39.9778,
+          "poseYawRatio": 0.0344,
+          "posePitchRatio": 0.0345
+        },
+        "file": "crops/known_face_vid6-0-new.png",
+        "sha256": "e748109f1f98942eb6148c49ef8d335104bb21b984a52c47d600cb32ac8822ff"
+      }
+    },
+    {
+      "video": "known_face_vid6.mp4",
+      "faceRun": 1,
+      "sampleCount": 4,
+      "first": 7.6,
+      "last": 8.4,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid6.mp4",
+      "faceRun": 2,
+      "sampleCount": 1,
+      "first": 9.2,
+      "last": 9.2,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid6.mp4",
+      "faceRun": 3,
+      "sampleCount": 13,
+      "first": 30.0,
+      "last": 32.4,
+      "old": {
+        "time": 31.2,
+        "frame": 936,
+        "qualityScore": 0.4048,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": true,
+        "oldScore": 0.8367,
+        "metrics": {
+          "faceWidthPx": 76,
+          "faceHeightPx": 85,
+          "detectionScore": 0.8766,
+          "sharpness": 163.9128,
+          "normalizedSharpness": 10.1434,
+          "poseYawRatio": 0.2687,
+          "posePitchRatio": 0.0171
+        },
+        "file": "crops/known_face_vid6-3-old.png",
+        "sha256": "c2274631ffa659eb622ee23b6656ad7d2ab03a68ee1e66ac480319842432677b"
+      },
+      "new": {
+        "time": 32.0,
+        "frame": 960,
+        "qualityScore": 0.5622,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8864,
+        "metrics": {
+          "faceWidthPx": 113,
+          "faceHeightPx": 123,
+          "detectionScore": 0.8944,
+          "sharpness": 113.4808,
+          "normalizedSharpness": 16.0657,
+          "poseYawRatio": 0.1126,
+          "posePitchRatio": 0.0516
+        },
+        "file": "crops/known_face_vid6-3-new.png",
+        "sha256": "24cc9bbd6a36f4bd2b1346d175dd1ae30d376f6ece4eadf4af0a821f1324f07d"
+      }
+    },
+    {
+      "video": "known_face_vid6.mp4",
+      "faceRun": 4,
+      "sampleCount": 1,
+      "first": 32.6,
+      "last": 32.6,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid6.mp4",
+      "faceRun": 5,
+      "sampleCount": 1,
+      "first": 32.8,
+      "last": 32.8,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid6.mp4",
+      "faceRun": 6,
+      "sampleCount": 1,
+      "first": 33.0,
+      "last": 33.0,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid6.mp4",
+      "faceRun": 7,
+      "sampleCount": 2,
+      "first": 35.0,
+      "last": 35.2,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid6.mp4",
+      "faceRun": 8,
+      "sampleCount": 16,
+      "first": 35.8,
+      "last": 38.8,
+      "old": {
+        "time": 37.0,
+        "frame": 1110,
+        "qualityScore": 0.5276,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8825,
+        "metrics": {
+          "faceWidthPx": 92,
+          "faceHeightPx": 111,
+          "detectionScore": 0.905,
+          "sharpness": 121.3152,
+          "normalizedSharpness": 16.2676,
+          "poseYawRatio": 0.0299,
+          "posePitchRatio": 0.062
+        },
+        "file": "crops/known_face_vid6-8-old.png",
+        "sha256": "25026b698e4f899ee6147bad9f34b198a4ad899352fcb7f63188d5a044df903e"
+      },
+      "new": {
+        "time": 37.8,
+        "frame": 1134,
+        "qualityScore": 0.5632,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9109,
+        "metrics": {
+          "faceWidthPx": 101,
+          "faceHeightPx": 118,
+          "detectionScore": 0.9224,
+          "sharpness": 130.304,
+          "normalizedSharpness": 21.3745,
+          "poseYawRatio": 0.0873,
+          "posePitchRatio": 0.0503
+        },
+        "file": "crops/known_face_vid6-8-new.png",
+        "sha256": "b5b5e4f0739d8f447206ede0cb4b2c3ff84c4672e46fe40827bef048966cce1c"
+      }
+    },
+    {
+      "video": "known_face_vid6.mp4",
+      "faceRun": 9,
+      "sampleCount": 7,
+      "first": 41.0,
+      "last": 42.2,
+      "old": {
+        "time": 42.2,
+        "frame": 1266,
+        "qualityScore": 0.5011,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8958,
+        "metrics": {
+          "faceWidthPx": 87,
+          "faceHeightPx": 101,
+          "detectionScore": 0.9147,
+          "sharpness": 141.7079,
+          "normalizedSharpness": 15.2512,
+          "poseYawRatio": 0.0854,
+          "posePitchRatio": 0.0419
+        },
+        "file": "crops/known_face_vid6-9-old.png",
+        "sha256": "c50f75b6300123399d9e1a3354c1ee8fd7cdd1a1fd037833533f1be694bfc764"
+      },
+      "new": {
+        "time": 42.2,
+        "frame": 1266,
+        "qualityScore": 0.5011,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8958,
+        "metrics": {
+          "faceWidthPx": 87,
+          "faceHeightPx": 101,
+          "detectionScore": 0.9147,
+          "sharpness": 141.7079,
+          "normalizedSharpness": 15.2512,
+          "poseYawRatio": 0.0854,
+          "posePitchRatio": 0.0419
+        },
+        "file": "crops/known_face_vid6-9-new.png",
+        "sha256": "c50f75b6300123399d9e1a3354c1ee8fd7cdd1a1fd037833533f1be694bfc764"
+      }
+    },
+    {
+      "video": "known_face_vid6_with_glass.mp4",
+      "faceRun": 0,
+      "sampleCount": 22,
+      "first": 0.0,
+      "last": 4.2,
+      "old": {
+        "time": 0.0,
+        "frame": 0,
+        "qualityScore": 0.6578,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9412,
+        "metrics": {
+          "faceWidthPx": 100,
+          "faceHeightPx": 123,
+          "detectionScore": 0.9344,
+          "sharpness": 260.3856,
+          "normalizedSharpness": 51.2562,
+          "poseYawRatio": 0.0098,
+          "posePitchRatio": 0.0214
+        },
+        "file": "crops/known_face_vid6_with_glass-0-old.png",
+        "sha256": "797a546f104602d91bb21cf18b9a07aacc0d38e7aeee55af8846e2e0fd1327e3"
+      },
+      "new": {
+        "time": 3.6,
+        "frame": 108,
+        "qualityScore": 0.676,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9385,
+        "metrics": {
+          "faceWidthPx": 123,
+          "faceHeightPx": 144,
+          "detectionScore": 0.9297,
+          "sharpness": 199.9725,
+          "normalizedSharpness": 52.3466,
+          "poseYawRatio": 0.1227,
+          "posePitchRatio": 0.0954
+        },
+        "file": "crops/known_face_vid6_with_glass-0-new.png",
+        "sha256": "bfb30e27c0ff0107481cf6c30d8f72f609acacce63c6a46108938a522554e286"
+      }
+    },
+    {
+      "video": "known_face_vid6_with_glass.mp4",
+      "faceRun": 1,
+      "sampleCount": 1,
+      "first": 4.8,
+      "last": 4.8,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid6_with_glass.mp4",
+      "faceRun": 2,
+      "sampleCount": 1,
+      "first": 17.6,
+      "last": 17.6,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid6_with_glass.mp4",
+      "faceRun": 3,
+      "sampleCount": 6,
+      "first": 21.0,
+      "last": 22.0,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid6_with_glass.mp4",
+      "faceRun": 4,
+      "sampleCount": 7,
+      "first": 24.6,
+      "last": 25.8,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_vid6_with_glass.mp4",
+      "faceRun": 5,
+      "sampleCount": 7,
+      "first": 27.2,
+      "last": 28.4,
+      "old": {
+        "time": 28.4,
+        "frame": 852,
+        "qualityScore": 0.3768,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": true,
+        "oldScore": 0.787,
+        "metrics": {
+          "faceWidthPx": 76,
+          "faceHeightPx": 88,
+          "detectionScore": 0.8216,
+          "sharpness": 169.2088,
+          "normalizedSharpness": 14.2171,
+          "poseYawRatio": 0.4144,
+          "posePitchRatio": 0.051
+        },
+        "file": "crops/known_face_vid6_with_glass-5-old.png",
+        "sha256": "643af83fc5a2e47be9073e5ee8f4f80a321018535abaf8d9087f806c6827a6ff"
+      },
+      "new": null
+    },
+    {
+      "video": "known_face_vid6_with_glass.mp4",
+      "faceRun": 6,
+      "sampleCount": 13,
+      "first": 29.4,
+      "last": 31.8,
+      "old": {
+        "time": 29.8,
+        "frame": 894,
+        "qualityScore": 0.6327,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9469,
+        "metrics": {
+          "faceWidthPx": 118,
+          "faceHeightPx": 141,
+          "detectionScore": 0.8895,
+          "sharpness": 162.353,
+          "normalizedSharpness": 25.3546,
+          "poseYawRatio": 0.0248,
+          "posePitchRatio": 0.0648
+        },
+        "file": "crops/known_face_vid6_with_glass-6-old.png",
+        "sha256": "662729c7f5459487a8e366341db1a14e99590a20495d1e72ded0a8a3c3701375"
+      },
+      "new": {
+        "time": 30.2,
+        "frame": 906,
+        "qualityScore": 0.6642,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9573,
+        "metrics": {
+          "faceWidthPx": 129,
+          "faceHeightPx": 144,
+          "detectionScore": 0.9119,
+          "sharpness": 146.1728,
+          "normalizedSharpness": 25.106,
+          "poseYawRatio": 0.0229,
+          "posePitchRatio": 0.0651
+        },
+        "file": "crops/known_face_vid6_with_glass-6-new.png",
+        "sha256": "27561c0df6440ce446fa6bf07889b39555a1c13e2b5e15feecb80558556eca12"
+      }
+    },
+    {
+      "video": "known_face_vid6_with_glass.mp4",
+      "faceRun": 7,
+      "sampleCount": 27,
+      "first": 33.4,
+      "last": 38.6,
+      "old": {
+        "time": 34.6,
+        "frame": 1038,
+        "qualityScore": 0.4536,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8315,
+        "metrics": {
+          "faceWidthPx": 87,
+          "faceHeightPx": 89,
+          "detectionScore": 0.8892,
+          "sharpness": 116.5375,
+          "normalizedSharpness": 12.0432,
+          "poseYawRatio": 0.1412,
+          "posePitchRatio": 0.1074
+        },
+        "file": "crops/known_face_vid6_with_glass-7-old.png",
+        "sha256": "c68a847dad82b9d2c3ba6c9c57326f9920d1b8082e8215f466b61262709406f2"
+      },
+      "new": {
+        "time": 37.2,
+        "frame": 1116,
+        "qualityScore": 0.7178,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9663,
+        "metrics": {
+          "faceWidthPx": 119,
+          "faceHeightPx": 148,
+          "detectionScore": 0.9283,
+          "sharpness": 187.0366,
+          "normalizedSharpness": 56.8897,
+          "poseYawRatio": 0.0085,
+          "posePitchRatio": 0.0481
+        },
+        "file": "crops/known_face_vid6_with_glass-7-new.png",
+        "sha256": "d39fbd3a676be35246005e45a2c075becdfc5d1df9ef0ab1c6b22bced3625146"
+      }
+    },
+    {
+      "video": "known_face_and_stranger.mp4",
+      "faceRun": 0,
+      "sampleCount": 7,
+      "first": 0.0,
+      "last": 1.2,
+      "old": {
+        "time": 0.0,
+        "frame": 0,
+        "qualityScore": 0.6735,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9394,
+        "metrics": {
+          "faceWidthPx": 138,
+          "faceHeightPx": 153,
+          "detectionScore": 0.9095,
+          "sharpness": 163.6603,
+          "normalizedSharpness": 29.7012,
+          "poseYawRatio": 0.0835,
+          "posePitchRatio": 0.0971
+        },
+        "file": "crops/known_face_and_stranger-0-old.png",
+        "sha256": "69a5a2b9eddb750d6e040a79b97d1bd50032860601df47b17f416d1111fec9b4"
+      },
+      "new": {
+        "time": 0.4,
+        "frame": 12,
+        "qualityScore": 0.6774,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9345,
+        "metrics": {
+          "faceWidthPx": 141,
+          "faceHeightPx": 158,
+          "detectionScore": 0.9191,
+          "sharpness": 125.7829,
+          "normalizedSharpness": 23.8707,
+          "poseYawRatio": 0.0092,
+          "posePitchRatio": 0.1212
+        },
+        "file": "crops/known_face_and_stranger-0-new.png",
+        "sha256": "d5c80afb7f19984a3d3fef40495d84d59c178d2bba3e312f6267c4af9cfad6a8"
+      }
+    },
+    {
+      "video": "known_face_and_stranger.mp4",
+      "faceRun": 1,
+      "sampleCount": 33,
+      "first": 3.6,
+      "last": 10.0,
+      "old": {
+        "time": 5.2,
+        "frame": 156,
+        "qualityScore": 0.4955,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8617,
+        "metrics": {
+          "faceWidthPx": 89,
+          "faceHeightPx": 103,
+          "detectionScore": 0.9219,
+          "sharpness": 114.9075,
+          "normalizedSharpness": 13.3162,
+          "poseYawRatio": 0.0804,
+          "posePitchRatio": 0.0601
+        },
+        "file": "crops/known_face_and_stranger-1-old.png",
+        "sha256": "e9691439b6c6c9a46c506328de4315c51764ee3ddeed213209cb00194c0b2ad3"
+      },
+      "new": {
+        "time": 7.0,
+        "frame": 210,
+        "qualityScore": 0.5595,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9094,
+        "metrics": {
+          "faceWidthPx": 95,
+          "faceHeightPx": 110,
+          "detectionScore": 0.9147,
+          "sharpness": 165.94,
+          "normalizedSharpness": 24.7966,
+          "poseYawRatio": 0.0614,
+          "posePitchRatio": 0.0649
+        },
+        "file": "crops/known_face_and_stranger-1-new.png",
+        "sha256": "a09a2f54eaeefc509c44a834ebb170e2d2d3da528120b9bef92cd8adadd31515"
+      }
+    },
+    {
+      "video": "known_face_and_stranger.mp4",
+      "faceRun": 3,
+      "sampleCount": 9,
+      "first": 11.6,
+      "last": 13.2,
+      "old": {
+        "time": 12.0,
+        "frame": 360,
+        "qualityScore": 0.502,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8549,
+        "metrics": {
+          "faceWidthPx": 95,
+          "faceHeightPx": 107,
+          "detectionScore": 0.9144,
+          "sharpness": 116.1495,
+          "normalizedSharpness": 16.4033,
+          "poseYawRatio": 0.1696,
+          "posePitchRatio": 0.0617
+        },
+        "file": "crops/known_face_and_stranger-3-old.png",
+        "sha256": "c98eaa63eaee0093d568c9e075e94cb7ef278881828c048fbf7455b945a9e7c3"
+      },
+      "new": {
+        "time": 12.2,
+        "frame": 366,
+        "qualityScore": 0.5204,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8933,
+        "metrics": {
+          "faceWidthPx": 88,
+          "faceHeightPx": 106,
+          "detectionScore": 0.9162,
+          "sharpness": 146.0573,
+          "normalizedSharpness": 21.0671,
+          "poseYawRatio": 0.0849,
+          "posePitchRatio": 0.0673
+        },
+        "file": "crops/known_face_and_stranger-3-new.png",
+        "sha256": "ca9278a5af0e9a43fa314a3c01b573411260a8767657781e8d425e4f783eef64"
+      }
+    },
+    {
+      "video": "known_face_and_stranger.mp4",
+      "faceRun": 4,
+      "sampleCount": 5,
+      "first": 14.2,
+      "last": 15.0,
+      "old": null,
+      "new": {
+        "time": 14.4,
+        "frame": 432,
+        "qualityScore": 0.5503,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8624,
+        "metrics": {
+          "faceWidthPx": 111,
+          "faceHeightPx": 116,
+          "detectionScore": 0.8852,
+          "sharpness": 98.8985,
+          "normalizedSharpness": 12.2909,
+          "poseYawRatio": 0.0958,
+          "posePitchRatio": 0.0193
+        },
+        "file": "crops/known_face_and_stranger-4-new.png",
+        "sha256": "5ce0446606afb76b382840a29ffc4375e757b740bb230fd18b425490b735960e"
+      }
+    },
+    {
+      "video": "known_face_with_glass_and_stranger.mp4",
+      "faceRun": 0,
+      "sampleCount": 25,
+      "first": 1.6,
+      "last": 6.4,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_with_glass_and_stranger.mp4",
+      "faceRun": 1,
+      "sampleCount": 10,
+      "first": 5.4,
+      "last": 7.2,
+      "old": {
+        "time": 5.8,
+        "frame": 174,
+        "qualityScore": 0.6246,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.925,
+        "metrics": {
+          "faceWidthPx": 133,
+          "faceHeightPx": 136,
+          "detectionScore": 0.8999,
+          "sharpness": 164.3408,
+          "normalizedSharpness": 24.7945,
+          "poseYawRatio": 0.1016,
+          "posePitchRatio": 0.1411
+        },
+        "file": "crops/known_face_with_glass_and_stranger-1-old.png",
+        "sha256": "98ccb7bd04ae1ef977d7b525845eac13360f673981b85c896bef746c0bd749b8"
+      },
+      "new": {
+        "time": 6.0,
+        "frame": 180,
+        "qualityScore": 0.6458,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9297,
+        "metrics": {
+          "faceWidthPx": 134,
+          "faceHeightPx": 136,
+          "detectionScore": 0.8878,
+          "sharpness": 160.0433,
+          "normalizedSharpness": 26.7126,
+          "poseYawRatio": 0.1519,
+          "posePitchRatio": 0.0457
+        },
+        "file": "crops/known_face_with_glass_and_stranger-1-new.png",
+        "sha256": "bb314f873c7e894edf9b5a2bfbff375969ed3ad45295bd9b80143796ffcdde77"
+      }
+    },
+    {
+      "video": "known_face_with_glass_and_stranger.mp4",
+      "faceRun": 2,
+      "sampleCount": 3,
+      "first": 9.6,
+      "last": 10.0,
+      "old": {
+        "time": 9.6,
+        "frame": 288,
+        "qualityScore": 0.3418,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": true,
+        "oldScore": 0.749,
+        "metrics": {
+          "faceWidthPx": 65,
+          "faceHeightPx": 77,
+          "detectionScore": 0.7507,
+          "sharpness": 122.2868,
+          "normalizedSharpness": 7.92,
+          "poseYawRatio": 0.2059,
+          "posePitchRatio": 0.1236
+        },
+        "file": "crops/known_face_with_glass_and_stranger-2-old.png",
+        "sha256": "2683a787fe82a50569e710fff16ac1515d6826dcd5449871effdd000843d7e21"
+      },
+      "new": null
+    },
+    {
+      "video": "known_face_with_glass_and_stranger.mp4",
+      "faceRun": 3,
+      "sampleCount": 3,
+      "first": 13.2,
+      "last": 13.6,
+      "old": null,
+      "new": null
+    },
+    {
+      "video": "known_face_with_glass_and_stranger.mp4",
+      "faceRun": 4,
+      "sampleCount": 22,
+      "first": 16.2,
+      "last": 21.2,
+      "old": {
+        "time": 17.0,
+        "frame": 510,
+        "qualityScore": 0.4394,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": true,
+        "oldScore": 0.8418,
+        "metrics": {
+          "faceWidthPx": 76,
+          "faceHeightPx": 88,
+          "detectionScore": 0.8909,
+          "sharpness": 193.602,
+          "normalizedSharpness": 17.5743,
+          "poseYawRatio": 0.2321,
+          "posePitchRatio": 0.0495
+        },
+        "file": "crops/known_face_with_glass_and_stranger-4-old.png",
+        "sha256": "4c96711b5d06f6d3bfd518e1a551dfa82120ed8ab277856f914fe6162915e35a"
+      },
+      "new": {
+        "time": 19.2,
+        "frame": 576,
+        "qualityScore": 0.686,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.957,
+        "metrics": {
+          "faceWidthPx": 116,
+          "faceHeightPx": 136,
+          "detectionScore": 0.92,
+          "sharpness": 199.2328,
+          "normalizedSharpness": 44.886,
+          "poseYawRatio": 0.0279,
+          "posePitchRatio": 0.0385
+        },
+        "file": "crops/known_face_with_glass_and_stranger-4-new.png",
+        "sha256": "ae54fd2656eaccfafe13f171d90b2fa2b539f1a332d54044c12e9477c6102086"
+      }
+    },
+    {
+      "video": "known_face_with_glass_and_stranger.mp4",
+      "faceRun": 5,
+      "sampleCount": 3,
+      "first": 20.0,
+      "last": 20.4,
+      "old": {
+        "time": 20.0,
+        "frame": 600,
+        "qualityScore": 0.6433,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9349,
+        "metrics": {
+          "faceWidthPx": 136,
+          "faceHeightPx": 145,
+          "detectionScore": 0.9214,
+          "sharpness": 136.974,
+          "normalizedSharpness": 25.6075,
+          "poseYawRatio": 0.0851,
+          "posePitchRatio": 0.139
+        },
+        "file": "crops/known_face_with_glass_and_stranger-5-old.png",
+        "sha256": "21618b062949c20fad0b4c01f7f6f165b199a9a46ff8cd3e14694bebd96afd0c"
+      },
+      "new": {
+        "time": 20.2,
+        "frame": 606,
+        "qualityScore": 0.6493,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8966,
+        "metrics": {
+          "faceWidthPx": 145,
+          "faceHeightPx": 152,
+          "detectionScore": 0.9156,
+          "sharpness": 114.6288,
+          "normalizedSharpness": 21.5986,
+          "poseYawRatio": 0.0757,
+          "posePitchRatio": 0.1424
+        },
+        "file": "crops/known_face_with_glass_and_stranger-5-new.png",
+        "sha256": "014ec6e82b90eeaf8a04dac8e2a63037d49fc1e72f9ce8f5a8196e419f138078"
+      }
+    },
+    {
+      "video": "known_face_with_glass_and_stranger.mp4",
+      "faceRun": 6,
+      "sampleCount": 33,
+      "first": 23.6,
+      "last": 30.0,
+      "old": {
+        "time": 24.4,
+        "frame": 732,
+        "qualityScore": 0.4756,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": true,
+        "oldScore": 0.8878,
+        "metrics": {
+          "faceWidthPx": 79,
+          "faceHeightPx": 93,
+          "detectionScore": 0.9184,
+          "sharpness": 146.6857,
+          "normalizedSharpness": 13.468,
+          "poseYawRatio": 0.0503,
+          "posePitchRatio": 0.0543
+        },
+        "file": "crops/known_face_with_glass_and_stranger-6-old.png",
+        "sha256": "7a194b3591f81655059a536600632d8d6d69710dff1eaa15d885468b100ca2a8"
+      },
+      "new": {
+        "time": 26.8,
+        "frame": 804,
+        "qualityScore": 0.5794,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9222,
+        "metrics": {
+          "faceWidthPx": 93,
+          "faceHeightPx": 115,
+          "detectionScore": 0.9193,
+          "sharpness": 169.8799,
+          "normalizedSharpness": 26.4764,
+          "poseYawRatio": 0.0016,
+          "posePitchRatio": 0.0446
+        },
+        "file": "crops/known_face_with_glass_and_stranger-6-new.png",
+        "sha256": "0047eb5f816faa6bdc9c707f2203d4678754307a658411f8052861020ae1ca41"
+      }
+    },
+    {
+      "video": "known_face_with_glass_and_stranger.mp4",
+      "faceRun": 8,
+      "sampleCount": 8,
+      "first": 31.6,
+      "last": 33.0,
+      "old": {
+        "time": 32.0,
+        "frame": 960,
+        "qualityScore": 0.4954,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8536,
+        "metrics": {
+          "faceWidthPx": 91,
+          "faceHeightPx": 109,
+          "detectionScore": 0.9076,
+          "sharpness": 117.7544,
+          "normalizedSharpness": 16.1294,
+          "poseYawRatio": 0.1464,
+          "posePitchRatio": 0.0608
+        },
+        "file": "crops/known_face_with_glass_and_stranger-8-old.png",
+        "sha256": "cef55ef3a9c45b3055ea2daf350123755ed4ffe99683a68dff74bde45480b800"
+      },
+      "new": {
+        "time": 31.8,
+        "frame": 954,
+        "qualityScore": 0.4962,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.837,
+        "metrics": {
+          "faceWidthPx": 97,
+          "faceHeightPx": 113,
+          "detectionScore": 0.904,
+          "sharpness": 109.8652,
+          "normalizedSharpness": 16.2535,
+          "poseYawRatio": 0.2314,
+          "posePitchRatio": 0.0351
+        },
+        "file": "crops/known_face_with_glass_and_stranger-8-new.png",
+        "sha256": "f6a26953f46702c2c3033f158075a74d36fabac9bf20c442655649371fb9aa92"
+      }
+    },
+    {
+      "video": "known_face_with_glass_and_stranger.mp4",
+      "faceRun": 9,
+      "sampleCount": 5,
+      "first": 34.2,
+      "last": 35.0,
+      "old": {
+        "time": 34.2,
+        "frame": 1026,
+        "qualityScore": 0.5242,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8676,
+        "metrics": {
+          "faceWidthPx": 108,
+          "faceHeightPx": 116,
+          "detectionScore": 0.8706,
+          "sharpness": 115.5611,
+          "normalizedSharpness": 13.6454,
+          "poseYawRatio": 0.1013,
+          "posePitchRatio": 0.1016
+        },
+        "file": "crops/known_face_with_glass_and_stranger-9-old.png",
+        "sha256": "055db90d5c244d2f2fb2cd26632b1f0b68da312d543248ffd9468a80892423ea"
+      },
+      "new": {
+        "time": 34.2,
+        "frame": 1026,
+        "qualityScore": 0.5242,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8676,
+        "metrics": {
+          "faceWidthPx": 108,
+          "faceHeightPx": 116,
+          "detectionScore": 0.8706,
+          "sharpness": 115.5611,
+          "normalizedSharpness": 13.6454,
+          "poseYawRatio": 0.1013,
+          "posePitchRatio": 0.1016
+        },
+        "file": "crops/known_face_with_glass_and_stranger-9-new.png",
+        "sha256": "055db90d5c244d2f2fb2cd26632b1f0b68da312d543248ffd9468a80892423ea"
+      }
+    },
+    {
+      "video": "known_face_vid9.mp4",
+      "faceRun": 0,
+      "sampleCount": 96,
+      "first": 0.0,
+      "last": 19.2,
+      "old": {
+        "time": 0.0,
+        "frame": 0,
+        "qualityScore": 0.5314,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8732,
+        "metrics": {
+          "faceWidthPx": 85,
+          "faceHeightPx": 104,
+          "detectionScore": 0.8953,
+          "sharpness": 243.7596,
+          "normalizedSharpness": 33.6569,
+          "poseYawRatio": 0.1818,
+          "posePitchRatio": 0.0182
+        },
+        "file": "crops/known_face_vid9-0-old.png",
+        "sha256": "3da920a1e80ebf86a2a8885ad0cfa8850ccc9b45b967bf0fa2ec3794ba1413b9"
+      },
+      "new": {
+        "time": 1.4,
+        "frame": 42,
+        "qualityScore": 0.5565,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8995,
+        "metrics": {
+          "faceWidthPx": 87,
+          "faceHeightPx": 103,
+          "detectionScore": 0.9078,
+          "sharpness": 218.4236,
+          "normalizedSharpness": 30.1637,
+          "poseYawRatio": 0.081,
+          "posePitchRatio": 0.0151
+        },
+        "file": "crops/known_face_vid9-0-new.png",
+        "sha256": "b3cc3c9e43932e738282d479700aaf6f7038674d377a03fbaa52ebc0007f966a"
+      }
+    }
+  ]
+}

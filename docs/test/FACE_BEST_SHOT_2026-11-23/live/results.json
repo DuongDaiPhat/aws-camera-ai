@@ -1,0 +1,405 @@
+{
+  "mode": "live-frigate-local-recognition-sink",
+  "awsCalls": 0,
+  "records": [
+    {
+      "type": "dispatch",
+      "case": "known_face_vid6",
+      "trackId": "1795368935.514708-b38cf5",
+      "file": "crops/known_face_vid6-1795368935.514708-b38cf5.png",
+      "sha256": "97ad3438ad9ad2d7f530ac4237861cb304a3c1e0228d4838fb4856bd21e4eb17",
+      "samplesCollected": 3,
+      "waitMs": 4769,
+      "qualityScore": 0.7962,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.7962,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 113,
+          "faceHeightPx": 151,
+          "detectionScore": 0.903,
+          "sharpness": 4115.4887,
+          "normalizedSharpness": 352.6937,
+          "poseYawRatio": 0.0081,
+          "posePitchRatio": 0.012
+        },
+        "boundingBox": {
+          "x": 0.40887960901487935,
+          "y": 0.09861947687506478,
+          "width": 0.24536094748275658,
+          "height": 0.25037471334732586
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    },
+    {
+      "type": "dispatch",
+      "case": "known_face_vid6",
+      "trackId": "1795368981.580333-ifjrfr",
+      "file": "crops/known_face_vid6-1795368981.580333-ifjrfr.png",
+      "sha256": "83414ee092b6881c159082d16bb0837e3e459f1c64487d7fe5ef637318ad5123",
+      "samplesCollected": 2,
+      "waitMs": 4393,
+      "qualityScore": 0.5533,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.5533,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 101,
+          "faceHeightPx": 121,
+          "detectionScore": 0.9245,
+          "sharpness": 187.3633,
+          "normalizedSharpness": 28.2485,
+          "poseYawRatio": 0.1066,
+          "posePitchRatio": 0.1523
+        },
+        "boundingBox": {
+          "x": 0.27427471705845424,
+          "y": 0.09597485468937801,
+          "width": 0.23999446687244233,
+          "height": 0.18578423133263222
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    },
+    {
+      "type": "dispatch",
+      "case": "known_face_vid6_with_glass",
+      "trackId": "1795369030.250213-weocab",
+      "file": "crops/known_face_vid6_with_glass-1795369030.250213-weocab.png",
+      "sha256": "cb477d9c2649760834f75d312693d4ef3ed5da81e0be8fde84f44a3cafec261b",
+      "samplesCollected": 6,
+      "waitMs": 4383,
+      "qualityScore": 0.6971,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.6971,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 104,
+          "faceHeightPx": 131,
+          "detectionScore": 0.9331,
+          "sharpness": 300.7367,
+          "normalizedSharpness": 82.1965,
+          "poseYawRatio": 0.0226,
+          "posePitchRatio": 0.0326
+        },
+        "boundingBox": {
+          "x": 0.31890201568603516,
+          "y": 0.11046404838562011,
+          "width": 0.24961005724393404,
+          "height": 0.20450243949890137
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    },
+    {
+      "type": "dispatch",
+      "case": "known_face_vid6_with_glass",
+      "trackId": "1795369048.224816-pew50w",
+      "file": "crops/known_face_vid6_with_glass-1795369048.224816-pew50w.png",
+      "sha256": "d1660316a60deb87afc4830bc5e6b02f54d4e8b94da572f0fce4c0cfec39ff47",
+      "samplesCollected": 2,
+      "waitMs": 4753,
+      "qualityScore": 0.6846,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.6846,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 139,
+          "faceHeightPx": 154,
+          "detectionScore": 0.9077,
+          "sharpness": 175.7975,
+          "normalizedSharpness": 31.2336,
+          "poseYawRatio": 0.0388,
+          "posePitchRatio": 0.1282
+        },
+        "boundingBox": {
+          "x": 0.12103382746378581,
+          "y": 0.17484340277020047,
+          "width": 0.28908462524414064,
+          "height": 0.28764110259725617
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    },
+    {
+      "type": "dispatch",
+      "case": "known_face_and_stranger",
+      "trackId": "1795369117.393414-xaivlv",
+      "file": "crops/known_face_and_stranger-1795369117.393414-xaivlv.png",
+      "sha256": "99bd79410212830bebccda62eadba1d45e4ab2f897edf519dab3afb0a6869d04",
+      "samplesCollected": 6,
+      "waitMs": 4542,
+      "qualityScore": 0.5747,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.5747,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 98,
+          "faceHeightPx": 113,
+          "detectionScore": 0.9333,
+          "sharpness": 162.2884,
+          "normalizedSharpness": 28.0495,
+          "poseYawRatio": 0.0957,
+          "posePitchRatio": 0.0513
+        },
+        "boundingBox": {
+          "x": 0.4087962290687019,
+          "y": 0.18440718977418663,
+          "width": 0.2318559257905065,
+          "height": 0.1552615858104131
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    },
+    {
+      "type": "dispatch",
+      "case": "known_face_and_stranger",
+      "trackId": "1795369130.043538-ewpwhc",
+      "file": "crops/known_face_and_stranger-1795369130.043538-ewpwhc.png",
+      "sha256": "b3e76180e54af25963ba51a64e99b742781fc97779b8cd028228e92d9005f8d0",
+      "samplesCollected": 1,
+      "waitMs": 2020,
+      "qualityScore": 0.4935,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.4935,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 92,
+          "faceHeightPx": 106,
+          "detectionScore": 0.921,
+          "sharpness": 120.8889,
+          "normalizedSharpness": 19.1968,
+          "poseYawRatio": 0.2423,
+          "posePitchRatio": 0.038
+        },
+        "boundingBox": {
+          "x": 0.29511022110716606,
+          "y": 0.11704235595353854,
+          "width": 0.292882559779353,
+          "height": 0.15130584673137965
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    },
+    {
+      "type": "dispatch",
+      "case": "known_face_and_stranger",
+      "trackId": "1795369140.273323-0akbsd",
+      "file": "crops/known_face_and_stranger-1795369140.273323-0akbsd.png",
+      "sha256": "010ae3c55f629a55a1a5070697a230f87d37a262538f010b4a67ede160d10d04",
+      "samplesCollected": 1,
+      "waitMs": 4353,
+      "qualityScore": 0.6257,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.6257,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 259,
+          "faceHeightPx": 374,
+          "detectionScore": 0.7508,
+          "sharpness": 55.7866,
+          "normalizedSharpness": 35.681,
+          "poseYawRatio": 0.4497,
+          "posePitchRatio": 0.0131
+        },
+        "boundingBox": {
+          "x": 0.10043209532032842,
+          "y": 0.09121510777538179,
+          "width": 0.7050869153893512,
+          "height": 0.5642002847939055
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    },
+    {
+      "type": "dispatch",
+      "case": "known_face_with_glass_and_stranger",
+      "trackId": "1795369187.616062-m0vqvq",
+      "file": "crops/known_face_with_glass_and_stranger-1795369187.616062-m0vqvq.png",
+      "sha256": "029ed23336db75a609eb84516088b19e1aabfb189e1ea691838dcffb7bce0ab3",
+      "samplesCollected": 5,
+      "waitMs": 4529,
+      "qualityScore": 0.7025,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.7025,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 123,
+          "faceHeightPx": 139,
+          "detectionScore": 0.9205,
+          "sharpness": 172.6945,
+          "normalizedSharpness": 43.7556,
+          "poseYawRatio": 0.0456,
+          "posePitchRatio": 0.0268
+        },
+        "boundingBox": {
+          "x": 0.32855019320445844,
+          "y": 0.11847167707916,
+          "width": 0.2473226800022355,
+          "height": 0.23840814574151978
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    },
+    {
+      "type": "dispatch",
+      "case": "known_face_with_glass_and_stranger",
+      "trackId": "1795369212.770771-f206yc",
+      "file": "crops/known_face_with_glass_and_stranger-1795369212.770771-f206yc.png",
+      "sha256": "09029336d78172b5970e2d37f1153e6d9115463c029d11a0e3d24bdfc2fd94f0",
+      "samplesCollected": 8,
+      "waitMs": 4010,
+      "qualityScore": 0.5879,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.5879,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 99,
+          "faceHeightPx": 116,
+          "detectionScore": 0.9202,
+          "sharpness": 214.2006,
+          "normalizedSharpness": 29.7725,
+          "poseYawRatio": 0.0843,
+          "posePitchRatio": 0.0355
+        },
+        "boundingBox": {
+          "x": 0.2738975912837659,
+          "y": 0.09853759810970585,
+          "width": 0.2398754055217161,
+          "height": 0.17248301626491688
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    },
+    {
+      "type": "dispatch",
+      "case": "known_face_with_glass_and_stranger",
+      "trackId": "1795369221.137687-1zhadg",
+      "file": "crops/known_face_with_glass_and_stranger-1795369221.137687-1zhadg.png",
+      "sha256": "c7b5bb1653d4a33fd7a94c3479d85ac75db9ec53a465f7acd39bb620851980e8",
+      "samplesCollected": 2,
+      "waitMs": 4530,
+      "qualityScore": 0.5089,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.5089,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 89,
+          "faceHeightPx": 110,
+          "detectionScore": 0.9225,
+          "sharpness": 162.529,
+          "normalizedSharpness": 21.4271,
+          "poseYawRatio": 0.1815,
+          "posePitchRatio": 0.0364
+        },
+        "boundingBox": {
+          "x": 0.32182242435479314,
+          "y": 0.11090967952777529,
+          "width": 0.28005336065712216,
+          "height": 0.15762898295989508
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    },
+    {
+      "type": "dispatch",
+      "case": "known_face_vid9",
+      "trackId": "1795369270.664597-k83ht8",
+      "file": "crops/known_face_vid9-1795369270.664597-k83ht8.png",
+      "sha256": "1e68a53ea29c28d16e12da592f86e4d144a4f1edf81dd91bbb1c2ed043fd23c8",
+      "samplesCollected": 4,
+      "waitMs": 4419,
+      "qualityScore": 0.5573,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.5573,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 84,
+          "faceHeightPx": 102,
+          "detectionScore": 0.9016,
+          "sharpness": 219.4496,
+          "normalizedSharpness": 30.8482,
+          "poseYawRatio": 0.0405,
+          "posePitchRatio": 0.0162
+        },
+        "boundingBox": {
+          "x": 0.32864332340591385,
+          "y": 0.1016884052468864,
+          "width": 0.24924319575731407,
+          "height": 0.13500798475837203
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    }
+  ],
+  "similarities": [
+    {
+      "case": "known_face_vid6",
+      "a": "1795368935.514708-b38cf5",
+      "b": "1795368981.580333-ifjrfr",
+      "cosine": 0.24052723759001712
+    },
+    {
+      "case": "known_face_vid6_with_glass",
+      "a": "1795369030.250213-weocab",
+      "b": "1795369048.224816-pew50w",
+      "cosine": 0.4860566098954781
+    }
+  ]
+}

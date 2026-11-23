@@ -1,0 +1,212 @@
+{
+  "case": "TC02-no-glasses-retest",
+  "video": "known_face_vid_2.mp4",
+  "startedAt": "2026-11-22T14:33:24.128Z",
+  "endedAt": "2026-11-22T14:34:08.726Z",
+  "ffmpegExitCode": 0,
+  "before": {
+    "case": "TC02-no-glasses-retest",
+    "metrics": {
+      "tracksCreated": 2,
+      "gateRejected": 29,
+      "sessionCacheHits": 0,
+      "spatialReidHits": 0,
+      "dispatched": 1,
+      "frozenKnownSkips": 0,
+      "pendingSkips": 3,
+      "retriesDispatched": 0
+    },
+    "tracks": []
+  },
+  "after": {
+    "case": "TC02-no-glasses-retest",
+    "metrics": {
+      "tracksCreated": 3,
+      "gateRejected": 33,
+      "sessionCacheHits": 0,
+      "spatialReidHits": 0,
+      "dispatched": 2,
+      "frozenKnownSkips": 18,
+      "pendingSkips": 11,
+      "retriesDispatched": 0
+    },
+    "tracks": [
+      {
+        "trackId": "1795358008.892334-68huyu",
+        "canonicalTrackId": "1795358008.892334-68huyu",
+        "eventId": "81a646f0-a1ec-4002-896f-2cfac5874b83",
+        "state": "KNOWN",
+        "collectionVersion": 2,
+        "currentRevision": 1,
+        "pendingRevision": null,
+        "firstSeenAt": 1795358009315,
+        "lastUpdatedAt": 1795358041205,
+        "samplesCollected": 1,
+        "dispatchedQualityScore": 0.8814,
+        "dispatchedAt": 1795358014930,
+        "lastResultAt": 1795358018595,
+        "unknownRecheckUsed": false,
+        "undeterminedRetriesUsed": 0,
+        "matchedKnownFaceId": "9019a5c2-70b2-4899-8365-b11b9697b0c9",
+        "matchedPersonName": "Person A QA",
+        "endedAt": 1795358041205
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": "81a646f0-a1ec-4002-896f-2cfac5874b83",
+      "camera_id": "eb6ebdcb-3eba-42cf-987e-bff1a4c7d004",
+      "zone_id": null,
+      "event_type": "PERSON_DETECTED",
+      "status": "LOGGED_ONLY",
+      "priority": "P3",
+      "source": "FRIGATE",
+      "track_id": "1795358008.892334-68huyu",
+      "dedup_key": "frigate:face_track_once_20261122:1795358008.892334-68huyu",
+      "confidence": "1.000",
+      "ai_label": "KNOWN",
+      "ai_model_version": "rekognition-7.0",
+      "ai_results": [
+        {
+          "error": null,
+          "label": "KNOWN",
+          "module": "M1_FACE",
+          "status": "SUCCESS",
+          "metadata": {
+            "provider": "rekognition",
+            "similarity": 0.9996092224121094,
+            "qualityReason": null,
+            "thresholdUsed": 0.9,
+            "fellBackToLocal": false,
+            "sourceSessionId": "face_track_once_20261122:1795358008.892334",
+            "collectionVersion": 2,
+            "confidencePolicyVersion": "rekognition-normalized-v1"
+          },
+          "resultId": "f87d2635-07a2-4386-b50c-aff381270576",
+          "revision": 1,
+          "confidence": 0.9996092224121094,
+          "boundingBox": null,
+          "processedAt": "2026-11-22T14:33:38.194889Z",
+          "modelVersion": "rekognition-7.0",
+          "observationId": "track:1795358008.892334-68huyu:face"
+        }
+      ],
+      "person_status": "KNOWN",
+      "matched_known_face_id": "9019a5c2-70b2-4899-8365-b11b9697b0c9",
+      "is_false_alarm": false,
+      "retain": false,
+      "correlation_id": "eab1a29c-f3e9-4bce-aa06-192cbe319b81",
+      "detected_at": "2026-11-22T14:33:28.892Z",
+      "ai_processed_at": "2026-11-22T14:33:38.194Z",
+      "notified_at": null,
+      "escalation_deadline_at": null,
+      "escalated_at": null,
+      "resolved_at": null,
+      "closed_at": null,
+      "created_at": "2026-11-22T14:33:29.302Z",
+      "updated_at": "2026-11-22T14:34:01.196Z",
+      "version": 2,
+      "rule_snapshot": {
+        "tLow": null,
+        "tHigh": null,
+        "version": 1,
+        "priority": "P3",
+        "eventType": "PERSON_DETECTED",
+        "isEnabled": true,
+        "tWaitSeconds": 0,
+        "notifyChannels": [],
+        "skipLoggedOnly": false,
+        "highWaitSeconds": null,
+        "escalateChannels": [],
+        "maxEscalationLevel": 3
+      },
+      "triggering_results": [],
+      "zone_name": null,
+      "detection_confidence": "0.994",
+      "aggregate_version": "1",
+      "wellness_owner_user_id": null,
+      "wellness_resident_user_id": null,
+      "person_name": "Person A QA"
+    }
+  ],
+  "jobs": [
+    {
+      "id": "07d12122-c17e-4655-956e-389d420dc487",
+      "event_id": "81a646f0-a1ec-4002-896f-2cfac5874b83",
+      "revision": 1,
+      "status": "SENT",
+      "attempts": 0,
+      "last_error": null,
+      "cached_result": {
+        "type": "face.result",
+        "payload": {
+          "body": {
+            "error": null,
+            "module": "M1_FACE",
+            "eventId": "81a646f0-a1ec-4002-896f-2cfac5874b83",
+            "results": [
+              {
+                "label": "KNOWN",
+                "module": "M1_FACE",
+                "metadata": {
+                  "provider": "rekognition",
+                  "similarity": 0.9996092224121094,
+                  "qualityReason": null,
+                  "thresholdUsed": 0.9,
+                  "fellBackToLocal": false,
+                  "sourceSessionId": "face_track_once_20261122:1795358008.892334",
+                  "collectionVersion": 2,
+                  "confidencePolicyVersion": "rekognition-normalized-v1"
+                },
+                "confidence": 0.9996092224121094,
+                "boundingBox": null
+              }
+            ],
+            "resultId": "f87d2635-07a2-4386-b50c-aff381270576",
+            "revision": 1,
+            "requestId": "07d12122-c17e-4655-956e-389d420dc487",
+            "processedAt": "2026-11-22T14:33:38.194889Z",
+            "modelVersion": "rekognition-7.0",
+            "personStatus": "KNOWN",
+            "observationId": "track:1795358008.892334-68huyu:face",
+            "schemaVersion": 1,
+            "collectionVersion": 2,
+            "matchedKnownFaceId": "9019a5c2-70b2-4899-8365-b11b9697b0c9"
+          },
+          "jobId": "07d12122-c17e-4655-956e-389d420dc487",
+          "cameraId": "eb6ebdcb-3eba-42cf-987e-bff1a4c7d004",
+          "ownerScopeId": "0f0d58b8-f0d5-4f5a-aa3a-41250239c83d"
+        },
+        "messageId": "f87d2635-07a2-4386-b50c-aff381270576",
+        "occurredAt": "2026-11-22T14:33:38.194889Z",
+        "correlationId": "81a646f0-a1ec-4002-896f-2cfac5874b83",
+        "schemaVersion": 1
+      },
+      "envelope": {
+        "type": "face.job",
+        "payload": {
+          "image": {
+            "key": "owners/0f0d58b8-f0d5-4f5a-aa3a-41250239c83d/cameras/eb6ebdcb-3eba-42cf-987e-bff1a4c7d004/events/81a646f0-a1ec-4002-896f-2cfac5874b83/face/07d12122-c17e-4655-956e-389d420dc487.jpg",
+            "bucket": "camerai-s4-dev-media-093206112026"
+          },
+          "jobId": "07d12122-c17e-4655-956e-389d420dc487",
+          "eventId": "81a646f0-a1ec-4002-896f-2cfac5874b83",
+          "trackId": "1795358008.892334-68huyu",
+          "cameraId": "eb6ebdcb-3eba-42cf-987e-bff1a4c7d004",
+          "resultId": "f87d2635-07a2-4386-b50c-aff381270576",
+          "revision": 1,
+          "collectionId": "camerai-s4-dev-owner-0f0d58b8-f0d5-4f5a-aa3a-41250239c83d",
+          "ownerScopeId": "0f0d58b8-f0d5-4f5a-aa3a-41250239c83d",
+          "observationId": "track:1795358008.892334-68huyu:face",
+          "sourceSessionId": "face_track_once_20261122:1795358008.892334",
+          "collectionVersion": 2
+        },
+        "messageId": "07d12122-c17e-4655-956e-389d420dc487",
+        "occurredAt": "2026-11-22T14:33:35.127Z",
+        "correlationId": "81a646f0-a1ec-4002-896f-2cfac5874b83",
+        "schemaVersion": 1
+      }
+    }
+  ]
+}

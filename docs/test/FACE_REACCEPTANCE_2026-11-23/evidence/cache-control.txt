@@ -1,0 +1,8 @@
+[Nest] 30412  - 23/11/2026, 08.22.56     LOG [KnownFacesService] Received 4 images for registration
+{"id":"64a23a26-8738-42e4-8d12-745e7c1a6726","personName":"Person B QA","relationship":"Dataset 2 acceptance test","linkedUserId":null,"provider":"REKOGNITION","modelVersion":"rekognition-7.0","sourceImageCount":4,"isActive":true,"createdAt":"2026-11-23T01:23:02.005Z","recognitionStatus":"READY"}
+{"case":"TC10-cache-prime","events":[{"id":"fdf5b5ff-ce1f-4555-a335-023f0192b740","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[{"id":"27044606-ac18-4f10-8262-05a246a84478","status":"SENT","revision":1}]}
+{"case":"TC10-cache-hit","events":[{"id":"a30fa57f-2468-4116-99ce-95d392d695f7","status":"KNOWN","type":"PERSON_DETECTED","name":"Person A QA"}],"jobs":[]}
+{"case":"TC10-after-delete","events":[{"id":"f1fe590e-0635-42fb-a0f7-f02c245e83ed","status":"UNKNOWN","type":"UNKNOWN_PERSON","name":null}],"jobs":[{"id":"eba1b0fe-565a-4660-90d7-920cfd90047f","status":"SENT","revision":1}]}
+{"case":"TC09-unknown-cap","events":[{"id":"60533fdb-227b-41c9-8bc6-cdba64246205","status":"UNKNOWN","type":"UNKNOWN_PERSON","name":null}],"jobs":[{"id":"164c06d7-f8a9-4662-beaf-d3113e649c41","status":"SENT","revision":1},{"id":"0b431f55-8935-4063-9e3f-e391caa214e2","status":"SENT","revision":2}]}
+[Nest] 28652  - 23/11/2026, 08.28.46     LOG [KnownFacesService] Received 5 images for registration
+{"id":"aa5d3ed7-4eea-4933-99c1-76bad166f5f8","personName":"Person A QA","relationship":"Dataset 2 acceptance test","linkedUserId":null,"provider":"REKOGNITION","modelVersion":"rekognition-7.0","sourceImageCount":5,"isActive":true,"createdAt":"2026-11-23T01:28:54.325Z","recognitionStatus":"READY"}

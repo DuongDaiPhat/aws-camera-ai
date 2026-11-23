@@ -1,0 +1,270 @@
+{
+  "files": [
+    {
+      "file": "local_image/Dataset_2/Faces/known_face.jpg",
+      "bytes": 2708993,
+      "sha256": "4451933473fe031acfb4b5484e1c8b770dcbb5c33ec931eec386cdd2e035ab1b"
+    },
+    {
+      "file": "local_image/Dataset_2/Faces/known_face_left.jpg",
+      "bytes": 2608529,
+      "sha256": "87e2a4315cd927bc25ebbb9ef4ec02d321b881f0d125c230ad2777b7c59e773d"
+    },
+    {
+      "file": "local_image/Dataset_2/Faces/known_face_right.jpg",
+      "bytes": 2636702,
+      "sha256": "320748865dc1bcf7d92551f63893fca8fa36e2efc6c21922cd7a8c3a71123d37"
+    },
+    {
+      "file": "local_image/Dataset_2/Faces/known_face_tilt_down.jpg",
+      "bytes": 2600588,
+      "sha256": "d5d6d0a48a7162969d33bf2916c86bca08bad98fbbdb7285b3aba38bbf9bb27b"
+    },
+    {
+      "file": "local_image/Dataset_2/Faces/known_face_with_glass.jpg",
+      "bytes": 2308241,
+      "sha256": "8c17bc6e33af2c3bd4cc28a077ba886db001a82839a7318090f4c03f7e6bf7ee"
+    },
+    {
+      "file": "local_image/Dataset_2/Faces/stranger_face.jpg",
+      "bytes": 2225014,
+      "sha256": "c3f561eb010ee19736c4bf050680fe541d98bfb06c8c4b8843cc7c643e92b952"
+    },
+    {
+      "file": "local_image/Dataset_2/Faces/stranger_face_left.jpg",
+      "bytes": 1991670,
+      "sha256": "19c0088fe61e03c51b2bf795435ad5e8e0d24033dac188729bf04402a0b48c70"
+    },
+    {
+      "file": "local_image/Dataset_2/Faces/stranger_face_right.jpg",
+      "bytes": 2001184,
+      "sha256": "de1fad5bddd0a16445bafa35510bef9966fc1c04a9580626254a0790d0c3cc61"
+    },
+    {
+      "file": "local_image/Dataset_2/Faces/stranger_face_tilt_down.jpg",
+      "bytes": 2146132,
+      "sha256": "55119b78394dc5611122eb2a183cf1e2f642f1b836b8381510882611020b0a39"
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_and_stranger.mp4",
+      "bytes": 21616785,
+      "sha256": "2cc0f485dd00a7a2cabd1b4e999616a13590c91b1cdf432c158486a4a44d6225",
+      "fps": 30.0,
+      "frames": 520,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 17.333
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_head_tilt_down.mp4",
+      "bytes": 14233016,
+      "sha256": "296aebf3e81b2023cd06e5237fbd40f796137e496d06c4844ac2463c6fe4799e",
+      "fps": 30.0,
+      "frames": 331,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 11.033
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_turning_back.mp4",
+      "bytes": 12586020,
+      "sha256": "180e91ce75f2e05a39454d231a320c54b67a481aa71a353fab08cc04b0a0c4bd",
+      "fps": 30.0,
+      "frames": 288,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 9.6
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid2_with_glass.mp4",
+      "bytes": 21013551,
+      "sha256": "b38b06542c2768b2995b1bfd9d1362ed7c56c8c7ae51820c5ca26babc914941f",
+      "fps": 30.0,
+      "frames": 498,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 16.6
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid3.mp4",
+      "bytes": 11019898,
+      "sha256": "8c86583fea74678f8c3b90084248341880f37c4e147f83aa0900ecac5b861d15",
+      "fps": 30.0,
+      "frames": 249,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 8.3
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid3_with_glass.mp4",
+      "bytes": 22617061,
+      "sha256": "66ab1b3642a02dbc75a9cac4ce905c371fd2d4d70076beeaefe9c75af0ce644f",
+      "fps": 30.0,
+      "frames": 540,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 18.0
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid4.mp4",
+      "bytes": 87690067,
+      "sha256": "cd3a486afcba73bc953fdb6b3dbb34304d057af0fe4342370ec1781e04b97e31",
+      "fps": 30.0,
+      "frames": 2130,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 71.0
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid4_with_glass.mp4",
+      "bytes": 54072136,
+      "sha256": "d3abae6c6516de79b936a8c36b9ee851bfe40c013a774fce5656664f95488c6d",
+      "fps": 30.0,
+      "frames": 1302,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 43.4
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid5.mp4",
+      "bytes": 33477853,
+      "sha256": "effb449031d1f96a23152351e718eac60c85d1c8c359046e2ecb48ee8bfd720d",
+      "fps": 30.0,
+      "frames": 800,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 26.667
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid5_with_glass.mp4",
+      "bytes": 33587274,
+      "sha256": "837f53779d67c4e37c7692711e6170758bd5e9f6b9617a17157f54960603891c",
+      "fps": 30.0,
+      "frames": 803,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 26.767
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid6.mp4",
+      "bytes": 52367440,
+      "sha256": "bcb38169b3b4d411354d668f27bd32d444aa85faeb363129139bc7760a35b6de",
+      "fps": 30.0,
+      "frames": 1270,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 42.333
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid6_with_glass.mp4",
+      "bytes": 47782449,
+      "sha256": "6b84b0bb90237eaf20017d7d5e670e496d4019cb46bb3a4529de8642a689038b",
+      "fps": 30.0,
+      "frames": 1160,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 38.667
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid7.mp4",
+      "bytes": 9748569,
+      "sha256": "8d9cbbb474709e730e426098491067c744cd3e941349b2ee248fbd8ebdc93c58",
+      "fps": 30.0,
+      "frames": 226,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 7.533
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid7_separated.mp4",
+      "bytes": 7094716,
+      "sha256": "67b583f8706655f9eca4f61052a6ac4f2f09e06e32c25cc32760fdeda0fd1e19",
+      "fps": 30.0,
+      "frames": 160,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 5.333
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid7_with_glass.mp4",
+      "bytes": 9748569,
+      "sha256": "9c793f5156d6b3069ebafb00b39d46977290936d50ff0c742bd3456e00fc0ad9",
+      "fps": 30.0,
+      "frames": 226,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 7.533
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid7_with_glass_separted.mp4",
+      "bytes": 5806342,
+      "sha256": "10a58df2e8732d4ffdac1cbd1b4c7a74e48b371375c9066b3517674956cdf5f7",
+      "fps": 30.0,
+      "frames": 129,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 4.3
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid8.mp4",
+      "bytes": 31460256,
+      "sha256": "8915b39f0b72a5090d8da6029202188da877e37ddfcac3d1ba1ad66b99995865",
+      "fps": 30.0,
+      "frames": 752,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 25.067
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid8_with_glass.mp4",
+      "bytes": 24823303,
+      "sha256": "4141fb0286036d454876ea16d4f79b7cbd4a297c73aef2b8b524c9d38bb26c11",
+      "fps": 30.0,
+      "frames": 589,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 19.633
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid9.mp4",
+      "bytes": 24245943,
+      "sha256": "585d82f7a5f0b2aaafbf3e6cd8dde30cab794646f732b236a78b82d48980fad4",
+      "fps": 30.0,
+      "frames": 580,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 19.333
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_vid_2.mp4",
+      "bytes": 22056327,
+      "sha256": "b280c0ee3bfd47a25a9c8ef52689501d9e6a501d8a5bd1a4539ed402df176b0b",
+      "fps": 30.0,
+      "frames": 520,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 17.333
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/known_face_with_glass_and_stranger.mp4",
+      "bytes": 45818112,
+      "sha256": "3aed95b771c260d176adabcb7e525d125a34e394d65910768d8a4525644fd6d0",
+      "fps": 30.0,
+      "frames": 1117,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 37.233
+    },
+    {
+      "file": "local_image/Dataset_2/Videos/stranger_face_vid9.mp4",
+      "bytes": 24245943,
+      "sha256": "9538ae54ade87cbe8d34954475c8471b80825e0d0167b65d3fee5a76996bb3f1",
+      "fps": 30.0,
+      "frames": 580,
+      "width": 1920,
+      "height": 1080,
+      "seconds": 19.333
+    }
+  ],
+  "duplicates": []
+}

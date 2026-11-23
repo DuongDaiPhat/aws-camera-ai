@@ -1,0 +1,1972 @@
+{
+  "events": [
+    {
+      "logStreamName": "2026/11/22/[$LATEST]ee37130d08c843c3a53e78c1c73fba2f",
+      "timestamp": 1795357687983,
+      "message": "INIT_START Runtime Version: python:3.12.mainlinev2.v86\tRuntime Version ARN: arn:aws:lambda:ap-southeast-1::runtime:9d15a516fef11563a8c452bd8d3fe5a5a120b73013e74783e925235557467534\n",
+      "ingestionTime": 1795357692063,
+      "eventId": "40037814339931927894382297603374465236863184920913838080"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]ee37130d08c843c3a53e78c1c73fba2f",
+      "timestamp": 1795357688820,
+      "message": "START RequestId: 5da0b8d9-ee4b-5e70-810d-dba5107af6b7 Version: $LATEST\n",
+      "ingestionTime": 1795357692063,
+      "eventId": "40037814358597651625552429172839861431069863501419446273"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]ee37130d08c843c3a53e78c1c73fba2f",
+      "timestamp": 1795357689824,
+      "message": "[INFO]\t2026-11-22T14:28:09.824Z\t5da0b8d9-ee4b-5e70-810d-dba5107af6b7\tFace provider jobId=83af0d1f-d410-4038-a766-beec34d8f69f operation=none reason=empty-collection-v1\n",
+      "ingestionTime": 1795357692063,
+      "eventId": "40037814380987599804877174806941722576808818453423783938"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]ee37130d08c843c3a53e78c1c73fba2f",
+      "timestamp": 1795357690445,
+      "message": "[INFO]\t2026-11-22T14:28:10.445Z\t5da0b8d9-ee4b-5e70-810d-dba5107af6b7\tFace completed jobId=83af0d1f-d410-4038-a766-beec34d8f69f resultId=3e34b15a-9001-4455-9843-eb3e3137d275 status=UNKNOWN cacheHit=False durationMs=1624\n",
+      "ingestionTime": 1795357692063,
+      "eventId": "40037814394836362573164691777835403624123450948637622275"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]ee37130d08c843c3a53e78c1c73fba2f",
+      "timestamp": 1795357690447,
+      "message": "END RequestId: 5da0b8d9-ee4b-5e70-810d-dba5107af6b7\n",
+      "ingestionTime": 1795357692063,
+      "eventId": "40037814394880964063561753024118475060668747671649583108"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]ee37130d08c843c3a53e78c1c73fba2f",
+      "timestamp": 1795357690447,
+      "message": "REPORT RequestId: 5da0b8d9-ee4b-5e70-810d-dba5107af6b7\tDuration: 1626.61 ms\tBilled Duration: 2461 ms\tMemory Size: 512 MB\tMax Memory Used: 89 MB\tInit Duration: 833.69 ms\t\n",
+      "ingestionTime": 1795357692063,
+      "eventId": "40037814394880964063561753024118475060668747671649583109"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]ee37130d08c843c3a53e78c1c73fba2f",
+      "timestamp": 1795358016947,
+      "message": "START RequestId: e52852a9-04e0-50d3-817c-31d5fb92ba37 Version: $LATEST\n",
+      "ingestionTime": 1795358025961,
+      "eventId": "40037821676074271383810209139188052602726219465665806336"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]ee37130d08c843c3a53e78c1c73fba2f",
+      "timestamp": 1795358018194,
+      "message": "[INFO]\t2026-11-22T14:33:38.194Z\te52852a9-04e0-50d3-817c-31d5fb92ba37\tFace provider jobId=07d12122-c17e-4655-956e-389d420dc487 operation=SearchFacesByImage awsRequestId=5457a81c-9001-47e3-b2c7-481eda7908e6\n",
+      "ingestionTime": 1795358025961,
+      "eventId": "40037821703883300646377896196683093288718726263623385089"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]ee37130d08c843c3a53e78c1c73fba2f",
+      "timestamp": 1795358018449,
+      "message": "[INFO]\t2026-11-22T14:33:38.449Z\te52852a9-04e0-50d3-817c-31d5fb92ba37\tFace completed jobId=07d12122-c17e-4655-956e-389d420dc487 resultId=f87d2635-07a2-4386-b50c-aff381270576 status=KNOWN cacheHit=False durationMs=1501\n",
+      "ingestionTime": 1795358025961,
+      "eventId": "40037821709569990672003205097774701448244058447648391170"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]ee37130d08c843c3a53e78c1c73fba2f",
+      "timestamp": 1795358018451,
+      "message": "END RequestId: e52852a9-04e0-50d3-817c-31d5fb92ba37\n",
+      "ingestionTime": 1795358025961,
+      "eventId": "40037821709614592162400266344057772884789355170660352003"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]ee37130d08c843c3a53e78c1c73fba2f",
+      "timestamp": 1795358018451,
+      "message": "REPORT RequestId: e52852a9-04e0-50d3-817c-31d5fb92ba37\tDuration: 1503.48 ms\tBilled Duration: 1504 ms\tMemory Size: 512 MB\tMax Memory Used: 92 MB\t\n",
+      "ingestionTime": 1795358025961,
+      "eventId": "40037821709614592162400266344057772884789355170660352004"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358420067,
+      "message": "INIT_START Runtime Version: python:3.12.mainlinev2.v86\tRuntime Version ARN: arn:aws:lambda:ap-southeast-1::runtime:9d15a516fef11563a8c452bd8d3fe5a5a120b73013e74783e925235557467534\n",
+      "ingestionTime": 1795358422629,
+      "eventId": "40037830665950675815475010434608977705834772031649611776"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358420896,
+      "message": "START RequestId: 10c7d62a-95bd-5ad7-95b1-b55794ac3bc8 Version: $LATEST\n",
+      "ingestionTime": 1795358422629,
+      "eventId": "40037830684437993585056897018942088153860263720107376641"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358422464,
+      "message": "[INFO]\t2026-11-22T14:40:22.464Z\t10c7d62a-95bd-5ad7-95b1-b55794ac3bc8\tFace provider jobId=9994d1e3-688e-462e-8f0b-fc5b11d8fcd7 operation=SearchFacesByImage awsRequestId=bcd61cc9-14aa-4cd1-b7d0-a078a32daa3f\n",
+      "ingestionTime": 1795358422629,
+      "eventId": "40037830719405562056352914104870094405372894561484668930"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358422858,
+      "message": "[INFO]\t2026-11-22T14:40:22.858Z\t10c7d62a-95bd-5ad7-95b1-b55794ac3bc8\tFace completed jobId=9994d1e3-688e-462e-8f0b-fc5b11d8fcd7 resultId=85aa7315-fe2d-439b-84ea-e64518fb39b2 status=KNOWN cacheHit=False durationMs=1961\n",
+      "ingestionTime": 1795358431869,
+      "eventId": "40037830728192055664573979633805590880970279368801189888"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358422860,
+      "message": "END RequestId: 10c7d62a-95bd-5ad7-95b1-b55794ac3bc8\n",
+      "ingestionTime": 1795358431869,
+      "eventId": "40037830728236657154971040880088662317515576091813150721"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358422860,
+      "message": "REPORT RequestId: 10c7d62a-95bd-5ad7-95b1-b55794ac3bc8\tDuration: 1963.15 ms\tBilled Duration: 2789 ms\tMemory Size: 512 MB\tMax Memory Used: 91 MB\tInit Duration: 825.11 ms\t\n",
+      "ingestionTime": 1795358431869,
+      "eventId": "40037830728236657154971040880088662317515576091813150722"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358494093,
+      "message": "START RequestId: f5c2cbd1-195b-5a41-a224-a8ac1807deb1 Version: $LATEST\n",
+      "ingestionTime": 1795358503108,
+      "eventId": "40037832316785639881902919207225445323422016138966794240"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358495049,
+      "message": "[INFO]\t2026-11-22T14:41:35.049Z\tf5c2cbd1-195b-5a41-a224-a8ac1807deb1\tFace provider jobId=4a5099d0-d705-4632-b8c6-c660ae22e00d operation=SearchFacesByImage awsRequestId=7a5a9bcc-f4ea-47ab-bfb3-e0f2e2bbba10\n",
+      "ingestionTime": 1795358503108,
+      "eventId": "40037832338105152291698194930533591992073849738684071937"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358495292,
+      "message": "[INFO]\t2026-11-22T14:41:35.292Z\tf5c2cbd1-195b-5a41-a224-a8ac1807deb1\tFace completed jobId=4a5099d0-d705-4632-b8c6-c660ae22e00d resultId=d7d4e150-980a-4fb9-9804-528b6e8a3cc1 status=KNOWN cacheHit=False durationMs=1198\n",
+      "ingestionTime": 1795358503108,
+      "eventId": "40037832343524233374941136353926771532327401584637313026"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358495297,
+      "message": "END RequestId: f5c2cbd1-195b-5a41-a224-a8ac1807deb1\n",
+      "ingestionTime": 1795358503108,
+      "eventId": "40037832343635737100933789469634450123690643392167215107"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358495297,
+      "message": "REPORT RequestId: f5c2cbd1-195b-5a41-a224-a8ac1807deb1\tDuration: 1203.17 ms\tBilled Duration: 1204 ms\tMemory Size: 512 MB\tMax Memory Used: 92 MB\t\n",
+      "ingestionTime": 1795358503108,
+      "eventId": "40037832343635737100933789469634450123690643392167215108"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358613169,
+      "message": "START RequestId: 3676845c-33b7-5730-b800-e721327353c0 Version: $LATEST\n",
+      "ingestionTime": 1795358622184,
+      "eventId": "40037834972269175142135400552686508420349882791752695808"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358614299,
+      "message": "[INFO]\t2026-11-22T14:43:34.299Z\t3676845c-33b7-5730-b800-e721327353c0\tFace provider jobId=927d4357-ae20-4919-a78a-53138b464ad6 operation=SearchFacesByImage awsRequestId=7983b17f-4bf0-45c9-98ed-e5fc25979299\n",
+      "ingestionTime": 1795358622184,
+      "eventId": "40037834997469017216475004702621870068442531293510565889"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358614579,
+      "message": "[INFO]\t2026-11-22T14:43:34.579Z\t3676845c-33b7-5730-b800-e721327353c0\tFace completed jobId=927d4357-ae20-4919-a78a-53138b464ad6 resultId=687a8545-973a-43c4-ad4f-64f7c3477a1c status=KNOWN cacheHit=False durationMs=1409\n",
+      "ingestionTime": 1795358622184,
+      "eventId": "40037835003713225872063579182251871184784072515185082370"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358614581,
+      "message": "END RequestId: 3676845c-33b7-5730-b800-e721327353c0\n",
+      "ingestionTime": 1795358622184,
+      "eventId": "40037835003757827362460640428534942621329369238197043203"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358614581,
+      "message": "REPORT RequestId: 3676845c-33b7-5730-b800-e721327353c0\tDuration: 1411.03 ms\tBilled Duration: 1412 ms\tMemory Size: 512 MB\tMax Memory Used: 94 MB\t\n",
+      "ingestionTime": 1795358622184,
+      "eventId": "40037835003757827362460640428534942621329369238197043204"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358677313,
+      "message": "START RequestId: 44b8a027-a392-553a-84d3-c35aa197c01b Version: $LATEST\n",
+      "ingestionTime": 1795358686327,
+      "eventId": "40037836402728175156683691420898044439801003282791596032"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358678265,
+      "message": "[INFO]\t2026-11-22T14:44:38.265Z\t44b8a027-a392-553a-84d3-c35aa197c01b\tFace provider jobId=699be9ad-de6c-4a70-8349-6bcd8308126e operation=SearchFacesByImage awsRequestId=b9ef3249-515f-4352-bde4-3c7675aa1884\n",
+      "ingestionTime": 1795358686327,
+      "eventId": "40037836423958484585684844651640048235362243436484952065"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358678526,
+      "message": "[INFO]\t2026-11-22T14:44:38.526Z\t44b8a027-a392-553a-84d3-c35aa197c01b\tFace completed jobId=699be9ad-de6c-4a70-8349-6bcd8308126e resultId=8b795daa-0c85-4fcf-bcea-dcf308651393 status=KNOWN cacheHit=False durationMs=1210\n",
+      "ingestionTime": 1795358686327,
+      "eventId": "40037836429778979082501337291580870704523465789545840642"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358678527,
+      "message": "END RequestId: 44b8a027-a392-553a-84d3-c35aa197c01b\n",
+      "ingestionTime": 1795358686327,
+      "eventId": "40037836429801279827699867914722406422796114151051821059"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358678527,
+      "message": "REPORT RequestId: 44b8a027-a392-553a-84d3-c35aa197c01b\tDuration: 1213.74 ms\tBilled Duration: 1214 ms\tMemory Size: 512 MB\tMax Memory Used: 96 MB\t\n",
+      "ingestionTime": 1795358686327,
+      "eventId": "40037836429801279827699867914722406422796114151051821060"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358754816,
+      "message": "START RequestId: 14c94b40-7050-5f17-bdb0-283d72050599 Version: $LATEST\n",
+      "ingestionTime": 1795358763830,
+      "eventId": "40037838131102830278402576853035861501232995421449486336"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358756048,
+      "message": "[INFO]\t2026-11-22T14:45:56.048Z\t14c94b40-7050-5f17-bdb0-283d72050599\tFace provider jobId=ec1c7020-1dc9-476f-bdd7-bb1431edc696 operation=SearchFacesByImage awsRequestId=846a8de9-8d03-453c-9007-7f9ed3b5ff96\n",
+      "ingestionTime": 1795358763830,
+      "eventId": "40037838158577348362992304563407866413135776796817358849"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358756328,
+      "message": "[INFO]\t2026-11-22T14:45:56.328Z\t14c94b40-7050-5f17-bdb0-283d72050599\tFace completed jobId=ec1c7020-1dc9-476f-bdd7-bb1431edc696 resultId=4a25aa00-c99e-4e5d-9585-25ff598290c0 status=KNOWN cacheHit=False durationMs=1511\n",
+      "ingestionTime": 1795358763830,
+      "eventId": "40037838164821557018580879043037867529477318018491875330"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358756330,
+      "message": "END RequestId: 14c94b40-7050-5f17-bdb0-283d72050599\n",
+      "ingestionTime": 1795358763830,
+      "eventId": "40037838164866158508977940289320938966022614741503836163"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358756330,
+      "message": "REPORT RequestId: 14c94b40-7050-5f17-bdb0-283d72050599\tDuration: 1512.77 ms\tBilled Duration: 1513 ms\tMemory Size: 512 MB\tMax Memory Used: 100 MB\t\n",
+      "ingestionTime": 1795358763830,
+      "eventId": "40037838164866158508977940289320938966022614741503836164"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358828370,
+      "message": "START RequestId: aea194a5-db68-59ac-868b-f7d8d9cde833 Version: $LATEST\n",
+      "ingestionTime": 1795358837383,
+      "eventId": "40037839771411842611124031494474479446141723196800892928"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358829504,
+      "message": "[INFO]\t2026-11-22T14:47:09.504Z\taea194a5-db68-59ac-868b-f7d8d9cde833\tFace provider jobId=bf35e9d6-bb10-4bdd-a03a-c5183b4c2ac8 operation=SearchFacesByImage awsRequestId=dc7667df-8128-4fd7-b170-178b6c8393c8\n",
+      "ingestionTime": 1795358837383,
+      "eventId": "40037839796700887666257758136975983967324965144582684673"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358829778,
+      "message": "[INFO]\t2026-11-22T14:47:09.778Z\taea194a5-db68-59ac-868b-f7d8d9cde833\tFace completed jobId=bf35e9d6-bb10-4bdd-a03a-c5183b4c2ac8 resultId=5e7675ca-ac35-43b4-a7d9-98e416d2f176 status=KNOWN cacheHit=False durationMs=1407\n",
+      "ingestionTime": 1795358837383,
+      "eventId": "40037839802811291850655148877756770774030616197221318658"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358829780,
+      "message": "END RequestId: aea194a5-db68-59ac-868b-f7d8d9cde833\n",
+      "ingestionTime": 1795358837383,
+      "eventId": "40037839802855893341052210124039842210575912920233279491"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358829780,
+      "message": "REPORT RequestId: aea194a5-db68-59ac-868b-f7d8d9cde833\tDuration: 1409.23 ms\tBilled Duration: 1410 ms\tMemory Size: 512 MB\tMax Memory Used: 103 MB\t\n",
+      "ingestionTime": 1795358837383,
+      "eventId": "40037839802855893341052210124039842210575912920233279492"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358888268,
+      "message": "START RequestId: 14ea43d4-59af-52af-9723-20a95b77d330 Version: $LATEST\n",
+      "ingestionTime": 1795358897279,
+      "eventId": "40037841107181878512711296498590579837211201578661117952"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358888784,
+      "message": "[INFO]\t2026-11-22T14:48:08.784Z\t14ea43d4-59af-52af-9723-20a95b77d330\tFace provider jobId=5431ebb4-2670-4d5a-b951-a2960d4f4931 operation=SearchFacesByImage awsRequestId=fb18c0ae-e2b2-4024-b65d-501fa1cfe5ee\n",
+      "ingestionTime": 1795358897279,
+      "eventId": "40037841118689063035153098039623010465897756115747012609"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358889099,
+      "message": "[INFO]\t2026-11-22T14:48:09.099Z\t14ea43d4-59af-52af-9723-20a95b77d330\tFace completed jobId=5431ebb4-2670-4d5a-b951-a2960d4f4931 resultId=7b215ad4-0829-4d90-8a9b-c62fdd5a2a40 status=KNOWN cacheHit=False durationMs=830\n",
+      "ingestionTime": 1795358897279,
+      "eventId": "40037841125713797772690244329206761721781989990130843650"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358889101,
+      "message": "END RequestId: 14ea43d4-59af-52af-9723-20a95b77d330\n",
+      "ingestionTime": 1795358897279,
+      "eventId": "40037841125758399263087305575489833158327286713142804483"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]f7b817fea78949cc9462ef74d9468668",
+      "timestamp": 1795358889101,
+      "message": "REPORT RequestId: 14ea43d4-59af-52af-9723-20a95b77d330\tDuration: 832.54 ms\tBilled Duration: 833 ms\tMemory Size: 512 MB\tMax Memory Used: 105 MB\t\n",
+      "ingestionTime": 1795358897279,
+      "eventId": "40037841125758399263087305575489833158327286713142804484"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]9f4034d87f914b3f8bf25bb375c85346",
+      "timestamp": 1795359408293,
+      "message": "INIT_START Runtime Version: python:3.12.mainlinev2.v86\tRuntime Version ARN: arn:aws:lambda:ap-southeast-1::runtime:9d15a516fef11563a8c452bd8d3fe5a5a120b73013e74783e925235557467534\n",
+      "ingestionTime": 1795359408599,
+      "eventId": "40037852704126900378598596293850305606388817922396258304"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]9f4034d87f914b3f8bf25bb375c85346",
+      "timestamp": 1795359409157,
+      "message": "START RequestId: 22101c23-14ba-5501-9e19-7f5e105d546b Version: $LATEST\n",
+      "ingestionTime": 1795359418161,
+      "eventId": "40037852723394744230129054699696876267523333087945949184"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]9f4034d87f914b3f8bf25bb375c85346",
+      "timestamp": 1795359410778,
+      "message": "[INFO]\t2026-11-22T14:56:50.778Z\t22101c23-14ba-5501-9e19-7f5e105d546b\tFace provider jobId=4e7c712a-06ff-46c5-8dbb-ea79dbc1815e operation=SearchFacesByImage awsRequestId=76f1dbeb-128b-4a03-b1a5-fa00f83b6eca\n",
+      "ingestionTime": 1795359418161,
+      "eventId": "40037852759544252196947194812126275587486327089140203521"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]9f4034d87f914b3f8bf25bb375c85346",
+      "timestamp": 1795359411115,
+      "message": "[INFO]\t2026-11-22T14:56:51.115Z\t22101c23-14ba-5501-9e19-7f5e105d546b\tFace completed jobId=4e7c712a-06ff-46c5-8dbb-ea79dbc1815e resultId=644c50f3-ee0e-4346-bc3c-9ff948d5a578 status=UNKNOWN cacheHit=False durationMs=1958\n",
+      "ingestionTime": 1795359418161,
+      "eventId": "40037852767059603328852014810823812645368824916655603714"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]9f4034d87f914b3f8bf25bb375c85346",
+      "timestamp": 1795359411118,
+      "message": "END RequestId: 22101c23-14ba-5501-9e19-7f5e105d546b\n",
+      "ingestionTime": 1795359418161,
+      "eventId": "40037852767126505564447606680248419800186770001173544963"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]9f4034d87f914b3f8bf25bb375c85346",
+      "timestamp": 1795359411118,
+      "message": "REPORT RequestId: 22101c23-14ba-5501-9e19-7f5e105d546b\tDuration: 1960.73 ms\tBilled Duration: 2821 ms\tMemory Size: 512 MB\tMax Memory Used: 91 MB\tInit Duration: 859.59 ms\t\n",
+      "ingestionTime": 1795359418161,
+      "eventId": "40037852767126505564447606680248419800186770001173544964"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]966969dbbbcf48c29327eec2a0fe110d",
+      "timestamp": 1795360893211,
+      "message": "INIT_START Runtime Version: python:3.12.mainlinev2.v86\tRuntime Version ARN: arn:aws:lambda:ap-southeast-1::runtime:9d15a516fef11563a8c452bd8d3fe5a5a120b73013e74783e925235557467534\n",
+      "ingestionTime": 1795360901908,
+      "eventId": "40037885818904859090294452182085694704215238648088494080"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]966969dbbbcf48c29327eec2a0fe110d",
+      "timestamp": 1795360894087,
+      "message": "START RequestId: 82c066b8-e8b8-576d-a47e-05c5e2006bdf Version: $LATEST\n",
+      "ingestionTime": 1795360901908,
+      "eventId": "40037885838440311884207278054070983911055203327327338497"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]966969dbbbcf48c29327eec2a0fe110d",
+      "timestamp": 1795360895851,
+      "message": "[INFO]\t2026-11-22T15:21:35.851Z\t82c066b8-e8b8-576d-a47e-05c5e2006bdf\tFace provider jobId=b5ec81b1-6132-489d-9a55-5549e867b88f operation=SearchFacesByImage awsRequestId=393b341d-0a33-46d7-a514-0804572ef2fc retryAttempts=0\n",
+      "ingestionTime": 1795360901908,
+      "eventId": "40037885877778826414415297275739990944006913023876792322"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]966969dbbbcf48c29327eec2a0fe110d",
+      "timestamp": 1795360896413,
+      "message": "[INFO]\t2026-11-22T15:21:36.413Z\t82c066b8-e8b8-576d-a47e-05c5e2006bdf\tFace completed jobId=b5ec81b1-6132-489d-9a55-5549e867b88f resultId=5265ac7f-1386-4117-9bcd-2cf347505a16 status=KNOWN cacheHit=False durationMs=2325\n",
+      "ingestionTime": 1795360901908,
+      "eventId": "40037885890311845215989507481283064613235292190237786115"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]966969dbbbcf48c29327eec2a0fe110d",
+      "timestamp": 1795360896415,
+      "message": "END RequestId: 82c066b8-e8b8-576d-a47e-05c5e2006bdf\n",
+      "ingestionTime": 1795360901908,
+      "eventId": "40037885890356446706386568727566136049780588913249746948"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]966969dbbbcf48c29327eec2a0fe110d",
+      "timestamp": 1795360896415,
+      "message": "REPORT RequestId: 82c066b8-e8b8-576d-a47e-05c5e2006bdf\tDuration: 2327.43 ms\tBilled Duration: 3200 ms\tMemory Size: 512 MB\tMax Memory Used: 91 MB\tInit Duration: 872.21 ms\t\n",
+      "ingestionTime": 1795360901908,
+      "eventId": "40037885890356446706386568727566136049780588913249746949"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362576568,
+      "message": "INIT_START Runtime Version: python:3.12.mainlinev2.v86\tRuntime Version ARN: arn:aws:lambda:ap-southeast-1::runtime:9d15a516fef11563a8c452bd8d3fe5a5a120b73013e74783e925235557467534\n",
+      "ingestionTime": 1795362582861,
+      "eventId": "40037923359020394253208633880375766447335740012789891072"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362577425,
+      "message": "START RequestId: e53ed4d6-dd9e-5967-a33b-b7abccdb3665 Version: $LATEST\n",
+      "ingestionTime": 1795362582861,
+      "eventId": "40037923378132132888349377912671877006995385823415107585"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362578788,
+      "message": "[INFO]\t2026-11-22T15:49:38.788Z\te53ed4d6-dd9e-5967-a33b-b7abccdb3665\tFace provider jobId=e7a271bc-9520-4b91-946f-69146d192e8d operation=SearchFacesByImage awsRequestId=63991292-a0c3-4270-ac2a-3307fdfd6364 retryAttempts=0\n",
+      "ingestionTime": 1795362582861,
+      "eventId": "40037923408528048593946617254585061012615102556066414594"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362579141,
+      "message": "[INFO]\t2026-11-22T15:49:39.141Z\te53ed4d6-dd9e-5967-a33b-b7abccdb3665\tFace completed jobId=e7a271bc-9520-4b91-946f-69146d192e8d resultId=b7003083-ebd4-424b-b410-fa5b9d9c95d4 status=UNKNOWN cacheHit=False durationMs=1715\n",
+      "ingestionTime": 1795362582861,
+      "eventId": "40037923416400211649027927223547169562859974167677501443"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362579143,
+      "message": "END RequestId: e53ed4d6-dd9e-5967-a33b-b7abccdb3665\n",
+      "ingestionTime": 1795362582861,
+      "eventId": "40037923416444813139424988469830240999405270890689462276"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362579143,
+      "message": "REPORT RequestId: e53ed4d6-dd9e-5967-a33b-b7abccdb3665\tDuration: 1717.67 ms\tBilled Duration: 2572 ms\tMemory Size: 512 MB\tMax Memory Used: 91 MB\tInit Duration: 853.44 ms\t\n",
+      "ingestionTime": 1795362582861,
+      "eventId": "40037923416444813139424988469830240999405270890689462277"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362630333,
+      "message": "START RequestId: ebef401c-0df9-556d-875f-23611c814dc1 Version: $LATEST\n",
+      "ingestionTime": 1795362639343,
+      "eventId": "40037924558019959852207587153325703161752721824450543616"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362630868,
+      "message": "[INFO]\t2026-11-22T15:50:30.868Z\tebef401c-0df9-556d-875f-23611c814dc1\tFace provider jobId=325a2f72-a11e-44e1-91a5-094f25df9530 operation=SearchFacesByImage awsRequestId=fa037d23-0563-4056-b72b-90bf393bbe95 retryAttempts=0\n",
+      "ingestionTime": 1795362639343,
+      "eventId": "40037924569950858533421470534047312437619595230150066177"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362631067,
+      "message": "[INFO]\t2026-11-22T15:50:31.067Z\tebef401c-0df9-556d-875f-23611c814dc1\tFace completed jobId=325a2f72-a11e-44e1-91a5-094f25df9530 resultId=75f5e91f-741d-4b0f-a9b8-9707e2831c74 status=KNOWN cacheHit=False durationMs=734\n",
+      "ingestionTime": 1795362639343,
+      "eventId": "40037924574388706827929064539212920373876619169840168962"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362631069,
+      "message": "END RequestId: ebef401c-0df9-556d-875f-23611c814dc1\n",
+      "ingestionTime": 1795362639343,
+      "eventId": "40037924574433308318326125785495991810421915892852129795"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362631069,
+      "message": "REPORT RequestId: ebef401c-0df9-556d-875f-23611c814dc1\tDuration: 735.78 ms\tBilled Duration: 736 ms\tMemory Size: 512 MB\tMax Memory Used: 91 MB\t\n",
+      "ingestionTime": 1795362639343,
+      "eventId": "40037924574433308318326125785495991810421915892852129796"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362685818,
+      "message": "START RequestId: def9695b-a1f7-50ea-80f4-0a26b04f4fe8 Version: $LATEST\n",
+      "ingestionTime": 1795362694832,
+      "eventId": "40037925795376807192679212228517241335521775868322971648"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362686735,
+      "message": "[INFO]\t2026-11-22T15:51:26.735Z\tdef9695b-a1f7-50ea-80f4-0a26b04f4fe8\tFace provider jobId=efa05014-cc3b-4c7f-898a-649866672f88 operation=SearchFacesByImage awsRequestId=2a97619b-7785-4886-8bc8-830556c4d2d4 retryAttempts=0\n",
+      "ingestionTime": 1795362694832,
+      "eventId": "40037925815826590539731793649305494991540323369307013121"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362687217,
+      "message": "[INFO]\t2026-11-22T15:51:27.217Z\tdef9695b-a1f7-50ea-80f4-0a26b04f4fe8\tFace completed jobId=efa05014-cc3b-4c7f-898a-649866672f88 resultId=534b062c-950a-4ba3-85c7-d6aa9d91340f status=KNOWN cacheHit=False durationMs=1397\n",
+      "ingestionTime": 1795362694832,
+      "eventId": "40037925826575549725423554003525711198956833615189573634"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362687219,
+      "message": "END RequestId: def9695b-a1f7-50ea-80f4-0a26b04f4fe8\n",
+      "ingestionTime": 1795362694832,
+      "eventId": "40037925826620151215820615249808782635502130338201534467"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362687219,
+      "message": "REPORT RequestId: def9695b-a1f7-50ea-80f4-0a26b04f4fe8\tDuration: 1400.91 ms\tBilled Duration: 1401 ms\tMemory Size: 512 MB\tMax Memory Used: 93 MB\t\n",
+      "ingestionTime": 1795362694832,
+      "eventId": "40037925826620151215820615249808782635502130338201534468"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362751047,
+      "message": "START RequestId: 8d149263-e528-5f04-9c1d-f11ef4dc9e4e Version: $LATEST\n",
+      "ingestionTime": 1795362760062,
+      "eventId": "40037927250032115747633229206608884813554417267785662464"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362752207,
+      "message": "[INFO]\t2026-11-22T15:52:32.207Z\t8d149263-e528-5f04-9c1d-f11ef4dc9e4e\tFace provider jobId=f7a99e01-b597-4db7-a949-a09f7eda4132 operation=SearchFacesByImage awsRequestId=daec5059-dd8b-45b1-ba6f-fd66117c1b7b retryAttempts=0\n",
+      "ingestionTime": 1795362760062,
+      "eventId": "40037927275900980177928752050790318009826516614722945025"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362752573,
+      "message": "[INFO]\t2026-11-22T15:52:32.573Z\t8d149263-e528-5f04-9c1d-f11ef4dc9e4e\tFace completed jobId=f7a99e01-b597-4db7-a949-a09f7eda4132 resultId=3aa2034d-4282-408e-ae6d-fffbba9dd220 status=KNOWN cacheHit=False durationMs=1525\n",
+      "ingestionTime": 1795362760062,
+      "eventId": "40037927284063052920590960120592390897615816925911777282"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362752575,
+      "message": "END RequestId: 8d149263-e528-5f04-9c1d-f11ef4dc9e4e\n",
+      "ingestionTime": 1795362760062,
+      "eventId": "40037927284107654410988021366875462334161113648923738115"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362752575,
+      "message": "REPORT RequestId: 8d149263-e528-5f04-9c1d-f11ef4dc9e4e\tDuration: 1527.61 ms\tBilled Duration: 1528 ms\tMemory Size: 512 MB\tMax Memory Used: 97 MB\t\n",
+      "ingestionTime": 1795362760062,
+      "eventId": "40037927284107654410988021366875462334161113648923738116"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362841318,
+      "message": "START RequestId: 2db1ea0d-70cd-53b4-9899-8970629d2b18 Version: $LATEST\n",
+      "ingestionTime": 1795362850337,
+      "eventId": "40037929263142685564191110925315396477961549360390602752"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362842565,
+      "message": "[INFO]\t2026-11-22T15:54:02.565Z\t2db1ea0d-70cd-53b4-9899-8970629d2b18\tFace provider jobId=497ce403-6cf0-4df2-a1ad-48b82e03af9a operation=SearchFacesByImage awsRequestId=97a5bda6-9904-4731-a8bf-d1a81df5d41f retryAttempts=0\n",
+      "ingestionTime": 1795362850337,
+      "eventId": "40037929290951714826758797982810437163954056158348181505"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362842818,
+      "message": "[INFO]\t2026-11-22T15:54:02.818Z\t2db1ea0d-70cd-53b4-9899-8970629d2b18\tFace completed jobId=497ce403-6cf0-4df2-a1ad-48b82e03af9a resultId=e34218f2-e19b-49b8-b0db-60f471a7c273 status=KNOWN cacheHit=False durationMs=1498\n",
+      "ingestionTime": 1795362850337,
+      "eventId": "40037929296593803361987045637618973886934091619361226754"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362842820,
+      "message": "END RequestId: 2db1ea0d-70cd-53b4-9899-8970629d2b18\n",
+      "ingestionTime": 1795362850337,
+      "eventId": "40037929296638404852384106883902045323479388342373187587"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362842820,
+      "message": "REPORT RequestId: 2db1ea0d-70cd-53b4-9899-8970629d2b18\tDuration: 1502.47 ms\tBilled Duration: 1503 ms\tMemory Size: 512 MB\tMax Memory Used: 100 MB\t\n",
+      "ingestionTime": 1795362850337,
+      "eventId": "40037929296638404852384106883902045323479388342373187588"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362914874,
+      "message": "START RequestId: a501004b-15f5-5b33-baa6-6336076363f0 Version: $LATEST\n",
+      "ingestionTime": 1795362923886,
+      "eventId": "40037930903496299387309626813032039463184717584697524224"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362915820,
+      "message": "[INFO]\t2026-11-22T15:55:15.820Z\ta501004b-15f5-5b33-baa6-6336076363f0\tFace provider jobId=8e9c37ad-838b-4f0b-8dc4-bdaebe8319b4 operation=SearchFacesByImage awsRequestId=6db55996-a336-4a3b-b4ec-40cd3cc185f4 retryAttempts=0\n",
+      "ingestionTime": 1795362923886,
+      "eventId": "40037930924592804345119596304924828949110067569354997761"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362916078,
+      "message": "[INFO]\t2026-11-22T15:55:16.078Z\ta501004b-15f5-5b33-baa6-6336076363f0\tFace completed jobId=8e9c37ad-838b-4f0b-8dc4-bdaebe8319b4 resultId=8386f2ff-4ebd-4f79-bb7b-005bddd2fec2 status=KNOWN cacheHit=False durationMs=1204\n",
+      "ingestionTime": 1795362923886,
+      "eventId": "40037930930346396606340497075441044263453344837897945090"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362916080,
+      "message": "END RequestId: a501004b-15f5-5b33-baa6-6336076363f0\n",
+      "ingestionTime": 1795362923886,
+      "eventId": "40037930930390998096737558321724115699998641560909905923"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362916080,
+      "message": "REPORT RequestId: a501004b-15f5-5b33-baa6-6336076363f0\tDuration: 1205.94 ms\tBilled Duration: 1206 ms\tMemory Size: 512 MB\tMax Memory Used: 103 MB\t\n",
+      "ingestionTime": 1795362923886,
+      "eventId": "40037930930390998096737558321724115699998641560909905924"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362979139,
+      "message": "START RequestId: 4c6d4b14-fc59-5b92-94d2-2869ee86fc83 Version: $LATEST\n",
+      "ingestionTime": 1795362988156,
+      "eventId": "40037932336653689570880123081522481159869373073099325440"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362980109,
+      "message": "[INFO]\t2026-11-22T15:56:20.109Z\t4c6d4b14-fc59-5b92-94d2-2869ee86fc83\tFace provider jobId=7805f61f-955a-4459-ba4e-570ec9ad0509 operation=SearchFacesByImage awsRequestId=8917da88-70e4-4a2e-9492-1e1d1b08bd42 retryAttempts=0\n",
+      "ingestionTime": 1795362988156,
+      "eventId": "40037932358285412413454827528812127884338283733900328961"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362980419,
+      "message": "[INFO]\t2026-11-22T15:56:20.419Z\t4c6d4b14-fc59-5b92-94d2-2869ee86fc83\tFace completed jobId=7805f61f-955a-4459-ba4e-570ec9ad0509 resultId=769411ff-60a2-43db-ba1a-eec93b7e8f6d status=KNOWN cacheHit=False durationMs=1278\n",
+      "ingestionTime": 1795362988156,
+      "eventId": "40037932365198643424999320702688200548859275800754257922"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362980421,
+      "message": "END RequestId: 4c6d4b14-fc59-5b92-94d2-2869ee86fc83\n",
+      "ingestionTime": 1795362988156,
+      "eventId": "40037932365243244915396381948971271985404572523766218755"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795362980421,
+      "message": "REPORT RequestId: 4c6d4b14-fc59-5b92-94d2-2869ee86fc83\tDuration: 1281.60 ms\tBilled Duration: 1282 ms\tMemory Size: 512 MB\tMax Memory Used: 105 MB\t\n",
+      "ingestionTime": 1795362988156,
+      "eventId": "40037932365243244915396381948971271985404572523766218756"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363046426,
+      "message": "START RequestId: 330ee2ea-4e23-5306-bc82-81975d064844 Version: $LATEST\n",
+      "ingestionTime": 1795363055439,
+      "eventId": "40037933837203931744410162487376531305928017176299503616"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363047558,
+      "message": "[INFO]\t2026-11-22T15:57:27.558Z\t330ee2ea-4e23-5306-bc82-81975d064844\tFace provider jobId=0aee1f6c-8d96-40cd-861c-9c63f5fd6fda operation=SearchFacesByImage awsRequestId=e05641e2-0559-4b3d-83c2-e0596f0638e6 retryAttempts=0\n",
+      "ingestionTime": 1795363055439,
+      "eventId": "40037933862448375309146827883594964390565962401069334529"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363047993,
+      "message": "[INFO]\t2026-11-22T15:57:27.993Z\t330ee2ea-4e23-5306-bc82-81975d064844\tFace completed jobId=0aee1f6c-8d96-40cd-861c-9c63f5fd6fda resultId=14618bee-95f7-4edd-a4f2-fd3ae6b38f48 status=KNOWN cacheHit=False durationMs=1565\n",
+      "ingestionTime": 1795363055439,
+      "eventId": "40037933872149199470507648950163001839167999656170815490"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363047995,
+      "message": "END RequestId: 330ee2ea-4e23-5306-bc82-81975d064844\n",
+      "ingestionTime": 1795363055439,
+      "eventId": "40037933872193800960904710196446073275713296379182776323"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363047995,
+      "message": "REPORT RequestId: 330ee2ea-4e23-5306-bc82-81975d064844\tDuration: 1568.69 ms\tBilled Duration: 1569 ms\tMemory Size: 512 MB\tMax Memory Used: 105 MB\t\n",
+      "ingestionTime": 1795363055439,
+      "eventId": "40037933872193800960904710196446073275713296379182776324"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363074035,
+      "message": "START RequestId: 88b8d968-0588-5599-9834-ba1516b4af17 Version: $LATEST\n",
+      "ingestionTime": 1795363083052,
+      "eventId": "40037934452905205930642136835418745199034516744126857216"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363074665,
+      "message": "[INFO]\t2026-11-22T15:57:54.665Z\t88b8d968-0588-5599-9834-ba1516b4af17\tFace provider jobId=b7e66b54-0583-4c4e-b0e5-cb84d109e1c1 operation=SearchFacesByImage awsRequestId=3a7733c1-cdf9-47d5-a76f-84a4df195b18 retryAttempts=0\n",
+      "ingestionTime": 1795363083052,
+      "eventId": "40037934466954675405716429414586247710802984492894519297"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363074916,
+      "message": "[INFO]\t2026-11-22T15:57:54.916Z\t88b8d968-0588-5599-9834-ba1516b4af17\tFace completed jobId=b7e66b54-0583-4c4e-b0e5-cb84d109e1c1 resultId=8efe95f6-f040-4fff-8004-af5fe738685a status=KNOWN cacheHit=False durationMs=880\n",
+      "ingestionTime": 1795363083052,
+      "eventId": "40037934472552162450547615823111712997237723230895603714"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363074918,
+      "message": "END RequestId: 88b8d968-0588-5599-9834-ba1516b4af17\n",
+      "ingestionTime": 1795363083052,
+      "eventId": "40037934472596763940944677069394784433783019953907564547"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363074918,
+      "message": "REPORT RequestId: 88b8d968-0588-5599-9834-ba1516b4af17\tDuration: 882.40 ms\tBilled Duration: 883 ms\tMemory Size: 512 MB\tMax Memory Used: 105 MB\t\n",
+      "ingestionTime": 1795363083052,
+      "eventId": "40037934472596763940944677069394784433783019953907564548"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363125660,
+      "message": "START RequestId: dd18670a-286b-524a-b27f-04773b07f9ce Version: $LATEST\n",
+      "ingestionTime": 1795363134679,
+      "eventId": "40037935604181176804785556579612877135222147086040301568"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363126661,
+      "message": "[INFO]\t2026-11-22T15:58:46.661Z\tdd18670a-286b-524a-b27f-04773b07f9ce\tFace provider jobId=558bc7e8-55c6-4eba-8bef-606b5b5da4e7 operation=SearchFacesByImage awsRequestId=369035e3-d9d9-416f-9364-38af85500117 retryAttempts=0\n",
+      "ingestionTime": 1795363134679,
+      "eventId": "40037935626504222748514710344290131126143156953526697985"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363127158,
+      "message": "[INFO]\t2026-11-22T15:58:47.158Z\tdd18670a-286b-524a-b27f-04773b07f9ce\tFace completed jobId=558bc7e8-55c6-4eba-8bef-606b5b5da4e7 resultId=af56e78e-1f68-4ea3-8c67-e3a48035dac4 status=KNOWN cacheHit=False durationMs=1496\n",
+      "ingestionTime": 1795363134679,
+      "eventId": "40037935637587693112184430045633383107649392621998964738"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363127160,
+      "message": "END RequestId: dd18670a-286b-524a-b27f-04773b07f9ce\n",
+      "ingestionTime": 1795363134679,
+      "eventId": "40037935637632294602581491291916454544194689345010925571"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363127160,
+      "message": "REPORT RequestId: dd18670a-286b-524a-b27f-04773b07f9ce\tDuration: 1498.99 ms\tBilled Duration: 1499 ms\tMemory Size: 512 MB\tMax Memory Used: 105 MB\t\n",
+      "ingestionTime": 1795363134679,
+      "eventId": "40037935637632294602581491291916454544194689345010925572"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363153811,
+      "message": "START RequestId: 0d55e4e5-66ad-5b98-a574-8798752310da Version: $LATEST\n",
+      "ingestionTime": 1795363162822,
+      "eventId": "40037936231969454888621128671008110572078533003296374784"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363154404,
+      "message": "[INFO]\t2026-11-22T15:59:14.404Z\t0d55e4e5-66ad-5b98-a574-8798752310da\tFace provider jobId=835140c7-6755-4df5-9a73-97d1639f23cb operation=SearchFacesByImage awsRequestId=99d21156-1a46-41e1-8cfd-752f5e89d153 retryAttempts=0\n",
+      "ingestionTime": 1795363162822,
+      "eventId": "40037936245193796791349788193938791507759011376342761473"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363154674,
+      "message": "[INFO]\t2026-11-22T15:59:14.674Z\t0d55e4e5-66ad-5b98-a574-8798752310da\tFace completed jobId=835140c7-6755-4df5-9a73-97d1639f23cb resultId=24944cd5-948f-4e9d-b154-c27e0c76ff10 status=KNOWN cacheHit=False durationMs=863\n",
+      "ingestionTime": 1795363162822,
+      "eventId": "40037936251214997994953056442153435441374068982957473794"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363154676,
+      "message": "END RequestId: 0d55e4e5-66ad-5b98-a574-8798752310da\n",
+      "ingestionTime": 1795363162822,
+      "eventId": "40037936251259599485350117688436506877919365705969434627"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363154676,
+      "message": "REPORT RequestId: 0d55e4e5-66ad-5b98-a574-8798752310da\tDuration: 864.51 ms\tBilled Duration: 865 ms\tMemory Size: 512 MB\tMax Memory Used: 105 MB\t\n",
+      "ingestionTime": 1795363162822,
+      "eventId": "40037936251259599485350117688436506877919365705969434628"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363202395,
+      "message": "START RequestId: d4be4a44-ae60-5a52-9031-2939bdd9fd5d Version: $LATEST\n",
+      "ingestionTime": 1795363211408,
+      "eventId": "40037937315428859614032923438116065925318618056259600384"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363203575,
+      "message": "[INFO]\t2026-11-22T16:00:03.575Z\td4be4a44-ae60-5a52-9031-2939bdd9fd5d\tFace provider jobId=5ef70391-4e40-4bcc-bed3-5f94bca2c445 operation=SearchFacesByImage awsRequestId=193855df-1a75-4114-8644-18b3cdb59e28 retryAttempts=0\n",
+      "ingestionTime": 1795363211408,
+      "eventId": "40037937341743738948299058745128213487043684633316491265"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363204043,
+      "message": "[INFO]\t2026-11-22T16:00:04.043Z\td4be4a44-ae60-5a52-9031-2939bdd9fd5d\tFace completed jobId=5ef70391-4e40-4bcc-bed3-5f94bca2c445 resultId=046eeb2f-4ad0-43ca-af4f-f373f59a5ce6 status=KNOWN cacheHit=False durationMs=1648\n",
+      "ingestionTime": 1795363211408,
+      "eventId": "40037937352180487701211390375366929638643117818115325954"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363204045,
+      "message": "END RequestId: d4be4a44-ae60-5a52-9031-2939bdd9fd5d\n",
+      "ingestionTime": 1795363211408,
+      "eventId": "40037937352225089191608451621650001075188414541127286787"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363204045,
+      "message": "REPORT RequestId: d4be4a44-ae60-5a52-9031-2939bdd9fd5d\tDuration: 1650.30 ms\tBilled Duration: 1651 ms\tMemory Size: 512 MB\tMax Memory Used: 105 MB\t\n",
+      "ingestionTime": 1795363211408,
+      "eventId": "40037937352225089191608451621650001075188414541127286788"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363218545,
+      "message": "START RequestId: b0df6399-6f2f-5206-9205-00e47ceac509 Version: $LATEST\n",
+      "ingestionTime": 1795363227574,
+      "eventId": "40037937675585894570302487193461333408240276820500480000"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363219164,
+      "message": "[INFO]\t2026-11-22T16:00:19.164Z\tb0df6399-6f2f-5206-9205-00e47ceac509\tFace provider jobId=f94624d4-47c7-4541-ba15-39a1a7b58d70 operation=SearchFacesByImage awsRequestId=171da313-b2db-4e39-ad57-62b005862a69 retryAttempts=0\n",
+      "ingestionTime": 1795363227574,
+      "eventId": "40037937689390055848192942918071943019009612592702357505"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363219709,
+      "message": "[INFO]\t2026-11-22T16:00:19.709Z\tb0df6399-6f2f-5206-9205-00e47ceac509\tFace completed jobId=f94624d4-47c7-4541-ba15-39a1a7b58d70 resultId=09433e08-c592-4d45-8300-b4713bace2c4 status=UNKNOWN cacheHit=False durationMs=1163\n",
+      "ingestionTime": 1795363227574,
+      "eventId": "40037937701543961981392132530208909477602969613461684226"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363219711,
+      "message": "END RequestId: b0df6399-6f2f-5206-9205-00e47ceac509\n",
+      "ingestionTime": 1795363227574,
+      "eventId": "40037937701588563471789193776491980914148266336473645059"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363219711,
+      "message": "REPORT RequestId: b0df6399-6f2f-5206-9205-00e47ceac509\tDuration: 1165.10 ms\tBilled Duration: 1166 ms\tMemory Size: 512 MB\tMax Memory Used: 105 MB\t\n",
+      "ingestionTime": 1795363227574,
+      "eventId": "40037937701588563471789193776491980914148266336473645060"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363267087,
+      "message": "START RequestId: 5824d537-6cf1-544e-9fce-b64a7f0aa8cb Version: $LATEST\n",
+      "ingestionTime": 1795363276101,
+      "eventId": "40037938758108667997375995788554023558302717795493085184"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363268205,
+      "message": "[INFO]\t2026-11-22T16:01:08.205Z\t5824d537-6cf1-544e-9fce-b64a7f0aa8cb\tFace provider jobId=6fe0b09a-f727-4024-a678-ebd227e7cf64 operation=SearchFacesByImage awsRequestId=536ed49e-c888-4676-8721-f2ea713fea81 retryAttempts=0\n",
+      "ingestionTime": 1795363276101,
+      "eventId": "40037938783040901129333232460790956587123585959179190273"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363268635,
+      "message": "[INFO]\t2026-11-22T16:01:08.635Z\t5824d537-6cf1-544e-9fce-b64a7f0aa8cb\tFace completed jobId=6fe0b09a-f727-4024-a678-ebd227e7cf64 resultId=a4fc319e-9056-43cb-8bb6-6df39a72d0ed status=KNOWN cacheHit=False durationMs=1547\n",
+      "ingestionTime": 1795363276101,
+      "eventId": "40037938792630221564701400411651315444362381406750769154"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363268637,
+      "message": "END RequestId: 5824d537-6cf1-544e-9fce-b64a7f0aa8cb\n",
+      "ingestionTime": 1795363276101,
+      "eventId": "40037938792674823055098461657934386880907678129762729987"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363268637,
+      "message": "REPORT RequestId: 5824d537-6cf1-544e-9fce-b64a7f0aa8cb\tDuration: 1548.94 ms\tBilled Duration: 1549 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795363276101,
+      "eventId": "40037938792674823055098461657934386880907678129762729988"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363272939,
+      "message": "START RequestId: 3257cee8-7e5f-552d-957b-ad956da32808 Version: $LATEST\n",
+      "ingestionTime": 1795363276101,
+      "eventId": "40037938888612628899177202412821046889840929328490479621"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363273770,
+      "message": "[INFO]\t2026-11-22T16:01:13.770Z\t3257cee8-7e5f-552d-957b-ad956da32808\tFace provider jobId=a258c4ab-372d-4587-94f5-447bd6b7ac50 operation=SearchFacesByImage awsRequestId=4562ec53-ac15-4882-8f49-23e8185f2548 retryAttempts=0\n",
+      "ingestionTime": 1795363276101,
+      "eventId": "40037938907144548159156150243437228774411717739960205318"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363274181,
+      "message": "[INFO]\t2026-11-22T16:01:14.181Z\t3257cee8-7e5f-552d-957b-ad956da32808\tFace completed jobId=a258c4ab-372d-4587-94f5-447bd6b7ac50 resultId=cc95a8a2-804c-4c0e-a88b-12ed2a35884a status=UNKNOWN cacheHit=False durationMs=1242\n",
+      "ingestionTime": 1795363276101,
+      "eventId": "40037938916310154435752236354608408984470194318918156295"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363274183,
+      "message": "END RequestId: 3257cee8-7e5f-552d-957b-ad956da32808\n",
+      "ingestionTime": 1795363276101,
+      "eventId": "40037938916354755926149297600891480421015491041930117128"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363274183,
+      "message": "REPORT RequestId: 3257cee8-7e5f-552d-957b-ad956da32808\tDuration: 1243.57 ms\tBilled Duration: 1244 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795363276101,
+      "eventId": "40037938916354755926149297600891480421015491041930117129"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363284892,
+      "message": "START RequestId: 3e14c890-5757-5b86-b7ec-abed4354d703 Version: $LATEST\n",
+      "ingestionTime": 1795363293902,
+      "eventId": "40037939155173436257213740845117284656549020625195237376"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363285468,
+      "message": "[INFO]\t2026-11-22T16:01:25.468Z\t3e14c890-5757-5b86-b7ec-abed4354d703\tFace provider jobId=39a5cea7-94a2-48ad-bb91-22a3e914499b operation=SearchFacesByImage awsRequestId=5e42fa75-1e4b-43c0-87f0-82a8f3b52c29 errorCode=InvalidParameterException\n",
+      "ingestionTime": 1795363293902,
+      "eventId": "40037939168018665491567379774641858381594476852639956993"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363285694,
+      "message": "[INFO]\t2026-11-22T16:01:25.694Z\t3e14c890-5757-5b86-b7ec-abed4354d703\tFace completed jobId=39a5cea7-94a2-48ad-bb91-22a3e914499b resultId=8e7e4044-83ad-450d-aef1-f1f6fc3ac7a2 status=UNDETERMINED cacheHit=False durationMs=801\n",
+      "ingestionTime": 1795363293902,
+      "eventId": "40037939173058633906435300604628930711213006552991531010"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363285696,
+      "message": "END RequestId: 3e14c890-5757-5b86-b7ec-abed4354d703\n",
+      "ingestionTime": 1795363293902,
+      "eventId": "40037939173103235396832361850912002147758303276003491843"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363285696,
+      "message": "REPORT RequestId: 3e14c890-5757-5b86-b7ec-abed4354d703\tDuration: 803.02 ms\tBilled Duration: 804 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795363293902,
+      "eventId": "40037939173103235396832361850912002147758303276003491844"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363324380,
+      "message": "START RequestId: b941c441-bf11-5b14-ae4d-a73cab229631 Version: $LATEST\n",
+      "ingestionTime": 1795363333390,
+      "eventId": "40037940035785262656790987505818143187514793426063654912"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363325091,
+      "message": "[INFO]\t2026-11-22T16:02:05.091Z\tb941c441-bf11-5b14-ae4d-a73cab229631\tFace provider jobId=5b9a10bc-40df-4efb-8f47-453d076c4a8a operation=SearchFacesByImage awsRequestId=7e55cf6c-118e-4ccc-bff2-2d831ee43192 retryAttempts=0\n",
+      "ingestionTime": 1795363333390,
+      "eventId": "40037940051641092492946260559450038879367778456815730689"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363325606,
+      "message": "[INFO]\t2026-11-22T16:02:05.606Z\tb941c441-bf11-5b14-ae4d-a73cab229631\tFace completed jobId=5b9a10bc-40df-4efb-8f47-453d076c4a8a resultId=820a34b3-b974-412c-b758-ab95312bd9f6 status=UNKNOWN cacheHit=False durationMs=1225\n",
+      "ingestionTime": 1795363333390,
+      "eventId": "40037940063125976270189531477340933789781684632395644930"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363325608,
+      "message": "END RequestId: b941c441-bf11-5b14-ae4d-a73cab229631\n",
+      "ingestionTime": 1795363333390,
+      "eventId": "40037940063170577760586592723624005226326981355407605763"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363325608,
+      "message": "REPORT RequestId: b941c441-bf11-5b14-ae4d-a73cab229631\tDuration: 1227.49 ms\tBilled Duration: 1228 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795363333390,
+      "eventId": "40037940063170577760586592723624005226326981355407605764"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363379327,
+      "message": "START RequestId: 2f8cbd95-8004-5085-8034-dee8947582e3 Version: $LATEST\n",
+      "ingestionTime": 1795363388340,
+      "eventId": "40037941261144309080453137330211390622551026269627744256"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363379873,
+      "message": "[INFO]\t2026-11-22T16:02:59.873Z\t2f8cbd95-8004-5085-8034-dee8947582e3\tFace provider jobId=d430a16f-38dc-4e6e-9d62-14133a9ca091 operation=SearchFacesByImage awsRequestId=d67191fd-ee0c-4f4a-9edd-4aa96aa621ab retryAttempts=0\n",
+      "ingestionTime": 1795363388340,
+      "eventId": "40037941273320515958850857565489892799417031651893051393"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363380165,
+      "message": "[INFO]\t2026-11-22T16:03:00.165Z\t2f8cbd95-8004-5085-8034-dee8947582e3\tFace completed jobId=d430a16f-38dc-4e6e-9d62-14133a9ca091 resultId=6bfa0a09-a697-4fe4-bc15-f5d491bd113b status=UNKNOWN cacheHit=False durationMs=837\n",
+      "ingestionTime": 1795363388340,
+      "eventId": "40037941279832333556821799522818322535030353211639332866"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363380166,
+      "message": "END RequestId: 2f8cbd95-8004-5085-8034-dee8947582e3\n",
+      "ingestionTime": 1795363388340,
+      "eventId": "40037941279854634302020330145959858253303001573145313283"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363380167,
+      "message": "REPORT RequestId: 2f8cbd95-8004-5085-8034-dee8947582e3\tDuration: 838.78 ms\tBilled Duration: 839 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795363388340,
+      "eventId": "40037941279876935047218860769101393971575649934651293700"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363434562,
+      "message": "START RequestId: dc6319fd-f1cc-5810-af1f-7a80e551af9d Version: $LATEST\n",
+      "ingestionTime": 1795363443573,
+      "eventId": "40037942492925970121292106619709704457487478365137797120"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363435164,
+      "message": "[INFO]\t2026-11-22T16:03:55.164Z\tdc6319fd-f1cc-5810-af1f-7a80e551af9d\tFace provider jobId=f16f26b0-21b6-448c-9211-2e7bd46bfb72 operation=SearchFacesByImage awsRequestId=6d5e2b32-4aad-4495-8d9d-144fedcda5e7 retryAttempts=0\n",
+      "ingestionTime": 1795363443573,
+      "eventId": "40037942506351018730807541750914206857621791991738007553"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363435508,
+      "message": "[INFO]\t2026-11-22T16:03:55.507Z\tdc6319fd-f1cc-5810-af1f-7a80e551af9d\tFace completed jobId=f16f26b0-21b6-448c-9211-2e7bd46bfb72 resultId=68f7d7f8-0cfc-442c-8812-e0696bccce87 status=KNOWN cacheHit=False durationMs=945\n",
+      "ingestionTime": 1795363443573,
+      "eventId": "40037942514022475079102076111602493943412828349795270658"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363435509,
+      "message": "END RequestId: dc6319fd-f1cc-5810-af1f-7a80e551af9d\n",
+      "ingestionTime": 1795363443573,
+      "eventId": "40037942514044775824300606734744029661685476711301251075"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363435509,
+      "message": "REPORT RequestId: dc6319fd-f1cc-5810-af1f-7a80e551af9d\tDuration: 946.74 ms\tBilled Duration: 947 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795363443573,
+      "eventId": "40037942514044775824300606734744029661685476711301251076"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363446149,
+      "message": "START RequestId: 2af57cb9-71b3-5817-83c8-1fc465061492 Version: $LATEST\n",
+      "ingestionTime": 1795363455162,
+      "eventId": "40037942751324704736666436974694052331353393097058353152"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363446919,
+      "message": "[INFO]\t2026-11-22T16:04:06.919Z\t2af57cb9-71b3-5817-83c8-1fc465061492\tFace provider jobId=49724289-1ea0-4c70-b879-3b46dbe36f5b operation=SearchFacesByImage awsRequestId=9a74a760-6bfb-414b-a3b4-aaf37ac048fa retryAttempts=0\n",
+      "ingestionTime": 1795363455162,
+      "eventId": "40037942768496278539535016793676555401292631456663273473"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363447323,
+      "message": "[INFO]\t2026-11-22T16:04:07.322Z\t2af57cb9-71b3-5817-83c8-1fc465061492\tFace completed jobId=49724289-1ea0-4c70-b879-3b46dbe36f5b resultId=107c9d9d-a33e-4146-a954-7b8738afadaf status=KNOWN cacheHit=False durationMs=1173\n",
+      "ingestionTime": 1795363455162,
+      "eventId": "40037942777505779599741388542856985583442569505079361538"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363447324,
+      "message": "END RequestId: 2af57cb9-71b3-5817-83c8-1fc465061492\n",
+      "ingestionTime": 1795363455162,
+      "eventId": "40037942777528080344939919165998521301715217866585341955"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363447324,
+      "message": "REPORT RequestId: 2af57cb9-71b3-5817-83c8-1fc465061492\tDuration: 1174.78 ms\tBilled Duration: 1175 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795363455162,
+      "eventId": "40037942777528080344939919165998521301715217866585341956"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363507996,
+      "message": "START RequestId: 9cfd9bf7-0fc7-5dc4-92cb-f88a1b3689d5 Version: $LATEST\n",
+      "ingestionTime": 1795363517017,
+      "eventId": "40037944130558893030189886484031815104796706446363983872"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363509110,
+      "message": "[INFO]\t2026-11-22T16:05:09.110Z\t9cfd9bf7-0fc7-5dc4-92cb-f88a1b3689d5\tFace provider jobId=ef57efdb-c7c2-492d-b034-7b1b380808b9 operation=SearchFacesByImage awsRequestId=edfecef9-1298-43e0-854b-0bf69423e109 retryAttempts=0\n",
+      "ingestionTime": 1795363517017,
+      "eventId": "40037944155401923181353000663702605260526981164026167297"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363509426,
+      "message": "[INFO]\t2026-11-22T16:05:09.426Z\t9cfd9bf7-0fc7-5dc4-92cb-f88a1b3689d5\tFace completed jobId=ef57efdb-c7c2-492d-b034-7b1b380808b9 resultId=ed1e90e1-50f1-4274-8f1b-b2baf9be6762 status=KNOWN cacheHit=False durationMs=1430\n",
+      "ingestionTime": 1795363517017,
+      "eventId": "40037944162448958664088677576427892234683863399915978754"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363509428,
+      "message": "END RequestId: 9cfd9bf7-0fc7-5dc4-92cb-f88a1b3689d5\n",
+      "ingestionTime": 1795363517017,
+      "eventId": "40037944162493560154485738822710963671229160122927939587"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363509428,
+      "message": "REPORT RequestId: 9cfd9bf7-0fc7-5dc4-92cb-f88a1b3689d5\tDuration: 1431.52 ms\tBilled Duration: 1432 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795363517017,
+      "eventId": "40037944162493560154485738822710963671229160122927939588"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363514090,
+      "message": "START RequestId: 1f2c9ea1-d86b-57d6-beca-fddccc8d405b Version: $LATEST\n",
+      "ingestionTime": 1795363517017,
+      "eventId": "40037944266459634270035503908550482258315821463808638981"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363514718,
+      "message": "[INFO]\t2026-11-22T16:05:14.718Z\t1f2c9ea1-d86b-57d6-beca-fddccc8d405b\tFace provider jobId=c9addcd8-e2cb-40cd-a8cf-0b3dbb012971 operation=SearchFacesByImage awsRequestId=3bda9e87-30f6-47a4-b4cf-a79901add66f retryAttempts=0\n",
+      "ingestionTime": 1795363517017,
+      "eventId": "40037944280464502254712735241434913333538992489564340230"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363514922,
+      "message": "[INFO]\t2026-11-22T16:05:14.922Z\t1f2c9ea1-d86b-57d6-beca-fddccc8d405b\tFace completed jobId=c9addcd8-e2cb-40cd-a8cf-0b3dbb012971 resultId=c5014dd3-eb22-474f-9e8c-bb52449a5696 status=KNOWN cacheHit=False durationMs=832\n",
+      "ingestionTime": 1795363517017,
+      "eventId": "40037944285013854275212982362308199861159258236784345095"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363514924,
+      "message": "END RequestId: 1f2c9ea1-d86b-57d6-beca-fddccc8d405b\n",
+      "ingestionTime": 1795363517017,
+      "eventId": "40037944285058455765610043608591271297704554959796305928"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363514924,
+      "message": "REPORT RequestId: 1f2c9ea1-d86b-57d6-beca-fddccc8d405b\tDuration: 833.38 ms\tBilled Duration: 834 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795363517017,
+      "eventId": "40037944285058455765610043608591271297704554959796305929"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363522329,
+      "message": "START RequestId: ad04f2a5-688e-584a-9cba-91d87c789c5b Version: $LATEST\n",
+      "ingestionTime": 1795363531340,
+      "eventId": "40037944450195473960729307988978484674715304923897724928"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363522860,
+      "message": "[INFO]\t2026-11-22T16:05:22.860Z\tad04f2a5-688e-584a-9cba-91d87c789c5b\tFace provider jobId=ccfa8621-0cfc-46b5-a028-496ff09651cd operation=SearchFacesByImage awsRequestId=4093cd4a-821d-4acd-a6af-bda139749bb3 retryAttempts=0\n",
+      "ingestionTime": 1795363531340,
+      "eventId": "40037944462037169661149068877133951077491584883573325825"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363523073,
+      "message": "[INFO]\t2026-11-22T16:05:23.073Z\tad04f2a5-688e-584a-9cba-91d87c789c5b\tFace completed jobId=ccfa8621-0cfc-46b5-a028-496ff09651cd resultId=9ad98ddf-f9c9-4e23-aeae-9894eaac8a6a status=UNKNOWN cacheHit=False durationMs=743\n",
+      "ingestionTime": 1795363531340,
+      "eventId": "40037944466787228388436091606281059069565685884347154434"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363523075,
+      "message": "END RequestId: ad04f2a5-688e-584a-9cba-91d87c789c5b\n",
+      "ingestionTime": 1795363531340,
+      "eventId": "40037944466831829878833152852564130506110982607359115267"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363523075,
+      "message": "REPORT RequestId: ad04f2a5-688e-584a-9cba-91d87c789c5b\tDuration: 745.05 ms\tBilled Duration: 746 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795363531340,
+      "eventId": "40037944466831829878833152852564130506110982607359115268"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363617325,
+      "message": "START RequestId: aa4e57d6-6a11-59c9-b9ad-34ab7f456a24 Version: $LATEST\n",
+      "ingestionTime": 1795363626340,
+      "eventId": "40037946568677064840344384057153762678121366796015501312"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363618407,
+      "message": "[INFO]\t2026-11-22T16:06:58.407Z\taa4e57d6-6a11-59c9-b9ad-34ab7f456a24\tFace provider jobId=38443cdf-dd73-457e-ad50-95e046f3b04b operation=SearchFacesByImage awsRequestId=65e8b0a8-e772-487b-ba05-7db37f73d844 retryAttempts=0\n",
+      "ingestionTime": 1795363626340,
+      "eventId": "40037946592806471145154518296295409849126893945486311425"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363618663,
+      "message": "[INFO]\t2026-11-22T16:06:58.663Z\taa4e57d6-6a11-59c9-b9ad-34ab7f456a24\tFace completed jobId=38443cdf-dd73-457e-ad50-95e046f3b04b resultId=b98b71f9-febe-44db-b044-27ea4e384375 status=KNOWN cacheHit=False durationMs=1337\n",
+      "ingestionTime": 1795363626340,
+      "eventId": "40037946598515461915978357820528553726924874491017297922"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363618665,
+      "message": "END RequestId: aa4e57d6-6a11-59c9-b9ad-34ab7f456a24\n",
+      "ingestionTime": 1795363626340,
+      "eventId": "40037946598560063406375419066811625163470171214029258755"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363618665,
+      "message": "REPORT RequestId: aa4e57d6-6a11-59c9-b9ad-34ab7f456a24\tDuration: 1338.90 ms\tBilled Duration: 1339 ms\tMemory Size: 512 MB\tMax Memory Used: 108 MB\t\n",
+      "ingestionTime": 1795363626340,
+      "eventId": "40037946598560063406375419066811625163470171214029258756"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363662991,
+      "message": "START RequestId: 88730adb-5c62-5ceb-8935-69a649eadd68 Version: $LATEST\n",
+      "ingestionTime": 1795363671999,
+      "eventId": "40037947587062895076443820493722064819026763472229826560"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363663595,
+      "message": "[INFO]\t2026-11-22T16:07:43.595Z\t88730adb-5c62-5ceb-8935-69a649eadd68\tFace provider jobId=880876d8-efe4-4d88-a6c7-38ee4091d989 operation=SearchFacesByImage awsRequestId=20275fde-8c14-4675-b498-14433feb6c31 retryAttempts=0\n",
+      "ingestionTime": 1795363671999,
+      "eventId": "40037947600532545176356316871209638655706373821841997825"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363664015,
+      "message": "[INFO]\t2026-11-22T16:07:44.015Z\t88730adb-5c62-5ceb-8935-69a649eadd68\tFace completed jobId=880876d8-efe4-4d88-a6c7-38ee4091d989 resultId=6e946a51-cc6a-4df8-907f-b16e29081a70 status=KNOWN cacheHit=False durationMs=1023\n",
+      "ingestionTime": 1795363671999,
+      "eventId": "40037947609898858159739178590654640330218685654353772546"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363664017,
+      "message": "END RequestId: 88730adb-5c62-5ceb-8935-69a649eadd68\n",
+      "ingestionTime": 1795363671999,
+      "eventId": "40037947609943459650136239836937711766763982377365733379"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363664017,
+      "message": "REPORT RequestId: 88730adb-5c62-5ceb-8935-69a649eadd68\tDuration: 1025.70 ms\tBilled Duration: 1026 ms\tMemory Size: 512 MB\tMax Memory Used: 108 MB\t\n",
+      "ingestionTime": 1795363671999,
+      "eventId": "40037947609943459650136239836937711766763982377365733380"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363665242,
+      "message": "START RequestId: a413212a-9780-5a59-b8f0-4257820b29b4 Version: $LATEST\n",
+      "ingestionTime": 1795363671999,
+      "eventId": "40037947637261872518336253185318966650758225222191742981"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363665768,
+      "message": "[INFO]\t2026-11-22T16:07:45.768Z\ta413212a-9780-5a59-b8f0-4257820b29b4\tFace provider jobId=fd2bc831-dcd6-4a7e-b9e3-4fc6efb9e975 operation=SearchFacesByImage awsRequestId=14830559-4854-4963-afc5-66a76758e6cf retryAttempts=0\n",
+      "ingestionTime": 1795363671999,
+      "eventId": "40037947648992064492763360957766754462171263374337441798"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363666019,
+      "message": "[INFO]\t2026-11-22T16:07:46.019Z\ta413212a-9780-5a59-b8f0-4257820b29b4\tFace completed jobId=fd2bc831-dcd6-4a7e-b9e3-4fc6efb9e975 resultId=b5964869-f9a0-44d5-a5ef-26d0f36e68d2 status=KNOWN cacheHit=False durationMs=777\n",
+      "ingestionTime": 1795363671999,
+      "eventId": "40037947654589551537594547366292219748606002112338526215"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363666021,
+      "message": "END RequestId: a413212a-9780-5a59-b8f0-4257820b29b4\n",
+      "ingestionTime": 1795363671999,
+      "eventId": "40037947654634153027991608612575291185151298835350487048"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]bd20f50d60fc4d8d8381ceb49f1988c5",
+      "timestamp": 1795363666021,
+      "message": "REPORT RequestId: a413212a-9780-5a59-b8f0-4257820b29b4\tDuration: 778.82 ms\tBilled Duration: 779 ms\tMemory Size: 512 MB\tMax Memory Used: 108 MB\t\n",
+      "ingestionTime": 1795363671999,
+      "eventId": "40037947654634153027991608612575291185151298835350487049"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364066828,
+      "message": "INIT_START Runtime Version: python:3.12.mainlinev2.v86\tRuntime Version ARN: arn:aws:lambda:ap-southeast-1::runtime:9d15a516fef11563a8c452bd8d3fe5a5a120b73013e74783e925235557467534\n",
+      "ingestionTime": 1795364071951,
+      "eventId": "40037956592928933815455078585594444320767716351732809728"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364067717,
+      "message": "START RequestId: 4608962e-68a9-5f94-98cb-f5537f888ef1 Version: $LATEST\n",
+      "ingestionTime": 1795364071951,
+      "eventId": "40037956612754296296948802558419697865152109730549399553"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364069423,
+      "message": "[INFO]\t2026-11-22T16:14:29.422Z\t4608962e-68a9-5f94-98cb-f5537f888ef1\tFace provider jobId=4bbd3a18-88f3-4a12-802c-b5ef0db1beb9 operation=SearchFacesByImage awsRequestId=dfd30dce-8388-4053-8b78-8b26dd97489f retryAttempts=0\n",
+      "ingestionTime": 1795364071951,
+      "eventId": "40037956650799367605642045637879633238290214459751989250"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364069772,
+      "message": "[INFO]\t2026-11-22T16:14:29.772Z\t4608962e-68a9-5f94-98cb-f5537f888ef1\tFace completed jobId=4bbd3a18-88f3-4a12-802c-b5ef0db1beb9 resultId=c909005f-d7bd-4daf-ae87-e08c9f8c41d4 status=KNOWN cacheHit=False durationMs=2055\n",
+      "ingestionTime": 1795364071951,
+      "eventId": "40037956658582327679929233114275598915444492625339154435"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364069775,
+      "message": "END RequestId: 4608962e-68a9-5f94-98cb-f5537f888ef1\n",
+      "ingestionTime": 1795364071951,
+      "eventId": "40037956658649229915524824983700206070262437709857095684"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364069775,
+      "message": "REPORT RequestId: 4608962e-68a9-5f94-98cb-f5537f888ef1\tDuration: 2057.09 ms\tBilled Duration: 2942 ms\tMemory Size: 512 MB\tMax Memory Used: 91 MB\tInit Duration: 884.75 ms\t\n",
+      "ingestionTime": 1795364071951,
+      "eventId": "40037956658649229915524824983700206070262437709857095685"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364083734,
+      "message": "START RequestId: 2ebf0a93-1924-589c-bb11-69ee0e06ebd5 Version: $LATEST\n",
+      "ingestionTime": 1795364092747,
+      "eventId": "40037956969945332141813793441538041834381183185660215296"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364084655,
+      "message": "[INFO]\t2026-11-22T16:14:44.655Z\t2ebf0a93-1924-589c-bb11-69ee0e06ebd5\tFace provider jobId=5673ea0c-9c09-47b8-97aa-3fe189d8248c operation=SearchFacesByImage awsRequestId=2f6320fb-5535-4b6f-8298-33b7df6b74e7 retryAttempts=0\n",
+      "ingestionTime": 1795364092747,
+      "eventId": "40037956990484318469660497354892438363490324132668178433"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364084863,
+      "message": "[INFO]\t2026-11-22T16:14:44.863Z\t2ebf0a93-1924-589c-bb11-69ee0e06ebd5\tFace completed jobId=5673ea0c-9c09-47b8-97aa-3fe189d8248c resultId=51373095-fc5f-4d29-a131-254f92cb967e status=UNKNOWN cacheHit=False durationMs=1129\n",
+      "ingestionTime": 1795364092747,
+      "eventId": "40037956995122873470954866968331867764201183325912104962"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364084865,
+      "message": "END RequestId: 2ebf0a93-1924-589c-bb11-69ee0e06ebd5\n",
+      "ingestionTime": 1795364092747,
+      "eventId": "40037956995167474961351928214614939200746480048924065795"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364084865,
+      "message": "REPORT RequestId: 2ebf0a93-1924-589c-bb11-69ee0e06ebd5\tDuration: 1130.59 ms\tBilled Duration: 1131 ms\tMemory Size: 512 MB\tMax Memory Used: 91 MB\t\n",
+      "ingestionTime": 1795364092747,
+      "eventId": "40037956995167474961351928214614939200746480048924065796"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364089266,
+      "message": "START RequestId: ee9145c3-d855-5ebb-acad-26becf606df2 Version: $LATEST\n",
+      "ingestionTime": 1795364092747,
+      "eventId": "40037957093313054580085200660513635318671919036743876613"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364089753,
+      "message": "[INFO]\t2026-11-22T16:14:49.753Z\tee9145c3-d855-5ebb-acad-26becf606df2\tFace provider jobId=1b835db0-456b-4ba2-b096-ef4fef9a86c0 operation=SearchFacesByImage awsRequestId=eb0e2560-728b-4c38-86c1-5578bbc286d2 retryAttempts=0\n",
+      "ingestionTime": 1795364092747,
+      "eventId": "40037957104173517491769614130441530117451671090156339206"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364089970,
+      "message": "[INFO]\t2026-11-22T16:14:49.970Z\tee9145c3-d855-5ebb-acad-26becf606df2\tFace completed jobId=1b835db0-456b-4ba2-b096-ef4fef9a86c0 resultId=8faf7f93-4197-4f15-85bf-524020f44ca6 status=UNKNOWN cacheHit=False durationMs=704\n",
+      "ingestionTime": 1795364092747,
+      "eventId": "40037957109012779199850759352154780982616365536954089479"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364089972,
+      "message": "END RequestId: ee9145c3-d855-5ebb-acad-26becf606df2\n",
+      "ingestionTime": 1795364092747,
+      "eventId": "40037957109057380690247820598437852419161662259966050312"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364089972,
+      "message": "REPORT RequestId: ee9145c3-d855-5ebb-acad-26becf606df2\tDuration: 705.79 ms\tBilled Duration: 706 ms\tMemory Size: 512 MB\tMax Memory Used: 93 MB\t\n",
+      "ingestionTime": 1795364092747,
+      "eventId": "40037957109057380690247820598437852419161662259966050313"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364125136,
+      "message": "START RequestId: ca7b5729-b340-5314-90a5-3454a41cd22b Version: $LATEST\n",
+      "ingestionTime": 1795364134152,
+      "eventId": "40037957893240784851378652797455683077036427747876667392"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364125646,
+      "message": "[INFO]\t2026-11-22T16:15:25.646Z\tca7b5729-b340-5314-90a5-3454a41cd22b\tFace provider jobId=7eb80475-1c89-470a-b6ed-58e5eaefc793 operation=SearchFacesByImage awsRequestId=ef7ca0a0-5b68-41fb-8cd8-5596d69b355e retryAttempts=0\n",
+      "ingestionTime": 1795364134152,
+      "eventId": "40037957904614164902629270599638899396087092115926679553"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364125849,
+      "message": "[INFO]\t2026-11-22T16:15:25.849Z\tca7b5729-b340-5314-90a5-3454a41cd22b\tFace completed jobId=7eb80475-1c89-470a-b6ed-58e5eaefc793 resultId=f18b2bb6-9366-4606-a80c-b77ffd0d913e status=KNOWN cacheHit=False durationMs=712\n",
+      "ingestionTime": 1795364134152,
+      "eventId": "40037957909141216177930987097370650205434709501640704002"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364125851,
+      "message": "END RequestId: ca7b5729-b340-5314-90a5-3454a41cd22b\n",
+      "ingestionTime": 1795364134152,
+      "eventId": "40037957909185817668328048343653721641980006224652664835"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364125851,
+      "message": "REPORT RequestId: ca7b5729-b340-5314-90a5-3454a41cd22b\tDuration: 714.38 ms\tBilled Duration: 715 ms\tMemory Size: 512 MB\tMax Memory Used: 96 MB\t\n",
+      "ingestionTime": 1795364134152,
+      "eventId": "40037957909185817668328048343653721641980006224652664836"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364130011,
+      "message": "START RequestId: 31b00745-0794-514e-8337-643810da002b Version: $LATEST\n",
+      "ingestionTime": 1795364134152,
+      "eventId": "40037958001956917694215440612442309656197190089531195397"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364130604,
+      "message": "[INFO]\t2026-11-22T16:15:30.604Z\t31b00745-0794-514e-8337-643810da002b\tFace provider jobId=6e66b80e-ec9b-45ad-afcd-da9f2e1ed926 operation=SearchFacesByImage awsRequestId=10259260-df60-4864-b2e7-208f4e58d1f5 retryAttempts=0\n",
+      "ingestionTime": 1795364134152,
+      "eventId": "40037958015181259596944100135372990591877668462577582086"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364130855,
+      "message": "[INFO]\t2026-11-22T16:15:30.855Z\t31b00745-0794-514e-8337-643810da002b\tFace completed jobId=6e66b80e-ec9b-45ad-afcd-da9f2e1ed926 resultId=1347a4be-d090-41c9-a58e-75feec970ba2 status=UNKNOWN cacheHit=False durationMs=844\n",
+      "ingestionTime": 1795364134152,
+      "eventId": "40037958020778746641775286543898455878312407200578666503"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364130857,
+      "message": "END RequestId: 31b00745-0794-514e-8337-643810da002b\n",
+      "ingestionTime": 1795364134152,
+      "eventId": "40037958020823348132172347790181527314857703923590627336"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364130857,
+      "message": "REPORT RequestId: 31b00745-0794-514e-8337-643810da002b\tDuration: 845.74 ms\tBilled Duration: 846 ms\tMemory Size: 512 MB\tMax Memory Used: 99 MB\t\n",
+      "ingestionTime": 1795364134152,
+      "eventId": "40037958020823348132172347790181527314857703923590627337"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364263850,
+      "message": "START RequestId: 8871b8e8-6500-5ed7-9138-db9572da7dd0 Version: $LATEST\n",
+      "ingestionTime": 1795364272872,
+      "eventId": "40037960986666354320355511420143206868466296147152207872"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364265098,
+      "message": "[INFO]\t2026-11-22T16:17:45.098Z\t8871b8e8-6500-5ed7-9138-db9572da7dd0\tFace provider jobId=79a20794-cb7b-4cbe-878a-fc3b99cb778f operation=SearchFacesByImage awsRequestId=7ad2e297-3ce5-4242-a651-2446df172b1a retryAttempts=0\n",
+      "ingestionTime": 1795364272872,
+      "eventId": "40037961014497684328121729100779783272731451306615767041"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364265373,
+      "message": "[INFO]\t2026-11-22T16:17:45.373Z\t8871b8e8-6500-5ed7-9138-db9572da7dd0\tFace completed jobId=79a20794-cb7b-4cbe-878a-fc3b99cb778f resultId=09f4b3af-5188-4e6b-b8e5-5198515273c2 status=KNOWN cacheHit=False durationMs=1521\n",
+      "ingestionTime": 1795364272872,
+      "eventId": "40037961020630389257717650464702105797709750720760381442"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364265375,
+      "message": "END RequestId: 8871b8e8-6500-5ed7-9138-db9572da7dd0\n",
+      "ingestionTime": 1795364272872,
+      "eventId": "40037961020674990748114711710985177234255047443772342275"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364265375,
+      "message": "REPORT RequestId: 8871b8e8-6500-5ed7-9138-db9572da7dd0\tDuration: 1525.14 ms\tBilled Duration: 1526 ms\tMemory Size: 512 MB\tMax Memory Used: 103 MB\t\n",
+      "ingestionTime": 1795364272872,
+      "eventId": "40037961020674990748114711710985177234255047443772342276"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364269683,
+      "message": "START RequestId: d5e63a21-5a80-5808-9a3d-595c4d6a0b0f Version: $LATEST\n",
+      "ingestionTime": 1795364272872,
+      "eventId": "40037961116746601063384636204721051552824188811535974405"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364270220,
+      "message": "[INFO]\t2026-11-22T16:17:50.220Z\td5e63a21-5a80-5808-9a3d-595c4d6a0b0f\tFace provider jobId=ae530e35-2487-4d4c-9c43-bc1d69f8c49d operation=SearchFacesByImage awsRequestId=0196f8de-ab43-4a3d-8e84-90c6c03e47d1 retryAttempts=0\n",
+      "ingestionTime": 1795364272872,
+      "eventId": "40037961128722101234995580831725732265236358940247457798"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364270512,
+      "message": "[INFO]\t2026-11-22T16:17:50.512Z\td5e63a21-5a80-5808-9a3d-595c4d6a0b0f\tFace completed jobId=ae530e35-2487-4d4c-9c43-bc1d69f8c49d resultId=675c3d4a-99f0-4532-b504-d1986d2e4801 status=KNOWN cacheHit=False durationMs=829\n",
+      "ingestionTime": 1795364272872,
+      "eventId": "40037961135233918832966522789054162000849680499993739271"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364270514,
+      "message": "END RequestId: d5e63a21-5a80-5808-9a3d-595c4d6a0b0f\n",
+      "ingestionTime": 1795364272872,
+      "eventId": "40037961135278520323363584035337233437394977223005700104"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364270514,
+      "message": "REPORT RequestId: d5e63a21-5a80-5808-9a3d-595c4d6a0b0f\tDuration: 830.78 ms\tBilled Duration: 831 ms\tMemory Size: 512 MB\tMax Memory Used: 106 MB\t\n",
+      "ingestionTime": 1795364272872,
+      "eventId": "40037961135278520323363584035337233437394977223005700105"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364274880,
+      "message": "START RequestId: 729a3e93-a746-5f8a-8fc4-5deeb0a8fc8d Version: $LATEST\n",
+      "ingestionTime": 1795364283890,
+      "eventId": "40037961232643573860148284684602254753334625009784586240"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364275476,
+      "message": "[INFO]\t2026-11-22T16:17:55.476Z\t729a3e93-a746-5f8a-8fc4-5deeb0a8fc8d\tFace provider jobId=f3519f24-9a2b-4230-919b-28c730215fa0 operation=SearchFacesByImage awsRequestId=1ce7120f-b4f1-48ad-8fd6-8249cc0d98ae retryAttempts=0\n",
+      "ingestionTime": 1795364283890,
+      "eventId": "40037961245934817998472536076957542843833048467348914177"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364275674,
+      "message": "[INFO]\t2026-11-22T16:17:55.674Z\t729a3e93-a746-5f8a-8fc4-5deeb0a8fc8d\tFace completed jobId=f3519f24-9a2b-4230-919b-28c730215fa0 resultId=fa4353bd-2fac-4cd7-b61b-d90ab95504c7 status=KNOWN cacheHit=False durationMs=793\n",
+      "ingestionTime": 1795364283890,
+      "eventId": "40037961250350365547781599458981615061817424045533036546"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364275676,
+      "message": "END RequestId: 729a3e93-a746-5f8a-8fc4-5deeb0a8fc8d\n",
+      "ingestionTime": 1795364283890,
+      "eventId": "40037961250394967038178660705264686498362720768544997379"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364275676,
+      "message": "REPORT RequestId: 729a3e93-a746-5f8a-8fc4-5deeb0a8fc8d\tDuration: 795.48 ms\tBilled Duration: 796 ms\tMemory Size: 512 MB\tMax Memory Used: 106 MB\t\n",
+      "ingestionTime": 1795364283890,
+      "eventId": "40037961250394967038178660705264686498362720768544997380"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364369858,
+      "message": "START RequestId: 29e55682-f1e1-5c7e-b9a8-35ffe9ac8859 Version: $LATEST\n",
+      "ingestionTime": 1795364378871,
+      "eventId": "40037963350723751326189809536206500740263527505376837632"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364370882,
+      "message": "[INFO]\t2026-11-22T16:19:30.881Z\t29e55682-f1e1-5c7e-b9a8-35ffe9ac8859\tFace provider jobId=1e4e7a3a-947b-46e7-86f9-6d2227d5be29 operation=SearchFacesByImage awsRequestId=52aefd7b-b16b-4685-8bd0-33d0c7862ab2 retryAttempts=0\n",
+      "ingestionTime": 1795364378871,
+      "eventId": "40037963373559714409485167633139076251455449687500783617"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364371115,
+      "message": "[INFO]\t2026-11-22T16:19:31.115Z\t29e55682-f1e1-5c7e-b9a8-35ffe9ac8859\tFace completed jobId=1e4e7a3a-947b-46e7-86f9-6d2227d5be29 resultId=f666377e-5ce1-470c-bf07-79baa5a3fdb9 status=KNOWN cacheHit=False durationMs=1256\n",
+      "ingestionTime": 1795364378871,
+      "eventId": "40037963378755788040742802825116898608982517918394220546"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364371117,
+      "message": "END RequestId: 29e55682-f1e1-5c7e-b9a8-35ffe9ac8859\n",
+      "ingestionTime": 1795364378871,
+      "eventId": "40037963378800389531139864071399970045527814641406181379"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364371117,
+      "message": "REPORT RequestId: 29e55682-f1e1-5c7e-b9a8-35ffe9ac8859\tDuration: 1258.09 ms\tBilled Duration: 1259 ms\tMemory Size: 512 MB\tMax Memory Used: 106 MB\t\n",
+      "ingestionTime": 1795364378871,
+      "eventId": "40037963378800389531139864071399970045527814641406181380"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364411595,
+      "message": "START RequestId: dcc7e315-835d-5723-ac1b-80689b27ba60 Version: $LATEST\n",
+      "ingestionTime": 1795364420607,
+      "eventId": "40037964281489953677262427644938646865122015640562040832"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364412098,
+      "message": "[INFO]\t2026-11-22T16:20:12.098Z\tdcc7e315-835d-5723-ac1b-80689b27ba60\tFace provider jobId=d4607198-e0ef-4097-916a-24e8e49e3ed8 operation=SearchFacesByImage awsRequestId=e4802532-4fca-4897-8011-98fcab48cfc2 retryAttempts=0\n",
+      "ingestionTime": 1795364420607,
+      "eventId": "40037964292707228512123331085131113156264141478070190081"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364412291,
+      "message": "[INFO]\t2026-11-22T16:20:12.291Z\tdcc7e315-835d-5723-ac1b-80689b27ba60\tFace completed jobId=d4607198-e0ef-4097-916a-24e8e49e3ed8 resultId=66c42b0d-8d6d-4f4f-884d-bfafea6f9cf0 status=KNOWN cacheHit=False durationMs=696\n",
+      "ingestionTime": 1795364420607,
+      "eventId": "40037964297011272335439741351447506782885275248724410370"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364412293,
+      "message": "END RequestId: dcc7e315-835d-5723-ac1b-80689b27ba60\n",
+      "ingestionTime": 1795364420607,
+      "eventId": "40037964297055873825836802597730578219430571971736371203"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364412293,
+      "message": "REPORT RequestId: dcc7e315-835d-5723-ac1b-80689b27ba60\tDuration: 697.67 ms\tBilled Duration: 698 ms\tMemory Size: 512 MB\tMax Memory Used: 106 MB\t\n",
+      "ingestionTime": 1795364420607,
+      "eventId": "40037964297055873825836802597730578219430571971736371204"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364416033,
+      "message": "START RequestId: f777eb96-c2db-5e43-a453-88ebdaa7d300 Version: $LATEST\n",
+      "ingestionTime": 1795364420607,
+      "eventId": "40037964380460660868341333147074164559135444004103127045"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364416581,
+      "message": "[INFO]\t2026-11-22T16:20:16.581Z\tf777eb96-c2db-5e43-a453-88ebdaa7d300\tFace provider jobId=9598e411-562f-40be-8b0f-a9fb32dbd959 operation=SearchFacesByImage awsRequestId=78f86215-89ac-4099-a27e-1fe44452de3a retryAttempts=0\n",
+      "ingestionTime": 1795364420607,
+      "eventId": "40037964392681469237136114628635738172546746109380395014"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364416744,
+      "message": "[INFO]\t2026-11-22T16:20:16.744Z\tf777eb96-c2db-5e43-a453-88ebdaa7d300\tFace completed jobId=9598e411-562f-40be-8b0f-a9fb32dbd959 resultId=e66f9159-9510-4da2-afd4-c47f03badbb4 status=KNOWN cacheHit=False durationMs=710\n",
+      "ingestionTime": 1795364420607,
+      "eventId": "40037964396316490704496606200706060250988429034855202823"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364416746,
+      "message": "END RequestId: f777eb96-c2db-5e43-a453-88ebdaa7d300\n",
+      "ingestionTime": 1795364420607,
+      "eventId": "40037964396361092194893667446989131687533725757867163656"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364416746,
+      "message": "REPORT RequestId: f777eb96-c2db-5e43-a453-88ebdaa7d300\tDuration: 711.96 ms\tBilled Duration: 712 ms\tMemory Size: 512 MB\tMax Memory Used: 106 MB\t\n",
+      "ingestionTime": 1795364420607,
+      "eventId": "40037964396361092194893667446989131687533725757867163657"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364454710,
+      "message": "START RequestId: 52644bab-80d7-5f6c-8fce-28d6984a6f8d Version: $LATEST\n",
+      "ingestionTime": 1795364463723,
+      "eventId": "40037965242986582911910244444375284031549230698212687872"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364455660,
+      "message": "[INFO]\t2026-11-22T16:20:55.660Z\t52644bab-80d7-5f6c-8fce-28d6984a6f8d\tFace provider jobId=6934d86f-42ff-4931-a03b-a161a1bea918 operation=SearchFacesByImage awsRequestId=8a281193-3ebd-49d3-9917-81ac3ad2313d retryAttempts=0\n",
+      "ingestionTime": 1795364463723,
+      "eventId": "40037965264172290850514336428834216390565174128894083073"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364455838,
+      "message": "[INFO]\t2026-11-22T16:20:55.838Z\t52644bab-80d7-5f6c-8fce-28d6984a6f8d\tFace completed jobId=6934d86f-42ff-4931-a03b-a161a1bea918 resultId=5866c159-f6d4-4bda-8677-7ad1e03d036e status=KNOWN cacheHit=False durationMs=1127\n",
+      "ingestionTime": 1795364463723,
+      "eventId": "40037965268141823495852787348027574243096582476958597122"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364455840,
+      "message": "END RequestId: 52644bab-80d7-5f6c-8fce-28d6984a6f8d\n",
+      "ingestionTime": 1795364463723,
+      "eventId": "40037965268186424986249848594310645679641879199970557955"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364455840,
+      "message": "REPORT RequestId: 52644bab-80d7-5f6c-8fce-28d6984a6f8d\tDuration: 1129.15 ms\tBilled Duration: 1130 ms\tMemory Size: 512 MB\tMax Memory Used: 106 MB\t\n",
+      "ingestionTime": 1795364463723,
+      "eventId": "40037965268186424986249848594310645679641879199970557956"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364457036,
+      "message": "START RequestId: 11a66fb2-6470-5608-aa90-0ccf7cd49c40 Version: $LATEST\n",
+      "ingestionTime": 1795364463723,
+      "eventId": "40037965294858116243692473871587364733729319561123135493"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364457741,
+      "message": "[INFO]\t2026-11-22T16:20:57.741Z\t11a66fb2-6470-5608-aa90-0ccf7cd49c40\tFace provider jobId=a339198b-4477-4d5f-8c65-0ac78a2fd5cd operation=SearchFacesByImage awsRequestId=c8d1bec5-8e1d-4806-a650-eb7cc99ea5bc retryAttempts=0\n",
+      "ingestionTime": 1795364463723,
+      "eventId": "40037965310580141608656563186370046115946414422839328774"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364457901,
+      "message": "[INFO]\t2026-11-22T16:20:57.901Z\t11a66fb2-6470-5608-aa90-0ccf7cd49c40\tFace completed jobId=a339198b-4477-4d5f-8c65-0ac78a2fd5cd resultId=35d6b034-4b0b-468d-aff6-e8d397d3b71d status=KNOWN cacheHit=False durationMs=864\n",
+      "ingestionTime": 1795364463723,
+      "eventId": "40037965314148260840421462889015761039570152263796195335"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364457902,
+      "message": "END RequestId: 11a66fb2-6470-5608-aa90-0ccf7cd49c40\n",
+      "ingestionTime": 1795364463723,
+      "eventId": "40037965314170561585619993512157296757842800625302175752"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364457903,
+      "message": "REPORT RequestId: 11a66fb2-6470-5608-aa90-0ccf7cd49c40\tDuration: 865.86 ms\tBilled Duration: 866 ms\tMemory Size: 512 MB\tMax Memory Used: 106 MB\t\n",
+      "ingestionTime": 1795364463723,
+      "eventId": "40037965314192862330818524135298832476115448986808156169"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364502355,
+      "message": "START RequestId: 295141b1-fd1b-5f98-8f7f-22cce5d4289f Version: $LATEST\n",
+      "ingestionTime": 1795364511367,
+      "eventId": "40037966305505587895901784080442251650822871808992870400"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364502918,
+      "message": "[INFO]\t2026-11-22T16:21:42.918Z\t295141b1-fd1b-5f98-8f7f-22cce5d4289f\tFace provider jobId=969d3fd7-6b6b-43dc-bf1e-aa68197c10fd operation=SearchFacesByImage awsRequestId=0a165d8d-f820-40f7-847a-8677b6b1e781 retryAttempts=0\n",
+      "ingestionTime": 1795364511367,
+      "eventId": "40037966318060907442674524909126861038323899336859844609"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364503397,
+      "message": "[INFO]\t2026-11-22T16:21:43.397Z\t295141b1-fd1b-5f98-8f7f-22cce5d4289f\tFace completed jobId=969d3fd7-6b6b-43dc-bf1e-aa68197c10fd resultId=0c4e1a03-7ee8-44f1-ab27-71f249cb860a status=KNOWN cacheHit=False durationMs=1040\n",
+      "ingestionTime": 1795364511367,
+      "eventId": "40037966328742964392770693393922470090922464498224463874"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364503398,
+      "message": "END RequestId: 295141b1-fd1b-5f98-8f7f-22cce5d4289f\n",
+      "ingestionTime": 1795364511367,
+      "eventId": "40037966328765265137969224017064005809195112859730444291"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364503399,
+      "message": "REPORT RequestId: 295141b1-fd1b-5f98-8f7f-22cce5d4289f\tDuration: 1043.07 ms\tBilled Duration: 1044 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795364511367,
+      "eventId": "40037966328787565883167754640205541527467761221236424708"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364544468,
+      "message": "START RequestId: e415a7c8-32b1-5978-9063-c4b52bb17f30 Version: $LATEST\n",
+      "ingestionTime": 1795364553482,
+      "eventId": "40037967244656870441621916490850155088886888832709689344"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364545524,
+      "message": "[INFO]\t2026-11-22T16:22:25.524Z\te415a7c8-32b1-5978-9063-c4b52bb17f30\tFace provider jobId=017b6d3a-3eee-474d-b542-4ddf20530e36 operation=SearchFacesByImage awsRequestId=0a4fdff9-f35c-4dae-bac1-9ce2f7bf4991 retryAttempts=0\n",
+      "ingestionTime": 1795364553482,
+      "eventId": "40037967268206457371270254528311873584803558583025008641"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364545741,
+      "message": "[INFO]\t2026-11-22T16:22:25.741Z\te415a7c8-32b1-5978-9063-c4b52bb17f30\tFace completed jobId=017b6d3a-3eee-474d-b542-4ddf20530e36 resultId=66a46bd0-f6fa-4aa9-9095-865ef5ec8eaf status=KNOWN cacheHit=False durationMs=1272\n",
+      "ingestionTime": 1795364553482,
+      "eventId": "40037967273045719079351399750025124449968253029822758914"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364545743,
+      "message": "END RequestId: e415a7c8-32b1-5978-9063-c4b52bb17f30\n",
+      "ingestionTime": 1795364553482,
+      "eventId": "40037967273090320569748460996308195886513549752834719747"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364545743,
+      "message": "REPORT RequestId: e415a7c8-32b1-5978-9063-c4b52bb17f30\tDuration: 1274.65 ms\tBilled Duration: 1275 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795364553482,
+      "eventId": "40037967273090320569748460996308195886513549752834719748"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364596428,
+      "message": "START RequestId: 35363a80-1afa-5b66-9f1c-59fd03d8823b Version: $LATEST\n",
+      "ingestionTime": 1795364605441,
+      "eventId": "40037968403403590957273094987860628667600269020496134144"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364596996,
+      "message": "[INFO]\t2026-11-22T16:23:16.996Z\t35363a80-1afa-5b66-9f1c-59fd03d8823b\tFace provider jobId=b547ed67-eba5-4466-9839-fdac2967bedf operation=SearchFacesByImage awsRequestId=56fdac6c-c56e-4378-bfb3-6acc173de91e retryAttempts=0\n",
+      "ingestionTime": 1795364605441,
+      "eventId": "40037968416070414230038488932252916646464538355893010433"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364597193,
+      "message": "[INFO]\t2026-11-22T16:23:17.193Z\t35363a80-1afa-5b66-9f1c-59fd03d8823b\tFace completed jobId=b547ed67-eba5-4466-9839-fdac2967bedf resultId=4d01d559-a526-4ba0-914b-f477499dad1e status=KNOWN cacheHit=False durationMs=764\n",
+      "ingestionTime": 1795364605441,
+      "eventId": "40037968420463661034149021691135453146176265572571152386"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364597195,
+      "message": "END RequestId: 35363a80-1afa-5b66-9f1c-59fd03d8823b\n",
+      "ingestionTime": 1795364605441,
+      "eventId": "40037968420508262524546082937418524582721562295583113219"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364597195,
+      "message": "REPORT RequestId: 35363a80-1afa-5b66-9f1c-59fd03d8823b\tDuration: 766.31 ms\tBilled Duration: 767 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795364605441,
+      "eventId": "40037968420508262524546082937418524582721562295583113220"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364641533,
+      "message": "START RequestId: 63e21ebf-954f-56ed-a978-7dc28c13160c Version: $LATEST\n",
+      "ingestionTime": 1795364650546,
+      "eventId": "40037969409278703136996851841357983584018510950642089984"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364642080,
+      "message": "[INFO]\t2026-11-22T16:24:02.080Z\t63e21ebf-954f-56ed-a978-7dc28c13160c\tFace provider jobId=ec88c8d3-fbef-440c-acae-d629d76f0b59 operation=SearchFacesByImage awsRequestId=f20c0ade-acfb-4a2c-850c-e2171e5e8fb1 retryAttempts=0\n",
+      "ingestionTime": 1795364650546,
+      "eventId": "40037969421477210760593102699778021479157164694413377537"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364642339,
+      "message": "[INFO]\t2026-11-22T16:24:02.339Z\t63e21ebf-954f-56ed-a978-7dc28c13160c\tFace completed jobId=ec88c8d3-fbef-440c-acae-d629d76f0b59 resultId=42c3fd2e-60f7-470a-9bd3-26d93e619858 status=UNKNOWN cacheHit=False durationMs=805\n",
+      "ingestionTime": 1795364650546,
+      "eventId": "40037969427253103767012534093435772511773090324462305282"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364642341,
+      "message": "END RequestId: 63e21ebf-954f-56ed-a978-7dc28c13160c\n",
+      "ingestionTime": 1795364650546,
+      "eventId": "40037969427297705257409595339718843948318387047474266115"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364642341,
+      "message": "REPORT RequestId: 63e21ebf-954f-56ed-a978-7dc28c13160c\tDuration: 807.09 ms\tBilled Duration: 808 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795364650546,
+      "eventId": "40037969427297705257409595339718843948318387047474266116"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364695951,
+      "message": "START RequestId: 507e37dc-aaa6-5196-be5a-54a1b32388f7 Version: $LATEST\n",
+      "ingestionTime": 1795364704961,
+      "eventId": "40037970622840655350636302023232326797248983523031252992"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364696873,
+      "message": "[INFO]\t2026-11-22T16:24:56.873Z\t507e37dc-aaa6-5196-be5a-54a1b32388f7\tFace provider jobId=6c6aed02-fcba-47ca-8026-c9278a0ea89e operation=SearchFacesByImage awsRequestId=ebafea76-cab6-46af-bc33-c470637adb8e retryAttempts=0\n",
+      "ingestionTime": 1795364704961,
+      "eventId": "40037970643401942423681536559728259044630772831545196545"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364697110,
+      "message": "[INFO]\t2026-11-22T16:24:57.110Z\t507e37dc-aaa6-5196-be5a-54a1b32388f7\tFace completed jobId=6c6aed02-fcba-47ca-8026-c9278a0ea89e resultId=910fbeec-6a5d-4da1-8962-6520bdec1409 status=UNKNOWN cacheHit=False durationMs=1158\n",
+      "ingestionTime": 1795364704961,
+      "eventId": "40037970648687219035733294244272224275248434508462555138"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364697112,
+      "message": "END RequestId: 507e37dc-aaa6-5196-be5a-54a1b32388f7\n",
+      "ingestionTime": 1795364704961,
+      "eventId": "40037970648731820526130355490555295711793731231474515971"
+    },
+    {
+      "logStreamName": "2026/11/22/[$LATEST]71fc3ad1e7df43ce832ab1329b209320",
+      "timestamp": 1795364697112,
+      "message": "REPORT RequestId: 507e37dc-aaa6-5196-be5a-54a1b32388f7\tDuration: 1160.38 ms\tBilled Duration: 1161 ms\tMemory Size: 512 MB\tMax Memory Used: 107 MB\t\n",
+      "ingestionTime": 1795364704961,
+      "eventId": "40037970648731820526130355490555295711793731231474515972"
+    }
+  ],
+  "searchedLogStreams": []
+}

@@ -1,0 +1,103 @@
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Object:
+{
+  "jobId": "00000000-0000-4000-8000-000000000004",
+  "reason": "Face collection registry missing"
+}
+
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Object:
+{
+  "jobId": "00000000-0000-4000-8000-000000000004",
+  "reason": "Face crop unavailable"
+}
+
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Object:
+{
+  "jobId": "00000000-0000-4000-8000-000000000004",
+  "reason": "Unexpected upload bucket"
+}
+
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Object:
+{
+  "jobId": "00000000-0000-4000-8000-000000000004",
+  "reason": "Face collection registry missing"
+}
+
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Object:
+{
+  "jobId": "00000000-0000-4000-8000-000000000004",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Object:
+{
+  "messageId": "empty"
+}
+
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Results input retained for retry/redrive
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Object:
+{
+  "messageId": "invalid-json"
+}
+
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Results input retained for retry/redrive
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Object:
+{
+  "messageId": "wrong-type"
+}
+
+[Nest] 35832  - 23/11/2026, 16.16.18    WARN [CloudQueueService] Results input retained for retry/redrive
+PASS test/cloud-queue-extended.spec.ts (27.84 s)
+  cloud queue endpoint configuration
+    √ rejects queue URL aliases that target Results (https://SQS.ap-southeast-1.amazonaws.com/123456789012/results) (55 ms)
+    √ rejects queue URL aliases that target Results (https://sqs.ap-southeast-1.amazonaws.com/123456789012/notifications/../results) (1 ms)
+    √ rejects passwords even with no username (1 ms)
+  cloud queue transport lifecycle
+    √ does not contact AWS or open a job transaction when both transports are local (2 ms)
+    √ does not poll Results while the consumer is disabled (5 ms)
+    √ retries a receive failure without logging the provider error body and stops on destruction (7 ms)
+    √ finishes existing work on shutdown and bounds unknown error details (2 ms)
+  shared queue dispatch and receive
+    √ persists a prepared Face envelope first and sends that exact body on the next pass (3 ms)
+    √ schedules a retry for absence of a collection without publishing (3 ms)
+    √ schedules a retry for an unavailable crop without publishing (2 ms)
+    √ schedules a retry for an upload to a different bucket without publishing (2 ms)
+    √ schedules a retry for an empty notification envelope without publishing (2 ms)
+    √ sanitizes a publish failure before persisting the retry reason (2 ms)
+    √ retains malformed and unexpected result types while acknowledging the valid next result (5 ms)
+  shared Face authorization and result cache
+    √ returns only mappings from active known faces and keeps the durable result (2 ms)
+    √ fails closed when no durable Face envelope exists (36 ms)
+    √ returns the canonical outcome when another writer has already cached a result (5 ms)
+    √ rejects invalid schema before loading authorization context (2 ms)
+    √ rejects cache writes that mismatch resultId (2 ms)
+    √ rejects cache writes that mismatch correlationId (3 ms)
+    √ rejects cache writes that mismatch eventId (3 ms)
+    √ rejects cache writes that mismatch observationId (1 ms)
+    √ rejects cache writes that mismatch revision (1 ms)
+    √ rejects cache writes that mismatch collectionVersion (1 ms)
+    √ rejects cache writes that mismatch ownerScopeId (2 ms)
+    √ rejects cache writes that mismatch cameraId (2 ms)
+    √ rejects cache writes that mismatch envelope type (2 ms)
+    √ rejects cache writes that mismatch job path (2 ms)
+    √ does not apply a face result that mismatches stored owner (2 ms)
+    √ does not apply a face result that mismatches current owner (1 ms)
+    √ does not apply a face result that mismatches event identity (1 ms)
+    √ does not apply a face result that mismatches job kind (1 ms)
+    √ does not apply a face result that mismatches missing durable envelope (1 ms)
+    √ does not apply a face result that mismatches result id (1 ms)
+    √ does not apply a face result that mismatches camera identity (1 ms)
+    √ does not apply a face result that mismatches observation (1 ms)
+    √ does not apply a face result that mismatches revision (1 ms)
+    √ does not apply a face result that mismatches collection version (1 ms)
+    √ rejects an otherwise authorized Face result if its body differs from durable cache (2 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       39 passed, 39 total
+Snapshots:   0 total
+Time:        28.816 s, estimated 105 s
+Ran all test suites within paths "test/cloud-queue-extended.spec.ts".

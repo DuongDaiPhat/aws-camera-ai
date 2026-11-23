@@ -15,6 +15,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager, suppress
 from datetime import UTC, datetime
 
+import cv2
 from fastapi import FastAPI
 
 from app.config import get_settings
@@ -41,6 +42,10 @@ async def sweep_fire_states() -> None:
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    cv2.setNumThreads(settings.face_cpu_threads)
+    if settings.face_quality_gate_enabled:
+        ready = await asyncio.to_thread(face.get_quality_assessor().warmup)
+        logger.info("Face quality warmup ready=%s threads=%s", ready, settings.face_cpu_threads)
     tasks = [asyncio.create_task(sweep_pose_tracks())]
     if settings.m3_enabled:
         tasks.append(asyncio.create_task(sweep_fire_states()))

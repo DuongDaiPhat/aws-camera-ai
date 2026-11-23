@@ -1,3 +1,4 @@
+import { imageFormat } from '../media/image-format';
 import type { PoolClient } from 'pg';
 import {
   BadRequestException,
@@ -7,6 +8,7 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
+  Optional,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -39,6 +41,49 @@ function isDefiniteSqsRejection(error: unknown): boolean {
   );
 }
 
+export interface RecognitionResultNotification {
+  eventId: string;
+  cameraSlug?: string;
+  cameraId?: string;
+  ownerScopeId: string;
+  trackId: string;
+  collectionVersion: number;
+  revision: number;
+  personStatus: 'KNOWN' | 'UNKNOWN' | 'UNDETERMINED';
+  matchedKnownFaceId?: string | null;
+  matchedPersonName?: string | null;
+  similarity?: number | null;
+  errorCode?: string | null;
+  disposition?: 'ACCEPTED' | 'DUPLICATE' | 'STALE';
+}
+
+export interface FaceRecognitionResultListener {
+  onRecognitionResult(result: RecognitionResultNotification): void | Promise<void>;
+}
+
+export interface EnqueueFaceJobInput {
+  eventId: string;
+  cameraId: string;
+  ownerScopeId: string;
+  trackId: string;
+  sourceSessionId: string;
+  revision: number;
+  imageBuffer?: Buffer;
+}
+
+export interface EnqueueFaceJobResult {
+  created: boolean;
+  jobId: string | null;
+  status: 'PREPARING' | 'PENDING' | null;
+}
+
+const KNOWN_PREPARE_REASONS = [
+  'Face collection registry missing',
+  'Face collection prefix mismatch',
+  'Face crop unavailable',
+  'Unexpected upload bucket',
+] as const;
+
 @Injectable()
 export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(CloudQueueService.name);
@@ -55,10 +100,23 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
     @Inject(STORAGE_SERVICE) private readonly storage: IStorageService,
     private readonly ai: AiResultsService,
     private readonly notifications: NotificationCloudService,
+    @Optional() private coordinator?: FaceRecognitionResultListener,
   ) {
     this.settings = readCloudConfig(config);
     if (this.settings.enabled)
       this.sqs = new SQSClient({ region: this.settings.region, maxAttempts: 3 });
+  }
+
+  registerRecognitionResultListener(listener: FaceRecognitionResultListener): void {
+    this.coordinator = listener;
+  }
+
+  private wakeLoop(): void {
+    if (this.delay) {
+      clearTimeout(this.delay);
+      this.delay = undefined;
+    }
+    this.wake?.();
   }
   async onModuleInit() {
     const result = await this.db.query(
@@ -104,6 +162,141 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
         });
     }
   }
+  private async buildUploadedFaceJobEnvelope(input: {
+    jobId: string;
+    resultId: string;
+    eventId: string;
+    cameraId: string;
+    ownerScopeId: string;
+    trackId: string;
+    sourceSessionId: string;
+    revision: number;
+    collectionId: string | null | undefined;
+    collectionVersion: number;
+    retain: boolean;
+    createdAt: Date;
+    crop: Buffer;
+  }): Promise<FaceJobEnvelope> {
+    if (!this.settings.enabled || this.settings.mode !== 'sqs')
+      throw new Error('Face SQS transport not enabled');
+    const settings = this.settings;
+    if (!input.collectionId) {
+      throw new Error('Face collection registry missing');
+    }
+    const expectedCollectionId = buildRekognitionCollectionId(
+      settings.rekognitionCollectionPrefix,
+      input.ownerScopeId,
+    );
+    if (input.collectionId !== expectedCollectionId) {
+      throw new Error('Face collection prefix mismatch');
+    }
+    const format = imageFormat(input.crop);
+    // The queue contract fixes this key suffix; MIME describes the actual bytes.
+    const key = `owners/${input.ownerScopeId}/cameras/${input.cameraId}/events/${input.eventId}/face/${input.jobId}.jpg`;
+    const image = await this.storage.upload(
+      key,
+      input.crop,
+      format.contentType,
+      input.retain ? { retain: true } : { tags: S3_EXPIRE_7D_TAG },
+    );
+    if (image.bucket !== settings.bucket) throw new Error('Unexpected upload bucket');
+    return parseEnvelope({
+      schemaVersion: 1,
+      type: 'face.job',
+      messageId: input.jobId,
+      correlationId: input.eventId,
+      occurredAt: input.createdAt.toISOString(),
+      payload: {
+        jobId: input.jobId,
+        resultId: input.resultId,
+        eventId: input.eventId,
+        cameraId: input.cameraId,
+        ownerScopeId: input.ownerScopeId,
+        trackId: input.trackId,
+        sourceSessionId: input.sourceSessionId,
+        observationId: `track:${input.trackId}:face`,
+        revision: input.revision,
+        collectionVersion: input.collectionVersion,
+        collectionId: input.collectionId,
+        image: { bucket: image.bucket, key: image.key },
+      },
+    }) as FaceJobEnvelope;
+  }
+
+  private toPrepareFailureReason(error: unknown): string {
+    return error instanceof Error &&
+      (KNOWN_PREPARE_REASONS as readonly string[]).includes(error.message)
+      ? error.message
+      : 'PREPARE_OR_SEND_FAILED';
+  }
+
+  async enqueueFaceJob(input: EnqueueFaceJobInput): Promise<EnqueueFaceJobResult> {
+    if (this.settings.mode !== 'sqs') throw new Error('Face SQS transport not enabled');
+    const hasBestShot = Boolean(input.imageBuffer && input.imageBuffer.length > 0);
+    const inserted = await this.db.query(
+      `INSERT INTO cloud_jobs(event_id,kind,owner_user_id,camera_id,revision,available_at)
+       VALUES($1,'face.job',$2,$3,$4,CASE WHEN $5 THEN now() + interval '15 seconds' ELSE now() END)
+       ON CONFLICT(event_id,revision) WHERE kind='face.job' DO NOTHING
+       RETURNING *`,
+      [input.eventId, input.ownerScopeId, input.cameraId, input.revision, hasBestShot],
+    );
+    const job = inserted.rows[0];
+    if (!job) {
+      return { created: false, jobId: null, status: null };
+    }
+    if (!hasBestShot || !input.imageBuffer) {
+      this.wakeLoop();
+      return { created: true, jobId: job.id as string, status: 'PREPARING' };
+    }
+
+    try {
+      const meta = await this.db.query(
+        `SELECT c.collection_id, c.version, e.retain
+         FROM events e
+         LEFT JOIN cloud_face_collections c ON c.owner_user_id = $2
+         WHERE e.id = $1
+         LIMIT 1`,
+        [input.eventId, input.ownerScopeId],
+      );
+      const row = meta.rows[0];
+      const createdAt =
+        job.created_at instanceof Date ? job.created_at : new Date(job.created_at ?? Date.now());
+      const envelope = await this.buildUploadedFaceJobEnvelope({
+        jobId: job.id as string,
+        resultId: job.result_id as string,
+        eventId: input.eventId,
+        cameraId: input.cameraId,
+        ownerScopeId: input.ownerScopeId,
+        trackId: input.trackId,
+        sourceSessionId: input.sourceSessionId,
+        revision: input.revision,
+        collectionId: row?.collection_id as string | null | undefined,
+        collectionVersion: Number(row?.version ?? 1),
+        retain: Boolean(row?.retain),
+        createdAt,
+        crop: input.imageBuffer,
+      });
+      await this.db.query(
+        `UPDATE cloud_jobs
+         SET envelope=$2,status='PENDING',available_at=now(),attempts=0,last_error=NULL
+         WHERE id=$1`,
+        [job.id, JSON.stringify(envelope)],
+      );
+      this.wakeLoop();
+      return { created: true, jobId: job.id as string, status: 'PENDING' };
+    } catch (error) {
+      const reason = this.toPrepareFailureReason(error);
+      this.logger.warn({ jobId: job.id, reason }, 'Face job preparation deferred to retry');
+      await this.db.query(
+        `UPDATE cloud_jobs
+         SET last_error=$2,available_at=now()+interval '30 seconds'
+         WHERE id=$1`,
+        [job.id, reason],
+      );
+      return { created: true, jobId: job.id as string, status: 'PREPARING' };
+    }
+  }
+
   async dispatchOne() {
     if (!this.sqs || !this.settings.enabled) return;
     const settings = this.settings;
@@ -124,43 +317,22 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
         if (!job.envelope) {
           if (job.kind !== 'face.job' || !job.collection_id)
             throw new Error('Face collection registry missing');
-          const expectedCollectionId = buildRekognitionCollectionId(
-            settings.rekognitionCollectionPrefix,
-            job.owner_user_id,
-          );
-          if (job.collection_id !== expectedCollectionId) {
-            throw new Error('Face collection prefix mismatch');
-          }
           const crop = await this.media.getCroppedSnapshot(job.track_id);
           if (!crop) throw new Error('Face crop unavailable');
-          const key = `owners/${job.owner_user_id}/cameras/${job.camera_id}/events/${job.event_id}/face/${job.id}.jpg`;
-          const image = await this.storage.upload(
-            key,
+          job.envelope = await this.buildUploadedFaceJobEnvelope({
+            jobId: job.id,
+            resultId: job.result_id,
+            eventId: job.event_id,
+            cameraId: job.camera_id,
+            ownerScopeId: job.owner_user_id,
+            trackId: job.track_id,
+            sourceSessionId: `${job.camera_slug}:${(job.detected_at.getTime() / 1000).toFixed(6)}`,
+            revision: Number(job.revision ?? 1),
+            collectionId: job.collection_id,
+            collectionVersion: job.version,
+            retain: Boolean(job.retain),
+            createdAt: job.created_at,
             crop,
-            'image/jpeg',
-            job.retain ? { retain: true } : { tags: S3_EXPIRE_7D_TAG },
-          );
-          if (image.bucket !== settings.bucket) throw new Error('Unexpected upload bucket');
-          job.envelope = parseEnvelope({
-            schemaVersion: 1,
-            type: 'face.job',
-            messageId: job.id,
-            correlationId: job.event_id,
-            occurredAt: job.created_at.toISOString(),
-            payload: {
-              jobId: job.id,
-              resultId: job.result_id,
-              eventId: job.event_id,
-              cameraId: job.camera_id,
-              ownerScopeId: job.owner_user_id,
-              trackId: job.track_id,
-              sourceSessionId: `${job.camera_slug}:${(job.detected_at.getTime() / 1000).toFixed(6)}`,
-              observationId: `track:${job.track_id}:face`,
-              revision: 1,
-              collectionVersion: job.version,
-              collectionId: job.collection_id,
-              image: { bucket: image.bucket, key: image.key },
-            },
           });
           // Persist before sending. Next iteration sends exactly this envelope.
           await client.query(
@@ -254,11 +426,13 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
       return;
     }
     if (message.type !== 'face.result') throw new Error('Unexpected Results type');
+    let faceNotification: RecognitionResultNotification | null = null;
     await this.db.transaction(async (client) => {
       const p = message.payload;
       const jobId = message.payload.jobId;
       const found = await client.query(
-        `SELECT j.*, d.owner_user_id AS current_owner, c.version AS current_collection_version
+        `SELECT j.*, d.owner_user_id AS current_owner, c.version AS current_collection_version,
+           camera.slug AS camera_slug
     FROM cloud_jobs j JOIN events e ON e.id=j.event_id
     JOIN cameras camera ON camera.id=e.camera_id JOIN devices d ON d.id=camera.device_id
     LEFT JOIN cloud_face_collections c ON c.owner_user_id=j.owner_user_id
@@ -305,11 +479,55 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
         body.collectionVersion === job.current_collection_version
           ? (await this.ai.submit(body.eventId, body, client)).disposition
           : 'STALE';
+      const trackIdFromObs =
+        typeof sent.observationId === 'string' &&
+        sent.observationId.startsWith('track:') &&
+        sent.observationId.endsWith(':face')
+          ? sent.observationId.slice(6, -5)
+          : '';
+      const cameraSlugFromSession =
+        typeof sent.sourceSessionId === 'string' && sent.sourceSessionId.includes(':')
+          ? sent.sourceSessionId.split(':')[0]
+          : undefined;
+      const firstResult = body.results?.[0];
+      const similarity =
+        firstResult &&
+        typeof firstResult.metadata?.similarity === 'number' &&
+        Number.isFinite(firstResult.metadata.similarity)
+          ? firstResult.metadata.similarity
+          : null;
+      faceNotification = {
+        eventId: body.eventId,
+        cameraSlug: typeof job.camera_slug === 'string' ? job.camera_slug : cameraSlugFromSession,
+        cameraId: p.cameraId,
+        ownerScopeId: p.ownerScopeId,
+        trackId: typeof sent.trackId === 'string' && sent.trackId ? sent.trackId : trackIdFromObs,
+        collectionVersion: body.collectionVersion ?? sent.collectionVersion,
+        revision: body.revision,
+        personStatus: body.personStatus ?? 'UNDETERMINED',
+        matchedKnownFaceId: body.matchedKnownFaceId ?? null,
+        similarity,
+        errorCode: body.error?.code ?? null,
+        disposition: disposition as 'ACCEPTED' | 'DUPLICATE' | 'STALE',
+      };
       await client.query(
         'INSERT INTO cloud_result_receipts(id,job_id,envelope,disposition) VALUES($1,$2,$3,$4)',
         [message.messageId, job.id, JSON.stringify(message), disposition],
       );
     });
+    if (faceNotification && this.coordinator) {
+      try {
+        await this.coordinator.onRecognitionResult(faceNotification);
+      } catch (error) {
+        this.logger.warn(
+          {
+            eventId: (faceNotification as RecognitionResultNotification).eventId,
+            error: error instanceof Error ? error.message : 'unknown',
+          },
+          'Failed to notify face coordinator after result commit',
+        );
+      }
+    }
   }
   // Call inside the transaction creating the notification intent. The caller owns
   // claim/lease/cap policy; this transport never grants permission to contact anyone.
@@ -346,6 +564,7 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
       envelope: result.rows[0].envelope as FaceJobEnvelope,
       cached_result: result.rows[0].cached_result as Envelope | null,
       mappings: Object.fromEntries(mappings.rows.map((row) => [row.face_id, row.known_face_id])),
+      collection_face_count: mappings.rows.length,
     };
   }
   async cacheFaceResult(id: string, value: unknown) {

@@ -1,0 +1,51 @@
+[Nest] 14140  - 23/11/2026, 16.09.40   ERROR [CloudQueueService] Cloud queue iteration failed (receive-results, unknown); retrying without acknowledging input
+[Nest] 14140  - 23/11/2026, 16.09.41   ERROR [CloudQueueService] Cloud queue iteration failed (dispatch, ECONNRESET); retrying without acknowledging input
+PASS test/cloud-queue.spec.ts (22.681 s)
+[Nest] 14140  - 23/11/2026, 16.09.40    WARN [CloudQueueService] Object:
+{
+  "messageId": "id"
+}
+
+[Nest] 14140  - 23/11/2026, 16.09.40    WARN [CloudQueueService] Results input retained for retry/redrive
+[Nest] 14140  - 23/11/2026, 16.09.40    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Face collection registry missing"
+}
+
+[Nest] 14140  - 23/11/2026, 16.09.40    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 14140  - 23/11/2026, 16.09.40    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Face collection prefix mismatch"
+}
+
+[Nest] 14140  - 23/11/2026, 16.09.40    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 14140  - 23/11/2026, 16.09.40    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Face crop unavailable"
+}
+
+[Nest] 14140  - 23/11/2026, 16.09.40    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 14140  - 23/11/2026, 16.09.40    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Unexpected upload bucket"
+}
+
+[Nest] 14140  - 23/11/2026, 16.09.40    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 14140  - 23/11/2026, 16.09.40    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 14140  - 23/11/2026, 16.09.40    WARN [CloudQueueService] Cloud job retained for retry
+PASS test/face-recognition-coordinator.service.spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       38 passed, 38 total
+Snapshots:   0 total
+Time:        27.452 s, estimated 131 s
+Ran all test suites within paths "test/cloud-queue.spec.ts", "test/face-recognition-coordinator.service.spec.ts".

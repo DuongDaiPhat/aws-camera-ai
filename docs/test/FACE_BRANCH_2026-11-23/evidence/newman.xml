@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Face branch real HTTP regression" tests="10" time="1.327">
+  <testsuite name="API-FACE-AUTH-assess: missing token" id="e905e6f9-b41f-42ae-9c9f-35d5350bb09c" timestamp="2026-11-23T08:39:05.716Z" tests="2" failures="0" errors="0" time="0.068">
+    <testcase name="status 401" time="0.068" classname="ApiFaceAuthAssessMissingToken"/>
+    <testcase name="unauthorized body" time="0.068" classname="ApiFaceAuthAssessMissingToken"/>
+  </testsuite>
+  <testsuite name="API-FACE-AUTH-embed: missing token" id="4d07c8bc-4597-4d10-986c-54feada6f1c7" timestamp="2026-11-23T08:39:05.716Z" tests="2" failures="0" errors="0" time="0.012">
+    <testcase name="status 401" time="0.012" classname="ApiFaceAuthEmbedMissingToken"/>
+    <testcase name="unauthorized body" time="0.012" classname="ApiFaceAuthEmbedMissingToken"/>
+  </testsuite>
+  <testsuite name="API-FACE-AUTH-match: missing token" id="a09e28c3-360f-4503-a1e4-90b37ee25fd0" timestamp="2026-11-23T08:39:05.716Z" tests="2" failures="0" errors="0" time="0.086">
+    <testcase name="status 401" time="0.086" classname="ApiFaceAuthMatchMissingToken"/>
+    <testcase name="unauthorized body" time="0.086" classname="ApiFaceAuthMatchMissingToken"/>
+  </testsuite>
+  <testsuite name="API-FACE-AUTH-collection/sync: missing token" id="d4c70b37-6c82-4186-95af-51b347d235cf" timestamp="2026-11-23T08:39:05.716Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="status 401" time="0.007" classname="ApiFaceAuthCollectionSyncMissingToken"/>
+    <testcase name="unauthorized body" time="0.007" classname="ApiFaceAuthCollectionSyncMissingToken"/>
+  </testsuite>
+  <testsuite name="API-FACE-001: assess requires image" id="f87d8da1-1f47-4c64-becb-637a2dfa7c78" timestamp="2026-11-23T08:39:05.716Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="status 422" time="0.007" classname="ApiFace001AssessRequiresImage"/>
+    <testcase name="validation detail" time="0.007" classname="ApiFace001AssessRequiresImage"/>
+  </testsuite>
+  <testsuite name="API-FACE-002: real R50 assessment" id="0bf7a9c2-fb84-4364-b542-79a49d7fcad7" timestamp="2026-11-23T08:39:05.716Z" tests="5" failures="0" errors="0" time="0.270">
+    <testcase name="status 200" time="0.270" classname="ApiFace002RealR50Assessment"/>
+    <testcase name="gate passes" time="0.270" classname="ApiFace002RealR50Assessment"/>
+    <testcase name="real R50 model" time="0.270" classname="ApiFace002RealR50Assessment"/>
+    <testcase name="gate ready" time="0.270" classname="ApiFace002RealR50Assessment"/>
+    <testcase name="normalized 512D embedding" time="0.270" classname="ApiFace002RealR50Assessment"/>
+  </testsuite>
+  <testsuite name="API-FACE-003: embedding opt-out" id="22d5a66c-c179-442c-96fa-1c38c273111b" timestamp="2026-11-23T08:39:05.716Z" tests="5" failures="0" errors="0" time="0.098">
+    <testcase name="status 200" time="0.098" classname="ApiFace003EmbeddingOptOut"/>
+    <testcase name="gate passes" time="0.098" classname="ApiFace003EmbeddingOptOut"/>
+    <testcase name="real R50 model" time="0.098" classname="ApiFace003EmbeddingOptOut"/>
+    <testcase name="gate ready" time="0.098" classname="ApiFace003EmbeddingOptOut"/>
+    <testcase name="no embedding" time="0.098" classname="ApiFace003EmbeddingOptOut"/>
+  </testsuite>
+  <testsuite name="API-FACE-004: SFace embed remains compatible" id="6a61c25c-4e0e-4944-b952-cd6cc5726cba" timestamp="2026-11-23T08:39:05.716Z" tests="2" failures="0" errors="0" time="0.754">
+    <testcase name="status 200" time="0.754" classname="ApiFace004SFaceEmbedRemainsCompatible"/>
+    <testcase name="128D contract" time="0.754" classname="ApiFace004SFaceEmbedRemainsCompatible"/>
+  </testsuite>
+  <testsuite name="API-FACE-BVA--0.01: threshold out of range" id="5fd66d79-14c7-4413-b6b1-4f7003fce2cf" timestamp="2026-11-23T08:39:05.716Z" tests="2" failures="0" errors="0" time="0.015">
+    <testcase name="status 422" time="0.015" classname="ApiFaceBva001ThresholdOutOfRange"/>
+    <testcase name="threshold rejected" time="0.015" classname="ApiFaceBva001ThresholdOutOfRange"/>
+  </testsuite>
+  <testsuite name="API-FACE-BVA-1.01: threshold out of range" id="1ce0de53-054c-4d2f-80f3-bfafbae501cc" timestamp="2026-11-23T08:39:05.716Z" tests="2" failures="0" errors="0" time="0.010">
+    <testcase name="status 422" time="0.010" classname="ApiFaceBva101ThresholdOutOfRange"/>
+    <testcase name="threshold rejected" time="0.010" classname="ApiFaceBva101ThresholdOutOfRange"/>
+  </testsuite>
+</testsuites>

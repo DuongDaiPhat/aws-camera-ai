@@ -1,0 +1,207 @@
+{
+  "mode": "live-frigate-local-recognition-sink",
+  "awsCalls": 0,
+  "records": [
+    {
+      "type": "dispatch",
+      "case": "known_face_vid6",
+      "trackId": "1795369886.033723-qtd60d",
+      "file": "crops/known_face_vid6-1795369886.033723-qtd60d.png",
+      "sha256": "28ac56bf3b4b5861757260b4577c69c6e2b53151a2291d95412c24ae65481bcf",
+      "samplesCollected": 8,
+      "waitMs": 4098,
+      "qualityScore": 0.6618,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.6618,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 108,
+          "faceHeightPx": 139,
+          "detectionScore": 0.9502,
+          "sharpness": 215.7137,
+          "normalizedSharpness": 52.9777,
+          "poseYawRatio": 0.0699,
+          "posePitchRatio": 0.0572
+        },
+        "boundingBox": {
+          "x": 0.350495101621487,
+          "y": 0.12485548378764719,
+          "width": 0.2422463504526706,
+          "height": 0.22310833769719957
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    },
+    {
+      "type": "dispatch",
+      "case": "known_face_vid6",
+      "trackId": "1795369913.465781-06kgff",
+      "file": "crops/known_face_vid6-1795369913.465781-06kgff.png",
+      "sha256": "d14bddae8ceb0f7d845f6c62b31a4578ca80a96805529b27ff467344d94c9041",
+      "samplesCollected": 3,
+      "waitMs": 4531,
+      "qualityScore": 0.5844,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.5844,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 100,
+          "faceHeightPx": 120,
+          "detectionScore": 0.921,
+          "sharpness": 179.3104,
+          "normalizedSharpness": 29.9787,
+          "poseYawRatio": 0.0784,
+          "posePitchRatio": 0.0682
+        },
+        "boundingBox": {
+          "x": 0.272551410954173,
+          "y": 0.10625006674281792,
+          "width": 0.24448355698004,
+          "height": 0.18170984190513645
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    },
+    {
+      "type": "dispatch",
+      "case": "known_face_vid6_with_glass",
+      "trackId": "1795370004.647399-x85lmb",
+      "file": "crops/known_face_vid6_with_glass-1795370004.647399-x85lmb.png",
+      "sha256": "982fc7ca4aaa1a97dd4ddd71ad1fd0a5479e7fc222cf1f7494cd39ea1553dba4",
+      "samplesCollected": 2,
+      "waitMs": 779,
+      "qualityScore": 0.6819,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.6819,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 103,
+          "faceHeightPx": 122,
+          "detectionScore": 0.9331,
+          "sharpness": 320.3924,
+          "normalizedSharpness": 73.4525,
+          "poseYawRatio": 0.0215,
+          "posePitchRatio": 0.0507
+        },
+        "boundingBox": {
+          "x": 0.33172888213150725,
+          "y": 0.11292800674209366,
+          "width": 0.24953390495540442,
+          "height": 0.18368367604665212
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    },
+    {
+      "type": "dispatch",
+      "case": "known_face_vid6_with_glass",
+      "trackId": "1795370006.298878-l52s3g",
+      "file": "crops/known_face_vid6_with_glass-1795370006.298878-l52s3g.png",
+      "sha256": "4e0e68affeceb60fa57fb39cbb1ab4032c4c836c0f994c169c3f96da913ab999",
+      "samplesCollected": 1,
+      "waitMs": 4679,
+      "qualityScore": 0.635,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.635,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 104,
+          "faceHeightPx": 128,
+          "detectionScore": 0.9324,
+          "sharpness": 191.2579,
+          "normalizedSharpness": 39.705,
+          "poseYawRatio": 0.0511,
+          "posePitchRatio": 0.0392
+        },
+        "boundingBox": {
+          "x": 0.37997696616432886,
+          "y": 0.11030924978431748,
+          "width": 0.23724611455743963,
+          "height": 0.1959760935028638
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    },
+    {
+      "type": "dispatch",
+      "case": "known_face_vid6_with_glass",
+      "trackId": "1795370022.276052-60rqlj",
+      "file": "crops/known_face_vid6_with_glass-1795370022.276052-60rqlj.png",
+      "sha256": "3c0f439a05a23b15436a5fd9b8354a0621c2fe1eab83f2357e96a76658d301b6",
+      "samplesCollected": 7,
+      "waitMs": 4212,
+      "qualityScore": 0.6603,
+      "assessment": {
+        "passed": true,
+        "qualityScore": 0.6603,
+        "faceCount": 1,
+        "rejectionReason": null,
+        "metrics": {
+          "faceWidthPx": 124,
+          "faceHeightPx": 145,
+          "detectionScore": 0.9215,
+          "sharpness": 182.8556,
+          "normalizedSharpness": 31.173,
+          "poseYawRatio": 0.0266,
+          "posePitchRatio": 0.0994
+        },
+        "boundingBox": {
+          "x": 0.03719194085748346,
+          "y": 0.17588201883140842,
+          "width": 0.27918439298062714,
+          "height": 0.2516153953724139
+        },
+        "embeddingDim": 128,
+        "modelVersion": "yunet-2023mar-sface-2021dec",
+        "gateStatus": "READY",
+        "failOpenApplied": false
+      }
+    }
+  ],
+  "similarities": [
+    {
+      "case": "known_face_vid6",
+      "a": "1795369886.033723-qtd60d",
+      "b": "1795369913.465781-06kgff",
+      "cosine": 0.6655404606636808
+    },
+    {
+      "case": "known_face_vid6_with_glass",
+      "a": "1795370004.647399-x85lmb",
+      "b": "1795370006.298878-l52s3g",
+      "cosine": 0.6741572303160421
+    },
+    {
+      "case": "known_face_vid6_with_glass",
+      "a": "1795370004.647399-x85lmb",
+      "b": "1795370022.276052-60rqlj",
+      "cosine": 0.4053250493584185
+    },
+    {
+      "case": "known_face_vid6_with_glass",
+      "a": "1795370006.298878-l52s3g",
+      "b": "1795370022.276052-60rqlj",
+      "cosine": 0.18451888562979918
+    }
+  ]
+}

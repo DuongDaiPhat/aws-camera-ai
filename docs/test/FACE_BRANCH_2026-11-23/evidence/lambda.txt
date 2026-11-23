@@ -1,0 +1,22 @@
+E
+======================================================================
+ERROR: test_handler (unittest.loader._FailedTest.test_handler)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_handler
+Traceback (most recent call last):
+  File "D:\hoc tap\project 1\aws-camera-ai\artifacts\python\cpython-3.11.13-windows-x86_64-none\Lib\unittest\loader.py", line 419, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\hoc tap\project 1\aws-camera-ai\artifacts\python\cpython-3.11.13-windows-x86_64-none\Lib\unittest\loader.py", line 362, in _get_module_from_name
+    __import__(name)
+  File "D:\hoc tap\project 1\aws-camera-ai\services\aws-workers\face\test_handler.py", line 8, in <module>
+    import handler
+  File "D:\hoc tap\project 1\aws-camera-ai\services\aws-workers\face\handler.py", line 11, in <module>
+    import boto3
+ModuleNotFoundError: No module named 'boto3'
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)

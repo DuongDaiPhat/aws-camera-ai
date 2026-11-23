@@ -294,7 +294,7 @@ describe('US-08 - Integration MQTT đến PostgreSQL', () => {
 
   async function waitForSubscription(): Promise<void> {
     await waitUntil(
-      () => loggerContains(logSpy, `Da subscribe topic ${MQTT_TOPIC_FRIGATE}`),
+      () => loggerContains(logSpy, 'Da subscribe cac topic MQTT.'),
       `Consumer không subscribe topic ${MQTT_TOPIC_FRIGATE} trong ${ACCEPTANCE_TIMEOUT_MS} ms`,
     );
   }

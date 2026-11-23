@@ -1,5 +1,8 @@
 import { ConfigService } from '@nestjs/config';
-import { FrigateDetectionTrackerService } from '../src/frigate/frigate-detection-tracker.service';
+import {
+  FrigateDetectionTrackerService,
+  type StabilizedFrameObject,
+} from '../src/frigate/frigate-detection-tracker.service';
 
 describe('FrigateDetectionTrackerService', () => {
   let service: FrigateDetectionTrackerService;
@@ -106,5 +109,51 @@ describe('FrigateDetectionTrackerService', () => {
     expect(service.getActiveDetections('cam_test')).toHaveLength(1);
     service.clearCamera('cam_test');
     expect(service.getActiveDetections('cam_test')).toEqual([]);
+  });
+
+  it('preserves canonicalTrackId from camera frames payload onto stored frames and tracked detections', () => {
+    const now = Date.now();
+    service.frames.accept(
+      {
+        camera: 'cam_test',
+        frameTime: now / 1000,
+        objects: [
+          {
+            id: 'track-new-9',
+            canonicalTrackId: 'canon-1',
+            label: 'person',
+            score: 0.94,
+            box: [10, 20, 110, 220],
+            observedAt: now / 1000,
+          },
+        ],
+      },
+      now,
+    );
+
+    const frames = service.frames.get('cam_test', now);
+    expect(frames).toHaveLength(1);
+    expect((frames[0]!.objects[0] as StabilizedFrameObject).canonicalTrackId).toBe('canon-1');
+    expect(service.getCanonicalTrackId('cam_test', 'track-new-9', now)).toBe('canon-1');
+    expect(service.resolveCanonicalTrackId('cam_test', 'track-new-9', now)).toBe('canon-1');
+    expect(service.resolveCanonicalTrackId('cam_test', 'unknown-track', now)).toBe('unknown-track');
+
+    service.track('new', {
+      id: 'track-new-9',
+      camera: 'cam_test',
+      label: 'person',
+      score: 0.94,
+      frame_time: now / 1000,
+      box: [10, 20, 110, 220],
+    });
+    expect(service.getActiveDetections('cam_test')).toEqual([
+      expect.objectContaining({
+        id: 'track-new-9',
+        canonicalTrackId: 'canon-1',
+      }),
+    ]);
+
+    service.clearCamera('cam_test');
+    expect(service.getCanonicalTrackId('cam_test', 'track-new-9', now)).toBeUndefined();
   });
 });

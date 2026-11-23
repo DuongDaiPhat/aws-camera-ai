@@ -12,10 +12,11 @@ from PIL import Image
 from app.config import Settings, get_settings
 from app.main import app
 from app.models.face import CollectionFace, EmbedResponse, SyncRequest
-from app.routers.face import get_embedder, get_slots
+from app.routers.face import get_embedder, get_quality_assessor, get_slots
 from app.services.embedding_codec import decode, encode
 from app.services.face_collection import FaceCollection
 from app.services.face_embedder import FaceEmbedder
+from app.services.face_quality import FaceQualityAssessor
 
 
 def picture() -> bytes:
@@ -170,3 +171,102 @@ def test_embed_response_never_contains_image() -> None:
     response = EmbedResponse(model_version="test").model_dump(by_alias=True)
     assert "image" not in response
     assert "filename" not in response
+
+
+def _sharp_face_png() -> bytes:
+    yy, xx = np.indices((200, 200))
+    pattern = (((xx // 4) + (yy // 4)) % 2 * 220 + 20).astype(np.uint8)
+    rgb = np.stack([pattern, pattern, pattern], axis=-1)
+    output = io.BytesIO()
+    Image.fromarray(rgb, mode="RGB").save(output, format="PNG")
+    return output.getvalue()
+
+
+def test_router_assess_auth_embedding_rekognition_and_unavailable(
+    monkeypatch: pytest.MonkeyPatch, tmp_path
+) -> None:
+    from app.routers import face
+
+    settings = Settings(ai_internal_token="test-token", face_provider="rekognition")
+    assessor = FaceQualityAssessor(settings)
+    assessor._detector = Mock()
+    assessor._detector.detect.return_value = (
+        1,
+        np.asarray(
+            [[40, 40, 120, 120, 76, 82, 124, 82, 100, 106, 82, 130, 118, 130, 0.94]],
+            dtype=np.float32,
+        ),
+    )
+    assessor._recognizer = Mock()
+    assessor._recognizer.alignCrop.return_value = np.zeros((112, 112, 3), dtype=np.uint8)
+    assessor._recognizer.feature.return_value = np.ones((1, 128), dtype=np.float32)
+
+    monkeypatch.setattr(face, "get_settings", lambda: settings)
+    monkeypatch.setattr(face, "get_quality_assessor", lambda: assessor)
+    client = TestClient(app)
+    headers = {"X-Internal-Token": "test-token"}
+    try:
+        assert (
+            client.post("/face/assess", files={"image": ("x.png", _sharp_face_png())}).status_code
+            == 401
+        )
+        res = client.post(
+            "/face/assess",
+            files={"image": ("x.png", _sharp_face_png())},
+            headers=headers,
+        )
+        assert res.status_code == 200
+        body = res.json()
+        assert body["passed"] is True
+        assert body["gateStatus"] == "READY"
+        assert body["faceCount"] == 1
+        assert body["rejectionReason"] is None
+        assert body["embeddingDim"] == 128
+        assert body["embeddingBase64"] is not None
+        assert body["metrics"]["faceWidthPx"] == 120
+        assert body["metrics"]["faceHeightPx"] == 120
+        assert body["boundingBox"] is not None
+
+        no_emb = client.post(
+            "/face/assess",
+            files={"image": ("x.png", _sharp_face_png())},
+            data={"includeEmbedding": "false"},
+            headers=headers,
+        )
+        assert no_emb.status_code == 200
+        assert no_emb.json()["passed"] is True
+        assert no_emb.json()["embeddingBase64"] is None
+        assert no_emb.json()["embeddingDim"] is None
+
+        missing_assessor = FaceQualityAssessor(
+            Settings(face_detector_path=str(tmp_path / "missing.onnx"))
+        )
+        monkeypatch.setattr(face, "get_quality_assessor", lambda: missing_assessor)
+        unavailable = client.post(
+            "/face/assess",
+            files={"image": ("x.png", _sharp_face_png())},
+            headers=headers,
+        )
+        assert unavailable.status_code == 200
+        assert unavailable.json()["passed"] is False
+        assert unavailable.json()["gateStatus"] == "UNAVAILABLE"
+        assert unavailable.json()["rejectionReason"] == "MODEL_UNAVAILABLE"
+
+        slots = get_slots()
+        acquired = []
+        while slots.acquire(blocking=False):
+            acquired.append(True)
+        try:
+            busy = client.post(
+                "/face/assess",
+                files={"image": ("x.png", _sharp_face_png())},
+                headers=headers,
+            )
+            assert busy.status_code == 503
+            assert busy.json()["detail"] == "PROVIDER_UNAVAILABLE"
+        finally:
+            for _ in acquired:
+                slots.release()
+    finally:
+        get_quality_assessor.cache_clear()
+        get_slots.cache_clear()

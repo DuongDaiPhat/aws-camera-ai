@@ -1,0 +1,4 @@
+
+> @cam/orchestrator@0.0.1 build D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator
+> nest build
+

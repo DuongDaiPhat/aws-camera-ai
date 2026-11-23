@@ -6,6 +6,13 @@ import { BullModule } from '@nestjs/bullmq';
 import { FaceRecognitionWorker } from './face-recognition.worker';
 import { MediaModule } from '../media/media.module';
 import { AiResultsModule } from '../ai-results/ai-results.module';
+import { EventsModule } from '../events/events.module';
+import { FrigateModule } from '../frigate/frigate.module';
+import { CloudQueueModule } from '../cloud-queue/cloud-queue.module';
+import { FaceQualityGateClient } from './face-quality-gate.client';
+import { FaceSessionCacheService } from './face-session-cache.service';
+import { TrackIdentityStateService } from './track-identity-state.service';
+import { FaceRecognitionCoordinatorService } from './face-recognition-coordinator.service';
 
 @Module({
   imports: [
@@ -14,17 +21,40 @@ import { AiResultsModule } from '../ai-results/ai-results.module';
     }),
     MediaModule,
     AiResultsModule,
+    EventsModule,
+    FrigateModule,
+    CloudQueueModule,
   ],
   providers: [
+    FaceQualityGateClient,
+    FaceSessionCacheService,
+    TrackIdentityStateService,
+    FaceRecognitionCoordinatorService,
     {
       provide: FaceRecognitionWorker,
-      inject: [ConfigService, FrigateMediaAdapter, AiResultsService],
-      useFactory: (config: ConfigService, media: FrigateMediaAdapter, ai: AiResultsService) =>
+      inject: [
+        ConfigService,
+        FrigateMediaAdapter,
+        AiResultsService,
+        FaceRecognitionCoordinatorService,
+      ],
+      useFactory: (
+        config: ConfigService,
+        media: FrigateMediaAdapter,
+        ai: AiResultsService,
+        coordinator: FaceRecognitionCoordinatorService,
+      ) =>
         config.get<string>('FACE_JOB_TRANSPORT', 'bullmq') === 'bullmq'
-          ? new FaceRecognitionWorker(media, config, ai)
+          ? new FaceRecognitionWorker(media, config, ai, coordinator)
           : null,
     },
   ],
-  exports: [BullModule],
+  exports: [
+    BullModule,
+    FaceQualityGateClient,
+    FaceSessionCacheService,
+    TrackIdentityStateService,
+    FaceRecognitionCoordinatorService,
+  ],
 })
 export class FaceRecognitionModule {}

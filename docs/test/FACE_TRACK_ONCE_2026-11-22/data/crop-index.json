@@ -1,0 +1,98 @@
+[
+  {
+    "case": "TC06-no-glasses-acceptance",
+    "eventId": "5d418ea6-8e8b-4671-9a09-1df6f39bd9e2",
+    "trackId": "1795363041.315733-7lx5cd",
+    "qualityScore": 0.9464,
+    "sha256": "c5399eb43e11626887104e60c66d0b8d99511d25629f9e78caad8e30b81c34bc",
+    "file": "evidence/crops/TC06-no-glasses-acceptance_1795363041.315733-7lx5cd.jpg"
+  },
+  {
+    "case": "TC06-no-glasses-acceptance",
+    "eventId": "55bc4192-098d-4a62-91e1-a9d0287aa7e4",
+    "trackId": "1795363069.503137-r9e2f5",
+    "qualityScore": 0.8328,
+    "sha256": "316064621f3861ffb74a0e5b8137744d1ff0c1fb414a240acbb4583e5461c0d4",
+    "file": "evidence/crops/TC06-no-glasses-acceptance_1795363069.503137-r9e2f5.jpg"
+  },
+  {
+    "case": "TC06-glasses-acceptance",
+    "eventId": "4bdef03e-cf48-4958-bf0d-2153a8f73067",
+    "trackId": "1795363121.133075-oe4a3v",
+    "qualityScore": 0.9399,
+    "sha256": "4dddc25ff139351a555267962b1bc8131ce0a32c0743ec63f758f778c74b5440",
+    "file": "evidence/crops/TC06-glasses-acceptance_1795363121.133075-oe4a3v.jpg"
+  },
+  {
+    "case": "TC06-glasses-acceptance",
+    "eventId": "63804338-cafc-4380-8b1f-56e2292278b6",
+    "trackId": "1795363137.565338-rryojx",
+    "qualityScore": 0.9053,
+    "sha256": "5f377ad198007060e85fbd0421f7aec4bcdf078ec35d6e99e0e280a84336d8d0",
+    "file": "evidence/crops/TC06-glasses-acceptance_1795363137.565338-rryojx.jpg"
+  },
+  {
+    "case": "TC08-extra-no-glasses-acceptance",
+    "eventId": "2e49f7eb-2943-44ed-9a9a-079b3498531c",
+    "trackId": "1795363433.04917-un0174",
+    "qualityScore": 0.8945,
+    "sha256": "d6daedf2d723b5f93b2c21ea5fbceffd515ef4a054e750a3ea7b9559b5dcd0e8",
+    "file": "evidence/crops/TC08-extra-no-glasses-acceptance_1795363433.04917-un0174.jpg"
+  },
+  {
+    "case": "TC08-extra-no-glasses-acceptance",
+    "eventId": "d922ed40-b35d-48c3-9a7f-4d73ce88d25c",
+    "trackId": "1795363433.04917-ytt0pv",
+    "qualityScore": 0.8827,
+    "sha256": "08b30510c613a8094bf8fe24aa98962353621627a5baa0245658e0bab4560ce2",
+    "file": "evidence/crops/TC08-extra-no-glasses-acceptance_1795363433.04917-ytt0pv.jpg"
+  },
+  {
+    "case": "TC08-glasses-aligned",
+    "eventId": "dddf0ad6-77a6-4777-88eb-3e946e668c72",
+    "trackId": "1795364122.071411-f1bxpf",
+    "qualityScore": 0.96,
+    "sha256": "71d9ade5657b08f8fd09a4a529a559e0359750c7226befa26adda35e9c096661",
+    "file": "evidence/crops/TC08-glasses-aligned_1795364122.071411-f1bxpf.jpg"
+  },
+  {
+    "case": "TC08-glasses-aligned",
+    "eventId": "871e7455-a096-4bb2-aaa5-0e1db029e761",
+    "trackId": "1795364123.150216-81mplo",
+    "qualityScore": 0.9264,
+    "sha256": "8fcf3f87c12a72cbab4321f1e507277ec29eb5daeec07cb4d95577754ed4f125",
+    "file": "evidence/crops/TC08-glasses-aligned_1795364123.150216-81mplo.jpg"
+  },
+  {
+    "case": "TC07-separated-aligned",
+    "eventId": "59ee1deb-167b-4564-982e-c2493133944a",
+    "trackId": "1795364409.915441-zlo7m3",
+    "qualityScore": 0.9564,
+    "sha256": "1e66f35b5376f03686b429e1ca73868b6583b6b8431dd6bb79d4d81cef73d49d",
+    "file": "evidence/crops/TC07-separated-aligned_1795364409.915441-zlo7m3.jpg"
+  },
+  {
+    "case": "TC07-separated-aligned",
+    "eventId": "f4077b55-f52c-49d5-b682-a3502c066767",
+    "trackId": "1795364409.915441-tugb1f",
+    "qualityScore": 0.9064,
+    "sha256": "dae4638c88098590a71a0d5533f232458d61be47d4ff50c61d35bbcca8b9c859",
+    "file": "evidence/crops/TC07-separated-aligned_1795364409.915441-tugb1f.jpg"
+  },
+  {
+    "case": "TC10-before-delete-aligned",
+    "eventId": "58cb97f4-eb3c-4c04-97c6-234fa72b43ee",
+    "trackId": "1795364579.266712-onjz1p",
+    "qualityScore": 0.887,
+    "sha256": "ab8c9863a6be0038447c9bdcbfee91adf792cca81936339efc7a56b04a580b23",
+    "file": "evidence/crops/TC10-before-delete-aligned_1795364579.266712-onjz1p.jpg"
+  },
+  {
+    "case": "TC10-after-delete-aligned",
+    "eventId": "7bc95a0a-22f9-46ef-970c-f119c4068f04",
+    "trackId": "1795364635.903566-vfd5rr",
+    "qualityScore": 0.8583,
+    "sha256": "9f83747fa080454b0b72616c0f25802e7e0c068e682105b32562b03766d2e11d",
+    "file": "evidence/crops/TC10-after-delete-aligned_1795364635.903566-vfd5rr.jpg"
+  }
+]

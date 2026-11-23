@@ -1,0 +1,116 @@
+mqtt:
+  enabled: true
+  host: mosquitto
+  port: 1883
+  topic_prefix: frigate
+  client_id: frigate
+  stats_interval: 60
+database:
+  path: /db/frigate.db
+detectors:
+  ov:
+    type: openvino
+    device: CPU
+model:
+  width: 300
+  height: 300
+  input_tensor: nhwc
+  input_pixel_format: bgr
+  path: /openvino-model/ssdlite_mobilenet_v2.xml
+  labelmap_path: /openvino-model/coco_91cl_bkgr.txt
+objects:
+  track:
+    - person
+  filters:
+    person:
+      min_score: 0.5
+      threshold: 0.7
+      min_area: 1500
+detect:
+  enabled: true
+  width: 1280
+  height: 720
+  fps: 5
+  min_initialized: 5
+  max_disappeared: 75
+  stationary:
+    interval: 50
+    threshold: 50
+    max_frames:
+      default: 3000
+ffmpeg:
+  retry_interval: 10
+  input_args: preset-rtsp-restream
+snapshots:
+  enabled: true
+  timestamp: true
+  bounding_box: true
+  retain:
+    default: 2
+record:
+  enabled: true
+  continuous:
+    days: 30
+  motion:
+    days: 1
+  alerts:
+    retain:
+      days: 2
+  detections:
+    retain:
+      days: 2
+cameras:
+  face_test6_20261123:
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: rtsp://<internal>@mediamtx:8554/face_test6_20261123
+          input_args:
+            - -rtsp_transport
+            - tcp
+            - -timeout
+            - "10000000"
+            - -analyzeduration
+            - "1000000"
+            - -probesize
+            - "32768"
+            - -fflags
+            - nobuffer
+            - -flags
+            - low_delay
+          roles:
+            - detect
+            - record
+    detect:
+      width: 1920
+      height: 1080
+      fps: 5
+      enabled: true
+      min_initialized: 2
+      max_disappeared: 75
+      stationary:
+        interval: 50
+        threshold: 50
+    objects:
+      track:
+        - person
+      filters:
+        person:
+          min_score: 0.5
+          threshold: 0.7
+          min_area: 1500
+    snapshots:
+      enabled: true
+      bounding_box: true
+    record:
+      continuous:
+        days: 7
+      enabled: true
+      detections:
+        retain:
+          days: 7
+      alerts:
+        retain:
+          days: 7
+    zones: {}
+version: 0.18-0
