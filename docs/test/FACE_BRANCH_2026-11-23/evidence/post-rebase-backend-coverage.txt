@@ -1,0 +1,1018 @@
+PASS test/notification-cloud-email.spec.ts (27.578 s)
+[Nest] 11288  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Object:
+{}
+
+[Nest] 11288  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Results input retained for retry/redrive
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Object:
+{
+  "jobId": "00000000-0000-4000-8000-000000000004",
+  "reason": "Face collection registry missing"
+}
+
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Object:
+{
+  "jobId": "00000000-0000-4000-8000-000000000004",
+  "reason": "Face crop unavailable"
+}
+
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Object:
+{
+  "jobId": "00000000-0000-4000-8000-000000000004",
+  "reason": "Unexpected upload bucket"
+}
+
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Object:
+{
+  "jobId": "00000000-0000-4000-8000-000000000004",
+  "reason": "Face collection registry missing"
+}
+
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Object:
+{
+  "jobId": "00000000-0000-4000-8000-000000000004",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Object:
+{
+  "messageId": "empty"
+}
+
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Results input retained for retry/redrive
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Object:
+{
+  "messageId": "invalid-json"
+}
+
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Results input retained for retry/redrive
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Object:
+{
+  "messageId": "wrong-type"
+}
+
+[Nest] 13036  - 23/11/2026, 16.30.39    WARN [CloudQueueService] Results input retained for retry/redrive
+PASS test/cloud-dispatch.spec.ts (8.551 s)
+PASS test/cloud-queue-extended.spec.ts (36.286 s)
+PASS test/frigate-media.adapter.spec.ts (5.497 s)
+[Nest] 11288  - 23/11/2026, 16.30.47   ERROR [RekognitionFaceEnrollmentService] Object:
+{
+  "action": "rekognition_create_collection_failed",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "errorCode": "UnknownError"
+}
+
+Failed to ensure Rekognition collection
+[Nest] 11288  - 23/11/2026, 16.30.47   ERROR [RekognitionFaceEnrollmentService] Object:
+{
+  "action": "rekognition_detect_faces_failed",
+  "errorCode": "ThrottlingException"
+}
+
+AWS Rekognition enrollment call failed
+[Nest] 11288  - 23/11/2026, 16.30.47   ERROR [RekognitionFaceEnrollmentService] Object:
+{
+  "action": "rekognition_delete_faces_failed",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 1,
+  "errorCode": "InternalError"
+}
+
+Failed to delete faces from Rekognition collection
+[Nest] 11288  - 23/11/2026, 16.30.47   ERROR [RekognitionFaceEnrollmentService] Object:
+{
+  "action": "rekognition_compensating_cleanup_failed",
+  "reason": "index_batch_failure",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 1,
+  "errorCode": "HttpException"
+}
+
+Compensating DeleteFaces cleanup failed; manual reconciliation required
+[Nest] 11288  - 23/11/2026, 16.30.47   ERROR [RekognitionFaceEnrollmentService] Object:
+{
+  "action": "rekognition_delete_faces_failed",
+  "collectionId": "col",
+  "faceCount": 1,
+  "errorCode": "AccessDenied"
+}
+
+Failed to delete faces from Rekognition collection
+[Nest] 11288  - 23/11/2026, 16.30.47   ERROR [KnownFacesService] Object:
+{
+  "action": "rekognition_compensating_delete_failed",
+  "reason": "create_db_persistence_failed",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 2,
+  "errorCode": "AWS_ERR"
+}
+
+Compensating Rekognition DeleteFaces failed; reconciliation required
+[Nest] 11288  - 23/11/2026, 16.30.47   ERROR [KnownFacesService] Object:
+{
+  "action": "rekognition_compensating_delete_failed",
+  "reason": "create_db_persistence_failed",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 2,
+  "errorCode": "AwsNameErr"
+}
+
+Compensating Rekognition DeleteFaces failed; reconciliation required
+[Nest] 11288  - 23/11/2026, 16.30.47   ERROR [KnownFacesService] Object:
+{
+  "action": "rekognition_compensating_delete_failed",
+  "reason": "create_db_persistence_failed",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 2,
+  "errorCode": "unknown"
+}
+
+Compensating Rekognition DeleteFaces failed; reconciliation required
+[Nest] 11288  - 23/11/2026, 16.30.47   ERROR [KnownFacesService] Object:
+{
+  "action": "rekognition_deactivate_db_reconciliation_required",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "knownFaceId": "22222222-2222-4222-8222-222222222222",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "deletedFaceCount": 1,
+  "errorCode": "DeadlockDetected"
+}
+
+Rekognition DeleteFaces succeeded but DB deactivation failed; retry deactivate to reconcile
+[Nest] 11288  - 23/11/2026, 16.30.47   ERROR [KnownFacesService] Object:
+{
+  "action": "rekognition_delete_db_reconciliation_required",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "knownFaceId": "22222222-2222-4222-8222-222222222222",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "deletedFaceCount": 1,
+  "errorCode": "57014"
+}
+
+Rekognition DeleteFaces succeeded but DB deletion failed; retry delete to reconcile
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [RekognitionFaceEnrollmentService] Object:
+{
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111"
+}
+
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [RekognitionFaceEnrollmentService] Object:
+{
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111"
+}
+
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [RekognitionFaceEnrollmentService] Object:
+{
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111"
+}
+
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [RekognitionFaceEnrollmentService] Object:
+{
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111"
+}
+
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [RekognitionFaceEnrollmentService] Object:
+{
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111"
+}
+
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [RekognitionFaceEnrollmentService] Object:
+{
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111"
+}
+
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [KnownFacesService] Received 2 images for registration
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 11288  - 23/11/2026, 16.30.47    WARN [KnownFacesService] Object:
+{
+  "action": "rekognition_compensating_delete_completed",
+  "reason": "create_db_persistence_failed",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 2
+}
+
+[Nest] 11288  - 23/11/2026, 16.30.47    WARN [KnownFacesService] Compensating Rekognition DeleteFaces succeeded after persistence failure
+[Nest] 11288  - 23/11/2026, 16.30.47    WARN [KnownFacesService] Object:
+{
+  "action": "rekognition_compensating_delete_completed",
+  "reason": "replace_photos_prune_previous_faces",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 1
+}
+
+[Nest] 11288  - 23/11/2026, 16.30.47    WARN [KnownFacesService] Compensating Rekognition DeleteFaces succeeded after persistence failure
+[Nest] 11288  - 23/11/2026, 16.30.47    WARN [KnownFacesService] Object:
+{
+  "action": "rekognition_compensating_delete_completed",
+  "reason": "replace_photos_db_persistence_failed",
+  "ownerUserId": "11111111-1111-4111-8111-111111111111",
+  "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+  "faceCount": 2
+}
+
+[Nest] 11288  - 23/11/2026, 16.30.47    WARN [KnownFacesService] Compensating Rekognition DeleteFaces succeeded after persistence failure
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 11288  - 23/11/2026, 16.30.47    WARN [FaceCollectionSyncService] Object:
+{
+  "code": "FACE_SYNC_RETRY",
+  "message": "Collection sync chưa hoàn tất"
+}
+
+[Nest] 11288  - 23/11/2026, 16.30.47    WARN [FaceCollectionSyncService] Object:
+{
+  "code": "FACE_SYNC_PENDING",
+  "ownerScopeId": "11111111-1111-4111-8111-111111111111",
+  "version": 1
+}
+
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [KnownFacesService] Received 2 images for registration
+[Nest] 11288  - 23/11/2026, 16.30.47     LOG [KnownFacesService] Received 1 images for registration
+PASS test/rekognition-enrollment.spec.ts (7.661 s)
+PASS test/mqtt-consumer.service.spec.ts (9.797 s)
+PASS test/resource-ownership.spec.ts (8.75 s)
+PASS test/events.service.spec.ts
+PASS test/notification-cloud-controller.spec.ts (5.357 s)
+PASS test/face-recognition-coordinator.service.spec.ts
+PASS test/auth-provider.spec.ts
+PASS test/cameras.controller.spec.ts
+PASS test/fire-health.spec.ts
+[Nest] 11288  - 23/11/2026, 16.31.11   ERROR [FireMediaService] Object:
+{
+  "err": {}
+}
+
+Fire media recovery failed
+PASS test/fire-media.spec.ts
+PASS test/events.controller.spec.ts
+PASS test/ffmpeg-source-runner.spec.ts
+[Nest] 13036  - 23/11/2026, 16.31.17   ERROR [CloudQueueService] Cloud queue iteration failed (receive-results, unknown); retrying without acknowledging input
+[Nest] 13036  - 23/11/2026, 16.31.18   ERROR [CloudQueueService] Cloud queue iteration failed (dispatch, ECONNRESET); retrying without acknowledging input
+[Nest] 13036  - 23/11/2026, 16.31.17    WARN [CloudQueueService] Object:
+{
+  "messageId": "id"
+}
+
+[Nest] 13036  - 23/11/2026, 16.31.17    WARN [CloudQueueService] Results input retained for retry/redrive
+[Nest] 13036  - 23/11/2026, 16.31.17    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Face collection registry missing"
+}
+
+[Nest] 13036  - 23/11/2026, 16.31.17    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 13036  - 23/11/2026, 16.31.17    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Face collection prefix mismatch"
+}
+
+[Nest] 13036  - 23/11/2026, 16.31.17    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 13036  - 23/11/2026, 16.31.17    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Face crop unavailable"
+}
+
+[Nest] 13036  - 23/11/2026, 16.31.17    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 13036  - 23/11/2026, 16.31.17    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "Unexpected upload bucket"
+}
+
+[Nest] 13036  - 23/11/2026, 16.31.17    WARN [CloudQueueService] Cloud job retained for retry
+[Nest] 13036  - 23/11/2026, 16.31.17    WARN [CloudQueueService] Object:
+{
+  "jobId": "44444444-4444-4444-8444-444444444444",
+  "reason": "PREPARE_OR_SEND_FAILED"
+}
+
+[Nest] 13036  - 23/11/2026, 16.31.17    WARN [CloudQueueService] Cloud job retained for retry
+PASS test/cloud-queue.spec.ts
+PASS test/wellness-policy.spec.ts
+PASS test/escalation-rules.controller.spec.ts
+PASS test/auth.controller.spec.ts
+[Nest] 13036  - 23/11/2026, 16.31.23   ERROR [AiResultOutboxService] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "messageId": "22222222-2222-4222-8222-222222222222",
+  "err": "database unavailable"
+}
+
+Xử lý AI result outbox thất bại
+PASS test/ai-result-outbox.service.spec.ts
+[Nest] 11288  - 23/11/2026, 16.31.25   DEBUG [PoseFrameConsumer] Bỏ qua pose frame cũ: delay 5.00s > 1s
+PASS src/fall-detection/consumer/pose-frame.consumer.spec.ts
+PASS test/fire.spec.ts
+PASS test/smoke.service.spec.ts
+[Nest] 11288  - 23/11/2026, 16.31.27    WARN [SmokeService] Smoke check failed for database: Error
+[Nest] 11288  - 23/11/2026, 16.31.27    WARN [SmokeService] Smoke check failed for cloudQueue: Error
+[Nest] 11288  - 23/11/2026, 16.31.27    WARN [SmokeService] Smoke check failed for storage: UnknownError
+[Nest] 11288  - 23/11/2026, 16.31.27    WARN [SmokeService] Smoke check failed for storage: UnknownError
+[Nest] 11288  - 23/11/2026, 16.31.27    WARN [SmokeService] Smoke check failed for auth: Error
+[Nest] 11288  - 23/11/2026, 16.31.27    WARN [SmokeService] Smoke check failed for storage: UnknownError
+PASS test/zone-result-producer.service.spec.ts
+PASS test/notification-retry-worker.spec.ts
+[Nest] 11288  - 23/11/2026, 16.31.32   ERROR [MediaService] Object:
+{
+  "eventId": "evt-err",
+  "error": "s3 down"
+}
+
+Camera snapshot storage failed; incident remains persisted
+[Nest] 11288  - 23/11/2026, 16.31.32   ERROR [MediaService] Object:
+{
+  "eventId": "evt-err-2",
+  "error": "Unknown snapshot storage error"
+}
+
+Camera snapshot storage failed; incident remains persisted
+[Nest] 11288  - 23/11/2026, 16.31.32   ERROR [MediaService] Loi khi tai/luu snapshot cho event evt-err
+[Nest] 11288  - 23/11/2026, 16.31.32   ERROR [MediaService] Error: network error
+[Nest] 11288  - 23/11/2026, 16.31.32   ERROR [MediaService] Loi khi luu buffer snapshot cho event evt-err
+[Nest] 11288  - 23/11/2026, 16.31.32   ERROR [MediaService] Error: upload failed
+[Nest] 11288  - 23/11/2026, 16.31.32   ERROR [MediaService] Loi khi tai/luu clip cho event evt-clip
+[Nest] 11288  - 23/11/2026, 16.31.32   ERROR [MediaService] Error: clip fetch error
+PASS test/media.service.spec.ts
+[Nest] 13036  - 23/11/2026, 16.31.32    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track track-1 camera cam-livingroom ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 13036  - 23/11/2026, 16.31.32     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera cam-livingroom (track: track-1, event: evt-111)
+[Nest] 13036  - 23/11/2026, 16.31.32   DEBUG [FallIncidentCoordinator] [M2A_CANDIDATE_CANCELLED] Track track-1 trên camera cam-livingroom đã hủy candidate (reason: RECOVERED)
+[Nest] 13036  - 23/11/2026, 16.31.32    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track track-1 camera cam-livingroom ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 13036  - 23/11/2026, 16.31.32   DEBUG [FallIncidentCoordinator] Incident té ngã episode 22222222-2222-4222-8222-222222222222 đã được xử lý trước đó (deduped)
+PASS src/fall-detection/coordinator/fall-incident.coordinator.spec.ts
+PASS test/wellness.controller.spec.ts
+[Nest] 13036  - 23/11/2026, 16.31.36   ERROR [FireDeliveryService] Object:
+{
+  "eventId": "89790e90-d1a5-4853-8ad5-e5cc96a8fc32",
+  "incidentId": "f1e9a6dd-72d5-4f18-9459-3d04105907a9",
+  "error": "Temporary AI result DB failure"
+}
+
+Fire pending result delivery failed
+PASS test/fire-delivery.spec.ts
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNDETERMINED",
+  "hasError": false
+}
+
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 11288  - 23/11/2026, 16.31.39    WARN [FaceRecognitionWorker] Không lấy được ảnh crop cho track track-1
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "2637c17e-6759-4308-9e0b-41ffd8bd9661",
+  "personStatus": null,
+  "hasError": true
+}
+
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "UNKNOWN",
+  "hasError": false
+}
+
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Object:
+{
+  "eventId": "11111111-1111-4111-8111-111111111111",
+  "trackId": "track-1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "personStatus": "KNOWN",
+  "hasError": false
+}
+
+[Nest] 11288  - 23/11/2026, 16.31.39     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+PASS test/face-recognition.worker.spec.ts
+[Nest] 13036  - 23/11/2026, 16.31.40   ERROR [FireProcessorService] Object:
+{
+  "frameId": "frame-1795426300202",
+  "error": "DB temporarily unavailable"
+}
+
+Fire confirmation persistence failed; evidence retained for retry
+PASS test/fire-recovery.spec.ts
+PASS test/ai-result.validator.spec.ts
+[Nest] 11288  - 23/11/2026, 16.31.42   ERROR [RestAreaEvaluator] Lỗi khi kiểm tra REST_AREA cho camera 11111111-1111-4111-8111-111111111111: DB unavailable
+[Nest] 11288  - 23/11/2026, 16.31.42   ERROR [FallIncidentCoordinator] Fall processing failed for qa-camera/qa-track: DB unavailable
+[Nest] 11288  - 23/11/2026, 16.31.42   ERROR [FallIncidentCoordinator] Lỗi khi submit kết quả AI té ngã cho event event: temporary submit failure
+[Nest] 11288  - 23/11/2026, 16.31.42    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+[Nest] 11288  - 23/11/2026, 16.31.42    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+[Nest] 11288  - 23/11/2026, 16.31.42   DEBUG [PoseFrameConsumer] Bỏ qua pose frame cũ: delay 1.10s > 1s
+[Nest] 11288  - 23/11/2026, 16.31.42   DEBUG [PoseFrameConsumer] Bỏ qua pose frame cũ: delay -0.60s > 1s
+[Nest] 11288  - 23/11/2026, 16.31.42    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track qa-track camera qa-camera ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 11288  - 23/11/2026, 16.31.42    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track qa-track camera qa-camera ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+[Nest] 11288  - 23/11/2026, 16.31.42     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera qa-camera (track: qa-track, event: event)
+PASS test/qa-fall.spec.ts
+PASS test/known-faces.spec.ts
+[Nest] 13036  - 23/11/2026, 16.31.45     LOG [KnownFacesService] Received 2 images for registration
+[Nest] 13036  - 23/11/2026, 16.31.45     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 13036  - 23/11/2026, 16.31.45     LOG [KnownFacesService] Received 1 images for registration
+[Nest] 13036  - 23/11/2026, 16.31.45     LOG [KnownFacesService] Received 1 images for registration
+PASS test/cameras.service.spec.ts
+  ● Console
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=camera_cong_chinh objectId=live-person frameTime=1795426306035 observedAt=1795426306035 receivedAt=1795426306035 action=ACCEPT
+
+      129 |     }
+      130 |
+    > 131 |     console.warn(
+          |             ^
+      132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+      133 |     );
+      134 |
+
+      at FrigateFrameBuffer.warn [as parseObject] (src/frigate/frigate-frame-buffer.ts:131:13)
+      at FrigateFrameBuffer.parseObject [as accept] (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/cameras.service.spec.ts:170:33)
+
+PASS test/escalation-engine.service.spec.ts
+PASS test/telegram-webhook.spec.ts
+PASS test/fire-ai-client.spec.ts
+PASS src/playback/playback.service.spec.ts
+PASS test/frigate-playback.spec.ts
+PASS src/playback/playback-frames.service.spec.ts
+PASS test/media.controller.spec.ts
+PASS test/media-mtx.service.spec.ts
+PASS test/escalation-deadline-worker.service.spec.ts
+PASS test/wellness-scheduler.service.spec.ts
+[Nest] 11288  - 23/11/2026, 16.31.56   ERROR [FrigateSyncService] Đồng bộ Frigate thất bại cho camera camera_cong_chinh:
+fetch failed: ECONNREFUSED 127.0.0.1:5000
+PASS test/frigate-sync.service.spec.ts
+PASS test/frigate-detection-tracker.service.spec.ts
+  ● Console
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=track-new-9 frameTime=1795426317258 observedAt=1795426317258 receivedAt=1795426317258 action=ACCEPT
+
+      129 |     }
+      130 |
+    > 131 |     console.warn(
+          |             ^
+      132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+      133 |     );
+      134 |
+
+      at CanonicalPreservingFrameBuffer.warn [as parseObject] (src/frigate/frigate-frame-buffer.ts:131:13)
+      at CanonicalPreservingFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:56:27)
+      at CanonicalPreservingFrameBuffer.accept (src/frigate/frigate-detection-tracker.service.ts:45:11)
+      at Object.<anonymous> (test/frigate-detection-tracker.service.spec.ts:116:20)
+
+PASS test/s3-storage.service.spec.ts
+[Nest] 11288  - 23/11/2026, 16.31.58     LOG [S3StorageService] Khoi tao AWS S3 Storage Adapter (region: ap-southeast-1, bucket: argusai-staging-media)
+[Nest] 11288  - 23/11/2026, 16.31.58     LOG [S3StorageService] Khoi tao AWS S3 Storage Adapter (region: ap-southeast-1, bucket: argusai-staging-media)
+[Nest] 11288  - 23/11/2026, 16.31.58     LOG [S3StorageService] Khoi tao AWS S3 Storage Adapter (region: ap-southeast-1, bucket: argusai-staging-media)
+[Nest] 11288  - 23/11/2026, 16.31.58     LOG [MinioStorageService] Khoi tao MinIO Storage Adapter (endpoint: http://localhost:9000, presign: http://localhost:9000, bucket: camerai-media)
+[Nest] 11288  - 23/11/2026, 16.31.58     LOG [S3StorageService] Khoi tao AWS S3 Storage Adapter (region: ap-southeast-1, bucket: argusai-staging-media)
+[Nest] 11288  - 23/11/2026, 16.31.58     LOG [MinioStorageService] Khoi tao MinIO Storage Adapter (endpoint: http://minio:9000, presign: http://localhost:9000, bucket: camerai-media)
+[Nest] 13036  - 23/11/2026, 16.31.59   ERROR [EventsRepository] Lỗi khi ghi event vào PostgreSQL (dedupKey: dedup-1, trackId: track-1)
+[Nest] 13036  - 23/11/2026, 16.31.59   ERROR [EventsRepository] Error: DB Error
+PASS test/events.repository.spec.ts
+PASS test/env-config.spec.ts
+[Nest] 13036  - 23/11/2026, 16.32.01   ERROR [FrigateConfigService] Lỗi khi phân tích cú pháp YAML cấu hình Frigate:
+[Nest] 13036  - 23/11/2026, 16.32.01   ERROR [FrigateConfigService] YAMLParseError: Flow sequence in block collection must be sufficiently indented and end with a ] at line 1, column 23:
+
+invalid: [yaml: broken
+                      ^
+
+PASS test/frigate-config.service.spec.ts
+PASS test/media-mtx-auth.controller.spec.ts
+[Nest] 11288  - 23/11/2026, 16.32.01    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=webrtc path=cam_front hasToken=true hasQuery=false
+[Nest] 11288  - 23/11/2026, 16.32.01    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=webrtc path=cam_front hasToken=true hasQuery=false
+[Nest] 11288  - 23/11/2026, 16.32.01    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=webrtc path=cam_other hasToken=false hasQuery=true
+[Nest] 11288  - 23/11/2026, 16.32.01    WARN [MediaMtxAuthController] MediaMTX auth denied action=publish protocol=webrtc path=cam_front hasToken=true hasQuery=false
+[Nest] 11288  - 23/11/2026, 16.32.01    WARN [MediaMtxAuthController] MediaMTX auth denied action=publish protocol=webrtc path=cam_other hasToken=true hasQuery=false
+[Nest] 11288  - 23/11/2026, 16.32.01    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=webrtc path=cam_front hasToken=true hasQuery=false
+[Nest] 11288  - 23/11/2026, 16.32.01    WARN [MediaMtxAuthController] MediaMTX auth denied action=publish protocol=rtsp path=cam_front hasToken=true hasQuery=false
+PASS test/face-session-cache.service.spec.ts
+PASS test/escalation-rules.service.spec.ts
+PASS test/face-track-optimization.config.spec.ts
+PASS test/cognito-verifier.spec.ts
+PASS test/telegram-link.service.spec.ts
+PASS test/fire-image-evidence.spec.ts
+PASS test/internal-token.guard.spec.ts
+PASS test/rekognition-selection.spec.ts
+PASS test/auth.service.spec.ts
+PASS test/wellness.service.spec.ts
+PASS test/jwt-token.service.spec.ts
+PASS test/jwt-auth.guard.spec.ts
+[Nest] 13036  - 23/11/2026, 16.32.11   ERROR [RestAreaEvaluator] Lỗi khi kiểm tra REST_AREA cho camera cam-1: Database offline
+PASS src/fall-detection/evaluator/rest-area.evaluator.spec.ts
+[Nest] 13036  - 23/11/2026, 16.32.11   DEBUG [RestAreaEvaluator] Người tại tâm (0.400, 0.400) nằm trong REST_AREA "Giường ngủ" (zone-1)
+PASS test/frigate-client.service.spec.ts
+PASS test/telegram.adapter.spec.ts
+PASS test/cloud-notification-transport.spec.ts
+PASS src/playback/playback-metadata.service.spec.ts
+PASS test/face-quality-gate.client.spec.ts
+[Nest] 11288  - 23/11/2026, 16.32.14    WARN [FaceQualityGateClient] Object:
+{
+  "reason": "QUALITY_GATE_TIMEOUT",
+  "failOpen": true
+}
+
+[Nest] 11288  - 23/11/2026, 16.32.14    WARN [FaceQualityGateClient] Face quality gate request failed
+[Nest] 11288  - 23/11/2026, 16.32.14    WARN [FaceQualityGateClient] Object:
+{
+  "reason": "QUALITY_GATE_TIMEOUT",
+  "failOpen": false
+}
+
+[Nest] 11288  - 23/11/2026, 16.32.14    WARN [FaceQualityGateClient] Face quality gate request failed
+PASS src/playback/playback.repository.spec.ts
+PASS test/known-faces.repository.spec.ts
+[Nest] 11288  - 23/11/2026, 16.32.16   ERROR [PoseInferenceAdapter] Lỗi gọi AI Service /pose/fall: Network connection refused
+PASS src/fall-detection/adapter/pose-inference.adapter.spec.ts
+PASS test/escalation-rules.repository.spec.ts
+[Nest] 11288  - 23/11/2026, 16.32.16    WARN [PoseInferenceAdapter] AI Service /pose/fall trả về HTTP 500: Internal Server Error
+PASS test/zone-geometry.validator.spec.ts
+PASS test/telegram-delivery-scope.spec.ts
+PASS test/notification-cloud-config.spec.ts
+PASS test/rtsp-source-tester.service.spec.ts
+PASS test/track-identity-state.service.spec.ts
+PASS test/fire-incidents.repository.spec.ts
+PASS test/zone-schedule.service.spec.ts
+PASS src/playback/playback-time.spec.ts
+PASS test/argon2-password-hasher.spec.ts
+PASS src/fall-detection/envelope/pose-frame-envelope.spec.ts
+[Nest] 13036  - 23/11/2026, 16.32.22    WARN [PoseFrameEnvelope] Dữ liệu envelope quá ngắn (< 4 bytes)
+[Nest] 13036  - 23/11/2026, 16.32.22    WARN [PoseFrameEnvelope] Envelope vượt quá giới hạn cho phép (1048586 > 1048576 bytes)
+[Nest] 13036  - 23/11/2026, 16.32.22    WARN [PoseFrameEnvelope] Header length không hợp lệ: 33792 bytes
+[Nest] 13036  - 23/11/2026, 16.32.22    WARN [PoseFrameEnvelope] Header bị cắt xén (4 + 50 > 20)
+[Nest] 13036  - 23/11/2026, 16.32.22    WARN [PoseFrameEnvelope] Lỗi parse JSON header trong envelope: Unexpected token 'o', "not-json{" is not valid JSON
+[Nest] 13036  - 23/11/2026, 16.32.22    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+[Nest] 13036  - 23/11/2026, 16.32.22    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+PASS test/frigate-frame-buffer.spec.ts
+  ● Console
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=a frameTime=10000 observedAt=9900 receivedAt=10100 action=ACCEPT
+
+      129 |     }
+      130 |
+    > 131 |     console.warn(
+          |             ^
+      132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+      133 |     );
+      134 |
+
+      at FrigateFrameBuffer.warn [as parseObject] (src/frigate/frigate-frame-buffer.ts:131:13)
+      at FrigateFrameBuffer.parseObject [as accept] (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:12:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test frameTime=10100 receivedAt=10300 action=DROP reason=out_of_order_or_duplicate
+
+      45 |     const frames = this.cameras.get(sample.camera) ?? [];
+      46 |     if (frames.length && frames[frames.length - 1].frameTime >= frameTime) {
+    > 47 |       console.warn(
+         |               ^
+      48 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${sample.camera} frameTime=${frameTime} receivedAt=${now} action=DROP reason=out_of_order_or_duplicate`,
+      49 |       );
+      50 |       return;
+
+      at FrigateFrameBuffer.warn [as accept] (src/frigate/frigate-frame-buffer.ts:47:15)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:17:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test frameTime=1000 receivedAt=10000 action=DROP reason=out_of_window
+
+      38 |     const frameTime = toMilliseconds(sample.frameTime);
+      39 |     if (frameTime < now - MAX_AGE_MS || frameTime > now + 1000) {
+    > 40 |       console.warn(
+         |               ^
+      41 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${sample.camera} frameTime=${frameTime} receivedAt=${now} action=DROP reason=out_of_window`,
+      42 |       );
+      43 |       return;
+
+      at FrigateFrameBuffer.warn [as accept] (src/frigate/frigate-frame-buffer.ts:40:15)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:25:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test frameTime=20000 receivedAt=10000 action=DROP reason=out_of_window
+
+      38 |     const frameTime = toMilliseconds(sample.frameTime);
+      39 |     if (frameTime < now - MAX_AGE_MS || frameTime > now + 1000) {
+    > 40 |       console.warn(
+         |               ^
+      41 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${sample.camera} frameTime=${frameTime} receivedAt=${now} action=DROP reason=out_of_window`,
+      42 |       );
+      43 |       return;
+
+      at FrigateFrameBuffer.warn [as accept] (src/frigate/frigate-frame-buffer.ts:40:15)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:26:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=a frameTime=10000 receivedAt=10000 action=DROP reason=malformed_geometry
+
+      100 |     ) {
+      101 |       if (label === 'person') {
+    > 102 |         console.warn(
+          |                 ^
+      103 |           `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id ?? 'unknown'} frameTime=${frameTimeMs} receivedAt=${now} action=DROP reason=malformed_geometry`,
+      104 |         );
+      105 |       }
+
+      at FrigateFrameBuffer.warn [as parseObject] (src/frigate/frigate-frame-buffer.ts:102:17)
+      at FrigateFrameBuffer.parseObject [as accept] (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:29:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=p1 frameTime=123500 observedAt=123400 receivedAt=124000 action=ACCEPT
+
+      129 |     }
+      130 |
+    > 131 |     console.warn(
+          |             ^
+      132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+      133 |     );
+      134 |
+
+      at FrigateFrameBuffer.warn [as parseObject] (src/frigate/frigate-frame-buffer.ts:131:13)
+      at FrigateFrameBuffer.parseObject [as accept] (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:47:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=p_no_obs frameTime=10000 receivedAt=10100 action=DROP reason=missing_observed_at
+
+      115 |
+      116 |     if (rawObserved === undefined || !Number.isFinite(rawObserved)) {
+    > 117 |       console.warn(
+          |               ^
+      118 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} receivedAt=${now} action=DROP reason=missing_observed_at`,
+      119 |       );
+      120 |       return null;
+
+      at FrigateFrameBuffer.warn [as parseObject] (src/frigate/frigate-frame-buffer.ts:117:15)
+      at FrigateFrameBuffer.parseObject [as accept] (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:71:12)
+
+    console.warn
+      [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=p_future frameTime=10000 observedAt=10200 receivedAt=10100 action=DROP reason=future_observed_at
+
+      123 |     const observedAtMs = toMilliseconds(rawObserved);
+      124 |     if (observedAtMs > frameTimeMs + 50) {
+    > 125 |       console.warn(
+          |               ^
+      126 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=DROP reason=future_observed_at`,
+      127 |       );
+      128 |       return null;
+
+      at FrigateFrameBuffer.warn [as parseObject] (src/frigate/frigate-frame-buffer.ts:125:15)
+      at FrigateFrameBuffer.parseObject [as accept] (src/frigate/frigate-frame-buffer.ts:56:27)
+      at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:71:12)
+
+PASS test/ai-result.aggregator.spec.ts
+PASS test/health.service.spec.ts
+PASS test/fire-telegram-channel.spec.ts
+PASS src/playback/playback-frame.codec.spec.ts
+PASS test/telegram-message-builder.spec.ts
+PASS test/face-person-association.spec.ts
+PASS test/escalation-rule-policy.spec.ts
+PASS test/escalation-policy.spec.ts
+------------------------------------------|---------|----------|---------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+File                                      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                                                                                                                     
+------------------------------------------|---------|----------|---------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+All files                                 |   66.47 |    57.38 |   60.25 |   67.63 |                                                                                                                                                                       
+ admin                                    |       0 |        0 |       0 |       0 |                                                                                                                                                                       
+  admin.controller.ts                     |       0 |      100 |       0 |       0 | 1-89                                                                                                                                                                  
+  admin.dto.ts                            |       0 |        0 |       0 |       0 | 1-170                                                                                                                                                                 
+  admin.repository.ts                     |       0 |        0 |       0 |       0 | 1-785                                                                                                                                                                 
+  admin.service.ts                        |       0 |        0 |       0 |       0 | 1-264                                                                                                                                                                 
+ ai-results                               |    56.6 |    47.68 |   58.51 |   58.12 |                                                                                                                                                                       
+  ai-result-outbox.service.ts             |   74.73 |    61.53 |   81.25 |   79.76 | 19,73,77,81,126-132,145,158-161,165,189-190,208                                                                                                                       
+  ai-result.aggregator.ts                 |   89.28 |    72.97 |   88.88 |   93.87 | 69,81-82                                                                                                                                                              
+  ai-result.types.ts                      |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  ai-result.validator.ts                  |   77.51 |    71.81 |     100 |    77.5 | 32,104,108,111,114,144,150,161,164,175,191-196,204,209,213,216,228,232,240,244-250,260                                                                                
+  ai-results.controller.ts                |       0 |      100 |       0 |       0 | 1-38                                                                                                                                                                  
+  ai-results.repository.ts                |     7.4 |        0 |       0 |    6.25 | 71-75,89-590                                                                                                                                                          
+  ai-results.service.ts                   |   23.52 |        0 |       0 |   20.68 | 14-24,44-95                                                                                                                                                           
+  internal-token.guard.ts                 |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ ai-results/dto                           |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  submit-ai-result.dto.ts                 |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ auth                                     |   84.79 |    63.57 |   78.26 |   85.67 |                                                                                                                                                                       
+  argon2-password-hasher.ts               |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  auth.config.ts                          |      90 |    84.61 |     100 |   93.75 | 40                                                                                                                                                                    
+  auth.controller.ts                      |   97.77 |     62.5 |     100 |     100 | 122-149                                                                                                                                                               
+  auth.repository.ts                      |   15.78 |        0 |    6.25 |   12.12 | 38-188                                                                                                                                                                
+  auth.service.ts                         |   80.28 |    56.52 |    87.5 |   82.08 | 50-51,79,102-104,110-112,123,202-207                                                                                                                                  
+  auth.types.ts                           |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  cognito-token.service.ts                |   83.33 |    66.66 |      50 |   83.33 | 22-26                                                                                                                                                                 
+  cognito-verifier.service.ts             |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  database-uuid.ts                        |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  jwt-auth.guard.ts                       |   80.64 |    33.33 |      80 |      80 | 40-44,57                                                                                                                                                              
+  jwt-token.service.ts                    |   96.66 |    78.57 |     100 |   96.42 | 99                                                                                                                                                                    
+  public.decorator.ts                     |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  resource-access.guard.ts                |   91.66 |    66.66 |     100 |   96.15 | 52                                                                                                                                                                    
+  roles.decorator.ts                      |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  roles.guard.ts                          |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  system-admin.ts                         |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  users.controller.ts                     |     100 |       50 |     100 |     100 | 64                                                                                                                                                                    
+  users.repository.ts                     |     100 |    93.75 |     100 |     100 | 45                                                                                                                                                                    
+  users.service.ts                        |   84.84 |    45.45 |     100 |      92 | 37,52                                                                                                                                                                 
+ auth/dto                                 |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  login.dto.ts                            |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  refresh-token.dto.ts                    |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ camera-sources                           |   69.73 |    60.54 |   54.05 |   69.75 |                                                                                                                                                                       
+  camera-sources.repository.ts            |      40 |        0 |       0 |   33.33 | 15-88                                                                                                                                                                 
+  camera-sources.service.ts               |    18.6 |        0 |       0 |      15 | 17-115                                                                                                                                                                
+  ffmpeg-source-runner.service.ts         |   75.56 |    72.54 |   66.66 |   77.43 | 59-62,79-82,104,127-129,141-150,160-164,212-213,224-238,275-276,328,351-352,356-359,385                                                                               
+  media-mtx-auth.controller.ts            |     100 |    86.48 |     100 |     100 | 29,34,56,62                                                                                                                                                           
+  media-mtx.service.ts                    |   82.41 |       60 |   84.61 |   82.92 | 114-115,157-158,172-174,186-192,204                                                                                                                                   
+  rtsp-source-tester.service.ts           |   48.83 |       50 |   41.66 |      50 | 64-86,95                                                                                                                                                              
+  source-runner.interface.ts              |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ cameras                                  |    54.9 |    36.67 |   59.37 |   54.64 |                                                                                                                                                                       
+  cameras.controller.ts                   |    86.3 |       50 |   80.95 |    88.4 | 101-102,117-118,177-178,193-194                                                                                                                                       
+  cameras.repository.ts                   |   19.81 |     5.08 |   11.11 |   18.62 | 12,30-31,95-500                                                                                                                                                       
+  cameras.service.ts                      |   58.76 |     43.6 |   66.66 |   58.42 | 113,153,196,225-231,250,256,266,281-282,292-295,318-327,340,396-436,447,458-481,506,520,555,567,598-794,803,807,818,822-834,906,913,917,940,969-971,984-987,1039,1080 
+ cameras/dto                              |   89.79 |        0 |       0 |   93.61 |                                                                                                                                                                       
+  list-cameras-query.dto.ts               |   54.54 |        0 |       0 |   66.66 | 14-16                                                                                                                                                                 
+  test-rtsp-source.dto.ts                 |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  update-camera-source.dto.ts             |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  update-camera-state.dto.ts              |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  update-camera.dto.ts                    |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ cloud-queue                              |   88.84 |    83.06 |   77.77 |   89.49 |                                                                                                                                                                       
+  cloud-config.ts                         |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  cloud-queue.controller.ts               |       0 |      100 |       0 |       0 | 1-16                                                                                                                                                                  
+  cloud-queue.service.ts                  |   90.95 |    78.52 |      85 |   91.27 | 35,111,116-117,181,184,227,248-249,288-296,375,522                                                                                                                    
+  queue-contract.ts                       |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  queue-schema.ts                         |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ config                                   |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  env-config.ts                           |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ contracts                                |       0 |      100 |     100 |       0 |                                                                                                                                                                       
+  vertical-slice.ports.ts                 |       0 |      100 |     100 |       0 | 55                                                                                                                                                                    
+ database                                 |    37.5 |        0 |   33.33 |   28.57 |                                                                                                                                                                       
+  database.service.ts                     |    37.5 |        0 |   33.33 |   28.57 | 12-26                                                                                                                                                                 
+ escalation                               |   67.02 |     50.2 |   55.26 |   66.91 |                                                                                                                                                                       
+  escalation-deadline-worker.service.ts   |   77.55 |    55.55 |      60 |   76.59 | 24-31,37-38,112-118                                                                                                                                                   
+  escalation-engine.service.ts            |   72.14 |    54.62 |   81.81 |   74.24 | 88-89,93-95,153-172,227-276,301,305,310-311,439,465,469-474,567                                                                                                       
+  escalation-policy.ts                    |   93.33 |    92.59 |     100 |   92.68 | 66,94,115                                                                                                                                                             
+  escalation.repository.ts                |   16.66 |        0 |       0 |   13.04 | 54-55,61-62,69-367                                                                                                                                                    
+ escalation-rules                         |   92.02 |    73.26 |   84.61 |   93.19 |                                                                                                                                                                       
+  escalation-rule-policy.ts               |   97.95 |    97.43 |     100 |     100 | 183                                                                                                                                                                   
+  escalation-rules.controller.ts          |      92 |    44.44 |      60 |    91.3 | 53,121                                                                                                                                                                
+  escalation-rules.repository.ts          |   85.24 |    57.89 |      75 |    87.5 | 91-99,179,187,227                                                                                                                                                     
+  escalation-rules.service.ts             |   96.42 |    66.66 |     100 |      96 | 113                                                                                                                                                                   
+ escalation-rules/dto                     |   85.29 |      100 |       0 |   85.29 |                                                                                                                                                                       
+  escalation-rule-response.dto.ts         |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  update-escalation-thresholds.dto.ts     |   64.28 |      100 |       0 |   64.28 | 13,26,38,52,63                                                                                                                                                        
+ events                                   |   81.14 |    64.32 |   85.22 |   81.27 |                                                                                                                                                                       
+  events.controller.ts                    |   90.24 |    30.76 |   66.66 |   89.47 | 75,109-110,124                                                                                                                                                        
+  events.repository.ts                    |   73.97 |    65.71 |      86 |   74.64 | 302-319,347-358,416-526,791-887                                                                                                                                       
+  events.service.ts                       |   87.27 |    67.64 |   89.65 |   87.37 | 46,171,206-208,238-245,432                                                                                                                                            
+ events/dto                               |   89.74 |       90 |      40 |   91.54 |                                                                                                                                                                       
+  confirm-event.dto.ts                    |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  confirmation-response.dto.ts            |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  event-detail-response.dto.ts            |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  event-stats-response.dto.ts             |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  event-summary-response.dto.ts           |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  get-event-stats-query.dto.ts            |      75 |      100 |       0 |   85.71 | 9                                                                                                                                                                     
+  list-events-query.dto.ts                |   82.85 |       90 |   44.44 |   82.75 | 37,43,56,62,89                                                                                                                                                        
+  sos-help.dto.ts                         |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ face-recognition                         |   87.28 |    73.27 |      95 |   91.55 |                                                                                                                                                                       
+  face-person-association.ts              |   94.73 |    88.88 |     100 |     100 | 22                                                                                                                                                                    
+  face-quality-gate.client.ts             |   83.33 |    63.33 |      90 |   91.22 | 63,87,170,175,179                                                                                                                                                     
+  face-recognition-coordinator.service.ts |   85.25 |    74.67 |   96.96 |    87.1 | 100,115-116,171,209,236,255,293,352-358,361,405,412,458-459,480,532-538,639,677,689,701,745,752-761,807-816,830-855,971,994-995,1013,1029,1036-1039,1054              
+  face-recognition.worker.ts              |   90.76 |    67.34 |      90 |    91.8 | 119,170-171,217,281                                                                                                                                                   
+  face-session-cache.service.ts           |   91.07 |    74.65 |     100 |   98.33 | 86,243,364,394                                                                                                                                                        
+  face-track-optimization.config.ts       |    87.5 |    80.88 |     100 |   97.67 | 66                                                                                                                                                                    
+  track-identity-state.service.ts         |   84.66 |     69.3 |   90.32 |   88.43 | 276-277,343-346,395,403-404,467-468,473-478                                                                                                                           
+ fall-detection                           |       0 |        0 |       0 |       0 |                                                                                                                                                                       
+  fall-delivery.worker.ts                 |       0 |        0 |       0 |       0 | 1-51                                                                                                                                                                  
+ fall-detection/adapter                   |   91.52 |    88.67 |      90 |   94.54 |                                                                                                                                                                       
+  pose-inference.adapter.ts               |   90.47 |    63.63 |   66.66 |    92.3 | 84-85,91                                                                                                                                                              
+  validate-fall-response.ts               |   94.11 |    95.23 |     100 |     100 | 63-65                                                                                                                                                                 
+ fall-detection/consumer                  |   91.42 |    69.23 |     100 |    90.9 |                                                                                                                                                                       
+  pose-frame.consumer.ts                  |   91.42 |    69.23 |     100 |    90.9 | 58,64,80                                                                                                                                                              
+ fall-detection/coordinator               |   93.54 |       66 |     100 |   94.91 |                                                                                                                                                                       
+  fall-incident.coordinator.ts            |   93.54 |       66 |     100 |   94.91 | 109,217,229                                                                                                                                                           
+ fall-detection/envelope                  |   88.88 |    88.33 |     100 |    92.3 |                                                                                                                                                                       
+  pose-frame-envelope.ts                  |   88.88 |    88.33 |     100 |    92.3 | 92,106,109,118                                                                                                                                                        
+ fall-detection/evaluator                 |     100 |    94.44 |     100 |     100 |                                                                                                                                                                       
+  rest-area.evaluator.ts                  |     100 |    94.44 |     100 |     100 | 83                                                                                                                                                                    
+ fall-detection/repository                |   14.28 |        0 |       0 |    9.09 |                                                                                                                                                                       
+  fall-incident.repository.ts             |   14.28 |        0 |       0 |    9.09 | 47-186                                                                                                                                                                
+ fire                                     |   86.35 |     77.6 |   86.79 |   88.47 |                                                                                                                                                                       
+  fire-ai.client.ts                       |   91.07 |    73.33 |     100 |   93.87 | 29,33,60                                                                                                                                                              
+  fire-delivery.service.ts                |    77.5 |    14.28 |      50 |   82.85 | 22-27,43,46                                                                                                                                                           
+  fire-evidence.validator.ts              |   86.27 |    83.92 |     100 |   85.71 | 43,49,66,74,108,118,130                                                                                                                                               
+  fire-frame.codec.ts                     |   86.66 |    83.33 |     100 |   86.66 | 23,29,35,38                                                                                                                                                           
+  fire-frames.consumer.ts                 |    64.7 |     61.9 |   41.66 |   68.91 | 29-59,106-107                                                                                                                                                         
+  fire-health.controller.ts               |       0 |      100 |       0 |       0 | 1-14                                                                                                                                                                  
+  fire-health.dto.ts                      |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  fire-health.service.ts                  |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  fire-incidents.repository.ts            |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  fire-media.service.ts                   |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  fire-processor.service.ts               |   78.98 |    67.21 |   88.23 |   82.78 | 57,71-72,108-110,153,171-172,175-176,211-212,259-267                                                                                                                  
+  fire-telemetry.service.ts               |   97.82 |    86.66 |     100 |     100 | 102-103                                                                                                                                                               
+  fire.config.ts                          |    90.9 |       70 |     100 |   93.33 | 50,68                                                                                                                                                                 
+  fire.dto.ts                             |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ frigate                                  |      83 |    80.84 |   79.16 |   85.48 |                                                                                                                                                                       
+  frigate-client.service.ts               |   52.94 |     9.09 |    62.5 |   54.34 | 25,34-51,80,85-113                                                                                                                                                    
+  frigate-config.service.ts               |   89.42 |    90.76 |   78.94 |   90.81 | 42,173-184                                                                                                                                                            
+  frigate-detection-tracker.service.ts    |   88.34 |    76.27 |   94.73 |   91.01 | 54,110,152,199-201,212,216                                                                                                                                            
+  frigate-frame-buffer.ts                 |   94.91 |    86.66 |     100 |     100 | 18-27,52,81-83,103,112                                                                                                                                                
+  frigate-sync.service.ts                 |   78.94 |    68.75 |   61.11 |   81.17 | 75-96,123,141,166,180,190,267                                                                                                                                         
+ health                                   |   89.71 |    96.96 |   78.57 |   91.75 |                                                                                                                                                                       
+  health.controller.ts                    |       0 |      100 |       0 |       0 | 1-19                                                                                                                                                                  
+  health.service.ts                       |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  smoke.controller.ts                     |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  smoke.service.ts                        |   98.71 |    96.55 |   88.88 |     100 | 165                                                                                                                                                                   
+ household                                |       0 |        0 |       0 |       0 |                                                                                                                                                                       
+  account.service.ts                      |       0 |        0 |       0 |       0 | 2-79                                                                                                                                                                  
+  household-access.service.ts             |       0 |        0 |       0 |       0 | 1-40                                                                                                                                                                  
+  household-members.service.ts            |       0 |        0 |       0 |       0 | 1-102                                                                                                                                                                 
+  household-rules.service.ts              |       0 |        0 |       0 |       0 | 1-108                                                                                                                                                                 
+  household.controller.ts                 |       0 |      100 |       0 |       0 | 1-129                                                                                                                                                                 
+  household.dto.ts                        |       0 |      100 |       0 |       0 | 1-62                                                                                                                                                                  
+  household.service.ts                    |       0 |        0 |       0 |       0 | 2-159                                                                                                                                                                 
+ ingestion                                |   71.92 |    66.15 |   55.17 |   71.68 |                                                                                                                                                                       
+  mqtt-consumer.service.ts                |   67.67 |    63.33 |      48 |    67.7 | 82-212,264,268,349,372,376,460,471,519-537                                                                                                                            
+  zone-result-producer.service.ts         |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ ingestion/dto                            |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  frigate-event.dto.ts                    |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ known-faces                              |   91.18 |    74.18 |   88.33 |   91.76 |                                                                                                                                                                       
+  ai-face-inference.service.ts            |   28.12 |        0 |      25 |   25.92 | 17-57                                                                                                                                                                 
+  embedding.ts                            |   98.14 |    90.24 |     100 |   97.91 | 56                                                                                                                                                                    
+  face-collection-sync.service.ts         |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  face-config.ts                          |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  face-error.ts                           |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  face-image.ts                           |   88.23 |       80 |     100 |   88.23 | 27,34                                                                                                                                                                 
+  face-inference.interface.ts             |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  face-response.ts                        |   13.33 |        0 |       0 |   13.33 | 4,8-49,58                                                                                                                                                             
+  known-faces.controller.ts               |   61.53 |        0 |   16.66 |   63.63 | 29-30,40,50,59,68-75                                                                                                                                                  
+  known-faces.filter.ts                   |   41.66 |        0 |       0 |      30 | 8-15                                                                                                                                                                  
+  known-faces.guard.ts                    |   85.71 |       40 |     100 |   94.28 | 17,31                                                                                                                                                                 
+  known-faces.repository.ts               |     100 |    93.42 |     100 |     100 | 206,335,370,472-476                                                                                                                                                   
+  known-faces.service.ts                  |   98.21 |     93.1 |     100 |   98.65 | 118,330                                                                                                                                                               
+  rekognition-face-enrollment.service.ts  |   99.22 |    96.49 |     100 |   99.18 | 164                                                                                                                                                                   
+ known-faces/dto                          |   86.66 |        0 |       0 |   86.66 |                                                                                                                                                                       
+  create-known-face.dto.ts                |    87.5 |        0 |       0 |    87.5 | 5                                                                                                                                                                     
+  update-known-face.dto.ts                |   85.71 |        0 |       0 |   85.71 | 4                                                                                                                                                                     
+ media                                    |   76.19 |    63.36 |   68.75 |   76.88 |                                                                                                                                                                       
+  event-media.repository.ts               |   27.58 |        0 |       0 |   22.22 | 76-194                                                                                                                                                                
+  frigate-media.adapter.ts                |      66 |    71.18 |   71.42 |   68.18 | 27,34,63,73-91,104,116,160-161,197-210                                                                                                                                
+  image-format.ts                         |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  media.controller.ts                     |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  media.service.ts                        |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ media/dto                                |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  event-media-response.dto.ts             |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ notification-cloud                       |   39.38 |    35.07 |   39.53 |   41.08 |                                                                                                                                                                       
+  notification-claim.ts                   |   10.29 |        0 |       0 |   12.72 | 24-25,43-203                                                                                                                                                          
+  notification-cloud.config.ts            |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  notification-cloud.controller.ts        |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  notification-cloud.service.ts           |    12.5 |        0 |       0 |   11.95 | 35,44-340                                                                                                                                                             
+  notification-delivery.ts                |   10.71 |        0 |       0 |   11.53 | 11-69,73                                                                                                                                                              
+  notification-email.ts                   |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ notifications                            |   63.63 |    73.75 |    53.7 |   64.65 |                                                                                                                                                                       
+  alert-image-renderer.interface.ts       |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  ffmpeg-alert-image.renderer.ts          |       0 |        0 |       0 |       0 | 1-92                                                                                                                                                                  
+  fire-image-evidence.ts                  |   94.73 |    97.43 |     100 |     100 | 11                                                                                                                                                                    
+  notification-channel.interface.ts       |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  notification-retry-worker.service.ts    |   88.79 |    85.07 |   73.68 |   91.08 | 63,67-81,90,237                                                                                                                                                       
+  notifications.repository.ts             |   34.09 |       20 |   16.66 |   33.33 | 107,140-190,216-276                                                                                                                                                   
+  telegram-delivery-scope.ts              |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ notifications/telegram                   |   36.38 |    44.16 |   40.57 |   37.31 |                                                                                                                                                                       
+  telegram-api.error.ts                   |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  telegram-callback.service.ts            |       0 |        0 |       0 |       0 | 1-104                                                                                                                                                                 
+  telegram-link.controller.ts             |       0 |        0 |       0 |       0 | 2-21                                                                                                                                                                  
+  telegram-link.repository.ts             |   20.58 |        0 |       0 |   17.85 | 13-103                                                                                                                                                                
+  telegram-link.service.ts                |   93.33 |      100 |     100 |   91.66 | 21                                                                                                                                                                    
+  telegram-message-builder.ts             |   95.23 |       90 |     100 |     100 | 70                                                                                                                                                                    
+  telegram-webhook.controller.ts          |       0 |      100 |       0 |       0 | 1-19                                                                                                                                                                  
+  telegram-webhook.guard.ts               |   94.11 |       80 |     100 |   93.33 | 16                                                                                                                                                                    
+  telegram-webhook.repository.ts          |   31.25 |        0 |       0 |   23.07 | 6-50                                                                                                                                                                  
+  telegram-webhook.service.ts             |      90 |    81.08 |     100 |   91.89 | 41,58,74                                                                                                                                                              
+  telegram-work-worker.service.ts         |       0 |        0 |       0 |       0 | 1-154                                                                                                                                                                 
+  telegram-work.config.ts                 |       0 |        0 |       0 |       0 | 1-31                                                                                                                                                                  
+  telegram-work.repository.ts             |       0 |        0 |       0 |       0 | 1-187                                                                                                                                                                 
+  telegram.adapter.ts                     |   78.43 |    82.92 |      80 |   82.22 | 46,50,80-85,107,127,141                                                                                                                                               
+ playback                                 |   62.02 |    58.28 |   56.66 |   63.12 |                                                                                                                                                                       
+  frigate-recording.adapter.ts            |       0 |        0 |       0 |       0 | 1-116                                                                                                                                                                 
+  playback-config.ts                      |      80 |    66.66 |     100 |      80 | 5                                                                                                                                                                     
+  playback-frame.codec.ts                 |    86.2 |    87.23 |     100 |      92 | 41,63                                                                                                                                                                 
+  playback-frames.repository.ts           |   45.45 |      100 |       0 |   33.33 | 22-62                                                                                                                                                                 
+  playback-frames.service.ts              |   89.28 |    58.82 |     100 |   93.75 | 41,46,84                                                                                                                                                              
+  playback-metadata.service.ts            |   68.18 |       56 |   66.66 |   71.05 | 51-78                                                                                                                                                                 
+  playback-time.ts                        |   96.66 |    77.77 |     100 |   96.29 | 38                                                                                                                                                                    
+  playback.controller.ts                  |       0 |        0 |       0 |       0 | 1-64                                                                                                                                                                  
+  playback.repository.ts                  |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  playback.service.ts                     |   93.54 |    86.95 |    87.5 |   94.44 | 28-29,69                                                                                                                                                              
+  playback.types.ts                       |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ storage                                  |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  minio-storage.service.ts                |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  s3-storage.service.ts                   |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  storage.interface.ts                    |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+ wellness                                 |   28.83 |    21.14 |   26.78 |   29.31 |                                                                                                                                                                       
+  wellness-policy.ts                      |   94.73 |    48.14 |   85.71 |   94.11 | 48                                                                                                                                                                    
+  wellness-scheduler.service.ts           |   51.32 |    34.48 |   36.84 |   53.92 | 30-36,45-49,55-61,92,111-112,115-116,119-121,130,165-168,207-208,229-282                                                                                              
+  wellness-source.adapter.ts              |    6.99 |        0 |       0 |    6.34 | 25-26,40-357                                                                                                                                                          
+  wellness.controller.ts                  |   85.71 |      100 |    62.5 |   84.61 | 119,138,152-153                                                                                                                                                       
+  wellness.repository.ts                  |    2.59 |        0 |       0 |    1.96 | 46-1043                                                                                                                                                               
+  wellness.service.ts                     |   63.76 |    56.58 |   66.66 |   66.66 | 50,88,91,93,123-167,174-180,200,213-231,245,267,271,289,294,380-382,397,399,405,408                                                                                   
+ wellness/dto                             |   91.35 |      100 |   28.57 |   93.67 |                                                                                                                                                                       
+  confirm-wellness-check.dto.ts           |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  create-wellness-schedule.dto.ts         |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  index.ts                                |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  list-wellness-checks-query.dto.ts       |   66.66 |      100 |       0 |      80 | 27,39                                                                                                                                                                 
+  list-wellness-schedules-query.dto.ts    |     100 |      100 |     100 |     100 |                                                                                                                                                                       
+  update-wellness-schedule.dto.ts         |   86.66 |      100 |       0 |   86.66 | 69,80                                                                                                                                                                 
+  wellness-observation.dto.ts             |   95.23 |      100 |       0 |   95.23 | 126                                                                                                                                                                   
+ zones                                    |   31.92 |     40.8 |    19.6 |    30.8 |                                                                                                                                                                       
+  frigate-config-sync.worker.ts           |       0 |        0 |       0 |       0 | 1-69                                                                                                                                                                  
+  zone-geometry.validator.ts              |   90.38 |    76.47 |   71.42 |    90.9 | 44,74,85-89                                                                                                                                                           
+  zone-schedule.service.ts                |    90.9 |    80.64 |     100 |   96.15 | 33                                                                                                                                                                    
+  zones.controller.ts                     |       0 |      100 |       0 |       0 | 1-63                                                                                                                                                                  
+  zones.repository.ts                     |    9.09 |        0 |       0 |    6.66 | 44-258                                                                                                                                                                
+  zones.service.ts                        |       0 |        0 |       0 |       0 | 1-128                                                                                                                                                                 
+ zones/dto                                |       0 |        0 |       0 |       0 |                                                                                                                                                                       
+  create-zone.dto.ts                      |       0 |        0 |       0 |       0 | 1-54                                                                                                                                                                  
+  update-zone.dto.ts                      |       0 |        0 |       0 |       0 | 1-53                                                                                                                                                                  
+------------------------------------------|---------|----------|---------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Test Suites: 94 passed, 94 total
+Tests:       771 passed, 771 total
+Snapshots:   0 total
+Time:        170.361 s
+Ran all test suites.

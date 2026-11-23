@@ -5,7 +5,7 @@ gate R50, prototype bank và guard chống lây nhãn. Đợt này bổ sung Uni
 Integration model thật, Postman/Newman và k6; chạy regression backend, frontend,
 AI, PostgreSQL/MQTT, Lambda và frame bridge.
 
-## Kết quả thực thi
+## Kết quả thực thi trước khi đồng bộ main
 
 | Nhóm                          | Kết quả                                                                            | Bằng chứng                                                                                           |
 | ----------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -107,4 +107,66 @@ không tính các lỗi môi trường là defect sản phẩm. Hook commit khô
 - Hai stress case mặt <80 px và việc thiếu E2E 720p vẫn là giới hạn đã công bố.
 - Không push/merge/deploy trong yêu cầu commit local này.
 
-Source/test commit: 7afc1ddf5995f60a71609acb202535f0b001bae1. Lượt pnpm check:all cuối có exit code 0: typecheck, lint (còn warnings), OpenAPI lint, format, backend 660/660, web 368/368 và AI 158/158 đều đạt. Các commit tiếp theo chỉ bổ sung tài liệu/bằng chứng và Postman environment template.
+Source/test commit: 7afc1ddf5995f60a71609acb202535f0b001bae1. Lượt pnpm check:all cuối có exit code 0: typecheck, lint (còn warnings), OpenAPI lint, format, backend 660/660, web 368/368 và AI 158/158 đều đạt. Các commit ngay sau lượt này bổ sung tài liệu/bằng chứng và Postman environment template. Xem mục sau rebase để biết phiên bản bàn giao mới nhất.
+
+## Xác nhận sau rebase — phiên bản bàn giao
+
+Đã fetch và rebase lên `origin/main` tại `600a7c9` theo GIT_WORKFLOW. Giữ nhánh
+dự phòng `codex/face-before-main-rebase`. Source/test cuối:
+`b8fee64cd30aaa7bde730d0f13f15db89a52eb9c`.
+
+| Kiểm tra sau rebase           | Kết quả                          | Bằng chứng                                                                                                  |
+| ----------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `pnpm check:all`              | Exit **0**                       | [log cuối](evidence/post-rebase-verified-checks.txt)                                                        |
+| Backend Jest                  | **771/771**, 94 suite            | Cùng log required checks                                                                                    |
+| Frontend Vitest               | **373/373**, 82 file             | Cùng log required checks                                                                                    |
+| AI pytest                     | **158/158**, coverage **92.29%** | Cùng log required checks                                                                                    |
+| DB/MQTT integration           | **150 pass**, 6 Fire test skip   | [log cuối](evidence/post-rebase-integration-final.txt), [JSON](evidence/post-rebase-integration-final.json) |
+| Cloud queue/coordinator smoke | **38/38**                        | [log](evidence/post-rebase-smoke.txt)                                                                       |
+| Cloud queue extended          | **39/39**                        | [retest](evidence/post-rebase-cloud-extended.txt)                                                           |
+| Backend build, Compose config | Exit **0**                       | [build](evidence/post-rebase-build.txt)                                                                     |
+
+Mã AI, module face-recognition và các script API/k6 không đổi so với nhánh dự
+phòng trước rebase. [Manifest sau rebase](evidence/post-rebase-source-manifest.json)
+ghi hash source và xác nhận phạm vi này không đổi. Kết quả Newman/k6 ở phần trên
+được giữ đúng ngày chạy và phạm vi; không giả thành một lượt replay mới sau rebase.
+
+Các vấn đề được phát hiện và sửa khi tích hợp main:
+
+- Cloud Queue phải giữ cả giao dịch notification mới của main và callback Face
+  sau commit. Cập nhật dependency trong fixture để kiểm tra cả hai luồng.
+- Test mới từ main chưa kỳ vọng `collection_face_count` mà Face pipeline bổ sung.
+  Assertion đã kiểm tra rõ giá trị **1**, giữ nguyên envelope, cached result và mappings.
+- Hai integration test cũ đếm tổng notification là 1. Main nay chủ động tạo
+  **SNS_EMAIL và TELEGRAM**; assertion mới kiểm tra chính xác danh sách hai kênh,
+  tiếp tục bảo đảm replay không sinh bản ghi trùng.
+- Một lượt NotificationBell timeout 5 giây khi nhiều worker cùng chạy với Docker.
+  Giới hạn Jest/Vitest tối đa **2 worker** mỗi runner; không tăng timeout, không
+  bỏ assertion. Lượt kiểm tra tổng sau điều chỉnh đạt toàn bộ 373 test frontend.
+
+Giữ nguyên [required checks fail sau rebase](evidence/post-rebase-required-checks.txt),
+[lượt timeout frontend](evidence/post-rebase-final-checks.txt) và
+[integration trước retest](evidence/post-rebase-integration.txt) để truy vết.
+Các lượt dừng ở format do JSON report mới sinh cũng được giữ trong evidence;
+đây là lỗi định dạng artifact, không phải lỗi nghiệp vụ.
+
+Google Sheets đã được điền theo rubric, giữ công thức và lịch sử các run.
+Native API read-back xác minh khóa Run + Case và các trường bắt buộc. Đã render
+bản export để xem tổng quan/coverage/performance; nội dung và công thức native
+được kiểm chứng trực tiếp qua connector. Không dùng kết quả export thay cho
+việc xác nhận phép tính trên Google Sheets.
+
+### Coverage trên đúng source sau rebase
+
+Full Jest coverage run: **771/771 pass**, exit 0. Toàn backend có **6039/8929 lines (67.63%)** và **3052/5318 branches (57.39%)**. Riêng module face-recognition có **835/912 lines (91.56%)**, **543/741 branches (73.28%)**; phần trăm này được làm tròn từ tử/mẫu số (Jest text truncates thành 91.55% và 73.27%). AI giữ **1878/2035 lines (92.29%)**, được xác nhận lại bằng pytest sau rebase.
+
+Nguồn: [coverage summary](evidence/post-rebase-backend-coverage/coverage-summary.json), [metric theo phạm vi](evidence/post-rebase-coverage-metrics.json), [log full coverage](evidence/post-rebase-backend-coverage.txt). **Toàn backend chưa đạt 90%**; không dùng số module Face để thay cho toàn hệ thống.
+
+Run đang chọn trên sheet là `RUN-20261123-FACE-POSTREBASE-VERIFIED`; API/k6 nằm
+ở `RUN-20261123-FACE-BRANCH-FINAL`. Không tự mang kết quả cũ sang run mới.
+[Snapshot read-back cuối](evidence/post-rebase-sheet-verification.json) xác nhận
+không có khóa trùng hoặc thiếu trường minh chứng. Các ảnh từ bản export:
+[tổng quan](evidence/sheet-overview-export.png),
+[coverage](evidence/sheet-coverage-export.png),
+[hiệu năng](evidence/sheet-performance-export.png).
+Tab kết quả đã dùng đến hàng 300; cần mở rộng table/công thức khi thêm kết quả mới.

@@ -1,0 +1,1563 @@
+
+> aws-camera-ai@0.0.1 check:all D:\hoc tap\project 1\aws-camera-ai
+> pnpm check:secrets && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm test:tools && pnpm api:lint && pnpm check:ai
+
+
+> aws-camera-ai@0.0.1 check:secrets D:\hoc tap\project 1\aws-camera-ai
+> node tools/scripts/check-secrets.mjs
+
+
+🔒 [Secret-Scan] Bắt đầu quét kiểm tra rò rỉ AWS credentials & file nhạy cảm...
+✅ [Secret-Scan] HOÀN TOÀN SẠCH: Không phát hiện file nhạy cảm hoặc chuỗi khóa AWS nào.
+
+
+> aws-camera-ai@0.0.1 format:check D:\hoc tap\project 1\aws-camera-ai
+> node tools/scripts/format.mjs --check
+
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+Checking formatting...
+All matched files use Prettier code style!
+
+> aws-camera-ai@0.0.1 lint D:\hoc tap\project 1\aws-camera-ai
+> pnpm -r lint
+
+Scope: 4 of 5 workspace projects
+packages/eslint-config lint$ echo "(config package - khong co source de lint)"
+packages/eslint-config lint: "(config package - khong co source de lint)"
+packages/eslint-config lint: Done
+packages/contracts lint$ eslint "src/**/*.ts"
+packages/contracts lint: Done
+apps/web lint$ eslint "src/**/*.{ts,tsx}"
+apps/orchestrator lint$ eslint "src/**/*.ts" "test/**/*.ts"
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\app\login\LoginForm.tsx
+apps/web lint:   14:8  warning  Function 'LoginForm' has too many lines (141). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\admin\AdminAccountsView.tsx
+apps/web lint:    21:8   warning  Function 'AdminAccountsView' has too many lines (300). Maximum allowed is 120  max-lines-per-function
+apps/web lint:   165:33  warning  Arrow function has too many lines (157). Maximum allowed is 120                max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\admin\AdminAuditLogsView.tsx
+apps/web lint:   8:8  warning  Function 'AdminAuditLogsView' has too many lines (151). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\admin\AdminOverviewView.tsx
+apps/web lint:   12:8  warning  Function 'AdminOverviewView' has too many lines (208). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\admin\AdminResourcesView.tsx
+apps/web lint:   13:8  warning  Function 'AdminResourcesView' has too many lines (207). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\admin\AdminServicesView.tsx
+apps/web lint:   14:8  warning  Function 'AdminServicesView' has too many lines (152). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\admin\AdminSettingsView.tsx
+apps/web lint:   12:8  warning  Function 'AdminSettingsView' has too many lines (246). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\cameras\CameraGridTile.tsx
+apps/web lint:   59:8  warning  Function 'CameraGridTile' has too many lines (141). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\cameras\CameraSettingsPanel.tsx
+apps/web lint:   277:8  warning  Function 'CameraSettingsPanel' has too many lines (154). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\cameras\CameraView.tsx
+apps/web lint:   172:8  warning  Function 'CameraView' has too many lines (184). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\cameras\__tests__\CameraSettingsPanel.spec.tsx
+apps/web lint:   63:57  warning  Arrow function has too many lines (140). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\cameras\live\camera-reader.ts
+apps/web lint:   134:3  warning  Async method 'connect' has a complexity of 18. Maximum allowed is 12  complexity
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\cameras\live\use-live-person-detections.ts
+apps/web lint:   18:8   warning  Function 'useLivePersonDetections' has too many lines (103). Maximum allowed is 60  max-lines-per-function
+apps/web lint:   32:13  warning  Arrow function has too many lines (62). Maximum allowed is 60                       max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\cameras\source\webcam-publish.ts
+apps/web lint:   29:8  warning  Async function 'publishWebcam' has too many lines (62). Maximum allowed is 60  max-lines-per-function
+apps/web lint:   29:8  warning  Async function 'publishWebcam' has a complexity of 15. Maximum allowed is 12   complexity
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\dashboard\CameraAreas.tsx
+apps/web lint:   87:8  warning  Function 'CameraAreas' has too many lines (319). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\dashboard\DashboardOverview.tsx
+apps/web lint:   31:8  warning  Function 'DashboardOverview' has too many lines (300). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\dashboard\DashboardView.tsx
+apps/web lint:   265:8  warning  Function 'DashboardView' has too many lines (292). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\dashboard\NotificationBell.tsx
+apps/web lint:   50:66  warning  Arrow function has too many lines (290). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\dashboard\ViewerHome.tsx
+apps/web lint:   40:8  warning  Function 'ViewerHome' has too many lines (225). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\events\EventDetailModal.tsx
+apps/web lint:   169:8  warning  Function 'EventDetailModal' has too many lines (124). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\household\CaregiverSettingsView.tsx
+apps/web lint:   21:1  warning  Function 'AccountPanels' has too many lines (219). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\household\FamilyView.tsx
+apps/web lint:   272:8  warning  Function 'FamilyView' has too many lines (175). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\known-faces\AddKnownFaceForm.tsx
+apps/web lint:   16:8  warning  Function 'AddKnownFaceForm' has too many lines (189). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\known-faces\KnownFacesView.tsx
+apps/web lint:   164:8  warning  Function 'KnownFacesView' has too many lines (214). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\layout\DatePicker.tsx
+apps/web lint:   24:8  warning  Function 'DatePicker' has too many lines (216). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\layout\Sidebar.tsx
+apps/web lint:   51:8  warning  Function 'Sidebar' has too many lines (123). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\playback\PlaybackPlayer.tsx
+apps/web lint:   27:8  warning  Function 'PlaybackPlayer' has too many lines (157). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\playback\PlaybackView.tsx
+apps/web lint:   40:1  warning  Function 'ArchiveWorkspace' has too many lines (319). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\playback\RecordingList.tsx
+apps/web lint:   18:8  warning  Function 'RecordingList' has too many lines (136). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\playback\ReplayTile.tsx
+apps/web lint:   27:8  warning  Function 'ReplayTile' has too many lines (126). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\settings\EscalationRuleCard.spec.tsx
+apps/web lint:   6:42  warning  Arrow function has too many lines (173). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\settings\EscalationRuleCard.tsx
+apps/web lint:   30:8  warning  Function 'EscalationRuleCard' has too many lines (230). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\settings\EscalationWaitControl.tsx
+apps/web lint:   49:8  warning  Function 'EscalationWaitControl' has too many lines (132). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\ui\SelectMenu.tsx
+apps/web lint:   22:8  warning  Function 'SelectMenu' has too many lines (182). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\ui\SlidingTabs.tsx
+apps/web lint:   22:8  warning  Function 'SlidingTabs' has too many lines (127). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\wellness\WellnessView.tsx
+apps/web lint:   51:8  warning  Function 'WellnessView' has too many lines (390). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\zones\ZoneForm.tsx
+apps/web lint:   6:8  warning  Function 'ZoneForm' has too many lines (126). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\components\zones\ZonesView.tsx
+apps/web lint:   52:8  warning  Function 'ZonesView' has too many lines (305). Maximum allowed is 120  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\hooks\useEscalationRules.ts
+apps/web lint:   27:8  warning  Function 'useEscalationRules' has too many lines (148). Maximum allowed is 60  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\hooks\useEvents.ts
+apps/web lint:   251:8  warning  Function 'useEvents' has too many lines (73). Maximum allowed is 60  max-lines-per-function
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\lib\api-client.ts
+apps/web lint:   70:1  warning  Async function 'request' has a complexity of 17. Maximum allowed is 12  complexity
+apps/web lint: D:\hoc tap\project 1\aws-camera-ai\apps\web\src\lib\known-faces-client.ts
+apps/web lint:   30:8  warning  Function 'selectionDetails' has a complexity of 18. Maximum allowed is 12  complexity
+apps/web lint: ✖ 45 problems (0 errors, 45 warnings)
+apps/web lint: Done
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\admin\admin.controller.ts
+apps/orchestrator lint:   24:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   30:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   36:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   46:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   58:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   64:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   70:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   76:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   82:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   88:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\admin\admin.repository.ts
+apps/orchestrator lint:   107:3  warning  Async method 'getOverviewCounts' has too many lines (67). Maximum allowed is 60       max-lines-per-function
+apps/orchestrator lint:   107:3  warning  Async method 'getOverviewCounts' has a complexity of 27. Maximum allowed is 12        complexity
+apps/orchestrator lint:   177:3  warning  Async method 'getOverviewTrends' has too many lines (71). Maximum allowed is 60       max-lines-per-function
+apps/orchestrator lint:   250:3  warning  Async method 'listHouseholds' has too many lines (94). Maximum allowed is 60          max-lines-per-function
+apps/orchestrator lint:   377:3  warning  Async method 'updateHouseholdQuota' has too many lines (69). Maximum allowed is 60    max-lines-per-function
+apps/orchestrator lint:   450:3  warning  Async method 'getServiceDiagnostics' has too many lines (111). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   681:3  warning  Async method 'listAuditLogs' has too many lines (84). Maximum allowed is 60           max-lines-per-function
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\admin\admin.service.ts
+apps/orchestrator lint:    62:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   113:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   117:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   127:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   138:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   187:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   216:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   221:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   232:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   262:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\ai-results\ai-results.repository.ts
+apps/orchestrator lint:   91:3   warning  Async method 'applyResult' has too many lines (72). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   97:19  warning  Async arrow function has too many lines (64). Maximum allowed is 60        max-lines-per-function
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\auth\auth.controller.ts
+apps/orchestrator lint:   46:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\auth\cognito-verifier.service.ts
+apps/orchestrator lint:   18:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\auth\resource-access.guard.ts
+apps/orchestrator lint:   20:60  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\auth\system-admin.ts
+apps/orchestrator lint:   6:35  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\auth\users.repository.ts
+apps/orchestrator lint:   56:53  warning  Async arrow function has a complexity of 14. Maximum allowed is 12  complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\cameras\cameras.repository.ts
+apps/orchestrator lint:   21:3  warning  Async method 'findAll' has too many lines (66). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\cameras\cameras.service.ts
+apps/orchestrator lint:   234:3  warning  Async method 'updateCameraState' has too many lines (74). Maximum allowed is 60     max-lines-per-function
+apps/orchestrator lint:   234:3  warning  Async method 'updateCameraState' has a complexity of 19. Maximum allowed is 12      complexity
+apps/orchestrator lint:   797:3  warning  Async method 'getCameraDebugStream' has too many lines (92). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   797:3  warning  Async method 'getCameraDebugStream' has a complexity of 15. Maximum allowed is 12   complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\cloud-queue\cloud-config.ts
+apps/orchestrator lint:    8:8   warning  Function 'readCloudConfig' has too many lines (82). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:    8:8   warning  Missing return type on function                                            @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:    8:8   warning  Function 'readCloudConfig' has a complexity of 25. Maximum allowed is 12   complexity
+apps/orchestrator lint:   17:34  warning  Missing return type on function                                            @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\cloud-queue\cloud-queue.controller.ts
+apps/orchestrator lint:   11:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   15:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\cloud-queue\cloud-queue.service.ts
+apps/orchestrator lint:   121:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   135:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   142:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   233:3   warning  Async method 'enqueueFaceJob' has too many lines (65). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   233:3   warning  Async method 'enqueueFaceJob' has a complexity of 13. Maximum allowed is 12   complexity
+apps/orchestrator lint:   300:3   warning  Async method 'dispatchOne' has too many lines (97). Maximum allowed is 60     max-lines-per-function
+apps/orchestrator lint:   300:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   303:31  warning  Async arrow function has too many lines (93). Maximum allowed is 60           max-lines-per-function
+apps/orchestrator lint:   303:46  warning  Async arrow function has a complexity of 19. Maximum allowed is 12            complexity
+apps/orchestrator lint:   399:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   423:3   warning  Async method 'applyResult' has too many lines (107). Maximum allowed is 60    max-lines-per-function
+apps/orchestrator lint:   423:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   430:31  warning  Async arrow function has too many lines (86). Maximum allowed is 60           max-lines-per-function
+apps/orchestrator lint:   430:46  warning  Async arrow function has a complexity of 37. Maximum allowed is 12            complexity
+apps/orchestrator lint:   534:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   546:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   570:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\escalation-rules\escalation-rule-policy.ts
+apps/orchestrator lint:   129:1  warning  Function 'validateAlertThresholds' has a complexity of 14. Maximum allowed is 12  complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\escalation-rules\escalation-rules.repository.ts
+apps/orchestrator lint:   138:3  warning  Async method 'updateThresholdsAtomic' has too many lines (136). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   138:3  warning  Async method 'updateThresholdsAtomic' has a complexity of 23. Maximum allowed is 12    complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\escalation-rules\escalation-rules.service.ts
+apps/orchestrator lint:   51:3  warning  Async method 'updateThresholds' has too many lines (62). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\escalation\escalation-deadline-worker.service.ts
+apps/orchestrator lint:   46:3  warning  Async method 'scanAndProcessDueDeadlines' has too many lines (67). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\escalation\escalation-engine.service.ts
+apps/orchestrator lint:   220:3  warning  Async method 'findInitialTelegramReplay' has a complexity of 17. Maximum allowed is 12  complexity
+apps/orchestrator lint:   287:3  warning  Async method 'confirmInitial' has too many lines (143). Maximum allowed is 60           max-lines-per-function
+apps/orchestrator lint:   287:3  warning  Async method 'confirmInitial' has a complexity of 30. Maximum allowed is 12             complexity
+apps/orchestrator lint:   451:3  warning  Async method 'closeEmergency' has too many lines (114). Maximum allowed is 60           max-lines-per-function
+apps/orchestrator lint:   451:3  warning  Async method 'closeEmergency' has a complexity of 17. Maximum allowed is 12             complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\escalation\escalation-policy.ts
+apps/orchestrator lint:   64:8  warning  Function 'isValidStatusTransition' has a complexity of 13. Maximum allowed is 12  complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\events\events.controller.ts
+apps/orchestrator lint:   134:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\events\events.repository.ts
+apps/orchestrator lint:   446:3  warning  Async method 'updateEvent' has too many lines (81). Maximum allowed is 60     max-lines-per-function
+apps/orchestrator lint:   802:3  warning  Async method 'createSosEvent' has too many lines (83). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\events\events.service.ts
+apps/orchestrator lint:   146:3  warning  Missing return type on function                                              @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   339:3  warning  Async method 'toEventSummary' has a complexity of 17. Maximum allowed is 12  complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\face-quality-gate.client.ts
+apps/orchestrator lint:   129:3  warning  Async method 'assess' has too many lines (90). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   129:3  warning  Async method 'assess' has a complexity of 20. Maximum allowed is 12   complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\face-recognition-coordinator.service.ts
+apps/orchestrator lint:   136:3  warning  Async method 'resolveContinuationDedupKey' has a complexity of 16. Maximum allowed is 12      complexity
+apps/orchestrator lint:   166:3  warning  Async method 'tryResolveContinuationDedupKey' has too many lines (61). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   166:3  warning  Async method 'tryResolveContinuationDedupKey' has a complexity of 31. Maximum allowed is 12   complexity
+apps/orchestrator lint:   268:3  warning  Async method 'sampleTrack' has too many lines (125). Maximum allowed is 60                    max-lines-per-function
+apps/orchestrator lint:   268:3  warning  Async method 'sampleTrack' has a complexity of 51. Maximum allowed is 12                      complexity
+apps/orchestrator lint:   504:3  warning  Async method 'trySpatialAppearanceReid' has too many lines (63). Maximum allowed is 60        max-lines-per-function
+apps/orchestrator lint:   504:3  warning  Async method 'trySpatialAppearanceReid' has a complexity of 20. Maximum allowed is 12         complexity
+apps/orchestrator lint:   614:3  warning  Async method 'handleEvaluatedCandidate' has a complexity of 15. Maximum allowed is 12         complexity
+apps/orchestrator lint:   695:3  warning  Async method 'onRecognitionResult' has a complexity of 31. Maximum allowed is 12              complexity
+apps/orchestrator lint:   741:3  warning  Async method 'handleLegacyDispatch' has a complexity of 13. Maximum allowed is 12             complexity
+apps/orchestrator lint:   779:3  warning  Async method 'dispatchBestShot' has too many lines (76). Maximum allowed is 60                max-lines-per-function
+apps/orchestrator lint:   917:3  warning  Async method 'submitLocalCacheHit' has too many lines (62). Maximum allowed is 60             max-lines-per-function
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\face-recognition.module.ts
+apps/orchestrator lint:   41:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\face-recognition.worker.ts
+apps/orchestrator lint:   242:3  warning  Async method 'handleAiResult' has a complexity of 16. Maximum allowed is 12  complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\face-session-cache.service.ts
+apps/orchestrator lint:    61:8  warning  Function 'decodeEmbeddingBase64' has a complexity of 13. Maximum allowed is 12   complexity
+apps/orchestrator lint:   227:3  warning  Method 'upsertKnown' has a complexity of 18. Maximum allowed is 12               complexity
+apps/orchestrator lint:   382:3  warning  Method 'matchBySpatialAppearance' has a complexity of 16. Maximum allowed is 12  complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\face-track-optimization.config.ts
+apps/orchestrator lint:   127:8  warning  Function 'readFaceTrackOptimizationConfig' has too many lines (91). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\track-identity-state.service.ts
+apps/orchestrator lint:   109:3  warning  Method 'getOrCreate' has too many lines (68). Maximum allowed is 60            max-lines-per-function
+apps/orchestrator lint:   368:3  warning  Method 'applyRecognitionResult' has a complexity of 14. Maximum allowed is 12  complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\fall-detection\coordinator\fall-incident.coordinator.ts
+apps/orchestrator lint:   123:3  warning  Async method 'handleConfirmedFall' has too many lines (109). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   123:3  warning  Async method 'handleConfirmedFall' has a complexity of 24. Maximum allowed is 12    complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\fall-detection\envelope\pose-frame-envelope.ts
+apps/orchestrator lint:   65:1  warning  Function 'isValidPoseFrameHeader' has too many lines (65). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   65:1  warning  Function 'isValidPoseFrameHeader' has a complexity of 41. Maximum allowed is 12   complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\fall-detection\repository\fall-incident.repository.ts
+apps/orchestrator lint:   55:3  warning  Async method 'createConfirmedIncident' has too many lines (89). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\frigate\frigate-config.service.ts
+apps/orchestrator lint:   27:3  warning  Method 'continuousRecording' has a complexity of 13. Maximum allowed is 12      complexity
+apps/orchestrator lint:   60:3  warning  Method 'generateUpdatedConfig' has too many lines (101). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   60:3  warning  Method 'generateUpdatedConfig' has a complexity of 58. Maximum allowed is 12    complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\frigate\frigate-detection-tracker.service.ts
+apps/orchestrator lint:    44:3  warning  Method 'accept' has a complexity of 20. Maximum allowed is 12  complexity
+apps/orchestrator lint:   128:3  warning  Method 'track' has a complexity of 16. Maximum allowed is 12   complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\frigate\frigate-frame-buffer.ts
+apps/orchestrator lint:   25:3  warning  Method 'accept' has a complexity of 18. Maximum allowed is 12        complexity
+apps/orchestrator lint:   75:3  warning  Method 'parseObject' has too many lines (62). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   75:3  warning  Method 'parseObject' has a complexity of 22. Maximum allowed is 12   complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\frigate\frigate-sync.service.ts
+apps/orchestrator lint:   100:3  warning  Async method 'executeSync' has too many lines (108). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   100:3  warning  Async method 'executeSync' has a complexity of 30. Maximum allowed is 12    complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\household\household-members.service.ts
+apps/orchestrator lint:   16:3  warning  Async method 'create' has a complexity of 13. Maximum allowed is 12  complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\ingestion\mqtt-consumer.service.ts
+apps/orchestrator lint:    89:3  warning  Method 'connect' has too many lines (107). Maximum allowed is 60                max-lines-per-function
+apps/orchestrator lint:   243:3  warning  Async method 'buildEventContext' has a complexity of 21. Maximum allowed is 12  complexity
+apps/orchestrator lint:   478:3  warning  Async method 'handleMessage' has a complexity of 19. Maximum allowed is 12      complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\known-faces\face-response.ts
+apps/orchestrator lint:   7:8  warning  Function 'isEmbeddingResult' has a complexity of 20. Maximum allowed is 12  complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\known-faces\known-faces.controller.ts
+apps/orchestrator lint:   39:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   45:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   54:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\known-faces\known-faces.repository.ts
+apps/orchestrator lint:   238:3  warning  Async method 'createRekognition' has too many lines (68). Maximum allowed is 60        max-lines-per-function
+apps/orchestrator lint:   408:3  warning  Async method 'replaceRekognitionFaces' has too many lines (72). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\known-faces\rekognition-face-enrollment.service.ts
+apps/orchestrator lint:    48:1  warning  Missing return type on function                                                    @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   123:3  warning  Async method 'validateSingleFaces' has too many lines (71). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   123:3  warning  Async method 'validateSingleFaces' has a complexity of 18. Maximum allowed is 12   complexity
+apps/orchestrator lint:   195:3  warning  Async method 'indexFaces' has too many lines (75). Maximum allowed is 60           max-lines-per-function
+apps/orchestrator lint:   195:3  warning  Async method 'indexFaces' has a complexity of 15. Maximum allowed is 12            complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\media\frigate-media.adapter.ts
+apps/orchestrator lint:   128:3  warning  Async method 'getCurrentPersonCrop' has a complexity of 17. Maximum allowed is 12  complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\notification-cloud\notification-claim.ts
+apps/orchestrator lint:   16:21  warning  Missing return type on function                                                     @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   35:8   warning  Async function 'claimNotification' has too many lines (132). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   35:8   warning  Async function 'claimNotification' has a complexity of 39. Maximum allowed is 12    complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\notification-cloud\notification-cloud.config.ts
+apps/orchestrator lint:    3:8   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:    4:30  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   12:51  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   17:59  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\notification-cloud\notification-cloud.controller.ts
+apps/orchestrator lint:   40:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   46:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   51:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   57:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\notification-cloud\notification-cloud.service.ts
+apps/orchestrator lint:    34:21  warning  Missing return type on function                                              @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   132:3   warning  Missing return type on function                                              @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   145:3   warning  Missing return type on function                                              @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   210:3   warning  Async method 'lockOutcomeJob' has a complexity of 16. Maximum allowed is 12  complexity
+apps/orchestrator lint:   281:3   warning  Async method 'applyLocked' has too many lines (61). Maximum allowed is 60    max-lines-per-function
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\notification-cloud\notification-delivery.ts
+apps/orchestrator lint:   6:8  warning  Async function 'readDelivery' has too many lines (64). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   6:8  warning  Async function 'readDelivery' has a complexity of 18. Maximum allowed is 12   complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\notification-cloud\notification-email.ts
+apps/orchestrator lint:    99:8  warning  Function 'formatIncidentEmail' has a complexity of 18. Maximum allowed is 12        complexity
+apps/orchestrator lint:   149:8  warning  Async function 'enrichEmailDelivery' has a complexity of 15. Maximum allowed is 12  complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\notifications\telegram\telegram-callback.service.ts
+apps/orchestrator lint:   30:3  warning  Async method 'confirm' has too many lines (64). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\notifications\telegram\telegram.adapter.ts
+apps/orchestrator lint:    30:3  warning  Constructor has a complexity of 15. Maximum allowed is 12                   complexity
+apps/orchestrator lint:   133:3  warning  Async method 'parseResponse' has a complexity of 13. Maximum allowed is 12  complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\playback\playback-frames.service.spec.ts
+apps/orchestrator lint:   27:40  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\wellness\wellness-scheduler.service.ts
+apps/orchestrator lint:    63:3   warning  Async method 'evaluateSingleRun' has too many lines (152). Maximum allowed is 60   max-lines-per-function
+apps/orchestrator lint:    77:41  warning  Async arrow function has too many lines (129). Maximum allowed is 60               max-lines-per-function
+apps/orchestrator lint:    77:56  warning  Async arrow function has a complexity of 15. Maximum allowed is 12                 complexity
+apps/orchestrator lint:   220:3   warning  Method 'computeScheduleOccurrence' has too many lines (64). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\wellness\wellness-source.adapter.ts
+apps/orchestrator lint:    56:3  warning  Constructor has a complexity of 16. Maximum allowed is 12                   complexity
+apps/orchestrator lint:   202:3  warning  Async method 'acceptFrame' has too many lines (139). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   202:3  warning  Async method 'acceptFrame' has a complexity of 39. Maximum allowed is 12    complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\wellness\wellness.controller.ts
+apps/orchestrator lint:    55:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:    88:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   114:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   134:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   151:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   181:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   231:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\wellness\wellness.repository.ts
+apps/orchestrator lint:    316:3   warning  Async method 'updateSchedule' has a complexity of 13. Maximum allowed is 12           complexity
+apps/orchestrator lint:    879:3   warning  Async method 'materializeOccurrences' has too many lines (87). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:    886:39  warning  Async arrow function has too many lines (77). Maximum allowed is 60                   max-lines-per-function
+apps/orchestrator lint:   1042:3   warning  Method 'mapRunRow' has a complexity of 16. Maximum allowed is 12                      complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\wellness\wellness.service.ts
+apps/orchestrator lint:    95:3   warning  Async method 'createSchedule' has a complexity of 14. Maximum allowed is 12      complexity
+apps/orchestrator lint:   188:3   warning  Async method 'confirmCheck' has too many lines (179). Maximum allowed is 60      max-lines-per-function
+apps/orchestrator lint:   194:55  warning  Async arrow function has too many lines (166). Maximum allowed is 60             max-lines-per-function
+apps/orchestrator lint:   194:70  warning  Async arrow function has a complexity of 32. Maximum allowed is 12               complexity
+apps/orchestrator lint:   368:3   warning  Async method 'submitObservation' has too many lines (74). Maximum allowed is 60  max-lines-per-function
+apps/orchestrator lint:   374:40  warning  Async arrow function has too many lines (67). Maximum allowed is 60              max-lines-per-function
+apps/orchestrator lint:   374:55  warning  Async arrow function has a complexity of 15. Maximum allowed is 12               complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\zones\zone-geometry.validator.ts
+apps/orchestrator lint:   31:8  warning  Function 'getZonePolygonError' has a complexity of 21. Maximum allowed is 12  complexity
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\cloud-dispatch.spec.ts
+apps/orchestrator lint:   19:32  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   23:1   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\cloud-queue-extended.spec.ts
+apps/orchestrator lint:   32:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   66:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\cloud-queue.integration.spec.ts
+apps/orchestrator lint:   57:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\cloud-queue.spec.ts
+apps/orchestrator lint:    16:32  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:    30:1   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   402:7   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\escalation-deadline-worker.service.spec.ts
+apps/orchestrator lint:   125:30  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\face-recognition-coordinator.service.spec.ts
+apps/orchestrator lint:   102:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   192:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\fall-runtime.integration.spec.ts
+apps/orchestrator lint:   137:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   140:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   143:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   210:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\frigate-frame-buffer.spec.ts
+apps/orchestrator lint:   4:58  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\known-faces.repository.spec.ts
+apps/orchestrator lint:   9:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\known-faces.spec.ts
+apps/orchestrator lint:   27:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\mocks\nestjs-bullmq.ts
+apps/orchestrator lint:    1:37  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:    3:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:    6:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   11:35  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\notification-cloud-email.spec.ts
+apps/orchestrator lint:   152:25  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   176:9   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   217:9   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   237:7   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\notification-cloud.integration.spec.ts
+apps/orchestrator lint:   283:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   300:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   313:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   328:23  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   347:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   364:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   401:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   410:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   418:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   440:7   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   687:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   845:23  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\qa-fall.spec.ts
+apps/orchestrator lint:   38:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   56:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\rekognition-enrollment.spec.ts
+apps/orchestrator lint:    34:1   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:    39:1   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   872:16  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   903:18  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\rekognition-selection.spec.ts
+apps/orchestrator lint:   12:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\resource-ownership.spec.ts
+apps/orchestrator lint:    59:45  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   139:13  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\smoke.service.spec.ts
+apps/orchestrator lint:   38:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\telegram-db.integration.spec.ts
+apps/orchestrator lint:   499:9  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\us20-browser-harness.ts
+apps/orchestrator lint:    52:23  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:    57:19  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:    62:18  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:    65:24  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   167:25  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\wellness-db.integration.spec.ts
+apps/orchestrator lint:    78:67  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:    80:59  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   176:9   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   188:23  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   269:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   301:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   332:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   385:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint:   626:84  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\wellness.service.spec.ts
+apps/orchestrator lint:   204:94  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+apps/orchestrator lint: ✖ 245 problems (0 errors, 245 warnings)
+apps/orchestrator lint: Done
+
+> aws-camera-ai@0.0.1 typecheck D:\hoc tap\project 1\aws-camera-ai
+> pnpm -r typecheck
+
+Scope: 4 of 5 workspace projects
+packages/contracts typecheck$ tsc --noEmit
+packages/contracts typecheck: Done
+apps/orchestrator typecheck$ tsc --noEmit
+apps/web typecheck$ tsc --noEmit
+apps/orchestrator typecheck: Done
+apps/web typecheck: Done
+
+> aws-camera-ai@0.0.1 test D:\hoc tap\project 1\aws-camera-ai
+> pnpm -r test
+
+Scope: 4 of 5 workspace projects
+packages/eslint-config test$ echo "(config package - khong co test)"
+packages/eslint-config test: "(config package - khong co test)"
+packages/eslint-config test: Done
+packages/contracts test$ echo "(contracts - kieu du lieu thuan, khong co runtime test)"
+packages/contracts test: "(contracts - kieu du lieu thuan, khong co runtime test)"
+packages/contracts test: Done
+apps/orchestrator test$ jest --passWithNoTests
+apps/web test$ vitest run --passWithNoTests
+apps/web test: [33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+apps/web test:  RUN  v2.1.9 D:/hoc tap/project 1/aws-camera-ai/apps/web
+apps/web test:  ✓ src/components/cameras/__tests__/webcam-publish.spec.ts (3 tests) 25ms
+apps/web test:  ✓ src/lib/api-client.spec.ts (6 tests) 37ms
+apps/web test:  ✓ src/lib/cameras-client.spec.ts (14 tests) 64ms
+apps/web test:  ✓ src/components/cameras/__tests__/camera-reader.spec.ts (6 tests) 90ms
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > keeps a box through a brief missed detection, then removes a person who really left
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=HOLD lastSeenBefore=1000 lastSeenAfter=1000 observedAt=1000 frameTime=1067 ageMs=67
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1134 observedAt=1134 frameTime=1134 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=HOLD lastSeenBefore=1134 lastSeenAfter=1134 observedAt=1134 frameTime=1300 ageMs=166
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=REMOVE lastSeenBefore=1134 lastSeenAfter=1134 observedAt=1134 frameTime=1634 ageMs=500
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > does not blink during a short transport gap but expires disconnected cameras
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=REMOVE lastSeenBefore=1000 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=1050 reason=stream_stale
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > attenuates alternating detector jitter while a person is stationary
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1067 lastSeenAfter=1134 observedAt=1134 frameTime=1134 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1134 lastSeenAfter=1201 observedAt=1201 frameTime=1201 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1201 lastSeenAfter=1268 observedAt=1268 frameTime=1268 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1268 lastSeenAfter=1335 observedAt=1335 frameTime=1335 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1335 lastSeenAfter=1402 observedAt=1402 frameTime=1402 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1402 lastSeenAfter=1469 observedAt=1469 frameTime=1469 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1469 lastSeenAfter=1536 observedAt=1536 frameTime=1536 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1536 lastSeenAfter=1603 observedAt=1603 frameTime=1603 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1603 lastSeenAfter=1670 observedAt=1670 frameTime=1670 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1670 lastSeenAfter=1737 observedAt=1737 frameTime=1737 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1737 lastSeenAfter=1804 observedAt=1804 frameTime=1804 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1804 lastSeenAfter=1871 observedAt=1871 frameTime=1871 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1871 lastSeenAfter=1938 observedAt=1938 frameTime=1938 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1938 lastSeenAfter=2005 observedAt=2005 frameTime=2005 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=2005 lastSeenAfter=2072 observedAt=2072 frameTime=2072 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=2072 lastSeenAfter=2139 observedAt=2139 frameTime=2139 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=2139 lastSeenAfter=2206 observedAt=2206 frameTime=2206 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=2206 lastSeenAfter=2273 observedAt=2273 frameTime=2273 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=2273 lastSeenAfter=2340 observedAt=2340 frameTime=2340 ageMs=0
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > animates a large movement quickly instead of jumping or chasing for a long time
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > does not restart filtering on duplicate polls or replay out-of-order frames
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > renders fast movement at the measured position on the next animation frame
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1067 lastSeenAfter=1134 observedAt=1134 frameTime=1134 ageMs=0
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > keeps the newest position when fast motion and a stop arrive in one batch
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1067 lastSeenAfter=1134 observedAt=1134 frameTime=1134 ageMs=0
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > updates vertical movement for a small person without waiting between 5 FPS samples
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1200 observedAt=1200 frameTime=1200 ageMs=0
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > does not leave a duplicate ghost when the detector changes ID at the same location
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=replacement objectId=replacement action=REASSOCIATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > reassociates fast-moving person when ID changes without duplicate ghost boxes
+apps/web test: [PERSON_DEBUG][TRACK] trackId=id-1 objectId=id-1 action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=id-2 objectId=id-2 action=REASSOCIATE lastSeenBefore=1000 lastSeenAfter=1200 observedAt=1200 frameTime=1200 ageMs=0
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > keeps independent people separate and does not merge them
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-b objectId=person-b action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-b objectId=person-b action=UPDATE lastSeenBefore=1000 lastSeenAfter=1067 observedAt=1067 frameTime=1067 ageMs=0
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > preserves two distinct people walking near each other without merging into one
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-1 objectId=person-1 action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-2 objectId=person-2 action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-1 objectId=person-1 action=UPDATE lastSeenBefore=1000 lastSeenAfter=1200 observedAt=1200 frameTime=1200 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-2 objectId=person-2 action=UPDATE lastSeenBefore=1000 lastSeenAfter=1200 observedAt=1200 frameTime=1200 ageMs=0
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > standardizes video-file box fit to 1:1 without arbitrary shrinking
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > expires track after TRACK_HOLD_MS from observedAt when newer frames carry the same stale observation
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=DUPLICATE lastSeenBefore=1000 lastSeenAfter=1000 observedAt=1000 frameTime=1100 ageMs=100
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=DUPLICATE lastSeenBefore=1000 lastSeenAfter=1000 observedAt=1000 frameTime=1200 ageMs=200
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=REMOVE lastSeenBefore=1000 lastSeenAfter=1000 observedAt=1000 frameTime=1200 ageMs=500 reason=person_stale
+apps/web test:  ✓ src/components/cameras/__tests__/live-person-tracker.spec.ts (16 tests) 40ms
+apps/web test: stderr | src/components/cameras/__tests__/live-person-tracker.spec.ts > LivePersonTracker > extends track lifetime when a genuinely new observation arrives
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=CREATE lastSeenBefore=0 lastSeenAfter=1000 observedAt=1000 frameTime=1000 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=UPDATE lastSeenBefore=1000 lastSeenAfter=1200 observedAt=1200 frameTime=1200 ageMs=0
+apps/web test: [PERSON_DEBUG][TRACK] trackId=person-a objectId=person-a action=REMOVE lastSeenBefore=1200 lastSeenAfter=1200 observedAt=1200 frameTime=1200 ageMs=500 reason=person_stale
+apps/web test:  ✓ src/lib/fire-alerts.spec.ts (8 tests) 17ms
+apps/web test:  ✓ src/lib/events-client.spec.ts (14 tests) 53ms
+apps/web test:  ✓ src/components/cameras/__tests__/camera-debug-subscription.spec.ts (4 tests) 29ms
+apps/web test:  ✓ src/components/cameras/__tests__/CameraList.spec.tsx (2 tests) 26ms
+apps/web test:  ✓ src/lib/recording-sessions.spec.ts (8 tests) 59ms
+apps/web test:  ✓ src/lib/playback-timeline.spec.ts (7 tests) 81ms
+apps/web test:  ✓ src/components/cameras/__tests__/CameraCard.spec.tsx (3 tests) 26ms
+apps/web test:  ✓ src/components/cameras/__tests__/detection-timeline.spec.ts (6 tests) 14ms
+apps/web test:  ✓ src/components/settings/EscalationWaitControl.spec.tsx (6 tests) 39ms
+apps/web test:  ✓ src/components/ui/Pagination.spec.tsx (5 tests) 27ms
+apps/web test:  ✓ src/lib/fire-evidence.spec.ts (2 tests) 12ms
+apps/web test:  ✓ src/lib/format.spec.ts (7 tests) 15ms
+apps/web test:  ✓ src/components/cameras/__tests__/CameraSourceForm.spec.tsx (4 tests) 33ms
+apps/web test:  ✓ src/lib/escalation-wait-settings.spec.ts (25 tests) 18ms
+apps/web test:  ✓ src/lib/known-faces-client.spec.ts (3 tests) 26ms
+apps/web test:  ✓ src/hooks/useEvents.spec.ts (3 tests) 12ms
+apps/web test:  ✓ src/components/cameras/__tests__/geometry-utils.spec.ts (6 tests) 12ms
+apps/web test:  ✓ src/components/cameras/__tests__/VideoSourceUploader.spec.tsx (5 tests) 26ms
+apps/web test:  ✓ src/components/events/EventCard.spec.tsx (10 tests) 58ms
+apps/web test:  ✓ src/lib/escalation-rules-client.spec.ts (2 tests) 13ms
+apps/web test:  ✓ src/lib/auth-client.spec.ts (2 tests) 15ms
+apps/web test:  ✓ src/lib/mock-events.spec.ts (4 tests) 11ms
+apps/web test:  ✓ src/components/ui/EmptyState.spec.tsx (2 tests) 20ms
+apps/web test:  ✓ src/components/cameras/__tests__/CameraStatusBadge.spec.tsx (4 tests) 20ms
+apps/web test:  ✓ src/lib/api-client.playback.spec.ts (1 test) 20ms
+apps/web test:  ✓ src/lib/playback-client.spec.ts (4 tests) 62ms
+apps/web test:  ✓ src/components/events/FireEventSummary.spec.tsx (1 test) 19ms
+apps/web test:  ✓ src/lib/camera-layout.spec.ts (9 tests) 15ms
+apps/web test:  ✓ src/lib/camera-grid.spec.ts (7 tests) 18ms
+apps/web test:  ✓ src/lib/notification-periods.spec.ts (2 tests) 10ms
+apps/web test:  ✓ src/hooks/useCameraSnapshot.spec.ts (3 tests) 9ms
+apps/web test:  ✓ src/middleware.spec.ts (4 tests) 7ms
+apps/web test:  ✓ src/lib/zone-geometry.spec.ts (3 tests) 10ms
+apps/web test:  ✓ src/components/cameras/__tests__/WebcamPublisher.spec.tsx (1 test) 20ms
+apps/web test:  ✓ src/components/events/FireEmergencyCall.spec.tsx (1 test) 16ms
+apps/web test:  ✓ src/lib/camera-order.spec.ts (2 tests) 8ms
+apps/web test:  ✓ src/components/settings/EscalationRuleCard.spec.tsx (14 tests) 144ms
+apps/web test:  ✓ src/components/cameras/__tests__/CameraPreview.spec.tsx (6 tests) 38ms
+apps/web test:  ✓ src/components/cameras/__tests__/CameraView.spec.tsx (3 tests) 43ms
+apps/web test:  ✓ src/components/cameras/__tests__/CameraGridView.spec.tsx (3 tests) 34ms
+apps/web test:  ✓ src/components/layout/Sidebar.spec.tsx (4 tests) 61ms
+apps/web test:  ✓ src/components/cameras/__tests__/CameraSettingsPanel.spec.tsx (10 tests) 716ms
+apps/web test:  ✓ src/components/users/CreateUserView.spec.tsx (4 tests) 52ms
+apps/web test:  ✓ src/components/layout/TopHeader.spec.tsx (3 tests) 45ms
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > resident sees own pending request, stable command on retry, error and refresh after conflict
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > resident sees own pending request, stable command on retry, error and refresh after conflict
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > resident sees own pending request, stable command on retry, error and refresh after conflict
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > resident sees own pending request, stable command on retry, error and refresh after conflict
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > resident sees own pending request, stable command on retry, error and refresh after conflict
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > hides actions before dispatch and for terminal/foreign requests; renders empty/error states
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > hides actions before dispatch and for terminal/foreign requests; renders empty/error states
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > shows an empty history
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > shows an empty history
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > offers retry when loading fails
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test:  ✓ src/components/wellness/WellnessView.spec.tsx (5 tests) 601ms
+apps/web test:    ✓ US20 caregiver and resident UI > caregiver can create, edit, disable and delete a schedule, while resident confirmation stays hidden 458ms
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > offers retry when loading fails
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test: stderr | src/components/wellness/WellnessView.spec.tsx > US20 caregiver and resident UI > offers retry when loading fails
+apps/web test: Warning: The current testing environment is not configured to support act(...)
+apps/web test:  ✓ src/components/cameras/__tests__/camera-signals.spec.tsx (4 tests) 182ms
+apps/web test:  ✓ src/components/events/EventNotifications.spec.tsx (5 tests) 316ms
+apps/web test:  ✓ src/hooks/useFireAttention.spec.tsx (6 tests) 375ms
+apps/web test:  ✓ src/components/playback/ReplayTile.spec.tsx (6 tests) 492ms
+apps/web test:  ✓ src/components/dashboard/DashboardOverview.spec.tsx (7 tests) 2373ms
+apps/web test:    ✓ uses saved area order for all layouts, paging and custom counts 998ms
+apps/web test:    ✓ restores fixed and custom layouts after remount and isolates accounts 634ms
+apps/web test:  ✓ src/components/dashboard/CameraAreas.spec.tsx (4 tests) 1365ms
+apps/web test:    ✓ camera area manager > moves numeric priorities, persists per account and cancels drafts 641ms
+apps/web test:    ✓ camera area manager > supports drag ordering, denies viewer toggles and closes during a critical alert 372ms
+apps/web test:  ✓ src/components/playback/PlaybackView.spec.tsx (7 tests) 3794ms
+apps/web test:    ✓ uses one observation time for all selected channels and supports keyboard seeking 600ms
+apps/web test:    ✓ limits layouts to authorized cameras and restores the chosen layout after remounting 910ms
+apps/web test:    ✓ preserves playhead and zoom when metadata refreshes, then resets media when the date changes 853ms
+apps/web test:    ✓ allows explicit empty channel selection and remembers it after reloading 404ms
+apps/web test:    ✓ uses one persistent play/pause control without issuing a seek on each toggle 314ms
+apps/web test:    ✓ applies a time window at its first recorded frame and keeps validation inside the monitor 499ms
+apps/web test:  ✓ src/components/dashboard/NotificationBell.spec.tsx (4 tests) 654ms
+apps/web test:    ✓ shows five newest, opens details and navigates to all notifications 410ms
+apps/web test:  ✓ src/components/events/NotificationInbox.spec.tsx (5 tests) 3209ms
+apps/web test:    ✓ opens on today and uses exact day-wide totals independent of the active list filters 511ms
+apps/web test:    ✓ applies a rolling preset, rejects reversed or out-of-range clocks and applies a valid interval 718ms
+apps/web test:    ✓ opens history through yesterday, combines period and status and restores today 591ms
+apps/web test:    ✓ filters today by status and uses numbered page controls 305ms
+apps/web test:    ✓ selects both history dates inside the period popup and excludes today 1082ms
+apps/web test:  ✓ src/hooks/useRecordingDays.spec.tsx (2 tests) 205ms
+apps/web test:  ✓ src/components/cameras/__tests__/camera-view-consistency.spec.tsx (5 tests) 3809ms
+apps/web test:    ✓ renders the same cyan person layer in source, dashboard, area live video and recorded playback 1627ms
+apps/web test:    ✓ stops all live media and shared polling when a camera is disabled 464ms
+apps/web test:    ✓ shows a placeholder for an unconfigured starting camera across source, dashboard and area cards 651ms
+apps/web test:    ✓ expires live boxes during API failure without freezing a ghost box or interrupting the player 967ms
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22   ERROR [RekognitionFaceEnrollmentService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "action": "rekognition_create_collection_failed",
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "errorCode": "UnknownError"
+apps/orchestrator test: }
+apps/orchestrator test: Failed to ensure Rekognition collection
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22   ERROR [RekognitionFaceEnrollmentService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "action": "rekognition_detect_faces_failed",
+apps/orchestrator test:   "errorCode": "ThrottlingException"
+apps/orchestrator test: }
+apps/orchestrator test: AWS Rekognition enrollment call failed
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22   ERROR [RekognitionFaceEnrollmentService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "action": "rekognition_delete_faces_failed",
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "faceCount": 1,
+apps/orchestrator test:   "errorCode": "InternalError"
+apps/orchestrator test: }
+apps/orchestrator test: Failed to delete faces from Rekognition collection
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22   ERROR [RekognitionFaceEnrollmentService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "action": "rekognition_compensating_cleanup_failed",
+apps/orchestrator test:   "reason": "index_batch_failure",
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "faceCount": 1,
+apps/orchestrator test:   "errorCode": "HttpException"
+apps/orchestrator test: }
+apps/orchestrator test: Compensating DeleteFaces cleanup failed; manual reconciliation required
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [RekognitionFaceEnrollmentService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "ownerUserId": "11111111-1111-4111-8111-111111111111"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [RekognitionFaceEnrollmentService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "ownerUserId": "11111111-1111-4111-8111-111111111111"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [RekognitionFaceEnrollmentService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "ownerUserId": "11111111-1111-4111-8111-111111111111"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [RekognitionFaceEnrollmentService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "ownerUserId": "11111111-1111-4111-8111-111111111111"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [RekognitionFaceEnrollmentService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "ownerUserId": "11111111-1111-4111-8111-111111111111"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [RekognitionFaceEnrollmentService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "ownerUserId": "11111111-1111-4111-8111-111111111111"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [RekognitionFaceEnrollmentService] Created Rekognition face collection
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22   ERROR [RekognitionFaceEnrollmentService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "action": "rekognition_delete_faces_failed",
+apps/orchestrator test:   "collectionId": "col",
+apps/orchestrator test:   "faceCount": 1,
+apps/orchestrator test:   "errorCode": "AccessDenied"
+apps/orchestrator test: }
+apps/orchestrator test: Failed to delete faces from Rekognition collection
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22   ERROR [KnownFacesService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "action": "rekognition_compensating_delete_failed",
+apps/orchestrator test:   "reason": "create_db_persistence_failed",
+apps/orchestrator test:   "ownerUserId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "faceCount": 2,
+apps/orchestrator test:   "errorCode": "AWS_ERR"
+apps/orchestrator test: }
+apps/orchestrator test: Compensating Rekognition DeleteFaces failed; reconciliation required
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22   ERROR [KnownFacesService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "action": "rekognition_compensating_delete_failed",
+apps/orchestrator test:   "reason": "create_db_persistence_failed",
+apps/orchestrator test:   "ownerUserId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "faceCount": 2,
+apps/orchestrator test:   "errorCode": "AwsNameErr"
+apps/orchestrator test: }
+apps/orchestrator test: Compensating Rekognition DeleteFaces failed; reconciliation required
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22   ERROR [KnownFacesService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "action": "rekognition_compensating_delete_failed",
+apps/orchestrator test:   "reason": "create_db_persistence_failed",
+apps/orchestrator test:   "ownerUserId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "faceCount": 2,
+apps/orchestrator test:   "errorCode": "unknown"
+apps/orchestrator test: }
+apps/orchestrator test: Compensating Rekognition DeleteFaces failed; reconciliation required
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22   ERROR [KnownFacesService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "action": "rekognition_deactivate_db_reconciliation_required",
+apps/orchestrator test:   "ownerUserId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "knownFaceId": "22222222-2222-4222-8222-222222222222",
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "deletedFaceCount": 1,
+apps/orchestrator test:   "errorCode": "DeadlockDetected"
+apps/orchestrator test: }
+apps/orchestrator test: Rekognition DeleteFaces succeeded but DB deactivation failed; retry deactivate to reconcile
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22   ERROR [KnownFacesService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "action": "rekognition_delete_db_reconciliation_required",
+apps/orchestrator test:   "ownerUserId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "knownFaceId": "22222222-2222-4222-8222-222222222222",
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "deletedFaceCount": 1,
+apps/orchestrator test:   "errorCode": "57014"
+apps/orchestrator test: }
+apps/orchestrator test: Rekognition DeleteFaces succeeded but DB deletion failed; retry delete to reconcile
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [KnownFacesService] Received 2 images for registration
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [KnownFacesService] Received 1 images for registration
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22    WARN [KnownFacesService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "action": "rekognition_compensating_delete_completed",
+apps/orchestrator test:   "reason": "create_db_persistence_failed",
+apps/orchestrator test:   "ownerUserId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "faceCount": 2
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22    WARN [KnownFacesService] Compensating Rekognition DeleteFaces succeeded after persistence failure
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22    WARN [KnownFacesService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "action": "rekognition_compensating_delete_completed",
+apps/orchestrator test:   "reason": "replace_photos_prune_previous_faces",
+apps/orchestrator test:   "ownerUserId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "faceCount": 1
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22    WARN [KnownFacesService] Compensating Rekognition DeleteFaces succeeded after persistence failure
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22    WARN [KnownFacesService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "action": "rekognition_compensating_delete_completed",
+apps/orchestrator test:   "reason": "replace_photos_db_persistence_failed",
+apps/orchestrator test:   "ownerUserId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "collectionId": "argusai-staging-owner-11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "faceCount": 2
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22    WARN [KnownFacesService] Compensating Rekognition DeleteFaces succeeded after persistence failure
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [KnownFacesService] Received 1 images for registration
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [KnownFacesService] Received 1 images for registration
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [KnownFacesService] Received 1 images for registration
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [KnownFacesService] Received 1 images for registration
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22    WARN [FaceCollectionSyncService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "code": "FACE_SYNC_RETRY",
+apps/orchestrator test:   "message": "Collection sync chưa hoàn tất"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22    WARN [FaceCollectionSyncService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "code": "FACE_SYNC_PENDING",
+apps/orchestrator test:   "ownerScopeId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "version": 1
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [KnownFacesService] Received 1 images for registration
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [KnownFacesService] Received 1 images for registration
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [KnownFacesService] Received 2 images for registration
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.13.22     LOG [KnownFacesService] Received 1 images for registration
+apps/web test:  ✓ src/components/cameras/__tests__/CameraLiveStream.spec.tsx (5 tests) 863ms
+apps/web test:    ✓ reports live only after the native video plays, and drops live status when it waits 428ms
+apps/orchestrator test: PASS test/rekognition-enrollment.spec.ts (81.151 s)
+apps/web test:  ✓ src/components/layout/TopHeader.calendar.spec.tsx (3 tests) 1821ms
+apps/web test:    ✓ header calendar and filters > moves across the year boundary and returns to the actual current week 630ms
+apps/web test:    ✓ arbitrary date picker > jumps directly to a distant local date and returns to today 998ms
+apps/web test:  ✓ src/components/household/FamilyView.spec.tsx (3 tests) 359ms
+apps/web test:  ✓ src/hooks/useEventDetail.spec.tsx (2 tests) 94ms
+apps/web test:  ✓ src/components/cameras/__tests__/webcam-continuity.spec.tsx (1 test) 63ms
+apps/web test:  ✓ src/hooks/useLoginEntrance.spec.tsx (3 tests) 158ms
+apps/orchestrator test: PASS test/notification-cloud-email.spec.ts (103.904 s)
+apps/web test:  ✓ src/app/login/LoginForm.spec.tsx (4 tests) 183ms
+apps/web test:  ✓ src/components/users/UsersView.spec.tsx (1 test) 124ms
+apps/orchestrator test: PASS test/cloud-notification-transport.spec.ts (103.766 s)
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "jobId": "00000000-0000-4000-8000-000000000004",
+apps/orchestrator test:   "reason": "Face collection registry missing"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Cloud job retained for retry
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "jobId": "00000000-0000-4000-8000-000000000004",
+apps/orchestrator test:   "reason": "Face crop unavailable"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Cloud job retained for retry
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "jobId": "00000000-0000-4000-8000-000000000004",
+apps/orchestrator test:   "reason": "Unexpected upload bucket"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Cloud job retained for retry
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "jobId": "00000000-0000-4000-8000-000000000004",
+apps/orchestrator test:   "reason": "Face collection registry missing"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Cloud job retained for retry
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "jobId": "00000000-0000-4000-8000-000000000004",
+apps/orchestrator test:   "reason": "PREPARE_OR_SEND_FAILED"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Cloud job retained for retry
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "messageId": "empty"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Results input retained for retry/redrive
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "messageId": "invalid-json"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Results input retained for retry/redrive
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "messageId": "wrong-type"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.13.45    WARN [CloudQueueService] Results input retained for retry/redrive
+apps/orchestrator test: FAIL test/cloud-queue-extended.spec.ts (104.369 s)
+apps/orchestrator test:   ● shared Face authorization and result cache › returns only mappings from active known faces and keeps the durable result
+apps/orchestrator test:     expect(received).resolves.toEqual(expected) // deep equality
+apps/orchestrator test:     - Expected  - 0
+apps/orchestrator test:     + Received  + 1
+apps/orchestrator test:     @@ -42,10 +42,11 @@
+apps/orchestrator test:             "ownerScopeId": "00000000-0000-4000-8000-000000000001",
+apps/orchestrator test:           },
+apps/orchestrator test:           "schemaVersion": 1,
+apps/orchestrator test:           "type": "face.result",
+apps/orchestrator test:         },
+apps/orchestrator test:     +   "collection_face_count": 1,
+apps/orchestrator test:         "envelope": Object {
+apps/orchestrator test:           "correlationId": "00000000-0000-4000-8000-000000000003",
+apps/orchestrator test:           "messageId": "00000000-0000-4000-8000-000000000004",
+apps/orchestrator test:           "occurredAt": "2026-11-05T03:00:00Z",
+apps/orchestrator test:           "payload": Object {
+apps/orchestrator test:       292 |       rows: [{ face_id: 'provider-id', known_face_id: 'known-face-id' }],
+apps/orchestrator test:       293 |     });
+apps/orchestrator test:     > 294 |     await expect(queue.faceContext(payload.jobId)).resolves.toEqual({
+apps/orchestrator test:           |                                                             ^
+apps/orchestrator test:       295 |       envelope: faceJob,
+apps/orchestrator test:       296 |       cached_result: faceResult,
+apps/orchestrator test:       297 |       mappings: { 'provider-id': 'known-face-id' },
+apps/orchestrator test:       at Object.toEqual (../../node_modules/.pnpm/expect@29.7.0/node_modules/expect/build/index.js:174:22)
+apps/orchestrator test:       at Object.<anonymous> (test/cloud-queue-extended.spec.ts:294:61)
+apps/web test:  ✓ src/components/ui/SelectMenu.spec.tsx (3 tests) 215ms
+apps/web test:  ✓ src/components/playback/PlaybackPlayer.spec.tsx (2 tests) 183ms
+apps/orchestrator test: PASS test/notification-cloud-controller.spec.ts (115.698 s)
+apps/orchestrator test: PASS test/notification-cloud-config.spec.ts (116.911 s)
+apps/orchestrator test: PASS test/auth.controller.spec.ts (117.929 s)
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.04   ERROR [FrigateConfigService] Lỗi khi phân tích cú pháp YAML cấu hình Frigate:
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.04   ERROR [FrigateConfigService] YAMLParseError: Flow sequence in block collection must be sufficiently indented and end with a ] at line 1, column 23:
+apps/orchestrator test: invalid: [yaml: broken
+apps/orchestrator test:                       ^
+apps/orchestrator test: PASS test/frigate-config.service.spec.ts (7.511 s)
+apps/web test:  ✓ src/hooks/useDialogFocus.spec.tsx (1 test) 151ms
+apps/web test: stderr | src/components/dashboard/DashboardNotifications.spec.tsx > notification categories > filters by actual event type, opens the selected event, and excludes routine P3 activity from pending alerts
+apps/web test: You have Reduced Motion enabled on your device. Animations may not appear as expected.. For more information and steps for solving, visit https://motion.dev/troubleshooting/reduced-motion-disabled
+apps/web test:  ✓ src/components/dashboard/DashboardNotifications.spec.tsx (1 test) 551ms
+apps/web test:    ✓ notification categories > filters by actual event type, opens the selected event, and excludes routine P3 activity from pending alerts 548ms
+apps/web test:  ✓ src/hooks/usePlaybackArchive.spec.tsx (1 test) 78ms
+apps/orchestrator test: PASS test/frigate-media.adapter.spec.ts (124.613 s)
+apps/web test:  ✓ src/app/auth/callback/page.spec.tsx (2 tests) 144ms
+apps/web test:  ✓ src/hooks/useNotificationReadState.spec.tsx (1 test) 155ms
+apps/orchestrator test: PASS test/cloud-dispatch.spec.ts (127.458 s)
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.08    WARN [CloudQueueService] Object:
+apps/orchestrator test: {}
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.08    WARN [CloudQueueService] Results input retained for retry/redrive
+apps/orchestrator test: PASS test/resource-ownership.spec.ts (127.79 s)
+apps/orchestrator test: PASS test/wellness.controller.spec.ts (26.291 s)
+apps/orchestrator test: PASS test/cameras.controller.spec.ts (129.954 s)
+apps/orchestrator test: PASS test/notification-retry-worker.spec.ts (12.988 s)
+apps/web test:  ✓ src/components/cameras/__tests__/CameraStreamViewport.spec.tsx (2 tests) 308ms
+apps/orchestrator test: PASS src/fall-detection/coordinator/fall-incident.coordinator.spec.ts (30.962 s)
+apps/orchestrator test: [Nest] 32140  - 23/11/2026, 16.14.16    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track track-1 camera cam-livingroom ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+apps/orchestrator test: [Nest] 32140  - 23/11/2026, 16.14.16     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera cam-livingroom (track: track-1, event: evt-111)
+apps/orchestrator test: [Nest] 32140  - 23/11/2026, 16.14.16   DEBUG [FallIncidentCoordinator] [M2A_CANDIDATE_CANCELLED] Track track-1 trên camera cam-livingroom đã hủy candidate (reason: RECOVERED)
+apps/orchestrator test: [Nest] 32140  - 23/11/2026, 16.14.16    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track track-1 camera cam-livingroom ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+apps/orchestrator test: [Nest] 32140  - 23/11/2026, 16.14.16   DEBUG [FallIncidentCoordinator] Incident té ngã episode 22222222-2222-4222-8222-222222222222 đã được xử lý trước đó (deduped)
+apps/orchestrator test: PASS test/mqtt-consumer.service.spec.ts (53.643 s)
+apps/orchestrator test: PASS test/ffmpeg-source-runner.spec.ts (11.748 s)
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.16   ERROR [FrigateSyncService] Đồng bộ Frigate thất bại cho camera camera_cong_chinh:
+apps/orchestrator test: fetch failed: ECONNREFUSED 127.0.0.1:5000
+apps/orchestrator test: PASS test/frigate-sync.service.spec.ts (8.055 s)
+apps/orchestrator test: PASS test/auth-provider.spec.ts (31.703 s)
+apps/orchestrator test: [Nest] 8880  - 23/11/2026, 16.14.22   ERROR [FireDeliveryService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "eventId": "991bc0b2-11f3-4a5a-a8c1-2e85cf379d36",
+apps/orchestrator test:   "incidentId": "11379ee0-1a11-450e-a8e1-9763d07cace1",
+apps/orchestrator test:   "error": "Temporary AI result DB failure"
+apps/orchestrator test: }
+apps/orchestrator test: Fire pending result delivery failed
+apps/orchestrator test: PASS test/fire-delivery.spec.ts (10.583 s)
+apps/orchestrator test: [Nest] 19028  - 23/11/2026, 16.14.22   ERROR [RestAreaEvaluator] Lỗi khi kiểm tra REST_AREA cho camera 11111111-1111-4111-8111-111111111111: DB unavailable
+apps/orchestrator test: [Nest] 19028  - 23/11/2026, 16.14.22   ERROR [FallIncidentCoordinator] Fall processing failed for qa-camera/qa-track: DB unavailable
+apps/orchestrator test: [Nest] 19028  - 23/11/2026, 16.14.22   ERROR [FallIncidentCoordinator] Lỗi khi submit kết quả AI té ngã cho event event: temporary submit failure
+apps/orchestrator test: PASS test/qa-fall.spec.ts (13.493 s)
+apps/orchestrator test: PASS test/face-quality-gate.client.spec.ts (5.868 s)
+apps/orchestrator test: [Nest] 19028  - 23/11/2026, 16.14.22    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+apps/orchestrator test: [Nest] 19028  - 23/11/2026, 16.14.22    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+apps/orchestrator test: [Nest] 19028  - 23/11/2026, 16.14.22   DEBUG [PoseFrameConsumer] Bỏ qua pose frame cũ: delay 1.10s > 1s
+apps/orchestrator test: [Nest] 19028  - 23/11/2026, 16.14.22   DEBUG [PoseFrameConsumer] Bỏ qua pose frame cũ: delay -0.60s > 1s
+apps/orchestrator test: [Nest] 19028  - 23/11/2026, 16.14.22    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track qa-track camera qa-camera ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+apps/orchestrator test: [Nest] 19028  - 23/11/2026, 16.14.22    WARN [FallIncidentCoordinator] [M2A_CONFIRMED] Track qa-track camera qa-camera ĐÃ XÁC NHẬN TÉ NGÃ BẤT ĐỘNG! Tạo sự kiện P1 khẩn cấp...
+apps/orchestrator test: [Nest] 19028  - 23/11/2026, 16.14.22     LOG [FallIncidentCoordinator] [FALL_ALERT_TRIGGERED] ĐÃ PHÁT HIỆN VÀ KÍCH HOẠT CẢNH BÁO TÉ NGÃ P1 trên camera qa-camera (track: qa-track, event: event)
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.22    WARN [FaceQualityGateClient] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "reason": "QUALITY_GATE_TIMEOUT",
+apps/orchestrator test:   "failOpen": true
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.22    WARN [FaceQualityGateClient] Face quality gate request failed
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.22    WARN [FaceQualityGateClient] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "reason": "QUALITY_GATE_TIMEOUT",
+apps/orchestrator test:   "failOpen": false
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.22    WARN [FaceQualityGateClient] Face quality gate request failed
+apps/orchestrator test: PASS test/fire-health.spec.ts (24.779 s)
+apps/orchestrator test: PASS test/smoke.service.spec.ts (8.51 s)
+apps/orchestrator test: PASS test/wellness-policy.spec.ts (13.432 s)
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.14.25    WARN [SmokeService] Smoke check failed for database: Error
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.14.25    WARN [SmokeService] Smoke check failed for cloudQueue: Error
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.14.25    WARN [SmokeService] Smoke check failed for storage: UnknownError
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.14.25    WARN [SmokeService] Smoke check failed for storage: UnknownError
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.14.25    WARN [SmokeService] Smoke check failed for auth: Error
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.14.25    WARN [SmokeService] Smoke check failed for storage: UnknownError
+apps/orchestrator test: [Nest] 35784  - 23/11/2026, 16.14.25   ERROR [FireProcessorService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "frameId": "frame-1795425265725",
+apps/orchestrator test:   "error": "DB temporarily unavailable"
+apps/orchestrator test: }
+apps/orchestrator test: Fire confirmation persistence failed; evidence retained for retry
+apps/orchestrator test: PASS test/fire-recovery.spec.ts (14.611 s)
+apps/web test:  ✓ src/components/settings/EscalationRuleCard.compact.spec.tsx (1 test) 186ms
+apps/orchestrator test: PASS test/media-mtx.service.spec.ts
+apps/orchestrator test: PASS test/media.controller.spec.ts
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.37   ERROR [AiResultOutboxService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "eventId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "messageId": "22222222-2222-4222-8222-222222222222",
+apps/orchestrator test:   "err": "database unavailable"
+apps/orchestrator test: }
+apps/orchestrator test: Xử lý AI result outbox thất bại
+apps/orchestrator test: PASS test/ai-result-outbox.service.spec.ts (14.716 s)
+apps/orchestrator test: PASS test/face-recognition.worker.spec.ts (19.089 s)
+apps/orchestrator test: PASS src/fall-detection/consumer/pose-frame.consumer.spec.ts (15.3 s)
+apps/orchestrator test: PASS test/escalation-rules.controller.spec.ts (12.865 s)
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "eventId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "trackId": "track-1",
+apps/orchestrator test:   "requestId": "33333333-3333-4333-8333-333333333333",
+apps/orchestrator test:   "personStatus": "UNDETERMINED",
+apps/orchestrator test:   "hasError": false
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "eventId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "trackId": "track-1",
+apps/orchestrator test:   "requestId": "33333333-3333-4333-8333-333333333333",
+apps/orchestrator test:   "personStatus": "UNDETERMINED",
+apps/orchestrator test:   "hasError": false
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "eventId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "trackId": "track-1",
+apps/orchestrator test:   "requestId": "33333333-3333-4333-8333-333333333333",
+apps/orchestrator test:   "personStatus": null,
+apps/orchestrator test:   "hasError": true
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "eventId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "trackId": "track-1",
+apps/orchestrator test:   "requestId": "33333333-3333-4333-8333-333333333333",
+apps/orchestrator test:   "personStatus": null,
+apps/orchestrator test:   "hasError": true
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "eventId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "trackId": "track-1",
+apps/orchestrator test:   "requestId": "33333333-3333-4333-8333-333333333333",
+apps/orchestrator test:   "personStatus": null,
+apps/orchestrator test:   "hasError": true
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37    WARN [FaceRecognitionWorker] Không lấy được ảnh crop cho track track-1
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "eventId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "trackId": "track-1",
+apps/orchestrator test:   "requestId": "26273f51-210d-49c5-9828-cae4e0224048",
+apps/orchestrator test:   "personStatus": null,
+apps/orchestrator test:   "hasError": true
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "eventId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "trackId": "track-1",
+apps/orchestrator test:   "requestId": "33333333-3333-4333-8333-333333333333",
+apps/orchestrator test:   "personStatus": "UNKNOWN",
+apps/orchestrator test:   "hasError": false
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đang xử lý job nhận diện khuôn mặt cho trackId=track-1, eventId=11111111-1111-4111-8111-111111111111
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "eventId": "11111111-1111-4111-8111-111111111111",
+apps/orchestrator test:   "trackId": "track-1",
+apps/orchestrator test:   "requestId": "33333333-3333-4333-8333-333333333333",
+apps/orchestrator test:   "personStatus": "KNOWN",
+apps/orchestrator test:   "hasError": false
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.37     LOG [FaceRecognitionWorker] Đã nhận kết quả M1 từ AI service
+apps/orchestrator test: [Nest] 8880  - 23/11/2026, 16.14.37   DEBUG [PoseFrameConsumer] Bỏ qua pose frame cũ: delay 5.00s > 1s
+apps/orchestrator test: PASS test/fire-ai-client.spec.ts (10.524 s)
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.14.38   ERROR [FireMediaService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "err": {}
+apps/orchestrator test: }
+apps/orchestrator test: Fire media recovery failed
+apps/orchestrator test: PASS test/fire-media.spec.ts (9.45 s)
+apps/orchestrator test: PASS test/events.controller.spec.ts (31.61 s)
+apps/orchestrator test: PASS test/events.service.spec.ts (21.86 s)
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.38   ERROR [CloudQueueService] Cloud queue iteration failed (receive-results, unknown); retrying without acknowledging input
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.39   ERROR [CloudQueueService] Cloud queue iteration failed (dispatch, ECONNRESET); retrying without acknowledging input
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.38    WARN [CloudQueueService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "messageId": "id"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.38    WARN [CloudQueueService] Results input retained for retry/redrive
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.38    WARN [CloudQueueService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "jobId": "44444444-4444-4444-8444-444444444444",
+apps/orchestrator test:   "reason": "Face collection registry missing"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.38    WARN [CloudQueueService] Cloud job retained for retry
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.38    WARN [CloudQueueService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "jobId": "44444444-4444-4444-8444-444444444444",
+apps/orchestrator test:   "reason": "Face collection prefix mismatch"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.38    WARN [CloudQueueService] Cloud job retained for retry
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.38    WARN [CloudQueueService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "jobId": "44444444-4444-4444-8444-444444444444",
+apps/orchestrator test:   "reason": "Face crop unavailable"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.38    WARN [CloudQueueService] Cloud job retained for retry
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.38    WARN [CloudQueueService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "jobId": "44444444-4444-4444-8444-444444444444",
+apps/orchestrator test:   "reason": "Unexpected upload bucket"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.38    WARN [CloudQueueService] Cloud job retained for retry
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.38    WARN [CloudQueueService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "jobId": "44444444-4444-4444-8444-444444444444",
+apps/orchestrator test:   "reason": "PREPARE_OR_SEND_FAILED"
+apps/orchestrator test: }
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.38    WARN [CloudQueueService] Cloud job retained for retry
+apps/orchestrator test: PASS test/fire.spec.ts (13.646 s)
+apps/orchestrator test: PASS test/cloud-queue.spec.ts (22.641 s)
+apps/orchestrator test: PASS test/zone-result-producer.service.spec.ts (13.503 s)
+apps/web test:  ✓ src/components/layout/TopHeader.playback.spec.tsx (1 test) 504ms
+apps/web test:    ✓ Dashboard calendar to playback > shares the picked date and only navigates on the explicit replay action 502ms
+apps/web test:  ✓ src/components/playback/ArchiveTimeline.spec.tsx (1 test) 342ms
+apps/web test:    ✓ previews a dragged time but commits only once on release, with keyboard alternatives 340ms
+apps/orchestrator test: PASS test/escalation-rules.repository.spec.ts
+apps/orchestrator test: PASS test/ai-result.validator.spec.ts (6.954 s)
+apps/orchestrator test: [Nest] 19028  - 23/11/2026, 16.14.44   ERROR [RestAreaEvaluator] Lỗi khi kiểm tra REST_AREA cho camera cam-1: Database offline
+apps/orchestrator test: PASS src/fall-detection/evaluator/rest-area.evaluator.spec.ts (6.978 s)
+apps/orchestrator test: [Nest] 19028  - 23/11/2026, 16.14.44   DEBUG [RestAreaEvaluator] Người tại tâm (0.400, 0.400) nằm trong REST_AREA "Giường ngủ" (zone-1)
+apps/orchestrator test: PASS test/internal-token.guard.spec.ts (6.538 s)
+apps/orchestrator test: PASS test/telegram-link.service.spec.ts (7.063 s)
+apps/orchestrator test: PASS test/known-faces.spec.ts (7.833 s)
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.45     LOG [KnownFacesService] Received 2 images for registration
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.45     LOG [KnownFacesService] Received 1 images for registration
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.45     LOG [KnownFacesService] Received 1 images for registration
+apps/orchestrator test: [Nest] 29684  - 23/11/2026, 16.14.45     LOG [KnownFacesService] Received 1 images for registration
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.14.45     LOG [S3StorageService] Khoi tao AWS S3 Storage Adapter (region: ap-southeast-1, bucket: argusai-staging-media)
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.14.45     LOG [S3StorageService] Khoi tao AWS S3 Storage Adapter (region: ap-southeast-1, bucket: argusai-staging-media)
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.14.45     LOG [S3StorageService] Khoi tao AWS S3 Storage Adapter (region: ap-southeast-1, bucket: argusai-staging-media)
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.14.45     LOG [MinioStorageService] Khoi tao MinIO Storage Adapter (endpoint: http://localhost:9000, presign: http://localhost:9000, bucket: camerai-media)
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.14.45     LOG [S3StorageService] Khoi tao AWS S3 Storage Adapter (region: ap-southeast-1, bucket: argusai-staging-media)
+apps/orchestrator test: [Nest] 35752  - 23/11/2026, 16.14.45     LOG [MinioStorageService] Khoi tao MinIO Storage Adapter (endpoint: http://minio:9000, presign: http://localhost:9000, bucket: camerai-media)
+apps/orchestrator test: PASS test/s3-storage.service.spec.ts (8.096 s)
+apps/web test:  ✓ src/components/playback/RecordingList.spec.tsx (1 test) 308ms
+apps/web test:    ✓ Daily recordings panel > shows chronological continuous ranges with no time search or duplicate date controls 300ms
+apps/orchestrator test: [Nest] 8880  - 23/11/2026, 16.14.46   ERROR [MediaService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "eventId": "evt-err",
+apps/orchestrator test:   "error": "s3 down"
+apps/orchestrator test: }
+apps/orchestrator test: Camera snapshot storage failed; incident remains persisted
+apps/orchestrator test: [Nest] 8880  - 23/11/2026, 16.14.46   ERROR [MediaService] Object:
+apps/orchestrator test: {
+apps/orchestrator test:   "eventId": "evt-err-2",
+apps/orchestrator test:   "error": "Unknown snapshot storage error"
+apps/orchestrator test: }
+apps/orchestrator test: Camera snapshot storage failed; incident remains persisted
+apps/orchestrator test: [Nest] 8880  - 23/11/2026, 16.14.46   ERROR [MediaService] Loi khi tai/luu snapshot cho event evt-err
+apps/orchestrator test: [Nest] 8880  - 23/11/2026, 16.14.46   ERROR [MediaService] Error: network error
+apps/orchestrator test: [Nest] 8880  - 23/11/2026, 16.14.46   ERROR [MediaService] Loi khi luu buffer snapshot cho event evt-err
+apps/orchestrator test: [Nest] 8880  - 23/11/2026, 16.14.46   ERROR [MediaService] Error: upload failed
+apps/orchestrator test: [Nest] 8880  - 23/11/2026, 16.14.46   ERROR [MediaService] Loi khi tai/luu clip cho event evt-clip
+apps/orchestrator test: [Nest] 8880  - 23/11/2026, 16.14.46   ERROR [MediaService] Error: clip fetch error
+apps/orchestrator test: PASS test/media.service.spec.ts (8.467 s)
+apps/orchestrator test: PASS test/escalation-engine.service.spec.ts (7.98 s)
+apps/web test:  ✓ src/components/ui/TimeField.spec.tsx (2 tests) 838ms
+apps/web test:    ✓ shows an unambiguous 24-hour value and commits custom hour/minute/second choices 489ms
+apps/web test:    ✓ supports keyboard selection and Escape without committing a cancelled edit 347ms
+apps/web test:  Test Files  82 passed (82)
+apps/web test:       Tests  373 passed (373)
+apps/web test:    Start at  16:11:57
+apps/web test:    Duration  170.06s (transform 58.43s, setup 0ms, collect 834.39s, tests 27.27s, environment 440.60s, prepare 120.06s)
+apps/web test: Done
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.48   ERROR [EventsRepository] Lỗi khi ghi event vào PostgreSQL (dedupKey: dedup-1, trackId: track-1)
+apps/orchestrator test: [Nest] 16640  - 23/11/2026, 16.14.48   ERROR [EventsRepository] Error: DB Error
+apps/orchestrator test: PASS test/cameras.service.spec.ts (10.887 s)
+apps/orchestrator test:   ● Console
+apps/orchestrator test:     console.warn
+apps/orchestrator test:       [PERSON_DEBUG][BUFFER_RECEIVE] camera=camera_cong_chinh objectId=live-person frameTime=1795425287254 observedAt=1795425287254 receivedAt=1795425287254 action=ACCEPT
+apps/orchestrator test:       129 |     }
+apps/orchestrator test:       130 |
+apps/orchestrator test:     > 131 |     console.warn(
+apps/orchestrator test:           |             ^
+apps/orchestrator test:       132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+apps/orchestrator test:       133 |     );
+apps/orchestrator test:       134 |
+apps/orchestrator test:       at FrigateFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:131:13)
+apps/orchestrator test:       at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:56:27)
+apps/orchestrator test:       at Object.<anonymous> (test/cameras.service.spec.ts:170:33)
+apps/orchestrator test: PASS test/events.repository.spec.ts (9.257 s)
+apps/orchestrator test: PASS test/telegram.adapter.spec.ts
+apps/orchestrator test: PASS src/playback/playback.service.spec.ts (5.238 s)
+apps/orchestrator test: PASS test/wellness.service.spec.ts
+apps/orchestrator test: PASS test/frigate-client.service.spec.ts
+apps/orchestrator test: PASS test/escalation-rules.service.spec.ts (5.34 s)
+apps/orchestrator test: [Nest] 32396  - 23/11/2026, 16.14.50   ERROR [PoseInferenceAdapter] Lỗi gọi AI Service /pose/fall: Network connection refused
+apps/orchestrator test: PASS src/fall-detection/adapter/pose-inference.adapter.spec.ts
+apps/orchestrator test: PASS src/playback/playback.repository.spec.ts
+apps/orchestrator test: [Nest] 32396  - 23/11/2026, 16.14.50    WARN [PoseInferenceAdapter] AI Service /pose/fall trả về HTTP 500: Internal Server Error
+apps/orchestrator test: PASS test/telegram-webhook.spec.ts (6.94 s)
+apps/orchestrator test: PASS test/fire-incidents.repository.spec.ts
+apps/orchestrator test: PASS test/env-config.spec.ts
+apps/orchestrator test: PASS test/wellness-scheduler.service.spec.ts
+apps/orchestrator test: PASS test/fire-image-evidence.spec.ts (5.269 s)
+apps/orchestrator test: PASS test/health.service.spec.ts
+apps/orchestrator test: PASS test/track-identity-state.service.spec.ts
+apps/orchestrator test: PASS test/telegram-delivery-scope.spec.ts
+apps/orchestrator test: PASS test/face-session-cache.service.spec.ts (6.141 s)
+apps/orchestrator test: PASS src/playback/playback-metadata.service.spec.ts
+apps/orchestrator test: PASS test/argon2-password-hasher.spec.ts
+apps/orchestrator test: PASS test/escalation-deadline-worker.service.spec.ts
+apps/orchestrator test: PASS test/jwt-auth.guard.spec.ts
+apps/orchestrator test: PASS test/auth.service.spec.ts
+apps/orchestrator test: PASS test/rtsp-source-tester.service.spec.ts
+apps/orchestrator test: PASS src/playback/playback-time.spec.ts
+apps/orchestrator test: PASS test/frigate-detection-tracker.service.spec.ts
+apps/orchestrator test:   ● Console
+apps/orchestrator test:     console.warn
+apps/orchestrator test:       [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=track-new-9 frameTime=1795425296804 observedAt=1795425296804 receivedAt=1795425296804 action=ACCEPT
+apps/orchestrator test:       129 |     }
+apps/orchestrator test:       130 |
+apps/orchestrator test:     > 131 |     console.warn(
+apps/orchestrator test:           |             ^
+apps/orchestrator test:       132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+apps/orchestrator test:       133 |     );
+apps/orchestrator test:       134 |
+apps/orchestrator test:       at CanonicalPreservingFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:131:13)
+apps/orchestrator test:       at CanonicalPreservingFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:56:27)
+apps/orchestrator test:       at CanonicalPreservingFrameBuffer.accept (src/frigate/frigate-detection-tracker.service.ts:45:11)
+apps/orchestrator test:       at Object.<anonymous> (test/frigate-detection-tracker.service.spec.ts:116:20)
+apps/orchestrator test: PASS src/fall-detection/envelope/pose-frame-envelope.spec.ts
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.57    WARN [PoseFrameEnvelope] Dữ liệu envelope quá ngắn (< 4 bytes)
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.57    WARN [PoseFrameEnvelope] Envelope vượt quá giới hạn cho phép (1048586 > 1048576 bytes)
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.57    WARN [PoseFrameEnvelope] Header length không hợp lệ: 33792 bytes
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.57    WARN [PoseFrameEnvelope] Header bị cắt xén (4 + 50 > 20)
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.57    WARN [PoseFrameEnvelope] Lỗi parse JSON header trong envelope: Unexpected token 'o', "not-json{" is not valid JSON
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.57    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+apps/orchestrator test: [Nest] 33440  - 23/11/2026, 16.14.57    WARN [PoseFrameEnvelope] Cấu trúc header envelope không hợp lệ theo PoseFrameHeaderDto
+apps/orchestrator test: PASS test/face-track-optimization.config.spec.ts
+apps/orchestrator test: [Nest] 32140  - 23/11/2026, 16.14.58    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=webrtc path=cam_front hasToken=true hasQuery=false
+apps/orchestrator test: [Nest] 32140  - 23/11/2026, 16.14.59    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=webrtc path=cam_front hasToken=true hasQuery=false
+apps/orchestrator test: PASS test/media-mtx-auth.controller.spec.ts (5.437 s)
+apps/orchestrator test: PASS test/zone-schedule.service.spec.ts
+apps/orchestrator test: [Nest] 32140  - 23/11/2026, 16.14.59    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=webrtc path=cam_other hasToken=false hasQuery=true
+apps/orchestrator test: [Nest] 32140  - 23/11/2026, 16.14.59    WARN [MediaMtxAuthController] MediaMTX auth denied action=publish protocol=webrtc path=cam_front hasToken=true hasQuery=false
+apps/orchestrator test: [Nest] 32140  - 23/11/2026, 16.14.59    WARN [MediaMtxAuthController] MediaMTX auth denied action=publish protocol=webrtc path=cam_other hasToken=true hasQuery=false
+apps/orchestrator test: [Nest] 32140  - 23/11/2026, 16.14.59    WARN [MediaMtxAuthController] MediaMTX auth denied action=read protocol=webrtc path=cam_front hasToken=true hasQuery=false
+apps/orchestrator test: [Nest] 32140  - 23/11/2026, 16.14.59    WARN [MediaMtxAuthController] MediaMTX auth denied action=publish protocol=rtsp path=cam_front hasToken=true hasQuery=false
+apps/orchestrator test: PASS src/playback/playback-frame.codec.spec.ts
+apps/orchestrator test: PASS test/known-faces.repository.spec.ts
+apps/orchestrator test: PASS src/playback/playback-frames.service.spec.ts
+apps/orchestrator test: PASS test/ai-result.aggregator.spec.ts
+apps/orchestrator test: PASS test/frigate-frame-buffer.spec.ts
+apps/orchestrator test:   ● Console
+apps/orchestrator test:     console.warn
+apps/orchestrator test:       [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=a frameTime=10000 observedAt=9900 receivedAt=10100 action=ACCEPT
+apps/orchestrator test:       129 |     }
+apps/orchestrator test:       130 |
+apps/orchestrator test:     > 131 |     console.warn(
+apps/orchestrator test:           |             ^
+apps/orchestrator test:       132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+apps/orchestrator test:       133 |     );
+apps/orchestrator test:       134 |
+apps/orchestrator test:       at FrigateFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:131:13)
+apps/orchestrator test:       at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:56:27)
+apps/orchestrator test:       at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:12:12)
+apps/orchestrator test:     console.warn
+apps/orchestrator test:       [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test frameTime=10100 receivedAt=10300 action=DROP reason=out_of_order_or_duplicate
+apps/orchestrator test:       45 |     const frames = this.cameras.get(sample.camera) ?? [];
+apps/orchestrator test:       46 |     if (frames.length && frames[frames.length - 1].frameTime >= frameTime) {
+apps/orchestrator test:     > 47 |       console.warn(
+apps/orchestrator test:          |               ^
+apps/orchestrator test:       48 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${sample.camera} frameTime=${frameTime} receivedAt=${now} action=DROP reason=out_of_order_or_duplicate`,
+apps/orchestrator test:       49 |       );
+apps/orchestrator test:       50 |       return;
+apps/orchestrator test:       at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:47:15)
+apps/orchestrator test:       at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:17:12)
+apps/orchestrator test:     console.warn
+apps/orchestrator test:       [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test frameTime=1000 receivedAt=10000 action=DROP reason=out_of_window
+apps/orchestrator test:       38 |     const frameTime = toMilliseconds(sample.frameTime);
+apps/orchestrator test:       39 |     if (frameTime < now - MAX_AGE_MS || frameTime > now + 1000) {
+apps/orchestrator test:     > 40 |       console.warn(
+apps/orchestrator test:          |               ^
+apps/orchestrator test:       41 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${sample.camera} frameTime=${frameTime} receivedAt=${now} action=DROP reason=out_of_window`,
+apps/orchestrator test:       42 |       );
+apps/orchestrator test:       43 |       return;
+apps/orchestrator test:       at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:40:15)
+apps/orchestrator test:       at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:25:12)
+apps/orchestrator test:     console.warn
+apps/orchestrator test:       [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test frameTime=20000 receivedAt=10000 action=DROP reason=out_of_window
+apps/orchestrator test:       38 |     const frameTime = toMilliseconds(sample.frameTime);
+apps/orchestrator test:       39 |     if (frameTime < now - MAX_AGE_MS || frameTime > now + 1000) {
+apps/orchestrator test:     > 40 |       console.warn(
+apps/orchestrator test:          |               ^
+apps/orchestrator test:       41 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${sample.camera} frameTime=${frameTime} receivedAt=${now} action=DROP reason=out_of_window`,
+apps/orchestrator test:       42 |       );
+apps/orchestrator test:       43 |       return;
+apps/orchestrator test:       at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:40:15)
+apps/orchestrator test:       at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:26:12)
+apps/orchestrator test:     console.warn
+apps/orchestrator test:       [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=a frameTime=10000 receivedAt=10000 action=DROP reason=malformed_geometry
+apps/orchestrator test:       100 |     ) {
+apps/orchestrator test:       101 |       if (label === 'person') {
+apps/orchestrator test:     > 102 |         console.warn(
+apps/orchestrator test:           |                 ^
+apps/orchestrator test:       103 |           `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id ?? 'unknown'} frameTime=${frameTimeMs} receivedAt=${now} action=DROP reason=malformed_geometry`,
+apps/orchestrator test:       104 |         );
+apps/orchestrator test:       105 |       }
+apps/orchestrator test:       at FrigateFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:102:17)
+apps/orchestrator test:       at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:56:27)
+apps/orchestrator test:       at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:29:12)
+apps/orchestrator test:     console.warn
+apps/orchestrator test:       [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=p1 frameTime=123500 observedAt=123400 receivedAt=124000 action=ACCEPT
+apps/orchestrator test:       129 |     }
+apps/orchestrator test:       130 |
+apps/orchestrator test:     > 131 |     console.warn(
+apps/orchestrator test:           |             ^
+apps/orchestrator test:       132 |       `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=ACCEPT`,
+apps/orchestrator test:       133 |     );
+apps/orchestrator test:       134 |
+apps/orchestrator test:       at FrigateFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:131:13)
+apps/orchestrator test:       at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:56:27)
+apps/orchestrator test:       at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:47:12)
+apps/orchestrator test:     console.warn
+apps/orchestrator test:       [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=p_no_obs frameTime=10000 receivedAt=10100 action=DROP reason=missing_observed_at
+apps/orchestrator test:       115 |
+apps/orchestrator test:       116 |     if (rawObserved === undefined || !Number.isFinite(rawObserved)) {
+apps/orchestrator test:     > 117 |       console.warn(
+apps/orchestrator test:           |               ^
+apps/orchestrator test:       118 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} receivedAt=${now} action=DROP reason=missing_observed_at`,
+apps/orchestrator test:       119 |       );
+apps/orchestrator test:       120 |       return null;
+apps/orchestrator test:       at FrigateFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:117:15)
+apps/orchestrator test:       at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:56:27)
+apps/orchestrator test:       at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:71:12)
+apps/orchestrator test:     console.warn
+apps/orchestrator test:       [PERSON_DEBUG][BUFFER_RECEIVE] camera=cam_test objectId=p_future frameTime=10000 observedAt=10200 receivedAt=10100 action=DROP reason=future_observed_at
+apps/orchestrator test:       123 |     const observedAtMs = toMilliseconds(rawObserved);
+apps/orchestrator test:       124 |     if (observedAtMs > frameTimeMs + 50) {
+apps/orchestrator test:     > 125 |       console.warn(
+apps/orchestrator test:           |               ^
+apps/orchestrator test:       126 |         `[PERSON_DEBUG][BUFFER_RECEIVE] camera=${camera} objectId=${id} frameTime=${frameTimeMs} observedAt=${observedAtMs} receivedAt=${now} action=DROP reason=future_observed_at`,
+apps/orchestrator test:       127 |       );
+apps/orchestrator test:       128 |       return null;
+apps/orchestrator test:       at FrigateFrameBuffer.parseObject (src/frigate/frigate-frame-buffer.ts:125:15)
+apps/orchestrator test:       at FrigateFrameBuffer.accept (src/frigate/frigate-frame-buffer.ts:56:27)
+apps/orchestrator test:       at Object.<anonymous> (test/frigate-frame-buffer.spec.ts:71:12)
+apps/orchestrator test: PASS test/telegram-message-builder.spec.ts
+apps/orchestrator test: PASS test/face-person-association.spec.ts
+apps/orchestrator test: PASS test/escalation-policy.spec.ts
+apps/orchestrator test: PASS test/cognito-verifier.spec.ts (5.628 s)
+apps/orchestrator test: PASS test/fire-telegram-channel.spec.ts
+apps/orchestrator test: PASS test/escalation-rule-policy.spec.ts
+apps/orchestrator test: PASS test/rekognition-selection.spec.ts (10.143 s)
+apps/orchestrator test: PASS test/jwt-token.service.spec.ts (7.824 s)
+apps/orchestrator test: PASS test/frigate-playback.spec.ts (5.153 s)
+apps/orchestrator test: PASS test/zone-geometry.validator.spec.ts (5.261 s)
+apps/orchestrator test: PASS test/face-recognition-coordinator.service.spec.ts (18.207 s)
+apps/orchestrator test: A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+apps/orchestrator test: Summary of all failing tests
+apps/orchestrator test: FAIL test/cloud-queue-extended.spec.ts (104.369 s)
+apps/orchestrator test:   ● shared Face authorization and result cache › returns only mappings from active known faces and keeps the durable result
+apps/orchestrator test:     expect(received).resolves.toEqual(expected) // deep equality
+apps/orchestrator test:     - Expected  - 0
+apps/orchestrator test:     + Received  + 1
+apps/orchestrator test:     @@ -42,10 +42,11 @@
+apps/orchestrator test:             "ownerScopeId": "00000000-0000-4000-8000-000000000001",
+apps/orchestrator test:           },
+apps/orchestrator test:           "schemaVersion": 1,
+apps/orchestrator test:           "type": "face.result",
+apps/orchestrator test:         },
+apps/orchestrator test:     +   "collection_face_count": 1,
+apps/orchestrator test:         "envelope": Object {
+apps/orchestrator test:           "correlationId": "00000000-0000-4000-8000-000000000003",
+apps/orchestrator test:           "messageId": "00000000-0000-4000-8000-000000000004",
+apps/orchestrator test:           "occurredAt": "2026-11-05T03:00:00Z",
+apps/orchestrator test:           "payload": Object {
+apps/orchestrator test:       292 |       rows: [{ face_id: 'provider-id', known_face_id: 'known-face-id' }],
+apps/orchestrator test:       293 |     });
+apps/orchestrator test:     > 294 |     await expect(queue.faceContext(payload.jobId)).resolves.toEqual({
+apps/orchestrator test:           |                                                             ^
+apps/orchestrator test:       295 |       envelope: faceJob,
+apps/orchestrator test:       296 |       cached_result: faceResult,
+apps/orchestrator test:       297 |       mappings: { 'provider-id': 'known-face-id' },
+apps/orchestrator test:       at Object.toEqual (../../node_modules/.pnpm/expect@29.7.0/node_modules/expect/build/index.js:174:22)
+apps/orchestrator test:       at Object.<anonymous> (test/cloud-queue-extended.spec.ts:294:61)
+apps/orchestrator test: Test Suites: 1 failed, 93 passed, 94 total
+apps/orchestrator test: Tests:       1 failed, 770 passed, 771 total
+apps/orchestrator test: Snapshots:   0 total
+apps/orchestrator test: Time:        188.218 s, estimated 190 s
+apps/orchestrator test: Ran all test suites.
+apps/orchestrator test: Failed
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @cam/orchestrator@0.0.1 test: `jest --passWithNoTests`
+Exit status 1
+ ELIFECYCLE  Test failed. See above for more details.
+ ELIFECYCLE  Command failed with exit code 1.
