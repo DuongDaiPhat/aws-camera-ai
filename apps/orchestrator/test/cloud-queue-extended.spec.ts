@@ -294,6 +294,7 @@ describe('shared Face authorization and result cache', () => {
     await expect(queue.faceContext(payload.jobId)).resolves.toEqual({
       envelope: faceJob,
       cached_result: faceResult,
+      collection_face_count: 1,
       mappings: { 'provider-id': 'known-face-id' },
     });
     expect(query.mock.calls[1]![0]).toContain('k.is_active');
