@@ -285,6 +285,128 @@ describe('shared queue dispatch and receive', () => {
 });
 
 describe('shared Face authorization and result cache', () => {
+  it.each([undefined, Buffer.alloc(0)])(
+    'keeps jobs without a best shot in PREPARING without uploading (%p)',
+    async (imageBuffer) => {
+      const { queue, query, storage } = setup();
+      query.mockResolvedValueOnce({ rows: [preparing] });
+      await expect(queue.enqueueFaceJob({ ...payload, imageBuffer })).resolves.toEqual({
+        created: true,
+        jobId: payload.jobId,
+        status: 'PREPARING',
+      });
+      expect(query.mock.calls[0]![1][4]).toBe(false);
+      expect(storage.upload).not.toHaveBeenCalled();
+      expect(query).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it('rejects face enqueueing when the cloud transport is disabled', async () => {
+    const { queue, query } = setup({});
+    await expect(queue.enqueueFaceJob(payload)).rejects.toThrow('Face SQS transport not enabled');
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it.each([undefined, '2026-11-23T00:00:00Z'])(
+    'prepares a best shot with a missing collection version and non-Date created_at (%p)',
+    async (createdAt) => {
+      const { queue, query, storage } = setup();
+      query.mockResolvedValueOnce({ rows: [{ ...preparing, created_at: createdAt }] });
+      query.mockResolvedValueOnce({ rows: [{ collection_id: payload.collectionId }] });
+      await expect(
+        queue.enqueueFaceJob({ ...payload, imageBuffer: Buffer.from('crop') }),
+      ).resolves.toMatchObject({ created: true, status: 'PENDING' });
+      const persisted = JSON.parse(query.mock.calls[2]![1][1]);
+      expect(persisted.payload.collectionVersion).toBe(1);
+      expect(Number.isFinite(Date.parse(persisted.occurredAt))).toBe(true);
+      expect(storage.upload).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Buffer),
+        'image/jpeg',
+        { tags: { retention: 'expire-7d' } },
+      );
+    },
+  );
+
+  it('defers a best shot with no collection metadata without uploading or publishing', async () => {
+    const { queue, query, storage, send } = setup();
+    query.mockResolvedValueOnce({ rows: [preparing] });
+    query.mockResolvedValueOnce({ rows: [] });
+    await expect(
+      queue.enqueueFaceJob({ ...payload, imageBuffer: Buffer.from('crop') }),
+    ).resolves.toMatchObject({ created: true, status: 'PREPARING' });
+    expect(query.mock.calls[2]![1]).toEqual([payload.jobId, 'Face collection registry missing']);
+    expect(storage.upload).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it.each([new Error('private storage details'), 'non-Error storage failure'])(
+    'sanitizes best-shot upload failure and preserves the durable job for retry (%p)',
+    async (error) => {
+      const { queue, query, storage, send } = setup();
+      query.mockResolvedValueOnce({ rows: [preparing] });
+      query.mockResolvedValueOnce({ rows: [{ collection_id: payload.collectionId, version: 1 }] });
+      storage.upload.mockRejectedValueOnce(error);
+      await expect(
+        queue.enqueueFaceJob({ ...payload, imageBuffer: Buffer.from('crop') }),
+      ).resolves.toMatchObject({ created: true, status: 'PREPARING' });
+      expect(query.mock.calls[2]![1]).toEqual([payload.jobId, 'PREPARE_OR_SEND_FAILED']);
+      expect(send).not.toHaveBeenCalled();
+    },
+  );
+
+  it('notifies the coordinator only after commit and retains the receipt if its callback fails', async () => {
+    const { queue, query, transaction, ai } = setup();
+    let committed = false;
+    transaction.mockImplementationOnce(async (callback) => {
+      const result = await callback({ query });
+      committed = true;
+      return result;
+    });
+    const onRecognitionResult = jest.fn(async () => {
+      expect(committed).toBe(true);
+      throw new Error('coordinator temporarily unavailable');
+    });
+    Object.assign(queue, { coordinator: { onRecognitionResult } });
+    const message = structuredClone(faceResult);
+    if (message.type !== 'face.result') throw new Error('fixture type');
+    message.payload.body.observationId = 'track:legacy-track:face';
+    delete message.payload.body.personStatus;
+    message.payload.body.results = [];
+    const durable = {
+      ...sent,
+      camera_slug: undefined,
+      envelope: {
+        payload: {
+          ...payload,
+          trackId: '',
+          observationId: message.payload.body.observationId,
+          sourceSessionId: 'legacy-camera:1700000000.000000',
+        },
+      },
+    };
+    query.mockResolvedValueOnce({ rows: [durable] });
+    query.mockResolvedValueOnce({ rows: [] });
+    query.mockResolvedValueOnce({ rows: [{ identical: true }] });
+    ai.submit.mockResolvedValue({ disposition: 'ACCEPTED' });
+    await expect(queue.applyResult(message)).resolves.toBeUndefined();
+    expect(onRecognitionResult).toHaveBeenCalledWith(
+      expect.objectContaining({
+        trackId: 'legacy-track',
+        cameraSlug: 'legacy-camera',
+        personStatus: 'UNDETERMINED',
+        matchedKnownFaceId: null,
+        similarity: null,
+        errorCode: null,
+      }),
+    );
+    expect(query.mock.calls[3]![0]).toContain('INSERT INTO cloud_result_receipts');
+    query.mockResolvedValueOnce({ rows: [durable] });
+    query.mockResolvedValueOnce({ rows: [{ identical: true }] });
+    await queue.applyResult(message);
+    expect(onRecognitionResult).toHaveBeenCalledTimes(1);
+  });
+
   it('returns only mappings from active known faces and keeps the durable result', async () => {
     const { queue, query } = setup();
     query.mockResolvedValueOnce({ rows: [{ envelope: faceJob, cached_result: faceResult }] });

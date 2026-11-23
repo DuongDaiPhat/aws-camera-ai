@@ -270,6 +270,8 @@ export interface components {
       faceHeightPx: number;
       detectionScore: number;
       sharpness: number;
+      /** @description Laplacian variance on a denoised 112x112 face ROI */
+      normalizedSharpness?: number;
       poseYawRatio: number;
       posePitchRatio: number;
     };

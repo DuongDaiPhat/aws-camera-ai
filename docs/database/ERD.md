@@ -463,6 +463,7 @@ erDiagram
         text source_session_id
         text track_id
         text kind
+        integer revision
         timestamptz observed_at
         timestamptz received_at
         char payload_hash
@@ -1168,7 +1169,10 @@ Outbox cloud dùng chung cho `face.job` và `notification.job`: PK `id`, `result
 FK tới event/owner và camera nullable. Xóa event cascade xuống job; `envelope` chỉ nhận
 JSON object hoặc NULL. `cached_result` lưu canonical outcome để retry không gọi provider lại.
 `status` là CHECK TEXT `PREPARING|PENDING|SENT|FAILED`; `attempts >= 0` và `available_at`
-phục vụ dispatcher. Unique partial index `cloud_one_face_job` chỉ áp dụng với Face.
+phục vụ dispatcher. Migration `0024_face_track_once_pipeline.sql` thêm `revision >= 1`
+(mặc định 1) và thay index cũ bằng `cloud_one_face_job_revision`: UNIQUE
+`(event_id, revision)` khi `kind = 'face.job'`. Coordinator tạo intent sau quality gate;
+trigger Face cũ được gỡ để không tạo thêm job trước khi chọn best shot.
 
 Job notification dùng cùng UUID với intent theo quy ước ứng dụng, **không có FK tới
 notifications**. Backend kiểm event/owner/camera/channel/driver/version trước claim.
@@ -1300,7 +1304,7 @@ truy vấn cụ thể biện minh.
 | `idx_auth_refresh_tokens_active`           | **Tìm token hợp lệ còn sống** (partial: revoked_at IS NULL)                     | US-05, FR-AUT-02 |
 | `idx_users_cognito_identity`               | Unique partial `(cognito_issuer,cognito_sub)` khi cả hai khác NULL              | US-25            |
 | `cloud_jobs_pending`                       | Dispatcher lấy job `PREPARING/PENDING` theo available_at                        | Cloud transport  |
-| `cloud_one_face_job`                       | Unique event_id riêng cho kind face.job                                         | US-29            |
+| `cloud_one_face_job_revision`              | Unique `(event_id, revision)` riêng cho kind face.job                           | US-10            |
 | `cloud_notification_attempts_limit_idx`    | Tra cap/cooldown theo recipient_key/channel/claimed_at, chỉ REAL                | US-26            |
 | `cloud_notification_cached_outcome_id_idx` | Tra outcome ID trong cached_result của job notification; index này không UNIQUE | US-26            |
 | `cloud_notification_routes_topic_arn_key`  | UNIQUE topic, không chia sẻ topic giữa nhiều route có topic ARN                 | US-26            |
