@@ -581,10 +581,13 @@ export class EventsRepository {
          SELECT jsonb_agg(jsonb_build_object(
            'id', n.id, 'channel', n.channel, 'status', n.status,
            'escalationLevel', n.escalation_level, 'attemptCount', n.attempt_count,
-           'errorCode', n.error_code, 'sentAt', n.sent_at, 'confirmedAt', n.confirmed_at,
+           'errorCode', COALESCE(n.error_code, CASE
+             WHEN n.status = 'PENDING' AND n.delivery_driver = 'sqs' AND j.status = 'FAILED'
+             THEN 'UNCERTAIN' END), 'sentAt', n.sent_at, 'confirmedAt', n.confirmed_at,
            'createdAt', n.created_at
          ) ORDER BY n.created_at DESC, n.id)
          FROM notifications n
+         LEFT JOIN cloud_jobs j ON j.id = n.id AND j.kind = 'notification.job'
          WHERE n.event_id = e.id
        ), '[]'::jsonb) AS data
        FROM events e

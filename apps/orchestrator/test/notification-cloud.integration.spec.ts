@@ -1,10 +1,13 @@
 import { randomUUID } from 'node:crypto';
+import { SQSServiceException } from '@aws-sdk/client-sqs';
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
 import { DatabaseService } from '../src/database/database.service';
+import { CloudQueueService } from '../src/cloud-queue/cloud-queue.service';
+import { EventsRepository } from '../src/events/events.repository';
 import { EscalationRepository } from '../src/escalation/escalation.repository';
 import { EscalationEngineService } from '../src/escalation/escalation-engine.service';
 import { EscalationRulesRepository } from '../src/escalation-rules/escalation-rules.repository';
@@ -403,6 +406,132 @@ describe('cloud notifications in PostgreSQL', () => {
       )
     ).rows[0];
   }
+
+  function rejectedSend(attempts = 1) {
+    return new SQSServiceException({
+      name: 'AccessDeniedException',
+      $fault: 'client',
+      $metadata: { httpStatusCode: 403, attempts },
+    });
+  }
+
+  function dispatchFixture(cloud: NotificationCloudService) {
+    const queues = new CloudQueueService(
+      new ConfigService({
+        FACE_JOB_TRANSPORT: 'bullmq',
+        NOTIFICATION_DRIVER: 'sqs',
+        AWS_REGION: 'ap-southeast-1',
+        APPLICATION_RESULTS_CONSUMER_ENABLED: 'true',
+        NOTIFICATION_JOBS_QUEUE_URL: 'https://sqs.ap-southeast-1.amazonaws.com/123456789012/jobs',
+        APPLICATION_RESULTS_QUEUE_URL:
+          'https://sqs.ap-southeast-1.amazonaws.com/123456789012/results',
+      }),
+      db,
+      {} as never,
+      {} as never,
+      {} as never,
+      cloud,
+    );
+    const send = jest.fn().mockRejectedValue(rejectedSend());
+    Object.assign(queues, { sqs: { send } });
+    return {
+      queues,
+      send,
+      async exhaust(id: string) {
+        for (let attempt = 1; attempt <= 5; attempt++) {
+          await pool.query('UPDATE cloud_jobs SET available_at=now() WHERE id=$1', [id]);
+          await queues.dispatchOne();
+          if (attempt < 5)
+            expect(await state(id)).toMatchObject({ status: 'PENDING', error_code: null });
+        }
+        const { rows } = await pool.query('SELECT status, attempts FROM cloud_jobs WHERE id=$1', [
+          id,
+        ]);
+        expect(rows).toEqual([{ status: 'FAILED', attempts: 5 }]);
+        await pool.query('UPDATE cloud_jobs SET available_at=now() WHERE id=$1', [id]);
+        await queues.dispatchOne();
+        expect(send).toHaveBeenCalledTimes(5);
+      },
+    };
+  }
+
+  it('marks the notification failed after five verified SQS rejections', async () => {
+    const cloud = service();
+    const job = await createJob(cloud);
+    await dispatchFixture(cloud).exhaust(job.id);
+    expect(await state(job.id)).toMatchObject({
+      status: 'FAILED',
+      error_code: 'SQS_SEND_REJECTED',
+      failed_at: expect.any(Date),
+    });
+  });
+
+  it.each([
+    ['network timeout', new Error('network timeout')],
+    ['SDK retries before a rejection', rejectedSend(2)],
+  ])(
+    'keeps an ambiguous dispatch visible after %s and accepts a late outcome',
+    async (_label, firstError) => {
+      await allow();
+      const cloud = service();
+      const job = await createJob(cloud);
+      const dispatch = dispatchFixture(cloud);
+      dispatch.send.mockRejectedValueOnce(firstError);
+      await dispatch.exhaust(job.id);
+      expect(await state(job.id)).toMatchObject({
+        status: 'PENDING',
+        error_code: 'UNCERTAIN',
+        failed_at: null,
+      });
+      const grant = await claimAttempt(cloud, job);
+      const result = outcome(job.id, job.request.eventId, grant.attemptId, {
+        status: 'PROVIDER_ACCEPTED',
+        providerCalled: true,
+        providerId: 'late-provider-result',
+      });
+      await cloud.cacheResult(job.id, result);
+      await cloud.applyResult(result);
+      expect(await state(job.id)).toMatchObject({
+        status: 'SENT',
+        provider_message_id: 'late-provider-result',
+      });
+    },
+  );
+
+  it('reports an older exhausted job as uncertain in the event API', async () => {
+    const job = await createJob();
+    await pool.query(
+      "UPDATE cloud_jobs SET status='FAILED',attempts=5,last_error='PREPARE_OR_SEND_FAILED' WHERE id=$1",
+      [job.id],
+    );
+    const notifications = await new EventsRepository(pool).listEventNotifications(
+      job.request.eventId,
+      owner,
+    );
+    expect(notifications?.data).toEqual([
+      expect.objectContaining({ id: job.id, status: 'PENDING', errorCode: 'UNCERTAIN' }),
+    ]);
+  });
+
+  it('keeps a granted notification open for its outcome when dispatch retries are exhausted', async () => {
+    await allow();
+    const cloud = service();
+    const job = await createJob(cloud);
+    const grant = await claimAttempt(cloud, job);
+    await dispatchFixture(cloud).exhaust(job.id);
+    expect(await state(job.id)).toMatchObject({ status: 'PENDING', error_code: 'UNCERTAIN' });
+    const result = outcome(job.id, job.request.eventId, grant.attemptId, {
+      status: 'PROVIDER_ACCEPTED',
+      providerCalled: true,
+      providerId: 'granted-provider-result',
+    });
+    await cloud.cacheResult(job.id, result);
+    await cloud.applyResult(result);
+    expect(await state(job.id)).toMatchObject({
+      status: 'SENT',
+      provider_message_id: 'granted-provider-result',
+    });
+  });
 
   it('creates an owner-fenced, PII-free outbox entry through the central escalation repository', async () => {
     const cloud = service();

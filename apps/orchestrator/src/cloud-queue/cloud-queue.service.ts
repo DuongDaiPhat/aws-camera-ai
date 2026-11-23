@@ -11,6 +11,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import {
   SQSClient,
+  SQSServiceException,
   SendMessageCommand,
   ReceiveMessageCommand,
   DeleteMessageCommand,
@@ -24,6 +25,19 @@ import { SubmitAiResultDto } from '../ai-results/dto/submit-ai-result.dto';
 import { readCloudConfig } from './cloud-config';
 import { Envelope, FaceJobEnvelope, parseEnvelope } from './queue-contract';
 import { NotificationCloudService } from '../notification-cloud/notification-cloud.service';
+
+const SQS_SEND_REJECTED = 'SQS_SEND_REJECTED';
+
+function isDefiniteSqsRejection(error: unknown): boolean {
+  // A final denial after SDK retries does not rule out acceptance of an earlier request.
+  return (
+    error instanceof SQSServiceException &&
+    error.$fault === 'client' &&
+    error.$metadata.attempts === 1 &&
+    [400, 403].includes(error.$metadata.httpStatusCode ?? 0) &&
+    ['AccessDenied', 'AccessDeniedException'].includes(error.name)
+  );
+}
 
 @Injectable()
 export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
@@ -171,15 +185,41 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
           'Face crop unavailable',
           'Unexpected upload bucket',
         ];
-        const reason =
-          error instanceof Error && knownReasons.includes(error.message)
-            ? error.message
-            : 'PREPARE_OR_SEND_FAILED';
-        this.logger.warn({ jobId: job.id, reason }, 'Cloud job retained for retry');
-        await client.query(
+        const rejected =
+          job.kind === 'notification.job' &&
+          (job.attempts === 0 || job.last_error === SQS_SEND_REJECTED) &&
+          isDefiniteSqsRejection(error);
+        let reason = 'PREPARE_OR_SEND_FAILED';
+        if (error instanceof Error && knownReasons.includes(error.message)) reason = error.message;
+        if (rejected) reason = SQS_SEND_REJECTED;
+        const updated = await client.query<{ status: string }>(
           `UPDATE cloud_jobs SET attempts=attempts+1,status=CASE WHEN attempts>=4 THEN 'FAILED' ELSE status END,
-     last_error=$2,available_at=now()+interval '30 seconds' WHERE id=$1`,
+     last_error=$2,available_at=now()+interval '30 seconds' WHERE id=$1 RETURNING status`,
           [job.id, reason],
+        );
+        const exhausted = updated.rows[0]?.status === 'FAILED';
+        if (exhausted && job.kind === 'notification.job') {
+          // A worker that already claimed the job may still report its outcome.
+          await client.query(
+            `WITH delivery AS (
+               SELECT $2::boolean AND NOT EXISTS (
+                 SELECT 1 FROM cloud_notification_attempts WHERE notification_id = $1
+               ) AS rejected
+             )
+             UPDATE notifications n
+             SET status = CASE WHEN delivery.rejected THEN 'FAILED' ELSE 'PENDING' END::notification_status,
+                 error_code = CASE WHEN delivery.rejected THEN 'SQS_SEND_REJECTED' ELSE 'UNCERTAIN' END,
+                 failed_at = CASE WHEN delivery.rejected THEN clock_timestamp() ELSE NULL END,
+                 next_retry_at = NULL
+             FROM delivery
+             WHERE n.id = $1 AND n.delivery_driver = 'sqs'
+               AND n.status = 'PENDING' AND n.error_code IS NULL`,
+            [job.id, rejected],
+          );
+        }
+        this.logger.warn(
+          { jobId: job.id, reason },
+          exhausted ? 'Cloud job exhausted dispatch retries' : 'Cloud job retained for retry',
         );
       }
     });
