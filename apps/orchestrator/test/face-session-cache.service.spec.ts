@@ -186,4 +186,136 @@ describe('FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID)', () =
     expect(computeBoxProximity([0.1, 0.1, 0.3, 0.5], [0.11, 0.1, 0.31, 0.5])).toBeGreaterThan(0.8);
     expect(computeBoxProximity([0, 0, 100, 200], [500, 500, 600, 700])).toBe(0);
   });
+
+  it('matches against a multi-prototype bank while preserving rejection of unrelated faces', () => {
+    const cache = new FaceSessionCacheService(
+      new ConfigService({
+        FACE_SESSION_CACHE_SIMILARITY_THRESHOLD: '0.52',
+        FACE_SESSION_CACHE_MAX_PROTOTYPES: '5',
+      }),
+    );
+
+    const frontal = decodeEmbeddingBase64(encodeVector([1, 0, 0, 0]), 4)!;
+    const angled = decodeEmbeddingBase64(encodeVector([0.4, 0.9165, 0, 0]), 4)!;
+    const returnPose = decodeEmbeddingBase64(encodeVector([0.35, 0.9367, 0, 0]), 4)!;
+    const stranger = decodeEmbeddingBase64(encodeVector([0, 0, 1, 0]), 4)!;
+
+    cache.upsertKnown(
+      scopeV1,
+      {
+        knownFaceId: 'face-alice',
+        personName: 'Alice',
+        trackId: 't-1',
+        embedding: frontal,
+        embeddings: [frontal, angled],
+      },
+      1_000,
+    );
+
+    // Frontal-only cosine would be 0.35 (< 0.52), but angled prototype matches ~0.998!
+    const hit = cache.matchByEmbedding(scopeV1, returnPose, 2_000);
+    expect(hit).not.toBeNull();
+    expect(hit?.entry.knownFaceId).toBe('face-alice');
+    expect(hit!.similarity).toBeGreaterThan(0.95);
+
+    // Subsequent upsert without embeddings preserves the stored prototype bank.
+    cache.upsertKnown(
+      scopeV1,
+      {
+        knownFaceId: 'face-alice',
+        personName: 'Alice',
+        trackId: 't-2',
+        embedding: frontal,
+      },
+      3_000,
+    );
+    expect(cache.matchByEmbedding(scopeV1, returnPose, 4_000)?.entry.embeddings).toHaveLength(2);
+    expect(cache.matchByEmbedding(scopeV1, stranger, 4_000)).toBeNull();
+  });
+
+  it('enforces cosine boundary, exact TTL and collection invalidation for R50 banks', () => {
+    const cache = new FaceSessionCacheService(
+      new ConfigService({ FACE_SESSION_CACHE_SIMILARITY_THRESHOLD: 0.52 }),
+    );
+    const vector = (cosine: number): Float32Array =>
+      new Float32Array([cosine, Math.sqrt(1 - cosine * cosine)]);
+    cache.upsertKnown(
+      scopeV1,
+      {
+        knownFaceId: 'face-boundary',
+        personName: 'Boundary',
+        trackId: 'boundary',
+        embeddings: [new Float32Array([1, 0])],
+      },
+      1000,
+    );
+    expect(cache.matchByEmbedding(scopeV1, vector(0.5199), 1001)).toBeNull();
+    expect(cache.matchByEmbedding(scopeV1, vector(0.5201), 1001)?.entry.knownFaceId).toBe(
+      'face-boundary',
+    );
+    expect(cache.matchByEmbedding(scopeV1, vector(1), 300999)).not.toBeNull();
+    expect(cache.matchByEmbedding(scopeV1, vector(1), 301000)).toBeNull();
+    cache.upsertKnown(
+      scopeV1,
+      {
+        knownFaceId: 'face-boundary',
+        personName: 'Boundary',
+        trackId: 'next',
+        embeddings: [new Float32Array([1, 0])],
+      },
+      302000,
+    );
+    expect(
+      cache.matchByEmbedding(
+        { ...scopeV1, collectionVersion: scopeV1.collectionVersion + 1 },
+        vector(1),
+        302001,
+      ),
+    ).toBeNull();
+  });
+
+  it('evicts oldest identities at camera and global limits without crossing owner scopes', () => {
+    const cache = new FaceSessionCacheService();
+    const embedding = new Float32Array([1, 0]);
+    for (let i = 0; i < 65; i++) {
+      cache.upsertKnown(
+        scopeV1,
+        {
+          knownFaceId: `face-${i}`,
+          personName: null,
+          trackId: `track-${i}`,
+          embedding,
+        },
+        1000 + i,
+      );
+    }
+    expect(cache.matchByEmbedding(scopeV1, embedding, 2000)?.entry.knownFaceId).toBe('face-1');
+    cache.clear();
+    for (let i = 0; i < 2001; i++) {
+      cache.upsertKnown(
+        { ...scopeV1, cameraSlug: `camera-${i}` },
+        {
+          knownFaceId: `face-${i}`,
+          personName: null,
+          trackId: `track-${i}`,
+          embedding,
+        },
+        1000 + i,
+      );
+    }
+    expect(
+      cache.matchByEmbedding({ ...scopeV1, cameraSlug: 'camera-0' }, embedding, 4000),
+    ).toBeNull();
+    expect(
+      cache.matchByEmbedding({ ...scopeV1, cameraSlug: 'camera-1' }, embedding, 4000),
+    ).not.toBeNull();
+    cache.invalidateOwner('different-owner');
+    expect(
+      cache.matchByEmbedding({ ...scopeV1, cameraSlug: 'camera-1' }, embedding, 4000),
+    ).not.toBeNull();
+    cache.invalidateOwner(scopeV1.ownerScopeId);
+    expect(
+      cache.matchByEmbedding({ ...scopeV1, cameraSlug: 'camera-1' }, embedding, 4000),
+    ).toBeNull();
+  });
 });

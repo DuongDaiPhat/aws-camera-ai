@@ -1,6 +1,7 @@
 import { Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { FaceAssessBoundingBox } from './face-quality-gate.client';
+import { cosineSimilarity } from './face-session-cache.service';
 import {
   type FaceTrackOptimizationConfig,
   readFaceTrackOptimizationConfig,
@@ -8,6 +9,11 @@ import {
 
 export type TrackIdentityState =
   'COLLECTING' | 'PENDING_RECOGNITION' | 'KNOWN' | 'UNKNOWN' | 'UNDETERMINED';
+
+export interface PrototypeSample {
+  embedding: Float32Array;
+  qualityScore: number;
+}
 
 export interface BestShotCandidate {
   imageBuffer: Buffer;
@@ -19,6 +25,7 @@ export interface BestShotCandidate {
   personBox: number[] | null;
   capturedAt: number;
   failOpenApplied?: boolean;
+  singlePersonClean?: boolean;
 }
 
 export interface TrackRecord {
@@ -41,8 +48,10 @@ export interface TrackRecord {
   lastSampleCapturedAt: number | null;
   samplesCollected: number;
   bestShot: BestShotCandidate | null;
+  collectedEmbeddings: PrototypeSample[];
   dispatchedQualityScore: number | null;
   dispatchedEmbedding: Float32Array | null;
+  dispatchedEmbeddings: Float32Array[];
   dispatchedAppearanceSignature: Float32Array | null;
   dispatchedBox: number[] | null;
   dispatchedAt: number | null;
@@ -145,8 +154,10 @@ export class TrackIdentityStateService {
       lastSampleCapturedAt: null,
       samplesCollected: 0,
       bestShot: null,
+      collectedEmbeddings: [],
       dispatchedQualityScore: null,
       dispatchedEmbedding: null,
+      dispatchedEmbeddings: [],
       dispatchedAppearanceSignature: null,
       dispatchedBox: null,
       dispatchedAt: null,
@@ -186,6 +197,31 @@ export class TrackIdentityStateService {
         record.endedAt !== null &&
         now >= record.endedAt &&
         now - record.endedAt <= maxGapMs,
+    );
+  }
+
+  hasActiveKnownTrackForFace(
+    cameraSlug: string,
+    ownerScopeId: string,
+    knownFaceId: string,
+    excludeTrackId: string,
+    excludeCanonicalTrackId: string | null = null,
+    now = Date.now(),
+    maxActiveAgeMs = 5_000,
+  ): boolean {
+    this.cleanup(now);
+    return [...this.tracks.values()].some(
+      (record) =>
+        record.cameraSlug === cameraSlug &&
+        record.ownerScopeId === ownerScopeId &&
+        record.state === 'KNOWN' &&
+        record.matchedKnownFaceId === knownFaceId &&
+        record.endedAt === null &&
+        record.trackId !== excludeTrackId &&
+        (excludeCanonicalTrackId === null ||
+          (record.canonicalTrackId ?? record.trackId) !== excludeCanonicalTrackId) &&
+        now >= record.lastUpdatedAt &&
+        now - record.lastUpdatedAt <= maxActiveAgeMs,
     );
   }
 
@@ -229,11 +265,49 @@ export class TrackIdentityStateService {
     }
   }
 
+  recordPrototypeSample(
+    record: TrackRecord,
+    embedding: Float32Array,
+    qualityScore: number,
+    maxSamples = 32,
+  ): void {
+    record.collectedEmbeddings.push({ embedding, qualityScore });
+    if (record.collectedEmbeddings.length > maxSamples) {
+      record.collectedEmbeddings.sort((a, b) => b.qualityScore - a.qualityScore);
+      record.collectedEmbeddings.length = maxSamples;
+    }
+  }
+
+  buildPrototypeBank(
+    primary: Float32Array | null,
+    samples: readonly PrototypeSample[],
+    maxPrototypes = this.optConfig.sessionCacheMaxPrototypes,
+    dedupThreshold = this.optConfig.sessionCachePrototypeDedupThreshold,
+  ): Float32Array[] {
+    const cap = Math.max(1, maxPrototypes);
+    const bank: Float32Array[] = [];
+    if (primary) {
+      bank.push(primary);
+    }
+    const ordered = [...samples].sort((a, b) => b.qualityScore - a.qualityScore);
+    for (const item of ordered) {
+      if (bank.length >= cap) break;
+      const isDuplicate = bank.some(
+        (existing) => cosineSimilarity(existing, item.embedding) >= dedupThreshold,
+      );
+      if (!isDuplicate) {
+        bank.push(item.embedding);
+      }
+    }
+    return bank;
+  }
+
   markDispatched(
     record: TrackRecord,
     shot: {
       qualityScore: number;
       embedding: Float32Array | null;
+      embeddings?: Float32Array[];
       appearanceSignature: Float32Array | null;
       box: number[] | null;
     },
@@ -246,11 +320,18 @@ export class TrackIdentityStateService {
     record.state = 'PENDING_RECOGNITION';
     record.dispatchedQualityScore = shot.qualityScore;
     record.dispatchedEmbedding = shot.embedding;
+    record.dispatchedEmbeddings =
+      shot.embeddings && shot.embeddings.length > 0
+        ? [...shot.embeddings]
+        : shot.embedding
+          ? [shot.embedding]
+          : [];
     record.dispatchedAppearanceSignature = shot.appearanceSignature;
     record.dispatchedBox = shot.box ? [...shot.box] : record.lastBox ? [...record.lastBox] : null;
     record.dispatchedAt = now;
     record.lastUpdatedAt = now;
     record.bestShot = null;
+    record.collectedEmbeddings = [];
     this.metrics.dispatched += 1;
     if (isRetry) {
       this.metrics.retriesDispatched += 1;

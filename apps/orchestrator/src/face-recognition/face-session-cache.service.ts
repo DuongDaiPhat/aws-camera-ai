@@ -17,6 +17,7 @@ export interface FaceSessionEntry {
   personName: string | null;
   trackId: string;
   embedding: Float32Array | null;
+  embeddings: Float32Array[];
   appearanceSignature: Float32Array | null;
   lastBox: number[] | null;
   confirmedAt: number;
@@ -230,6 +231,7 @@ export class FaceSessionCacheService {
       personName: string | null;
       trackId: string;
       embedding?: Float32Array | null;
+      embeddings?: readonly Float32Array[] | null;
       appearanceSignature?: Float32Array | null;
       lastBox?: number[] | null;
       confirmedAt?: number;
@@ -243,11 +245,14 @@ export class FaceSessionCacheService {
     const bucket = this.getScopeBucket(scope, true, now)!;
     const existing = bucket.entries.get(input.knownFaceId);
     const confirmedAt = input.confirmedAt ?? now;
+    const primaryEmbedding = input.embedding ?? existing?.embedding ?? null;
+    const embeddings = this.resolveEmbeddings(input.embeddings, primaryEmbedding, existing);
     const entry: FaceSessionEntry = {
       knownFaceId: input.knownFaceId,
       personName: input.personName ?? existing?.personName ?? null,
       trackId: input.trackId,
-      embedding: input.embedding ?? existing?.embedding ?? null,
+      embedding: primaryEmbedding,
+      embeddings,
       appearanceSignature: input.appearanceSignature ?? existing?.appearanceSignature ?? null,
       lastBox: isValidBox(input.lastBox)
         ? [...input.lastBox]
@@ -266,6 +271,43 @@ export class FaceSessionCacheService {
     bucket.entries.set(input.knownFaceId, entry);
     this.enforceBounds(bucket);
     return entry;
+  }
+
+  private resolveEmbeddings(
+    incoming: readonly Float32Array[] | null | undefined,
+    primaryEmbedding: Float32Array | null,
+    existing: FaceSessionEntry | undefined,
+  ): Float32Array[] {
+    const cap = Math.max(1, this.optConfig.sessionCacheMaxPrototypes);
+    const merged: Float32Array[] = [];
+    const pushUnique = (vec: Float32Array | null | undefined): void => {
+      if (!vec || vec.length === 0 || merged.length >= cap) return;
+      if (!merged.some((item) => item === vec)) {
+        merged.push(vec);
+      }
+    };
+    if (incoming && incoming.length > 0) {
+      for (const vec of incoming) pushUnique(vec);
+      pushUnique(primaryEmbedding);
+      return merged;
+    }
+    if (existing?.embeddings && existing.embeddings.length > 0) {
+      for (const vec of existing.embeddings) pushUnique(vec);
+    }
+    pushUnique(primaryEmbedding);
+    return merged;
+  }
+
+  maxEntrySimilarity(entry: FaceSessionEntry, embedding: Float32Array | null): number {
+    if (!embedding || embedding.length === 0) return 0;
+    const prototypes =
+      entry.embeddings.length > 0 ? entry.embeddings : entry.embedding ? [entry.embedding] : [];
+    let best = 0;
+    for (const proto of prototypes) {
+      const sim = cosineSimilarity(embedding, proto);
+      if (sim > best) best = sim;
+    }
+    return best;
   }
 
   updateTrackBox(scope: FaceSessionScope, trackId: string, box: number[], now = Date.now()): void {
@@ -326,8 +368,7 @@ export class FaceSessionCacheService {
 
     let best: EmbeddingMatchResult | null = null;
     for (const entry of bucket.entries.values()) {
-      if (!entry.embedding) continue;
-      const similarity = cosineSimilarity(embedding, entry.embedding);
+      const similarity = this.maxEntrySimilarity(entry, embedding);
       if (
         similarity >= this.optConfig.sessionCacheSimilarityThreshold &&
         (!best || similarity > best.similarity)

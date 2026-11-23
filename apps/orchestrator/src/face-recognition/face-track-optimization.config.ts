@@ -18,6 +18,8 @@ export interface FaceTrackOptimizationConfig {
   sessionCacheEnabled: boolean;
   sessionCacheTtlMs: number;
   sessionCacheSimilarityThreshold: number;
+  sessionCacheMaxPrototypes: number;
+  sessionCachePrototypeDedupThreshold: number;
   spatialReidEnabled: boolean;
   spatialReidMaxGapMs: number;
   spatialReidMinProximityScore: number;
@@ -42,7 +44,9 @@ export const DEFAULT_FACE_TRACK_OPTIMIZATION_CONFIG: FaceTrackOptimizationConfig
   unknownRecheckMinQualityGain: 0.15,
   sessionCacheEnabled: true,
   sessionCacheTtlMs: 300000,
-  sessionCacheSimilarityThreshold: 0.72,
+  sessionCacheSimilarityThreshold: 0.52,
+  sessionCacheMaxPrototypes: 5,
+  sessionCachePrototypeDedupThreshold: 0.92,
   spatialReidEnabled: true,
   spatialReidMaxGapMs: 20000,
   spatialReidMinProximityScore: 0.35,
@@ -181,6 +185,16 @@ export function readFaceTrackOptimizationConfig(
       config,
       'FACE_SESSION_CACHE_SIMILARITY_THRESHOLD',
       d.sessionCacheSimilarityThreshold,
+    ),
+    sessionCacheMaxPrototypes: readPositiveInt(
+      config,
+      'FACE_SESSION_CACHE_MAX_PROTOTYPES',
+      d.sessionCacheMaxPrototypes,
+    ),
+    sessionCachePrototypeDedupThreshold: readUnitNumber(
+      config,
+      'FACE_SESSION_CACHE_PROTOTYPE_DEDUP_THRESHOLD',
+      d.sessionCachePrototypeDedupThreshold,
     ),
     spatialReidEnabled: readBoolean(config, 'FACE_SPATIAL_REID_ENABLED', d.spatialReidEnabled),
     spatialReidMaxGapMs: readPositiveNumber(

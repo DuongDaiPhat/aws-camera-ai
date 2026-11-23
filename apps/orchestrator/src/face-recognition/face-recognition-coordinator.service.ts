@@ -23,7 +23,6 @@ import {
 } from './face-quality-gate.client';
 import {
   computeAppearanceSignature,
-  cosineSimilarity,
   decodeEmbeddingBase64,
   type FaceSessionScope,
   FaceSessionCacheService,
@@ -220,8 +219,7 @@ export class FaceRecognitionCoordinatorService
         : null;
       if (
         !embedding ||
-        !match.entry.embedding ||
-        cosineSimilarity(embedding, match.entry.embedding) <
+        this.sessionCache.maxEntrySimilarity(match.entry, embedding) <
           this.optConfig.sessionCacheSimilarityThreshold
       )
         return null;
@@ -397,6 +395,7 @@ export class FaceRecognitionCoordinatorService
       personBox: record.lastBox,
       capturedAt: pairedCrop && pairedCapturedAt !== null ? pairedCapturedAt : now,
       failOpenApplied: gateResult.failOpenApplied,
+      singlePersonClean: !otherPeople && !gateResult.failOpenApplied && gateResult.faceCount === 1,
     };
     await this.handleEvaluatedCandidate(record, candidate, now);
   }
@@ -546,8 +545,7 @@ export class FaceRecognitionCoordinatorService
         : null;
       if (
         !embedding ||
-        !reidMatch.entry.embedding ||
-        cosineSimilarity(embedding, reidMatch.entry.embedding) <
+        this.sessionCache.maxEntrySimilarity(reidMatch.entry, embedding) <
           this.optConfig.sessionCacheSimilarityThreshold
       ) {
         return false;
@@ -558,6 +556,7 @@ export class FaceRecognitionCoordinatorService
       knownFaceId: reidMatch.entry.knownFaceId,
       personName: reidMatch.entry.personName,
       embedding: reidMatch.entry.embedding,
+      embeddings: reidMatch.entry.embeddings,
       appearanceSignature: appearanceSignature ?? reidMatch.entry.appearanceSignature,
       similarity: reidMatch.appearanceSimilarity,
       boundingBox: null,
@@ -577,18 +576,31 @@ export class FaceRecognitionCoordinatorService
     modelVersion: string,
     now: number,
   ): Promise<boolean> {
-    if (!embedding || !this.optConfig.sessionCacheEnabled) {
+    if (record.state === 'UNKNOWN' || !embedding || !this.optConfig.sessionCacheEnabled) {
       return false;
     }
     const cacheHit = this.sessionCache.matchByEmbedding(scope, embedding, now);
     if (!cacheHit) {
       return false;
     }
+    if (
+      this.stateService.hasActiveKnownTrackForFace(
+        record.cameraSlug,
+        record.ownerScopeId,
+        cacheHit.entry.knownFaceId,
+        record.trackId,
+        record.canonicalTrackId ?? record.trackId,
+        now,
+      )
+    ) {
+      return false;
+    }
     this.stateService.recordSessionCacheHit();
     await this.applyLocalCacheHit(record, scope, {
       knownFaceId: cacheHit.entry.knownFaceId,
       personName: cacheHit.entry.personName,
-      embedding,
+      embedding: cacheHit.entry.embedding ?? embedding,
+      embeddings: cacheHit.entry.embeddings,
       appearanceSignature: appearanceSignature ?? cacheHit.entry.appearanceSignature,
       similarity: cacheHit.similarity,
       boundingBox,
@@ -631,6 +643,15 @@ export class FaceRecognitionCoordinatorService
     if (!record.bestShot) {
       record.bestShotWindowStartedAt = now;
       record.samplesCollected = 0;
+      record.collectedEmbeddings = [];
+    }
+    if (candidate.embedding && candidate.singlePersonClean) {
+      this.stateService.recordPrototypeSample(
+        record,
+        candidate.embedding,
+        candidate.qualityScore,
+        this.optConfig.bestShotMaxSamples,
+      );
     }
     this.stateService.updateBestShot(record, candidate, now);
     const elapsed = now - (record.bestShotWindowStartedAt ?? now);
@@ -706,6 +727,7 @@ export class FaceRecognitionCoordinatorService
           personName,
           trackId,
           embedding: record?.dispatchedEmbedding ?? null,
+          embeddings: record?.dispatchedEmbeddings,
           appearanceSignature: record?.dispatchedAppearanceSignature ?? null,
           lastBox: record?.lastBox ?? record?.dispatchedBox ?? null,
           confirmedAt: now,
@@ -761,11 +783,16 @@ export class FaceRecognitionCoordinatorService
     now: number,
   ): Promise<void> {
     this.clearWindowTimer(record.key);
+    const prototypeBank = this.stateService.buildPrototypeBank(
+      candidate.embedding,
+      record.collectedEmbeddings,
+    );
     const revision = this.stateService.markDispatched(
       record,
       {
         qualityScore: candidate.qualityScore,
         embedding: candidate.embedding,
+        embeddings: prototypeBank,
         appearanceSignature: candidate.appearanceSignature,
         box: candidate.personBox ?? record.lastBox,
       },
@@ -840,6 +867,7 @@ export class FaceRecognitionCoordinatorService
       knownFaceId: string;
       personName: string | null;
       embedding: Float32Array | null;
+      embeddings?: readonly Float32Array[];
       appearanceSignature: Float32Array | null;
       similarity: number;
       boundingBox: FaceAssessBoundingBox | null;
@@ -865,6 +893,7 @@ export class FaceRecognitionCoordinatorService
         personName: hit.personName,
         trackId: record.trackId,
         embedding: hit.embedding,
+        embeddings: hit.embeddings,
         appearanceSignature: hit.appearanceSignature,
         lastBox: record.lastBox,
         confirmedAt: hit.now,

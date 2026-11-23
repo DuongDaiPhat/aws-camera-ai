@@ -10,6 +10,9 @@ describe('Best-Shot production configuration', () => {
       bestShotEarlyDispatchEnabled: false,
       requireTimestampedFrame: true,
       qualityGateFailOpen: false,
+      sessionCacheSimilarityThreshold: 0.52,
+      sessionCacheMaxPrototypes: 5,
+      sessionCachePrototypeDedupThreshold: 0.92,
     });
   });
 });

@@ -1321,4 +1321,327 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
     );
     h.coordinator.onModuleDestroy();
   });
+
+  it('caches a diverse single-person prototype bank from Track 1 and matches return angle with 0 AWS calls', async () => {
+    const h = buildHarness({
+      FACE_BEST_SHOT_EARLY_DISPATCH_ENABLED: 'false',
+      FACE_BEST_SHOT_WINDOW_MS: '1200',
+      FACE_MIN_SAMPLE_INTERVAL_MS: '150',
+      FACE_SESSION_CACHE_SIMILARITY_THRESHOLD: '0.52',
+      FACE_SESSION_CACHE_MAX_PROTOTYPES: '5',
+      FACE_SESSION_CACHE_PROTOTYPE_DEDUP_THRESHOLD: '0.92',
+    });
+    let now = 80_000;
+    jest.spyOn(Date, 'now').mockImplementation(() => now);
+    const camera = makeCamera();
+
+    const crop1 = await solidJpeg({ r: 20, g: 30, b: 180 }, { r: 20, g: 20, b: 20 });
+    const crop2 = await solidJpeg({ r: 22, g: 32, b: 175 }, { r: 22, g: 22, b: 22 });
+    const returnCrop = await solidJpeg({ r: 190, g: 160, b: 40 }, { r: 40, g: 40, b: 40 });
+    const strangerCrop = await solidJpeg({ r: 10, g: 190, b: 20 }, { r: 20, g: 20, b: 20 });
+
+    const protoAngle = encodeVector([0.3, 0.9539, 0, 0]);
+    const protoBest = encodeVector([1, 0, 0, 0]);
+    const returnVec = encodeVector([0.35, 0.9367, 0, 0]); // cos vs protoBest=0.35 (<0.52), vs protoAngle~0.998!
+    const strangerVec = encodeVector([0, 0, 1, 0]);
+
+    const event1 = makeEvent({ id: '11111111-1111-4111-8111-111111111151', track_id: 't1' });
+    h.getCroppedSnapshot.mockResolvedValueOnce(crop1).mockResolvedValueOnce(crop2);
+    h.assess
+      .mockResolvedValueOnce(makeGateResult({ qualityScore: 0.72, embeddingBase64: protoAngle }))
+      .mockResolvedValueOnce(makeGateResult({ qualityScore: 0.91, embeddingBase64: protoBest }));
+
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: event1,
+      after: { id: 't1', camera: 'cam_front', frame_time: 80, label: 'person', score: 0.9 },
+      isCreated: true,
+      camera,
+    });
+    now += 1_300;
+    await h.coordinator.handleTrackEvent({
+      messageType: 'update',
+      event: event1,
+      after: { id: 't1', camera: 'cam_front', frame_time: 81.3, label: 'person', score: 0.9 },
+      isCreated: false,
+      camera,
+    });
+    expect(h.enqueueFaceJob).toHaveBeenCalledTimes(1);
+
+    await h.coordinator.onRecognitionResult({
+      eventId: event1.id,
+      cameraSlug: 'cam_front',
+      ownerScopeId: camera.owner_user_id!,
+      trackId: 't1',
+      collectionVersion: 1,
+      revision: 1,
+      personStatus: 'KNOWN',
+      matchedKnownFaceId: aliceId,
+      matchedPersonName: 'Alice',
+      similarity: 0.98,
+      disposition: 'ACCEPTED',
+    });
+
+    // End Track 1 and wait 30 seconds (> spatialReidMaxGapMs 20s) with completely different clothes.
+    now += 1_000;
+    await h.coordinator.handleTrackEvent({
+      messageType: 'end',
+      event: event1,
+      after: { id: 't1', camera: 'cam_front', frame_time: 82.3, label: 'person', score: 0.9 },
+      isCreated: false,
+      camera,
+    });
+
+    now += 30_000;
+    const event2 = makeEvent({ id: '11111111-1111-4111-8111-111111111152', track_id: 't2' });
+    h.getCroppedSnapshot.mockResolvedValueOnce(returnCrop);
+    h.assess.mockResolvedValueOnce(
+      makeGateResult({ qualityScore: 0.65, embeddingBase64: returnVec }),
+    );
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: event2,
+      after: { id: 't2', camera: 'cam_front', frame_time: 112.3, label: 'person', score: 0.9 },
+      isCreated: true,
+      camera,
+    });
+
+    expect(h.enqueueFaceJob).toHaveBeenCalledTimes(1);
+    expect(h.stateService.getMetrics().sessionCacheHits).toBe(1);
+    expect(h.submitAiResult).toHaveBeenCalledWith(
+      event2.id,
+      expect.objectContaining({
+        personStatus: 'KNOWN',
+        matchedKnownFaceId: aliceId,
+        results: [
+          expect.objectContaining({
+            metadata: expect.objectContaining({
+              provider: 'local-session-cache',
+              cacheHit: true,
+              matchMethod: 'embedding',
+            }),
+          }),
+        ],
+      }),
+    );
+
+    // Unrelated stranger must still miss cache and dispatch to AWS after Best-Shot window closes.
+    now += 1_000;
+    const event3 = makeEvent({ id: '11111111-1111-4111-8111-111111111153', track_id: 't3' });
+    h.getCroppedSnapshot.mockResolvedValueOnce(strangerCrop);
+    h.assess.mockResolvedValueOnce(
+      makeGateResult({ qualityScore: 0.85, embeddingBase64: strangerVec }),
+    );
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: event3,
+      after: { id: 't3', camera: 'cam_front', frame_time: 113.3, label: 'person', score: 0.9 },
+      isCreated: true,
+      camera,
+    });
+    now += 1_300;
+    await h.coordinator.handleTrackEvent({
+      messageType: 'end',
+      event: event3,
+      after: { id: 't3', camera: 'cam_front', frame_time: 114.6, label: 'person', score: 0.9 },
+      isCreated: false,
+      camera,
+    });
+    expect(h.submitAiResult).toHaveBeenCalledTimes(1);
+    expect(h.enqueueFaceJob).toHaveBeenCalledTimes(2);
+    expect(h.enqueueFaceJob).toHaveBeenLastCalledWith(
+      expect.objectContaining({ eventId: event3.id }),
+    );
+    h.coordinator.onModuleDestroy();
+  });
+
+  it('does not promote an UNKNOWN track via local-session-cache when a cached person later appears in its crop', async () => {
+    const h = buildHarness({
+      FACE_BEST_SHOT_EARLY_DISPATCH_ENABLED: 'false',
+      FACE_BEST_SHOT_WINDOW_MS: '1200',
+      FACE_MIN_SAMPLE_INTERVAL_MS: '150',
+      FACE_SESSION_CACHE_SIMILARITY_THRESHOLD: '0.52',
+    });
+    let now = 90_000;
+    jest.spyOn(Date, 'now').mockImplementation(() => now);
+    const camera = makeCamera();
+
+    const aliceCrop = await solidJpeg({ r: 20, g: 30, b: 180 }, { r: 20, g: 20, b: 20 });
+    const strangerCrop = await solidJpeg({ r: 10, g: 190, b: 20 }, { r: 20, g: 20, b: 20 });
+    const aliceVec = encodeVector([1, 0, 0, 0]);
+    const strangerVec = encodeVector([0, 1, 0, 0]);
+
+    // Track 1 primes session cache for Alice and ends cleanly.
+    const event1 = makeEvent({ id: '11111111-1111-4111-8111-111111111161', track_id: 't1' });
+    h.getCroppedSnapshot.mockResolvedValueOnce(aliceCrop);
+    h.assess.mockResolvedValueOnce(
+      makeGateResult({ qualityScore: 0.85, embeddingBase64: aliceVec }),
+    );
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: event1,
+      after: { id: 't1', camera: 'cam_front', frame_time: 90, label: 'person', score: 0.9 },
+      isCreated: true,
+      camera,
+    });
+    now += 1_300;
+    await h.coordinator.handleTrackEvent({
+      messageType: 'end',
+      event: event1,
+      after: { id: 't1', camera: 'cam_front', frame_time: 91.3, label: 'person', score: 0.9 },
+      isCreated: false,
+      camera,
+    });
+    await h.coordinator.onRecognitionResult({
+      eventId: event1.id,
+      cameraSlug: 'cam_front',
+      ownerScopeId: camera.owner_user_id!,
+      trackId: 't1',
+      collectionVersion: 1,
+      revision: 1,
+      personStatus: 'KNOWN',
+      matchedKnownFaceId: aliceId,
+      matchedPersonName: 'Alice',
+      similarity: 0.99,
+      disposition: 'ACCEPTED',
+    });
+
+    // Track 2 is a stranger verified UNKNOWN by AWS.
+    now += 1_000;
+    const event2 = makeEvent({ id: '11111111-1111-4111-8111-111111111162', track_id: 't2' });
+    h.getCroppedSnapshot.mockResolvedValueOnce(strangerCrop).mockResolvedValueOnce(strangerCrop);
+    h.assess
+      .mockResolvedValueOnce(makeGateResult({ qualityScore: 0.65, embeddingBase64: strangerVec }))
+      .mockResolvedValueOnce(makeGateResult({ qualityScore: 0.65, embeddingBase64: strangerVec }));
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: event2,
+      after: { id: 't2', camera: 'cam_front', frame_time: 92.3, label: 'person', score: 0.9 },
+      isCreated: true,
+      camera,
+    });
+    now += 1_300;
+    await h.coordinator.handleTrackEvent({
+      messageType: 'update',
+      event: event2,
+      after: { id: 't2', camera: 'cam_front', frame_time: 93.6, label: 'person', score: 0.9 },
+      isCreated: false,
+      camera,
+    });
+    await h.coordinator.onRecognitionResult({
+      eventId: event2.id,
+      cameraSlug: 'cam_front',
+      ownerScopeId: camera.owner_user_id!,
+      trackId: 't2',
+      collectionVersion: 1,
+      revision: 1,
+      personStatus: 'UNKNOWN',
+      matchedKnownFaceId: null,
+      matchedPersonName: null,
+      similarity: 0.02,
+      disposition: 'ACCEPTED',
+    });
+
+    // Later occlusion puts Alice's embedding into Track 2's crop; cache must not flip Track 2 to KNOWN.
+    now += 1_000;
+    h.getCroppedSnapshot.mockResolvedValueOnce(aliceCrop);
+    h.assess.mockResolvedValueOnce(
+      makeGateResult({ qualityScore: 0.66, embeddingBase64: aliceVec }),
+    );
+    await h.coordinator.handleTrackEvent({
+      messageType: 'update',
+      event: event2,
+      after: { id: 't2', camera: 'cam_front', frame_time: 94.6, label: 'person', score: 0.9 },
+      isCreated: false,
+      camera,
+    });
+
+    expect(h.stateService.getMetrics().sessionCacheHits).toBe(0);
+    expect(h.submitAiResult).not.toHaveBeenCalled();
+    expect(h.enqueueFaceJob).toHaveBeenCalledTimes(2);
+    expect(h.stateService.get('cam_front', 't2', now)?.state).toBe('UNKNOWN');
+    h.coordinator.onModuleDestroy();
+  });
+
+  it('does not match a concurrent COLLECTING track while an active KNOWN track on the same camera owns that face', async () => {
+    const h = buildHarness({
+      FACE_BEST_SHOT_EARLY_DISPATCH_ENABLED: 'false',
+      FACE_BEST_SHOT_WINDOW_MS: '1200',
+      FACE_MIN_SAMPLE_INTERVAL_MS: '150',
+      FACE_SESSION_CACHE_SIMILARITY_THRESHOLD: '0.52',
+    });
+    let now = 100_000;
+    jest.spyOn(Date, 'now').mockImplementation(() => now);
+    const camera = makeCamera();
+
+    const crop1 = await solidJpeg({ r: 20, g: 30, b: 180 }, { r: 20, g: 20, b: 20 });
+    const crop2 = await solidJpeg({ r: 10, g: 190, b: 20 }, { r: 20, g: 20, b: 20 });
+    const aliceVec = encodeVector([1, 0, 0, 0]);
+
+    // Track 1 is active (endedAt === null) and KNOWN as Alice.
+    const event1 = makeEvent({ id: '11111111-1111-4111-8111-111111111171', track_id: 't1' });
+    h.getCroppedSnapshot.mockResolvedValueOnce(crop1).mockResolvedValueOnce(crop1);
+    h.assess
+      .mockResolvedValueOnce(makeGateResult({ qualityScore: 0.85, embeddingBase64: aliceVec }))
+      .mockResolvedValueOnce(makeGateResult({ qualityScore: 0.85, embeddingBase64: aliceVec }));
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: event1,
+      after: { id: 't1', camera: 'cam_front', frame_time: 100, label: 'person', score: 0.9 },
+      isCreated: true,
+      camera,
+    });
+    now += 1_300;
+    await h.coordinator.handleTrackEvent({
+      messageType: 'update',
+      event: event1,
+      after: { id: 't1', camera: 'cam_front', frame_time: 101.3, label: 'person', score: 0.9 },
+      isCreated: false,
+      camera,
+    });
+    await h.coordinator.onRecognitionResult({
+      eventId: event1.id,
+      cameraSlug: 'cam_front',
+      ownerScopeId: camera.owner_user_id!,
+      trackId: 't1',
+      collectionVersion: 1,
+      revision: 1,
+      personStatus: 'KNOWN',
+      matchedKnownFaceId: aliceId,
+      matchedPersonName: 'Alice',
+      similarity: 0.99,
+      disposition: 'ACCEPTED',
+    });
+
+    // Concurrent Track 2 cannot claim Alice from local cache while Track 1 is still active.
+    now += 500;
+    const event2 = makeEvent({ id: '11111111-1111-4111-8111-111111111172', track_id: 't2' });
+    h.getCroppedSnapshot.mockResolvedValueOnce(crop2);
+    h.assess.mockResolvedValueOnce(
+      makeGateResult({ qualityScore: 0.8, embeddingBase64: aliceVec }),
+    );
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: event2,
+      after: { id: 't2', camera: 'cam_front', frame_time: 101.8, label: 'person', score: 0.9 },
+      isCreated: true,
+      camera,
+    });
+    now += 1_300;
+    await h.coordinator.handleTrackEvent({
+      messageType: 'end',
+      event: event2,
+      after: { id: 't2', camera: 'cam_front', frame_time: 103.1, label: 'person', score: 0.9 },
+      isCreated: false,
+      camera,
+    });
+
+    expect(h.stateService.getMetrics().sessionCacheHits).toBe(0);
+    expect(h.submitAiResult).not.toHaveBeenCalled();
+    expect(h.enqueueFaceJob).toHaveBeenCalledTimes(2);
+    expect(h.enqueueFaceJob).toHaveBeenLastCalledWith(
+      expect.objectContaining({ eventId: event2.id }),
+    );
+    h.coordinator.onModuleDestroy();
+  });
 });
