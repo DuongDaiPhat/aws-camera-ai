@@ -44,6 +44,14 @@ jobs:
           persist-credentials: false
       - name: Validate Sender deployment configuration
         run: bash tools/cd/deploy-sender.sh --check-config
+      - name: Require authenticated dependency smoke
+        env:
+          SMOKE_INTERNAL_TOKEN: ${{ secrets.SMOKE_INTERNAL_TOKEN }}
+        run: |
+          test -n "$SMOKE_INTERNAL_TOKEN" || {
+            echo 'SMOKE_INTERNAL_TOKEN is required for deployment dependency verification' >&2
+            exit 1
+          }
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
