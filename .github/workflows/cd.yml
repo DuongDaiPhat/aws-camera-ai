@@ -7,7 +7,9 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: camerai-release-main
+  # A production approval must not block a later commit from reaching staging.
+  # deploy-environment.yml still serializes deployment within each environment.
+  group: camerai-release-${{ github.event.workflow_run.head_sha }}
   cancel-in-progress: false
 jobs:
   package:
