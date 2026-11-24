@@ -75,3 +75,4 @@ docs/CI_CD_STAGING_SOURCE_OF_TRUTH.md
 docs/CI_CD_PRODUCTION_SOURCE_OF_TRUTH.md
 
 local_image/
+scratch/
