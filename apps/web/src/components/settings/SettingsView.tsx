@@ -3,6 +3,7 @@
 import { CaregiverSettingsView } from '@/components/household/CaregiverSettingsView';
 import React, { useEffect, useState } from 'react';
 import type { CurrentUser } from '@/lib/auth-client';
+import { AlertDeliverySettings } from './AlertDeliverySettings';
 import { EscalationRulesSection } from './EscalationRulesSection';
 import styles from './settings-view.module.css';
 
@@ -130,6 +131,7 @@ function ViewerPersonalSettings({ user }: { user: CurrentUser }) {
           </div>
         </article>
       </div>
+      <AlertDeliverySettings />
     </section>
   );
 }
