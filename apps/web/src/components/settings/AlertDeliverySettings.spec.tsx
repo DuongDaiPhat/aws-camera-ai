@@ -128,3 +128,243 @@ it('saves the call toggle without turning on SMS, verifies the phone, and uses a
     mocked.mockReset();
   }
 });
+
+it('renders message when neither call, SMS, nor email are available', async () => {
+  Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', {
+    value: true,
+    configurable: true,
+  });
+  const container = document.createElement('div');
+  const root = createRoot(container);
+  const mocked = vi.mocked(apiFetch);
+
+  mocked.mockImplementation(async (path) => {
+    if (path.endsWith('/phone')) {
+      return {
+        smsAvailable: false,
+        callAvailable: false,
+        smsEnabled: false,
+        callEnabled: false,
+        accountPhone: null,
+        phone: null,
+        status: 'OFF',
+      };
+    }
+    return {
+      available: false,
+      enabled: false,
+      accountEmail: 'user@example.com',
+      email: 'user@example.com',
+      status: 'OFF',
+      confirmationSent: false,
+    };
+  });
+
+  try {
+    await act(async () => root.render(<AlertDeliverySettings />));
+    expect(container.textContent).toContain('Cuộc gọi và SMS chưa được cấu hình ở môi trường này.');
+    expect(container.textContent).toContain('Email chưa được cấu hình ở môi trường này.');
+  } finally {
+    await act(async () => root.unmount());
+    mocked.mockReset();
+  }
+});
+
+it('renders message when only SMS is available and email is verified', async () => {
+  Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', {
+    value: true,
+    configurable: true,
+  });
+  const container = document.createElement('div');
+  const root = createRoot(container);
+  const mocked = vi.mocked(apiFetch);
+
+  mocked.mockImplementation(async (path) => {
+    if (path.endsWith('/phone')) {
+      return {
+        smsAvailable: true,
+        callAvailable: false,
+        smsEnabled: true,
+        callEnabled: false,
+        accountPhone: '+84901111111',
+        phone: '+84902222222',
+        status: 'VERIFIED',
+      };
+    }
+    return {
+      available: true,
+      enabled: true,
+      accountEmail: 'user@example.com',
+      email: 'user@example.com',
+      status: 'VERIFIED',
+      confirmationSent: true,
+    };
+  });
+
+  try {
+    await act(async () => root.render(<AlertDeliverySettings />));
+    expect(container.textContent).toContain('Cuộc gọi chưa được cấu hình ở môi trường này.');
+    expect(container.textContent).toContain('Đã bật email cho user@example.com');
+    expect(container.textContent).toContain('Đã xác minh +84902222222');
+  } finally {
+    await act(async () => root.unmount());
+    mocked.mockReset();
+  }
+});
+
+it('renders message when only Call is available and email confirmation failed', async () => {
+  Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', {
+    value: true,
+    configurable: true,
+  });
+  const container = document.createElement('div');
+  const root = createRoot(container);
+  const mocked = vi.mocked(apiFetch);
+
+  mocked.mockImplementation(async (path) => {
+    if (path.endsWith('/phone')) {
+      return {
+        smsAvailable: false,
+        callAvailable: true,
+        smsEnabled: false,
+        callEnabled: true,
+        accountPhone: '+84901111111',
+        phone: '+84901111111',
+        status: 'PENDING',
+      };
+    }
+    return {
+      available: true,
+      enabled: true,
+      accountEmail: 'user@example.com',
+      email: 'user@example.com',
+      status: 'PENDING',
+      confirmationSent: false,
+    };
+  });
+
+  try {
+    await act(async () => root.render(<AlertDeliverySettings />));
+    expect(container.textContent).toContain('Cảnh báo SMS chưa được cấu hình ở môi trường này.');
+    expect(container.textContent).toContain('Chưa gửi được thư xác nhận. Hãy lưu lại để thử lại.');
+  } finally {
+    await act(async () => root.unmount());
+    mocked.mockReset();
+  }
+});
+
+it('handles initial load failure gracefully', async () => {
+  Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', {
+    value: true,
+    configurable: true,
+  });
+  const container = document.createElement('div');
+  const root = createRoot(container);
+  const mocked = vi.mocked(apiFetch);
+
+  mocked.mockImplementation(async (path) => {
+    if (path.endsWith('/phone')) throw new Error('Không thể tải điện thoại');
+    throw 'Lỗi không xác định';
+  });
+
+  try {
+    await act(async () => root.render(<AlertDeliverySettings />));
+    expect(container.textContent).toContain('Không thể tải điện thoại');
+    expect(container.textContent).toContain('Không thể cập nhật cài đặt.');
+  } finally {
+    await act(async () => root.unmount());
+    mocked.mockReset();
+  }
+});
+
+it('handles update failure gracefully', async () => {
+  Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', {
+    value: true,
+    configurable: true,
+  });
+  const container = document.createElement('div');
+  const root = createRoot(container);
+  const mocked = vi.mocked(apiFetch);
+
+  const phone = {
+    smsAvailable: true,
+    callAvailable: true,
+    smsEnabled: false,
+    callEnabled: false,
+    accountPhone: '+84901234567',
+    phone: '+84901234567',
+    status: 'OFF',
+  };
+  const email = {
+    available: true,
+    enabled: false,
+    accountEmail: 'user@example.com',
+    email: 'user@example.com',
+    status: 'OFF',
+    confirmationSent: false,
+  };
+  mocked.mockImplementation(async (path, options) => {
+    if (options?.method) throw new Error('Cập nhật thất bại');
+    return path.endsWith('/phone') ? phone : email;
+  });
+
+  try {
+    await act(async () => root.render(<AlertDeliverySettings />));
+    const button = container.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    await act(async () => {
+      button.form!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+    expect(container.textContent).toContain('Cập nhật thất bại');
+  } finally {
+    await act(async () => root.unmount());
+    mocked.mockReset();
+  }
+});
+
+it('polls for email confirmation while pending and stops on unmount', async () => {
+  vi.useFakeTimers();
+  Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', {
+    value: true,
+    configurable: true,
+  });
+  const container = document.createElement('div');
+  const root = createRoot(container);
+  const mocked = vi.mocked(apiFetch);
+
+  const pendingEmail = {
+    available: true,
+    enabled: true,
+    accountEmail: 'user@example.com',
+    email: 'user@example.com',
+    status: 'PENDING',
+    confirmationSent: true,
+  };
+  const phone = {
+    smsAvailable: true,
+    callAvailable: true,
+    smsEnabled: false,
+    callEnabled: false,
+    accountPhone: null,
+    phone: null,
+    status: 'OFF',
+  };
+
+  mocked.mockImplementation(async (path) => {
+    if (path.endsWith('/phone')) return phone;
+    return pendingEmail;
+  });
+
+  try {
+    await act(async () => root.render(<AlertDeliverySettings />));
+    expect(container.textContent).toContain('Chờ xác nhận qua thư gửi đến user@example.com');
+
+    await act(async () => {
+      vi.advanceTimersByTime(10_000);
+    });
+    expect(mocked).toHaveBeenCalledWith('/account/alert-delivery/email', expect.anything());
+  } finally {
+    await act(async () => root.unmount());
+    vi.useRealTimers();
+    mocked.mockReset();
+  }
+});
