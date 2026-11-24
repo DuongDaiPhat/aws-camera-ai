@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     face_max_pixels: int = 12_000_000
     face_detection_threshold: float = 0.9
     face_max_concurrent: int = 2
+    face_acquire_timeout_seconds: float = Field(default=0.8, ge=0.0, le=10.0, allow_inf_nan=False)
     face_cpu_threads: int = Field(default=2, ge=1, le=64)
     aws_region: str = "ap-southeast-1"
     rekognition_collection_id: str = "camerai-known-faces"

@@ -1,6 +1,9 @@
 """Unit tests for Layer 2 local face quality gate (YuNet/SFace)."""
 
 import io
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -8,6 +11,7 @@ import cv2
 import numpy as np
 import pytest
 from PIL import Image
+from pydantic import ValidationError
 
 from app.config import Settings, get_settings
 from app.models.face import FaceQualityMetrics
@@ -77,6 +81,7 @@ def test_face_quality_gate_defaults_and_env_override(monkeypatch: pytest.MonkeyP
     assert defaults.face_gate_min_sharpness == 45.0
     assert defaults.face_gate_max_yaw_ratio == 0.45
     assert defaults.face_gate_max_pitch_ratio == 0.45
+    assert defaults.face_acquire_timeout_seconds == 0.8
 
     monkeypatch.setenv("FACE_QUALITY_GATE_ENABLED", "false")
     monkeypatch.setenv("FACE_GATE_MIN_FACE_PX", "80")
@@ -84,6 +89,7 @@ def test_face_quality_gate_defaults_and_env_override(monkeypatch: pytest.MonkeyP
     monkeypatch.setenv("FACE_GATE_MIN_SHARPNESS", "60.5")
     monkeypatch.setenv("FACE_GATE_MAX_YAW_RATIO", "0.35")
     monkeypatch.setenv("FACE_GATE_MAX_PITCH_RATIO", "0.40")
+    monkeypatch.setenv("FACE_ACQUIRE_TIMEOUT_SECONDS", "1.5")
     get_settings.cache_clear()
     try:
         loaded = get_settings()
@@ -93,8 +99,13 @@ def test_face_quality_gate_defaults_and_env_override(monkeypatch: pytest.MonkeyP
         assert loaded.face_gate_min_sharpness == 60.5
         assert loaded.face_gate_max_yaw_ratio == 0.35
         assert loaded.face_gate_max_pitch_ratio == 0.40
+        assert loaded.face_acquire_timeout_seconds == 1.5
     finally:
         get_settings.cache_clear()
+
+    for bad_timeout in (-0.1, 10.1, float("nan")):
+        with pytest.raises(ValidationError):
+            Settings(_env_file=None, face_acquire_timeout_seconds=bad_timeout)
 
 
 def test_quality_gate_loads_local_models_independently_of_face_provider(
@@ -508,3 +519,154 @@ def test_arcface_onnx_gate_alignment_sha256_and_512d_embedding(
     assert np.isclose(decoded[1], 0.8, atol=1e-5)
     assert captured_blobs[-1].shape == (1, 3, 112, 112)
     assert float(captured_blobs[-1].min()) >= -1.0 and float(captured_blobs[-1].max()) <= 1.0
+
+
+def test_arcface_concurrent_assess_overlaps_without_global_lock(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    model_file = tmp_path / "w600k_r50.onnx"
+    model_file.write_bytes(b"fake-arcface")
+    detector_file = tmp_path / "yunet.onnx"
+    detector_file.write_bytes(b"fake-yunet")
+
+    detect_barrier = threading.Barrier(2, timeout=2.0)
+    feature_barrier = threading.Barrier(2, timeout=2.0)
+
+    class ConcurrentDetector:
+        def setInputSize(self, _size: tuple[int, int]) -> None:  # noqa: N802
+            return None
+
+        def detect(self, _image: np.ndarray) -> tuple[int, np.ndarray]:
+            detect_barrier.wait()
+            return 1, np.asarray([_yunet_face()], dtype=np.float32)
+
+    class ConcurrentArcFaceRecognizer:
+        def align_crop(self, _image: np.ndarray, _face: np.ndarray) -> np.ndarray:
+            return np.zeros((112, 112, 3), dtype=np.uint8)
+
+        def feature(self, _aligned: np.ndarray) -> np.ndarray:
+            feature_barrier.wait()
+            vec = np.zeros((1, 512), dtype=np.float32)
+            vec[0, 0] = 1.0
+            return vec
+
+    created_detectors: list[ConcurrentDetector] = []
+
+    def _create_detector(*_args: object) -> ConcurrentDetector:
+        det = ConcurrentDetector()
+        created_detectors.append(det)
+        return det
+
+    monkeypatch.setattr(cv2.FaceDetectorYN, "create", _create_detector)
+
+    settings = Settings(
+        _env_file=None,
+        face_max_concurrent=2,
+        face_detector_path=str(detector_file),
+        face_gate_embedder_path=str(model_file),
+        face_gate_embedder_backend="arcface_onnx",
+    )
+    assessor = FaceQualityAssessor(settings)
+    monkeypatch.setattr(
+        assessor, "_create_recognizer", lambda _path, _backend: ConcurrentArcFaceRecognizer()
+    )
+
+    payload = _sharp_picture()
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [pool.submit(assessor.assess, payload, True) for _ in range(2)]
+        results = [future.result(timeout=5.0) for future in futures]
+
+    assert len(created_detectors) == 2
+    assert all(res.passed is True and res.embedding_dim == 512 for res in results)
+
+    # Also verify injected custom _detector fallback still allows ArcFace feature() overlap
+    fallback_feature_barrier = threading.Barrier(2, timeout=2.0)
+    fallback_assessor = FaceQualityAssessor(settings)
+    fallback_assessor._detector = Mock()
+    fallback_assessor._detector.detect.return_value = (
+        1,
+        np.asarray([_yunet_face()], dtype=np.float32),
+    )
+
+    class FallbackArcFaceRecognizer:
+        def align_crop(self, _image: np.ndarray, _face: np.ndarray) -> np.ndarray:
+            return np.zeros((112, 112, 3), dtype=np.uint8)
+
+        def feature(self, _aligned: np.ndarray) -> np.ndarray:
+            fallback_feature_barrier.wait()
+            vec = np.zeros((1, 512), dtype=np.float32)
+            vec[0, 0] = 1.0
+            return vec
+
+    fallback_assessor._recognizer = FallbackArcFaceRecognizer()
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [pool.submit(fallback_assessor.assess, payload, True) for _ in range(2)]
+        fallback_results = [future.result(timeout=5.0) for future in futures]
+
+    assert all(res.passed is True and res.embedding_dim == 512 for res in fallback_results)
+
+
+def test_sface_concurrent_assess_serializes_sface_and_respects_replaced_detector(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    detector_file = tmp_path / "yunet.onnx"
+    detector_file.write_bytes(b"fake-yunet")
+    embedder_file = tmp_path / "sface.onnx"
+    embedder_file.write_bytes(b"fake-sface")
+
+    pool_detector = Mock()
+    pool_detector.detect.return_value = (1, np.asarray([_yunet_face()], dtype=np.float32))
+    monkeypatch.setattr(cv2.FaceDetectorYN, "create", lambda *_args: pool_detector)
+
+    active_lock = threading.Lock()
+    active_calls = 0
+    max_active_calls = 0
+
+    class FakeSFaceRecognizer:
+        def alignCrop(self, _image: np.ndarray, _face: np.ndarray) -> np.ndarray:  # noqa: N802
+            nonlocal active_calls, max_active_calls
+            with active_lock:
+                active_calls += 1
+                max_active_calls = max(max_active_calls, active_calls)
+            time.sleep(0.02)
+            with active_lock:
+                active_calls -= 1
+            return np.zeros((112, 112, 3), dtype=np.uint8)
+
+        def feature(self, _aligned: np.ndarray) -> np.ndarray:
+            nonlocal active_calls, max_active_calls
+            with active_lock:
+                active_calls += 1
+                max_active_calls = max(max_active_calls, active_calls)
+            time.sleep(0.02)
+            with active_lock:
+                active_calls -= 1
+            return np.ones((1, 128), dtype=np.float32)
+
+    monkeypatch.setattr(cv2.FaceRecognizerSF, "create", lambda *_args: FakeSFaceRecognizer())
+
+    settings = Settings(
+        _env_file=None,
+        face_max_concurrent=2,
+        face_detector_path=str(detector_file),
+        face_embedder_path=str(embedder_file),
+        face_gate_embedder_backend="sface",
+    )
+    assessor = FaceQualityAssessor(settings)
+    assert assessor.warmup() is True
+
+    payload = _sharp_picture()
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [pool.submit(assessor.assess, payload, True) for _ in range(2)]
+        results = [future.result(timeout=5.0) for future in futures]
+
+    assert all(res.passed is True and res.embedding_dim == 128 for res in results)
+    assert max_active_calls == 1
+
+    # Replacing _detector after warmup/load must fall back to the replaced mock under _detector_lock
+    replaced_detector = Mock()
+    replaced_detector.detect.return_value = (1, None)
+    assessor._detector = replaced_detector
+    replaced_result = assessor.assess(payload, include_embedding=True)
+    assert replaced_result.rejection_reason == "NO_FACE_DETECTED"
+    assert replaced_detector.detect.call_count == 1

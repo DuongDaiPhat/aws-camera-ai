@@ -25,6 +25,7 @@ export interface FaceTrackOptimizationConfig {
   spatialReidMinProximityScore: number;
   spatialReidMinAppearanceSimilarity: number;
   trackStateTtlMs: number;
+  maxConcurrentAssessPerCamera: number;
 }
 
 export const DEFAULT_FACE_TRACK_OPTIMIZATION_CONFIG: FaceTrackOptimizationConfig = {
@@ -52,6 +53,7 @@ export const DEFAULT_FACE_TRACK_OPTIMIZATION_CONFIG: FaceTrackOptimizationConfig
   spatialReidMinProximityScore: 0.35,
   spatialReidMinAppearanceSimilarity: 0.78,
   trackStateTtlMs: 120000,
+  maxConcurrentAssessPerCamera: 2,
 };
 
 function readBoolean(config: ConfigService | undefined, key: string, fallback: boolean): boolean {
@@ -213,5 +215,10 @@ export function readFaceTrackOptimizationConfig(
       d.spatialReidMinAppearanceSimilarity,
     ),
     trackStateTtlMs: readPositiveNumber(config, 'FACE_TRACK_STATE_TTL_MS', d.trackStateTtlMs),
+    maxConcurrentAssessPerCamera: readPositiveInt(
+      config,
+      'FACE_MAX_CONCURRENT_ASSESS_PER_CAMERA',
+      d.maxConcurrentAssessPerCamera,
+    ),
   };
 }

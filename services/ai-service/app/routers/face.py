@@ -52,13 +52,19 @@ def get_slots() -> BoundedSemaphore:
     return BoundedSemaphore(get_settings().face_max_concurrent)
 
 
+async def _acquire_slot(slots: BoundedSemaphore, timeout: float) -> bool:
+    if timeout <= 0:
+        return slots.acquire(blocking=False)
+    return await run_in_threadpool(slots.acquire, True, timeout)
+
+
 @router.post("/assess", response_model=FaceAssessResponse)
 async def assess_face(
     image: UploadFile = File(...),  # noqa: B008
     include_embedding: bool = Form(default=True, alias="includeEmbedding"),  # noqa: B008
 ) -> FaceAssessResponse:
     slots = get_slots()
-    if not slots.acquire(blocking=False):
+    if not await _acquire_slot(slots, get_settings().face_acquire_timeout_seconds):
         await image.close()
         raise HTTPException(status_code=503, detail="PROVIDER_UNAVAILABLE")
     try:
@@ -75,7 +81,7 @@ async def embed_face(
     selected_face_index: int | None = Form(default=None, alias="selectedFaceIndex"),  # noqa: B008
 ) -> EmbedResponse:
     slots = get_slots()
-    if not slots.acquire(blocking=False):
+    if not await _acquire_slot(slots, get_settings().face_acquire_timeout_seconds):
         await image.close()
         raise HTTPException(status_code=503, detail="PROVIDER_UNAVAILABLE")
     try:
@@ -95,7 +101,7 @@ async def match_face(
     threshold: float | None = Form(default=None, ge=0, le=1),  # noqa: B008
 ) -> MatchResponse:
     slots = get_slots()
-    if not slots.acquire(blocking=False):
+    if not await _acquire_slot(slots, get_settings().face_acquire_timeout_seconds):
         await image.close()
         raise HTTPException(status_code=503, detail="PROVIDER_UNAVAILABLE")
     try:

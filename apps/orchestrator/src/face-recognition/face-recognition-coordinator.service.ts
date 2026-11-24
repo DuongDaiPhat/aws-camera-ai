@@ -24,6 +24,7 @@ import {
 import {
   computeAppearanceSignature,
   decodeEmbeddingBase64,
+  type FaceSessionEntry,
   type FaceSessionScope,
   FaceSessionCacheService,
   isValidBox,
@@ -77,6 +78,7 @@ export class FaceRecognitionCoordinatorService
   private readonly windowTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private readonly samplingTracks = new Set<string>();
   private readonly sampleInputs = new Map<string, FaceTrackEventInput>();
+  private readonly inFlightAssessByCamera = new Map<string, number>();
 
   constructor(
     private readonly configService: ConfigService,
@@ -106,53 +108,134 @@ export class FaceRecognitionCoordinatorService
   /** Frame-driven sampling continues even when Frigate suppresses event updates. */
   async sampleAvailableFrame(cameraSlug: string, trackIds: string[]): Promise<void> {
     const now = Date.now();
+    const seen = new Set<string>();
+    const eligible: Array<{
+      input: FaceTrackEventInput;
+      record: TrackRecord;
+      scope: FaceSessionScope;
+    }> = [];
+
+    for (const trackId of trackIds) {
+      if (seen.has(trackId)) continue;
+      seen.add(trackId);
+      const key = TrackIdentityStateService.makeKey(cameraSlug, trackId);
+      const input = this.sampleInputs.get(key);
+      const record = this.stateService.get(cameraSlug, trackId, now);
+      if (!record) {
+        this.sampleInputs.delete(key);
+        continue;
+      }
+      if (!input || record.endedAt !== null || this.samplingTracks.has(key)) continue;
+      const scope: FaceSessionScope = {
+        ownerScopeId: record.ownerScopeId,
+        cameraSlug,
+        collectionVersion: record.collectionVersion,
+      };
+      if (!this.canAttemptSample(record, scope, now)) continue;
+      eligible.push({ input, record, scope });
+    }
+
+    eligible.sort((a, b) => {
+      const aPriority = a.record.samplesCollected === 0 && a.record.state === 'COLLECTING' ? 0 : 1;
+      const bPriority = b.record.samplesCollected === 0 && b.record.state === 'COLLECTING' ? 0 : 1;
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      return (a.record.lastSampleAttemptAt ?? 0) - (b.record.lastSampleAttemptAt ?? 0);
+    });
+
+    const inFlight = this.inFlightAssessByCamera.get(cameraSlug) ?? 0;
+    const availableSlots = Math.max(0, this.optConfig.maxConcurrentAssessPerCamera - inFlight);
+    if (availableSlots === 0 || eligible.length === 0) return;
+
     await Promise.all(
-      trackIds.map(async (trackId) => {
-        const key = TrackIdentityStateService.makeKey(cameraSlug, trackId);
-        const input = this.sampleInputs.get(key);
-        const record = this.stateService.get(cameraSlug, trackId, now);
-        if (!record) {
-          this.sampleInputs.delete(key);
-          return;
-        }
-        if (!input || record.endedAt !== null || this.samplingTracks.has(key)) return;
-        const scope: FaceSessionScope = {
-          ownerScopeId: record.ownerScopeId,
-          cameraSlug,
-          collectionVersion: record.collectionVersion,
-        };
-        if (!this.canAttemptSample(record, scope, now)) return;
-        this.samplingTracks.add(key);
-        try {
-          await this.sampleTrack(input, record, scope, now);
-        } finally {
-          this.samplingTracks.delete(key);
-        }
-      }),
+      eligible
+        .slice(0, availableSlots)
+        .map(({ input, record, scope }) => this.runTrackSample(input, record, scope, now)),
     );
   }
 
-  /** Reuse an incident only after validating the stabilizer's proposed continuation. */
+  private async runTrackSample(
+    input: FaceTrackEventInput,
+    record: TrackRecord,
+    scope: FaceSessionScope,
+    now: number,
+  ): Promise<void> {
+    const cameraSlug = record.cameraSlug;
+    this.samplingTracks.add(record.key);
+    this.inFlightAssessByCamera.set(
+      cameraSlug,
+      (this.inFlightAssessByCamera.get(cameraSlug) ?? 0) + 1,
+    );
+    try {
+      await this.sampleTrack(input, record, scope, now);
+    } finally {
+      this.samplingTracks.delete(record.key);
+      const remaining = (this.inFlightAssessByCamera.get(cameraSlug) ?? 0) - 1;
+      if (remaining <= 0) {
+        this.inFlightAssessByCamera.delete(cameraSlug);
+      } else {
+        this.inFlightAssessByCamera.set(cameraSlug, remaining);
+      }
+    }
+  }
+
+  private getAbsentKnownTrackIds(
+    cameraSlug: string,
+    ownerScopeId: string,
+    excludeTrackId: string,
+    now: number,
+  ): Set<string> {
+    const latestFrame = this.detectionTracker?.frames?.get(cameraSlug, now).at(-1);
+    if (!latestFrame || now - latestFrame.frameTime > 2000) {
+      return new Set();
+    }
+    const liveIds = new Set(latestFrame.objects.map((o) => o.id));
+    const absent = new Set<string>();
+    for (const record of this.stateService.findKnownTracksForCamera(
+      cameraSlug,
+      ownerScopeId,
+      now,
+    )) {
+      if (
+        record.endedAt === null &&
+        record.trackId !== excludeTrackId &&
+        !liveIds.has(record.trackId) &&
+        now - record.lastUpdatedAt <= this.optConfig.spatialReidMaxGapMs
+      ) {
+        absent.add(record.trackId);
+      }
+    }
+    return absent;
+  }
+
+  /** Reuse an incident only after validating the stabilizer's proposed or absent-track continuation. */
   async resolveContinuationDedupKey(
     after: FrigateEventAfterDto,
     camera: CameraRecord | null,
     waitForFrameMs = 0,
   ): Promise<string | null> {
+    const now = Date.now();
     const canonical = this.detectionTracker?.getCanonicalTrackId(after.camera, after.id);
-    const previous = canonical ? this.stateService.get(after.camera, canonical) : undefined;
+    const previous = canonical ? this.stateService.get(after.camera, canonical, now) : undefined;
+    const absentKnownIds = camera?.owner_user_id
+      ? this.getAbsentKnownTrackIds(after.camera, camera.owner_user_id, after.id, now)
+      : new Set<string>();
     // Paired pixels can arrive just after MQTT's new-track message. Give a
-    // proposed, ended KNOWN continuation a bounded chance before creating an
-    // irreversible second incident. Frame ingestion bypasses the event queue.
+    // proposed or recently-ended/absent KNOWN continuation a bounded chance before
+    // creating an irreversible second incident. Frame ingestion bypasses the event queue.
     const attempts =
       this.optConfig.enabled &&
       this.optConfig.spatialReidEnabled &&
-      ((canonical !== after.id && previous?.state === 'KNOWN' && previous.endedAt !== null) ||
+      ((Boolean(canonical && canonical !== after.id) &&
+        previous?.state === 'KNOWN' &&
+        (previous.endedAt !== null || absentKnownIds.has(previous.trackId))) ||
         (!!camera?.owner_user_id &&
           this.stateService.hasRecentEndedKnown(
             after.camera,
             camera.owner_user_id,
             this.optConfig.spatialReidMaxGapMs,
-          )))
+            now,
+          )) ||
+        absentKnownIds.size > 0)
         ? Math.min(6, Math.max(0, Math.ceil(waitForFrameMs / 250)))
         : 0;
     for (let attempt = 0; attempt <= attempts; attempt++) {
@@ -163,33 +246,60 @@ export class FaceRecognitionCoordinatorService
     return null;
   }
 
-  private async tryResolveContinuationDedupKey(
+  private isSinglePersonInLiveFrame(cameraSlug: string, trackId: string, now: number): boolean {
+    const latestFrame = this.detectionTracker?.frames?.get(cameraSlug, now).at(-1);
+    return Boolean(
+      latestFrame &&
+      now - latestFrame.frameTime <= 2000 &&
+      latestFrame.objects.every((o) => o.id === trackId),
+    );
+  }
+
+  private hasMatchingEmbedding(entry: FaceSessionEntry, gate: FaceQualityGateResult): boolean {
+    const embedding = gate.embeddingBase64
+      ? decodeEmbeddingBase64(gate.embeddingBase64, gate.embeddingDim)
+      : null;
+    return Boolean(
+      embedding &&
+      this.sessionCache.maxEntrySimilarity(entry, embedding) >=
+        this.optConfig.sessionCacheSimilarityThreshold,
+    );
+  }
+
+  private selectContinuationCandidates(
     after: FrigateEventAfterDto,
-    camera: CameraRecord | null,
-  ): Promise<string | null> {
-    if (!this.optConfig.enabled || !this.optConfig.spatialReidEnabled || !camera?.owner_user_id)
-      return null;
-    const canonical = this.detectionTracker?.getCanonicalTrackId(after.camera, after.id);
-    if (!canonical || canonical === after.id) return null;
-    const now = Date.now();
-    const previous = this.stateService.get(after.camera, canonical, now);
-    if (
-      !previous ||
-      previous.state !== 'KNOWN' ||
-      previous.endedAt === null ||
-      previous.ownerScopeId !== camera.owner_user_id ||
-      !isValidBox(after.box)
-    )
-      return null;
-    const version = await this.resolveCollectionVersion(camera.owner_user_id);
-    if (previous.collectionVersion !== version) return null;
-    const scope: FaceSessionScope = {
-      ownerScopeId: camera.owner_user_id,
-      cameraSlug: after.camera,
-      collectionVersion: version,
-    };
-    const association = this.frigateMedia.getTimestampedPersonContext?.(after.camera, after.id);
-    const crop = await this.frigateMedia.getTimestampedPersonCrop(after.camera, after.id, now);
+    ownerScopeId: string,
+    canonical: string | undefined,
+    absentKnownIds: ReadonlySet<string>,
+    now: number,
+  ): { canonicalCandidate: TrackRecord | null; fallbackCandidates: TrackRecord[] } {
+    const previous = canonical ? this.stateService.get(after.camera, canonical, now) : null;
+    const isEligible = (record: TrackRecord): boolean =>
+      record.endedAt !== null || absentKnownIds.has(record.trackId);
+    const canonicalCandidate =
+      canonical &&
+      canonical !== after.id &&
+      previous &&
+      previous.state === 'KNOWN' &&
+      previous.ownerScopeId === ownerScopeId &&
+      isEligible(previous)
+        ? previous
+        : null;
+    const fallbackCandidates = canonicalCandidate
+      ? []
+      : this.stateService
+          .findKnownTracksForCamera(after.camera, ownerScopeId, now)
+          .filter((record) => record.trackId !== after.id && isEligible(record));
+    return { canonicalCandidate, fallbackCandidates };
+  }
+
+  private async assessContinuationHead(
+    cameraSlug: string,
+    trackId: string,
+    now: number,
+  ): Promise<{ crop: Buffer; gate: FaceQualityGateResult } | null> {
+    const association = this.frigateMedia.getTimestampedPersonContext?.(cameraSlug, trackId);
+    const crop = await this.frigateMedia.getTimestampedPersonCrop(cameraSlug, trackId, now);
     if (!crop) return null;
     const head = (await this.frigateMedia.getRecognitionHead?.(crop)) ?? {
       imageBuffer: crop,
@@ -205,26 +315,94 @@ export class FaceRecognitionCoordinatorService
         }
       : null;
     const gate = await this.qualityGateClient.assess(head.imageBuffer);
-    if (headContext && gate.boundingBox && !faceBelongsToPerson(headContext, gate.boundingBox))
+    if (headContext && gate.boundingBox && !faceBelongsToPerson(headContext, gate.boundingBox)) {
       return null;
-    if (gate.gateStatus !== 'READY' || gate.failOpenApplied || gate.faceCount > 1) return null;
+    }
+    if (gate.gateStatus !== 'READY' || gate.failOpenApplied || gate.faceCount > 1) {
+      return null;
+    }
+    return { crop, gate };
+  }
+
+  private async tryResolveContinuationDedupKey(
+    after: FrigateEventAfterDto,
+    camera: CameraRecord | null,
+  ): Promise<string | null> {
+    if (
+      !this.optConfig.enabled ||
+      !this.optConfig.spatialReidEnabled ||
+      !camera?.owner_user_id ||
+      !isValidBox(after.box)
+    ) {
+      return null;
+    }
+    const now = Date.now();
+    const absentKnownIds = this.getAbsentKnownTrackIds(
+      after.camera,
+      camera.owner_user_id,
+      after.id,
+      now,
+    );
+    const canonical = this.detectionTracker?.getCanonicalTrackId(after.camera, after.id);
+    const raw = this.selectContinuationCandidates(
+      after,
+      camera.owner_user_id,
+      canonical,
+      absentKnownIds,
+      now,
+    );
+    if (!raw.canonicalCandidate && raw.fallbackCandidates.length === 0) {
+      return null;
+    }
+
+    const version = await this.resolveCollectionVersion(camera.owner_user_id);
+    const canonicalCandidate =
+      raw.canonicalCandidate && raw.canonicalCandidate.collectionVersion === version
+        ? raw.canonicalCandidate
+        : null;
+    const fallbackCandidates = canonicalCandidate
+      ? []
+      : raw.fallbackCandidates.filter((record) => record.collectionVersion === version);
+    if (!canonicalCandidate && fallbackCandidates.length === 0) {
+      return null;
+    }
+
+    const assessed = await this.assessContinuationHead(after.camera, after.id, now);
+    if (!assessed) return null;
+
+    const scope: FaceSessionScope = {
+      ownerScopeId: camera.owner_user_id,
+      cameraSlug: after.camera,
+      collectionVersion: version,
+    };
     // Apply the same spatial/appearance admission policy as trySpatialAppearanceReid.
     // An assessable face must additionally corroborate identity below.
-    const appearance = await computeAppearanceSignature(crop);
-    const match = this.sessionCache.matchBySpatialAppearance(scope, after.box, appearance, now);
-    if (!match || match.entry.knownFaceId !== previous.matchedKnownFaceId) return null;
-    if (gate.passed) {
-      const embedding = gate.embeddingBase64
-        ? decodeEmbeddingBase64(gate.embeddingBase64, gate.embeddingDim)
-        : null;
+    const appearance = await computeAppearanceSignature(assessed.crop);
+    const match = this.sessionCache.matchBySpatialAppearance(scope, after.box, appearance, now, {
+      allowAbsentTrackIds: absentKnownIds,
+    });
+    if (!match) return null;
+
+    const matchedCandidate = canonicalCandidate
+      ? canonicalCandidate.matchedKnownFaceId === match.entry.knownFaceId
+        ? canonicalCandidate
+        : null
+      : (fallbackCandidates.find((c) => c.matchedKnownFaceId === match.entry.knownFaceId) ?? null);
+    if (!matchedCandidate) return null;
+
+    if (assessed.gate.passed) {
+      if (!this.hasMatchingEmbedding(match.entry, assessed.gate)) return null;
+    } else if (!canonicalCandidate) {
+      const hasStabilizerLink = Boolean(canonical && canonical !== after.id);
       if (
-        !embedding ||
-        this.sessionCache.maxEntrySimilarity(match.entry, embedding) <
-          this.optConfig.sessionCacheSimilarityThreshold
-      )
+        hasStabilizerLink ||
+        assessed.gate.faceCount !== 0 ||
+        !this.isSinglePersonInLiveFrame(after.camera, after.id, now)
+      ) {
         return null;
+      }
     }
-    return `frigate:${after.camera}:${previous.trackId}`;
+    return `frigate:${after.camera}:${matchedCandidate.trackId}`;
   }
 
   async handleTrackEvent(input: FaceTrackEventInput): Promise<void> {
@@ -257,12 +435,13 @@ export class FaceRecognitionCoordinatorService
       return;
     }
     if (this.samplingTracks.has(record.key)) return;
-    this.samplingTracks.add(record.key);
-    try {
-      await this.sampleTrack(input, record, scope, now);
-    } finally {
-      this.samplingTracks.delete(record.key);
+    if (
+      (this.inFlightAssessByCamera.get(record.cameraSlug) ?? 0) >=
+      this.optConfig.maxConcurrentAssessPerCamera
+    ) {
+      return;
     }
+    await this.runTrackSample(input, record, scope, now);
   }
 
   private async sampleTrack(
@@ -274,7 +453,7 @@ export class FaceRecognitionCoordinatorService
     record.lastSampleAttemptAt = now;
     // Event delivery can wait behind media uploads. Frame telemetry bypasses
     // that queue, so align a current image with the most recent live person box.
-    const latestFrame = this.detectionTracker?.frames.get(record.cameraSlug, now).at(-1);
+    const latestFrame = this.detectionTracker?.frames?.get(record.cameraSlug, now).at(-1);
     const liveObject = latestFrame?.objects.find((object) => object.id === record.trackId);
     const freshObject =
       liveObject && isValidBox(liveObject.box) && Math.abs(now - liveObject.observedAt) <= 2000
@@ -514,8 +693,20 @@ export class FaceRecognitionCoordinatorService
       gateResult.gateStatus !== 'READY' ||
       gateResult.failOpenApplied ||
       gateResult.faceCount > 1 ||
-      !isValidBox(record.lastBox) ||
-      !this.sessionCache.hasRecentlyEndedKnownTrack(scope, now)
+      !isValidBox(record.lastBox)
+    ) {
+      return false;
+    }
+    const absentKnownIds = this.getAbsentKnownTrackIds(
+      record.cameraSlug,
+      record.ownerScopeId,
+      record.trackId,
+      now,
+    );
+    if (
+      !this.sessionCache.hasRecentlyEndedKnownTrack(scope, now, {
+        allowAbsentTrackIds: absentKnownIds,
+      })
     ) {
       return false;
     }
@@ -524,6 +715,7 @@ export class FaceRecognitionCoordinatorService
       record.lastBox,
       appearanceSignature,
       now,
+      { allowAbsentTrackIds: absentKnownIds },
     );
     if (!reidMatch) {
       return false;
@@ -537,19 +729,18 @@ export class FaceRecognitionCoordinatorService
       )
         return false;
     }
+    if (
+      !gateResult.passed &&
+      reidMatch.entry.endedAt === null &&
+      (gateResult.faceCount !== 0 ||
+        !this.isSinglePersonInLiveFrame(record.cameraSlug, record.trackId, now))
+    ) {
+      return false;
+    }
     // Clothing and proximity cannot override a clearly different face. A
     // back-facing return can still use appearance when no face is assessable.
-    if (gateResult.passed) {
-      const embedding = gateResult.embeddingBase64
-        ? decodeEmbeddingBase64(gateResult.embeddingBase64, gateResult.embeddingDim)
-        : null;
-      if (
-        !embedding ||
-        this.sessionCache.maxEntrySimilarity(reidMatch.entry, embedding) <
-          this.optConfig.sessionCacheSimilarityThreshold
-      ) {
-        return false;
-      }
+    if (gateResult.passed && !this.hasMatchingEmbedding(reidMatch.entry, gateResult)) {
+      return false;
     }
     this.stateService.recordSpatialReidHit();
     await this.applyLocalCacheHit(record, scope, {

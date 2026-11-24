@@ -318,4 +318,76 @@ describe('FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID)', () =
       cache.matchByEmbedding({ ...scopeV1, cameraSlug: 'camera-1' }, embedding, 4000),
     ).toBeNull();
   });
+
+  it('allows absent active tracks via allowAbsentTrackIds while ignoring non-absent active tracks', async () => {
+    const cache = new FaceSessionCacheService(
+      new ConfigService({
+        FACE_SESSION_CACHE_TTL_MS: '300000',
+        FACE_SPATIAL_REID_MAX_GAP_MS: '20000',
+        FACE_SPATIAL_REID_MIN_PROXIMITY_SCORE: '0.35',
+        FACE_SPATIAL_REID_MIN_APPEARANCE_SIMILARITY: '0.78',
+      }),
+    );
+
+    const aliceCrop1 = await solidColorJpeg({ r: 20, g: 40, b: 220 }, { r: 30, g: 30, b: 30 });
+    const aliceCrop2 = await solidColorJpeg({ r: 24, g: 44, b: 215 }, { r: 34, g: 34, b: 34 });
+    const strangerCrop = await solidColorJpeg({ r: 230, g: 20, b: 20 }, { r: 230, g: 230, b: 230 });
+    const aliceSig1 = await computeAppearanceSignature(aliceCrop1);
+    const aliceSig2 = await computeAppearanceSignature(aliceCrop2);
+    const strangerSig = await computeAppearanceSignature(strangerCrop);
+
+    cache.upsertKnown(
+      scopeV1,
+      {
+        knownFaceId: 'face-alice',
+        personName: 'Alice',
+        trackId: 'track-alice-active',
+        appearanceSignature: aliceSig1,
+        lastBox: [100, 100, 220, 340],
+        confirmedAt: 1_000,
+        endedAt: null,
+      },
+      1_000,
+    );
+
+    // Without allowAbsentTrackIds, active track (endedAt === null) is ignored.
+    expect(cache.hasRecentlyEndedKnownTrack(scopeV1, 25_000)).toBe(false);
+    expect(
+      cache.matchBySpatialAppearance(scopeV1, [110, 105, 230, 345], aliceSig2, 25_000),
+    ).toBeNull();
+
+    // Non-absent active track (different ID in allowAbsentTrackIds) is still ignored.
+    const otherAbsent = new Set(['track-someone-else']);
+    expect(
+      cache.hasRecentlyEndedKnownTrack(scopeV1, 25_000, { allowAbsentTrackIds: otherAbsent }),
+    ).toBe(false);
+    expect(
+      cache.matchBySpatialAppearance(scopeV1, [110, 105, 230, 345], aliceSig2, 25_000, {
+        allowAbsentTrackIds: otherAbsent,
+      }),
+    ).toBeNull();
+
+    // When track-alice-active is in allowAbsentTrackIds, spatial Re-ID matches within sessionCacheTtlMs
+    // (even after 20s spatialReidMaxGapMs when MQTT end was delayed), while rejecting strangers.
+    const absentAlice = new Set(['track-alice-active']);
+    expect(
+      cache.hasRecentlyEndedKnownTrack(scopeV1, 25_000, { allowAbsentTrackIds: absentAlice }),
+    ).toBe(true);
+    expect(
+      cache.matchBySpatialAppearance(scopeV1, [110, 105, 230, 345], strangerSig, 25_000, {
+        allowAbsentTrackIds: absentAlice,
+      }),
+    ).toBeNull();
+    const hit = cache.matchBySpatialAppearance(scopeV1, [110, 105, 230, 345], aliceSig2, 25_000, {
+      allowAbsentTrackIds: absentAlice,
+    });
+    expect(hit?.entry.knownFaceId).toBe('face-alice');
+
+    // Beyond sessionCacheTtlMs (1_000 + 300_000 = 301_000), entry expires.
+    expect(
+      cache.matchBySpatialAppearance(scopeV1, [110, 105, 230, 345], aliceSig2, 301_001, {
+        allowAbsentTrackIds: absentAlice,
+      }),
+    ).toBeNull();
+  });
 });

@@ -1644,4 +1644,414 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
     );
     h.coordinator.onModuleDestroy();
   });
+
+  it('caps concurrent per-camera assess calls and prioritizes samplesCollected === 0 with oldest attempt tie-break', async () => {
+    let now = 10_000;
+    jest.spyOn(Date, 'now').mockImplementation(() => now);
+    const h = buildHarness({
+      FACE_MAX_CONCURRENT_ASSESS_PER_CAMERA: '2',
+      FACE_REQUIRE_TIMESTAMPED_FRAME: 'true',
+      FACE_MIN_SAMPLE_INTERVAL_MS: '150',
+      FACE_BEST_SHOT_EARLY_DISPATCH_ENABLED: 'false',
+      FACE_BEST_SHOT_WINDOW_MS: '4000',
+    });
+    const camera = makeCamera();
+
+    // Seed t1 with 1 collected sample (oldest lastSampleAttemptAt = 10_000).
+    h.getTimestampedPersonCrop.mockResolvedValueOnce(Buffer.from('crop-t1'));
+    h.assess.mockResolvedValueOnce(makeGateResult({ qualityScore: 0.6 }));
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: makeEvent({ id: '11111111-1111-4111-8111-111111111201', track_id: 't1' }),
+      after: { id: 't1', camera: 'cam_front', frame_time: 10, label: 'person', score: 0.9 },
+      isCreated: true,
+      camera,
+    });
+    expect(h.stateService.get('cam_front', 't1', now)?.samplesCollected).toBe(1);
+
+    // Seed t2, t3, t4 with 0 collected samples (crop unavailable at registration).
+    h.getTimestampedPersonCrop.mockResolvedValue(null);
+    for (const [idx, trackId] of (['t2', 't3', 't4'] as const).entries()) {
+      now = 10_050 + idx * 50;
+      await h.coordinator.handleTrackEvent({
+        messageType: 'new',
+        event: makeEvent({
+          id: `11111111-1111-4111-8111-11111111120${idx + 2}`,
+          track_id: trackId,
+        }),
+        after: {
+          id: trackId,
+          camera: 'cam_front',
+          frame_time: now / 1000,
+          label: 'person',
+          score: 0.9,
+        },
+        isCreated: true,
+        camera,
+      });
+    }
+
+    now = 10_500;
+    const resolvers: Array<(res: FaceQualityGateResult) => void> = [];
+    const assessedOrder: string[] = [];
+    let notifyAssessed: (() => void) | null = null;
+    const waitForAssessCount = (count: number): Promise<void> =>
+      assessedOrder.length >= count
+        ? Promise.resolve()
+        : new Promise((resolve) => {
+            notifyAssessed = () => {
+              if (assessedOrder.length >= count) {
+                notifyAssessed = null;
+                resolve();
+              }
+            };
+          });
+    h.getTimestampedPersonCrop.mockImplementation(async (_cam, trackId) =>
+      Buffer.from(`crop-${trackId}`),
+    );
+    h.assess.mockImplementation(
+      (buf) =>
+        new Promise((resolve): void => {
+          assessedOrder.push(buf.toString('utf8'));
+          resolvers.push(resolve);
+          notifyAssessed?.();
+        }),
+    );
+
+    // t1 is listed first and has the oldest attempt, but t2 & t3 have samplesCollected === 0.
+    // Cap=2 runs only [t2, t3] and leaves t4/t1 waiting.
+    const batch1 = h.coordinator.sampleAvailableFrame('cam_front', ['t1', 't2', 't3', 't4']);
+    await waitForAssessCount(2);
+    expect(assessedOrder).toEqual(['crop-t2', 'crop-t3']);
+
+    // Concurrent frame arrival while 2 slots are occupied must not exceed cap=2.
+    await h.coordinator.sampleAvailableFrame('cam_front', ['t1', 't2', 't3', 't4']);
+    expect(assessedOrder).toEqual(['crop-t2', 'crop-t3']);
+
+    resolvers[0]!(makeGateResult({ qualityScore: 0.7 }));
+    resolvers[1]!(makeGateResult({ qualityScore: 0.75 }));
+    await batch1;
+
+    // Next frame: t4 still has samplesCollected === 0 (priority), and t1 has oldest attempt among samplesCollected >= 1.
+    now = 10_700;
+    const batch2 = h.coordinator.sampleAvailableFrame('cam_front', ['t2', 't3', 't1', 't4']);
+    await waitForAssessCount(4);
+    expect(assessedOrder).toEqual(['crop-t2', 'crop-t3', 'crop-t4', 'crop-t1']);
+    resolvers[2]!(makeGateResult({ qualityScore: 0.8 }));
+    resolvers[3]!(makeGateResult({ qualityScore: 0.8 }));
+    await batch2;
+    h.coordinator.onModuleDestroy();
+  });
+
+  it('merges delayed-end absent KNOWN track via live-frame absence while refusing active-in-live-frame tailgating', async () => {
+    const now = 4_000;
+    jest.spyOn(Date, 'now').mockReturnValue(now);
+    let liveObjects: Array<{ id: string; box: number[]; observedAt: number }> = [];
+    const tracker = {
+      getCanonicalTrackId: (_cam: string, id: string) => id,
+      frames: {
+        get: () => [{ frameTime: now - 50, objects: liveObjects }],
+      },
+    } as unknown as FrigateDetectionTrackerService;
+    const h = buildHarness({}, tracker);
+    const camera = makeCamera();
+    const box = [100, 100, 220, 340];
+    const crop = await solidJpeg({ r: 20, g: 40, b: 220 }, { r: 30, g: 30, b: 30 });
+
+    const { record } = h.stateService.getOrCreate(
+      {
+        cameraSlug: 'cam_front',
+        trackId: 'track-old',
+        eventId: makeEvent().id,
+        cameraId: camera.id,
+        ownerScopeId: camera.owner_user_id!,
+        collectionVersion: 1,
+        sourceSessionId: 'old-source',
+      },
+      2_000,
+    );
+    h.stateService.markKnownFromLocalCache(record, aliceId, 'Alice', 1, box, 2_000);
+    expect(record.endedAt).toBeNull();
+    h.sessionCache.upsertKnown(
+      { ownerScopeId: camera.owner_user_id!, cameraSlug: 'cam_front', collectionVersion: 1 },
+      {
+        knownFaceId: aliceId,
+        personName: 'Alice',
+        trackId: 'track-old',
+        embedding: new Float32Array([1, 0, 0, 0]),
+        appearanceSignature: await computeAppearanceSignature(crop),
+        lastBox: box,
+        confirmedAt: 2_000,
+        endedAt: null,
+      },
+      2_000,
+    );
+    h.getTimestampedPersonCrop.mockResolvedValue(crop);
+    const after = {
+      id: 'track-new',
+      camera: 'cam_front',
+      frame_time: 4,
+      label: 'person',
+      score: 0.9,
+      box,
+    };
+
+    // Active-in-live-frame tailgating: track-old is STILL in liveObjects -> MUST NOT merge!
+    liveObjects = [
+      { id: 'track-old', box, observedAt: now - 50 },
+      { id: 'track-new', box, observedAt: now - 50 },
+    ];
+    h.assess.mockResolvedValue(makeGateResult());
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBeNull();
+
+    // Delayed-end absent track: track-old disappeared from liveObjects (only track-new present) -> merges!
+    liveObjects = [{ id: 'track-new', box, observedAt: now - 50 }];
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBe(
+      'frigate:cam_front:track-old',
+    );
+
+    // Bounded frame wait also triggers for absent KNOWN track when crop arrives on retry.
+    h.getTimestampedPersonCrop.mockResolvedValueOnce(null);
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera, 250)).resolves.toBe(
+      'frigate:cam_front:track-old',
+    );
+
+    // NO_FACE_DETECTED alone in live frame merges safely.
+    h.assess.mockResolvedValue(
+      makeGateResult({ passed: false, faceCount: 0, rejectionReason: 'NO_FACE_DETECTED' }),
+    );
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBe(
+      'frigate:cam_front:track-old',
+    );
+
+    // NO_FACE_DETECTED when a bystander is also in live frame MUST NOT merge.
+    liveObjects = [
+      { id: 'track-new', box, observedAt: now - 50 },
+      { id: 'track-bystander', box: [400, 100, 520, 340], observedAt: now - 50 },
+    ];
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBeNull();
+
+    // Distinct face MUST NOT merge even when track-old is absent.
+    liveObjects = [{ id: 'track-new', box, observedAt: now - 50 }];
+    h.assess.mockResolvedValue(makeGateResult({ embeddingBase64: encodeVector([0, 1, 0, 0]) }));
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBeNull();
+    h.coordinator.onModuleDestroy();
+  });
+
+  it('merges recent ended KNOWN track without stabilizer canonical link while rejecting unverified small faces and strangers', async () => {
+    const now = 5_000;
+    jest.spyOn(Date, 'now').mockReturnValue(now);
+    let liveObjects: Array<{ id: string; box: number[]; observedAt: number }> = [
+      { id: 'track-new', box: [100, 100, 220, 340], observedAt: now - 50 },
+    ];
+    const tracker = {
+      getCanonicalTrackId: (_cam: string, id: string) => id,
+      frames: {
+        get: () => [{ frameTime: now - 50, objects: liveObjects }],
+      },
+    } as unknown as FrigateDetectionTrackerService;
+    const h = buildHarness({}, tracker);
+    const camera = makeCamera();
+    const box = [100, 100, 220, 340];
+    const crop = await solidJpeg({ r: 20, g: 40, b: 220 }, { r: 30, g: 30, b: 30 });
+    const strangerCrop = await solidJpeg({ r: 220, g: 30, b: 20 }, { r: 240, g: 240, b: 240 });
+
+    const { record } = h.stateService.getOrCreate(
+      {
+        cameraSlug: 'cam_front',
+        trackId: 'track-old',
+        eventId: makeEvent().id,
+        cameraId: camera.id,
+        ownerScopeId: camera.owner_user_id!,
+        collectionVersion: 1,
+        sourceSessionId: 'old-source',
+      },
+      1_000,
+    );
+    h.stateService.markKnownFromLocalCache(record, aliceId, 'Alice', 1, box, 1_000);
+    record.endedAt = 2_000;
+    h.sessionCache.upsertKnown(
+      { ownerScopeId: camera.owner_user_id!, cameraSlug: 'cam_front', collectionVersion: 1 },
+      {
+        knownFaceId: aliceId,
+        personName: 'Alice',
+        trackId: 'track-old',
+        embedding: new Float32Array([1, 0, 0, 0]),
+        appearanceSignature: await computeAppearanceSignature(crop),
+        lastBox: box,
+        confirmedAt: 1_000,
+        endedAt: 2_000,
+      },
+      1_000,
+    );
+    const after = {
+      id: 'track-new',
+      camera: 'cam_front',
+      frame_time: 5,
+      label: 'person',
+      score: 0.9,
+      box,
+    };
+
+    // Matching spatial+appearance+embedding without canonical link -> merges!
+    h.getTimestampedPersonCrop.mockResolvedValue(crop);
+    h.assess.mockResolvedValue(makeGateResult());
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBe(
+      'frigate:cam_front:track-old',
+    );
+
+    // NO_FACE_DETECTED alone in live frame -> merges!
+    h.assess.mockResolvedValue(
+      makeGateResult({ passed: false, faceCount: 0, rejectionReason: 'NO_FACE_DETECTED' }),
+    );
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBe(
+      'frigate:cam_front:track-old',
+    );
+
+    // FACE_TOO_SMALL (faceCount === 1, !passed) without canonical link -> rejected!
+    h.assess.mockResolvedValue(
+      makeGateResult({ passed: false, faceCount: 1, rejectionReason: 'FACE_TOO_SMALL' }),
+    );
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBeNull();
+
+    // Stranger appearance or stranger face -> rejected!
+    h.assess.mockResolvedValue(makeGateResult({ embeddingBase64: encodeVector([0, 1, 0, 0]) }));
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBeNull();
+
+    h.getTimestampedPersonCrop.mockResolvedValue(strangerCrop);
+    h.assess.mockResolvedValue(makeGateResult());
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBeNull();
+
+    // Multi-person frame with NO_FACE_DETECTED -> rejected!
+    liveObjects = [
+      { id: 'track-new', box, observedAt: now - 50 },
+      { id: 'track-other', box: [400, 100, 520, 340], observedAt: now - 50 },
+    ];
+    h.getTimestampedPersonCrop.mockResolvedValue(crop);
+    h.assess.mockResolvedValue(
+      makeGateResult({ passed: false, faceCount: 0, rejectionReason: 'NO_FACE_DETECTED' }),
+    );
+    await expect(h.coordinator.resolveContinuationDedupKey(after, camera)).resolves.toBeNull();
+    h.coordinator.onModuleDestroy();
+  });
+
+  it('re-identifies absent KNOWN track via spatial+appearance during delayed end while blocking live tailgating', async () => {
+    let now = 50_000;
+    jest.spyOn(Date, 'now').mockImplementation(() => now);
+    let liveObjects: Array<{ id: string; box: number[]; observedAt: number }> = [];
+    const tracker = {
+      getCanonicalTrackId: (_cam: string, id: string) => id,
+      frames: {
+        get: () => [{ frameTime: now - 20, objects: liveObjects }],
+      },
+    } as unknown as FrigateDetectionTrackerService;
+    const h = buildHarness({ FACE_REQUIRE_TIMESTAMPED_FRAME: 'true' }, tracker);
+    const camera = makeCamera();
+    const box = [100, 100, 220, 340];
+    const aliceCrop = await solidJpeg({ r: 20, g: 40, b: 220 }, { r: 30, g: 30, b: 30 });
+
+    const event1 = makeEvent({ id: '11111111-1111-4111-8111-111111111301', track_id: 't-live-1' });
+    liveObjects = [{ id: 't-live-1', box, observedAt: now - 20 }];
+    h.getTimestampedPersonCrop.mockResolvedValueOnce(aliceCrop);
+    h.assess.mockResolvedValueOnce(
+      makeGateResult({ qualityScore: 0.9, embeddingBase64: encodeVector([1, 0, 0, 0]) }),
+    );
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: event1,
+      after: {
+        id: 't-live-1',
+        camera: 'cam_front',
+        frame_time: 50,
+        label: 'person',
+        score: 0.9,
+        box,
+      },
+      isCreated: true,
+      camera,
+    });
+    await h.coordinator.onRecognitionResult({
+      eventId: event1.id,
+      cameraSlug: 'cam_front',
+      ownerScopeId: camera.owner_user_id!,
+      trackId: 't-live-1',
+      collectionVersion: 1,
+      revision: 1,
+      personStatus: 'KNOWN',
+      matchedKnownFaceId: aliceId,
+      matchedPersonName: 'Alice',
+      similarity: 0.98,
+      disposition: 'ACCEPTED',
+    });
+
+    // t-live-1 did NOT receive MQTT end yet, AND is STILL in liveObjects -> t-tailgater MUST NOT Re-ID!
+    now += 1_000;
+    liveObjects = [
+      { id: 't-live-1', box, observedAt: now - 20 },
+      { id: 't-tailgater', box: [110, 105, 230, 345], observedAt: now - 20 },
+    ];
+    h.getTimestampedPersonCrop.mockResolvedValueOnce(aliceCrop);
+    h.assess.mockResolvedValueOnce(
+      makeGateResult({
+        passed: false,
+        faceCount: 0,
+        rejectionReason: 'NO_FACE_DETECTED',
+        embeddingBase64: null,
+        embeddingDim: null,
+      }),
+    );
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: makeEvent({ id: '11111111-1111-4111-8111-111111111302', track_id: 't-tailgater' }),
+      after: {
+        id: 't-tailgater',
+        camera: 'cam_front',
+        frame_time: 51,
+        label: 'person',
+        score: 0.9,
+        box: [110, 105, 230, 345],
+      },
+      isCreated: true,
+      camera,
+    });
+    expect(h.stateService.getMetrics().spatialReidHits).toBe(0);
+
+    // Now t-live-1 disappears from liveObjects (still endedAt === null), t-return arrives alone -> Re-ID hits!
+    now += 1_000;
+    liveObjects = [{ id: 't-return', box: [108, 102, 228, 342], observedAt: now - 20 }];
+    const event3 = makeEvent({ id: '11111111-1111-4111-8111-111111111303', track_id: 't-return' });
+    h.getTimestampedPersonCrop.mockResolvedValueOnce(aliceCrop);
+    h.assess.mockResolvedValueOnce(
+      makeGateResult({
+        passed: false,
+        faceCount: 0,
+        rejectionReason: 'NO_FACE_DETECTED',
+        embeddingBase64: null,
+        embeddingDim: null,
+      }),
+    );
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: event3,
+      after: {
+        id: 't-return',
+        camera: 'cam_front',
+        frame_time: 52,
+        label: 'person',
+        score: 0.9,
+        box: [108, 102, 228, 342],
+      },
+      isCreated: true,
+      camera,
+    });
+    expect(h.stateService.getMetrics().spatialReidHits).toBe(1);
+    expect(h.submitAiResult).toHaveBeenCalledWith(
+      event3.id,
+      expect.objectContaining({
+        personStatus: 'KNOWN',
+        matchedKnownFaceId: aliceId,
+      }),
+    );
+    h.coordinator.onModuleDestroy();
+  });
 });

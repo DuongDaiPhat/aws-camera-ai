@@ -10,6 +10,7 @@ import { FrigateDetectionTrackerService } from '../src/frigate/frigate-detection
 import { ZoneResultProducerService } from '../src/ingestion/zone-result-producer.service';
 import { AiResultsService } from '../src/ai-results/ai-results.service';
 import { FaceRecognitionCoordinatorService } from '../src/face-recognition/face-recognition-coordinator.service';
+import { FrigateMediaAdapter } from '../src/media/frigate-media.adapter';
 
 function createEvent(overrides: Partial<EventRecord> = {}): EventRecord {
   return {
@@ -76,6 +77,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
   let eventsService: jest.Mocked<EventsService>;
   let detectionTracker: jest.Mocked<FrigateDetectionTrackerService>;
   let aiResultsService: jest.Mocked<AiResultsService>;
+  let frigateMedia: jest.Mocked<Pick<FrigateMediaAdapter, 'getTimestampedFullFrame'>>;
 
   beforeEach(async () => {
     const mockEventsRepository = {
@@ -90,6 +92,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     const mockMediaService = {
       downloadAndStoreSnapshot: jest.fn(),
       downloadAndStoreClip: jest.fn(),
+      storeCameraSnapshot: jest.fn(),
     };
     const mockEventMediaRepository = {
       findMediaByEventIdAndType: jest.fn().mockResolvedValue(null),
@@ -104,6 +107,9 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     const mockConfigService = {
       get: jest.fn((_key: string, defaultValue?: unknown) => defaultValue),
     };
+    const mockFrigateMedia = {
+      getTimestampedFullFrame: jest.fn().mockReturnValue(null),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -116,6 +122,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
         { provide: EventsService, useValue: mockEventsService },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: FrigateDetectionTrackerService, useValue: mockDetectionTracker },
+        { provide: FrigateMediaAdapter, useValue: mockFrigateMedia },
       ],
     }).compile();
 
@@ -126,6 +133,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     eventsService = module.get(EventsService);
     detectionTracker = module.get(FrigateDetectionTrackerService);
     aiResultsService = module.get(AiResultsService);
+    frigateMedia = module.get(FrigateMediaAdapter);
   });
 
   it('khởi tạo thành công', () => {
@@ -761,5 +769,161 @@ describe('MqttConsumerService (US-03, US-04)', () => {
       2,
       expect.objectContaining({ messageType: 'end', isCreated: false, camera }),
     );
+  });
+
+  it.each(['update', 'end'] as const)(
+    'stores timestamped full frame fallback snapshot and emits event.updated on %s when has_snapshot is false',
+    async (messageType) => {
+      const existingEvent = createEvent({ track_id: `track-fallback-${messageType}` });
+      const summary = { id: existingEvent.id, thumbnailUrl: 'https://minio/snapshot.jpg' };
+      const imageBytes = Buffer.from([0xff, 0xd8, 0xff, 0xd9]);
+      eventsRepository.findCameraBySlug.mockResolvedValueOnce({
+        id: 'cam-uuid-1',
+        name: 'Phong khach',
+        slug: 'cam_living_room',
+      });
+      eventsRepository.findEventByDedupKey.mockResolvedValueOnce(existingEvent);
+      eventsRepository.updateEvent.mockResolvedValueOnce(existingEvent);
+      eventMediaRepository.findMediaByEventIdAndType.mockResolvedValueOnce(null);
+      frigateMedia.getTimestampedFullFrame.mockReturnValueOnce({
+        imageBytes,
+        frameWidth: 1280,
+        frameHeight: 720,
+        capturedAt: 1_726_387_205_000,
+      });
+      mediaService.storeCameraSnapshot.mockResolvedValueOnce(createSnapshotMedia());
+      eventsRepository.findEventSummaryById.mockResolvedValueOnce({
+        ...summary,
+        camera_owner_user_id: 'camera-owner',
+      } as unknown as Awaited<ReturnType<EventsRepository['findEventSummaryById']>>);
+      eventsService.toEventSummary.mockResolvedValueOnce(
+        summary as unknown as Awaited<ReturnType<EventsService['toEventSummary']>>,
+      );
+
+      await service.handleMessage(
+        'frigate/events',
+        Buffer.from(
+          JSON.stringify({
+            type: messageType,
+            after: {
+              id: `track-fallback-${messageType}`,
+              camera: 'cam_living_room',
+              frame_time: 1_726_387_205,
+              label: 'person',
+              score: 0.9,
+              current_zones: [],
+              has_snapshot: false,
+            },
+          }),
+        ),
+      );
+
+      expect(frigateMedia.getTimestampedFullFrame).toHaveBeenCalledWith('cam_living_room');
+      expect(mediaService.storeCameraSnapshot).toHaveBeenCalledWith(
+        existingEvent.id,
+        existingEvent.detected_at,
+        imageBytes,
+        1280,
+        720,
+      );
+      expect(mediaService.downloadAndStoreSnapshot).not.toHaveBeenCalled();
+      expect(eventsService.emitEvent).toHaveBeenCalledWith(summary, 'event.updated', [
+        'camera-owner',
+      ]);
+    },
+  );
+
+  it('skips timestamped fallback snapshot when a SNAPSHOT already exists', async () => {
+    const existingEvent = createEvent({ track_id: 'track-existing-snap' });
+    eventsRepository.findCameraBySlug.mockResolvedValueOnce({
+      id: 'cam-uuid-1',
+      name: 'Phong khach',
+      slug: 'cam_living_room',
+    });
+    eventsRepository.findEventByDedupKey.mockResolvedValueOnce(existingEvent);
+    eventsRepository.updateEvent.mockResolvedValueOnce(existingEvent);
+    eventMediaRepository.findMediaByEventIdAndType.mockResolvedValueOnce(createSnapshotMedia());
+
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'update',
+          after: {
+            id: 'track-existing-snap',
+            camera: 'cam_living_room',
+            frame_time: 1_726_387_205,
+            label: 'person',
+            score: 0.9,
+            current_zones: [],
+            has_snapshot: false,
+          },
+        }),
+      ),
+    );
+
+    expect(frigateMedia.getTimestampedFullFrame).not.toHaveBeenCalled();
+    expect(mediaService.storeCameraSnapshot).not.toHaveBeenCalled();
+    expect(eventsService.emitEvent).not.toHaveBeenCalled();
+  });
+
+  it('keeps using downloadAndStoreSnapshot when has_snapshot is true', async () => {
+    const existingEvent = createEvent({ track_id: 'track-frigate-snap' });
+    eventsRepository.findCameraBySlug.mockResolvedValueOnce({
+      id: 'cam-uuid-1',
+      name: 'Phong khach',
+      slug: 'cam_living_room',
+    });
+    eventsRepository.findEventByDedupKey.mockResolvedValueOnce(existingEvent);
+    eventsRepository.updateEvent.mockResolvedValueOnce(existingEvent);
+    eventMediaRepository.findMediaByEventIdAndType.mockResolvedValueOnce(null);
+    mediaService.downloadAndStoreSnapshot.mockResolvedValueOnce(createSnapshotMedia());
+
+    await service.handleMessage('frigate/events', buildSnapshotUpdateMessage('track-frigate-snap'));
+
+    expect(mediaService.downloadAndStoreSnapshot).toHaveBeenCalledWith(
+      existingEvent.id,
+      'track-frigate-snap',
+      existingEvent.detected_at,
+    );
+    expect(frigateMedia.getTimestampedFullFrame).not.toHaveBeenCalled();
+    expect(mediaService.storeCameraSnapshot).not.toHaveBeenCalled();
+  });
+
+  it('does not store fallback snapshot on new message when has_snapshot is false', async () => {
+    const createdEvent = createEvent({ track_id: 'track-new-no-snap' });
+    eventsRepository.findCameraBySlug.mockResolvedValueOnce({
+      id: 'cam-uuid-1',
+      name: 'Phong khach',
+      slug: 'cam_living_room',
+    });
+    eventsRepository.createEvent.mockResolvedValueOnce(createdEvent);
+    frigateMedia.getTimestampedFullFrame.mockReturnValue({
+      imageBytes: Buffer.from([0xff, 0xd8, 0xff, 0xd9]),
+      frameWidth: 1280,
+      frameHeight: 720,
+      capturedAt: 1_726_387_200_000,
+    });
+
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'new',
+          after: {
+            id: 'track-new-no-snap',
+            camera: 'cam_living_room',
+            frame_time: 1_726_387_200,
+            label: 'person',
+            score: 0.9,
+            current_zones: [],
+            has_snapshot: false,
+          },
+        }),
+      ),
+    );
+
+    expect(frigateMedia.getTimestampedFullFrame).not.toHaveBeenCalled();
+    expect(mediaService.storeCameraSnapshot).not.toHaveBeenCalled();
   });
 });
