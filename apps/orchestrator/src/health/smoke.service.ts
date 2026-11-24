@@ -4,7 +4,7 @@ import { GetQueueAttributesCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { readAuthSettings } from '../auth/auth.config';
 import { readCloudConfig } from '../cloud-queue/cloud-config';
 import { DatabaseService } from '../database/database.service';
-import { IStorageService, STORAGE_SERVICE } from '../storage/storage.interface';
+import { IStorageService, S3_EXPIRE_7D_TAG, STORAGE_SERVICE } from '../storage/storage.interface';
 
 export interface SmokeCheckResult {
   status: 'ok' | 'error';
@@ -105,7 +105,9 @@ export class SmokeService {
   private async checkStorage(): Promise<SmokeCheckResult> {
     const provider = this.configService.get<string>('STORAGE_PROVIDER', 'minio').toLowerCase();
     try {
-      const uploaded = await this.storage.upload(SMOKE_OBJECT_KEY, SMOKE_PAYLOAD, 'text/plain');
+      const uploaded = await this.storage.upload(SMOKE_OBJECT_KEY, SMOKE_PAYLOAD, 'text/plain', {
+        tags: S3_EXPIRE_7D_TAG,
+      });
       const downloaded = await this.storage.download(SMOKE_OBJECT_KEY);
       if (!downloaded.equals(SMOKE_PAYLOAD)) {
         return { status: 'error', reason: 'Storage roundtrip payload mismatch' };

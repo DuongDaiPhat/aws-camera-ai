@@ -11,18 +11,37 @@ import time
 import uuid
 from contextlib import suppress
 
+if __package__:
+    from .track_stabilizer import TrackStabilizer
+else:
+    from track_stabilizer import TrackStabilizer
+
 LOGGER = logging.getLogger(__name__)
 
 MAX_OBJECT_AGE_SECONDS = float(os.getenv("FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS", "0.25"))
+MAX_BRIDGE_FRAME_AGE_SECONDS = 2.0
 FRIGATE_POSE_FRAMES_ENABLED = os.getenv("FRIGATE_POSE_FRAMES_ENABLED", "false").lower() in (
     "true",
     "1",
-)
+) or os.getenv("FRIGATE_FACE_FRAMES_ENABLED", "true").lower() in ("true", "1")
 MQTT_TOPIC_POSE_FRAMES = os.getenv("MQTT_TOPIC_POSE_FRAMES", "frigate/camerai/pose/frames")
 MAX_POSE_FPS = float(os.getenv("FRIGATE_POSE_MAX_FPS", "5.0"))
 POSE_SAMPLING_JITTER_RATIO = 0.1
 MAX_ENVELOPE_BYTES = 1024 * 1024  # 1 MiB
 MAX_HEADER_BYTES = 32 * 1024  # 32 KiB
+_DEFAULT_TRACK_STABILIZER = TrackStabilizer()
+
+
+def is_track_stabilizer_enabled() -> bool:
+    return os.getenv("FRIGATE_TRACK_STABILIZER_ENABLED", "true").strip().lower() in (
+        "true",
+        "1",
+        "yes",
+    )
+
+
+def reset_track_stabilizer() -> None:
+    _DEFAULT_TRACK_STABILIZER.reset()
 
 
 def normalize_box(box: list[float], frame_w: int = 1280, frame_h: int = 720) -> dict[str, float]:
@@ -128,7 +147,7 @@ def is_valid_person(obj, frame_time, max_age=MAX_OBJECT_AGE_SECONDS):
     return 0 <= age <= max_age
 
 
-def frame_payload(payload, max_age=MAX_OBJECT_AGE_SECONDS):
+def frame_payload(payload, max_age=MAX_OBJECT_AGE_SECONDS, stabilizer=None):
     camera, _name, frame_time, objects, _motion, _regions = payload
     people = []
     for obj in objects:
@@ -162,6 +181,11 @@ def frame_payload(payload, max_age=MAX_OBJECT_AGE_SECONDS):
                 f"ageMs={age_ms:.1f} box={obj.get('box')} action=DROP",
                 flush=True,
             )
+    if is_track_stabilizer_enabled():
+        active_stabilizer = _DEFAULT_TRACK_STABILIZER if stabilizer is None else stabilizer
+        canonical_ids = active_stabilizer.update(camera, frame_time, people)
+        for person, canonical_id in zip(people, canonical_ids, strict=True):
+            person["canonicalTrackId"] = canonical_id
     return {"camera": camera, "frameTime": frame_time, "objects": people}
 
 
@@ -218,7 +242,7 @@ class PoseFramePublisher:
             except queue.Empty:
                 continue
             age = time.time() - metadata["frameTime"]
-            if age > 1.0 or age < -0.5:
+            if age > MAX_BRIDGE_FRAME_AGE_SECONDS or age < -0.5:
                 continue
             try:
                 image = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
@@ -237,11 +261,11 @@ class PoseFramePublisher:
                     self.session_id,
                 )
                 header["frameId"] = f"{frame_name}:{metadata['frameTime']}"
-                ok, jpeg = cv2.imencode(".jpg", image)
+                ok, jpeg = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 98])
                 if not ok:
                     LOGGER.warning("Pose JPEG encode failed")
                     continue
-                if time.time() - metadata["frameTime"] > 1.0:
+                if time.time() - metadata["frameTime"] > MAX_BRIDGE_FRAME_AGE_SECONDS:
                     continue
                 self.client.publish(
                     MQTT_TOPIC_POSE_FRAMES,
@@ -337,7 +361,7 @@ def main():
                 raw_payload = json.loads(message)
                 result = frame_payload(raw_payload)
                 frame_time = result["frameTime"]
-                if time.time() - frame_time > 1:
+                if time.time() - frame_time > MAX_BRIDGE_FRAME_AGE_SECONDS:
                     continue
                 client.publish(
                     os.getenv("MQTT_TOPIC_CAMERA_FRAMES", "frigate/camerai/frames"),

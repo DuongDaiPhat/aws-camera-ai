@@ -27,35 +27,37 @@ sequenceDiagram
     autonumber
     participant CAM as Webcam
     participant MTX as mediamtx
-    participant FRG as Frigate
+    participant FRG as Frigate + bridge.py
     participant MQ as Mosquitto
-    participant ORC as Orchestrator
+    participant ORC as Orchestrator (MqttConsumerService)
     participant PG as PostgreSQL
-    participant OBJ as MinIO
+    participant OBJ as MinIO / S3
     participant WEB as Dashboard
 
     CAM->>MTX: ffmpeg đẩy luồng
     MTX->>FRG: RTSP
-    FRG->>FRG: Phát hiện "person"<br/>(min_score 0.5)
+    FRG->>FRG: Phát hiện "person" (min_score 0.5, threshold 0.7)<br/>max_disappeared=75, stationary interval=50/threshold=50
+    FRG->>MQ: publish frigate/camerai/frames (TrackStabilizer gắn canonicalTrackId)
     FRG->>MQ: publish frigate/events {type:"new|update|end"}
     MQ->>ORC: message JSON
 
-    ORC->>ORC: Parse + kiểm tra schema
-    ORC->>ORC: Tính dedup_key ổn định<br/>frigate:camera:track
+    ORC->>ORC: Parse + kiểm tra schema + cập nhật FrigateDetectionTrackerService
+    ORC->>ORC: Tính dedup_key ổn định frigate:camera:track
 
     alt Chưa có event của track
         ORC->>PG: INSERT events (status=DETECTED)
     else Event của track đã tồn tại
-        ORC->>PG: UPDATE cùng event<br/>(confidence, zone, priority)
+        ORC->>PG: UPDATE cùng event (confidence, zone, priority)
     end
 
     opt after.has_snapshot = true
         ORC->>FRG: GET /api/events/{id}/snapshot.jpg
-        ORC->>OBJ: PUT events/2026/09/15/{id}/snapshot.jpg
+        ORC->>OBJ: PUT events/.../{id}/snapshot.jpg
         ORC->>PG: UPSERT event_media (SNAPSHOT)
     end
 
-    Note over ORC,WEB: SSE event.created và danh sách Dashboard thuộc US-06, hiện chưa triển khai
+    ORC-->>WEB: SSE event.created / event.updated
+    ORC->>ORC: Chuyển tiếp track sang FaceRecognitionCoordinatorService (Luồng 2)
 ```
 
 Consumer xử lý tuần tự các message của cùng kết nối MQTT. Một `after.id` của Frigate luôn ánh xạ
@@ -63,6 +65,12 @@ vào đúng một hàng `events`; các message `update` và `end` chỉ cập nh
 sẵn sàng ở message `new`, nên orchestrator thử lưu khi bất kỳ message nào báo
 `after.has_snapshot = true`. Việc lưu media là idempotent: nếu snapshot/clip đã tồn tại thì không tải
 và upload lại.
+
+Ngoài topic `frigate/events`, bridge `infra/frigate/frame-metadata/bridge.py` chạy `TrackStabilizer`
+(two-stage IoU + center-proximity theo từng camera) để gắn `canonicalTrackId` lên topic
+`frigate/camerai/frames` (bật mặc định qua `FRIGATE_TRACK_STABILIZER_ENABLED=true`). Sau đó
+`MqttConsumerService` chuyển tiếp cả `new`, `update` và `end` sang `FaceRecognitionCoordinatorService`
+thay vì tự đẩy job nhận diện ngay khi `INSERT events`.
 
 ### Payload MQTT từ Frigate (rút gọn những trường nhóm thực sự dùng)
 
@@ -134,7 +142,8 @@ Cột `dedup_key` có **unique index**, nên chống trùng lặp được đả
 kể cả khi message đi qua ranh giới 10 giây hoặc chạy hai instance orchestrator song song. Nếu khóa đã
 tồn tại, orchestrator cập nhật chính event đó thay vì tạo thêm hàng mới. Quy tắc này đáp ứng yêu cầu
 FR-ING-07 “cùng `track_id` trong 10 giây chỉ tạo một sự kiện” và còn chặt hơn: toàn bộ vòng đời của
-một track chỉ có một event.
+một track chỉ có một event. Ngoài ra, `detect.max_disappeared: 75` (~15 giây ở 5 fps), `detect.stationary`
+(`interval: 50, threshold: 50`) và `TrackStabilizer` giúp giữ ổn định vòng đời track ngay từ edge.
 
 ---
 
@@ -142,63 +151,93 @@ một track chỉ có một event.
 
 Đây là luồng đầy đủ nhất, chạm vào gần như mọi thành phần.
 
-> Phần gửi nhận Telegram của sơ đồ Luồng 2 dưới đây là phác thảo Sprint 2.
-> Sequence Telegram đã đối chiếu code hiện tại nằm ở Luồng 7; không dùng các bước ACK hoặc gửi trực tiếp trong sơ đồ cũ làm đặc tả triển khai.
+> **Cập nhật kiến trúc Track-Once (`feat/face-track-once-optimization`):** Luồng nhận diện khuôn mặt M1
+> trong Luồng 2 đã chuyển từ cơ chế gửi ảnh ngay lúc `type=new` / DB trigger `cloud_face_intent` sang
+> kiến trúc 5 lớp **"Recognize Once, Track Continuously"** (migration
+> [0024_face_track_once_pipeline.sql](../../db/migrations/0024_face_track_once_pipeline.sql)).
+> Xem phân tích chi tiết, bảng cấu hình và cơ chế chống tailgating tại
+> [FACE_TRACK_ONCE_OPTIMIZATION_REPORT.md](../reports/FACE_TRACK_ONCE_OPTIMIZATION_REPORT.md) và
+> [services/aws-workers/README.md](../../services/aws-workers/README.md).
+>
+> Phần gửi nhận Telegram của sơ đồ Luồng 2 là phác thảo tích hợp với Escalation Engine.
+> Sequence Telegram đã đối chiếu code hiện tại nằm ở Luồng 7; không dùng các bước ACK hoặc gửi trực tiếp cũ làm đặc tả Telegram.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant FRG as Frigate
-    participant ORC as Orchestrator
-    participant AI as AI Service
+    participant FRG as Frigate + TrackStabilizer
+    participant ORC as Orchestrator (Coordinator + State + Cache)
+    participant AI as AI Service (/face/assess | /face/match)
+    participant AWS as CloudQueue + S3/SQS + Face Lambda
     participant PG as PostgreSQL
-    participant TG as Telegram
+    participant TG as Telegram (Luồng 7)
     participant P1 as 👤 Người giám sát
     participant P4 as 👤 Liên hệ khẩn
 
-    FRG->>ORC: person trong zone "Bếp"
-    ORC->>PG: INSERT events (DETECTED)
+    FRG->>ORC: frigate/events (new/update/end) + frames (canonicalTrackId)
+    ORC->>PG: INSERT/UPDATE events (DETECTED)
 
-    ORC->>AI: POST /face/match (ảnh crop, timeout 5s)
-
-    alt AI trả kết quả trong 5 giây
-        AI-->>ORC: {personStatus:"UNKNOWN", similarity:0.31}
-        ORC->>PG: UPDATE events SET person_status, confidence,<br/>ai_results, event_type='UNKNOWN_PERSON'
-    else AI timeout
-        ORC->>PG: UPDATE events SET status='AI_FAILED'
-        Note over ORC: Sự kiện KHÔNG bị mất (US-10)
+    alt Track đang KNOWN hoặc PENDING_RECOGNITION
+        ORC->>ORC: Bỏ qua gọi AI/cloud (chỉ cập nhật lastBox / endedAt vào Session Cache)
+    else Đủ nhịp lấy mẫu (>= 350ms) và được phép đánh giá
+        ORC->>FRG: GET /api/events/{trackId}/snapshot.jpg?crop=1&quality=100
+        ORC->>ORC: Tính appearanceSignature & kiểm tra Spatial-Appearance Re-ID<br/>(track KNOWN mới kết thúc <=20s, proximity>=0.35, appearance>=0.78)
+        alt Hit Spatial-Appearance Re-ID
+            ORC->>PG: AiResultsService.submit (KNOWN, provider=local-session-cache, 0 AWS call)
+        else Miss Spatial Re-ID -> Local Quality Gate (Layer 2)
+            ORC->>AI: POST /face/assess (YuNet + SFace cục bộ, độc lập FACE_PROVIDER)
+            AI-->>ORC: {passed, qualityScore, rejectionReason, embeddingBase64, gateStatus}
+            alt Không đạt gate (quay lưng, mờ, nhỏ, nhiều mặt)
+                ORC->>ORC: Giữ track ở COLLECTING/state cũ, chờ frame tốt hơn
+            else Đạt gate -> Kiểm tra Embedding Session Cache (Layer 4)
+                ORC->>ORC: Match cosine SFace trong scope (ownerScopeId, cameraSlug, collectionVersion) >= 0.72
+                alt Hit Embedding Cache
+                    ORC->>PG: AiResultsService.submit (KNOWN, provider=local-session-cache, 0 AWS call)
+                else Miss Cache -> Tích lũy Best-Shot (1200ms / 4 mẫu / early >= 0.82 / end)
+                    alt FACE_JOB_TRANSPORT = sqs (Layer 5 Cloud)
+                        ORC->>AWS: CloudQueueService.enqueueFaceJob(revision, bestShot) -> S3 -> SQS face.job
+                        AWS->>AWS: Face Lambda fast path (REKOGNITION_SKIP_DETECT_FACES=true)<br/>0 call nếu collection rỗng; 1 call SearchFacesByImage
+                        AWS-->>ORC: SQS face.result -> CloudQueueService.applyResult
+                        ORC->>PG: AiResultsService.submit + cloud_result_receipts
+                    else FACE_JOB_TRANSPORT = bullmq (Local)
+                        ORC->>AI: FaceRecognitionWorker -> POST /face/match
+                        AI-->>ORC: {personStatus, similarity, matchedKnownFaceId}
+                        ORC->>PG: AiResultsService.submit
+                    end
+                    ORC->>ORC: onRecognitionResult: đóng băng KNOWN (hoặc giới hạn retry UNDETERMINED/UNKNOWN)<br/>và lưu Session Cache nếu KNOWN
+                end
+            end
+        end
     end
 
-    ORC->>PG: SELECT * FROM escalation_rules<br/>WHERE event_type='UNKNOWN_PERSON'
-    Note over ORC: T_low=0.60 T_high=0.80 T_wait=120s
+    ORC->>PG: SELECT * FROM escalation_rules WHERE event_type='UNKNOWN_PERSON'
+    Note over ORC: T_low=0.60 T_high=0.80 T_wait=120s (cấu hình DB)
 
-    alt confidence < T_low
-        ORC->>PG: status = LOGGED_ONLY
-        Note over ORC: Không làm phiền ai
-    else confidence ≥ T_low
-        ORC->>PG: status=NOTIFIED,<br/>escalation_deadline_at = now() + 120s
-        ORC->>TG: sendPhoto + 2 inline button
-        TG->>P1: 📸 "Người lạ · Bếp · 14:20"<br/>[✅ Tôi ổn] [🆘 Cần giúp đỡ]
-        ORC->>PG: INSERT notifications (SENT)
+    alt personStatus = KNOWN hoặc UNDETERMINED hoặc confidence < T_low
+        ORC->>PG: status = LOGGED_ONLY (không báo M1)
+    else UNKNOWN và confidence >= T_low
+        ORC->>PG: status=NOTIFIED, escalation_deadline_at = now() + T_wait
+        ORC->>TG: Gửi cảnh báo qua NotificationRetryWorker (Luồng 7)
+        TG->>P1: Ảnh + nút [Tôi ổn] / [Cần giúp đỡ]
     end
 
-    alt P1 bấm "Tôi ổn" trong 120 giây
+    alt P1 bấm "Tôi ổn" trong T_wait
         P1->>TG: bấm nút
-        TG->>ORC: POST /webhooks/telegram
-        ORC->>PG: INSERT confirmations (IM_OK)
-        ORC->>PG: status = RESOLVED, hủy hẹn giờ
-        ORC->>TG: sửa tin nhắn → "Đã xác nhận bởi Lan lúc 14:21"
-    else P1 bấm "Cần giúp đỡ"
-        P1->>TG: bấm nút
-        TG->>ORC: POST /webhooks/telegram
-        ORC->>PG: status = ESCALATED (ngay, không chờ)
-        ORC->>P4: gọi điện / thông báo
-    else Hết 120 giây không ai phản hồi
-        Note over ORC: TimerService kích hoạt
+        TG->>ORC: POST /api/v1/webhooks/telegram
+        ORC->>PG: status = RESOLVED, hủy deadline
+    else P1 bấm "Cần giúp đỡ" hoặc hết hạn T_wait
         ORC->>PG: status = ESCALATED
-        ORC->>P4: gọi điện (Connect) hoặc log giả lập
+        ORC->>P4: Gọi điện / thông báo khẩn cấp
     end
 ```
+
+### Tóm tắt 5 lớp tối ưu M1 trong Luồng 2
+
+1. **Lớp 1 — `TrackIdentityStateService` & `FaceRecognitionCoordinatorService`:** quản lý vòng đời từng track `(cameraSlug, trackId)` với các trạng thái `COLLECTING → PENDING_RECOGNITION → KNOWN | UNKNOWN | UNDETERMINED`. Track đã `KNOWN` bị đóng băng vĩnh viễn không gọi lại cloud; `UNDETERMINED` chỉ retry tối đa 2 lần (cooldown 4s, chất lượng cao hơn); `UNKNOWN` chỉ recheck tối đa 1 lần khi `qualityScore` tăng tối thiểu `+0.15`.
+2. **Lớp 2 — Local Face Quality Gate (`POST /face/assess` + `Best-Shot`):** chạy YuNet + SFace cục bộ trong `ai-service` (độc lập với `FACE_PROVIDER`) để loại ngay ảnh quay lưng, mờ (`BLURRY`), mặt nhỏ (`FACE_TOO_SMALL`), góc nghiêng lớn (`EXTREME_POSE`), không mặt hoặc nhiều mặt trước khi đẩy lên cloud; đồng thời chọn best-shot trong cửa sổ `1200 ms` (tối đa `4` mẫu, bắn sớm nếu `qualityScore >= 0.82`).
+3. **Lớp 3 — Frigate Tracker & `TrackStabilizer`:** `detect.max_disappeared: 75` (~15s), `stationary` (`interval: 50, threshold: 50`) và `TrackStabilizer` (two-stage IoU + center-proximity) giữ ổn định track và cấp `canonicalTrackId` qua đứt quãng ngắn.
+4. **Lớp 4 — `FaceSessionCacheService` (chống tailgating):** cache ngắn hạn theo đúng bucket `(ownerScopeId, cameraSlug)` và `collectionVersion` (tự hủy khi `collectionVersion` đổi). Hỗ trợ match embedding SFace (`>= 0.72`) và Spatial-Appearance Re-ID cho track vừa đứt (`<= 20s`, chỉ khớp khi có track `KNOWN` đã kết thúc thỏa đồng thời `proximityScore >= 0.35` và `appearanceSimilarity >= 0.78`), tuyệt đối không dùng cooldown toàn camera mù quáng.
+5. **Lớp 5 — Cloud Queue & Face Lambda Fast Path:** migration `0024` xóa trigger `cloud_face_intent` và thêm khóa `(event_id, revision)` cho `cloud_jobs`; `CloudQueueService.enqueueFaceJob` upload thẳng best-shot lên S3; Face Lambda (`REKOGNITION_SKIP_DETECT_FACES=true`) trả `UNKNOWN` với **0 Rekognition API call** khi `collection_face_count == 0`, hoặc chỉ **1 call** `SearchFacesByImage` (map `InvalidParameterException` sang `UNDETERMINED / NO_FACE_DETECTED` không retry SQS).
 
 ### Vì sao `escalation_deadline_at` phải nằm trong DB
 
@@ -473,36 +512,40 @@ Hình minh họa và giải thích xem [báo cáo của Nhân](../BAO_CAO_PHAN_C
 ## Ngân sách độ trễ
 
 NFR-01 yêu cầu **< 10 giây** từ lúc sự kiện xảy ra đến khi người dùng nhận thông báo.
-Phân bổ ngân sách cho từng chặng để biết chặng nào đang ăn hết thời gian:
+Phân bổ ngân sách cho từng chặng (kèm các mốc cấu hình của luồng M1 Track-Once):
 
-| #   | Chặng                                 | Ngân sách | Đo bằng                        |
-| --- | ------------------------------------- | --------- | ------------------------------ |
-| 1   | Camera → Frigate phát hiện            | 1.0 s     | `frame_time` vs `start_time`   |
-| 2   | Frigate → MQTT → Orchestrator         | 0.2 s     | log timestamp hai đầu          |
-| 3   | Orchestrator ghi DB                   | 0.1 s     | log truy vấn                   |
-| 4   | Gọi AI service suy luận               | 2.0 s     | `ai_processed_at − created_at` |
-| 5   | Escalation engine quyết định          | 0.1 s     | log                            |
-| 6   | Gửi Telegram                          | 1.5 s     | `notifications.sent_at`        |
-|     | **Tổng**                              | **~5 s**  | còn 5 s dự phòng               |
-|     | _NFR-02: đến khi hiện trên dashboard_ | _< 5 s_   | chặng 1–3 + SSE                |
+| #   | Chặng                                                  | Ngân sách / Cấu hình giới hạn | Đo bằng / Ghi chú                                                                                                     |
+| --- | ------------------------------------------------------ | ----------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| 1   | Camera → Frigate phát hiện                             | 1.0 s                         | `frame_time` vs `start_time` (có `min_initialized` frame)                                                             |
+| 2   | Frigate → MQTT → Orchestrator                          | 0.2 s                         | log timestamp hai đầu (`frigate/events` & `frigate/camerai/frames`)                                                   |
+| 3   | Orchestrator ghi DB & SSE                              | 0.1 s                         | `events`, `event_media`, SSE `event.created`                                                                          |
+| 4a  | M1 Local Quality Gate & Best-Shot Window (Lớp 2)       | 0–1.2 s (`window 1200 ms`)    | `POST /face/assess` (timeout `2000 ms`); early dispatch ngay nếu `qualityScore >= 0.82`                               |
+| 4b  | M1 Session Cache / Re-ID (Lớp 4) hoặc AI/Cloud (Lớp 5) | ~0 s (cache hit) / ≤ 2.0 s    | Cache hit gọi thẳng `AiResultsService.submit`; cloud dùng 0/1 call Rekognition, local `/face/match` timeout `5000 ms` |
+| 5   | Escalation engine quyết định                           | 0.1 s                         | `escalation_rules` & `outbox_messages`                                                                                |
+| 6   | Gửi Telegram                                           | 1.5 s                         | `notifications.sent_at`                                                                                               |
+|     | **Tổng**                                               | **~5–6.1 s**                  | còn ~3.9–5 s dự phòng trong ngưỡng NFR-01 `< 10 s`                                                                    |
+|     | _NFR-02: đến khi hiện trên dashboard_                  | _< 5 s_                       | chặng 1–3 + SSE `event.created` (không chờ chặng 4a/4b)                                                               |
 
-**Cách đo:** mọi log ghi kèm `correlation_id`. Đến Sprint 4, lọc log theo một
-`correlation_id` là dựng lại được toàn bộ dòng thời gian của một sự kiện.
+**Cách đo:** mọi log ghi kèm `correlation_id` (và log Lambda ghi `jobId`, `resultId`, `cacheHit`, `durationMs`). Lọc log theo `correlation_id` là dựng lại được toàn bộ dòng thời gian của một sự kiện.
 
 ---
 
 ## Xử lý lỗi trên từng chặng
 
-| Chặng hỏng                       | Hành vi bắt buộc                                                                                     | FR                   |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------- |
-| RTSP mất kết nối                 | Ghi log, tự thử lại sau 30 s, **không crash**                                                        | FR-ING-03            |
-| Message MQTT sai định dạng       | Ghi vào dead-letter log, consumer **vẫn sống**                                                       | US-03, US-08         |
-| AI service timeout > 5 s         | `status = AI_FAILED`, sự kiện vẫn được lưu                                                           | US-10                |
-| Rekognition lỗi                  | Tự fallback về model local, ghi cảnh báo                                                             | FR-DET-M1-06         |
-| Upload MinIO/S3 thất bại         | Retry 3 lần (2 s / 4 s / 8 s), sự kiện vẫn tồn tại không có ảnh                                      | US-29                |
-| Telegram lỗi                     | Mặc định 4 attempts tổng cộng, retry 2/4/8 giây; khi lỗi ghi `FAILED`, **timer escalation vẫn chạy** | FR-NOT-03, FR-NOT-05 |
-| Một camera bắn > 20 sự kiện/phút | Kích hoạt rate limit, gộp thành 1 cảnh báo tổng hợp                                                  | FR-ADM-05            |
-| PostgreSQL chết                  | Không có kế hoạch B — dừng nhận sự kiện mới, ghi log lỗi rõ ràng                                     | —                    |
+| Chặng hỏng                                                                                    | Hành vi bắt buộc                                                                                                                                                                                                                    | FR / Cơ chế                 |
+| --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| RTSP mất kết nối                                                                              | Ghi log, tự thử lại sau 30 s (`retry_interval` trên Frigate), **không crash**                                                                                                                                                       | FR-ING-03                   |
+| Message MQTT sai định dạng                                                                    | Ghi vào dead-letter log, consumer **vẫn sống**                                                                                                                                                                                      | US-03, US-08                |
+| Face Quality Gate (`POST /face/assess`) lỗi / timeout `2000 ms` / thiếu model (`UNAVAILABLE`) | `FaceQualityGateClient` áp dụng `FACE_QUALITY_GATE_FAIL_OPEN=true` mặc định cho qua với `qualityScore=0` để không nghẽn nhận diện (đặt `false` nếu muốn fail-closed)                                                                | Layer 2 Quality Gate        |
+| Local AI service (`/face/match`) timeout > 5 s                                                | `status = AI_FAILED`, sự kiện vẫn được lưu; `TrackIdentityStateService` chuyển `UNDETERMINED` để retry có giới hạn                                                                                                                  | US-10                       |
+| Face Lambda / Rekognition lỗi (SQS mode)                                                      | `InvalidParameterException` (không thấy mặt) ánh xạ sang `UNDETERMINED / NO_FACE_DETECTED` (`error=null`, không retry SQS); lỗi kỹ thuật khác giữ message cho SQS retry → DLQ (`fellBackToLocal=false`, không biến thành `UNKNOWN`) | Layer 5 / `handler.py`      |
+| `collectionVersion` thay đổi khi có cache                                                     | `FaceSessionCacheService` tự xóa bucket của `(ownerScopeId, cameraSlug)` khi lệch `collectionVersion`; `CloudQueueService` ghi receipt `STALE` và không áp dụng kết quả cũ                                                          | Layer 4 / `applyResult`     |
+| Lỗi upload S3 / prepare `cloud_jobs`                                                          | `enqueueFaceJob` giữ job ở `PREPARING` (`available_at + 30s`), `dispatchOne()` thử lại tối đa 5 lượt rồi `FAILED`; ảnh event vẫn giữ lifecycle 7 ngày (`S3_EXPIRE_7D_TAG`)                                                          | US-29 / `CloudQueueService` |
+| Upload MinIO/S3 cho snapshot sự kiện thất bại                                                 | Retry 3 lần (2 s / 4 s / 8 s), sự kiện vẫn tồn tại không có ảnh                                                                                                                                                                     | US-29                       |
+| Telegram lỗi                                                                                  | Mặc định 4 attempts tổng cộng, retry 2/4/8 giây; khi lỗi ghi `FAILED`, **timer escalation vẫn chạy**                                                                                                                                | FR-NOT-03, FR-NOT-05        |
+| Một camera bắn > 20 sự kiện/phút                                                              | Kích hoạt rate limit, gộp thành 1 cảnh báo tổng hợp                                                                                                                                                                                 | FR-ADM-05                   |
+| Cần rollback khẩn cấp tối ưu Track-Once                                                       | Đặt `FACE_TRACK_OPTIMIZATION_ENABLED=false` (Orchestrator quay về `handleLegacyDispatch`) và `REKOGNITION_SKIP_DETECT_FACES=false` (Lambda quay về legacy flow)                                                                     | Rollback Layer 1–5          |
+| PostgreSQL chết                                                                               | Không có kế hoạch B — dừng nhận sự kiện mới, ghi log lỗi rõ ràng                                                                                                                                                                    | —                           |
 
 ### Mẫu retry dùng chung
 

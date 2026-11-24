@@ -1,0 +1,799 @@
+{
+  "spreadsheetUrl": "https://docs.google.com/spreadsheets/d/1kPecT3IpjgqX0DywlxEORHdBbN1nnQVk9NPoprpXemc/edit",
+  "runId": "RUN-20261123-FACE-BRANCH-FINAL",
+  "verification": "Native Sheets API read-back; browser preview unavailable. Existing formulas preserved; no duplicate run/case keys and required fields complete.",
+  "ranges": {
+    "results": {
+      "range": "'07_Ket_qua'!M272:N293",
+      "majorDimension": "ROWS",
+      "values": [
+        ["RUN-20261123-FACE-BRANCH-FINAL|UT-FBR-BACKEND", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|UT-FBR-AI", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|UT-FBR-FACE", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|UT-FBR-LAMBDA", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|UT-FBR-BRIDGE", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|UT-FBR-WEB", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|IT-FBR-DB", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|IT-FBR-MODEL", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|API-FBR-AUTH-ASSESS", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|API-FBR-AUTH-EMBED", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|API-FBR-AUTH-MATCH", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|API-FBR-AUTH-SYNC", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|API-FBR-MISSING-IMAGE", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|API-FBR-R50", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|API-FBR-OPT-OUT", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|API-FBR-SFACE", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|API-FBR-BVA-LOW", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|API-FBR-BVA-HIGH", "Đủ trường"],
+        ["RUN-20261123-FACE-BRANCH-FINAL|PERF-FBR-ASSESS", "Đủ trường"],
+        ["RUN-20261123-FACE-INTEGRATION-BEFORE|IT-FBR-DB", "Đủ trường"],
+        ["RUN-20261123-FACE-T6-EVIDENCE|E2E-FACE-TC06-NOGLASS", "Đủ trường"],
+        ["RUN-20261123-FACE-T6-EVIDENCE|E2E-FACE-TC06-GLASS", "Đủ trường"]
+      ]
+    },
+    "coverage": {
+      "range": "'08_Coverage'!A18:O21",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "RUN-20261123-FACE-BRANCH-FINAL",
+          "Backend src toàn bộ (snapshot trước 2 cache tests)",
+          "Lines",
+          "5891",
+          "8640",
+          "68.2%",
+          "90.0%",
+          "Fail",
+          "7afc1dd; full snapshot trước 2 cache tests",
+          "docs/test/FACE_BRANCH_2026-11-23/evidence/backend-lcov.info",
+          "src/**/*.ts; exclude main.ts và *.module.ts theo Jest",
+          "2749 lines chưa phủ",
+          "Coverage full backend68.18%; ngoài phần Face còn thiếu",
+          "Bổ sung theo LCOV, không thu hẹp include để làm xanh",
+          "Codex"
+        ],
+        [
+          "RUN-20261123-FACE-BRANCH-FINAL",
+          "Face-recognition module",
+          "Lines",
+          "835",
+          "912",
+          "91.6%",
+          "90.0%",
+          "Pass",
+          "7afc1ddf5995f60a71609acb202535f0b001bae1",
+          "docs/test/FACE_BRANCH_2026-11-23/evidence/face-coverage/coverage-summary.json",
+          "Toàn src/face-recognition/*.ts; exclude module wiring",
+          "77 lines chưa phủ",
+          "Xem HTML/LCOV; lines91.55%",
+          "Bổ sung path coordinator/state chưa phủ",
+          "Codex"
+        ],
+        [
+          "RUN-20261123-FACE-BRANCH-FINAL",
+          "Face-recognition module",
+          "Branches",
+          "543",
+          "741",
+          "73.3%",
+          "90.0%",
+          "Fail",
+          "7afc1ddf5995f60a71609acb202535f0b001bae1",
+          "docs/test/FACE_BRANCH_2026-11-23/evidence/face-coverage/coverage-summary.json",
+          "Toàn src/face-recognition/*.ts; exclude module wiring",
+          "198 branches chưa phủ",
+          "Branch73.27% chưa đạt90%",
+          "Bổ sung theo report branches",
+          "Codex"
+        ],
+        [
+          "RUN-20261123-FACE-BRANCH-FINAL",
+          "AI service app",
+          "Lines",
+          "1878",
+          "2035",
+          "92.3%",
+          "90.0%",
+          "Pass",
+          "7afc1ddf5995f60a71609acb202535f0b001bae1",
+          "docs/test/FACE_BRANCH_2026-11-23/evidence/ai-final-coverage.json",
+          "--cov=app; không loại file để tăng số",
+          "157 lines chưa phủ",
+          "Chủ yếu đường lỗi/pose; chưa bật branch coverage",
+          "Xem missing_lines trong JSON",
+          "Codex"
+        ]
+      ]
+    },
+    "cases": {
+      "range": "'04_Test_cases'!S184:T202",
+      "majorDimension": "ROWS",
+      "values": [
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"],
+        ["Codex (thực thi)", "Pass"]
+      ]
+    },
+    "rtm": {
+      "range": "'03_RTM'!G184:I202",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "6 Fire test skip, ngoài phạm vi Face"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Không đại diện mọi yêu cầu hệ thống"
+        ],
+        [
+          "Đã chạy; xem actual và giới hạn trong kết quả",
+          "Pass",
+          "Chỉ HTTP local; chưa pipeline đa camera"
+        ]
+      ]
+    },
+    "01_Tong_quan": {
+      "range": "'01_Tong_quan'!B20:B27",
+      "majorDimension": "ROWS",
+      "values": [
+        ["Chưa đạt"],
+        ["0"],
+        ["Chưa đạt/thiếu evidence"],
+        ["Đạt các metric đã khai báo"],
+        [],
+        ["Các test thực thi trong phạm vi pass; chưa đạt coverage toàn hệ thống >90%"],
+        [],
+        [
+          "Run mới gồm 19 nhóm/case: Unit, Integration, Postman/Newman và k6. Required checks exit 0: backend 660, web 368, AI 158 test pass; DB/MQTT 98 pass, 6 Fire test skip; model thật 2 pass; Lambda 19; bridge 20. Face line coverage 91.55%, branch coverage 73.27%; AI line coverage 92.29%; snapshot toàn backend 68.18% — chưa đạt 90% toàn hệ thống. k6 HTTP local: p95 235.13 ms, 2.0159 request/s, 0% lỗi, tải 2 request/s trong 60 giây; chưa xác nhận SLA staging hoặc pipeline đa camera. Giữ lịch sử và Not Run của case ngoài đợt này. Test 6 được nhập từ bằng chứng đã có, không replay mới; BUG-FACE-013 đóng theo R50/0.52. Giới hạn mặt <80 px và thiếu E2E 720p vẫn còn. Bằng chứng dùng đường dẫn repository local, chưa push. Preview trình duyệt không mở được; đã kiểm tra công thức, giá trị và metadata qua API."
+        ]
+      ]
+    },
+    "09_Hieu_nang": {
+      "range": "'09_Hieu_nang'!H13:U15",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "235.13393",
+          "Pass",
+          "2",
+          "2",
+          "0",
+          "60",
+          "0.3304175",
+          "Windows 10.0.26300; AMD Ryzen 5 5500U; 12 logical CPU; RAM 16,469,520,384 byte",
+          "Crop TC02 thật; yunet-2023mar-w600k-r50; 2 CPU thread",
+          "tools/testing/face/assess.k6.js",
+          "docs/test/FACE_BRANCH_2026-11-23/evidence/k6-raw.jsonl",
+          "docs/test/FACE_BRANCH_2026-11-23/evidence/k6-summary.json",
+          "Codex: ngưỡng QA local xác định trước khi chạy; chưa phải SLA staging",
+          "2 VU dự cấp, tối đa 4; thực tế tối đa 1 VU dùng. 122 HTTP gồm 1 warm-up (330.4175 ms); 121 iteration; 0 dropped. Model đã khởi động trước tải. Chưa đo pipeline cloud hoặc nhiều camera."
+        ],
+        [
+          "2.015902347",
+          "Pass",
+          "2",
+          "2",
+          "0",
+          "60",
+          "0.3304175",
+          "Windows 10.0.26300; AMD Ryzen 5 5500U; 12 logical CPU; RAM 16,469,520,384 byte",
+          "Crop TC02 thật; yunet-2023mar-w600k-r50; 2 CPU thread",
+          "tools/testing/face/assess.k6.js",
+          "docs/test/FACE_BRANCH_2026-11-23/evidence/k6-raw.jsonl",
+          "docs/test/FACE_BRANCH_2026-11-23/evidence/k6-summary.json",
+          "Codex: ngưỡng QA local xác định trước khi chạy; chưa phải SLA staging",
+          "2 VU dự cấp, tối đa 4; thực tế tối đa 1 VU dùng. 122 HTTP gồm 1 warm-up (330.4175 ms); 121 iteration; 0 dropped. Model đã khởi động trước tải. Chưa đo pipeline cloud hoặc nhiều camera."
+        ],
+        [
+          "0",
+          "Pass",
+          "2",
+          "2",
+          "0",
+          "60",
+          "0.3304175",
+          "Windows 10.0.26300; AMD Ryzen 5 5500U; 12 logical CPU; RAM 16,469,520,384 byte",
+          "Crop TC02 thật; yunet-2023mar-w600k-r50; 2 CPU thread",
+          "tools/testing/face/assess.k6.js",
+          "docs/test/FACE_BRANCH_2026-11-23/evidence/k6-raw.jsonl",
+          "docs/test/FACE_BRANCH_2026-11-23/evidence/k6-summary.json",
+          "Codex: ngưỡng QA local xác định trước khi chạy; chưa phải SLA staging",
+          "2 VU dự cấp, tối đa 4; thực tế tối đa 1 VU dùng. 122 HTTP gồm 1 warm-up (330.4175 ms); 121 iteration; 0 dropped. Model đã khởi động trước tải. Chưa đo pipeline cloud hoặc nhiều camera."
+        ]
+      ]
+    }
+  },
+  "formulas": [
+    {
+      "sheet": "01_Tong_quan",
+      "row": 20,
+      "col": 2,
+      "formula": "=IF(B5=\"\",\"Chưa chọn run\",IF(COUNTIFS(K12:K16,\"Pass\")=5,\"Pass\",\"Chưa đạt\"))"
+    },
+    {
+      "sheet": "01_Tong_quan",
+      "row": 21,
+      "col": 2,
+      "formula": "=IF(B5=\"\",\"\",COUNTIFS('07_Ket_qua'!$A$6:$A$300,B5)-COUNTIFS('07_Ket_qua'!$A$6:$A$300,B5,'07_Ket_qua'!$N$6:$N$300,\"Đủ trường\"))"
+    },
+    {
+      "sheet": "01_Tong_quan",
+      "row": 22,
+      "col": 2,
+      "formula": "=IF(B5=\"\",\"Chưa chọn run\",IF(COUNTIFS('08_Coverage'!$A$6:$A$205,B5)=0,\"Chưa có báo cáo\",IF(COUNTIFS('08_Coverage'!$A$6:$A$205,B5)=COUNTIFS('08_Coverage'!$A$6:$A$205,B5,'08_Coverage'!$H$6:$H$205,\"Pass\"),\"Đạt các metric đã khai báo\",\"Chưa đạt/thiếu evidence\")))"
+    },
+    {
+      "sheet": "01_Tong_quan",
+      "row": 23,
+      "col": 2,
+      "formula": "=IF(B5=\"\",\"Chưa chọn run\",IF(COUNTIFS('09_Hieu_nang'!$A$6:$A$205,B5)=0,\"Chưa có báo cáo\",IF(COUNTIFS('09_Hieu_nang'!$A$6:$A$205,B5)=COUNTIFS('09_Hieu_nang'!$A$6:$A$205,B5,'09_Hieu_nang'!$I$6:$I$205,\"Pass\"),\"Đạt các metric đã khai báo\",\"Chưa đạt/thiếu evidence\")))"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 184,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D184,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 185,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D185,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 186,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D186,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 187,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D187,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 188,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D188,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 189,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D189,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 190,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D190,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 191,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D191,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 192,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D192,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 193,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D193,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 194,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D194,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 195,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D195,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 196,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D196,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 197,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D197,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 198,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D198,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 199,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D199,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 200,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D200,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 201,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D201,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "03_RTM",
+      "row": 202,
+      "col": 8,
+      "formula": "=IFERROR(INDEX('04_Test_cases'!$T$6:$T$205,MATCH(D202,'04_Test_cases'!$A$6:$A$205,0)),\"Case ID thiếu\")"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 272,
+      "col": 13,
+      "formula": "=IF(OR(A272=\"\",B272=\"\"),\"\",A272&\"|\"&B272)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 272,
+      "col": 14,
+      "formula": "=IF(M272=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M272)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A272)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B272)<>1,\"Case ID thiếu/trùng\",IF(OR(D272=\"\",C272=\"\",H272=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D272=\"Skipped\",D272=\"Blocked\"),K272=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 273,
+      "col": 13,
+      "formula": "=IF(OR(A273=\"\",B273=\"\"),\"\",A273&\"|\"&B273)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 273,
+      "col": 14,
+      "formula": "=IF(M273=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M273)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A273)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B273)<>1,\"Case ID thiếu/trùng\",IF(OR(D273=\"\",C273=\"\",H273=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D273=\"Skipped\",D273=\"Blocked\"),K273=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 274,
+      "col": 13,
+      "formula": "=IF(OR(A274=\"\",B274=\"\"),\"\",A274&\"|\"&B274)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 274,
+      "col": 14,
+      "formula": "=IF(M274=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M274)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A274)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B274)<>1,\"Case ID thiếu/trùng\",IF(OR(D274=\"\",C274=\"\",H274=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D274=\"Skipped\",D274=\"Blocked\"),K274=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 275,
+      "col": 13,
+      "formula": "=IF(OR(A275=\"\",B275=\"\"),\"\",A275&\"|\"&B275)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 275,
+      "col": 14,
+      "formula": "=IF(M275=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M275)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A275)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B275)<>1,\"Case ID thiếu/trùng\",IF(OR(D275=\"\",C275=\"\",H275=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D275=\"Skipped\",D275=\"Blocked\"),K275=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 276,
+      "col": 13,
+      "formula": "=IF(OR(A276=\"\",B276=\"\"),\"\",A276&\"|\"&B276)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 276,
+      "col": 14,
+      "formula": "=IF(M276=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M276)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A276)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B276)<>1,\"Case ID thiếu/trùng\",IF(OR(D276=\"\",C276=\"\",H276=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D276=\"Skipped\",D276=\"Blocked\"),K276=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 277,
+      "col": 13,
+      "formula": "=IF(OR(A277=\"\",B277=\"\"),\"\",A277&\"|\"&B277)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 277,
+      "col": 14,
+      "formula": "=IF(M277=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M277)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A277)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B277)<>1,\"Case ID thiếu/trùng\",IF(OR(D277=\"\",C277=\"\",H277=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D277=\"Skipped\",D277=\"Blocked\"),K277=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 278,
+      "col": 13,
+      "formula": "=IF(OR(A278=\"\",B278=\"\"),\"\",A278&\"|\"&B278)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 278,
+      "col": 14,
+      "formula": "=IF(M278=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M278)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A278)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B278)<>1,\"Case ID thiếu/trùng\",IF(OR(D278=\"\",C278=\"\",H278=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D278=\"Skipped\",D278=\"Blocked\"),K278=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 279,
+      "col": 13,
+      "formula": "=IF(OR(A279=\"\",B279=\"\"),\"\",A279&\"|\"&B279)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 279,
+      "col": 14,
+      "formula": "=IF(M279=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M279)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A279)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B279)<>1,\"Case ID thiếu/trùng\",IF(OR(D279=\"\",C279=\"\",H279=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D279=\"Skipped\",D279=\"Blocked\"),K279=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 280,
+      "col": 13,
+      "formula": "=IF(OR(A280=\"\",B280=\"\"),\"\",A280&\"|\"&B280)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 280,
+      "col": 14,
+      "formula": "=IF(M280=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M280)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A280)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B280)<>1,\"Case ID thiếu/trùng\",IF(OR(D280=\"\",C280=\"\",H280=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D280=\"Skipped\",D280=\"Blocked\"),K280=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 281,
+      "col": 13,
+      "formula": "=IF(OR(A281=\"\",B281=\"\"),\"\",A281&\"|\"&B281)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 281,
+      "col": 14,
+      "formula": "=IF(M281=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M281)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A281)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B281)<>1,\"Case ID thiếu/trùng\",IF(OR(D281=\"\",C281=\"\",H281=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D281=\"Skipped\",D281=\"Blocked\"),K281=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 282,
+      "col": 13,
+      "formula": "=IF(OR(A282=\"\",B282=\"\"),\"\",A282&\"|\"&B282)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 282,
+      "col": 14,
+      "formula": "=IF(M282=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M282)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A282)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B282)<>1,\"Case ID thiếu/trùng\",IF(OR(D282=\"\",C282=\"\",H282=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D282=\"Skipped\",D282=\"Blocked\"),K282=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 283,
+      "col": 13,
+      "formula": "=IF(OR(A283=\"\",B283=\"\"),\"\",A283&\"|\"&B283)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 283,
+      "col": 14,
+      "formula": "=IF(M283=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M283)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A283)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B283)<>1,\"Case ID thiếu/trùng\",IF(OR(D283=\"\",C283=\"\",H283=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D283=\"Skipped\",D283=\"Blocked\"),K283=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 284,
+      "col": 13,
+      "formula": "=IF(OR(A284=\"\",B284=\"\"),\"\",A284&\"|\"&B284)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 284,
+      "col": 14,
+      "formula": "=IF(M284=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M284)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A284)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B284)<>1,\"Case ID thiếu/trùng\",IF(OR(D284=\"\",C284=\"\",H284=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D284=\"Skipped\",D284=\"Blocked\"),K284=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 285,
+      "col": 13,
+      "formula": "=IF(OR(A285=\"\",B285=\"\"),\"\",A285&\"|\"&B285)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 285,
+      "col": 14,
+      "formula": "=IF(M285=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M285)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A285)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B285)<>1,\"Case ID thiếu/trùng\",IF(OR(D285=\"\",C285=\"\",H285=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D285=\"Skipped\",D285=\"Blocked\"),K285=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 286,
+      "col": 13,
+      "formula": "=IF(OR(A286=\"\",B286=\"\"),\"\",A286&\"|\"&B286)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 286,
+      "col": 14,
+      "formula": "=IF(M286=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M286)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A286)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B286)<>1,\"Case ID thiếu/trùng\",IF(OR(D286=\"\",C286=\"\",H286=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D286=\"Skipped\",D286=\"Blocked\"),K286=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 287,
+      "col": 13,
+      "formula": "=IF(OR(A287=\"\",B287=\"\"),\"\",A287&\"|\"&B287)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 287,
+      "col": 14,
+      "formula": "=IF(M287=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M287)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A287)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B287)<>1,\"Case ID thiếu/trùng\",IF(OR(D287=\"\",C287=\"\",H287=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D287=\"Skipped\",D287=\"Blocked\"),K287=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 288,
+      "col": 13,
+      "formula": "=IF(OR(A288=\"\",B288=\"\"),\"\",A288&\"|\"&B288)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 288,
+      "col": 14,
+      "formula": "=IF(M288=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M288)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A288)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B288)<>1,\"Case ID thiếu/trùng\",IF(OR(D288=\"\",C288=\"\",H288=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D288=\"Skipped\",D288=\"Blocked\"),K288=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 289,
+      "col": 13,
+      "formula": "=IF(OR(A289=\"\",B289=\"\"),\"\",A289&\"|\"&B289)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 289,
+      "col": 14,
+      "formula": "=IF(M289=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M289)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A289)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B289)<>1,\"Case ID thiếu/trùng\",IF(OR(D289=\"\",C289=\"\",H289=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D289=\"Skipped\",D289=\"Blocked\"),K289=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 290,
+      "col": 13,
+      "formula": "=IF(OR(A290=\"\",B290=\"\"),\"\",A290&\"|\"&B290)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 290,
+      "col": 14,
+      "formula": "=IF(M290=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M290)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A290)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B290)<>1,\"Case ID thiếu/trùng\",IF(OR(D290=\"\",C290=\"\",H290=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D290=\"Skipped\",D290=\"Blocked\"),K290=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 291,
+      "col": 13,
+      "formula": "=IF(OR(A291=\"\",B291=\"\"),\"\",A291&\"|\"&B291)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 291,
+      "col": 14,
+      "formula": "=IF(M291=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M291)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A291)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B291)<>1,\"Case ID thiếu/trùng\",IF(OR(D291=\"\",C291=\"\",H291=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D291=\"Skipped\",D291=\"Blocked\"),K291=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 292,
+      "col": 13,
+      "formula": "=IF(OR(A292=\"\",B292=\"\"),\"\",A292&\"|\"&B292)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 292,
+      "col": 14,
+      "formula": "=IF(M292=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M292)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A292)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B292)<>1,\"Case ID thiếu/trùng\",IF(OR(D292=\"\",C292=\"\",H292=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D292=\"Skipped\",D292=\"Blocked\"),K292=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 293,
+      "col": 13,
+      "formula": "=IF(OR(A293=\"\",B293=\"\"),\"\",A293&\"|\"&B293)"
+    },
+    {
+      "sheet": "07_Ket_qua",
+      "row": 293,
+      "col": 14,
+      "formula": "=IF(M293=\"\",\"\",IF(COUNTIFS($M$6:$M$300,M293)>1,\"Trùng Run + Case\",IF(COUNTIFS('06_Lan_chay'!$A$6:$A$205,A293)<>1,\"Run ID thiếu/trùng\",IF(COUNTIFS('04_Test_cases'!$A$6:$A$205,B293)<>1,\"Case ID thiếu/trùng\",IF(OR(D293=\"\",C293=\"\",H293=\"\"),\"Thiếu kết quả/MT/evidence\",IF(AND(OR(D293=\"Skipped\",D293=\"Blocked\"),K293=\"\"),\"Thiếu lý do\",\"Đủ trường\"))))))"
+    },
+    {
+      "sheet": "08_Coverage",
+      "row": 18,
+      "col": 6,
+      "formula": "=IF(OR(D18=\"\",E18=\"\",E18=0),\"\",D18/E18)"
+    },
+    {
+      "sheet": "08_Coverage",
+      "row": 18,
+      "col": 7,
+      "formula": "=IF(B18=\"\",\"\",'12_Huong_dan'!$B$6)"
+    },
+    {
+      "sheet": "08_Coverage",
+      "row": 18,
+      "col": 8,
+      "formula": "=IF(B18=\"\",\"\",IF(OR(A18=\"\",F18=\"\",I18=\"\",J18=\"\",K18=\"\"),\"Chưa đủ minh chứng\",IF(OR(D18<0,D18>E18),\"Sai số liệu\",IF(F18>G18,\"Pass\",\"Fail\"))))"
+    },
+    {
+      "sheet": "08_Coverage",
+      "row": 19,
+      "col": 6,
+      "formula": "=IF(OR(D19=\"\",E19=\"\",E19=0),\"\",D19/E19)"
+    },
+    {
+      "sheet": "08_Coverage",
+      "row": 19,
+      "col": 7,
+      "formula": "=IF(B19=\"\",\"\",'12_Huong_dan'!$B$6)"
+    },
+    {
+      "sheet": "08_Coverage",
+      "row": 19,
+      "col": 8,
+      "formula": "=IF(B19=\"\",\"\",IF(OR(A19=\"\",F19=\"\",I19=\"\",J19=\"\",K19=\"\"),\"Chưa đủ minh chứng\",IF(OR(D19<0,D19>E19),\"Sai số liệu\",IF(F19>G19,\"Pass\",\"Fail\"))))"
+    },
+    {
+      "sheet": "08_Coverage",
+      "row": 20,
+      "col": 6,
+      "formula": "=IF(OR(D20=\"\",E20=\"\",E20=0),\"\",D20/E20)"
+    },
+    {
+      "sheet": "08_Coverage",
+      "row": 20,
+      "col": 7,
+      "formula": "=IF(B20=\"\",\"\",'12_Huong_dan'!$B$6)"
+    },
+    {
+      "sheet": "08_Coverage",
+      "row": 20,
+      "col": 8,
+      "formula": "=IF(B20=\"\",\"\",IF(OR(A20=\"\",F20=\"\",I20=\"\",J20=\"\",K20=\"\"),\"Chưa đủ minh chứng\",IF(OR(D20<0,D20>E20),\"Sai số liệu\",IF(F20>G20,\"Pass\",\"Fail\"))))"
+    },
+    {
+      "sheet": "08_Coverage",
+      "row": 21,
+      "col": 6,
+      "formula": "=IF(OR(D21=\"\",E21=\"\",E21=0),\"\",D21/E21)"
+    },
+    {
+      "sheet": "08_Coverage",
+      "row": 21,
+      "col": 7,
+      "formula": "=IF(B21=\"\",\"\",'12_Huong_dan'!$B$6)"
+    },
+    {
+      "sheet": "08_Coverage",
+      "row": 21,
+      "col": 8,
+      "formula": "=IF(B21=\"\",\"\",IF(OR(A21=\"\",F21=\"\",I21=\"\",J21=\"\",K21=\"\"),\"Chưa đủ minh chứng\",IF(OR(D21<0,D21>E21),\"Sai số liệu\",IF(F21>G21,\"Pass\",\"Fail\"))))"
+    },
+    {
+      "sheet": "09_Hieu_nang",
+      "row": 13,
+      "col": 9,
+      "formula": "=IF(B13=\"\",\"\",IF(OR(A13=\"\",G13=\"\",H13=\"\",O13=\"\",Q13=\"\",R13=\"\",S13=\"\",T13=\"\"),\"Chưa đủ minh chứng\",IF(F13=\"<=\",IF(H13<=G13,\"Pass\",\"Fail\"),IF(F13=\">=\",IF(H13>=G13,\"Pass\",\"Fail\"),IF(F13=\"<\",IF(H13<G13,\"Pass\",\"Fail\"),IF(F13=\">\",IF(H13>G13,\"Pass\",\"Fail\"),\"Thiếu toán tử\"))))))"
+    },
+    {
+      "sheet": "09_Hieu_nang",
+      "row": 14,
+      "col": 9,
+      "formula": "=IF(B14=\"\",\"\",IF(OR(A14=\"\",G14=\"\",H14=\"\",O14=\"\",Q14=\"\",R14=\"\",S14=\"\",T14=\"\"),\"Chưa đủ minh chứng\",IF(F14=\"<=\",IF(H14<=G14,\"Pass\",\"Fail\"),IF(F14=\">=\",IF(H14>=G14,\"Pass\",\"Fail\"),IF(F14=\"<\",IF(H14<G14,\"Pass\",\"Fail\"),IF(F14=\">\",IF(H14>G14,\"Pass\",\"Fail\"),\"Thiếu toán tử\"))))))"
+    },
+    {
+      "sheet": "09_Hieu_nang",
+      "row": 15,
+      "col": 9,
+      "formula": "=IF(B15=\"\",\"\",IF(OR(A15=\"\",G15=\"\",H15=\"\",O15=\"\",Q15=\"\",R15=\"\",S15=\"\",T15=\"\"),\"Chưa đủ minh chứng\",IF(F15=\"<=\",IF(H15<=G15,\"Pass\",\"Fail\"),IF(F15=\">=\",IF(H15>=G15,\"Pass\",\"Fail\"),IF(F15=\"<\",IF(H15<G15,\"Pass\",\"Fail\"),IF(F15=\">\",IF(H15>G15,\"Pass\",\"Fail\"),\"Thiếu toán tử\"))))))"
+    }
+  ]
+}

@@ -1,0 +1,998 @@
+[
+  {
+    "faceRun": 0,
+    "samples": [
+      {
+        "time": 0.0,
+        "frame": 0,
+        "qualityScore": 0.6735,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9394,
+        "metrics": {
+          "faceWidthPx": 138,
+          "faceHeightPx": 153,
+          "detectionScore": 0.9095,
+          "sharpness": 163.6603,
+          "normalizedSharpness": 29.7012,
+          "poseYawRatio": 0.0835,
+          "posePitchRatio": 0.0971
+        }
+      },
+      {
+        "time": 0.2,
+        "frame": 6,
+        "qualityScore": 0.6532,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9351,
+        "metrics": {
+          "faceWidthPx": 138,
+          "faceHeightPx": 144,
+          "detectionScore": 0.9161,
+          "sharpness": 166.0298,
+          "normalizedSharpness": 26.463,
+          "poseYawRatio": 0.0999,
+          "posePitchRatio": 0.1148
+        }
+      },
+      {
+        "time": 0.4,
+        "frame": 12,
+        "qualityScore": 0.6774,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9345,
+        "metrics": {
+          "faceWidthPx": 141,
+          "faceHeightPx": 158,
+          "detectionScore": 0.9191,
+          "sharpness": 125.7829,
+          "normalizedSharpness": 23.8707,
+          "poseYawRatio": 0.0092,
+          "posePitchRatio": 0.1212
+        }
+      },
+      {
+        "time": 0.6,
+        "frame": 18,
+        "qualityScore": 0.5818,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8498,
+        "metrics": {
+          "faceWidthPx": 126,
+          "faceHeightPx": 140,
+          "detectionScore": 0.9239,
+          "sharpness": 86.7885,
+          "normalizedSharpness": 15.399,
+          "poseYawRatio": 0.0607,
+          "posePitchRatio": 0.1452
+        }
+      },
+      {
+        "time": 0.8,
+        "frame": 24,
+        "qualityScore": 0.518,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8169,
+        "metrics": {
+          "faceWidthPx": 109,
+          "faceHeightPx": 126,
+          "detectionScore": 0.9225,
+          "sharpness": 84.1834,
+          "normalizedSharpness": 13.5656,
+          "poseYawRatio": 0.1253,
+          "posePitchRatio": 0.1308
+        }
+      },
+      {
+        "time": 1.0,
+        "frame": 30,
+        "qualityScore": 0.4774,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8009,
+        "metrics": {
+          "faceWidthPx": 99,
+          "faceHeightPx": 112,
+          "detectionScore": 0.923,
+          "sharpness": 88.1071,
+          "normalizedSharpness": 12.2561,
+          "poseYawRatio": 0.1925,
+          "posePitchRatio": 0.1001
+        }
+      },
+      {
+        "time": 1.2,
+        "frame": 36,
+        "qualityScore": 0.2944,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": false,
+        "oldScore": 0.6261,
+        "metrics": {
+          "faceWidthPx": 74,
+          "faceHeightPx": 115,
+          "detectionScore": 0.8596,
+          "sharpness": 74.638,
+          "normalizedSharpness": 11.6593,
+          "poseYawRatio": 2.1602,
+          "posePitchRatio": 0.0992
+        }
+      }
+    ]
+  },
+  {
+    "faceRun": 1,
+    "samples": [
+      {
+        "time": 3.6,
+        "frame": 108,
+        "qualityScore": 0.2154,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": false,
+        "oldScore": 0.5771,
+        "metrics": {
+          "faceWidthPx": 43,
+          "faceHeightPx": 77,
+          "detectionScore": 0.73,
+          "sharpness": 76.0858,
+          "normalizedSharpness": 3.7141,
+          "poseYawRatio": 0.546,
+          "posePitchRatio": 0.0183
+        }
+      },
+      {
+        "time": 3.8,
+        "frame": 114,
+        "qualityScore": 0.2418,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": false,
+        "oldScore": 0.7056,
+        "metrics": {
+          "faceWidthPx": 50,
+          "faceHeightPx": 73,
+          "detectionScore": 0.8346,
+          "sharpness": 149.6871,
+          "normalizedSharpness": 8.4562,
+          "poseYawRatio": 1.4622,
+          "posePitchRatio": 0.0166
+        }
+      },
+      {
+        "time": 4.0,
+        "frame": 120,
+        "qualityScore": 0.2709,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": false,
+        "oldScore": 0.7374,
+        "metrics": {
+          "faceWidthPx": 63,
+          "faceHeightPx": 82,
+          "detectionScore": 0.87,
+          "sharpness": 146.5436,
+          "normalizedSharpness": 7.836,
+          "poseYawRatio": 0.6792,
+          "posePitchRatio": 0.0197
+        }
+      },
+      {
+        "time": 4.2,
+        "frame": 126,
+        "qualityScore": 0.3137,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": false,
+        "oldScore": 0.7743,
+        "metrics": {
+          "faceWidthPx": 68,
+          "faceHeightPx": 84,
+          "detectionScore": 0.8976,
+          "sharpness": 142.4711,
+          "normalizedSharpness": 8.9031,
+          "poseYawRatio": 0.5594,
+          "posePitchRatio": 0.0257
+        }
+      },
+      {
+        "time": 4.4,
+        "frame": 132,
+        "qualityScore": 0.4134,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": true,
+        "oldScore": 0.8095,
+        "metrics": {
+          "faceWidthPx": 78,
+          "faceHeightPx": 92,
+          "detectionScore": 0.9128,
+          "sharpness": 111.0342,
+          "normalizedSharpness": 9.3577,
+          "poseYawRatio": 0.2295,
+          "posePitchRatio": 0.0405
+        }
+      },
+      {
+        "time": 4.6,
+        "frame": 138,
+        "qualityScore": 0.5262,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9177,
+        "metrics": {
+          "faceWidthPx": 88,
+          "faceHeightPx": 100,
+          "detectionScore": 0.9158,
+          "sharpness": 144.8565,
+          "normalizedSharpness": 14.2501,
+          "poseYawRatio": 0.0059,
+          "posePitchRatio": 0.0139
+        }
+      },
+      {
+        "time": 4.8,
+        "frame": 144,
+        "qualityScore": 0.4703,
+        "passed": false,
+        "reason": "BLURRY_NORMALIZED",
+        "oldPassed": true,
+        "oldScore": 0.7849,
+        "metrics": {
+          "faceWidthPx": 89,
+          "faceHeightPx": 102,
+          "detectionScore": 0.9146,
+          "sharpness": 73.8031,
+          "normalizedSharpness": 8.4054,
+          "poseYawRatio": 0.088,
+          "posePitchRatio": 0.0443
+        }
+      },
+      {
+        "time": 5.0,
+        "frame": 150,
+        "qualityScore": 0.4816,
+        "passed": false,
+        "reason": "BLURRY_NORMALIZED",
+        "oldPassed": true,
+        "oldScore": 0.8186,
+        "metrics": {
+          "faceWidthPx": 86,
+          "faceHeightPx": 104,
+          "detectionScore": 0.9186,
+          "sharpness": 90.8411,
+          "normalizedSharpness": 10.3486,
+          "poseYawRatio": 0.0537,
+          "posePitchRatio": 0.0466
+        }
+      },
+      {
+        "time": 5.2,
+        "frame": 156,
+        "qualityScore": 0.4955,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8617,
+        "metrics": {
+          "faceWidthPx": 89,
+          "faceHeightPx": 103,
+          "detectionScore": 0.9219,
+          "sharpness": 114.9075,
+          "normalizedSharpness": 13.3162,
+          "poseYawRatio": 0.0804,
+          "posePitchRatio": 0.0601
+        }
+      },
+      {
+        "time": 5.4,
+        "frame": 162,
+        "qualityScore": 0.4885,
+        "passed": false,
+        "reason": "BLURRY_NORMALIZED",
+        "oldPassed": true,
+        "oldScore": 0.8242,
+        "metrics": {
+          "faceWidthPx": 95,
+          "faceHeightPx": 109,
+          "detectionScore": 0.9016,
+          "sharpness": 95.735,
+          "normalizedSharpness": 10.8283,
+          "poseYawRatio": 0.1078,
+          "posePitchRatio": 0.0643
+        }
+      },
+      {
+        "time": 5.6,
+        "frame": 168,
+        "qualityScore": 0.5222,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8988,
+        "metrics": {
+          "faceWidthPx": 91,
+          "faceHeightPx": 112,
+          "detectionScore": 0.9228,
+          "sharpness": 138.5404,
+          "normalizedSharpness": 19.4712,
+          "poseYawRatio": 0.1305,
+          "posePitchRatio": 0.0299
+        }
+      },
+      {
+        "time": 5.8,
+        "frame": 174,
+        "qualityScore": 0.5033,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8427,
+        "metrics": {
+          "faceWidthPx": 94,
+          "faceHeightPx": 109,
+          "detectionScore": 0.9136,
+          "sharpness": 101.2804,
+          "normalizedSharpness": 12.1895,
+          "poseYawRatio": 0.1078,
+          "posePitchRatio": 0.0302
+        }
+      },
+      {
+        "time": 6.0,
+        "frame": 180,
+        "qualityScore": 0.5151,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8281,
+        "metrics": {
+          "faceWidthPx": 99,
+          "faceHeightPx": 117,
+          "detectionScore": 0.9258,
+          "sharpness": 92.5282,
+          "normalizedSharpness": 14.5561,
+          "poseYawRatio": 0.0791,
+          "posePitchRatio": 0.115
+        }
+      },
+      {
+        "time": 6.2,
+        "frame": 186,
+        "qualityScore": 0.5047,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8045,
+        "metrics": {
+          "faceWidthPx": 106,
+          "faceHeightPx": 113,
+          "detectionScore": 0.9175,
+          "sharpness": 80.3259,
+          "normalizedSharpness": 12.1686,
+          "poseYawRatio": 0.2011,
+          "posePitchRatio": 0.048
+        }
+      },
+      {
+        "time": 6.4,
+        "frame": 192,
+        "qualityScore": 0.525,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8382,
+        "metrics": {
+          "faceWidthPx": 101,
+          "faceHeightPx": 109,
+          "detectionScore": 0.9211,
+          "sharpness": 94.3267,
+          "normalizedSharpness": 14.2441,
+          "poseYawRatio": 0.1279,
+          "posePitchRatio": 0.0405
+        }
+      },
+      {
+        "time": 6.6,
+        "frame": 198,
+        "qualityScore": 0.5313,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8985,
+        "metrics": {
+          "faceWidthPx": 94,
+          "faceHeightPx": 112,
+          "detectionScore": 0.9181,
+          "sharpness": 134.627,
+          "normalizedSharpness": 20.9809,
+          "poseYawRatio": 0.1447,
+          "posePitchRatio": 0.0329
+        }
+      },
+      {
+        "time": 6.8,
+        "frame": 204,
+        "qualityScore": 0.5499,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9053,
+        "metrics": {
+          "faceWidthPx": 93,
+          "faceHeightPx": 113,
+          "detectionScore": 0.9209,
+          "sharpness": 164.8015,
+          "normalizedSharpness": 24.5269,
+          "poseYawRatio": 0.0714,
+          "posePitchRatio": 0.0688
+        }
+      },
+      {
+        "time": 7.0,
+        "frame": 210,
+        "qualityScore": 0.5595,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.9094,
+        "metrics": {
+          "faceWidthPx": 95,
+          "faceHeightPx": 110,
+          "detectionScore": 0.9147,
+          "sharpness": 165.94,
+          "normalizedSharpness": 24.7966,
+          "poseYawRatio": 0.0614,
+          "posePitchRatio": 0.0649
+        }
+      },
+      {
+        "time": 7.2,
+        "frame": 216,
+        "qualityScore": 0.4964,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8907,
+        "metrics": {
+          "faceWidthPx": 80,
+          "faceHeightPx": 103,
+          "detectionScore": 0.9189,
+          "sharpness": 149.4761,
+          "normalizedSharpness": 17.4373,
+          "poseYawRatio": 0.0725,
+          "posePitchRatio": 0.0262
+        }
+      },
+      {
+        "time": 7.4,
+        "frame": 222,
+        "qualityScore": 0.4804,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8766,
+        "metrics": {
+          "faceWidthPx": 80,
+          "faceHeightPx": 101,
+          "detectionScore": 0.9157,
+          "sharpness": 158.4866,
+          "normalizedSharpness": 17.7188,
+          "poseYawRatio": 0.1373,
+          "posePitchRatio": 0.0323
+        }
+      },
+      {
+        "time": 7.6,
+        "frame": 228,
+        "qualityScore": 0.4547,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8625,
+        "metrics": {
+          "faceWidthPx": 83,
+          "faceHeightPx": 96,
+          "detectionScore": 0.9216,
+          "sharpness": 144.7323,
+          "normalizedSharpness": 15.6691,
+          "poseYawRatio": 0.2382,
+          "posePitchRatio": 0.0441
+        }
+      },
+      {
+        "time": 7.8,
+        "frame": 234,
+        "qualityScore": 0.4804,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8574,
+        "metrics": {
+          "faceWidthPx": 89,
+          "faceHeightPx": 104,
+          "detectionScore": 0.9247,
+          "sharpness": 121.4488,
+          "normalizedSharpness": 15.0021,
+          "poseYawRatio": 0.1726,
+          "posePitchRatio": 0.061
+        }
+      },
+      {
+        "time": 8.0,
+        "frame": 240,
+        "qualityScore": 0.4705,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8419,
+        "metrics": {
+          "faceWidthPx": 85,
+          "faceHeightPx": 104,
+          "detectionScore": 0.9218,
+          "sharpness": 115.0333,
+          "normalizedSharpness": 14.1226,
+          "poseYawRatio": 0.1776,
+          "posePitchRatio": 0.0347
+        }
+      },
+      {
+        "time": 8.2,
+        "frame": 246,
+        "qualityScore": 0.4629,
+        "passed": false,
+        "reason": "BLURRY_NORMALIZED",
+        "oldPassed": true,
+        "oldScore": 0.8151,
+        "metrics": {
+          "faceWidthPx": 84,
+          "faceHeightPx": 102,
+          "detectionScore": 0.9173,
+          "sharpness": 99.5113,
+          "normalizedSharpness": 11.8445,
+          "poseYawRatio": 0.1552,
+          "posePitchRatio": 0.0305
+        }
+      },
+      {
+        "time": 8.4,
+        "frame": 252,
+        "qualityScore": 0.4773,
+        "passed": false,
+        "reason": "BLURRY_NORMALIZED",
+        "oldPassed": true,
+        "oldScore": 0.7966,
+        "metrics": {
+          "faceWidthPx": 89,
+          "faceHeightPx": 104,
+          "detectionScore": 0.9257,
+          "sharpness": 79.2186,
+          "normalizedSharpness": 9.7534,
+          "poseYawRatio": 0.1342,
+          "posePitchRatio": 0.0069
+        }
+      },
+      {
+        "time": 8.6,
+        "frame": 258,
+        "qualityScore": 0.4322,
+        "passed": false,
+        "reason": "BLURRY_NORMALIZED",
+        "oldPassed": true,
+        "oldScore": 0.7758,
+        "metrics": {
+          "faceWidthPx": 86,
+          "faceHeightPx": 104,
+          "detectionScore": 0.9095,
+          "sharpness": 88.199,
+          "normalizedSharpness": 9.9609,
+          "poseYawRatio": 0.2504,
+          "posePitchRatio": 0.0396
+        }
+      },
+      {
+        "time": 8.8,
+        "frame": 264,
+        "qualityScore": 0.3008,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": false,
+        "oldScore": 0.6963,
+        "metrics": {
+          "faceWidthPx": 75,
+          "faceHeightPx": 94,
+          "detectionScore": 0.8779,
+          "sharpness": 98.9481,
+          "normalizedSharpness": 7.8674,
+          "poseYawRatio": 0.7338,
+          "posePitchRatio": 0.0015
+        }
+      },
+      {
+        "time": 9.0,
+        "frame": 270,
+        "qualityScore": 0.3329,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": false,
+        "oldScore": 0.7514,
+        "metrics": {
+          "faceWidthPx": 74,
+          "faceHeightPx": 97,
+          "detectionScore": 0.8498,
+          "sharpness": 121.4118,
+          "normalizedSharpness": 9.361,
+          "poseYawRatio": 0.5462,
+          "posePitchRatio": 0.0029
+        }
+      },
+      {
+        "time": 9.2,
+        "frame": 276,
+        "qualityScore": 0.2916,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": false,
+        "oldScore": 0.7037,
+        "metrics": {
+          "faceWidthPx": 71,
+          "faceHeightPx": 107,
+          "detectionScore": 0.8621,
+          "sharpness": 109.0628,
+          "normalizedSharpness": 7.9695,
+          "poseYawRatio": 1.1735,
+          "posePitchRatio": 0.0015
+        }
+      },
+      {
+        "time": 9.4,
+        "frame": 282,
+        "qualityScore": 0.3027,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": false,
+        "oldScore": 0.741,
+        "metrics": {
+          "faceWidthPx": 75,
+          "faceHeightPx": 106,
+          "detectionScore": 0.8603,
+          "sharpness": 129.931,
+          "normalizedSharpness": 10.2525,
+          "poseYawRatio": 0.7164,
+          "posePitchRatio": 0.0414
+        }
+      },
+      {
+        "time": 9.6,
+        "frame": 288,
+        "qualityScore": 0.3452,
+        "passed": false,
+        "reason": "EXTREME_POSE",
+        "oldPassed": false,
+        "oldScore": 0.7598,
+        "metrics": {
+          "faceWidthPx": 83,
+          "faceHeightPx": 111,
+          "detectionScore": 0.8242,
+          "sharpness": 142.4528,
+          "normalizedSharpness": 14.7858,
+          "poseYawRatio": 1.2375,
+          "posePitchRatio": 0.0042
+        }
+      },
+      {
+        "time": 9.8,
+        "frame": 294,
+        "qualityScore": 0.4311,
+        "passed": false,
+        "reason": "EXTREME_POSE",
+        "oldPassed": false,
+        "oldScore": 0.7798,
+        "metrics": {
+          "faceWidthPx": 109,
+          "faceHeightPx": 136,
+          "detectionScore": 0.8937,
+          "sharpness": 96.0724,
+          "normalizedSharpness": 12.0196,
+          "poseYawRatio": 0.4929,
+          "posePitchRatio": 0.0355
+        }
+      },
+      {
+        "time": 10.0,
+        "frame": 300,
+        "qualityScore": 0.5649,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.87,
+        "metrics": {
+          "faceWidthPx": 120,
+          "faceHeightPx": 133,
+          "detectionScore": 0.9255,
+          "sharpness": 105.1504,
+          "normalizedSharpness": 19.5469,
+          "poseYawRatio": 0.1784,
+          "posePitchRatio": 0.1046
+        }
+      }
+    ]
+  },
+  {
+    "faceRun": 2,
+    "samples": []
+  },
+  {
+    "faceRun": 3,
+    "samples": [
+      {
+        "time": 11.6,
+        "frame": 348,
+        "qualityScore": 0.2215,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": false,
+        "oldScore": 0.5661,
+        "metrics": {
+          "faceWidthPx": 64,
+          "faceHeightPx": 94,
+          "detectionScore": 0.834,
+          "sharpness": 64.7104,
+          "normalizedSharpness": 5.7371,
+          "poseYawRatio": 1.6608,
+          "posePitchRatio": 0.1925
+        }
+      },
+      {
+        "time": 11.8,
+        "frame": 354,
+        "qualityScore": 0.4348,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8126,
+        "metrics": {
+          "faceWidthPx": 90,
+          "faceHeightPx": 108,
+          "detectionScore": 0.8955,
+          "sharpness": 122.1809,
+          "normalizedSharpness": 16.8022,
+          "poseYawRatio": 0.4225,
+          "posePitchRatio": 0.0221
+        }
+      },
+      {
+        "time": 12.0,
+        "frame": 360,
+        "qualityScore": 0.502,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8549,
+        "metrics": {
+          "faceWidthPx": 95,
+          "faceHeightPx": 107,
+          "detectionScore": 0.9144,
+          "sharpness": 116.1495,
+          "normalizedSharpness": 16.4033,
+          "poseYawRatio": 0.1696,
+          "posePitchRatio": 0.0617
+        }
+      },
+      {
+        "time": 12.2,
+        "frame": 366,
+        "qualityScore": 0.5204,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8933,
+        "metrics": {
+          "faceWidthPx": 88,
+          "faceHeightPx": 106,
+          "detectionScore": 0.9162,
+          "sharpness": 146.0573,
+          "normalizedSharpness": 21.0671,
+          "poseYawRatio": 0.0849,
+          "posePitchRatio": 0.0673
+        }
+      },
+      {
+        "time": 12.4,
+        "frame": 372,
+        "qualityScore": 0.4719,
+        "passed": false,
+        "reason": "BLURRY_NORMALIZED",
+        "oldPassed": true,
+        "oldScore": 0.8317,
+        "metrics": {
+          "faceWidthPx": 83,
+          "faceHeightPx": 97,
+          "detectionScore": 0.9032,
+          "sharpness": 103.6313,
+          "normalizedSharpness": 10.6351,
+          "poseYawRatio": 0.0378,
+          "posePitchRatio": 0.0673
+        }
+      },
+      {
+        "time": 12.6,
+        "frame": 378,
+        "qualityScore": 0.4628,
+        "passed": false,
+        "reason": "BLURRY_NORMALIZED",
+        "oldPassed": true,
+        "oldScore": 0.7928,
+        "metrics": {
+          "faceWidthPx": 86,
+          "faceHeightPx": 95,
+          "detectionScore": 0.8838,
+          "sharpness": 84.062,
+          "normalizedSharpness": 8.3444,
+          "poseYawRatio": 0.0398,
+          "posePitchRatio": 0.0754
+        }
+      },
+      {
+        "time": 12.8,
+        "frame": 384,
+        "qualityScore": 0.4787,
+        "passed": false,
+        "reason": "BLURRY_NORMALIZED",
+        "oldPassed": true,
+        "oldScore": 0.7533,
+        "metrics": {
+          "faceWidthPx": 100,
+          "faceHeightPx": 103,
+          "detectionScore": 0.8012,
+          "sharpness": 65.4376,
+          "normalizedSharpness": 7.5133,
+          "poseYawRatio": 0.0098,
+          "posePitchRatio": 0.1247
+        }
+      },
+      {
+        "time": 13.0,
+        "frame": 390,
+        "qualityScore": 0.4165,
+        "passed": false,
+        "reason": "BLURRY_NORMALIZED",
+        "oldPassed": true,
+        "oldScore": 0.7336,
+        "metrics": {
+          "faceWidthPx": 84,
+          "faceHeightPx": 94,
+          "detectionScore": 0.8046,
+          "sharpness": 76.6222,
+          "normalizedSharpness": 6.996,
+          "poseYawRatio": 0.1739,
+          "posePitchRatio": 0.0405
+        }
+      },
+      {
+        "time": 13.2,
+        "frame": 396,
+        "qualityScore": 0.2627,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": false,
+        "oldScore": 0.6245,
+        "metrics": {
+          "faceWidthPx": 68,
+          "faceHeightPx": 83,
+          "detectionScore": 0.8474,
+          "sharpness": 74.6914,
+          "normalizedSharpness": 5.5436,
+          "poseYawRatio": 0.9396,
+          "posePitchRatio": 0.0345
+        }
+      }
+    ]
+  },
+  {
+    "faceRun": 4,
+    "samples": [
+      {
+        "time": 14.2,
+        "frame": 426,
+        "qualityScore": 0.33,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": false,
+        "oldScore": 0.775,
+        "metrics": {
+          "faceWidthPx": 77,
+          "faceHeightPx": 94,
+          "detectionScore": 0.8629,
+          "sharpness": 142.7697,
+          "normalizedSharpness": 9.7734,
+          "poseYawRatio": 0.5811,
+          "posePitchRatio": 0.0249
+        }
+      },
+      {
+        "time": 14.4,
+        "frame": 432,
+        "qualityScore": 0.5503,
+        "passed": true,
+        "reason": null,
+        "oldPassed": true,
+        "oldScore": 0.8624,
+        "metrics": {
+          "faceWidthPx": 111,
+          "faceHeightPx": 116,
+          "detectionScore": 0.8852,
+          "sharpness": 98.8985,
+          "normalizedSharpness": 12.2909,
+          "poseYawRatio": 0.0958,
+          "posePitchRatio": 0.0193
+        }
+      },
+      {
+        "time": 14.6,
+        "frame": 438,
+        "qualityScore": 0.336,
+        "passed": false,
+        "reason": "BLURRY_NORMALIZED",
+        "oldPassed": false,
+        "oldScore": 0.721,
+        "metrics": {
+          "faceWidthPx": 85,
+          "faceHeightPx": 104,
+          "detectionScore": 0.8789,
+          "sharpness": 96.7054,
+          "normalizedSharpness": 7.8941,
+          "poseYawRatio": 0.6094,
+          "posePitchRatio": 0.0031
+        }
+      },
+      {
+        "time": 14.8,
+        "frame": 444,
+        "qualityScore": 0.2991,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": false,
+        "oldScore": 0.7207,
+        "metrics": {
+          "faceWidthPx": 78,
+          "faceHeightPx": 99,
+          "detectionScore": 0.8656,
+          "sharpness": 115.3509,
+          "normalizedSharpness": 8.3624,
+          "poseYawRatio": 0.8224,
+          "posePitchRatio": 0.0411
+        }
+      },
+      {
+        "time": 15.0,
+        "frame": 450,
+        "qualityScore": 0.2609,
+        "passed": false,
+        "reason": "FACE_TOO_SMALL",
+        "oldPassed": false,
+        "oldScore": 0.6217,
+        "metrics": {
+          "faceWidthPx": 73,
+          "faceHeightPx": 90,
+          "detectionScore": 0.8316,
+          "sharpness": 75.7301,
+          "normalizedSharpness": 5.5886,
+          "poseYawRatio": 0.9725,
+          "posePitchRatio": 0.0791
+        }
+      }
+    ]
+  }
+]

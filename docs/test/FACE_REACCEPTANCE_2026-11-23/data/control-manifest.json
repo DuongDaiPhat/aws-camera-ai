@@ -1,0 +1,81 @@
+{
+  "sourceHashes": {
+    "known_face_vid_2.mp4": "b280c0ee3bfd47a25a9c8ef52689501d9e6a501d8a5bd1a4539ed402df176b0b",
+    "known_face_vid2_with_glass.mp4": "b38b06542c2768b2995b1bfd9d1362ed7c56c8c7ae51820c5ca26babc914941f"
+  },
+  "controls": [
+    {
+      "file": "TC09-unknown-recheck.mp4",
+      "derivation": {
+        "source": "known_face_vid_2.mp4",
+        "initialHoldSeconds": 12,
+        "initialSourceTime": 13.0,
+        "reverseSourceInterval": [4.6, 13.0],
+        "finalHoldSeconds": 18,
+        "finalSourceTime": 4.6,
+        "purpose": "Exercise a genuine quality gain on one continuous person track"
+      },
+      "sha256": "829568dc39cbcebfedca9d79288c0065fb868f9c13680dd73ec2c27d5f19b64d"
+    },
+    {
+      "file": "TC09-undetermined-retry.mp4",
+      "derivation": {
+        "source": "known_face_vid_2.mp4",
+        "sourceTime": 4.6,
+        "occlusionSeconds": 14,
+        "clearSeconds": 18,
+        "occluder": "opaque rectangle over detected face",
+        "purpose": "AI-outage/fail-open control, then real no-face AWS outcome and restored quality gate"
+      },
+      "sha256": "7c8b3e94fd0e2ce42db51ee86d027a975e83742fb2402e94a0d1fb1dd361b273"
+    },
+    {
+      "file": "TC09-undetermined-cap.mp4",
+      "derivation": {
+        "source": "known_face_vid_2.mp4",
+        "holds": [
+          [13.0, 12],
+          [3.2, 16],
+          [4.6, 20]
+        ],
+        "reverseSourceIntervals": [[3.2, 13.0]],
+        "forwardSourceIntervals": [[3.2, 4.6]],
+        "purpose": "Genuine quality gains while scoped storage fault causes real InvalidS3ObjectException, verify two-retry cap"
+      },
+      "sha256": "131464f5ddbc77fd85dabe498f51dd99a53ffe75e4710187576d8ac379356526"
+    },
+    {
+      "file": "TC02-known-lock-no-glasses.mp4",
+      "derivation": {
+        "source": "known_face_vid_2.mp4",
+        "sourceTime": 4.6,
+        "holdSeconds": 30,
+        "purpose": "Observe KNOWN lock for >=10 seconds with a stationary real person image"
+      },
+      "sha256": "85b512d69b08cb33202f92a6bf62f32dd09b370620dc4181f9afbfd1796fc377"
+    },
+    {
+      "file": "TC02-known-lock-glasses.mp4",
+      "derivation": {
+        "source": "known_face_vid2_with_glass.mp4",
+        "sourceTime": 5.6,
+        "holdSeconds": 30,
+        "purpose": "Observe KNOWN lock for >=10 seconds with a stationary real person image"
+      },
+      "sha256": "8266c3e1563d8eeacb6f2b4608e07dc0ca4741cac6ab78500f7eb9f3ca0e8df8"
+    },
+    {
+      "file": "TC09-unknown-cap.mp4",
+      "derivation": {
+        "source": "known_face_vid_2.mp4",
+        "holds": [
+          [6.0, 12],
+          [4.6, 20]
+        ],
+        "reverseSourceInterval": [4.6, 6.0],
+        "purpose": "Real UNKNOWN single-recheck/cap with >=0.15 quality gain; A absent and B keeps collection nonempty"
+      },
+      "sha256": "8d7a1e30afa16effc729aa05239b07152e36e9ce5058e5265dfee4154d4cd816"
+    }
+  ]
+}

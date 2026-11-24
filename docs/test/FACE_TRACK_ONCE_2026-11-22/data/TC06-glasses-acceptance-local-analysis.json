@@ -1,0 +1,25 @@
+{
+  "case": "TC06-glasses-acceptance",
+  "analysisAt": "2026-11-22T16:26:47.362Z",
+  "method": "Re-assess the exact dispatch crop on the same local AI service; no AWS request",
+  "samples": [
+    {
+      "trackId": "1795363121.133075-oe4a3v",
+      "imageSha256": "4dddc25ff139351a555267962b1bc8131ce0a32c0743ec63f758f778c74b5440",
+      "qualityScore": 0.9399
+    },
+    {
+      "trackId": "1795363137.565338-rryojx",
+      "imageSha256": "5f377ad198007060e85fbd0421f7aec4bcdf078ec35d6e99e0e280a84336d8d0",
+      "qualityScore": 0.9053
+    }
+  ],
+  "pairs": [
+    {
+      "firstTrackId": "1795363121.133075-oe4a3v",
+      "secondTrackId": "1795363137.565338-rryojx",
+      "sfaceCosine": 0.5961622504852276,
+      "appearanceCosine": 0.5315649034674472
+    }
+  ]
+}

@@ -681,11 +681,14 @@ describe('US-11 - AI result đến PostgreSQL', () => {
       status: string;
       message_status: string;
       notifications: string;
+      notification_channels: string[];
       transitions: string;
     }>(
       `SELECT e.status,
               o.status AS message_status,
               (SELECT COUNT(*)::text FROM notifications WHERE event_id = e.id) AS notifications,
+              (SELECT array_agg(channel::text ORDER BY channel::text) FROM notifications
+               WHERE event_id = e.id) AS notification_channels,
               (SELECT COUNT(*)::text FROM event_status_history WHERE event_id = e.id) AS transitions
        FROM events e
        JOIN outbox_messages o ON o.event_id = e.id
@@ -695,7 +698,8 @@ describe('US-11 - AI result đến PostgreSQL', () => {
     expect(result.rows[0]).toEqual({
       status: 'NOTIFIED',
       message_status: 'PROCESSED',
-      notifications: '1',
+      notifications: '2',
+      notification_channels: ['SNS_EMAIL', 'TELEGRAM'],
       transitions: '1',
     });
   });

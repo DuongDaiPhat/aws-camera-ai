@@ -1,0 +1,14 @@
+{
+  "at": "2026-11-22T16:42:56.365Z",
+  "secretScan": {
+    "scannedTextFiles": 143,
+    "redactions": [],
+    "unrecognizedAwsKeys": 0
+  },
+  "missingMarkdownLinks": 0,
+  "selectedReplays": 37,
+  "uniqueVideos": 22,
+  "distinctJobs": 45,
+  "searchRequestIds": 44,
+  "allJobReceiptsPresent": true
+}

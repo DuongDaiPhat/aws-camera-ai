@@ -48,7 +48,8 @@ const SECRET_PATTERNS = [
 ];
 
 function runGit(args) {
-  const result = spawnSync('git', args, { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
+  // Evidence bundles can exceed 10 MiB of text diff; keep scanning fail-closed.
+  const result = spawnSync('git', args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   if (result.error) {
     console.error('Không thể thực thi lệnh git:', result.error.message);
     process.exit(1);

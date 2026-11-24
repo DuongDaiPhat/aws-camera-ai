@@ -4,7 +4,7 @@ import './globals.css';
 import { AppMotion } from '@/components/ui/AppMotion';
 
 export const metadata: Metadata = {
-  title: 'CameraAI — Giám sát an toàn tại nhà',
+  title: 'Argus AI — Giám sát an toàn tại nhà',
   description: 'Hệ thống camera giám sát hành vi ứng dụng AI và AWS',
 };
 

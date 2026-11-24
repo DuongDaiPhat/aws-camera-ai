@@ -1,0 +1,17 @@
+{
+  "case": "TC01-head-down",
+  "video": "known_face_head_tilt_down.mp4",
+  "startedAt": "2026-11-22T14:24:51.053Z",
+  "endedAt": "2026-11-22T14:25:25.935Z",
+  "ffmpegExitCode": 0,
+  "before": {
+    "case": "TC01-head-down",
+    "tracks": []
+  },
+  "after": {
+    "case": "TC01-head-down",
+    "tracks": []
+  },
+  "events": [],
+  "jobs": []
+}

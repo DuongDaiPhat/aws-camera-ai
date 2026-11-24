@@ -1,0 +1,15 @@
+PASS test/face-session-cache.service.spec.ts (33.121 s)
+  FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID)
+    √ decodes little-endian float32 embeddings and matches by cosine similarity threshold (16 ms)
+    √ strictly scopes by (ownerScopeId, cameraSlug, collectionVersion) and invalidates prior versions (3 ms)
+    √ matches spatial+appearance Re-ID ONLY after track ended, within gap, and blocks tailgating strangers (58 ms)
+    √ expires entries after sessionCacheTtlMs and computes scale-invariant box proximity (3 ms)
+    √ matches against a multi-prototype bank while preserving rejection of unrelated faces (5 ms)
+    √ enforces cosine boundary, exact TTL and collection invalidation for R50 banks (6 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        34.353 s
+Ran all test suites within paths "test/face-session-cache.service.spec.ts".
+Test results written to: ..\..\docs\test\FACE_BRANCH_2026-11-23\evidence\cache-boundaries.json

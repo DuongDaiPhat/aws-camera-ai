@@ -1,0 +1,62 @@
+{
+  "sampling": "2s for long videos; 0.5s for short videos; start=0",
+  "files": [
+    {
+      "name": "has_known_face_no_glasses.mp4",
+      "bytes": 37127350,
+      "sha256": "f8993a3a5f342cd3ff742e47d6148accfcb4c8007860a09c3e7ca1c9c8d5a618",
+      "fps": 29.992030434100307,
+      "frameCount": 3249,
+      "durationSeconds": 108.32877777777777
+    },
+    {
+      "name": "has_known_face_with_glasses.mp4",
+      "bytes": 24938674,
+      "sha256": "4340fae9eef1da25d2498b41243f04f497ca94cf744451e79ffee42e2ca7f1ea",
+      "fps": 30.00152932715133,
+      "frameCount": 2171,
+      "durationSeconds": 72.36297777777777
+    },
+    {
+      "name": "has_known_face_with_many_stranger_faces.mp4",
+      "bytes": 3575427,
+      "sha256": "3a41288ddf6cd9a135a5f6b8c1c8b02a88ed67db9737095626f17e3b662f5b49",
+      "fps": 29.90456449453729,
+      "frameCount": 277,
+      "durationSeconds": 9.2628
+    },
+    {
+      "name": "know_face.png",
+      "bytes": 3545332,
+      "sha256": "dc7f118f1b1e17036c6b59c8d1420599686777813f86048d664d7703aeba47e4"
+    },
+    {
+      "name": "known_face_half_left.jpg",
+      "bytes": 445424,
+      "sha256": "63691d94e11e65b76ed4f65376b921d59978e8fd5d165047fb05d7029fd2e7c6"
+    },
+    {
+      "name": "known_face_half_right.jpg",
+      "bytes": 355421,
+      "sha256": "f6174965690f9b058c39f58273b275bf7cbae9cc45e4f2bb2976a86a4df79ec2"
+    },
+    {
+      "name": "known_face_left.jpg",
+      "bytes": 523212,
+      "sha256": "065efa0e4286f12b6ad1c20939e64a406b8b5959598ae1765f7f66e16e809914"
+    },
+    {
+      "name": "known_face_right.jpg",
+      "bytes": 496172,
+      "sha256": "a6715901d863740f9607c824eed2d5dfc3a554fa296131643f51ce3cb7a0ae8c"
+    },
+    {
+      "name": "no_known_face.mp4",
+      "bytes": 2955256,
+      "sha256": "f016ccdefc4b0e076c05a14094f6ceb51f813f1163eac4ec033ae98f6dd8d4e0",
+      "fps": 30.00551212370865,
+      "frameCount": 225,
+      "durationSeconds": 7.498622222222222
+    }
+  ]
+}

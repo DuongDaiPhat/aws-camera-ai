@@ -1,0 +1,33 @@
+PASS test/mqtt-consumer.service.spec.ts (34.697 s)
+PASS test/face-recognition-coordinator.service.spec.ts (5.625 s)
+[Nest] 30336  - 22/11/2026, 23.11.52   ERROR [FrigateConfigService] Lỗi khi phân tích cú pháp YAML cấu hình Frigate:
+[Nest] 30336  - 22/11/2026, 23.11.52   ERROR [FrigateConfigService] YAMLParseError: Flow sequence in block collection must be sufficiently indented and end with a ] at line 1, column 23:
+
+invalid: [yaml: broken
+                      ^
+
+PASS test/frigate-config.service.spec.ts
+PASS test/track-identity-state.service.spec.ts
+PASS test/frigate-media.adapter.spec.ts
+PASS test/face-session-cache.service.spec.ts
+PASS test/face-quality-gate.client.spec.ts
+
+Test Suites: 7 passed, 7 total
+Tests:       58 passed, 58 total
+Snapshots:   0 total
+Time:        59.773 s
+Ran all test suites matching /face-recognition-coordinator.service.spec.ts|frigate-media.adapter.spec.ts|mqtt-consumer.service.spec.ts|track-identity-state.service.spec.ts|face-session-cache.service.spec.ts|face-quality-gate.client.spec.ts|frigate-config.service.spec.ts/i.
+[Nest] 30336  - 22/11/2026, 23.12.06    WARN [FaceQualityGateClient] Object:
+{
+  "reason": "QUALITY_GATE_TIMEOUT",
+  "failOpen": true
+}
+
+[Nest] 30336  - 22/11/2026, 23.12.06    WARN [FaceQualityGateClient] Face quality gate request failed
+[Nest] 30336  - 22/11/2026, 23.12.06    WARN [FaceQualityGateClient] Object:
+{
+  "reason": "QUALITY_GATE_TIMEOUT",
+  "failOpen": false
+}
+
+[Nest] 30336  - 22/11/2026, 23.12.06    WARN [FaceQualityGateClient] Face quality gate request failed

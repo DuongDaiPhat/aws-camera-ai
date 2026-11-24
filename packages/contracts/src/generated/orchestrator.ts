@@ -1099,8 +1099,8 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Danh sach thong bao da gui cho su kien
-     * @description FR-NOT-04 — theo doi kenh nao gui thanh cong, kenh nao that bai.
+     * Danh sach trang thai thong bao cua su kien
+     * @description FR-NOT-04 — xem trang thai gui, chay thu va ket qua can doi soat.
      */
     get: operations['listEventNotifications'];
     put?: never;
@@ -1509,6 +1509,82 @@ export interface paths {
      */
     put: operations['cacheCloudFaceJobResult'];
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/internal/notifications/{notificationId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        notificationId: string;
+      };
+      cookie?: never;
+    };
+    /** Read canonical notification job and cached outcome */
+    get: operations['getCloudNotificationJobContext'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/internal/notifications/{notificationId}/claim': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        notificationId: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Claim notification delivery */
+    post: operations['claimCloudNotificationJob'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/internal/notifications/{notificationId}/result': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        notificationId: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    /** Cache the first valid outcome before publication */
+    put: operations['cacheCloudNotificationJobResult'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/internal/notifications/{notificationId}/outcome': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        notificationId: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Apply an outcome idempotently */
+    post: operations['applyCloudNotificationOutcome'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2454,6 +2530,137 @@ export interface components {
         };
       };
     };
+    NotificationJobPayload: {
+      /** Format: uuid */
+      notificationId: string;
+      /** Format: uuid */
+      eventId: string;
+      /** Format: uuid */
+      ownerScopeId: string;
+      expectedEventVersion: number;
+      /** @enum {string} */
+      channel: 'SNS_EMAIL' | 'SNS_SMS' | 'CONNECT_CALL';
+    };
+    NotificationOutcomePayload: {
+      /** Format: uuid */
+      outcomeId: string;
+      /** Format: uuid */
+      notificationId: string;
+      /** Format: uuid */
+      eventId: string;
+      /** Format: uuid */
+      ownerScopeId: string;
+      /** Format: uuid */
+      attemptId: string;
+      /** @enum {string} */
+      status: 'DRY_RUN' | 'PROVIDER_ACCEPTED' | 'FAILED' | 'UNCERTAIN';
+      providerCalled: boolean;
+      providerId: string | null;
+      reason: string | null;
+    } & (unknown & unknown);
+    NotificationJobEnvelope: {
+      /** @constant */
+      schemaVersion: 1;
+      /** @constant */
+      type: 'notification.job';
+      /** Format: uuid */
+      messageId: string;
+      /** Format: uuid */
+      correlationId: string;
+      /** Format: date-time */
+      occurredAt: string;
+      payload: components['schemas']['NotificationJobPayload'];
+    };
+    NotificationOutcomeEnvelope: {
+      /** @constant */
+      schemaVersion: 1;
+      /** @constant */
+      type: 'notification.outcome';
+      /** Format: uuid */
+      messageId: string;
+      /** Format: uuid */
+      correlationId: string;
+      /** Format: date-time */
+      occurredAt: string;
+      payload: components['schemas']['NotificationOutcomePayload'];
+    };
+    NotificationJobContext: {
+      envelope: components['schemas']['NotificationJobEnvelope'];
+      cached_result: components['schemas']['NotificationOutcomeEnvelope'] | null;
+    };
+    NotificationClaimRequest: {
+      /** @constant */
+      schemaVersion: 1;
+      /** Format: uuid */
+      claimId: string;
+      /** Format: uuid */
+      eventId: string;
+      expectedEventVersion: number;
+    };
+    NotificationDelivery: {
+      /** @enum {string} */
+      channel: 'SNS_EMAIL' | 'SNS_SMS' | 'CONNECT_CALL';
+      recipientRef: string;
+      message: string;
+      topicArn?: string;
+      destination?: string;
+      subject?: string;
+      instanceId?: string;
+      contactFlowId?: string;
+      sourcePhoneNumber?: string;
+    };
+    NotificationClaimed: {
+      /** Format: uuid */
+      notificationId: string;
+      /** @constant */
+      disposition: 'CLAIMED';
+      /** Format: uuid */
+      attemptId: string;
+      /** Format: date-time */
+      leaseUntil: string;
+      /** @enum {string} */
+      mode: 'DRY_RUN' | 'REAL';
+      delivery: components['schemas']['NotificationDelivery'];
+      /** @constant */
+      reason?: 'BLOCKED_PROVIDER';
+    };
+    NotificationClaimNoOp: {
+      /** Format: uuid */
+      notificationId: string;
+      /** @constant */
+      disposition: 'NO_OP';
+      /** @enum {string} */
+      reason:
+        | 'ALREADY_SENT'
+        | 'RESOLVED'
+        | 'STALE_VERSION'
+        | 'EXPIRED'
+        | 'CAP_EXCEEDED'
+        | 'CANCELLED'
+        | 'UNCERTAIN';
+    };
+    NotificationClaimBusy: {
+      /** Format: uuid */
+      notificationId: string;
+      /** @constant */
+      disposition: 'BUSY';
+      /** Format: date-time */
+      retryAt: string;
+    };
+    NotificationConflict: {
+      /** @constant */
+      statusCode: 409;
+      message: string;
+      error?: string;
+    };
+    NotificationOutcomeReceipt: {
+      /** Format: uuid */
+      outcomeId: string;
+      /** @enum {string} */
+      disposition: 'ACCEPTED' | 'DUPLICATE';
+    };
+    NotificationClaimResponse:
+      components['schemas']['NotificationClaimed'] | components['schemas']['NotificationClaimNoOp'];
     Notification: {
       /** Format: uuid */
       id: string;
@@ -2463,6 +2670,7 @@ export interface components {
       escalationLevel: number;
       recipientName?: string | null;
       attemptCount?: number;
+      /** @description Optional delivery reason. Notification outcomes may expose controlled codes such as BLOCKED_PROVIDER, DRY_RUN, LAB_DRY_RUN, SENDER_DRY_RUN, LEASE_EXPIRED, LAMBDA_TIME_BUDGET and UNCERTAIN. Clients use the base status label for unrecognized codes. */
       errorCode?: string | null;
       errorMessage?: string | null;
       /** Format: date-time */
@@ -5573,11 +5781,12 @@ export interface operations {
         };
         content: {
           'application/json': {
-            data?: components['schemas']['Notification'][];
+            data: components['schemas']['Notification'][];
           };
         };
       };
       401: components['responses']['Unauthorized'];
+      403: components['responses']['Forbidden'];
       404: components['responses']['NotFound'];
     };
   };
@@ -6265,6 +6474,212 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  getCloudNotificationJobContext: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        notificationId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Read canonical notification job and cached outcome */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationJobContext'];
+        };
+      };
+      /** @description Invalid internal service token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Notification job missing */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  claimCloudNotificationJob: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        notificationId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['NotificationClaimRequest'];
+      };
+    };
+    responses: {
+      /** @description Claim notification delivery */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationClaimResponse'];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid internal service token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Notification job missing */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request conflicts with the notification or its attempt */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json':
+            | components['schemas']['NotificationClaimBusy']
+            | components['schemas']['NotificationConflict'];
+        };
+      };
+    };
+  };
+  cacheCloudNotificationJobResult: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        notificationId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['NotificationOutcomeEnvelope'];
+      };
+    };
+    responses: {
+      /** @description Cache the first valid outcome before publication */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationOutcomeEnvelope'];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid internal service token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Notification job missing */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request conflicts with the notification or its attempt */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationConflict'];
+        };
+      };
+    };
+  };
+  applyCloudNotificationOutcome: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        notificationId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['NotificationOutcomePayload'];
+      };
+    };
+    responses: {
+      /** @description Apply an outcome idempotently */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationOutcomeReceipt'];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid internal service token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Notification job missing */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request conflicts with the notification or its attempt */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationConflict'];
+        };
       };
     };
   };

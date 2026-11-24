@@ -69,8 +69,13 @@ detect:
   # US-01: nguoi phai xuat hien lien tuc >= 1 giay moi tao track
   #   min_initialized = fps x 1 giay = 5 frame
   min_initialized: 5
-  # Mat dau 5 giay (25 frame o 5 fps) moi coi la da roi khung hinh -> type=end
-  max_disappeared: 25
+  # Mat dau 15 giay (75 frame o 5 fps) moi coi la da roi khung hinh -> type=end
+  max_disappeared: 75
+  stationary:
+    interval: 50
+    threshold: 50
+    max_frames:
+      default: 3000
 
 ffmpeg:
   # US-01 / FR-ING-03: mat luong -> Frigate tu ket noi lai, khong crash.

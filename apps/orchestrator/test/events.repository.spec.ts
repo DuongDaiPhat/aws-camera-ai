@@ -12,6 +12,28 @@ describe('EventsRepository (US-03, US-06)', () => {
     repository = new EventsRepository(mockPool as unknown as Pool);
   });
 
+  it('returns notification status scoped to the same camera visibility as event details', async () => {
+    const data = [
+      { id: 'note-1', channel: 'SNS_EMAIL', status: 'PENDING', errorCode: 'UNCERTAIN' },
+    ];
+    mockPool.query.mockResolvedValueOnce({ rows: [{ data }] });
+    await expect(repository.listEventNotifications('event-1', 'actor-1')).resolves.toEqual({
+      data,
+    });
+    const [query, args] = mockPool.query.mock.calls[0]!;
+    expect(query).toContain('n.event_id = e.id');
+    expect(query).toContain('can_access_camera($2, camera.id)');
+    expect(query).toContain('shares_camera_household($2, e.wellness_owner_user_id)');
+    expect(query).not.toContain('error_message');
+    expect(query).not.toContain('recipient_user_id');
+    expect(args).toEqual(['event-1', 'actor-1']);
+  });
+
+  it('returns null when the event is absent or inaccessible', async () => {
+    mockPool.query.mockResolvedValueOnce({ rows: [] });
+    await expect(repository.listEventNotifications('event-1', null)).resolves.toBeNull();
+  });
+
   describe('findCameraBySlug', () => {
     it('tra ve camera neu tim thay', async () => {
       const mockCam = { id: 'cam-1', name: 'Camera 1', slug: 'camera_1' };

@@ -33,14 +33,27 @@ jobs:
       APP_URL: ${{ vars.APP_URL }}
       RELEASE_BUCKET: ${{ vars.RELEASE_BUCKET }}
       FACE_FUNCTION_NAME: ${{ vars.FACE_FUNCTION_NAME }}
-      FACE_FUNCTION_ALIAS: ${{ vars.FACE_FUNCTION_ALIAS }}
       DEADLINE_FUNCTION_NAME: ${{ vars.DEADLINE_FUNCTION_NAME }}
       DEADLINE_FUNCTION_ALIAS: ${{ vars.DEADLINE_FUNCTION_ALIAS }}
+      FACE_FUNCTION_ALIAS: ${{ vars.FACE_FUNCTION_ALIAS }}
+      SENDER_FUNCTION_NAME: ${{ vars.SENDER_FUNCTION_NAME }}
+      SENDER_FUNCTION_ALIAS: ${{ vars.SENDER_FUNCTION_ALIAS }}
+      DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.source_sha }}
           persist-credentials: false
+      - name: Validate Sender deployment configuration
+        run: bash tools/cd/deploy-sender.sh --check-config
+      - name: Require authenticated dependency smoke
+        env:
+          SMOKE_INTERNAL_TOKEN: ${{ secrets.SMOKE_INTERNAL_TOKEN }}
+        run: |
+          test -n "$SMOKE_INTERNAL_TOKEN" || {
+            echo 'SMOKE_INTERNAL_TOKEN is required for deployment dependency verification' >&2
+            exit 1
+          }
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
@@ -75,6 +88,8 @@ jobs:
           verified_version=$(aws lambda get-alias --function-name "$FACE_FUNCTION_NAME" --name "$alias_name" --query FunctionVersion --output text)
           test "$verified_version" = "$version"
           printf 'Face Lambda: `%s:%s` -> version `%s` (previous: `%s`)\n' "$FACE_FUNCTION_NAME" "$alias_name" "$version" "$prev_version" >> "$GITHUB_STEP_SUMMARY"
+      - name: Update Sender Lambda and alias
+        run: bash tools/cd/deploy-sender.sh
       - name: Update deadline Lambda and alias
         if: env.DEADLINE_FUNCTION_NAME != ''
         run: |

@@ -1,0 +1,339 @@
+
+> @cam/orchestrator@0.0.1 lint D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator
+> eslint "src/**/*.ts" "test/**/*.ts"
+
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\admin\admin.controller.ts
+  24:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  30:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  36:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  46:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  58:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  64:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  70:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  76:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  82:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  88:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\admin\admin.repository.ts
+  107:3  warning  Async method 'getOverviewCounts' has too many lines (67). Maximum allowed is 60       max-lines-per-function
+  107:3  warning  Async method 'getOverviewCounts' has a complexity of 27. Maximum allowed is 12        complexity
+  177:3  warning  Async method 'getOverviewTrends' has too many lines (71). Maximum allowed is 60       max-lines-per-function
+  250:3  warning  Async method 'listHouseholds' has too many lines (94). Maximum allowed is 60          max-lines-per-function
+  377:3  warning  Async method 'updateHouseholdQuota' has too many lines (69). Maximum allowed is 60    max-lines-per-function
+  450:3  warning  Async method 'getServiceDiagnostics' has too many lines (111). Maximum allowed is 60  max-lines-per-function
+  681:3  warning  Async method 'listAuditLogs' has too many lines (84). Maximum allowed is 60           max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\admin\admin.service.ts
+   62:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  113:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  117:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  127:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  138:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  187:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  216:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  221:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  232:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  262:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\ai-results\ai-results.repository.ts
+  91:3   warning  Async method 'applyResult' has too many lines (72). Maximum allowed is 60  max-lines-per-function
+  97:19  warning  Async arrow function has too many lines (64). Maximum allowed is 60        max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\auth\auth.controller.ts
+  46:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\auth\cognito-verifier.service.ts
+  18:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\auth\resource-access.guard.ts
+  20:60  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\auth\system-admin.ts
+  6:35  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\auth\users.repository.ts
+  56:53  warning  Async arrow function has a complexity of 14. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\cameras\cameras.repository.ts
+  21:3  warning  Async method 'findAll' has too many lines (66). Maximum allowed is 60  max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\cameras\cameras.service.ts
+  234:3  warning  Async method 'updateCameraState' has too many lines (74). Maximum allowed is 60     max-lines-per-function
+  234:3  warning  Async method 'updateCameraState' has a complexity of 19. Maximum allowed is 12      complexity
+  797:3  warning  Async method 'getCameraDebugStream' has too many lines (92). Maximum allowed is 60  max-lines-per-function
+  797:3  warning  Async method 'getCameraDebugStream' has a complexity of 15. Maximum allowed is 12   complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\cloud-queue\cloud-config.ts
+   8:8   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  17:34  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\cloud-queue\cloud-queue.controller.ts
+  11:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  15:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\cloud-queue\cloud-queue.service.ts
+  105:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+  113:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+  120:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+  208:3   warning  Async method 'enqueueFaceJob' has too many lines (65). Maximum allowed is 60  max-lines-per-function
+  208:3   warning  Async method 'enqueueFaceJob' has a complexity of 13. Maximum allowed is 12   complexity
+  275:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+  336:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+  360:3   warning  Async method 'applyResult' has too many lines (125). Maximum allowed is 60    max-lines-per-function
+  360:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+  364:31  warning  Async arrow function has too many lines (107). Maximum allowed is 60          max-lines-per-function
+  364:46  warning  Async arrow function has a complexity of 41. Maximum allowed is 12            complexity
+  489:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+  526:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+  550:3   warning  Missing return type on function                                               @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\escalation-rules\escalation-rule-policy.ts
+  129:1  warning  Function 'validateAlertThresholds' has a complexity of 14. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\escalation-rules\escalation-rules.repository.ts
+  138:3  warning  Async method 'updateThresholdsAtomic' has too many lines (136). Maximum allowed is 60  max-lines-per-function
+  138:3  warning  Async method 'updateThresholdsAtomic' has a complexity of 23. Maximum allowed is 12    complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\escalation-rules\escalation-rules.service.ts
+  51:3  warning  Async method 'updateThresholds' has too many lines (62). Maximum allowed is 60  max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\escalation\escalation-deadline-worker.service.ts
+  46:3  warning  Async method 'scanAndProcessDueDeadlines' has too many lines (67). Maximum allowed is 60  max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\escalation\escalation-engine.service.ts
+  220:3  warning  Async method 'findInitialTelegramReplay' has a complexity of 17. Maximum allowed is 12  complexity
+  287:3  warning  Async method 'confirmInitial' has too many lines (143). Maximum allowed is 60           max-lines-per-function
+  287:3  warning  Async method 'confirmInitial' has a complexity of 30. Maximum allowed is 12             complexity
+  451:3  warning  Async method 'closeEmergency' has too many lines (114). Maximum allowed is 60           max-lines-per-function
+  451:3  warning  Async method 'closeEmergency' has a complexity of 17. Maximum allowed is 12             complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\escalation\escalation-policy.ts
+  64:8  warning  Function 'isValidStatusTransition' has a complexity of 13. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\events\events.repository.ts
+  445:3  warning  Async method 'updateEvent' has too many lines (81). Maximum allowed is 60     max-lines-per-function
+  776:3  warning  Async method 'createSosEvent' has too many lines (83). Maximum allowed is 60  max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\events\events.service.ts
+  330:3  warning  Async method 'toEventSummary' has a complexity of 17. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\face-quality-gate.client.ts
+  123:3  warning  Async method 'assess' has too many lines (90). Maximum allowed is 60  max-lines-per-function
+  123:3  warning  Async method 'assess' has a complexity of 20. Maximum allowed is 12   complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\face-recognition-coordinator.service.ts
+  103:3  warning  Async method 'handleTrackEvent' has too many lines (83). Maximum allowed is 60         max-lines-per-function
+  103:3  warning  Async method 'handleTrackEvent' has a complexity of 27. Maximum allowed is 12          complexity
+  288:3  warning  Async method 'trySpatialAppearanceReid' has a complexity of 15. Maximum allowed is 12  complexity
+  425:3  warning  Async method 'onRecognitionResult' has a complexity of 30. Maximum allowed is 12       complexity
+  470:3  warning  Async method 'handleLegacyDispatch' has a complexity of 13. Maximum allowed is 12      complexity
+  508:3  warning  Async method 'dispatchBestShot' has too many lines (71). Maximum allowed is 60         max-lines-per-function
+  639:3  warning  Async method 'submitLocalCacheHit' has too many lines (62). Maximum allowed is 60      max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\face-recognition.module.ts
+  41:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\face-recognition.worker.ts
+  236:3  warning  Async method 'handleAiResult' has a complexity of 16. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\face-session-cache.service.ts
+   60:8  warning  Function 'decodeEmbeddingBase64' has a complexity of 13. Maximum allowed is 12   complexity
+  226:3  warning  Method 'upsertKnown' has a complexity of 18. Maximum allowed is 12               complexity
+  341:3  warning  Method 'matchBySpatialAppearance' has a complexity of 16. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\face-track-optimization.config.ts
+  119:8  warning  Function 'readFaceTrackOptimizationConfig' has too many lines (71). Maximum allowed is 60  max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\face-recognition\track-identity-state.service.ts
+   99:3  warning  Method 'getOrCreate' has too many lines (65). Maximum allowed is 60            max-lines-per-function
+  267:3  warning  Method 'applyRecognitionResult' has a complexity of 14. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\fall-detection\coordinator\fall-incident.coordinator.ts
+  123:3  warning  Async method 'handleConfirmedFall' has too many lines (109). Maximum allowed is 60  max-lines-per-function
+  123:3  warning  Async method 'handleConfirmedFall' has a complexity of 24. Maximum allowed is 12    complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\fall-detection\envelope\pose-frame-envelope.ts
+  65:1  warning  Function 'isValidPoseFrameHeader' has too many lines (65). Maximum allowed is 60  max-lines-per-function
+  65:1  warning  Function 'isValidPoseFrameHeader' has a complexity of 41. Maximum allowed is 12   complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\fall-detection\repository\fall-incident.repository.ts
+  55:3  warning  Async method 'createConfirmedIncident' has too many lines (89). Maximum allowed is 60  max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\frigate\frigate-config.service.ts
+  27:3  warning  Method 'continuousRecording' has a complexity of 13. Maximum allowed is 12      complexity
+  60:3  warning  Method 'generateUpdatedConfig' has too many lines (101). Maximum allowed is 60  max-lines-per-function
+  60:3  warning  Method 'generateUpdatedConfig' has a complexity of 58. Maximum allowed is 12    complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\frigate\frigate-detection-tracker.service.ts
+   44:3  warning  Method 'accept' has a complexity of 20. Maximum allowed is 12  complexity
+  128:3  warning  Method 'track' has a complexity of 16. Maximum allowed is 12   complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\frigate\frigate-frame-buffer.ts
+  25:3  warning  Method 'accept' has a complexity of 18. Maximum allowed is 12        complexity
+  75:3  warning  Method 'parseObject' has too many lines (62). Maximum allowed is 60  max-lines-per-function
+  75:3  warning  Method 'parseObject' has a complexity of 22. Maximum allowed is 12   complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\frigate\frigate-sync.service.ts
+  100:3  warning  Async method 'executeSync' has too many lines (108). Maximum allowed is 60  max-lines-per-function
+  100:3  warning  Async method 'executeSync' has a complexity of 30. Maximum allowed is 12    complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\household\household-members.service.ts
+  16:3  warning  Async method 'create' has a complexity of 13. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\ingestion\mqtt-consumer.service.ts
+   86:3  warning  Method 'connect' has too many lines (94). Maximum allowed is 60             max-lines-per-function
+  444:3  warning  Async method 'handleMessage' has a complexity of 19. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\known-faces\face-response.ts
+  7:8  warning  Function 'isEmbeddingResult' has a complexity of 20. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\known-faces\known-faces.controller.ts
+  39:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  45:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  54:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\known-faces\known-faces.repository.ts
+  238:3  warning  Async method 'createRekognition' has too many lines (68). Maximum allowed is 60        max-lines-per-function
+  408:3  warning  Async method 'replaceRekognitionFaces' has too many lines (72). Maximum allowed is 60  max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\known-faces\rekognition-face-enrollment.service.ts
+   48:1  warning  Missing return type on function                                                    @typescript-eslint/explicit-function-return-type
+  123:3  warning  Async method 'validateSingleFaces' has too many lines (71). Maximum allowed is 60  max-lines-per-function
+  123:3  warning  Async method 'validateSingleFaces' has a complexity of 18. Maximum allowed is 12   complexity
+  195:3  warning  Async method 'indexFaces' has too many lines (75). Maximum allowed is 60           max-lines-per-function
+  195:3  warning  Async method 'indexFaces' has a complexity of 15. Maximum allowed is 12            complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\media\frigate-media.adapter.ts
+  16:3  warning  Async method 'getCurrentPersonCrop' has a complexity of 23. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\notifications\telegram\telegram-callback.service.ts
+  30:3  warning  Async method 'confirm' has too many lines (64). Maximum allowed is 60  max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\notifications\telegram\telegram.adapter.ts
+   30:3  warning  Constructor has a complexity of 15. Maximum allowed is 12                   complexity
+  133:3  warning  Async method 'parseResponse' has a complexity of 13. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\playback\playback-frames.service.spec.ts
+  27:40  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\wellness\wellness-scheduler.service.ts
+   63:3   warning  Async method 'evaluateSingleRun' has too many lines (152). Maximum allowed is 60   max-lines-per-function
+   77:41  warning  Async arrow function has too many lines (129). Maximum allowed is 60               max-lines-per-function
+   77:56  warning  Async arrow function has a complexity of 15. Maximum allowed is 12                 complexity
+  220:3   warning  Method 'computeScheduleOccurrence' has too many lines (64). Maximum allowed is 60  max-lines-per-function
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\wellness\wellness-source.adapter.ts
+   56:3  warning  Constructor has a complexity of 16. Maximum allowed is 12                   complexity
+  202:3  warning  Async method 'acceptFrame' has too many lines (139). Maximum allowed is 60  max-lines-per-function
+  202:3  warning  Async method 'acceptFrame' has a complexity of 39. Maximum allowed is 12    complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\wellness\wellness.controller.ts
+   55:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+   88:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  114:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  134:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  151:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  181:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  231:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\wellness\wellness.repository.ts
+   316:3   warning  Async method 'updateSchedule' has a complexity of 13. Maximum allowed is 12           complexity
+   879:3   warning  Async method 'materializeOccurrences' has too many lines (87). Maximum allowed is 60  max-lines-per-function
+   886:39  warning  Async arrow function has too many lines (77). Maximum allowed is 60                   max-lines-per-function
+  1042:3   warning  Method 'mapRunRow' has a complexity of 16. Maximum allowed is 12                      complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\wellness\wellness.service.ts
+   95:3   warning  Async method 'createSchedule' has a complexity of 14. Maximum allowed is 12      complexity
+  188:3   warning  Async method 'confirmCheck' has too many lines (179). Maximum allowed is 60      max-lines-per-function
+  194:55  warning  Async arrow function has too many lines (166). Maximum allowed is 60             max-lines-per-function
+  194:70  warning  Async arrow function has a complexity of 32. Maximum allowed is 12               complexity
+  368:3   warning  Async method 'submitObservation' has too many lines (74). Maximum allowed is 60  max-lines-per-function
+  374:40  warning  Async arrow function has too many lines (67). Maximum allowed is 60              max-lines-per-function
+  374:55  warning  Async arrow function has a complexity of 15. Maximum allowed is 12               complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\src\zones\zone-geometry.validator.ts
+  31:8  warning  Function 'getZonePolygonError' has a complexity of 21. Maximum allowed is 12  complexity
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\cloud-queue.integration.spec.ts
+  56:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\cloud-queue.spec.ts
+   15:32  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+   29:1   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  387:7   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\escalation-deadline-worker.service.spec.ts
+  125:30  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\face-recognition-coordinator.service.spec.ts
+  102:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  178:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\fall-runtime.integration.spec.ts
+  137:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  140:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  143:7  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  210:3  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\frigate-frame-buffer.spec.ts
+  4:58  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\known-faces.repository.spec.ts
+  9:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\known-faces.spec.ts
+  27:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\mocks\nestjs-bullmq.ts
+   1:37  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+   3:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+   6:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  11:35  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\qa-fall.spec.ts
+  38:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  56:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\rekognition-enrollment.spec.ts
+   34:1   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+   39:1   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  872:16  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  903:18  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\rekognition-selection.spec.ts
+  12:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\resource-ownership.spec.ts
+   59:45  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  139:13  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\smoke.service.spec.ts
+  38:1  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\telegram-db.integration.spec.ts
+  495:9  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\us20-browser-harness.ts
+   52:23  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+   57:19  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+   62:18  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+   65:24  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  167:25  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\wellness-db.integration.spec.ts
+   78:67  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+   80:59  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  176:9   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  188:23  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  264:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  296:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  327:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  380:3   warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+  621:84  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+D:\hoc tap\project 1\aws-camera-ai\apps\orchestrator\test\wellness.service.spec.ts
+  204:94  warning  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+✖ 192 problems (0 errors, 192 warnings)
+

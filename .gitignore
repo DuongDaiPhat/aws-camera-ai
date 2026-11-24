@@ -6,6 +6,7 @@ build/
 services/aws-workers/.build/
 out/
 .next/
+.next-face-eval/
 coverage/
 *.tsbuildinfo
 
@@ -73,3 +74,5 @@ postman/
 # ---- Tai lieu nguon su that CI/CD (Dev -> Staging -> Production) giua cac agent (KHONG commit) ----
 docs/CI_CD_STAGING_SOURCE_OF_TRUTH.md
 docs/CI_CD_PRODUCTION_SOURCE_OF_TRUTH.md
+
+local_image/

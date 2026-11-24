@@ -1,0 +1,71 @@
+[
+  {
+    "name": "original-five-with-background-face",
+    "status": 422,
+    "response": {
+      "error": {
+        "code": "MULTIPLE_FACES",
+        "message": "Mỗi ảnh đăng ký phải chứa đúng một khuôn mặt.",
+        "details": {
+          "images": [
+            {
+              "imageIndex": 1,
+              "code": "MULTIPLE_FACES",
+              "faces": [
+                {
+                  "faceIndex": 0,
+                  "boundingBox": {
+                    "x": 0.1343020796775818,
+                    "y": 0.318427711725235,
+                    "width": 0.5395687818527222,
+                    "height": 0.611142098903656
+                  }
+                },
+                {
+                  "faceIndex": 1,
+                  "boundingBox": {
+                    "x": 0.6088159084320068,
+                    "y": 0.011006293818354607,
+                    "width": 0.05058667063713074,
+                    "height": 0.05038106441497803
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "traceId": "76679207-e610-425f-9a7f-094de1967930"
+      }
+    },
+    "expectedFailure": true
+  },
+  {
+    "name": "invalid-selection",
+    "status": 422,
+    "response": {
+      "error": {
+        "code": "FACE_SELECTION_INVALID",
+        "message": "Lựa chọn khuôn mặt không hợp lệ.",
+        "traceId": "984847c9-db06-4ebe-921a-c598caa1d304"
+      }
+    },
+    "expectedFailure": true
+  },
+  {
+    "name": "selected-five",
+    "status": 201,
+    "result": {
+      "id": "8cdab2df-122e-4b9a-aca5-0ef86c5ca58e",
+      "personName": "Eval selected-five",
+      "relationship": "Test dev",
+      "linkedUserId": null,
+      "provider": "REKOGNITION",
+      "modelVersion": "rekognition-7.0",
+      "sourceImageCount": 5,
+      "isActive": true,
+      "createdAt": "2026-11-21T17:16:45.230Z",
+      "recognitionStatus": "READY"
+    },
+    "expectedFailure": false
+  }
+]

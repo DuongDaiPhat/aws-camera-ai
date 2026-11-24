@@ -1,0 +1,81 @@
+newman
+
+Face branch real HTTP regression
+
+→ API-FACE-AUTH-assess: missing token
+  POST http://127.0.0.1:18082/face/assess [401 Unauthorized, 160B, 68ms]
+  √  status 401
+  √  unauthorized body
+
+→ API-FACE-AUTH-embed: missing token
+  POST http://127.0.0.1:18082/face/embed [401 Unauthorized, 160B, 12ms]
+  √  status 401
+  √  unauthorized body
+
+→ API-FACE-AUTH-match: missing token
+  POST http://127.0.0.1:18082/face/match [401 Unauthorized, 160B, 86ms]
+  √  status 401
+  √  unauthorized body
+
+→ API-FACE-AUTH-collection/sync: missing token
+  POST http://127.0.0.1:18082/face/collection/sync [401 Unauthorized, 160B, 7ms]
+  √  status 401
+  √  unauthorized body
+
+→ API-FACE-001: assess requires image
+  POST http://127.0.0.1:18082/face/assess [422 Unprocessable Entity, 233B, 7ms]
+  √  status 422
+  √  validation detail
+
+→ API-FACE-002: real R50 assessment
+(node:36740) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+  POST http://127.0.0.1:18082/face/assess [200 OK, 3.32kB, 270ms]
+  √  status 200
+  √  gate passes
+  √  real R50 model
+  √  gate ready
+  √  normalized 512D embedding
+
+→ API-FACE-003: embedding opt-out
+  POST http://127.0.0.1:18082/face/assess [200 OK, 594B, 98ms]
+  √  status 200
+  √  gate passes
+  √  real R50 model
+  √  gate ready
+  √  no embedding
+
+→ API-FACE-004: SFace embed remains compatible
+  POST http://127.0.0.1:18082/face/embed [200 OK, 1.07kB, 754ms]
+  √  status 200
+  √  128D contract
+
+→ API-FACE-BVA--0.01: threshold out of range
+  POST http://127.0.0.1:18082/face/match [422 Unprocessable Entity, 297B, 15ms]
+  √  status 422
+  √  threshold rejected
+
+→ API-FACE-BVA-1.01: threshold out of range
+  POST http://127.0.0.1:18082/face/match [422 Unprocessable Entity, 290B, 10ms]
+  √  status 422
+  √  threshold rejected
+
+┌─────────────────────────┬────────────────────┬───────────────────┐
+│                         │           executed │            failed │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│              iterations │                  1 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│                requests │                 10 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│            test-scripts │                 10 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│      prerequest-scripts │                  0 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│              assertions │                 26 │                 0 │
+├─────────────────────────┴────────────────────┴───────────────────┤
+│ total run duration: 2.3s                                         │
+├──────────────────────────────────────────────────────────────────┤
+│ total data received: 5.09kB (approx)                             │
+├──────────────────────────────────────────────────────────────────┤
+│ average response time: 132ms [min: 7ms, max: 754ms, s.d.: 220ms] │
+└──────────────────────────────────────────────────────────────────┘

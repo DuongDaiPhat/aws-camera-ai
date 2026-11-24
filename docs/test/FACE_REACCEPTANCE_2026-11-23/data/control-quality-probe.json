@@ -1,0 +1,77 @@
+[
+  {
+    "passed": true,
+    "qualityScore": 0.5288,
+    "faceCount": 1,
+    "rejectionReason": null,
+    "metrics": {
+      "faceWidthPx": 95,
+      "faceHeightPx": 117,
+      "detectionScore": 0.902,
+      "sharpness": 149.2561,
+      "normalizedSharpness": 23.3243,
+      "poseYawRatio": 0.2219,
+      "posePitchRatio": 0.0002
+    },
+    "boundingBox": {
+      "x": 0.3214684172049581,
+      "y": 0.27246394753456116,
+      "width": 0.26658014478630193,
+      "height": 0.45548492670059204
+    },
+    "embeddingDim": null,
+    "modelVersion": "yunet-2023mar-sface-2021dec",
+    "gateStatus": "READY",
+    "file": "TC09-undetermined-cap-verified-1795396524.720743-l0kfrx-r1.png"
+  },
+  {
+    "passed": true,
+    "qualityScore": 0.5992,
+    "faceCount": 1,
+    "rejectionReason": null,
+    "metrics": {
+      "faceWidthPx": 94,
+      "faceHeightPx": 119,
+      "detectionScore": 0.9406,
+      "sharpness": 174.3019,
+      "normalizedSharpness": 33.8173,
+      "poseYawRatio": 0.007,
+      "posePitchRatio": 0.057
+    },
+    "boundingBox": {
+      "x": 0.2939908377731903,
+      "y": 0.3013658967923947,
+      "width": 0.23810807240160206,
+      "height": 0.4261653995855735
+    },
+    "embeddingDim": null,
+    "modelVersion": "yunet-2023mar-sface-2021dec",
+    "gateStatus": "READY",
+    "file": "TC09-undetermined-cap-verified-1795396524.720743-l0kfrx-r2.png"
+  },
+  {
+    "passed": true,
+    "qualityScore": 0.6206,
+    "faceCount": 1,
+    "rejectionReason": null,
+    "metrics": {
+      "faceWidthPx": 97,
+      "faceHeightPx": 125,
+      "detectionScore": 0.9374,
+      "sharpness": 229.9914,
+      "normalizedSharpness": 40.8611,
+      "poseYawRatio": 0.0213,
+      "posePitchRatio": 0.0513
+    },
+    "boundingBox": {
+      "x": 0.28083231529216124,
+      "y": 0.29276915958949495,
+      "width": 0.24961245830052892,
+      "height": 0.44812703813825333
+    },
+    "embeddingDim": null,
+    "modelVersion": "yunet-2023mar-sface-2021dec",
+    "gateStatus": "READY",
+    "file": "TC09-undetermined-cap-verified-1795396524.720743-l0kfrx-r3.png"
+  }
+]

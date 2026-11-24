@@ -1,0 +1,34 @@
+E
+======================================================================
+ERROR: test_handler (unittest.loader._FailedTest.test_handler)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_handler
+Traceback (most recent call last):
+  File "D:\hoc tap\project 1\aws-camera-ai\artifacts\python\cpython-3.11.13-windows-x86_64-none\Lib\unittest\loader.py", line 419, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\hoc tap\project 1\aws-camera-ai\artifacts\python\cpython-3.11.13-windows-x86_64-none\Lib\unittest\loader.py", line 362, in _get_module_from_name
+    __import__(name)
+  File "D:\hoc tap\project 1\aws-camera-ai\services\aws-workers\face\test_handler.py", line 8, in <module>
+    import handler
+  File "D:\hoc tap\project 1\aws-camera-ai\services\aws-workers\face\handler.py", line 14, in <module>
+    from jsonschema import Draft202012Validator, FormatChecker
+  File "D:\hoc tap\project 1\aws-camera-ai\node_modules\.python-aws-workers\jsonschema\__init__.py", line 13, in <module>
+    from jsonschema._format import FormatChecker
+  File "D:\hoc tap\project 1\aws-camera-ai\node_modules\.python-aws-workers\jsonschema\_format.py", line 11, in <module>
+    from jsonschema.exceptions import FormatError
+  File "D:\hoc tap\project 1\aws-camera-ai\node_modules\.python-aws-workers\jsonschema\exceptions.py", line 15, in <module>
+    from referencing.exceptions import Unresolvable as _Unresolvable
+  File "D:\hoc tap\project 1\aws-camera-ai\node_modules\.python-aws-workers\referencing\__init__.py", line 5, in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+  File "D:\hoc tap\project 1\aws-camera-ai\node_modules\.python-aws-workers\referencing\_core.py", line 9, in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+  File "D:\hoc tap\project 1\aws-camera-ai\node_modules\.python-aws-workers\rpds\__init__.py", line 1, in <module>
+    from .rpds import *
+ModuleNotFoundError: No module named 'rpds.rpds'
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)

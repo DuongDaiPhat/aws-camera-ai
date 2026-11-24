@@ -1,0 +1,10 @@
+Scope: all 5 workspace projects
+Update available! 12.3.4 → 12.21.0.
+Changelog: https://pnpm.io/v/12.21.0
+To update, run: pnpm self-update
+Error: ERR_PNPM_PACKAGE_MANAGER_REMOVE_MODULES_DIR
+
+  × installing dependencies
+  ╰─▶ Failed to remove modules directory contents: Access is denied. (os error
+      5)
+

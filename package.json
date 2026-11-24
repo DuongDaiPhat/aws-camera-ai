@@ -38,6 +38,7 @@
     "frigate:check": "node tools/scripts/frigate-check.mjs",
     "frigate:validate": "node tools/scripts/frigate-validate.mjs",
     "test:tools": "node --test \"tools/scripts/test/*.test.mjs\"",
+    "test:notification": "pnpm --filter @cam/orchestrator test:notification",
     "test:fire:db": "node tools/scripts/fire-db-gate.mjs",
     "test:fire:video": "node tools/scripts/fire-video-gate.mjs",
     "test:fire:clock": "node tools/scripts/fire-clock-check.mjs",

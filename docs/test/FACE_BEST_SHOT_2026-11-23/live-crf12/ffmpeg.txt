@@ -1,0 +1,12 @@
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000145d72dc800] Unknown cover type: 0x1.
+[swscaler @ 00000145d9d02140] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000145db9bcec0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001792d89b640] Unknown cover type: 0x1.
+[swscaler @ 00000179306c59c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000179327008c0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001849bf2c800] Unknown cover type: 0x1.
+[swscaler @ 00000184a202a440] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000184a0d91c80] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000013b6042b640] Unknown cover type: 0x1.
+[swscaler @ 0000013b64621480] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000013b668c8540] deprecated pixel format used, make sure you did set range correctly

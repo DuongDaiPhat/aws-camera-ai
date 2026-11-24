@@ -1,0 +1,9 @@
+PASS test/face-recognition-coordinator.service.spec.ts (27.292 s)
+PASS test/mqtt-consumer.service.spec.ts (6.164 s)
+PASS test/frigate-media.adapter.spec.ts
+PASS test/face-person-association.spec.ts
+
+Test Suites: 4 passed, 4 total
+Tests:       44 passed, 44 total
+Snapshots:   0 total
+Time:        36.023 s

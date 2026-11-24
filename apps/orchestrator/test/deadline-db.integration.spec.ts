@@ -302,4 +302,32 @@ describe('Deadline Step Functions PostgreSQL integration (US-13 / AWS-06)', () =
       .status;
     expect(status).toBe('NOTIFIED');
   });
+  it('blocks driver handoff for FAILED cloud deadlines, recovers once, then allows local startup', async () => {
+    const eventId = await seedDetectedEvent(new Date(Date.now() - 120000));
+    await escalationEngine.evaluateAndTransition(eventId, {
+      eventType: 'FALL_DETECTED',
+      confidence: 0.65,
+      detectedAt: new Date(Date.now() - 120000),
+    });
+    await pool.query(
+      "UPDATE deadline_workflow_dispatches SET status='FAILED', available_at=now()-interval '1 second' WHERE event_id=$1",
+      [eventId],
+    );
+    await expect(deadlineRepo.assertLocalDriverSafe()).rejects.toThrow('drain/reconcile');
+    await stepFunctionsService.reconcileStartedDispatches();
+    await stepFunctionsService.reconcileStartedDispatches();
+    const result = await pool.query('SELECT status FROM events WHERE id=$1', [eventId]);
+    expect(result.rows[0].status).toBe('ESCALATED');
+    const notifications = await pool.query(
+      'SELECT id FROM notifications WHERE event_id=$1 AND escalation_level=1',
+      [eventId],
+    );
+    expect(notifications.rows).toHaveLength(1);
+    // Finish other test-owned deadlines before checking global mode handoff.
+    await pool.query(
+      "UPDATE events SET status='CLOSED', escalation_deadline_at=NULL WHERE camera_id=$1 AND status='NOTIFIED'",
+      [cameraId],
+    );
+    await expect(deadlineRepo.assertLocalDriverSafe()).resolves.toBeUndefined();
+  });
 });

@@ -17,7 +17,7 @@ export const CAMERA_PARTS = [
   {
     id: 'processor',
     name: 'Xử lý AI của hệ thống',
-    detail: 'CameraAI phân tích hình ảnh bằng dịch vụ AI; chip là biểu tượng cho luồng xử lý này.',
+    detail: 'Argus AI phân tích hình ảnh bằng dịch vụ AI; chip là biểu tượng cho luồng xử lý này.',
   },
   { id: 'mount', name: 'Ngàm gắn camera', detail: 'Giữ camera ở vị trí và góc quan sát đã chọn.' },
   { id: 'fasteners', name: 'Chi tiết lắp ráp', detail: 'Vít và chốt liên kết các cụm linh kiện.' },

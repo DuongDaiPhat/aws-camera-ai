@@ -44,6 +44,7 @@ describe('EventsService (US-06)', () => {
       findEventSummaryById: jest.fn(),
       findEventDetailById: jest.fn(),
       listStatusHistoryByEventId: jest.fn(),
+      listEventNotifications: jest.fn(),
       getEventStats: jest.fn(),
       canReceiveEvent: jest.fn().mockResolvedValue(true),
     };
@@ -87,6 +88,25 @@ describe('EventsService (US-06)', () => {
     tokenService = module.get(TOKEN_SERVICE);
     mediaService = module.get(MediaService);
     escalationEngineService = module.get(EscalationEngineService);
+  });
+
+  it('scopes an ordinary admin and permits system-admin event lookups', async () => {
+    const actor = {
+      sub: 'user-1',
+      email: 'household@example.com',
+      role: 'ADMIN',
+      tokenType: 'access',
+      jti: 'session-1',
+    } as const;
+    eventsRepository.listEventNotifications
+      .mockResolvedValueOnce({ data: [] })
+      .mockResolvedValueOnce(null);
+    await expect(service.listEventNotifications('event-1', actor)).resolves.toEqual({ data: [] });
+    expect(eventsRepository.listEventNotifications).toHaveBeenNthCalledWith(1, 'event-1', 'user-1');
+    await expect(
+      service.listEventNotifications('missing', { ...actor, email: 'admin@camerai.local' }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(eventsRepository.listEventNotifications).toHaveBeenNthCalledWith(2, 'missing', null);
   });
 
   describe('listEvents', () => {

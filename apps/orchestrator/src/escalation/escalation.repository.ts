@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 import { PG_POOL } from '../database/database.module';
+import { NotificationCloudService } from '../notification-cloud/notification-cloud.service';
 import type {
   EventType,
   EventStatus,
@@ -65,7 +66,10 @@ export class EventVersionConflictError extends Error {
 
 @Injectable()
 export class EscalationRepository {
-  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+  constructor(
+    @Inject(PG_POOL) private readonly pool: Pool,
+    private readonly notificationCloud?: NotificationCloudService,
+  ) {}
 
   async getPoolClient(): Promise<PoolClient> {
     return this.pool.connect();
@@ -334,7 +338,11 @@ export class EscalationRepository {
       data.escalationLevel,
       JSON.stringify(data.payload ?? {}),
     ]);
-    return res.rows[0].id;
+    const id = res.rows[0].id;
+    const automaticContact =
+      data.channel === 'CONNECT_CALL' && !data.recipientUserId && !data.emergencyContactId;
+    await this.notificationCloud?.enqueueIntent(client, id, automaticContact);
+    return id;
   }
 
   async findDueEventsForEscalation(client: PoolClient, limit: number): Promise<EventRecord[]> {

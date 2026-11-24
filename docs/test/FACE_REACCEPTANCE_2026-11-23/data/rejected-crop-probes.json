@@ -1,0 +1,137 @@
+{
+  "method": "Direct SDK diagnostic, not E2E",
+  "results": [
+    {
+      "case": "TC08-extra-no-glasses-candidate",
+      "path": "artifacts/face-reacceptance-2026-11-23/1795394069.801298-3ikvsi-1795394074132.jpg",
+      "metrics": {
+        "faceWidthPx": 29,
+        "faceHeightPx": 34,
+        "detectionScore": 0.7591,
+        "sharpness": 173.9129,
+        "normalizedSharpness": 2.5211,
+        "poseYawRatio": 0.9788,
+        "posePitchRatio": 0.0046
+      },
+      "requestId": "c5081c3c-76b4-4905-b4e8-528047612192",
+      "faceConfidence": 94.94692993164062,
+      "faceBox": {
+        "Width": 0.3805152475833893,
+        "Height": 0.24025261402130127,
+        "Left": 0.14963677525520325,
+        "Top": 0.25117558240890503
+      },
+      "similarity": 0.9271623492240906
+    },
+    {
+      "case": "TC08-extra-no-glasses-candidate",
+      "path": "artifacts/face-reacceptance-2026-11-23/1795394069.801298-3ikvsi-1795394072400.jpg",
+      "metrics": {
+        "faceWidthPx": 39,
+        "faceHeightPx": 47,
+        "detectionScore": 0.6676,
+        "sharpness": 164.5504,
+        "normalizedSharpness": 3.8704,
+        "poseYawRatio": 0.5958,
+        "posePitchRatio": 0.064
+      },
+      "requestId": "e775eeba-7b95-48e9-ad5d-a0bb2f4b14ed",
+      "faceConfidence": 85.43302154541016,
+      "faceBox": {
+        "Width": 0.19524040818214417,
+        "Height": 0.1887686401605606,
+        "Left": 0.5104090571403503,
+        "Top": 0.3846987783908844
+      },
+      "similarity": 0.6024906635284424
+    },
+    {
+      "case": "TC08-extra-no-glasses-candidate",
+      "path": "artifacts/face-reacceptance-2026-11-23/1795394069.801298-3ikvsi-1795394071705.jpg",
+      "metrics": {
+        "faceWidthPx": 36,
+        "faceHeightPx": 43,
+        "detectionScore": 0.6229,
+        "sharpness": 157.4048,
+        "normalizedSharpness": 3.1464,
+        "poseYawRatio": 0.3679,
+        "posePitchRatio": 0.071
+      },
+      "requestId": "47a58497-9b58-4d7f-a27c-03c565884247",
+      "faceConfidence": 97.98844909667969,
+      "faceBox": {
+        "Width": 0.14970146119594574,
+        "Height": 0.17569570243358612,
+        "Left": 0.6164144277572632,
+        "Top": 0.351193904876709
+      },
+      "similarity": 1.1577423810958862
+    },
+    {
+      "case": "TC08-extra-glasses-candidate",
+      "path": "artifacts/face-reacceptance-2026-11-23/1795394160.678679-8z06hl-1795394165037.jpg",
+      "metrics": {
+        "faceWidthPx": 48,
+        "faceHeightPx": 61,
+        "detectionScore": 0.931,
+        "sharpness": 254.0673,
+        "normalizedSharpness": 9.6739,
+        "poseYawRatio": 0.2155,
+        "posePitchRatio": 0.0078
+      },
+      "requestId": "a9693699-204c-4729-bb30-3ca8f48c2bd1",
+      "faceConfidence": 99.98573303222656,
+      "faceBox": {
+        "Width": 0.13425777852535248,
+        "Height": 0.24557724595069885,
+        "Left": 0.6607078909873962,
+        "Top": 0.23983228206634521
+      },
+      "similarity": 2.283323049545288
+    },
+    {
+      "case": "TC08-extra-glasses-candidate",
+      "path": "artifacts/face-reacceptance-2026-11-23/1795394160.678679-8z06hl-1795394165604.jpg",
+      "metrics": {
+        "faceWidthPx": 47,
+        "faceHeightPx": 61,
+        "detectionScore": 0.9294,
+        "sharpness": 245.1921,
+        "normalizedSharpness": 8.8272,
+        "poseYawRatio": 0.2202,
+        "posePitchRatio": 0.0053
+      },
+      "requestId": "d16a5651-a809-47f1-a985-f8b6f7fdcc35",
+      "faceConfidence": 99.98250579833984,
+      "faceBox": {
+        "Width": 0.13174068927764893,
+        "Height": 0.253597617149353,
+        "Left": 0.6643558740615845,
+        "Top": 0.22256968915462494
+      },
+      "similarity": 4.998768329620361
+    },
+    {
+      "case": "TC08-extra-glasses-candidate",
+      "path": "artifacts/face-reacceptance-2026-11-23/1795394160.678679-8z06hl-1795394166946.jpg",
+      "metrics": {
+        "faceWidthPx": 48,
+        "faceHeightPx": 61,
+        "detectionScore": 0.9267,
+        "sharpness": 238.2654,
+        "normalizedSharpness": 9.1648,
+        "poseYawRatio": 0.2097,
+        "posePitchRatio": 0.008
+      },
+      "requestId": "e45a2c15-c3fe-42dd-a9ad-3b78d5ac1b09",
+      "faceConfidence": 99.98457336425781,
+      "faceBox": {
+        "Width": 0.1325971484184265,
+        "Height": 0.25070807337760925,
+        "Left": 0.6683192849159241,
+        "Top": 0.23097822070121765
+      },
+      "similarity": 3.561260223388672
+    }
+  ]
+}

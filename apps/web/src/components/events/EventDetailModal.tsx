@@ -9,6 +9,7 @@ import styles from './event-detail-modal.module.css';
 import { FireEvidenceSection } from './FireEvidenceSection';
 import { EventEvidenceViewer } from './EventEvidenceViewer';
 import { EventDetailFooter } from './EventDetailFooter';
+import { EventNotifications } from './EventNotifications';
 import { FireEventSummary } from './FireEventSummary';
 
 interface EventDetailModalProps {
@@ -273,6 +274,7 @@ export function EventDetailModal({
               <StatusHistorySection detail={detail} />
             </>
           )}
+          <EventNotifications key={event.id} eventId={event.id} />
         </div>
 
         {actionError && (

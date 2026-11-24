@@ -90,6 +90,9 @@ jobs:
         run: pnpm test
 
       # Script ha tang o thu muc goc khong thuoc package nao nen `pnpm -r test` khong chay
+      - name: Deadline PostgreSQL integration
+        run: pnpm --filter @cam/orchestrator exec jest --runInBand --testRegex "deadline-db\\.integration\\.spec\\.ts$"
+
       - name: Unit test cong cu (Frigate config + su kien MQTT)
         run: pnpm test:tools
 

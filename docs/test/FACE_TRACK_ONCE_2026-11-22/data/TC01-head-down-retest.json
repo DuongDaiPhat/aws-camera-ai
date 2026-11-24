@@ -1,0 +1,37 @@
+{
+  "case": "TC01-head-down-retest",
+  "video": "known_face_head_tilt_down.mp4",
+  "startedAt": "2026-11-22T14:34:47.256Z",
+  "endedAt": "2026-11-22T14:35:30.507Z",
+  "ffmpegExitCode": 0,
+  "before": {
+    "case": "TC01-head-down-retest",
+    "metrics": {
+      "tracksCreated": 3,
+      "gateRejected": 33,
+      "sessionCacheHits": 0,
+      "spatialReidHits": 0,
+      "dispatched": 2,
+      "frozenKnownSkips": 18,
+      "pendingSkips": 11,
+      "retriesDispatched": 0
+    },
+    "tracks": []
+  },
+  "after": {
+    "case": "TC01-head-down-retest",
+    "metrics": {
+      "tracksCreated": 3,
+      "gateRejected": 33,
+      "sessionCacheHits": 0,
+      "spatialReidHits": 0,
+      "dispatched": 2,
+      "frozenKnownSkips": 18,
+      "pendingSkips": 11,
+      "retriesDispatched": 0
+    },
+    "tracks": []
+  },
+  "events": [],
+  "jobs": []
+}

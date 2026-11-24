@@ -54,6 +54,7 @@ describe('DeadlineStepFunctionsService & local worker gating (US-13 / AWS-06)', 
       destroy: jest.fn(),
     };
     deadlineRepo = {
+      assertLocalDriverSafe: jest.fn().mockResolvedValue(undefined),
       adoptPendingLocalDeadlines: jest.fn().mockResolvedValue(0),
       claimNextPendingDispatch: jest.fn().mockResolvedValue(null),
       markDispatchStarted: jest.fn().mockResolvedValue(undefined),
@@ -515,11 +516,7 @@ describe('DeadlineStepFunctionsService & local worker gating (US-13 / AWS-06)', 
     sfnMock.send.mockResolvedValueOnce({ status: 'TIMED_OUT' });
     commandService.applyCommand.mockRejectedValueOnce(new Error('DB down'));
     await service.reconcileStartedDispatches();
-    expect(deadlineRepo.markDispatchFailed).toHaveBeenCalledWith(
-      COMMAND_ID,
-      'RECOVERY_Error',
-      EXECUTION_ARN,
-    );
+    expect(deadlineRepo.touchReconciledAt).toHaveBeenCalledWith(COMMAND_ID);
 
     // 6. ABORTED (no error) -> EXECUTION_ABORTED and undefined status -> EXECUTION_UNKNOWN
     deadlineRepo.findStartedDispatchesForReconcile.mockResolvedValueOnce([
@@ -543,5 +540,50 @@ describe('DeadlineStepFunctionsService & local worker gating (US-13 / AWS-06)', 
       'EXECUTION_UNKNOWN',
       EXECUTION_ARN,
     );
+  });
+  it('retries a failed dispatch after a transient DB recovery error without another AWS execution', async () => {
+    const service = new DeadlineStepFunctionsService(
+      stepFunctionsConfig,
+      deadlineRepo,
+      commandService,
+      sfnMock as unknown as SFNClient,
+    );
+    const dispatch = makeDispatch({ status: 'FAILED', execution_arn: null });
+    deadlineRepo.findStartedDispatchesForReconcile.mockResolvedValue([dispatch]);
+    deadlineRepo.getDispatchEventState.mockResolvedValue({
+      id: EVENT_ID,
+      status: 'NOTIFIED',
+      deadline_version: 2,
+      escalation_deadline_at: dispatch.expected_deadline_at,
+      has_receipt: false,
+    });
+    commandService.applyCommand
+      .mockRejectedValueOnce(new Error('temporary database outage'))
+      .mockResolvedValueOnce({
+        commandId: COMMAND_ID,
+        disposition: 'APPLIED',
+        reason: 'ESCALATED',
+        aggregateVersion: 3,
+      });
+    await service.reconcileStartedDispatches();
+    expect(deadlineRepo.touchReconciledAt).toHaveBeenCalledWith(COMMAND_ID);
+    expect(deadlineRepo.markDispatchFailed).not.toHaveBeenCalled();
+    await service.reconcileStartedDispatches();
+    expect(commandService.applyCommand).toHaveBeenCalledTimes(2);
+    expect(deadlineRepo.markDispatchCompleted).toHaveBeenCalledWith(COMMAND_ID, EXECUTION_ARN);
+    expect(sfnMock.send).not.toHaveBeenCalled();
+  });
+
+  it('refuses a switch to local while cloud deadlines still own pending work', async () => {
+    const service = new DeadlineStepFunctionsService(
+      new ConfigService({ DEADLINE_DRIVER: 'local' }),
+      deadlineRepo,
+      commandService,
+    );
+    deadlineRepo.assertLocalDriverSafe.mockRejectedValueOnce(new Error('active cloud deadlines'));
+    await expect(service.onModuleInit()).rejects.toThrow('active cloud deadlines');
+    deadlineRepo.assertLocalDriverSafe.mockResolvedValueOnce(undefined);
+    await expect(service.onModuleInit()).resolves.toBeUndefined();
+    await service.onModuleDestroy();
   });
 });

@@ -1,0 +1,23 @@
+﻿{
+  "lambdaFunction": "camerai-s4-dev-face",
+  "containers": "camerai-mediamtx: Up 21 seconds; camerai-ai: Up 40 minutes (healthy); camerai-mosquitto: Up 6 hours (healthy); camerai-postgres: Up 6 hours (healthy); camerai-redis: Up 6 hours (healthy); camerai-minio: Up 6 hours (healthy)",
+  "lambdaRestoredInternalApiBaseUrl": "https://four-wishlist-waves-now.trycloudflare.com/api/v1",
+  "aiServiceHealth": {
+    "status": "ok",
+    "service": "ai-service",
+    "version": "0.0.1",
+    "face_provider": "rekognition",
+    "pose_min_visibility": 0.3,
+    "uptime_seconds": 2439
+  },
+  "at": "2026-11-23T05:16:34Z",
+  "daemonsStopped": [
+    "task-495 (web 3002)",
+    "task-483 (runtime 3001/18081)",
+    "task-135 (caddy 18080)",
+    "task-136 (cloudflared)"
+  ],
+  "mediamtxRecreated": true,
+  "nextAutoDiffsReverted": ["apps/web/next-env.d.ts", "apps/web/tsconfig.json"],
+  "frigateStopped": true
+}

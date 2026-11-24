@@ -1,0 +1,122 @@
+{
+  "numFailedTestSuites": 0,
+  "numFailedTests": 0,
+  "numPassedTestSuites": 1,
+  "numPassedTests": 6,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 1,
+  "numTotalTests": 6,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1795423261452,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID)"],
+          "duration": 16,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID) decodes little-endian float32 embeddings and matches by cosine similarity threshold",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 5,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "decodes little-endian float32 embeddings and matches by cosine similarity threshold"
+        },
+        {
+          "ancestorTitles": ["FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID)"],
+          "duration": 3,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID) strictly scopes by (ownerScopeId, cameraSlug, collectionVersion) and invalidates prior versions",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 4,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "strictly scopes by (ownerScopeId, cameraSlug, collectionVersion) and invalidates prior versions"
+        },
+        {
+          "ancestorTitles": ["FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID)"],
+          "duration": 58,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID) matches spatial+appearance Re-ID ONLY after track ended, within gap, and blocks tailgating strangers",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 9,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "matches spatial+appearance Re-ID ONLY after track ended, within gap, and blocks tailgating strangers"
+        },
+        {
+          "ancestorTitles": ["FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID)"],
+          "duration": 3,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID) expires entries after sessionCacheTtlMs and computes scale-invariant box proximity",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 4,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "expires entries after sessionCacheTtlMs and computes scale-invariant box proximity"
+        },
+        {
+          "ancestorTitles": ["FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID)"],
+          "duration": 5,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID) matches against a multi-prototype bank while preserving rejection of unrelated faces",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 5,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "matches against a multi-prototype bank while preserving rejection of unrelated faces"
+        },
+        {
+          "ancestorTitles": ["FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID)"],
+          "duration": 6,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "FaceSessionCacheService (Layer 4 Tailgating-Safe Cache & Re-ID) enforces cosine boundary, exact TTL and collection invalidation for R50 banks",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 5,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "enforces cosine boundary, exact TTL and collection invalidation for R50 banks"
+        }
+      ],
+      "endTime": 1795423295787,
+      "message": "",
+      "name": "D:\\hoc tap\\project 1\\aws-camera-ai\\apps\\orchestrator\\test\\face-session-cache.service.spec.ts",
+      "startTime": 1795423262666,
+      "status": "passed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}

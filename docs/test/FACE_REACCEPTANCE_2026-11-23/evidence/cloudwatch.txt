@@ -1,0 +1,711 @@
+2026-11-22T23:51:29.947Z INIT_START Runtime Version: python:3.12.mainlinev2.v86	Runtime Version ARN: arn:aws:lambda:ap-southeast-1::runtime:9d15a516fef11563a8c452bd8d3fe5a5a120b73013e74783e925235557467534
+
+2026-11-22T23:51:30.825Z START RequestId: 031647ca-fe6a-5b84-be73-24b77c50c0c4 Version: $LATEST
+
+2026-11-22T23:51:32.618Z [INFO]	2026-11-22T23:51:32.618Z	031647ca-fe6a-5b84-be73-24b77c50c0c4	Face provider jobId=1b47cd44-cff3-4177-a6f5-446dc2241b83 operation=SearchFacesByImage awsRequestId=22ecc478-404b-4717-96d7-add33986b624 retryAttempts=0
+
+2026-11-22T23:51:32.962Z [INFO]	2026-11-22T23:51:32.962Z	031647ca-fe6a-5b84-be73-24b77c50c0c4	Face completed jobId=1b47cd44-cff3-4177-a6f5-446dc2241b83 resultId=7f5e4e10-cb4d-42b3-8830-d02bea5900ab status=UNKNOWN cacheHit=False durationMs=2137
+
+2026-11-22T23:51:32.964Z END RequestId: 031647ca-fe6a-5b84-be73-24b77c50c0c4
+
+2026-11-22T23:51:32.965Z REPORT RequestId: 031647ca-fe6a-5b84-be73-24b77c50c0c4	Duration: 2139.43 ms	Billed Duration: 3014 ms	Memory Size: 512 MB	Max Memory Used: 91 MB	Init Duration: 874.18 ms	
+
+2026-11-22T23:53:18.537Z START RequestId: 35476ae8-8a6a-575f-a918-099508c941b7 Version: $LATEST
+
+2026-11-22T23:53:19.559Z [INFO]	2026-11-22T23:53:19.559Z	35476ae8-8a6a-575f-a918-099508c941b7	Face provider jobId=2de6ca8a-3414-4d78-89c6-407780b3edd6 operation=SearchFacesByImage awsRequestId=2c95fc70-42fc-4972-9530-1d21f8c9f9b6 retryAttempts=0
+
+2026-11-22T23:53:19.800Z [INFO]	2026-11-22T23:53:19.800Z	35476ae8-8a6a-575f-a918-099508c941b7	Face completed jobId=2de6ca8a-3414-4d78-89c6-407780b3edd6 resultId=22f653cb-c9d1-4ac6-abd4-3f56c83d469b status=KNOWN cacheHit=False durationMs=1262
+
+2026-11-22T23:53:19.802Z END RequestId: 35476ae8-8a6a-575f-a918-099508c941b7
+
+2026-11-22T23:53:19.802Z REPORT RequestId: 35476ae8-8a6a-575f-a918-099508c941b7	Duration: 1264.30 ms	Billed Duration: 1265 ms	Memory Size: 512 MB	Max Memory Used: 92 MB	
+
+2026-11-22T23:54:38.187Z START RequestId: b50d1540-9a55-5577-ab3c-763d18bfff68 Version: $LATEST
+
+2026-11-22T23:54:39.166Z [INFO]	2026-11-22T23:54:39.166Z	b50d1540-9a55-5577-ab3c-763d18bfff68	Face provider jobId=7a3bd61b-1ed7-4391-8689-afb3f4b5aa4b operation=SearchFacesByImage awsRequestId=2b65260c-27ae-48cf-a7df-11714f72d003 retryAttempts=0
+
+2026-11-22T23:54:39.461Z [INFO]	2026-11-22T23:54:39.461Z	b50d1540-9a55-5577-ab3c-763d18bfff68	Face completed jobId=7a3bd61b-1ed7-4391-8689-afb3f4b5aa4b resultId=2eec7718-cf92-447e-8af2-98f4e1b304b1 status=KNOWN cacheHit=False durationMs=1273
+
+2026-11-22T23:54:39.463Z END RequestId: b50d1540-9a55-5577-ab3c-763d18bfff68
+
+2026-11-22T23:54:39.463Z REPORT RequestId: b50d1540-9a55-5577-ab3c-763d18bfff68	Duration: 1274.67 ms	Billed Duration: 1275 ms	Memory Size: 512 MB	Max Memory Used: 94 MB	
+
+2026-11-22T23:56:09.944Z START RequestId: 6b4d25bc-5598-59b2-957a-46c1d6c88b16 Version: $LATEST
+
+2026-11-22T23:56:11.072Z [INFO]	2026-11-22T23:56:11.072Z	6b4d25bc-5598-59b2-957a-46c1d6c88b16	Face provider jobId=03cfa2c5-e890-45df-a983-c6ab6cd5f354 operation=SearchFacesByImage awsRequestId=4095157c-a4e1-4940-8615-e2a325aae192 retryAttempts=0
+
+2026-11-22T23:56:11.315Z [INFO]	2026-11-22T23:56:11.315Z	6b4d25bc-5598-59b2-957a-46c1d6c88b16	Face completed jobId=03cfa2c5-e890-45df-a983-c6ab6cd5f354 resultId=837c74be-3162-4255-8eac-7eab908afc1e status=KNOWN cacheHit=False durationMs=1369
+
+2026-11-22T23:56:11.317Z END RequestId: 6b4d25bc-5598-59b2-957a-46c1d6c88b16
+
+2026-11-22T23:56:11.317Z REPORT RequestId: 6b4d25bc-5598-59b2-957a-46c1d6c88b16	Duration: 1372.09 ms	Billed Duration: 1373 ms	Memory Size: 512 MB	Max Memory Used: 97 MB	
+
+2026-11-22T23:57:39.303Z START RequestId: 202f68c7-4fad-5924-816f-0bbacc0da467 Version: $LATEST
+
+2026-11-22T23:57:40.335Z [INFO]	2026-11-22T23:57:40.335Z	202f68c7-4fad-5924-816f-0bbacc0da467	Face provider jobId=8cde79a9-d1fd-4152-94a2-30a53a19ed59 operation=SearchFacesByImage awsRequestId=31c4b791-3f77-44ac-8dfb-10d274a8c2a7 retryAttempts=0
+
+2026-11-22T23:57:40.590Z [INFO]	2026-11-22T23:57:40.590Z	202f68c7-4fad-5924-816f-0bbacc0da467	Face completed jobId=8cde79a9-d1fd-4152-94a2-30a53a19ed59 resultId=5e67e9d8-5db9-4345-ad1e-5a33e7f1359a status=KNOWN cacheHit=False durationMs=1286
+
+2026-11-22T23:57:40.591Z END RequestId: 202f68c7-4fad-5924-816f-0bbacc0da467
+
+2026-11-22T23:57:40.592Z REPORT RequestId: 202f68c7-4fad-5924-816f-0bbacc0da467	Duration: 1288.08 ms	Billed Duration: 1289 ms	Memory Size: 512 MB	Max Memory Used: 100 MB	
+
+2026-11-22T23:57:51.061Z START RequestId: dbdc819b-d375-5b63-ad77-e2e650c89888 Version: $LATEST
+
+2026-11-22T23:57:51.611Z [INFO]	2026-11-22T23:57:51.611Z	dbdc819b-d375-5b63-ad77-e2e650c89888	Face provider jobId=600026a5-7fa9-42ec-8d05-eb91eb0de4a5 operation=SearchFacesByImage awsRequestId=792b6086-2c84-45a5-96e3-9b1fd5a9efbe retryAttempts=0
+
+2026-11-22T23:57:51.778Z [INFO]	2026-11-22T23:57:51.778Z	dbdc819b-d375-5b63-ad77-e2e650c89888	Face completed jobId=600026a5-7fa9-42ec-8d05-eb91eb0de4a5 resultId=d466c297-12c7-461a-9a6f-33177f7a1e21 status=UNKNOWN cacheHit=False durationMs=717
+
+2026-11-22T23:57:51.780Z END RequestId: dbdc819b-d375-5b63-ad77-e2e650c89888
+
+2026-11-22T23:57:51.780Z REPORT RequestId: dbdc819b-d375-5b63-ad77-e2e650c89888	Duration: 718.43 ms	Billed Duration: 719 ms	Memory Size: 512 MB	Max Memory Used: 102 MB	
+
+2026-11-22T23:59:00.038Z START RequestId: 59255fc5-0fc7-539d-bd3c-3cb88c3ae076 Version: $LATEST
+
+2026-11-22T23:59:00.935Z [INFO]	2026-11-22T23:59:00.935Z	59255fc5-0fc7-539d-bd3c-3cb88c3ae076	Face provider jobId=a31c7d63-ce6e-45ef-9110-ed3b8df71f54 operation=SearchFacesByImage awsRequestId=ff5dd1d5-fc24-4c93-b448-34fc6891963f retryAttempts=0
+
+2026-11-22T23:59:01.270Z [INFO]	2026-11-22T23:59:01.270Z	59255fc5-0fc7-539d-bd3c-3cb88c3ae076	Face completed jobId=a31c7d63-ce6e-45ef-9110-ed3b8df71f54 resultId=a80d5a2b-2eaf-48cc-aad0-d4f900a3f8a2 status=KNOWN cacheHit=False durationMs=1230
+
+2026-11-22T23:59:01.272Z END RequestId: 59255fc5-0fc7-539d-bd3c-3cb88c3ae076
+
+2026-11-22T23:59:01.272Z REPORT RequestId: 59255fc5-0fc7-539d-bd3c-3cb88c3ae076	Duration: 1233.24 ms	Billed Duration: 1234 ms	Memory Size: 512 MB	Max Memory Used: 105 MB	
+
+2026-11-22T23:59:08.579Z START RequestId: 1539e2e0-ae39-553b-b304-819d2a3d66d0 Version: $LATEST
+
+2026-11-22T23:59:09.074Z [INFO]	2026-11-22T23:59:09.074Z	1539e2e0-ae39-553b-b304-819d2a3d66d0	Face provider jobId=8e4d9b5e-5ae0-40db-abcf-e4aaeb548931 operation=SearchFacesByImage awsRequestId=ffadfc95-c9a7-4b01-af6c-0e908b8acb17 retryAttempts=0
+
+2026-11-22T23:59:09.250Z [INFO]	2026-11-22T23:59:09.250Z	1539e2e0-ae39-553b-b304-819d2a3d66d0	Face completed jobId=8e4d9b5e-5ae0-40db-abcf-e4aaeb548931 resultId=1df083e0-4c40-4f69-806a-48416f2d1215 status=UNKNOWN cacheHit=False durationMs=671
+
+2026-11-22T23:59:09.252Z END RequestId: 1539e2e0-ae39-553b-b304-819d2a3d66d0
+
+2026-11-22T23:59:09.252Z REPORT RequestId: 1539e2e0-ae39-553b-b304-819d2a3d66d0	Duration: 672.81 ms	Billed Duration: 673 ms	Memory Size: 512 MB	Max Memory Used: 105 MB	
+
+2026-11-23T00:00:17.976Z START RequestId: e11c1f7b-51c9-5d4a-ae77-7c06d580b10f Version: $LATEST
+
+2026-11-23T00:00:19.067Z [INFO]	2026-11-23T00:00:19.067Z	e11c1f7b-51c9-5d4a-ae77-7c06d580b10f	Face provider jobId=d981544e-2ce6-4e82-a8b8-f2477b84a5de operation=SearchFacesByImage awsRequestId=02ef52df-0e9c-499e-b4e7-c6cefe1a7685 retryAttempts=0
+
+2026-11-23T00:00:19.295Z [INFO]	2026-11-23T00:00:19.295Z	e11c1f7b-51c9-5d4a-ae77-7c06d580b10f	Face completed jobId=d981544e-2ce6-4e82-a8b8-f2477b84a5de resultId=44ba247b-13cc-4bcd-8a51-1be59f4eb0af status=KNOWN cacheHit=False durationMs=1318
+
+2026-11-23T00:00:19.297Z END RequestId: e11c1f7b-51c9-5d4a-ae77-7c06d580b10f
+
+2026-11-23T00:00:19.297Z REPORT RequestId: e11c1f7b-51c9-5d4a-ae77-7c06d580b10f	Duration: 1320.46 ms	Billed Duration: 1321 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T00:00:23.191Z START RequestId: cde5ec69-391f-56cb-9497-8f14bd4c6a8e Version: $LATEST
+
+2026-11-23T00:00:23.723Z [INFO]	2026-11-23T00:00:23.723Z	cde5ec69-391f-56cb-9497-8f14bd4c6a8e	Face provider jobId=f38c18f7-4fa3-47b0-8dd2-306a349e71da operation=SearchFacesByImage awsRequestId=d141c35c-3c8d-46b9-b662-8bd8dee68e76 retryAttempts=0
+
+2026-11-23T00:00:23.917Z [INFO]	2026-11-23T00:00:23.916Z	cde5ec69-391f-56cb-9497-8f14bd4c6a8e	Face completed jobId=f38c18f7-4fa3-47b0-8dd2-306a349e71da resultId=4a996da0-8ea5-4ff4-b082-a2c11e5dce0f status=KNOWN cacheHit=False durationMs=725
+
+2026-11-23T00:00:23.918Z END RequestId: cde5ec69-391f-56cb-9497-8f14bd4c6a8e
+
+2026-11-23T00:00:23.918Z REPORT RequestId: cde5ec69-391f-56cb-9497-8f14bd4c6a8e	Duration: 726.40 ms	Billed Duration: 727 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T00:00:28.293Z START RequestId: e6224edc-8404-5928-b2a4-2da1004ce0b7 Version: $LATEST
+
+2026-11-23T00:00:28.826Z [INFO]	2026-11-23T00:00:28.826Z	e6224edc-8404-5928-b2a4-2da1004ce0b7	Face provider jobId=60716ccd-13d7-4988-b6c2-c61ca89404e2 operation=SearchFacesByImage awsRequestId=4f36d195-e883-41d3-919d-4b7aafbfb6f6 retryAttempts=0
+
+2026-11-23T00:00:29.047Z [INFO]	2026-11-23T00:00:29.047Z	e6224edc-8404-5928-b2a4-2da1004ce0b7	Face completed jobId=60716ccd-13d7-4988-b6c2-c61ca89404e2 resultId=f1fc517e-222c-4484-a995-65eebe7a0411 status=KNOWN cacheHit=False durationMs=754
+
+2026-11-23T00:00:29.049Z END RequestId: e6224edc-8404-5928-b2a4-2da1004ce0b7
+
+2026-11-23T00:00:29.049Z REPORT RequestId: e6224edc-8404-5928-b2a4-2da1004ce0b7	Duration: 755.47 ms	Billed Duration: 756 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T00:02:05.720Z START RequestId: 372b35c2-4e0e-5de4-96b2-56bfcab7e0ca Version: $LATEST
+
+2026-11-23T00:02:06.645Z [INFO]	2026-11-23T00:02:06.645Z	372b35c2-4e0e-5de4-96b2-56bfcab7e0ca	Face provider jobId=6db81eca-4689-4209-870e-d9998cc0df8e operation=SearchFacesByImage awsRequestId=bee74a1c-d6bb-4142-93cc-a2a7b62b601b retryAttempts=0
+
+2026-11-23T00:02:06.872Z [INFO]	2026-11-23T00:02:06.872Z	372b35c2-4e0e-5de4-96b2-56bfcab7e0ca	Face completed jobId=6db81eca-4689-4209-870e-d9998cc0df8e resultId=90135ad6-da08-4f33-8547-90500baefcd6 status=KNOWN cacheHit=False durationMs=1152
+
+2026-11-23T00:02:06.874Z END RequestId: 372b35c2-4e0e-5de4-96b2-56bfcab7e0ca
+
+2026-11-23T00:02:06.874Z REPORT RequestId: 372b35c2-4e0e-5de4-96b2-56bfcab7e0ca	Duration: 1154.25 ms	Billed Duration: 1155 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T00:02:14.691Z START RequestId: 9b69869c-1c25-56d0-a45a-e5e1989aabfe Version: $LATEST
+
+2026-11-23T00:02:15.195Z [INFO]	2026-11-23T00:02:15.195Z	9b69869c-1c25-56d0-a45a-e5e1989aabfe	Face provider jobId=adc70a8d-7c56-4457-a856-03f4d9bfdbe3 operation=SearchFacesByImage awsRequestId=b2662125-7c6b-4f1e-bf18-dbf250cec564 retryAttempts=0
+
+2026-11-23T00:02:15.370Z [INFO]	2026-11-23T00:02:15.370Z	9b69869c-1c25-56d0-a45a-e5e1989aabfe	Face completed jobId=adc70a8d-7c56-4457-a856-03f4d9bfdbe3 resultId=a8bc02d6-b02d-4aff-a1ca-cd874c79bff4 status=KNOWN cacheHit=False durationMs=678
+
+2026-11-23T00:02:15.372Z END RequestId: 9b69869c-1c25-56d0-a45a-e5e1989aabfe
+
+2026-11-23T00:02:15.372Z REPORT RequestId: 9b69869c-1c25-56d0-a45a-e5e1989aabfe	Duration: 679.75 ms	Billed Duration: 680 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T00:03:30.991Z START RequestId: 623c89c0-efa7-5b4f-ae94-eabd6ab7d905 Version: $LATEST
+
+2026-11-23T00:03:32.045Z [INFO]	2026-11-23T00:03:32.045Z	623c89c0-efa7-5b4f-ae94-eabd6ab7d905	Face provider jobId=71d7ee9b-beb0-4e0b-8424-66c0dafb006a operation=SearchFacesByImage awsRequestId=daf59a05-3935-4304-b47f-3e732b4d76ef retryAttempts=0
+
+2026-11-23T00:03:32.416Z [INFO]	2026-11-23T00:03:32.416Z	623c89c0-efa7-5b4f-ae94-eabd6ab7d905	Face completed jobId=71d7ee9b-beb0-4e0b-8424-66c0dafb006a resultId=62856467-7c0e-4105-8762-cc6c72b8d990 status=UNKNOWN cacheHit=False durationMs=1425
+
+2026-11-23T00:03:32.418Z END RequestId: 623c89c0-efa7-5b4f-ae94-eabd6ab7d905
+
+2026-11-23T00:03:32.418Z REPORT RequestId: 623c89c0-efa7-5b4f-ae94-eabd6ab7d905	Duration: 1427.03 ms	Billed Duration: 1428 ms	Memory Size: 512 MB	Max Memory Used: 107 MB	
+
+2026-11-23T00:04:48.220Z START RequestId: b9001511-a112-5728-a203-766c2441d562 Version: $LATEST
+
+2026-11-23T00:04:49.179Z [INFO]	2026-11-23T00:04:49.179Z	b9001511-a112-5728-a203-766c2441d562	Face provider jobId=8ff0bc4b-8199-4370-9f50-1c4d26477d5b operation=SearchFacesByImage awsRequestId=27601953-3ceb-42e8-aec0-dba28438dec0 retryAttempts=0
+
+2026-11-23T00:04:49.416Z [INFO]	2026-11-23T00:04:49.416Z	b9001511-a112-5728-a203-766c2441d562	Face completed jobId=8ff0bc4b-8199-4370-9f50-1c4d26477d5b resultId=bad974b7-865b-48d4-b11d-25fcf500322f status=UNKNOWN cacheHit=False durationMs=1195
+
+2026-11-23T00:04:49.419Z END RequestId: b9001511-a112-5728-a203-766c2441d562
+
+2026-11-23T00:04:49.419Z REPORT RequestId: b9001511-a112-5728-a203-766c2441d562	Duration: 1198.64 ms	Billed Duration: 1199 ms	Memory Size: 512 MB	Max Memory Used: 108 MB	
+
+2026-11-23T00:12:25.938Z INIT_START Runtime Version: python:3.12.mainlinev2.v86	Runtime Version ARN: arn:aws:lambda:ap-southeast-1::runtime:9d15a516fef11563a8c452bd8d3fe5a5a120b73013e74783e925235557467534
+
+2026-11-23T00:12:26.797Z START RequestId: d1f51a3a-dab7-5625-b5ef-79475dafaf86 Version: $LATEST
+
+2026-11-23T00:12:28.210Z [INFO]	2026-11-23T00:12:28.210Z	d1f51a3a-dab7-5625-b5ef-79475dafaf86	Face provider jobId=a4a87ee7-e57b-4552-bbcd-b952a5a045c3 operation=SearchFacesByImage awsRequestId=ead736b5-701f-4387-8a3a-892042d31d5c retryAttempts=0
+
+2026-11-23T00:12:28.691Z [INFO]	2026-11-23T00:12:28.691Z	d1f51a3a-dab7-5625-b5ef-79475dafaf86	Face completed jobId=a4a87ee7-e57b-4552-bbcd-b952a5a045c3 resultId=4093ff1f-7e4f-438e-99d7-044c94188924 status=KNOWN cacheHit=False durationMs=1894
+
+2026-11-23T00:12:28.693Z END RequestId: d1f51a3a-dab7-5625-b5ef-79475dafaf86
+
+2026-11-23T00:12:28.693Z REPORT RequestId: d1f51a3a-dab7-5625-b5ef-79475dafaf86	Duration: 1896.21 ms	Billed Duration: 2752 ms	Memory Size: 512 MB	Max Memory Used: 91 MB	Init Duration: 855.57 ms	
+
+2026-11-23T00:13:39.870Z START RequestId: d4bd0439-25a4-51bb-9f00-6744a2cb513e Version: $LATEST
+
+2026-11-23T00:13:40.812Z [INFO]	2026-11-23T00:13:40.812Z	d4bd0439-25a4-51bb-9f00-6744a2cb513e	Face provider jobId=74962875-d965-4e94-896d-bcd8fddaac72 operation=SearchFacesByImage awsRequestId=2aee97e0-1aac-4f1f-86e6-9338529fac1a retryAttempts=0
+
+2026-11-23T00:13:41.069Z [INFO]	2026-11-23T00:13:41.069Z	d4bd0439-25a4-51bb-9f00-6744a2cb513e	Face completed jobId=74962875-d965-4e94-896d-bcd8fddaac72 resultId=02c45d99-cb11-4b7b-abf6-97c66dfe5fe1 status=KNOWN cacheHit=False durationMs=1198
+
+2026-11-23T00:13:41.071Z END RequestId: d4bd0439-25a4-51bb-9f00-6744a2cb513e
+
+2026-11-23T00:13:41.071Z REPORT RequestId: d4bd0439-25a4-51bb-9f00-6744a2cb513e	Duration: 1200.06 ms	Billed Duration: 1201 ms	Memory Size: 512 MB	Max Memory Used: 92 MB	
+
+2026-11-23T00:14:59.973Z START RequestId: 34637be6-e3da-5ff7-a095-189b64656654 Version: $LATEST
+
+2026-11-23T00:15:01.450Z [INFO]	2026-11-23T00:15:01.450Z	34637be6-e3da-5ff7-a095-189b64656654	Face provider jobId=4b298e45-d66e-4c91-b425-6e58341e4d7a operation=SearchFacesByImage awsRequestId=6a48e923-2761-4ba5-9769-faf42f685506 retryAttempts=0
+
+2026-11-23T00:15:01.914Z [INFO]	2026-11-23T00:15:01.914Z	34637be6-e3da-5ff7-a095-189b64656654	Face completed jobId=4b298e45-d66e-4c91-b425-6e58341e4d7a resultId=86350a08-95a0-4b97-8c75-82640dce7d63 status=KNOWN cacheHit=False durationMs=1940
+
+2026-11-23T00:15:01.916Z END RequestId: 34637be6-e3da-5ff7-a095-189b64656654
+
+2026-11-23T00:15:01.916Z REPORT RequestId: 34637be6-e3da-5ff7-a095-189b64656654	Duration: 1942.76 ms	Billed Duration: 1943 ms	Memory Size: 512 MB	Max Memory Used: 94 MB	
+
+2026-11-23T00:17:25.343Z START RequestId: dedf5b51-a734-58d7-8903-382c2f668d6c Version: $LATEST
+
+2026-11-23T00:17:26.375Z [INFO]	2026-11-23T00:17:26.375Z	dedf5b51-a734-58d7-8903-382c2f668d6c	Face provider jobId=f4b23690-79a3-4bbe-8456-dfa3fd77fa7f operation=SearchFacesByImage awsRequestId=58476089-6893-4aa8-bcda-dbe28bd6e9a7 retryAttempts=0
+
+2026-11-23T00:17:26.609Z [INFO]	2026-11-23T00:17:26.609Z	dedf5b51-a734-58d7-8903-382c2f668d6c	Face completed jobId=f4b23690-79a3-4bbe-8456-dfa3fd77fa7f resultId=f0379a5c-376f-4de4-87e1-7c7b2a3358e2 status=KNOWN cacheHit=False durationMs=1265
+
+2026-11-23T00:17:26.611Z END RequestId: dedf5b51-a734-58d7-8903-382c2f668d6c
+
+2026-11-23T00:17:26.611Z REPORT RequestId: dedf5b51-a734-58d7-8903-382c2f668d6c	Duration: 1267.25 ms	Billed Duration: 1268 ms	Memory Size: 512 MB	Max Memory Used: 97 MB	
+
+2026-11-23T00:18:50.333Z START RequestId: 76a0ede9-d538-5b14-a33f-8e945d9caa71 Version: $LATEST
+
+2026-11-23T00:18:51.378Z [INFO]	2026-11-23T00:18:51.378Z	76a0ede9-d538-5b14-a33f-8e945d9caa71	Face provider jobId=7da4fd2b-fd14-466d-8567-5d45b02828a5 operation=SearchFacesByImage awsRequestId=03fcc9b1-c9dd-4a76-bb39-0c58a2eff3d6 retryAttempts=0
+
+2026-11-23T00:18:51.614Z [INFO]	2026-11-23T00:18:51.614Z	76a0ede9-d538-5b14-a33f-8e945d9caa71	Face completed jobId=7da4fd2b-fd14-466d-8567-5d45b02828a5 resultId=63b4c5d4-14b6-48b2-8805-0d41b81a016c status=KNOWN cacheHit=False durationMs=1280
+
+2026-11-23T00:18:51.615Z END RequestId: 76a0ede9-d538-5b14-a33f-8e945d9caa71
+
+2026-11-23T00:18:51.615Z REPORT RequestId: 76a0ede9-d538-5b14-a33f-8e945d9caa71	Duration: 1281.73 ms	Billed Duration: 1282 ms	Memory Size: 512 MB	Max Memory Used: 100 MB	
+
+2026-11-23T00:19:05.626Z START RequestId: 2baa7320-a039-5c55-a7db-105d2892fd30 Version: $LATEST
+
+2026-11-23T00:19:06.180Z [INFO]	2026-11-23T00:19:06.180Z	2baa7320-a039-5c55-a7db-105d2892fd30	Face provider jobId=117b3559-2216-4524-813a-17a81244396e operation=SearchFacesByImage awsRequestId=01e97ec8-28a6-4f00-bf81-41d6b376e996 retryAttempts=0
+
+2026-11-23T00:19:06.435Z [INFO]	2026-11-23T00:19:06.435Z	2baa7320-a039-5c55-a7db-105d2892fd30	Face completed jobId=117b3559-2216-4524-813a-17a81244396e resultId=2eccc229-7588-45b0-8891-8fd04892b33b status=UNKNOWN cacheHit=False durationMs=809
+
+2026-11-23T00:19:06.437Z END RequestId: 2baa7320-a039-5c55-a7db-105d2892fd30
+
+2026-11-23T00:19:06.437Z REPORT RequestId: 2baa7320-a039-5c55-a7db-105d2892fd30	Duration: 810.61 ms	Billed Duration: 811 ms	Memory Size: 512 MB	Max Memory Used: 102 MB	
+
+2026-11-23T00:20:15.676Z START RequestId: 5e05b8b8-74cb-5f5d-9d25-dbc5fc3c7c76 Version: $LATEST
+
+2026-11-23T00:20:16.646Z [INFO]	2026-11-23T00:20:16.646Z	5e05b8b8-74cb-5f5d-9d25-dbc5fc3c7c76	Face provider jobId=06c22a6d-086a-4a7d-9df7-efc94de51e1c operation=SearchFacesByImage awsRequestId=a32a8cb9-49ee-4441-8b80-0058b9819d62 retryAttempts=0
+
+2026-11-23T00:20:17.313Z [INFO]	2026-11-23T00:20:17.313Z	5e05b8b8-74cb-5f5d-9d25-dbc5fc3c7c76	Face completed jobId=06c22a6d-086a-4a7d-9df7-efc94de51e1c resultId=abd0358b-43e2-4b22-972a-a14303745bbf status=KNOWN cacheHit=False durationMs=1635
+
+2026-11-23T00:20:17.315Z END RequestId: 5e05b8b8-74cb-5f5d-9d25-dbc5fc3c7c76
+
+2026-11-23T00:20:17.315Z REPORT RequestId: 5e05b8b8-74cb-5f5d-9d25-dbc5fc3c7c76	Duration: 1638.28 ms	Billed Duration: 1639 ms	Memory Size: 512 MB	Max Memory Used: 105 MB	
+
+2026-11-23T00:20:21.272Z START RequestId: ba088a7c-7f0d-5f9a-8afb-e901f60cfcb1 Version: $LATEST
+
+2026-11-23T00:20:21.777Z [INFO]	2026-11-23T00:20:21.777Z	ba088a7c-7f0d-5f9a-8afb-e901f60cfcb1	Face provider jobId=19b617a8-d18f-4144-bd68-df4dfb674275 operation=SearchFacesByImage awsRequestId=e2ea2f57-e503-458f-a803-3373424aae38 retryAttempts=0
+
+2026-11-23T00:20:21.980Z [INFO]	2026-11-23T00:20:21.980Z	ba088a7c-7f0d-5f9a-8afb-e901f60cfcb1	Face completed jobId=19b617a8-d18f-4144-bd68-df4dfb674275 resultId=894f8cad-044f-4d3b-820c-54a9c1efb4e3 status=UNKNOWN cacheHit=False durationMs=708
+
+2026-11-23T00:20:21.982Z END RequestId: ba088a7c-7f0d-5f9a-8afb-e901f60cfcb1
+
+2026-11-23T00:20:21.982Z REPORT RequestId: ba088a7c-7f0d-5f9a-8afb-e901f60cfcb1	Duration: 709.90 ms	Billed Duration: 710 ms	Memory Size: 512 MB	Max Memory Used: 105 MB	
+
+2026-11-23T00:21:31.533Z START RequestId: 28b9c353-c040-5778-b7f3-a02e4902b453 Version: $LATEST
+
+2026-11-23T00:21:32.635Z [INFO]	2026-11-23T00:21:32.635Z	28b9c353-c040-5778-b7f3-a02e4902b453	Face provider jobId=bb8c3b77-070e-4f22-a89d-2b4f7b1ad58f operation=SearchFacesByImage awsRequestId=138ee91d-20a5-49c0-ba1e-0c29b8f9b541 retryAttempts=0
+
+2026-11-23T00:21:32.997Z [INFO]	2026-11-23T00:21:32.997Z	28b9c353-c040-5778-b7f3-a02e4902b453	Face completed jobId=bb8c3b77-070e-4f22-a89d-2b4f7b1ad58f resultId=bb5b9697-0cb6-43ab-a09f-92177f07f366 status=KNOWN cacheHit=False durationMs=1463
+
+2026-11-23T00:21:32.999Z END RequestId: 28b9c353-c040-5778-b7f3-a02e4902b453
+
+2026-11-23T00:21:32.999Z REPORT RequestId: 28b9c353-c040-5778-b7f3-a02e4902b453	Duration: 1465.39 ms	Billed Duration: 1466 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T00:21:43.204Z START RequestId: 200fc198-2dd1-5838-a203-a2e5a485a255 Version: $LATEST
+
+2026-11-23T00:21:43.755Z [INFO]	2026-11-23T00:21:43.755Z	200fc198-2dd1-5838-a203-a2e5a485a255	Face provider jobId=b8b3a1e2-9011-408a-bf65-524364e71c6c operation=SearchFacesByImage awsRequestId=31a54a22-fc1f-4788-b95a-2f4b8f8209bd retryAttempts=0
+
+2026-11-23T00:21:43.955Z [INFO]	2026-11-23T00:21:43.955Z	200fc198-2dd1-5838-a203-a2e5a485a255	Face completed jobId=b8b3a1e2-9011-408a-bf65-524364e71c6c resultId=7b70282d-06b7-4872-8987-96c14ac193d9 status=KNOWN cacheHit=False durationMs=749
+
+2026-11-23T00:21:43.957Z END RequestId: 200fc198-2dd1-5838-a203-a2e5a485a255
+
+2026-11-23T00:21:43.957Z REPORT RequestId: 200fc198-2dd1-5838-a203-a2e5a485a255	Duration: 751.74 ms	Billed Duration: 752 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T00:23:27.189Z START RequestId: a7591651-b801-52a3-8f04-752c31aea8ce Version: $LATEST
+
+2026-11-23T00:23:28.189Z [INFO]	2026-11-23T00:23:28.189Z	a7591651-b801-52a3-8f04-752c31aea8ce	Face provider jobId=7a02b7c4-5fe7-423d-8890-e9018af9321b operation=SearchFacesByImage awsRequestId=0b94c107-44a4-40f8-bda2-6fd700263021 retryAttempts=0
+
+2026-11-23T00:23:28.613Z [INFO]	2026-11-23T00:23:28.613Z	a7591651-b801-52a3-8f04-752c31aea8ce	Face completed jobId=7a02b7c4-5fe7-423d-8890-e9018af9321b resultId=e24b72a1-e56d-4c94-a5ff-60dc77470617 status=KNOWN cacheHit=False durationMs=1422
+
+2026-11-23T00:23:28.615Z END RequestId: a7591651-b801-52a3-8f04-752c31aea8ce
+
+2026-11-23T00:23:28.615Z REPORT RequestId: a7591651-b801-52a3-8f04-752c31aea8ce	Duration: 1424.89 ms	Billed Duration: 1425 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T00:23:36.915Z START RequestId: 1d9cba91-95f6-5416-b798-d9ec1c348e7b Version: $LATEST
+
+2026-11-23T00:23:37.472Z [INFO]	2026-11-23T00:23:37.472Z	1d9cba91-95f6-5416-b798-d9ec1c348e7b	Face provider jobId=fdeab3f9-6ad1-4e37-b578-14bbed6acebc operation=SearchFacesByImage awsRequestId=82e21f0e-943b-4655-9b5c-e18737bd3032 retryAttempts=0
+
+2026-11-23T00:23:37.784Z [INFO]	2026-11-23T00:23:37.784Z	1d9cba91-95f6-5416-b798-d9ec1c348e7b	Face completed jobId=fdeab3f9-6ad1-4e37-b578-14bbed6acebc resultId=7595e7db-1599-42e8-9df0-657f0da4118c status=KNOWN cacheHit=False durationMs=868
+
+2026-11-23T00:23:37.786Z END RequestId: 1d9cba91-95f6-5416-b798-d9ec1c348e7b
+
+2026-11-23T00:23:37.786Z REPORT RequestId: 1d9cba91-95f6-5416-b798-d9ec1c348e7b	Duration: 869.87 ms	Billed Duration: 870 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T00:23:42.540Z START RequestId: b90086f7-1d91-52a4-aa90-e58a945898c9 Version: $LATEST
+
+2026-11-23T00:23:43.064Z [INFO]	2026-11-23T00:23:43.064Z	b90086f7-1d91-52a4-aa90-e58a945898c9	Face provider jobId=6289f037-1116-4842-982d-7fc684d88eb7 operation=SearchFacesByImage awsRequestId=66a451a4-5815-4cdc-806d-751ac4399c2f retryAttempts=0
+
+2026-11-23T00:23:43.257Z [INFO]	2026-11-23T00:23:43.257Z	b90086f7-1d91-52a4-aa90-e58a945898c9	Face completed jobId=6289f037-1116-4842-982d-7fc684d88eb7 resultId=8e233f99-c5cd-4834-b8a5-8f25dd6a72b0 status=KNOWN cacheHit=False durationMs=716
+
+2026-11-23T00:23:43.259Z END RequestId: b90086f7-1d91-52a4-aa90-e58a945898c9
+
+2026-11-23T00:23:43.259Z REPORT RequestId: b90086f7-1d91-52a4-aa90-e58a945898c9	Duration: 717.63 ms	Billed Duration: 718 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T00:24:53.589Z INIT_START Runtime Version: python:3.12.mainlinev2.v86	Runtime Version ARN: arn:aws:lambda:ap-southeast-1::runtime:9d15a516fef11563a8c452bd8d3fe5a5a120b73013e74783e925235557467534
+
+2026-11-23T00:24:54.483Z START RequestId: cc6db4ec-b1ee-5a14-8767-d7913be52679 Version: $LATEST
+
+2026-11-23T00:24:55.964Z [INFO]	2026-11-23T00:24:55.964Z	cc6db4ec-b1ee-5a14-8767-d7913be52679	Face provider jobId=ab1fc97d-79c7-4d10-b3e0-cd99412643a7 operation=SearchFacesByImage awsRequestId=8f3f4696-7159-46cb-9185-49968a0a49d2 retryAttempts=0
+
+2026-11-23T00:24:56.539Z [INFO]	2026-11-23T00:24:56.539Z	cc6db4ec-b1ee-5a14-8767-d7913be52679	Face completed jobId=ab1fc97d-79c7-4d10-b3e0-cd99412643a7 resultId=c3819f71-04d2-47d3-94f0-be93b8829800 status=UNKNOWN cacheHit=False durationMs=2055
+
+2026-11-23T00:24:56.541Z END RequestId: cc6db4ec-b1ee-5a14-8767-d7913be52679
+
+2026-11-23T00:24:56.541Z REPORT RequestId: cc6db4ec-b1ee-5a14-8767-d7913be52679	Duration: 2057.47 ms	Billed Duration: 2948 ms	Memory Size: 512 MB	Max Memory Used: 91 MB	Init Duration: 890.14 ms	
+
+2026-11-23T00:26:22.050Z START RequestId: 856d0b77-3cec-5b08-8c1b-680ab6b25206 Version: $LATEST
+
+2026-11-23T00:26:23.085Z [INFO]	2026-11-23T00:26:23.085Z	856d0b77-3cec-5b08-8c1b-680ab6b25206	Face provider jobId=47ca8a7f-4d67-4207-93ec-341b02fd29bb operation=SearchFacesByImage awsRequestId=f26548a0-6823-40d9-a887-d1c0ff6bdee1 retryAttempts=0
+
+2026-11-23T00:26:23.435Z [INFO]	2026-11-23T00:26:23.435Z	856d0b77-3cec-5b08-8c1b-680ab6b25206	Face completed jobId=47ca8a7f-4d67-4207-93ec-341b02fd29bb resultId=64453679-5de0-463d-9cab-7aca8822b674 status=UNKNOWN cacheHit=False durationMs=1384
+
+2026-11-23T00:26:23.439Z END RequestId: 856d0b77-3cec-5b08-8c1b-680ab6b25206
+
+2026-11-23T00:26:23.439Z REPORT RequestId: 856d0b77-3cec-5b08-8c1b-680ab6b25206	Duration: 1388.10 ms	Billed Duration: 1389 ms	Memory Size: 512 MB	Max Memory Used: 91 MB	
+
+2026-11-23T00:31:41.078Z START RequestId: 7f29aec7-57eb-54be-b589-cdbadc757a94 Version: $LATEST
+
+2026-11-23T00:31:42.197Z [INFO]	2026-11-23T00:31:42.197Z	7f29aec7-57eb-54be-b589-cdbadc757a94	Face provider jobId=5b35189a-057e-4510-b1f9-acafc4be6a5e operation=SearchFacesByImage awsRequestId=3b0f7d4e-1ebe-4530-8729-3377147ea5ba retryAttempts=0
+
+2026-11-23T00:31:42.544Z [INFO]	2026-11-23T00:31:42.544Z	7f29aec7-57eb-54be-b589-cdbadc757a94	Face completed jobId=5b35189a-057e-4510-b1f9-acafc4be6a5e resultId=6f049717-28a6-4916-9af8-17193f7a8958 status=KNOWN cacheHit=False durationMs=1465
+
+2026-11-23T00:31:42.546Z END RequestId: 7f29aec7-57eb-54be-b589-cdbadc757a94
+
+2026-11-23T00:31:42.546Z REPORT RequestId: 7f29aec7-57eb-54be-b589-cdbadc757a94	Duration: 1467.73 ms	Billed Duration: 1468 ms	Memory Size: 512 MB	Max Memory Used: 94 MB	
+
+2026-11-23T00:32:05.400Z START RequestId: 1253e649-5b32-5f65-b9ba-8534d08b4977 Version: $LATEST
+
+2026-11-23T00:32:05.934Z [INFO]	2026-11-23T00:32:05.934Z	1253e649-5b32-5f65-b9ba-8534d08b4977	Face provider jobId=e4a153ce-b303-48d3-bf96-2b9d0bc6109b operation=SearchFacesByImage awsRequestId=acda2e26-ce32-4608-813a-7527aa7ed967 retryAttempts=0
+
+2026-11-23T00:32:06.110Z [INFO]	2026-11-23T00:32:06.110Z	1253e649-5b32-5f65-b9ba-8534d08b4977	Face completed jobId=e4a153ce-b303-48d3-bf96-2b9d0bc6109b resultId=ea12cd49-b904-4a35-bbdb-79ccec331c28 status=UNKNOWN cacheHit=False durationMs=710
+
+2026-11-23T00:32:06.112Z END RequestId: 1253e649-5b32-5f65-b9ba-8534d08b4977
+
+2026-11-23T00:32:06.112Z REPORT RequestId: 1253e649-5b32-5f65-b9ba-8534d08b4977	Duration: 712.12 ms	Billed Duration: 713 ms	Memory Size: 512 MB	Max Memory Used: 97 MB	
+
+2026-11-23T00:33:14.848Z START RequestId: cb2880fe-581c-59ba-b562-e383d41d083f Version: $LATEST
+
+2026-11-23T00:33:16.032Z [INFO]	2026-11-23T00:33:16.032Z	cb2880fe-581c-59ba-b562-e383d41d083f	Face provider jobId=09fde1f0-b36c-439b-bb5f-b4f380e686df operation=SearchFacesByImage awsRequestId=974afbc0-1146-41a4-9fa3-70e28a811bf8 retryAttempts=0
+
+2026-11-23T00:33:16.318Z [INFO]	2026-11-23T00:33:16.318Z	cb2880fe-581c-59ba-b562-e383d41d083f	Face completed jobId=09fde1f0-b36c-439b-bb5f-b4f380e686df resultId=45c891ad-dea1-4365-9d65-2ac22e71ba59 status=KNOWN cacheHit=False durationMs=1469
+
+2026-11-23T00:33:16.320Z END RequestId: cb2880fe-581c-59ba-b562-e383d41d083f
+
+2026-11-23T00:33:16.320Z REPORT RequestId: cb2880fe-581c-59ba-b562-e383d41d083f	Duration: 1471.34 ms	Billed Duration: 1472 ms	Memory Size: 512 MB	Max Memory Used: 100 MB	
+
+2026-11-23T00:34:37.040Z START RequestId: dcc571da-ae45-5799-a098-12a722166439 Version: $LATEST
+
+2026-11-23T00:34:37.967Z [INFO]	2026-11-23T00:34:37.967Z	dcc571da-ae45-5799-a098-12a722166439	Face provider jobId=9fb63b8e-503f-4993-a250-20b4942206af operation=SearchFacesByImage awsRequestId=70a18e4d-f663-4ae2-b2fd-b42f116a8c0e retryAttempts=0
+
+2026-11-23T00:34:38.361Z [INFO]	2026-11-23T00:34:38.361Z	dcc571da-ae45-5799-a098-12a722166439	Face completed jobId=9fb63b8e-503f-4993-a250-20b4942206af resultId=d456030a-b30f-421f-8a5e-3c5bb30411e4 status=KNOWN cacheHit=False durationMs=1320
+
+2026-11-23T00:34:38.363Z END RequestId: dcc571da-ae45-5799-a098-12a722166439
+
+2026-11-23T00:34:38.363Z REPORT RequestId: dcc571da-ae45-5799-a098-12a722166439	Duration: 1323.22 ms	Billed Duration: 1324 ms	Memory Size: 512 MB	Max Memory Used: 103 MB	
+
+2026-11-23T00:34:42.601Z START RequestId: 06ba10e1-e969-53a5-8f17-739c65333220 Version: $LATEST
+
+2026-11-23T00:34:43.104Z [INFO]	2026-11-23T00:34:43.104Z	06ba10e1-e969-53a5-8f17-739c65333220	Face provider jobId=fe1bd948-1e85-4e37-a43d-082577b8271b operation=SearchFacesByImage awsRequestId=b984d231-9a10-4e67-a33c-9da21862f34c retryAttempts=0
+
+2026-11-23T00:34:43.558Z [INFO]	2026-11-23T00:34:43.558Z	06ba10e1-e969-53a5-8f17-739c65333220	Face completed jobId=fe1bd948-1e85-4e37-a43d-082577b8271b resultId=b8946f57-f15a-44a1-b04e-70f410c64b28 status=KNOWN cacheHit=False durationMs=956
+
+2026-11-23T00:34:43.560Z END RequestId: 06ba10e1-e969-53a5-8f17-739c65333220
+
+2026-11-23T00:34:43.560Z REPORT RequestId: 06ba10e1-e969-53a5-8f17-739c65333220	Duration: 957.75 ms	Billed Duration: 958 ms	Memory Size: 512 MB	Max Memory Used: 105 MB	
+
+2026-11-23T00:36:26.038Z START RequestId: 5c2ec174-9791-5b24-b0a6-a2091b583aa1 Version: $LATEST
+
+2026-11-23T00:36:26.940Z [INFO]	2026-11-23T00:36:26.940Z	5c2ec174-9791-5b24-b0a6-a2091b583aa1	Face provider jobId=c4c34331-a24f-40bc-b881-b5985acaff53 operation=SearchFacesByImage awsRequestId=59b041e9-2aba-45dc-b551-fb2f6c2030a3 retryAttempts=0
+
+2026-11-23T00:36:27.282Z [INFO]	2026-11-23T00:36:27.282Z	5c2ec174-9791-5b24-b0a6-a2091b583aa1	Face completed jobId=c4c34331-a24f-40bc-b881-b5985acaff53 resultId=4e1d2e53-c042-4f1e-b954-45365a6ad8f1 status=KNOWN cacheHit=False durationMs=1243
+
+2026-11-23T00:36:27.284Z END RequestId: 5c2ec174-9791-5b24-b0a6-a2091b583aa1
+
+2026-11-23T00:36:27.284Z REPORT RequestId: 5c2ec174-9791-5b24-b0a6-a2091b583aa1	Duration: 1245.56 ms	Billed Duration: 1246 ms	Memory Size: 512 MB	Max Memory Used: 105 MB	
+
+2026-11-23T00:36:39.742Z START RequestId: 0c3394c8-00f9-5fe0-9421-f7b58c339e65 Version: $LATEST
+
+2026-11-23T00:36:40.289Z [INFO]	2026-11-23T00:36:40.289Z	0c3394c8-00f9-5fe0-9421-f7b58c339e65	Face provider jobId=e693c380-3cd5-44ac-a978-3d5ca5b01d7a operation=SearchFacesByImage awsRequestId=a2ef5727-2886-4a4a-b036-ca61ac8d41fa retryAttempts=0
+
+2026-11-23T00:36:40.449Z [INFO]	2026-11-23T00:36:40.449Z	0c3394c8-00f9-5fe0-9421-f7b58c339e65	Face completed jobId=e693c380-3cd5-44ac-a978-3d5ca5b01d7a resultId=f04c98b0-dfc1-4b19-a6b2-99cac779f021 status=KNOWN cacheHit=False durationMs=707
+
+2026-11-23T00:36:40.451Z END RequestId: 0c3394c8-00f9-5fe0-9421-f7b58c339e65
+
+2026-11-23T00:36:40.451Z REPORT RequestId: 0c3394c8-00f9-5fe0-9421-f7b58c339e65	Duration: 708.59 ms	Billed Duration: 709 ms	Memory Size: 512 MB	Max Memory Used: 105 MB	
+
+2026-11-23T00:37:46.341Z START RequestId: 0525eb98-d877-5f55-b22d-88e555642d24 Version: $LATEST
+
+2026-11-23T00:37:47.350Z [INFO]	2026-11-23T00:37:47.350Z	0525eb98-d877-5f55-b22d-88e555642d24	Face provider jobId=3948ab5f-7210-4089-8155-5c79f1c8c77c operation=SearchFacesByImage awsRequestId=b195b5f7-ea9f-4892-96e4-b73994dc28f9 retryAttempts=0
+
+2026-11-23T00:37:47.574Z [INFO]	2026-11-23T00:37:47.574Z	0525eb98-d877-5f55-b22d-88e555642d24	Face completed jobId=3948ab5f-7210-4089-8155-5c79f1c8c77c resultId=0e684f54-f901-4481-aee7-0095b1721bde status=KNOWN cacheHit=False durationMs=1232
+
+2026-11-23T00:37:47.576Z END RequestId: 0525eb98-d877-5f55-b22d-88e555642d24
+
+2026-11-23T00:37:47.576Z REPORT RequestId: 0525eb98-d877-5f55-b22d-88e555642d24	Duration: 1234.69 ms	Billed Duration: 1235 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T00:38:59.546Z START RequestId: a185f7e4-5edc-541c-95b2-9499d384266d Version: $LATEST
+
+2026-11-23T00:39:00.495Z [INFO]	2026-11-23T00:39:00.495Z	a185f7e4-5edc-541c-95b2-9499d384266d	Face provider jobId=aacae508-ec73-4d7a-9831-0e16becfbb99 operation=SearchFacesByImage awsRequestId=9d1a4627-36e0-400a-b8b0-929bb42b3b35 retryAttempts=0
+
+2026-11-23T00:39:00.756Z [INFO]	2026-11-23T00:39:00.756Z	a185f7e4-5edc-541c-95b2-9499d384266d	Face completed jobId=aacae508-ec73-4d7a-9831-0e16becfbb99 resultId=32ab1005-a4b0-4ce1-bf86-69f416414b16 status=KNOWN cacheHit=False durationMs=1209
+
+2026-11-23T00:39:00.757Z END RequestId: a185f7e4-5edc-541c-95b2-9499d384266d
+
+2026-11-23T00:39:00.758Z REPORT RequestId: a185f7e4-5edc-541c-95b2-9499d384266d	Duration: 1211.44 ms	Billed Duration: 1212 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T00:40:18.718Z START RequestId: d4bd53fe-1d33-5113-b5a8-308390ac865b Version: $LATEST
+
+2026-11-23T00:40:19.707Z [INFO]	2026-11-23T00:40:19.707Z	d4bd53fe-1d33-5113-b5a8-308390ac865b	Face provider jobId=49bf57c5-5241-4c93-9bf5-d5cf652aa6f3 operation=SearchFacesByImage awsRequestId=deecff62-95f5-42db-95e8-0bfa4e3f561e retryAttempts=0
+
+2026-11-23T00:40:19.939Z [INFO]	2026-11-23T00:40:19.939Z	d4bd53fe-1d33-5113-b5a8-308390ac865b	Face completed jobId=49bf57c5-5241-4c93-9bf5-d5cf652aa6f3 resultId=7e3386ba-583d-44bf-9469-52c41f27050b status=KNOWN cacheHit=False durationMs=1220
+
+2026-11-23T00:40:19.941Z END RequestId: d4bd53fe-1d33-5113-b5a8-308390ac865b
+
+2026-11-23T00:40:19.941Z REPORT RequestId: d4bd53fe-1d33-5113-b5a8-308390ac865b	Duration: 1222.42 ms	Billed Duration: 1223 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T00:40:30.344Z START RequestId: 93aab18a-3e8e-5f16-8116-d2f7b33a985e Version: $LATEST
+
+2026-11-23T00:40:30.819Z [INFO]	2026-11-23T00:40:30.819Z	93aab18a-3e8e-5f16-8116-d2f7b33a985e	Face provider jobId=65c4ecfa-c897-461d-b911-3bfae99ec4a0 operation=SearchFacesByImage awsRequestId=e613e7b8-7a99-4700-99b9-4e3c9930d4f4 retryAttempts=0
+
+2026-11-23T00:40:31.049Z [INFO]	2026-11-23T00:40:31.049Z	93aab18a-3e8e-5f16-8116-d2f7b33a985e	Face completed jobId=65c4ecfa-c897-461d-b911-3bfae99ec4a0 resultId=4e7cc57c-9873-47e1-863f-850a0efc387e status=UNKNOWN cacheHit=False durationMs=704
+
+2026-11-23T00:40:31.051Z END RequestId: 93aab18a-3e8e-5f16-8116-d2f7b33a985e
+
+2026-11-23T00:40:31.051Z REPORT RequestId: 93aab18a-3e8e-5f16-8116-d2f7b33a985e	Duration: 705.92 ms	Billed Duration: 706 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T00:41:42.765Z START RequestId: 8745cf92-91c0-5efe-bfa3-acef1c3b69b6 Version: $LATEST
+
+2026-11-23T00:41:43.845Z [INFO]	2026-11-23T00:41:43.845Z	8745cf92-91c0-5efe-bfa3-acef1c3b69b6	Face provider jobId=3fe53fee-4169-4ec6-b235-444f92e243a9 operation=SearchFacesByImage awsRequestId=f8491eac-061b-44dc-9414-093f5f19824b retryAttempts=0
+
+2026-11-23T00:41:44.211Z [INFO]	2026-11-23T00:41:44.210Z	8745cf92-91c0-5efe-bfa3-acef1c3b69b6	Face completed jobId=3fe53fee-4169-4ec6-b235-444f92e243a9 resultId=c03d067e-8f15-406c-8dfc-d305a6594be1 status=KNOWN cacheHit=False durationMs=1445
+
+2026-11-23T00:41:44.213Z END RequestId: 8745cf92-91c0-5efe-bfa3-acef1c3b69b6
+
+2026-11-23T00:41:44.213Z REPORT RequestId: 8745cf92-91c0-5efe-bfa3-acef1c3b69b6	Duration: 1447.37 ms	Billed Duration: 1448 ms	Memory Size: 512 MB	Max Memory Used: 108 MB	
+
+2026-11-23T00:41:48.743Z START RequestId: 05409c62-6691-507a-a558-ff1fe895171e Version: $LATEST
+
+2026-11-23T00:41:49.220Z [INFO]	2026-11-23T00:41:49.220Z	05409c62-6691-507a-a558-ff1fe895171e	Face provider jobId=6ce24bcd-566d-4268-bd4e-df54758114f4 operation=SearchFacesByImage awsRequestId=4ae76c6a-a370-4383-bfcb-8a2e6a9498b4 retryAttempts=0
+
+2026-11-23T00:41:49.513Z [INFO]	2026-11-23T00:41:49.513Z	05409c62-6691-507a-a558-ff1fe895171e	Face completed jobId=6ce24bcd-566d-4268-bd4e-df54758114f4 resultId=e27340af-8dbd-4894-bdb3-cb81b8d2ca17 status=UNKNOWN cacheHit=False durationMs=770
+
+2026-11-23T00:41:49.515Z END RequestId: 05409c62-6691-507a-a558-ff1fe895171e
+
+2026-11-23T00:41:49.515Z REPORT RequestId: 05409c62-6691-507a-a558-ff1fe895171e	Duration: 771.72 ms	Billed Duration: 772 ms	Memory Size: 512 MB	Max Memory Used: 108 MB	
+
+2026-11-23T00:42:57.747Z START RequestId: eb95335c-4f8d-5153-bb72-5021c1cf061b Version: $LATEST
+
+2026-11-23T00:42:58.642Z [INFO]	2026-11-23T00:42:58.642Z	eb95335c-4f8d-5153-bb72-5021c1cf061b	Face provider jobId=ba6be0ed-73aa-4669-90b9-b80760f881c8 operation=SearchFacesByImage awsRequestId=8cfdf15c-b459-41bd-8a34-3fb3c8d363a6 retryAttempts=0
+
+2026-11-23T00:42:58.856Z [INFO]	2026-11-23T00:42:58.856Z	eb95335c-4f8d-5153-bb72-5021c1cf061b	Face completed jobId=ba6be0ed-73aa-4669-90b9-b80760f881c8 resultId=fb58e0d0-8bc1-4bf5-bf37-82da6c189509 status=UNKNOWN cacheHit=False durationMs=1108
+
+2026-11-23T00:42:58.858Z END RequestId: eb95335c-4f8d-5153-bb72-5021c1cf061b
+
+2026-11-23T00:42:58.858Z REPORT RequestId: eb95335c-4f8d-5153-bb72-5021c1cf061b	Duration: 1110.52 ms	Billed Duration: 1111 ms	Memory Size: 512 MB	Max Memory Used: 108 MB	
+
+2026-11-23T00:44:16.891Z START RequestId: 9a803e65-d3ba-5980-9595-5d185d2b790d Version: $LATEST
+
+2026-11-23T00:44:17.884Z [INFO]	2026-11-23T00:44:17.884Z	9a803e65-d3ba-5980-9595-5d185d2b790d	Face provider jobId=6ce028f7-01fb-4889-a75f-4bef1d839f8b operation=SearchFacesByImage awsRequestId=06dac57e-6355-492b-b1f6-90588098902b retryAttempts=0
+
+2026-11-23T00:44:18.116Z [INFO]	2026-11-23T00:44:18.116Z	9a803e65-d3ba-5980-9595-5d185d2b790d	Face completed jobId=6ce028f7-01fb-4889-a75f-4bef1d839f8b resultId=1f928d91-355f-40cf-9891-499f7632eb4e status=UNKNOWN cacheHit=False durationMs=1223
+
+2026-11-23T00:44:18.118Z END RequestId: 9a803e65-d3ba-5980-9595-5d185d2b790d
+
+2026-11-23T00:44:18.118Z REPORT RequestId: 9a803e65-d3ba-5980-9595-5d185d2b790d	Duration: 1226.92 ms	Billed Duration: 1227 ms	Memory Size: 512 MB	Max Memory Used: 108 MB	
+
+2026-11-23T00:47:27.658Z INIT_START Runtime Version: python:3.12.mainlinev2.v86	Runtime Version ARN: arn:aws:lambda:ap-southeast-1::runtime:9d15a516fef11563a8c452bd8d3fe5a5a120b73013e74783e925235557467534
+
+2026-11-23T00:54:58.934Z INIT_START Runtime Version: python:3.12.mainlinev2.v86	Runtime Version ARN: arn:aws:lambda:ap-southeast-1::runtime:9d15a516fef11563a8c452bd8d3fe5a5a120b73013e74783e925235557467534
+
+2026-11-23T00:54:59.839Z START RequestId: 35600436-bde9-58b8-b1ff-674b2cf9b0ba Version: $LATEST
+
+2026-11-23T00:55:01.288Z [INFO]	2026-11-23T00:55:01.288Z	35600436-bde9-58b8-b1ff-674b2cf9b0ba	Face provider jobId=90531d3b-ca39-4b36-8b45-eb9660448486 operation=SearchFacesByImage awsRequestId=e9e0b04a-b928-4171-a8af-17d88f8e4938 retryAttempts=0
+
+2026-11-23T00:55:01.730Z [INFO]	2026-11-23T00:55:01.730Z	35600436-bde9-58b8-b1ff-674b2cf9b0ba	Face completed jobId=90531d3b-ca39-4b36-8b45-eb9660448486 resultId=31823e88-df5d-484d-94c9-25999f559336 status=KNOWN cacheHit=False durationMs=1890
+
+2026-11-23T00:55:01.732Z END RequestId: 35600436-bde9-58b8-b1ff-674b2cf9b0ba
+
+2026-11-23T00:55:01.732Z REPORT RequestId: 35600436-bde9-58b8-b1ff-674b2cf9b0ba	Duration: 1892.21 ms	Billed Duration: 2794 ms	Memory Size: 512 MB	Max Memory Used: 91 MB	Init Duration: 901.49 ms	
+
+2026-11-23T00:56:54.674Z INIT_START Runtime Version: python:3.12.mainlinev2.v86	Runtime Version ARN: arn:aws:lambda:ap-southeast-1::runtime:9d15a516fef11563a8c452bd8d3fe5a5a120b73013e74783e925235557467534
+
+2026-11-23T00:56:55.656Z START RequestId: 7b52fa0c-0dc0-5e78-a95c-99719c4bc848 Version: $LATEST
+
+2026-11-23T00:56:57.392Z [INFO]	2026-11-23T00:56:57.392Z	7b52fa0c-0dc0-5e78-a95c-99719c4bc848	Face provider jobId=32765861-456b-4e56-aee8-0853aed5387a operation=SearchFacesByImage awsRequestId=441026ff-78dc-4c99-8d64-8a5767a1d84f retryAttempts=0
+
+2026-11-23T00:56:57.721Z [INFO]	2026-11-23T00:56:57.721Z	7b52fa0c-0dc0-5e78-a95c-99719c4bc848	Face completed jobId=32765861-456b-4e56-aee8-0853aed5387a resultId=b8d8ab68-e2ec-4022-8141-cc682667e4e4 status=KNOWN cacheHit=False durationMs=2064
+
+2026-11-23T00:56:57.723Z END RequestId: 7b52fa0c-0dc0-5e78-a95c-99719c4bc848
+
+2026-11-23T00:56:57.723Z REPORT RequestId: 7b52fa0c-0dc0-5e78-a95c-99719c4bc848	Duration: 2066.86 ms	Billed Duration: 3045 ms	Memory Size: 512 MB	Max Memory Used: 91 MB	Init Duration: 977.45 ms	
+
+2026-11-23T01:00:02.047Z START RequestId: 6c7c9ba8-d3d5-5f5d-871a-f8d5419a76dc Version: $LATEST
+
+2026-11-23T01:00:03.112Z [INFO]	2026-11-23T01:00:03.112Z	6c7c9ba8-d3d5-5f5d-871a-f8d5419a76dc	Face provider jobId=63f6eb9c-cd68-4eb9-9602-ddac54e601a0 operation=SearchFacesByImage awsRequestId=da402a9a-25ca-4a8f-b786-25487e7d606e retryAttempts=0
+
+2026-11-23T01:00:03.425Z [INFO]	2026-11-23T01:00:03.425Z	6c7c9ba8-d3d5-5f5d-871a-f8d5419a76dc	Face completed jobId=63f6eb9c-cd68-4eb9-9602-ddac54e601a0 resultId=468284ab-5f8f-43c3-a6a3-a8886fa3f0c3 status=KNOWN cacheHit=False durationMs=1377
+
+2026-11-23T01:00:03.427Z END RequestId: 6c7c9ba8-d3d5-5f5d-871a-f8d5419a76dc
+
+2026-11-23T01:00:03.427Z REPORT RequestId: 6c7c9ba8-d3d5-5f5d-871a-f8d5419a76dc	Duration: 1379.60 ms	Billed Duration: 1380 ms	Memory Size: 512 MB	Max Memory Used: 92 MB	
+
+2026-11-23T01:01:37.583Z START RequestId: 302b7492-85b4-5d3b-81ee-17ef171074ba Version: $LATEST
+
+2026-11-23T01:01:38.605Z [INFO]	2026-11-23T01:01:38.605Z	302b7492-85b4-5d3b-81ee-17ef171074ba	Face provider jobId=b5e0a9e3-df49-448a-ba45-4a43dec592f9 operation=SearchFacesByImage awsRequestId=6b265133-3bb3-4203-84db-774c10a06061 retryAttempts=0
+
+2026-11-23T01:01:38.915Z [INFO]	2026-11-23T01:01:38.915Z	302b7492-85b4-5d3b-81ee-17ef171074ba	Face completed jobId=b5e0a9e3-df49-448a-ba45-4a43dec592f9 resultId=ee6ad460-ec22-480b-86be-49e31b130207 status=KNOWN cacheHit=False durationMs=1330
+
+2026-11-23T01:01:38.917Z END RequestId: 302b7492-85b4-5d3b-81ee-17ef171074ba
+
+2026-11-23T01:01:38.917Z REPORT RequestId: 302b7492-85b4-5d3b-81ee-17ef171074ba	Duration: 1333.43 ms	Billed Duration: 1334 ms	Memory Size: 512 MB	Max Memory Used: 94 MB	
+
+2026-11-23T01:05:10.572Z START RequestId: c18d5c55-ee49-50d9-a530-3f287dc99c33 Version: $LATEST
+
+2026-11-23T01:05:11.672Z [INFO]	2026-11-23T01:05:11.672Z	c18d5c55-ee49-50d9-a530-3f287dc99c33	Face provider jobId=c3676ea8-fba7-41ee-a15d-d516fcffb2f7 operation=SearchFacesByImage awsRequestId=917e05e2-1efa-4da9-92a2-5b3009130ebb retryAttempts=0
+
+2026-11-23T01:05:12.058Z [INFO]	2026-11-23T01:05:12.058Z	c18d5c55-ee49-50d9-a530-3f287dc99c33	Face completed jobId=c3676ea8-fba7-41ee-a15d-d516fcffb2f7 resultId=c781ee84-3cb3-4658-997e-550462ac507c status=KNOWN cacheHit=False durationMs=1486
+
+2026-11-23T01:05:12.060Z END RequestId: c18d5c55-ee49-50d9-a530-3f287dc99c33
+
+2026-11-23T01:05:12.060Z REPORT RequestId: c18d5c55-ee49-50d9-a530-3f287dc99c33	Duration: 1487.77 ms	Billed Duration: 1488 ms	Memory Size: 512 MB	Max Memory Used: 98 MB	
+
+2026-11-23T01:08:25.854Z START RequestId: 1a865a21-621e-5cbd-a0de-395cf65f01b1 Version: $LATEST
+
+2026-11-23T01:08:26.780Z [INFO]	2026-11-23T01:08:26.779Z	1a865a21-621e-5cbd-a0de-395cf65f01b1	Face provider jobId=530ea2db-49a1-42dd-9f5a-2b829f09c2cf operation=SearchFacesByImage awsRequestId=a6a6e0fe-e849-4690-bad1-c3b739cbbafa retryAttempts=0
+
+2026-11-23T01:08:27.041Z [INFO]	2026-11-23T01:08:27.040Z	1a865a21-621e-5cbd-a0de-395cf65f01b1	Face completed jobId=530ea2db-49a1-42dd-9f5a-2b829f09c2cf resultId=7d4a5eb7-586f-4603-85ce-4405ea84014e status=KNOWN cacheHit=False durationMs=1181
+
+2026-11-23T01:08:27.043Z END RequestId: 1a865a21-621e-5cbd-a0de-395cf65f01b1
+
+2026-11-23T01:08:27.043Z REPORT RequestId: 1a865a21-621e-5cbd-a0de-395cf65f01b1	Duration: 1188.32 ms	Billed Duration: 1189 ms	Memory Size: 512 MB	Max Memory Used: 100 MB	
+
+2026-11-23T01:08:43.699Z START RequestId: bd62acba-b393-5d35-ab1c-cfc727c344bf Version: $LATEST
+
+2026-11-23T01:08:44.341Z [INFO]	2026-11-23T01:08:44.341Z	bd62acba-b393-5d35-ab1c-cfc727c344bf	Face provider jobId=a9ca3f24-5553-4778-ae9e-b0806f45f48a operation=SearchFacesByImage awsRequestId=803005cb-cc6f-4072-baf9-2436d842585e retryAttempts=0
+
+2026-11-23T01:08:44.626Z [INFO]	2026-11-23T01:08:44.626Z	bd62acba-b393-5d35-ab1c-cfc727c344bf	Face completed jobId=a9ca3f24-5553-4778-ae9e-b0806f45f48a resultId=ec2effbf-edd3-4ef8-aa63-4a8baa2db30b status=UNKNOWN cacheHit=False durationMs=926
+
+2026-11-23T01:08:44.628Z END RequestId: bd62acba-b393-5d35-ab1c-cfc727c344bf
+
+2026-11-23T01:08:44.628Z REPORT RequestId: bd62acba-b393-5d35-ab1c-cfc727c344bf	Duration: 927.65 ms	Billed Duration: 928 ms	Memory Size: 512 MB	Max Memory Used: 102 MB	
+
+2026-11-23T01:09:53.747Z START RequestId: 3ca73e35-395d-5be9-b4a3-5d48adc4a263 Version: $LATEST
+
+2026-11-23T01:09:54.678Z [INFO]	2026-11-23T01:09:54.678Z	3ca73e35-395d-5be9-b4a3-5d48adc4a263	Face provider jobId=d8642109-dc6e-4f66-8ba3-33c63780a6ed operation=SearchFacesByImage awsRequestId=3447959c-30e5-49b8-9968-930035692455 retryAttempts=0
+
+2026-11-23T01:09:55.053Z [INFO]	2026-11-23T01:09:55.053Z	3ca73e35-395d-5be9-b4a3-5d48adc4a263	Face completed jobId=d8642109-dc6e-4f66-8ba3-33c63780a6ed resultId=5f7bd20a-a03a-48ba-9b61-e53d59819ebc status=KNOWN cacheHit=False durationMs=1305
+
+2026-11-23T01:09:55.055Z END RequestId: 3ca73e35-395d-5be9-b4a3-5d48adc4a263
+
+2026-11-23T01:09:55.055Z REPORT RequestId: 3ca73e35-395d-5be9-b4a3-5d48adc4a263	Duration: 1307.58 ms	Billed Duration: 1308 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T01:09:58.954Z START RequestId: 74036c57-ac5d-5189-b287-0f2a38c63c85 Version: $LATEST
+
+2026-11-23T01:09:59.791Z [INFO]	2026-11-23T01:09:59.791Z	74036c57-ac5d-5189-b287-0f2a38c63c85	Face provider jobId=f7a25ec1-93ce-4164-bc3a-4a0e7f674b6d operation=SearchFacesByImage awsRequestId=3f9f1d16-2462-4106-bcba-f0623cff294a retryAttempts=0
+
+2026-11-23T01:09:59.990Z [INFO]	2026-11-23T01:09:59.990Z	74036c57-ac5d-5189-b287-0f2a38c63c85	Face completed jobId=f7a25ec1-93ce-4164-bc3a-4a0e7f674b6d resultId=be328ce5-b5ea-4341-bb87-c147e66b6c00 status=UNKNOWN cacheHit=False durationMs=1035
+
+2026-11-23T01:09:59.992Z END RequestId: 74036c57-ac5d-5189-b287-0f2a38c63c85
+
+2026-11-23T01:09:59.992Z REPORT RequestId: 74036c57-ac5d-5189-b287-0f2a38c63c85	Duration: 1037.54 ms	Billed Duration: 1038 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T01:11:05.693Z START RequestId: 948413aa-4dc6-555b-aab6-70d7d91bbcd1 Version: $LATEST
+
+2026-11-23T01:11:06.618Z [INFO]	2026-11-23T01:11:06.618Z	948413aa-4dc6-555b-aab6-70d7d91bbcd1	Face provider jobId=edf65cf8-5a58-4795-a8ca-6b9fd2525599 operation=SearchFacesByImage awsRequestId=003fd31b-0a9f-4832-b151-539da9117cc5 retryAttempts=0
+
+2026-11-23T01:11:06.835Z [INFO]	2026-11-23T01:11:06.835Z	948413aa-4dc6-555b-aab6-70d7d91bbcd1	Face completed jobId=edf65cf8-5a58-4795-a8ca-6b9fd2525599 resultId=6017f417-f81a-4cfe-8342-65fcc85b1fb4 status=KNOWN cacheHit=False durationMs=1141
+
+2026-11-23T01:11:06.837Z END RequestId: 948413aa-4dc6-555b-aab6-70d7d91bbcd1
+
+2026-11-23T01:11:06.837Z REPORT RequestId: 948413aa-4dc6-555b-aab6-70d7d91bbcd1	Duration: 1143.66 ms	Billed Duration: 1144 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T01:12:28.123Z START RequestId: 8e0eb7f0-e3c8-57f8-afb3-d48d76fbe5d0 Version: $LATEST
+
+2026-11-23T01:12:29.035Z [INFO]	2026-11-23T01:12:29.035Z	8e0eb7f0-e3c8-57f8-afb3-d48d76fbe5d0	Face provider jobId=143623ed-97bc-45d3-936a-8d1bed4173c0 operation=SearchFacesByImage awsRequestId=8129012b-353a-461e-9ec2-062a0927b824 retryAttempts=0
+
+2026-11-23T01:12:29.277Z [INFO]	2026-11-23T01:12:29.277Z	8e0eb7f0-e3c8-57f8-afb3-d48d76fbe5d0	Face completed jobId=143623ed-97bc-45d3-936a-8d1bed4173c0 resultId=8098157f-7daf-49f2-88cd-d4df0fdd8fad status=KNOWN cacheHit=False durationMs=1152
+
+2026-11-23T01:12:29.279Z END RequestId: 8e0eb7f0-e3c8-57f8-afb3-d48d76fbe5d0
+
+2026-11-23T01:12:29.279Z REPORT RequestId: 8e0eb7f0-e3c8-57f8-afb3-d48d76fbe5d0	Duration: 1155.86 ms	Billed Duration: 1156 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T01:13:53.658Z START RequestId: 77611e6a-368a-5785-8be7-7d17a304ede1 Version: $LATEST
+
+2026-11-23T01:13:54.694Z [INFO]	2026-11-23T01:13:54.694Z	77611e6a-368a-5785-8be7-7d17a304ede1	Face provider jobId=a69b93f6-3de3-418c-b937-44e3ae901fb0 operation=SearchFacesByImage awsRequestId=22a7ef0a-e57e-48ca-9ae5-3921215a2cbe errorCode=InvalidParameterException
+
+2026-11-23T01:13:54.958Z [INFO]	2026-11-23T01:13:54.958Z	77611e6a-368a-5785-8be7-7d17a304ede1	Face completed jobId=a69b93f6-3de3-418c-b937-44e3ae901fb0 resultId=57792e77-43d4-4b73-b2b0-f483953747b2 status=UNDETERMINED cacheHit=False durationMs=1298
+
+2026-11-23T01:13:54.960Z END RequestId: 77611e6a-368a-5785-8be7-7d17a304ede1
+
+2026-11-23T01:13:54.960Z REPORT RequestId: 77611e6a-368a-5785-8be7-7d17a304ede1	Duration: 1301.21 ms	Billed Duration: 1302 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T01:14:05.387Z START RequestId: a9eff3b0-517a-5caa-b0f8-90cdc4f191d8 Version: $LATEST
+
+2026-11-23T01:14:05.999Z [INFO]	2026-11-23T01:14:05.998Z	a9eff3b0-517a-5caa-b0f8-90cdc4f191d8	Face provider jobId=1fad0dc8-50db-4d2c-91d0-c60f140fb98a operation=SearchFacesByImage awsRequestId=8ff87b2e-ab5e-4c11-b2a0-038ecb6a8f79 retryAttempts=0
+
+2026-11-23T01:14:06.188Z [INFO]	2026-11-23T01:14:06.188Z	a9eff3b0-517a-5caa-b0f8-90cdc4f191d8	Face completed jobId=1fad0dc8-50db-4d2c-91d0-c60f140fb98a resultId=12c89116-bc50-4bbf-b2ba-679c368dc3ff status=KNOWN cacheHit=False durationMs=801
+
+2026-11-23T01:14:06.190Z END RequestId: a9eff3b0-517a-5caa-b0f8-90cdc4f191d8
+
+2026-11-23T01:14:06.190Z REPORT RequestId: a9eff3b0-517a-5caa-b0f8-90cdc4f191d8	Duration: 802.70 ms	Billed Duration: 803 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T01:15:33.254Z START RequestId: 378c0dff-d4f8-58d4-b26d-6e824119e2b0 Version: $LATEST
+
+2026-11-23T01:15:34.043Z [INFO]	2026-11-23T01:15:34.042Z	378c0dff-d4f8-58d4-b26d-6e824119e2b0	Face provider jobId=9ca49e11-47df-4309-afc9-8f428e22910c operation=SearchFacesByImage awsRequestId=190530bf-c4dd-4b58-897a-47d1b0d2a360 errorCode=InvalidS3ObjectException
+
+2026-11-23T01:15:34.303Z [INFO]	2026-11-23T01:15:34.303Z	378c0dff-d4f8-58d4-b26d-6e824119e2b0	Face completed jobId=9ca49e11-47df-4309-afc9-8f428e22910c resultId=7c88eb6d-b4a6-43a3-9dfa-a0e1a235ac17 status=UNDETERMINED cacheHit=False durationMs=1049
+
+2026-11-23T01:15:34.305Z END RequestId: 378c0dff-d4f8-58d4-b26d-6e824119e2b0
+
+2026-11-23T01:15:34.305Z REPORT RequestId: 378c0dff-d4f8-58d4-b26d-6e824119e2b0	Duration: 1051.14 ms	Billed Duration: 1052 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T01:15:54.145Z START RequestId: a31bf579-ff3c-5102-8096-96046acacb66 Version: $LATEST
+
+2026-11-23T01:15:54.636Z [INFO]	2026-11-23T01:15:54.636Z	a31bf579-ff3c-5102-8096-96046acacb66	Face provider jobId=30779e08-1238-4547-8da7-476073713a10 operation=SearchFacesByImage awsRequestId=c7003a97-0bda-44ff-8b83-941f57a264cf errorCode=InvalidS3ObjectException
+
+2026-11-23T01:15:54.880Z [INFO]	2026-11-23T01:15:54.880Z	a31bf579-ff3c-5102-8096-96046acacb66	Face completed jobId=30779e08-1238-4547-8da7-476073713a10 resultId=2d3190c5-8aa8-4090-b4c3-4207a5c73e74 status=UNDETERMINED cacheHit=False durationMs=734
+
+2026-11-23T01:15:54.882Z END RequestId: a31bf579-ff3c-5102-8096-96046acacb66
+
+2026-11-23T01:15:54.882Z REPORT RequestId: a31bf579-ff3c-5102-8096-96046acacb66	Duration: 736.04 ms	Billed Duration: 737 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T01:16:11.708Z START RequestId: 57e8aa5d-28a6-5fde-b276-c920beac35ba Version: $LATEST
+
+2026-11-23T01:16:12.140Z [INFO]	2026-11-23T01:16:12.140Z	57e8aa5d-28a6-5fde-b276-c920beac35ba	Face provider jobId=a7e64a75-67b7-4b58-a37d-b690f849dcf6 operation=SearchFacesByImage awsRequestId=18a3034d-d985-4aa7-b400-0e8062644b4d errorCode=InvalidS3ObjectException
+
+2026-11-23T01:16:12.360Z [INFO]	2026-11-23T01:16:12.360Z	57e8aa5d-28a6-5fde-b276-c920beac35ba	Face completed jobId=a7e64a75-67b7-4b58-a37d-b690f849dcf6 resultId=db3e10a5-4442-44bd-a478-3f8841fbddeb status=UNDETERMINED cacheHit=False durationMs=651
+
+2026-11-23T01:16:12.362Z END RequestId: 57e8aa5d-28a6-5fde-b276-c920beac35ba
+
+2026-11-23T01:16:12.362Z REPORT RequestId: 57e8aa5d-28a6-5fde-b276-c920beac35ba	Duration: 653.06 ms	Billed Duration: 654 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T01:18:32.057Z START RequestId: b94c8c68-a4db-5daf-a701-ef153279e7ae Version: $LATEST
+
+2026-11-23T01:18:32.986Z [INFO]	2026-11-23T01:18:32.985Z	b94c8c68-a4db-5daf-a701-ef153279e7ae	Face provider jobId=874760a8-7144-4cd2-b821-6cd134c295cc operation=SearchFacesByImage awsRequestId=b921029e-e425-4465-bef6-a9688d8683be retryAttempts=0
+
+2026-11-23T01:18:33.217Z [INFO]	2026-11-23T01:18:33.216Z	b94c8c68-a4db-5daf-a701-ef153279e7ae	Face completed jobId=874760a8-7144-4cd2-b821-6cd134c295cc resultId=0986fe9d-fcc3-4b4f-ad64-ea668e074445 status=KNOWN cacheHit=False durationMs=1158
+
+2026-11-23T01:18:33.218Z END RequestId: b94c8c68-a4db-5daf-a701-ef153279e7ae
+
+2026-11-23T01:18:33.218Z REPORT RequestId: b94c8c68-a4db-5daf-a701-ef153279e7ae	Duration: 1161.04 ms	Billed Duration: 1162 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T01:20:06.478Z START RequestId: 1e84a537-5215-5063-a7d5-c64ac4efea62 Version: $LATEST
+
+2026-11-23T01:20:07.439Z [INFO]	2026-11-23T01:20:07.439Z	1e84a537-5215-5063-a7d5-c64ac4efea62	Face provider jobId=241297b9-6ee5-4355-b8bd-5ac3041c69cb operation=SearchFacesByImage awsRequestId=6fe1ffc1-9263-4785-8a65-c75f419b12ab retryAttempts=0
+
+2026-11-23T01:20:07.694Z [INFO]	2026-11-23T01:20:07.694Z	1e84a537-5215-5063-a7d5-c64ac4efea62	Face completed jobId=241297b9-6ee5-4355-b8bd-5ac3041c69cb resultId=2df9f028-7bd3-4b39-8f31-21da2c779b16 status=KNOWN cacheHit=False durationMs=1215
+
+2026-11-23T01:20:07.696Z END RequestId: 1e84a537-5215-5063-a7d5-c64ac4efea62
+
+2026-11-23T01:20:07.696Z REPORT RequestId: 1e84a537-5215-5063-a7d5-c64ac4efea62	Duration: 1217.44 ms	Billed Duration: 1218 ms	Memory Size: 512 MB	Max Memory Used: 106 MB	
+
+2026-11-23T01:21:38.598Z START RequestId: 96ae8ea4-a3eb-599c-8125-edd934b750f8 Version: $LATEST
+
+2026-11-23T01:21:39.963Z [INFO]	2026-11-23T01:21:39.963Z	96ae8ea4-a3eb-599c-8125-edd934b750f8	Face provider jobId=31c1a559-ee2b-4dba-99ea-40514c06c335 operation=SearchFacesByImage awsRequestId=4133d3ae-dd51-40e8-93e0-a316ea076f90 retryAttempts=0
+
+2026-11-23T01:21:40.198Z [INFO]	2026-11-23T01:21:40.198Z	96ae8ea4-a3eb-599c-8125-edd934b750f8	Face completed jobId=31c1a559-ee2b-4dba-99ea-40514c06c335 resultId=ba3d8242-6f83-46f5-81e5-351373269d75 status=KNOWN cacheHit=False durationMs=1600
+
+2026-11-23T01:21:40.200Z END RequestId: 96ae8ea4-a3eb-599c-8125-edd934b750f8
+
+2026-11-23T01:21:40.200Z REPORT RequestId: 96ae8ea4-a3eb-599c-8125-edd934b750f8	Duration: 1601.86 ms	Billed Duration: 1602 ms	Memory Size: 512 MB	Max Memory Used: 108 MB	
+
+2026-11-23T01:23:41.692Z START RequestId: a1348716-c11b-54d3-aff7-e46b56d590de Version: $LATEST
+
+2026-11-23T01:23:42.679Z [INFO]	2026-11-23T01:23:42.679Z	a1348716-c11b-54d3-aff7-e46b56d590de	Face provider jobId=27044606-ac18-4f10-8262-05a246a84478 operation=SearchFacesByImage awsRequestId=db17332c-c962-4e74-ac31-d9daca18401f retryAttempts=0
+
+2026-11-23T01:23:43.115Z [INFO]	2026-11-23T01:23:43.115Z	a1348716-c11b-54d3-aff7-e46b56d590de	Face completed jobId=27044606-ac18-4f10-8262-05a246a84478 resultId=78782c16-6440-4574-b9e8-bac42686ddad status=KNOWN cacheHit=False durationMs=1421
+
+2026-11-23T01:23:43.117Z END RequestId: a1348716-c11b-54d3-aff7-e46b56d590de
+
+2026-11-23T01:23:43.117Z REPORT RequestId: a1348716-c11b-54d3-aff7-e46b56d590de	Duration: 1424.57 ms	Billed Duration: 1425 ms	Memory Size: 512 MB	Max Memory Used: 109 MB	
+
+2026-11-23T01:26:30.310Z START RequestId: 87dc925b-dbcd-5a83-b3d4-f12643b25ccc Version: $LATEST
+
+2026-11-23T01:26:31.238Z [INFO]	2026-11-23T01:26:31.238Z	87dc925b-dbcd-5a83-b3d4-f12643b25ccc	Face provider jobId=eba1b0fe-565a-4660-90d7-920cfd90047f operation=SearchFacesByImage awsRequestId=ec30f1db-3359-4e8c-bdec-38b4db2efc65 retryAttempts=0
+
+2026-11-23T01:26:31.479Z [INFO]	2026-11-23T01:26:31.479Z	87dc925b-dbcd-5a83-b3d4-f12643b25ccc	Face completed jobId=eba1b0fe-565a-4660-90d7-920cfd90047f resultId=bf3387f8-1941-477e-afbd-8d60f447af18 status=UNKNOWN cacheHit=False durationMs=1169
+
+2026-11-23T01:26:31.481Z END RequestId: 87dc925b-dbcd-5a83-b3d4-f12643b25ccc
+
+2026-11-23T01:26:31.481Z REPORT RequestId: 87dc925b-dbcd-5a83-b3d4-f12643b25ccc	Duration: 1170.79 ms	Billed Duration: 1171 ms	Memory Size: 512 MB	Max Memory Used: 110 MB	
+
+2026-11-23T01:28:02.612Z START RequestId: e02a3ec8-d97b-553c-ac75-5db541a22016 Version: $LATEST
+
+2026-11-23T01:28:03.562Z [INFO]	2026-11-23T01:28:03.562Z	e02a3ec8-d97b-553c-ac75-5db541a22016	Face provider jobId=164c06d7-f8a9-4662-beaf-d3113e649c41 operation=SearchFacesByImage awsRequestId=afe24c09-6485-40b9-8df7-7ffb009ce185 retryAttempts=0
+
+2026-11-23T01:28:03.823Z [INFO]	2026-11-23T01:28:03.823Z	e02a3ec8-d97b-553c-ac75-5db541a22016	Face completed jobId=164c06d7-f8a9-4662-beaf-d3113e649c41 resultId=ee5b0979-9755-4fb3-97f4-eae70287c81b status=UNKNOWN cacheHit=False durationMs=1209
+
+2026-11-23T01:28:03.825Z END RequestId: e02a3ec8-d97b-553c-ac75-5db541a22016
+
+2026-11-23T01:28:03.825Z REPORT RequestId: e02a3ec8-d97b-553c-ac75-5db541a22016	Duration: 1212.38 ms	Billed Duration: 1213 ms	Memory Size: 512 MB	Max Memory Used: 110 MB	
+
+2026-11-23T01:28:11.527Z START RequestId: 36b8ba14-c974-559b-a812-d969519e9e79 Version: $LATEST
+
+2026-11-23T01:28:12.013Z [INFO]	2026-11-23T01:28:12.013Z	36b8ba14-c974-559b-a812-d969519e9e79	Face provider jobId=0b431f55-8935-4063-9e3f-e391caa214e2 operation=SearchFacesByImage awsRequestId=0dec019d-6292-475c-8ba8-dae456d4f47f retryAttempts=0
+
+2026-11-23T01:28:12.199Z [INFO]	2026-11-23T01:28:12.199Z	36b8ba14-c974-559b-a812-d969519e9e79	Face completed jobId=0b431f55-8935-4063-9e3f-e391caa214e2 resultId=c3651dfe-83f0-4ead-9a67-dcd4ebc2d229 status=UNKNOWN cacheHit=False durationMs=672
+
+2026-11-23T01:28:12.202Z END RequestId: 36b8ba14-c974-559b-a812-d969519e9e79
+
+2026-11-23T01:28:12.202Z REPORT RequestId: 36b8ba14-c974-559b-a812-d969519e9e79	Duration: 674.26 ms	Billed Duration: 675 ms	Memory Size: 512 MB	Max Memory Used: 110 MB	
+
+2026-11-23T01:30:01.504Z START RequestId: c072b462-1235-5654-b4a4-d71f8b73237e Version: $LATEST
+
+2026-11-23T01:30:02.468Z [INFO]	2026-11-23T01:30:02.468Z	c072b462-1235-5654-b4a4-d71f8b73237e	Face provider jobId=226ffd5d-e3eb-4280-8b14-567ccdecf413 operation=SearchFacesByImage awsRequestId=a43df8ce-ca2a-4bdb-972f-28e6fec4a021 retryAttempts=0
+
+2026-11-23T01:30:02.737Z [INFO]	2026-11-23T01:30:02.737Z	c072b462-1235-5654-b4a4-d71f8b73237e	Face completed jobId=226ffd5d-e3eb-4280-8b14-567ccdecf413 resultId=46989ab9-02db-4aa1-a259-d9a1bbde725a status=UNKNOWN cacheHit=False durationMs=1232
+
+2026-11-23T01:30:02.739Z END RequestId: c072b462-1235-5654-b4a4-d71f8b73237e
+
+2026-11-23T01:30:02.740Z REPORT RequestId: c072b462-1235-5654-b4a4-d71f8b73237e	Duration: 1234.63 ms	Billed Duration: 1235 ms	Memory Size: 512 MB	Max Memory Used: 110 MB	
+
+2026-11-23T01:31:21.076Z START RequestId: e3ad242b-f08c-5a34-83c0-47566924fb9a Version: $LATEST
+
+2026-11-23T01:31:21.980Z [INFO]	2026-11-23T01:31:21.980Z	e3ad242b-f08c-5a34-83c0-47566924fb9a	Face provider jobId=cc2d9325-7fb1-492f-87fa-76efee6765f7 operation=SearchFacesByImage awsRequestId=ac3db54c-3791-44f5-b7ba-e185ad3ebe2f retryAttempts=0
+
+2026-11-23T01:31:22.322Z [INFO]	2026-11-23T01:31:22.322Z	e3ad242b-f08c-5a34-83c0-47566924fb9a	Face completed jobId=cc2d9325-7fb1-492f-87fa-76efee6765f7 resultId=791e3711-43e1-438a-89be-ab5452aeab04 status=UNKNOWN cacheHit=False durationMs=1245
+
+2026-11-23T01:31:22.324Z END RequestId: e3ad242b-f08c-5a34-83c0-47566924fb9a
+
+2026-11-23T01:31:22.324Z REPORT RequestId: e3ad242b-f08c-5a34-83c0-47566924fb9a	Duration: 1247.54 ms	Billed Duration: 1248 ms	Memory Size: 512 MB	Max Memory Used: 110 MB	

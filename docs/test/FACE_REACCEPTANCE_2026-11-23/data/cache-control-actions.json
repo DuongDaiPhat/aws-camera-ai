@@ -1,0 +1,42 @@
+[
+  {
+    "args": ["enroll", "B"],
+    "code": 0,
+    "at": "2026-11-23T01:23:02.084Z"
+  },
+  {
+    "args": ["play", "TC02-known-lock-no-glasses.mp4", "TC10-cache-prime"],
+    "code": 0,
+    "at": "2026-11-23T01:24:25.054Z"
+  },
+  {
+    "args": ["play", "TC02-known-lock-no-glasses.mp4", "TC10-cache-hit", "keep-cache"],
+    "code": 0,
+    "at": "2026-11-23T01:25:47.305Z"
+  },
+  {
+    "args": ["delete", "A"],
+    "code": 0,
+    "at": "2026-11-23T01:25:50.732Z"
+  },
+  {
+    "args": ["play", "TC02-known-lock-no-glasses.mp4", "TC10-after-delete", "keep-cache"],
+    "code": 0,
+    "at": "2026-11-23T01:27:12.807Z"
+  },
+  {
+    "args": ["play", "TC09-unknown-cap.mp4", "TC09-unknown-cap"],
+    "code": 0,
+    "at": "2026-11-23T01:28:42.957Z"
+  },
+  {
+    "args": ["enroll", "A"],
+    "code": 0,
+    "at": "2026-11-23T01:28:54.530Z"
+  },
+  {
+    "args": ["delete", "B"],
+    "code": 0,
+    "at": "2026-11-23T01:28:57.453Z"
+  }
+]

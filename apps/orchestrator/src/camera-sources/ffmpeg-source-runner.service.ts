@@ -4,6 +4,7 @@ import { spawn, spawnSync, type ChildProcess } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import type { ISourceRunner, SourceRunOptions, SourceRunResult } from './source-runner.interface';
+import { readNonEmptyConfigString, readPositiveConfigNumber } from '../config/env-config';
 import { MediaMtxService, SLUG_REGEX } from './media-mtx.service';
 
 const MAX_STDERR_BYTES = 4096;
@@ -34,12 +35,24 @@ export class FfmpegSourceRunnerService implements ISourceRunner, OnApplicationSh
     private readonly configService: ConfigService,
     private readonly mediaMtxService: MediaMtxService,
   ) {
-    this.stopTimeoutMs = Number(this.configService.get('CAMERA_SOURCE_STOP_TIMEOUT_MS', 5000));
-    this.startTimeoutMs = Number(this.configService.get('CAMERA_SOURCE_START_TIMEOUT_MS', 5000));
-    this.maxRetries = Number(this.configService.get('CAMERA_SOURCE_MAX_RETRIES', 3));
-    this.retryDelayMs = Number(this.configService.get('CAMERA_SOURCE_RETRY_DELAY_MS', 2000));
+    this.stopTimeoutMs = readPositiveConfigNumber(
+      this.configService,
+      'CAMERA_SOURCE_STOP_TIMEOUT_MS',
+      5000,
+    );
+    this.startTimeoutMs = readPositiveConfigNumber(
+      this.configService,
+      'CAMERA_SOURCE_START_TIMEOUT_MS',
+      5000,
+    );
+    this.maxRetries = readPositiveConfigNumber(this.configService, 'CAMERA_SOURCE_MAX_RETRIES', 3);
+    this.retryDelayMs = readPositiveConfigNumber(
+      this.configService,
+      'CAMERA_SOURCE_RETRY_DELAY_MS',
+      2000,
+    );
     this.videoStoragePath = path.resolve(
-      this.configService.get('CAMERA_VIDEO_STORAGE_PATH', './storage/videos'),
+      readNonEmptyConfigString(this.configService, 'CAMERA_VIDEO_STORAGE_PATH', './storage/videos'),
     );
 
     if (!fs.existsSync(this.videoStoragePath)) {

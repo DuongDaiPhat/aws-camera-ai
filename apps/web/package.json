@@ -11,6 +11,7 @@
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
+    "test:notification": "vitest run src/components/events/EventNotifications.spec.tsx --coverage --coverage.reportsDirectory=coverage/notification --coverage.include=src/components/events/EventNotifications.tsx --coverage.thresholds.lines=91 --coverage.thresholds.branches=91 --coverage.thresholds.statements=91 --coverage.thresholds.functions=91",
     "test:cov": "vitest run --coverage"
   },
   "dependencies": {
@@ -29,6 +30,7 @@
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.2",
+    "@vitest/coverage-v8": "2.1.9",
     "jsdom": "^25.0.1",
     "typescript": "^5.6.2",
     "vitest": "^2.1.2",

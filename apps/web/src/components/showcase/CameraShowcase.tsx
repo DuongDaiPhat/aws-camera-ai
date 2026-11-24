@@ -110,7 +110,7 @@ function ShowcaseHeader({ feature, exploded }: Pick<SceneProps, 'feature' | 'exp
   return (
     <div className={styles.heroTop}>
       <span className={styles.productTag}>
-        <Icon name="aperture" size={14} /> CameraAI Vision
+        <Icon name="aperture" size={14} /> Argus AI Vision
       </span>
       <span className={styles.viewState} aria-live="polite">
         <span />
@@ -142,7 +142,7 @@ function CameraIntro({
         <br />
         Nhiều lớp bảo vệ.
       </h2>
-      <p>Khám phá cách CameraAI quan sát, phân tích và kết nối bạn với điều đang xảy ra.</p>
+      <p>Khám phá cách Argus AI quan sát, phân tích và kết nối bạn với điều đang xảy ra.</p>
       <button type="button" className={styles.openCamera} onClick={onNavigate}>
         <Icon name="camera" size={17} />
         Mở camera trực tiếp

@@ -60,6 +60,21 @@ export interface DispatchEventState {
 export class DeadlineRepository {
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
+  async assertLocalDriverSafe(): Promise<void> {
+    const result = await this.pool.query<{ count: string }>(
+      `SELECT count(*)::text AS count
+       FROM deadline_workflow_dispatches d JOIN events e ON e.id = d.event_id
+       WHERE d.status IN ('PENDING', 'STARTED', 'FAILED')
+         AND e.status = 'NOTIFIED' AND e.escalation_deadline_at IS NOT NULL
+         AND e.deadline_version = d.deadline_version;`,
+    );
+    if (Number(result.rows[0]?.count ?? 0) > 0) {
+      throw new Error(
+        'DEADLINE_DRIVER=local blocked: drain/reconcile active cloud deadlines before switching driver',
+      );
+    }
+  }
+
   async getPoolClient(): Promise<PoolClient> {
     return this.pool.connect();
   }
@@ -392,7 +407,7 @@ export class DeadlineRepository {
   async touchReconciledAt(commandId: string): Promise<void> {
     await this.pool.query(
       `UPDATE deadline_workflow_dispatches
-       SET reconciled_at = now()
+       SET reconciled_at = now(), available_at = now() + interval '30 seconds'
        WHERE command_id = $1;`,
       [commandId],
     );
@@ -426,7 +441,8 @@ export class DeadlineRepository {
       `SELECT d.*
        FROM deadline_workflow_dispatches d
        JOIN events e ON e.id = d.event_id
-       WHERE d.status = 'STARTED'
+       WHERE d.status IN ('STARTED', 'FAILED')
+         AND d.available_at <= now()
          AND (
            d.expected_deadline_at <= now() - ($2 * interval '1 second')
            OR e.status <> 'NOTIFIED'
@@ -435,7 +451,7 @@ export class DeadlineRepository {
              SELECT 1 FROM deadline_command_receipts r WHERE r.command_id = d.command_id
            )
          )
-       ORDER BY d.expected_deadline_at ASC
+       ORDER BY d.reconciled_at ASC NULLS FIRST, d.expected_deadline_at ASC
        LIMIT $1;`,
       [limit, graceSeconds],
     );

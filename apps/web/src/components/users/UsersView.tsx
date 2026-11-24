@@ -49,7 +49,7 @@ function AccountRow({
               <strong>Cognito</strong> {loginEmail}
             </small>
             <small>
-              <strong>CameraAI</strong> {user.email}
+              <strong>Argus AI</strong> {user.email}
             </small>
           </>
         ) : (
@@ -256,7 +256,7 @@ export function UsersView({ currentUserId }: { currentUserId: string }) {
       <header className={styles.header}>
         <div>
           <h2 id="users-title">Quản lý tài khoản</h2>
-          <p>Chọn một tài khoản để đổi vai trò trong CameraAI.</p>
+          <p>Chọn một tài khoản để đổi vai trò trong Argus AI.</p>
         </div>
         <button
           type="button"

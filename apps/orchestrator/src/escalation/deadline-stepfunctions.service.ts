@@ -1,5 +1,4 @@
 import {
-  ConflictException,
   Inject,
   Injectable,
   Logger,
@@ -98,6 +97,7 @@ export class DeadlineStepFunctionsService implements OnModuleInit, OnModuleDestr
 
   async onModuleInit(): Promise<void> {
     if (this.config.driver !== 'stepfunctions') {
+      await this.deadlineRepository.assertLocalDriverSafe();
       this.logger.log('DEADLINE_DRIVER=local — Step Functions deadline dispatcher tắt');
       return;
     }
@@ -305,7 +305,11 @@ export class DeadlineStepFunctionsService implements OnModuleInit, OnModuleDestr
         dispatch.execution_arn ?? deriveExecutionArn(stateMachineArn, dispatch.execution_name);
 
       try {
-        await this.reconcileExecution(dispatch, executionArn);
+        if (dispatch.status === 'FAILED') {
+          await this.recoverDispatch(dispatch, executionArn);
+        } else {
+          await this.reconcileExecution(dispatch, executionArn);
+        }
         reconciledCount += 1;
       } catch (error) {
         this.logger.warn(
@@ -376,44 +380,8 @@ export class DeadlineStepFunctionsService implements OnModuleInit, OnModuleDestr
       (execStatus === 'FAILED' && RETRYABLE_EXECUTION_ERRORS.has(executionError));
 
     if (isRecoverableFailure) {
-      const command = buildDeadlineCommandPayload({
-        commandId: dispatch.command_id,
-        eventId: dispatch.event_id,
-        deadlineVersion: dispatch.deadline_version,
-        expectedDeadlineAt: dispatch.expected_deadline_at,
-      });
-
-      try {
-        await this.deadlineCommandService.applyCommand(dispatch.event_id, command);
-        await this.deadlineRepository.markDispatchCompleted(dispatch.command_id, executionArn);
-        this.logger.warn(
-          {
-            commandId: dispatch.command_id,
-            eventId: dispatch.event_id,
-            executionArn,
-            previousExecutionStatus: execStatus,
-            previousExecutionError: executionError || null,
-          },
-          'Recovered overdue deadline via shared idempotent command operation',
-        );
-        return;
-      } catch (error) {
-        if (
-          error instanceof ConflictException &&
-          typeof error.getResponse() === 'object' &&
-          (error.getResponse() as { code?: string }).code === 'NOT_DUE'
-        ) {
-          await this.deadlineRepository.touchReconciledAt(dispatch.command_id);
-          return;
-        }
-        const code = safeErrorCode(error);
-        await this.deadlineRepository.markDispatchFailed(
-          dispatch.command_id,
-          `RECOVERY_${code}`,
-          executionArn,
-        );
-        return;
-      }
+      await this.recoverDispatch(dispatch, executionArn);
+      return;
     }
 
     const failureReason = `EXECUTION_${execStatus ?? 'UNKNOWN'}${executionError ? `:${executionError}` : ''}`;
@@ -432,5 +400,27 @@ export class DeadlineStepFunctionsService implements OnModuleInit, OnModuleDestr
       },
       'Step Functions deadline execution ended in terminal failure; requires reconciliation',
     );
+  }
+  private async recoverDispatch(
+    dispatch: DeadlineDispatchRecord,
+    executionArn: string,
+  ): Promise<void> {
+    const command = buildDeadlineCommandPayload({
+      commandId: dispatch.command_id,
+      eventId: dispatch.event_id,
+      deadlineVersion: dispatch.deadline_version,
+      expectedDeadlineAt: dispatch.expected_deadline_at,
+    });
+    try {
+      await this.deadlineCommandService.applyCommand(dispatch.event_id, command);
+      await this.deadlineRepository.markDispatchCompleted(dispatch.command_id, executionArn);
+    } catch (error) {
+      // Preserve ownership and retry eligibility even when the DB is temporarily unavailable.
+      await this.deadlineRepository.touchReconciledAt(dispatch.command_id);
+      this.logger.warn(
+        { commandId: dispatch.command_id, errorCode: safeErrorCode(error) },
+        'Deadline recovery deferred; retrying shared idempotent command',
+      );
+    }
   }
 }

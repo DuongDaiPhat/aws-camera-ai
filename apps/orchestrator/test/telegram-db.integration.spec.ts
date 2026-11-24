@@ -380,6 +380,10 @@ describe('Telegram delivery PostgreSQL integration', () => {
     }>(`INSERT INTO users (email, password_hash, full_name, role,
       telegram_user_id, telegram_chat_id, telegram_linked_at) VALUES ('admin-telegram@test.local', 'hash', 'Admin', 'ADMIN',
       '67890', '67890', now()) ON CONFLICT (email) DO UPDATE SET is_active = TRUE RETURNING id`);
+    await pool.query('UPDATE users SET household_owner_id = $1 WHERE id = $2', [
+      userId,
+      admin.rows[0].id,
+    ]);
     const first = callback(await sentNotification(), 20001, 'ok');
     const second = {
       ...callback(await sentNotification(admin.rows[0].id, '67890', '43'), 20002, 'help'),

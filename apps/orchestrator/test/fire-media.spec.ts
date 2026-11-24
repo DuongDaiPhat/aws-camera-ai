@@ -55,6 +55,7 @@ describe('US-18 camera recording recovery', () => {
         expect.stringContaining('/event/clip.mp4'),
         mp4,
         'video/mp4',
+        { tags: { retention: 'expire-7d' } },
       );
       expect(media.createEventMedia).toHaveBeenCalledTimes(1);
       expect(media.createEventMedia).toHaveBeenCalledWith(
@@ -63,6 +64,24 @@ describe('US-18 camera recording recovery', () => {
       expect(events.publishCommittedUpdate).toHaveBeenCalledWith('event');
       expect(String(fetchMock.mock.calls[0][0])).toContain(
         `/start/${work.first_qualified_at.getTime() / 1000 - 5}/end/${work.confirmed_at.getTime() / 1000 + 5}/`,
+      );
+    } finally {
+      await module.close();
+    }
+  });
+
+  it('preserves retained fire clips with retain=true instead of retention=expire-7d', async () => {
+    const mp4 = Buffer.from([0, 0, 0, 20, 102, 116, 121, 112, 105, 115, 111, 109]);
+    repository.claimMedia.mockResolvedValueOnce({ ...work, retain: true });
+    fetchMock = jest.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(mp4));
+    const module = await fixture();
+    try {
+      await module.get(FireMediaService).dispatch();
+      expect(storage.upload).toHaveBeenCalledWith(
+        expect.stringContaining('/event/clip.mp4'),
+        mp4,
+        'video/mp4',
+        { retain: true },
       );
     } finally {
       await module.close();
@@ -81,6 +100,84 @@ describe('US-18 camera recording recovery', () => {
       expect(media.createEventMedia).not.toHaveBeenCalled();
     } finally {
       await module.close();
+    }
+  });
+
+  it('recovers missing snapshot DB record from storage, handles busy/empty claims, HTTP errors, and lifecycle polling', async () => {
+    const snap = Buffer.from([0xff, 0xd8, 0xff]);
+    storage.download.mockResolvedValueOnce(snap);
+    media.findMediaByEventIdAndType
+      .mockResolvedValueOnce(null) // SNAPSHOT missing
+      .mockResolvedValueOnce({ id: 'clip-exists' }); // CLIP already exists
+
+    const module = await fixture();
+    try {
+      const svc = module.get(FireMediaService);
+      await svc.dispatch();
+      expect(media.createEventMedia).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mediaType: 'SNAPSHOT',
+          objectKey: 'events/2026/10/27/event/snapshot.jpg',
+        }),
+      );
+      expect(events.publishCommittedUpdate).toHaveBeenCalledWith('event');
+
+      // Empty claim returns early
+      repository.claimMedia.mockResolvedValueOnce(null);
+      await svc.dispatch();
+
+      // Busy guard skips overlapping dispatch
+      Object.assign(svc, { busy: true });
+      repository.claimMedia.mockClear();
+      await svc.dispatch();
+      expect(repository.claimMedia).not.toHaveBeenCalled();
+      Object.assign(svc, { busy: false });
+
+      // Non-OK HTTP response throws
+      media.findMediaByEventIdAndType.mockResolvedValue({ id: 'snap-exists' });
+      media.findMediaByEventIdAndType
+        .mockResolvedValueOnce({ id: 'snap-exists' })
+        .mockResolvedValueOnce(null);
+      jest.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(null, { status: 502 }));
+      await expect(svc.dispatch()).rejects.toThrow('Fire camera clip HTTP 502');
+    } finally {
+      await module.close();
+    }
+  });
+
+  it('starts and stops polling interval via onModuleInit/onModuleDestroy and validates positive config', async () => {
+    jest.useFakeTimers();
+    try {
+      repository.claimMedia.mockRejectedValueOnce(new Error('poll error'));
+      const mod = await Test.createTestingModule({
+        providers: [
+          FireMediaService,
+          { provide: ConfigService, useValue: new ConfigService({ FIRE_DELIVERY_POLL_MS: 500 }) },
+          { provide: FireIncidentsRepository, useValue: repository },
+          { provide: EventMediaRepository, useValue: media },
+          { provide: STORAGE_SERVICE, useValue: storage },
+          { provide: EventsService, useValue: events },
+        ],
+      }).compile();
+      const svc = mod.get(FireMediaService);
+      svc.onModuleInit();
+      await jest.advanceTimersByTimeAsync(500);
+      expect(repository.claimMedia).toHaveBeenCalled();
+      svc.onModuleDestroy();
+      await mod.close();
+
+      expect(
+        () =>
+          new FireMediaService(
+            new ConfigService({ FIRE_MEDIA_READY_DELAY_SECONDS: '0' }),
+            repository as unknown as FireIncidentsRepository,
+            media as unknown as EventMediaRepository,
+            storage as never,
+            events as unknown as EventsService,
+          ),
+      ).toThrow('Invalid FIRE_MEDIA_READY_DELAY_SECONDS');
+    } finally {
+      jest.useRealTimers();
     }
   });
 });

@@ -156,6 +156,7 @@ services:
       TZ: ${TZ}
       MQTT_TOPIC_CAMERA_FRAMES: ${MQTT_TOPIC_CAMERA_FRAMES:-frigate/camerai/frames}
       FRIGATE_POSE_FRAMES_ENABLED: ${FRIGATE_POSE_FRAMES_ENABLED:-false}
+      FRIGATE_FACE_FRAMES_ENABLED: ${FRIGATE_FACE_FRAMES_ENABLED:-true}
       FRIGATE_POSE_MAX_FPS: ${POSE_SAMPLE_FPS:-5}
       FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS: ${FRIGATE_FRAME_OBJECT_MAX_AGE_SECONDS:-2.0}
       MQTT_TOPIC_POSE_FRAMES: ${MQTT_TOPIC_POSE_FRAMES:-frigate/camerai/pose/frames}
@@ -174,6 +175,7 @@ services:
       - ./infra/frigate/config.yml:/config/config.yml:rw
       - ./infra/frigate/frame-metadata/bridge.py:/opt/camerai-frame-metadata/bridge.py:ro
       - ./infra/frigate/frame-metadata/fire_publisher.py:/opt/camerai-frame-metadata/fire_publisher.py:ro
+      - ./infra/frigate/frame-metadata/track_stabilizer.py:/opt/camerai-frame-metadata/track_stabilizer.py:ro
       - ./infra/frigate/frame-metadata/service:/etc/s6-overlay/s6-rc.d/camerai-frames:ro
       - ./infra/frigate/frame-metadata/enabled:/etc/s6-overlay/s6-rc.d/user/contents.d/camerai-frames:ro
       - frigatedb:/db
@@ -197,9 +199,17 @@ services:
       FACE_MODEL_VERSION: ${FACE_MODEL_VERSION:-yunet-2023mar-sface-2021dec}
       FACE_DETECTOR_PATH: /app/models/face_detection_yunet_2023mar.onnx
       FACE_EMBEDDER_PATH: /app/models/face_recognition_sface_2021dec.onnx
+      FACE_GATE_EMBEDDER_PATH: ${FACE_GATE_EMBEDDER_PATH:-/app/models/w600k_r50.onnx}
+      FACE_GATE_EMBEDDER_BACKEND: ${FACE_GATE_EMBEDDER_BACKEND:-arcface_onnx}
+      FACE_GATE_EMBEDDER_SHA256: ${FACE_GATE_EMBEDDER_SHA256:-4c06341c33c2ca1f86781dab0e829f88ad5b64be9fba56e56bc9ebdefc619e43}
+      FACE_GATE_MODEL_VERSION: ${FACE_GATE_MODEL_VERSION:-yunet-2023mar-w600k-r50}
       FACE_MAX_IMAGE_BYTES: ${FACE_MAX_IMAGE_BYTES:-5242880}
       FACE_MAX_PIXELS: ${FACE_MAX_PIXELS:-12000000}
       FACE_MAX_CONCURRENT: ${FACE_MAX_CONCURRENT:-2}
+      FACE_CPU_THREADS: ${FACE_CPU_THREADS:-2}
+      FACE_GATE_MIN_FACE_PX: ${FACE_GATE_MIN_FACE_PX:-80}
+      FACE_GATE_MIN_DETECTION_SCORE: ${FACE_GATE_MIN_DETECTION_SCORE:-0.90}
+      FACE_GATE_MIN_NORMALIZED_SHARPNESS: ${FACE_GATE_MIN_NORMALIZED_SHARPNESS:-12}
       FALL_IMMOBILITY_SECONDS: ${FALL_IMMOBILITY_SECONDS:-15}
       M2A_ENABLED: ${M2A_ENABLED:-false}
       FALL_TORSO_ANGLE_THRESHOLD_DEG: ${FALL_TORSO_ANGLE_THRESHOLD_DEG:-30}
@@ -292,6 +302,18 @@ services:
       APPLICATION_RESULTS_CONSUMER_ENABLED: ${APPLICATION_RESULTS_CONSUMER_ENABLED:-false}
       DEADLINE_DRIVER: ${DEADLINE_DRIVER:-local}
       DEADLINE_STATE_MACHINE_ARN: ${DEADLINE_STATE_MACHINE_ARN:-}
+      NOTIFICATION_DRIVER: ${NOTIFICATION_DRIVER:-local}
+      SENDER_DRY_RUN: ${SENDER_DRY_RUN:-true}
+      APP_ENV: ${APP_ENV:-dev}
+      SENDER_NOTIFICATION_CAP: ${SENDER_NOTIFICATION_CAP:-5}
+      SENDER_COOLDOWN_SECONDS: ${SENDER_COOLDOWN_SECONDS:-60}
+      SENDER_LEASE_SECONDS: ${SENDER_LEASE_SECONDS:-120}
+      SENDER_INTENT_TTL_SECONDS: ${SENDER_INTENT_TTL_SECONDS:-300}
+      SNS_SMS_ENABLED: ${SNS_SMS_ENABLED:-false}
+      SNS_TOPIC_ARN: ${SNS_TOPIC_ARN:-}
+      CONNECT_INSTANCE_ID: ${CONNECT_INSTANCE_ID:-}
+      CONNECT_CONTACT_FLOW_ID: ${CONNECT_CONTACT_FLOW_ID:-}
+      CONNECT_SOURCE_PHONE_NUMBER: ${CONNECT_SOURCE_PHONE_NUMBER:-}
       M3_ENABLED: ${M3_ENABLED:-false}
       MQTT_TOPIC_FIRE_FRAMES: ${MQTT_TOPIC_FIRE_FRAMES:-frigate/camerai/fire/frames}
       FIRE_HEALTH_STALE_SECONDS: ${FIRE_HEALTH_STALE_SECONDS:-5}

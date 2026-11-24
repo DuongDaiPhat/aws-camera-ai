@@ -36,6 +36,7 @@ export interface FireMediaWork {
   camera_slug: string;
   confirmed_at: Date;
   first_qualified_at: Date;
+  retain?: boolean;
 }
 
 @Injectable()
@@ -173,7 +174,10 @@ export class FireIncidentsRepository {
   ): Promise<FireMediaWork | null> {
     const result = await this.database.query<FireMediaWork>(
       `WITH next_media AS (
-        SELECT i.id, c.slug AS camera_slug FROM fire_incidents i JOIN cameras c ON c.id=i.camera_id
+        SELECT i.id, c.slug AS camera_slug, e.retain
+        FROM fire_incidents i
+        JOIN cameras c ON c.id=i.camera_id
+        JOIN events e ON e.id=i.event_id
         WHERE i.delivery_status='APPLIED' AND i.available_at <= now()
           AND i.confirmed_at <= now() - $1 * interval '1 second'
           AND i.confirmed_at >= now() - $3 * interval '1 day'
@@ -181,7 +185,7 @@ export class FireIncidentsRepository {
             OR NOT EXISTS (SELECT 1 FROM event_media m WHERE m.event_id=i.event_id AND m.media_type='SNAPSHOT'))
         ORDER BY i.available_at, i.created_at LIMIT 1 FOR UPDATE OF i SKIP LOCKED)
        UPDATE fire_incidents i SET available_at=now() + $2 * interval '1 second'
-       FROM next_media n WHERE i.id=n.id RETURNING i.id, i.event_id, i.first_qualified_at, i.confirmed_at, n.camera_slug`,
+       FROM next_media n WHERE i.id=n.id RETURNING i.id, i.event_id, i.first_qualified_at, i.confirmed_at, n.camera_slug, n.retain`,
       [readySeconds, retrySeconds, maxAgeDays],
     );
     return result.rows[0] ?? null;

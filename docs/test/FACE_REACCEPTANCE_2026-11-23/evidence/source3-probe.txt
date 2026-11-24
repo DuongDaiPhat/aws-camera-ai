@@ -1,0 +1,1 @@
+{"video": "known_face_vid3.mp4", "faceRuns": 1, "samples": 42}

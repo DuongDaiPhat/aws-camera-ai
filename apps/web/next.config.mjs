@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  distDir: process.env.FACE_EVAL_NEXT_DIST_DIR || '.next',
   reactStrictMode: true,
   // Docker builds on Linux need standalone output. Local Windows builds use next start
   // and avoid symlink privileges required by standalone file tracing.

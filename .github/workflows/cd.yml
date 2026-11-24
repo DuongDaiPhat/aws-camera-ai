@@ -7,7 +7,9 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: camerai-release-main
+  # A production approval must not block a later commit from reaching staging.
+  # deploy-environment.yml still serializes deployment within each environment.
+  group: camerai-release-${{ github.event.workflow_run.head_sha }}
   cancel-in-progress: false
 jobs:
   package:
@@ -72,7 +74,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Build AWS worker Lambda packages
+      - name: Build Face, Sender and Deadline Lambda packages
         run: python services/aws-workers/build.py
       - name: Create release bundle
         env:
@@ -82,26 +84,40 @@ jobs:
           set -euo pipefail
           mkdir -p artifacts/cd
           cp services/aws-workers/.build/face.zip artifacts/cd/face.zip
-          cp services/aws-workers/.build/deadline.zip artifacts/cd/deadline.zip
+          cp services/aws-workers/.build/sender.zip artifacts/cd/sender.zip
           face_sha256=$(sha256sum artifacts/cd/face.zip | awk '{print $1}')
+          printf 'RELEASE_ID=%s\nWEB_IMAGE=%s/camerai/web@%s\nORCHESTRATOR_IMAGE=%s/camerai/orchestrator@%s\nFACE_ZIP_KEY=releases/%s/face.zip\nFACE_ZIP_SHA256=%s\n' \
+            "$RELEASE_ID" "$ECR_REGISTRY" "$WEB_DIGEST" "$ECR_REGISTRY" "$ORCHESTRATOR_DIGEST" "$RELEASE_ID" "$face_sha256" > release.env
+          sender_sha256=$(sha256sum artifacts/cd/sender.zip | awk '{print $1}')
+          printf 'SENDER_ZIP_KEY=releases/%s/sender.zip\nSENDER_ZIP_SHA256=%s\n' "$RELEASE_ID" "$sender_sha256" >> release.env
+          cp services/aws-workers/.build/deadline.zip artifacts/cd/deadline.zip
           deadline_sha256=$(sha256sum artifacts/cd/deadline.zip | awk '{print $1}')
-          printf 'RELEASE_ID=%s\nWEB_IMAGE=%s/camerai/web@%s\nORCHESTRATOR_IMAGE=%s/camerai/orchestrator@%s\nFACE_ZIP_KEY=releases/%s/face.zip\nFACE_ZIP_SHA256=%s\nDEADLINE_ZIP_KEY=releases/%s/deadline.zip\nDEADLINE_ZIP_SHA256=%s\n' \
-            "$RELEASE_ID" "$ECR_REGISTRY" "$WEB_DIGEST" "$ECR_REGISTRY" "$ORCHESTRATOR_DIGEST" "$RELEASE_ID" "$face_sha256" "$RELEASE_ID" "$deadline_sha256" > release.env
+          printf 'DEADLINE_ZIP_KEY=releases/%s/deadline.zip\nDEADLINE_ZIP_SHA256=%s\n' "$RELEASE_ID" "$deadline_sha256" >> release.env
           tar -czf artifacts/cd/bundle.tgz release.env deploy/compose.yml deploy/Caddyfile
-          (cd artifacts/cd && sha256sum bundle.tgz > bundle.sha256 && sha256sum face.zip > face.zip.sha256 && sha256sum deadline.zip > deadline.zip.sha256)
+          (
+            cd artifacts/cd
+            sha256sum bundle.tgz > bundle.sha256
+            sha256sum face.zip > face.zip.sha256
+            sha256sum sender.zip > sender.zip.sha256
+            sha256sum deadline.zip > deadline.zip.sha256
+          )
           aws s3 cp artifacts/cd/bundle.tgz "s3://$RELEASE_BUCKET/releases/$RELEASE_ID/bundle.tgz"
           aws s3 cp artifacts/cd/bundle.sha256 "s3://$RELEASE_BUCKET/releases/$RELEASE_ID/bundle.sha256"
           aws s3 cp artifacts/cd/face.zip "s3://$RELEASE_BUCKET/releases/$RELEASE_ID/face.zip"
           aws s3 cp artifacts/cd/face.zip.sha256 "s3://$RELEASE_BUCKET/releases/$RELEASE_ID/face.zip.sha256"
           aws s3 cp artifacts/cd/deadline.zip "s3://$RELEASE_BUCKET/releases/$RELEASE_ID/deadline.zip"
           aws s3 cp artifacts/cd/deadline.zip.sha256 "s3://$RELEASE_BUCKET/releases/$RELEASE_ID/deadline.zip.sha256"
-          printf 'Release ready: `%s`\nFace ZIP SHA-256: `%s`\nDeadline ZIP SHA-256: `%s`\n' "$RELEASE_ID" "$face_sha256" "$deadline_sha256" >> "$GITHUB_STEP_SUMMARY"
+          aws s3 cp artifacts/cd/sender.zip "s3://$RELEASE_BUCKET/releases/$RELEASE_ID/sender.zip"
+          aws s3 cp artifacts/cd/sender.zip.sha256 "s3://$RELEASE_BUCKET/releases/$RELEASE_ID/sender.zip.sha256"
+          printf 'Sender ZIP SHA-256: `%s`\n' "$sender_sha256" >> "$GITHUB_STEP_SUMMARY"
+          printf 'Release ready: `%s`\nFace ZIP SHA-256: `%s`\n' "$RELEASE_ID" "$face_sha256" >> "$GITHUB_STEP_SUMMARY"
   staging:
     needs: package
     permissions:
       contents: read
       id-token: write
     uses: ./.github/workflows/deploy-environment.yml
+    secrets: inherit
     with:
       environment: staging
       release_id: ${{ needs.package.outputs.release_id }}
@@ -112,6 +128,7 @@ jobs:
       contents: read
       id-token: write
     uses: ./.github/workflows/deploy-environment.yml
+    secrets: inherit
     with:
       environment: production
       release_id: ${{ needs.package.outputs.release_id }}

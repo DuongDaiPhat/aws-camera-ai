@@ -1,0 +1,212 @@
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000219f9db8940] Unknown cover type: 0x1.
+[vist#0:0/h264 @ 00000219fb88e5c0] Resumed reading at pts -0.033 with rate 1.050 after a lag of 0.533s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002716ee18900] Unknown cover type: 0x1.
+[vist#0:0/h264 @ 0000027170981640] Resumed reading at pts -0.033 with rate 1.050 after a lag of 0.533s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000017c9ccb8900] Unknown cover type: 0x1.
+[vist#0:0/h264 @ 0000017c9d2bbc00] Resumed reading at pts -0.033 with rate 1.050 after a lag of 0.533s
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000026bc6958900] Unknown cover type: 0x1.
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001da202e8900] Unknown cover type: 0x1.
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000017367fd8900] Unknown cover type: 0x1.
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001d129718900] Unknown cover type: 0x1.
+[Parsed_realtime_4 @ 000001d12b2ffb80] time discontinuity detected: -2046654 us, resetting
+[Parsed_realtime_4 @ 000001d12b2ffb80] time discontinuity detected: -2652225 us, resetting
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001ca2e808900] Unknown cover type: 0x1.
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000199b7108900] Unknown cover type: 0x1.
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002123f7a8900] Unknown cover type: 0x1.
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001d4dd518900] Unknown cover type: 0x1.
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000022cde288900] Unknown cover type: 0x1.
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001aac52e8900] Unknown cover type: 0x1.
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000252a0ad7900] Unknown cover type: 0x1.
+[swscaler @ 00000252a51de500] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000252a58f7140] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002bfc87ab300] Unknown cover type: 0x1.
+[swscaler @ 000002bfce723fc0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002bfccc9e5c0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001f1e3907900] Unknown cover type: 0x1.
+[swscaler @ 000001f1e6874b80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001f1e96bbdc0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000020a793ab300] Unknown cover type: 0x1.
+[swscaler @ 0000020a7de8a600] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000020a7ddefac0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001ff1b8b7900] Unknown cover type: 0x1.
+[swscaler @ 000001ff1e0aecc0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001ff1e7e4640] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000027119e2b300] Unknown cover type: 0x1.
+[swscaler @ 000002711e8db3c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002711facbb00] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000027c30687900] Unknown cover type: 0x1.
+[swscaler @ 0000027c333bd280] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000027c34f0fc40] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000184b9627900] Unknown cover type: 0x1.
+[swscaler @ 00000184b9ce8500] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000184bdcbf780] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002a850678600] Unknown cover type: 0x1.
+[swscaler @ 000002a8523fec00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002a854dcd300] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001d9de998600] Unknown cover type: 0x1.
+[swscaler @ 000001d9e2a5eb40] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001d9e315ad00] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000105bd4d78c0] Unknown cover type: 0x1.
+[swscaler @ 00000105c1f82840] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000105c1afae00] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001a264a08600] Unknown cover type: 0x1.
+[swscaler @ 000001a264ce43c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001a2679aff40] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000023a7d1d78c0] Unknown cover type: 0x1.
+[swscaler @ 0000023a7f4e3780] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000023a01c34dc0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002dc880e8600] Unknown cover type: 0x1.
+[swscaler @ 000002dc8c25f800] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002dc89dc48c0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002557cc978c0] Unknown cover type: 0x1.
+[swscaler @ 0000025502bda140] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002557cecd240] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000247dae3b540] Unknown cover type: 0x1.
+[swscaler @ 00000247ddc01040] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000247df575b80] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000019432f7b540] Unknown cover type: 0x1.
+[swscaler @ 000001943367e240] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000019434a34e80] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000208828ef040] Unknown cover type: 0x1.
+[swscaler @ 00000208874aa400] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000020885ba2600] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001fc3e52b540] Unknown cover type: 0x1.
+[swscaler @ 000001fc3ff3f480] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001fc41304a80] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000213b3ddf040] Unknown cover type: 0x1.
+[swscaler @ 00000213b8837700] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000213b58f9a80] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001ed8968b540] Unknown cover type: 0x1.
+[swscaler @ 000001ed8c14fcc0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001ed8e161040] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000026fef09b500] Unknown cover type: 0x1.
+[swscaler @ 0000026ff4e05340] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000026ff347e600] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000029c07d8f180] Unknown cover type: 0x1.
+[swscaler @ 0000029c0c0e1b80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000029c0c0eeb80] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000025666888a00] Unknown cover type: 0x1.
+[swscaler @ 0000025669610b00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000256674a7b40] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002af74ccb500] Unknown cover type: 0x1.
+[swscaler @ 000002af796b8580] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002af79d68c80] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000016583848a00] Unknown cover type: 0x1.
+[swscaler @ 0000016586db1200] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000165886c8200] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002642b6cb500] Unknown cover type: 0x1.
+[swscaler @ 000002642e9fa1c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002642ea16a80] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002928c5e8a00] Unknown cover type: 0x1.
+[swscaler @ 0000029291ec6cc0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000029290ea8cc0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001bbebe9b500] Unknown cover type: 0x1.
+[swscaler @ 000001bbf01f1680] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001bbf01fe6c0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000019497d4f180] Unknown cover type: 0x1.
+[swscaler @ 0000019498455d80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000019498442c80] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000018455b28a00] Unknown cover type: 0x1.
+[swscaler @ 000001845a29bfc0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000018459ee3880] deprecated pixel format used, make sure you did set range correctly
+[Parsed_realtime_16 @ 00000184577fcf40] time discontinuity detected: -2274100 us, resetting
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001d0e683b500] Unknown cover type: 0x1.
+[swscaler @ 000001d0e9260400] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001d0e9275940] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000018805a68a00] Unknown cover type: 0x1.
+[swscaler @ 000001880a951f80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001880a1c3e00] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002a8bdf8b500] Unknown cover type: 0x1.
+[swscaler @ 000002a8c2691bc0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002a8c2d923c0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001f748558a00] Unknown cover type: 0x1.
+[swscaler @ 000001f74b0b1180] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001f74b53de00] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002178e92b500] Unknown cover type: 0x1.
+[swscaler @ 0000021791cc4f80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000217937a4800] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001ad99f08a00] Unknown cover type: 0x1.
+[swscaler @ 000001ad9fe490c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001ada054a280] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000189d4b7b500] Unknown cover type: 0x1.
+[swscaler @ 00000189d4cd4340] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000189d4d37e80] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000026fb8498a00] Unknown cover type: 0x1.
+[swscaler @ 0000026fba4673c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000026fbc76a180] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000196f66bb500] Unknown cover type: 0x1.
+[swscaler @ 00000196faa29e80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000196f95f0e00] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000027223198a00] Unknown cover type: 0x1.
+[swscaler @ 0000027223862a40] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000027225c36f00] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000012ad540b500] Unknown cover type: 0x1.
+[swscaler @ 0000012ad9d837c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000012ad724c400] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000160e0418a00] Unknown cover type: 0x1.
+[swscaler @ 00000160e0bf8f80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000160e53686c0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000133905d8a40] Unknown cover type: 0x1.
+[swscaler @ 00000133911faf00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000013393789fc0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002686b8ff180] Unknown cover type: 0x1.
+[swscaler @ 000002686fcab4c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002686db48a80] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000018a0b3db500] Unknown cover type: 0x1.
+[swscaler @ 0000018a0dfaca00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000018a0fb89bc0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000293ee088a00] Unknown cover type: 0x1.
+[swscaler @ 00000293f3d22240] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000293f2bbf040] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000023c797fb500] Unknown cover type: 0x1.
+[swscaler @ 0000023c7c7e1e00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000023c7c7eee40] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000002a979fdb500] Unknown cover type: 0x1.
+[swscaler @ 000002a97c9ee340] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000002a97edf4900] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001a52872cb40] Unknown cover type: 0x1.
+[swscaler @ 000001a52d28cb80] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001a52cee93c0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001f538f98a00] Unknown cover type: 0x1.
+[swscaler @ 000001f53df7f940] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001f53c8d3040] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001c6d898cb40] Unknown cover type: 0x1.
+[swscaler @ 000001c6d8afc880] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001c6de6e6980] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000017f77aaf180] Unknown cover type: 0x1.
+[swscaler @ 0000017f7c7df0c0] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000017f7cb9dc00] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000297a7c28a00] Unknown cover type: 0x1.
+[swscaler @ 00000297a7d6cf40] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000297a87d9140] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001b5c5cccb40] Unknown cover type: 0x1.
+[swscaler @ 000001b5cd23d940] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001b5ca00a0c0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001cb292acb40] Unknown cover type: 0x1.
+[swscaler @ 000001cb293d1c00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001cb2d627880] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001fbd78ff180] Unknown cover type: 0x1.
+[swscaler @ 000001fbda6e4f00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001fbdbc53c40] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001c31d618a00] Unknown cover type: 0x1.
+[swscaler @ 000001c322116a40] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001c322123a80] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001b710458a00] Unknown cover type: 0x1.
+[swscaler @ 000001b7135bf040] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001b71101b540] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000022e84fe8a00] Unknown cover type: 0x1.
+[swscaler @ 0000022e88109200] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000022e87d817c0] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000023132ca8a00] Unknown cover type: 0x1.
+[swscaler @ 0000023135484c40] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000023135491c80] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0000017b2af78a00] Unknown cover type: 0x1.
+[swscaler @ 0000017b2facd400] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 0000017b2e170800] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 00000189a6ccb540] Unknown cover type: 0x1.
+[swscaler @ 00000189ab0fd880] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 00000189a9d51000] deprecated pixel format used, make sure you did set range correctly
+[mov,mp4,m4a,3gp,3g2,mj2 @ 000001f2a20dcb40] Unknown cover type: 0x1.
+[swscaler @ 000001f2a4f28c00] deprecated pixel format used, make sure you did set range correctly
+[swscaler @ 000001f2a6d9ee00] deprecated pixel format used, make sure you did set range correctly
+[Parsed_realtime_16 @ 000001f2a89c82c0] time discontinuity detected: -2069280 us, resetting

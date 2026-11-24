@@ -9,6 +9,8 @@ import { MediaService } from '../src/media/media.service';
 import { FrigateDetectionTrackerService } from '../src/frigate/frigate-detection-tracker.service';
 import { ZoneResultProducerService } from '../src/ingestion/zone-result-producer.service';
 import { AiResultsService } from '../src/ai-results/ai-results.service';
+import { FaceRecognitionCoordinatorService } from '../src/face-recognition/face-recognition-coordinator.service';
+import { FrigateMediaAdapter } from '../src/media/frigate-media.adapter';
 
 function createEvent(overrides: Partial<EventRecord> = {}): EventRecord {
   return {
@@ -75,6 +77,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
   let eventsService: jest.Mocked<EventsService>;
   let detectionTracker: jest.Mocked<FrigateDetectionTrackerService>;
   let aiResultsService: jest.Mocked<AiResultsService>;
+  let frigateMedia: jest.Mocked<Pick<FrigateMediaAdapter, 'getTimestampedFullFrame'>>;
 
   beforeEach(async () => {
     const mockEventsRepository = {
@@ -89,6 +92,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     const mockMediaService = {
       downloadAndStoreSnapshot: jest.fn(),
       downloadAndStoreClip: jest.fn(),
+      storeCameraSnapshot: jest.fn(),
     };
     const mockEventMediaRepository = {
       findMediaByEventIdAndType: jest.fn().mockResolvedValue(null),
@@ -103,6 +107,9 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     const mockConfigService = {
       get: jest.fn((_key: string, defaultValue?: unknown) => defaultValue),
     };
+    const mockFrigateMedia = {
+      getTimestampedFullFrame: jest.fn().mockReturnValue(null),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -115,6 +122,7 @@ describe('MqttConsumerService (US-03, US-04)', () => {
         { provide: EventsService, useValue: mockEventsService },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: FrigateDetectionTrackerService, useValue: mockDetectionTracker },
+        { provide: FrigateMediaAdapter, useValue: mockFrigateMedia },
       ],
     }).compile();
 
@@ -125,10 +133,66 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     eventsService = module.get(EventsService);
     detectionTracker = module.get(FrigateDetectionTrackerService);
     aiResultsService = module.get(AiResultsService);
+    frigateMedia = module.get(FrigateMediaAdapter);
   });
 
   it('khởi tạo thành công', () => {
     expect(service).toBeDefined();
+  });
+
+  it('retains the original incident key for a coordinator-verified continuation', async () => {
+    const event = createEvent();
+    eventsRepository.findCameraBySlug.mockResolvedValue({
+      id: 'cam-uuid-1',
+      name: 'Room',
+      slug: 'cam_living_room',
+    });
+    const resolveContinuationDedupKey = jest
+      .fn()
+      .mockResolvedValue('frigate:cam_living_room:track-101');
+    Object.assign(service, {
+      faceCoordinator: { resolveContinuationDedupKey, handleTrackEvent: jest.fn() },
+    });
+    eventsRepository.findEventByDedupKey.mockResolvedValue(event);
+    eventsRepository.updateEvent.mockResolvedValue(event);
+    await service.handleMessage('frigate/events', buildSnapshotUpdateMessage('new-raw-id'));
+    await service.handleMessage('frigate/events', buildSnapshotUpdateMessage('new-raw-id'));
+    expect(eventsRepository.createEvent).not.toHaveBeenCalled();
+    expect(eventsRepository.findEventByDedupKey).toHaveBeenCalledWith(
+      'frigate:cam_living_room:track-101',
+    );
+    expect(resolveContinuationDedupKey).toHaveBeenCalledTimes(1);
+  });
+
+  it('starts face sampling while snapshot storage is still pending', async () => {
+    const event = createEvent();
+    eventsRepository.findCameraBySlug.mockResolvedValue({
+      id: 'cam-uuid-1',
+      name: 'Room',
+      slug: 'cam_living_room',
+    });
+    eventsRepository.createEvent.mockResolvedValue(event);
+    let releaseMedia!: (value: null) => void;
+    let startedMedia!: () => void;
+    const mediaStarted = new Promise<void>((resolve) => {
+      startedMedia = resolve;
+    });
+    mediaService.downloadAndStoreSnapshot.mockImplementation(() => {
+      startedMedia();
+      return new Promise((resolve) => {
+        releaseMedia = resolve;
+      });
+    });
+    const handleTrackEvent = jest.fn().mockResolvedValue(undefined);
+    Object.assign(service, { faceCoordinator: { handleTrackEvent } });
+    const handling = service.handleMessage(
+      'frigate/events',
+      buildSnapshotUpdateMessage('track-101'),
+    );
+    await mediaStarted;
+    expect(handleTrackEvent).toHaveBeenCalledTimes(1);
+    releaseMedia(null);
+    await handling;
   });
 
   it('tạo một PERSON_DETECTED P3 với dedup key ổn định theo Frigate track', async () => {
@@ -616,6 +680,420 @@ describe('MqttConsumerService (US-03, US-04)', () => {
       'track-clip',
       restrictedEvent.detected_at,
       15_000,
+    );
+  });
+
+  it('forwards new/update/end person events to FaceRecognitionCoordinatorService when present', async () => {
+    const handleTrackEvent = jest.fn().mockResolvedValue(undefined);
+    const coordinator = { handleTrackEvent } as unknown as FaceRecognitionCoordinatorService;
+    const camera = {
+      id: 'cam-uuid-1',
+      name: 'Phong khach',
+      slug: 'cam_living_room',
+      owner_user_id: 'owner-uuid-1',
+    };
+    const event = createEvent({ track_id: 'track-coord' });
+    const mockEventsRepo = {
+      findCameraBySlug: jest.fn().mockResolvedValue(camera),
+      findEligibleZones: jest.fn(),
+      findZoneByCameraAndSlug: jest.fn(),
+      createEvent: jest.fn().mockResolvedValue(event),
+      findEventByDedupKey: jest.fn().mockResolvedValue(event),
+      updateEvent: jest.fn().mockResolvedValue(event),
+      findEventSummaryById: jest.fn().mockResolvedValue(null),
+    };
+    const moduleWithCoordinator: TestingModule = await Test.createTestingModule({
+      providers: [
+        MqttConsumerService,
+        ZoneResultProducerService,
+        { provide: AiResultsService, useValue: { submit: jest.fn() } },
+        { provide: EventsRepository, useValue: mockEventsRepo },
+        {
+          provide: MediaService,
+          useValue: { downloadAndStoreSnapshot: jest.fn(), downloadAndStoreClip: jest.fn() },
+        },
+        {
+          provide: EventMediaRepository,
+          useValue: { findMediaByEventIdAndType: jest.fn().mockResolvedValue(null) },
+        },
+        { provide: EventsService, useValue: { toEventSummary: jest.fn(), emitEvent: jest.fn() } },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn((_k: string, d?: unknown) => d) },
+        },
+        { provide: FrigateDetectionTrackerService, useValue: { track: jest.fn() } },
+        { provide: FaceRecognitionCoordinatorService, useValue: coordinator },
+      ],
+    }).compile();
+
+    const consumerWithCoord = moduleWithCoordinator.get(MqttConsumerService);
+    await consumerWithCoord.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'new',
+          after: {
+            id: 'track-coord',
+            camera: 'cam_living_room',
+            frame_time: 1_726_387_200,
+            label: 'person',
+            score: 0.9,
+            current_zones: [],
+          },
+        }),
+      ),
+    );
+    await consumerWithCoord.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'end',
+          after: {
+            id: 'track-coord',
+            camera: 'cam_living_room',
+            frame_time: 1_726_387_205,
+            label: 'person',
+            score: 0.9,
+            current_zones: [],
+          },
+        }),
+      ),
+    );
+
+    expect(handleTrackEvent).toHaveBeenCalledTimes(2);
+    expect(handleTrackEvent).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ messageType: 'new', isCreated: true, camera }),
+    );
+    expect(handleTrackEvent).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ messageType: 'end', isCreated: false, camera }),
+    );
+  });
+
+  it.each(['update', 'end'] as const)(
+    'stores timestamped full frame fallback snapshot and emits event.updated on %s when has_snapshot is false',
+    async (messageType) => {
+      const existingEvent = createEvent({ track_id: `track-fallback-${messageType}` });
+      const summary = { id: existingEvent.id, thumbnailUrl: 'https://minio/snapshot.jpg' };
+      const imageBytes = Buffer.from([0xff, 0xd8, 0xff, 0xd9]);
+      eventsRepository.findCameraBySlug.mockResolvedValueOnce({
+        id: 'cam-uuid-1',
+        name: 'Phong khach',
+        slug: 'cam_living_room',
+      });
+      eventsRepository.findEventByDedupKey.mockResolvedValueOnce(existingEvent);
+      eventsRepository.updateEvent.mockResolvedValueOnce(existingEvent);
+      eventMediaRepository.findMediaByEventIdAndType.mockResolvedValueOnce(null);
+      frigateMedia.getTimestampedFullFrame.mockReturnValueOnce({
+        imageBytes,
+        frameWidth: 1280,
+        frameHeight: 720,
+        capturedAt: 1_726_387_205_000,
+      });
+      mediaService.storeCameraSnapshot.mockResolvedValueOnce(createSnapshotMedia());
+      eventsRepository.findEventSummaryById.mockResolvedValueOnce({
+        ...summary,
+        camera_owner_user_id: 'camera-owner',
+      } as unknown as Awaited<ReturnType<EventsRepository['findEventSummaryById']>>);
+      eventsService.toEventSummary.mockResolvedValueOnce(
+        summary as unknown as Awaited<ReturnType<EventsService['toEventSummary']>>,
+      );
+
+      await service.handleMessage(
+        'frigate/events',
+        Buffer.from(
+          JSON.stringify({
+            type: messageType,
+            after: {
+              id: `track-fallback-${messageType}`,
+              camera: 'cam_living_room',
+              frame_time: 1_726_387_205,
+              label: 'person',
+              score: 0.9,
+              current_zones: [],
+              has_snapshot: false,
+            },
+          }),
+        ),
+      );
+
+      expect(frigateMedia.getTimestampedFullFrame).toHaveBeenCalledWith('cam_living_room');
+      expect(mediaService.storeCameraSnapshot).toHaveBeenCalledWith(
+        existingEvent.id,
+        existingEvent.detected_at,
+        imageBytes,
+        1280,
+        720,
+      );
+      expect(mediaService.downloadAndStoreSnapshot).not.toHaveBeenCalled();
+      expect(eventsService.emitEvent).toHaveBeenCalledWith(summary, 'event.updated', [
+        'camera-owner',
+      ]);
+    },
+  );
+
+  it('skips timestamped fallback snapshot when a SNAPSHOT already exists', async () => {
+    const existingEvent = createEvent({ track_id: 'track-existing-snap' });
+    eventsRepository.findCameraBySlug.mockResolvedValueOnce({
+      id: 'cam-uuid-1',
+      name: 'Phong khach',
+      slug: 'cam_living_room',
+    });
+    eventsRepository.findEventByDedupKey.mockResolvedValueOnce(existingEvent);
+    eventsRepository.updateEvent.mockResolvedValueOnce(existingEvent);
+    eventMediaRepository.findMediaByEventIdAndType.mockResolvedValueOnce(createSnapshotMedia());
+
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'update',
+          after: {
+            id: 'track-existing-snap',
+            camera: 'cam_living_room',
+            frame_time: 1_726_387_205,
+            label: 'person',
+            score: 0.9,
+            current_zones: [],
+            has_snapshot: false,
+          },
+        }),
+      ),
+    );
+
+    expect(frigateMedia.getTimestampedFullFrame).not.toHaveBeenCalled();
+    expect(mediaService.storeCameraSnapshot).not.toHaveBeenCalled();
+    expect(eventsService.emitEvent).not.toHaveBeenCalled();
+  });
+
+  it('keeps using downloadAndStoreSnapshot when has_snapshot is true', async () => {
+    const existingEvent = createEvent({ track_id: 'track-frigate-snap' });
+    eventsRepository.findCameraBySlug.mockResolvedValueOnce({
+      id: 'cam-uuid-1',
+      name: 'Phong khach',
+      slug: 'cam_living_room',
+    });
+    eventsRepository.findEventByDedupKey.mockResolvedValueOnce(existingEvent);
+    eventsRepository.updateEvent.mockResolvedValueOnce(existingEvent);
+    eventMediaRepository.findMediaByEventIdAndType.mockResolvedValueOnce(null);
+    mediaService.downloadAndStoreSnapshot.mockResolvedValueOnce(createSnapshotMedia());
+
+    await service.handleMessage('frigate/events', buildSnapshotUpdateMessage('track-frigate-snap'));
+
+    expect(mediaService.downloadAndStoreSnapshot).toHaveBeenCalledWith(
+      existingEvent.id,
+      'track-frigate-snap',
+      existingEvent.detected_at,
+    );
+    expect(frigateMedia.getTimestampedFullFrame).not.toHaveBeenCalled();
+    expect(mediaService.storeCameraSnapshot).not.toHaveBeenCalled();
+  });
+
+  it('does not store fallback snapshot on new message when has_snapshot is false', async () => {
+    const createdEvent = createEvent({ track_id: 'track-new-no-snap' });
+    eventsRepository.findCameraBySlug.mockResolvedValueOnce({
+      id: 'cam-uuid-1',
+      name: 'Phong khach',
+      slug: 'cam_living_room',
+    });
+    eventsRepository.createEvent.mockResolvedValueOnce(createdEvent);
+    frigateMedia.getTimestampedFullFrame.mockReturnValue({
+      imageBytes: Buffer.from([0xff, 0xd8, 0xff, 0xd9]),
+      frameWidth: 1280,
+      frameHeight: 720,
+      capturedAt: 1_726_387_200_000,
+    });
+
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'new',
+          after: {
+            id: 'track-new-no-snap',
+            camera: 'cam_living_room',
+            frame_time: 1_726_387_200,
+            label: 'person',
+            score: 0.9,
+            current_zones: [],
+            has_snapshot: false,
+          },
+        }),
+      ),
+    );
+
+    expect(frigateMedia.getTimestampedFullFrame).not.toHaveBeenCalled();
+    expect(mediaService.storeCameraSnapshot).not.toHaveBeenCalled();
+  });
+
+  it('negative-caches continuation misses on new so update and end do not re-call resolveContinuationDedupKey', async () => {
+    const camera = {
+      id: 'cam-uuid-1',
+      name: 'Room',
+      slug: 'cam_living_room',
+      owner_user_id: 'owner-uuid-1',
+    };
+    const event = createEvent({
+      track_id: 'track-miss-1',
+      dedup_key: 'frigate:cam_living_room:track-miss-1',
+    });
+    eventsRepository.findCameraBySlug.mockResolvedValue(camera);
+    eventsRepository.createEvent.mockResolvedValueOnce(event);
+    eventsRepository.findEventByDedupKey.mockResolvedValue(event);
+    eventsRepository.updateEvent.mockResolvedValue(event);
+
+    const resolveContinuationDedupKey = jest.fn().mockResolvedValue(null);
+    Object.assign(service, {
+      faceCoordinator: { resolveContinuationDedupKey, handleTrackEvent: jest.fn() },
+    });
+
+    const baseAfter = {
+      id: 'track-miss-1',
+      camera: 'cam_living_room',
+      frame_time: 1_726_387_205,
+      label: 'person',
+      score: 0.9,
+      current_zones: [],
+      has_snapshot: false,
+    };
+
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(JSON.stringify({ type: 'new', after: baseAfter })),
+    );
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(JSON.stringify({ type: 'update', after: baseAfter })),
+    );
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(JSON.stringify({ type: 'end', after: baseAfter })),
+    );
+
+    expect(resolveContinuationDedupKey).toHaveBeenCalledTimes(1);
+    expect(resolveContinuationDedupKey).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'track-miss-1' }),
+      camera,
+      1000,
+    );
+    expect(eventsRepository.createEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ dedupKey: 'frigate:cam_living_room:track-miss-1' }),
+    );
+    expect(eventsRepository.findEventByDedupKey).toHaveBeenCalledTimes(2);
+    expect(eventsRepository.findEventByDedupKey).toHaveBeenCalledWith(
+      'frigate:cam_living_room:track-miss-1',
+    );
+  });
+
+  it('does not call resolveContinuationDedupKey when end is the first-seen message for a track', async () => {
+    const camera = {
+      id: 'cam-uuid-1',
+      name: 'Room',
+      slug: 'cam_living_room',
+      owner_user_id: 'owner-uuid-1',
+    };
+    const event = createEvent({
+      track_id: 'track-end-first',
+      dedup_key: 'frigate:cam_living_room:track-end-first',
+    });
+    eventsRepository.findCameraBySlug.mockResolvedValue(camera);
+    eventsRepository.findEventByDedupKey.mockResolvedValueOnce(event);
+    eventsRepository.updateEvent.mockResolvedValueOnce(event);
+
+    const resolveContinuationDedupKey = jest
+      .fn()
+      .mockResolvedValue('frigate:cam_living_room:track-old');
+    Object.assign(service, {
+      faceCoordinator: { resolveContinuationDedupKey, handleTrackEvent: jest.fn() },
+    });
+
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'end',
+          after: {
+            id: 'track-end-first',
+            camera: 'cam_living_room',
+            frame_time: 1_726_387_210,
+            label: 'person',
+            score: 0.9,
+            current_zones: [],
+            has_snapshot: false,
+          },
+        }),
+      ),
+    );
+
+    expect(resolveContinuationDedupKey).not.toHaveBeenCalled();
+    expect(eventsRepository.findEventByDedupKey).toHaveBeenCalledWith(
+      'frigate:cam_living_room:track-end-first',
+    );
+  });
+
+  it('passes waitForFrameMs = 0 to resolveContinuationDedupKey for RESTRICTED_ZONE (P1) events', async () => {
+    const camera = {
+      id: 'cam-uuid-kitchen',
+      name: 'Phong bep',
+      slug: 'cam_kitchen',
+      timezone: 'Asia/Bangkok',
+      zone_config_applied: true,
+      zone_config_version: 7,
+      owner_user_id: 'owner-uuid-1',
+    };
+    eventsRepository.findCameraBySlug.mockResolvedValueOnce(camera);
+    eventsRepository.findEligibleZones.mockResolvedValueOnce([
+      {
+        id: 'zone-uuid-stove',
+        camera_id: 'cam-uuid-kitchen',
+        name: 'Khu vuc bep',
+        slug: 'restricted_stove',
+        zone_type: 'RESTRICTED',
+        min_dwell_seconds: 2,
+        active_from: null,
+        active_to: null,
+      },
+    ]);
+    eventsRepository.createEvent.mockResolvedValueOnce(
+      createEvent({
+        camera_id: 'cam-uuid-kitchen',
+        zone_id: 'zone-uuid-stove',
+        event_type: 'RESTRICTED_ZONE',
+        priority: 'P1',
+        track_id: 'track-p1',
+        dedup_key: 'frigate:cam_kitchen:track-p1',
+        detected_at: new Date(1_726_387_200_000),
+      }),
+    );
+
+    const resolveContinuationDedupKey = jest.fn().mockResolvedValue(null);
+    Object.assign(service, {
+      faceCoordinator: { resolveContinuationDedupKey, handleTrackEvent: jest.fn() },
+    });
+
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'new',
+          after: {
+            id: 'track-p1',
+            camera: 'cam_kitchen',
+            frame_time: 1_726_387_200.123,
+            label: 'person',
+            score: 0.9,
+            current_zones: ['restricted_stove'],
+          },
+        }),
+      ),
+    );
+
+    expect(resolveContinuationDedupKey).toHaveBeenCalledTimes(1);
+    expect(resolveContinuationDedupKey).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'track-p1' }),
+      camera,
+      0,
     );
   });
 });

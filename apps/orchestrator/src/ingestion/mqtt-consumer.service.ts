@@ -1,3 +1,4 @@
+import { readNonEmptyConfigString, readPositiveConfigNumber } from '../config/env-config';
 import { PlaybackFramesService } from '../playback/playback-frames.service';
 import { WellnessSourceAdapter } from '../wellness/wellness-source.adapter';
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit, Optional } from '@nestjs/common';
@@ -24,6 +25,8 @@ import { FrigateDetectionTrackerService } from '../frigate/frigate-detection-tra
 import { ZoneScheduleService } from '../zones/zone-schedule.service';
 import { ZoneResultProducerService, ZoneResultContext } from './zone-result-producer.service';
 import { PoseFrameConsumer } from '../fall-detection/consumer/pose-frame.consumer';
+import { FaceRecognitionCoordinatorService } from '../face-recognition/face-recognition-coordinator.service';
+import { FrigateMediaAdapter } from '../media/frigate-media.adapter';
 
 const DEFAULT_MQTT_CONNECT_TIMEOUT_MS = 10_000;
 const DEFAULT_MQTT_RECONNECT_PERIOD_MS = 3_000;
@@ -31,6 +34,7 @@ const DEFAULT_MQTT_RECONNECT_PERIOD_MS = 3_000;
 type FrigateMessageType = FrigateEventMessageDto['type'];
 
 interface EventContext {
+  camera: CameraRecord | null;
   cameraId: string | null;
   zoneId: string | null;
   zoneName: string | null;
@@ -45,6 +49,7 @@ interface SynchronizedEvent {
   event: EventRecord;
   isCreated: boolean;
   isPromoted: boolean;
+  camera: CameraRecord | null;
   zoneResultContext: ZoneResultContext | null;
 }
 
@@ -53,6 +58,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(MqttConsumerService.name);
   private client: MqttClient | null = null;
   private processingQueue: Promise<void> = Promise.resolve();
+  private readonly continuationKeys = new Map<string, { dedupKey: string; expiresAt: number }>();
 
   constructor(
     private readonly configService: ConfigService,
@@ -68,6 +74,8 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     @Optional() private readonly wellnessSource?: WellnessSourceAdapter,
     @Optional() private readonly poseFrameConsumer?: PoseFrameConsumer,
     @Optional() private readonly playbackFrames?: PlaybackFramesService,
+    @Optional() private readonly faceCoordinator?: FaceRecognitionCoordinatorService,
+    @Optional() private readonly frigateMedia?: FrigateMediaAdapter,
   ) {}
 
   onModuleInit(): void {
@@ -79,33 +87,42 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
   }
 
   connect(): void {
-    const mqttUrl = this.configService.get<string>('MQTT_URL', 'mqtt://localhost:1883');
-    const clientId = this.configService.get<string>(
+    const mqttUrl = readNonEmptyConfigString(
+      this.configService,
+      'MQTT_URL',
+      'mqtt://localhost:1883',
+    );
+    const clientId = readNonEmptyConfigString(
+      this.configService,
       'MQTT_CLIENT_ID',
       `orchestrator-${Math.random().toString(16).substring(2, 8)}`,
     );
     const username = this.configService.get<string>('MQTT_USERNAME');
     const password = this.configService.get<string>('MQTT_PASSWORD');
-    const topic = this.configService.get<string>('MQTT_TOPIC_FRIGATE', 'frigate/events');
-    const framesTopic = this.configService.get<string>(
+    const topic = readNonEmptyConfigString(
+      this.configService,
+      'MQTT_TOPIC_FRIGATE',
+      'frigate/events',
+    );
+    const framesTopic = readNonEmptyConfigString(
+      this.configService,
       'MQTT_TOPIC_CAMERA_FRAMES',
       'frigate/camerai/frames',
     );
-    const poseFramesTopic = this.configService.get<string>(
+    const poseFramesTopic = readNonEmptyConfigString(
+      this.configService,
       'MQTT_TOPIC_POSE_FRAMES',
       'frigate/camerai/pose/frames',
     );
-    const reconnectPeriodMs = Number(
-      this.configService.get<string | number>(
-        'MQTT_RECONNECT_PERIOD_MS',
-        DEFAULT_MQTT_RECONNECT_PERIOD_MS,
-      ),
+    const reconnectPeriodMs = readPositiveConfigNumber(
+      this.configService,
+      'MQTT_RECONNECT_PERIOD_MS',
+      DEFAULT_MQTT_RECONNECT_PERIOD_MS,
     );
-    const connectTimeoutMs = Number(
-      this.configService.get<string | number>(
-        'MQTT_CONNECT_TIMEOUT_MS',
-        DEFAULT_MQTT_CONNECT_TIMEOUT_MS,
-      ),
+    const connectTimeoutMs = readPositiveConfigNumber(
+      this.configService,
+      'MQTT_CONNECT_TIMEOUT_MS',
+      DEFAULT_MQTT_CONNECT_TIMEOUT_MS,
     );
 
     this.logger.log(`Dang ket noi MQTT Broker tai ${mqttUrl} (clientId: ${clientId})...`);
@@ -138,6 +155,19 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     this.client.on('message', (receivedTopic, buffer) => {
       // Pose frame binary stream handling (US-16, US-17)
       if (receivedTopic === poseFramesTopic) {
+        const faceFrame = this.frigateMedia?.acceptTimestampedFrame(buffer);
+        if (faceFrame) {
+          void this.faceCoordinator
+            ?.sampleAvailableFrame(
+              faceFrame.header.cameraSlug,
+              faceFrame.header.persons.map((person) => person.trackId),
+            )
+            .catch((error: unknown) => {
+              this.logger.warn(
+                `Face frame sampling error: ${error instanceof Error ? error.message : String(error)}`,
+              );
+            });
+        }
         if (this.poseFrameConsumer) {
           this.poseFrameConsumer.handlePoseFrame(buffer).catch((error: unknown) => {
             this.logger.warn(
@@ -210,11 +240,39 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     return [...new Set(after.current_zones ?? [])];
   }
 
-  private async buildEventContext(after: FrigateEventAfterDto): Promise<EventContext> {
+  private async buildEventContext(
+    messageType: FrigateMessageType,
+    after: FrigateEventAfterDto,
+  ): Promise<EventContext> {
     const camera = await this.eventsRepository.findCameraBySlug(after.camera);
     const cameraId = camera?.id ?? null;
     const activeZones = await this.findActiveZones(camera, after);
     const zone = activeZones[0];
+    const isRestrictedZone = zone !== undefined;
+    const rawKey = `frigate:${after.camera}:${after.id}`;
+    const now = Date.now();
+    const existing = this.continuationKeys.get(rawKey);
+    let dedupKey: string;
+    if (existing && existing.expiresAt > now) {
+      dedupKey = existing.dedupKey;
+      this.continuationKeys.delete(rawKey);
+      this.continuationKeys.set(rawKey, existing);
+    } else if (messageType === 'end') {
+      if (existing) this.continuationKeys.delete(rawKey);
+      dedupKey = rawKey;
+    } else {
+      const verified = await this.faceCoordinator?.resolveContinuationDedupKey?.(
+        after,
+        camera,
+        isRestrictedZone ? 0 : 1000,
+      );
+      dedupKey = verified ?? rawKey;
+      this.continuationKeys.delete(rawKey);
+      this.continuationKeys.set(rawKey, { dedupKey, expiresAt: now + 120_000 });
+      while (this.continuationKeys.size > 5000) {
+        this.continuationKeys.delete(this.continuationKeys.keys().next().value!);
+      }
+    }
 
     if (!camera) {
       this.logger.warn(
@@ -222,15 +280,14 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       );
     }
 
-    const isRestrictedZone = zone !== undefined;
-
     return {
+      camera,
       cameraId,
       zoneId: zone?.id ?? null,
       zoneName: zone?.name ?? null,
       eventType: isRestrictedZone ? 'RESTRICTED_ZONE' : 'PERSON_DETECTED',
       priority: isRestrictedZone ? 'P1' : 'P3',
-      dedupKey: `frigate:${after.camera}:${after.id}`,
+      dedupKey,
       detectedAt: new Date((after.start_time ?? after.frame_time) * 1_000),
       zoneResultContext: camera ? { camera, zones: activeZones } : null,
     };
@@ -306,7 +363,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     messageType: FrigateMessageType,
     after: FrigateEventAfterDto,
   ): Promise<SynchronizedEvent> {
-    const context = await this.buildEventContext(after);
+    const context = await this.buildEventContext(messageType, after);
     let event =
       messageType === 'new'
         ? null
@@ -348,7 +405,49 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
         : 'Da cap nhat su kien theo vong doi Frigate track',
     );
 
-    return { event, isCreated, isPromoted, zoneResultContext: context.zoneResultContext };
+    return {
+      event,
+      isCreated,
+      isPromoted,
+      camera: context.camera,
+      zoneResultContext: context.zoneResultContext,
+    };
+  }
+
+  private async storeTimestampedFallbackSnapshot(
+    messageType: FrigateMessageType,
+    event: EventRecord,
+    cameraSlug: string,
+  ): Promise<boolean> {
+    if (messageType !== 'update' && messageType !== 'end') {
+      return false;
+    }
+
+    const existingSnapshot = await this.eventMediaRepository.findMediaByEventIdAndType(
+      event.id,
+      'SNAPSHOT',
+    );
+    if (existingSnapshot) {
+      return false;
+    }
+
+    const frame = this.frigateMedia?.getTimestampedFullFrame?.(cameraSlug);
+    if (
+      !frame ||
+      frame.imageBytes.length === 0 ||
+      typeof this.mediaService.storeCameraSnapshot !== 'function'
+    ) {
+      return false;
+    }
+
+    const stored = await this.mediaService.storeCameraSnapshot(
+      event.id,
+      event.detected_at,
+      frame.imageBytes,
+      frame.frameWidth,
+      frame.frameHeight,
+    );
+    return stored !== null;
   }
 
   /**
@@ -374,6 +473,12 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
         event.detected_at,
       );
       hasNewSnapshot = !existingSnapshot && snapshot !== null;
+    } else {
+      hasNewSnapshot = await this.storeTimestampedFallbackSnapshot(
+        messageType,
+        event,
+        after.camera,
+      );
     }
 
     if (
@@ -429,40 +534,54 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     this.detectionTracker.track(message.type, message.after);
 
     try {
-      const { event, isCreated, isPromoted, zoneResultContext } = await this.synchronizeEvent(
-        message.type,
-        message.after,
-      );
+      const { event, isCreated, isPromoted, camera, zoneResultContext } =
+        await this.synchronizeEvent(message.type, message.after);
       await this.zoneResultProducer.submit(event, message.after, zoneResultContext);
-      const hasNewSnapshot = await this.synchronizeMedia(message.type, event, message.after);
+      // Face sampling must start before snapshot/S3 synchronization can make
+      // the event box stale. Both operations use the already persisted event.
+      const [hasNewSnapshot] = await Promise.all([
+        this.synchronizeMedia(message.type, event, message.after),
+        this.faceCoordinator?.handleTrackEvent({
+          messageType: message.type,
+          event,
+          after: message.after,
+          isCreated,
+          camera,
+        }),
+      ]);
 
       if (isCreated) {
         await this.emitEventToStream(event.id, 'event.created');
-        if (
-          this.configService.get<string>('FACE_JOB_TRANSPORT', 'bullmq') === 'bullmq' &&
-          this.faceQueue &&
-          (event.event_type === 'PERSON_DETECTED' || event.event_type === 'RESTRICTED_ZONE')
-        ) {
-          const camera = await this.eventsRepository.findCameraBySlug(message.after.camera);
-          const ownerScopeId = camera?.owner_user_id ?? '00000000-0000-0000-0000-000000000000';
-          const collectionVersion =
-            await this.eventsRepository.getSyncedFaceCollectionVersion(ownerScopeId);
-          await this.faceQueue.add('match_face', {
-            eventId: event.id,
-            trackId: message.after.id,
-            cameraSlug: message.after.camera,
-            ownerScopeId,
-            collectionVersion,
-            sourceSessionId:
-              typeof message.after.start_time === 'number'
-                ? message.after.camera + ':' + message.after.start_time.toFixed(6)
-                : undefined,
-          });
-        }
       } else if (isPromoted || hasNewSnapshot) {
         // Anh vua ve toi sau khi the su kien da hien tren dashboard: day ban cap nhat
         // de nguoi dung thay snapshot ma khong phai F5 (FR-DSH-02).
         await this.emitEventToStream(event.id, 'event.updated');
+      }
+
+      if (
+        !this.faceCoordinator &&
+        isCreated &&
+        this.configService.get<string>('FACE_JOB_TRANSPORT', 'bullmq') === 'bullmq' &&
+        this.faceQueue &&
+        (event.event_type === 'PERSON_DETECTED' || event.event_type === 'RESTRICTED_ZONE')
+      ) {
+        const resolvedCamera =
+          camera ?? (await this.eventsRepository.findCameraBySlug(message.after.camera));
+        const ownerScopeId =
+          resolvedCamera?.owner_user_id ?? '00000000-0000-0000-0000-000000000000';
+        const collectionVersion =
+          await this.eventsRepository.getSyncedFaceCollectionVersion(ownerScopeId);
+        await this.faceQueue.add('match_face', {
+          eventId: event.id,
+          trackId: message.after.id,
+          cameraSlug: message.after.camera,
+          ownerScopeId,
+          collectionVersion,
+          sourceSessionId:
+            typeof message.after.start_time === 'number'
+              ? message.after.camera + ':' + message.after.start_time.toFixed(6)
+              : undefined,
+        });
       }
     } catch (error) {
       this.logger.error(

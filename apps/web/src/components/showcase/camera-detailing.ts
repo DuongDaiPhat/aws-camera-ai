@@ -8,7 +8,7 @@ function bodyMark(group: THREE.Group) {
   const ctx = canvas.getContext('2d')!;
   ctx.fillStyle = '#667489';
   ctx.font = '600 43px Arial';
-  ctx.fillText('CameraAI', 85, 65);
+  ctx.fillText('Argus AI', 85, 65);
   ctx.font = '20px Arial';
   ctx.fillText('VISION / OPTICAL SYSTEM', 86, 98);
   for (let y = 0; y < 7; y++)

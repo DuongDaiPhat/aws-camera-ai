@@ -1,3 +1,4 @@
+import { NotificationCloudModule } from '../notification-cloud/notification-cloud.module';
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../database/database.module';
 import { EscalationRulesModule } from '../escalation-rules/escalation-rules.module';
@@ -11,7 +12,7 @@ import { DeadlineController } from './deadline.controller';
 import { DeadlineStepFunctionsService } from './deadline-stepfunctions.service';
 
 @Module({
-  imports: [DatabaseModule, EscalationRulesModule],
+  imports: [DatabaseModule, EscalationRulesModule, NotificationCloudModule],
   controllers: [DeadlineController],
   providers: [
     InternalTokenGuard,

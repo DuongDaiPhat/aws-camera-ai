@@ -11,6 +11,8 @@ module.exports = {
   collectCoverageFrom: ['src/**/*.ts', '!src/main.ts', '!src/**/*.module.ts'],
   coverageDirectory: './coverage',
   testEnvironment: 'node',
+  // Bound memory when backend, web and Docker integration gates share a host.
+  maxWorkers: 2,
   // DoD: coverage core logic >= 60% (NFR-07)
   coverageThreshold: {
     global: { branches: 50, functions: 60, lines: 60, statements: 60 },

@@ -1,0 +1,25 @@
+{
+  "case": "TC06-glasses-baseline",
+  "analysisAt": "2026-11-23T04:06:10.342Z",
+  "method": "Re-assess the exact dispatch crop on the same local AI service; no AWS request",
+  "samples": [
+    {
+      "trackId": "1795406673.532019-8w0ye2",
+      "imageSha256": "e015e7167c806e1ca504972ee5a5ca844bffa0f295788f9e32357b4474261453",
+      "qualityScore": 0.721
+    },
+    {
+      "trackId": "1795406706.945548-6fk9j6",
+      "imageSha256": "8b58752945dcc15b62431fff57ec6cb2a01aceda598a38d10ef4cb7bd84b8b33",
+      "qualityScore": 0.6566
+    }
+  ],
+  "pairs": [
+    {
+      "firstTrackId": "1795406673.532019-8w0ye2",
+      "secondTrackId": "1795406706.945548-6fk9j6",
+      "sfaceCosine": 0.39936577290970665,
+      "appearanceCosine": 0.5430657038958647
+    }
+  ]
+}

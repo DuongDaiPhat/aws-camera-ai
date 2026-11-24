@@ -43,6 +43,27 @@ describe('FrigateConfigService', () => {
     service = new FrigateConfigService(new ConfigService());
   });
 
+  it('bounds MediaMTX probing so short videos retain their opening recognition frames', () => {
+    const relayed = YAML.parse(
+      service.generateUpdatedConfig('', {
+        camera: { ...mockCamera, source_type_val: 'VIDEO_FILE' },
+        mediamtxRtspBaseUrl: 'rtsp://mediamtx:8554',
+      }),
+    ).cameras[mockCamera.slug].ffmpeg.inputs[0];
+    const args: string[] = relayed.input_args;
+    expect(
+      args.slice(args.indexOf('-analyzeduration'), args.indexOf('-analyzeduration') + 2),
+    ).toEqual(['-analyzeduration', '1000000']);
+    expect(args.slice(args.indexOf('-probesize'), args.indexOf('-probesize') + 2)).toEqual([
+      '-probesize',
+      '32768',
+    ]);
+    const direct = YAML.parse(service.generateUpdatedConfig('', { camera: mockCamera }));
+    expect(direct.cameras[mockCamera.slug].ffmpeg.inputs[0].input_args).toBe(
+      'preset-rtsp-restream-low-latency',
+    );
+  });
+
   it('keeps recording before a fire even without a person or motion trigger when M3 is enabled', () => {
     const fireService = new FrigateConfigService(new ConfigService({ M3_ENABLED: 'true' }));
     const config = YAML.parse(fireService.generateUpdatedConfig('', { camera: mockCamera }));
@@ -79,6 +100,11 @@ describe('FrigateConfigService', () => {
     expect(parsed.cameras.camera_cong_chinh.ffmpeg.inputs[0].path).toBe(mockCamera.rtsp_url);
     expect(parsed.cameras.camera_cong_chinh.detect.fps).toBe(5);
     expect(parsed.cameras.camera_cong_chinh.detect.min_initialized).toBeGreaterThanOrEqual(2);
+    expect(parsed.cameras.camera_cong_chinh.detect.max_disappeared).toBe(75);
+    expect(parsed.cameras.camera_cong_chinh.detect.stationary).toEqual({
+      interval: 50,
+      threshold: 50,
+    });
     expect(parsed.cameras.camera_cong_chinh.record.retain).toBeUndefined();
     expect(parsed.cameras.camera_cong_chinh.record.continuous.days).toBe(7);
     expect(parsed.cameras.camera_cong_chinh.record.detections.retain.days).toBe(7);
@@ -231,5 +257,31 @@ describe('FrigateConfigService', () => {
     expect(
       (service as any).hasAppliedSettings(JSON.stringify(running), expected, mockCamera.slug),
     ).toBe(true);
+  });
+
+  it('respects explicit settings.max_disappeared_frames and preserves extra stationary fields', () => {
+    const prior = YAML.stringify({
+      cameras: {
+        [mockCamera.slug]: {
+          detect: {
+            stationary: {
+              max_frames: { default: 3000 },
+            },
+          },
+        },
+      },
+    });
+    const parsed = YAML.parse(
+      service.generateUpdatedConfig(prior, {
+        camera: mockCamera,
+        settings: { max_disappeared_frames: 40 },
+      }),
+    );
+    expect(parsed.cameras[mockCamera.slug].detect.max_disappeared).toBe(40);
+    expect(parsed.cameras[mockCamera.slug].detect.stationary).toEqual({
+      max_frames: { default: 3000 },
+      interval: 50,
+      threshold: 50,
+    });
   });
 });
