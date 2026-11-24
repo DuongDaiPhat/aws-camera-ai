@@ -1,0 +1,76 @@
+{
+  "sourceSha": "2c40d699e2de52ad48299432e0c7a568c429a196",
+  "fixture": true,
+  "dryRun": true,
+  "cases": [
+    {
+      "label": "ack",
+      "eventId": "582b1161-5776-441f-9d65-7df44a25c527",
+      "commandId": "4dcd41a4-36ee-4675-9e3b-afaea0ad12d0",
+      "deadline": "2026-11-24T08:51:24.292Z",
+      "ownerId": "67c4e1a4-d118-4f44-8196-654c67c19f95",
+      "receipt": {
+        "disposition": "NO_OP",
+        "reason": "RESOLVED",
+        "notification_id": null
+      },
+      "pass": true
+    },
+    {
+      "label": "timeout-retry",
+      "eventId": "9c07d090-00a4-4a92-a2fd-a979c6d4dc7e",
+      "commandId": "75f91ac8-dbb6-4637-a364-c96f250311c9",
+      "deadline": "2026-11-24T08:51:45.416Z",
+      "ownerId": "67c4e1a4-d118-4f44-8196-654c67c19f95",
+      "receipt": {
+        "disposition": "APPLIED",
+        "reason": "ESCALATED",
+        "notification_id": "817ab6e1-8adc-43af-b56c-63e17824dab3"
+      },
+      "earlyRetry": {
+        "code": "NOT_DUE",
+        "retryAt": "2026-11-24T08:51:45.416Z",
+        "message": "S\u1ef1 ki\u1ec7n ch\u01b0a \u0111\u1ebfn h\u1ea1n leo thang theo \u0111\u1ed3ng h\u1ed3 c\u01a1 s\u1edf d\u1eef li\u1ec7u."
+      },
+      "notifications": [
+        {
+          "id": "817ab6e1-8adc-43af-b56c-63e17824dab3",
+          "status": "SKIPPED",
+          "outcome": "DRY_RUN",
+          "provider_called": false,
+          "attempt_id": "0e7b6949-7db7-47c6-ab8d-a7e7e2a8b39d"
+        }
+      ],
+      "replayCount": 2,
+      "pass": true
+    },
+    {
+      "label": "handoff-recovery",
+      "eventId": "bdd4b471-da01-4585-9f5d-6a5bc4ddbbd5",
+      "commandId": "dfbb50d1-6a0a-4470-9f8b-d1a7725cdccc",
+      "deadline": "2026-11-24T08:52:03.581Z",
+      "ownerId": "67c4e1a4-d118-4f44-8196-654c67c19f95",
+      "localStartupBlocked": true,
+      "localStartupAfterDrain": true,
+      "pass": true
+    }
+  ],
+  "dispatches": [
+    {
+      "command_id": "4dcd41a4-36ee-4675-9e3b-afaea0ad12d0",
+      "status": "COMPLETED",
+      "execution_arn": "arn:aws:states:ap-southeast-1:926883321040:execution:argusai-staging-deadline:deadline-4dcd41a4-36ee-4675-9e3b-afaea0ad12d0"
+    },
+    {
+      "command_id": "75f91ac8-dbb6-4637-a364-c96f250311c9",
+      "status": "COMPLETED",
+      "execution_arn": "arn:aws:states:ap-southeast-1:926883321040:execution:argusai-staging-deadline:deadline-75f91ac8-dbb6-4637-a364-c96f250311c9"
+    },
+    {
+      "command_id": "dfbb50d1-6a0a-4470-9f8b-d1a7725cdccc",
+      "status": "COMPLETED",
+      "execution_arn": "arn:aws:states:ap-southeast-1:926883321040:execution:argusai-staging-deadline:deadline-dfbb50d1-6a0a-4470-9f8b-d1a7725cdccc"
+    }
+  ],
+  "completedAt": "2026-11-24T08:52:43.714Z"
+}

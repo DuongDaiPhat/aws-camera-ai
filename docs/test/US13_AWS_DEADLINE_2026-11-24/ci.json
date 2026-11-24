@@ -1,0 +1,1099 @@
+{
+  "conclusion": "success",
+  "headSha": "2c40d699e2de52ad48299432e0c7a568c429a196",
+  "jobs": [
+    {
+      "completedAt": "2026-11-24T08:42:57Z",
+      "conclusion": "success",
+      "databaseId": 138322124610,
+      "name": "Secret scan (AWS keys · .env · credentials)",
+      "startedAt": "2026-11-24T08:42:27Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-24T08:42:28Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-24T08:42:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:31Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-11-24T08:42:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:32Z",
+          "conclusion": "success",
+          "name": "Run pnpm/action-setup@v4",
+          "number": 3,
+          "startedAt": "2026-11-24T08:42:31Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:33Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 4,
+          "startedAt": "2026-11-24T08:42:32Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:50Z",
+          "conclusion": "success",
+          "name": "Cai dependency",
+          "number": 5,
+          "startedAt": "2026-11-24T08:42:33Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:51Z",
+          "conclusion": "success",
+          "name": "Quet secrets va file nhay cam",
+          "number": 6,
+          "startedAt": "2026-11-24T08:42:50Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:55Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 10,
+          "startedAt": "2026-11-24T08:42:51Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:55Z",
+          "conclusion": "success",
+          "name": "Post Run pnpm/action-setup@v4",
+          "number": 11,
+          "startedAt": "2026-11-24T08:42:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:55Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 12,
+          "startedAt": "2026-11-24T08:42:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:56Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 13,
+          "startedAt": "2026-11-24T08:42:55Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/45358456431/job/138322124610"
+    },
+    {
+      "completedAt": "2026-11-24T08:44:27Z",
+      "conclusion": "success",
+      "databaseId": 138322124854,
+      "name": "Node (lint · typecheck · test)",
+      "startedAt": "2026-11-24T08:42:27Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-24T08:42:28Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-24T08:42:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:31Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-11-24T08:42:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:32Z",
+          "conclusion": "success",
+          "name": "Run pnpm/action-setup@v4",
+          "number": 3,
+          "startedAt": "2026-11-24T08:42:31Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:32Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 4,
+          "startedAt": "2026-11-24T08:42:32Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:57Z",
+          "conclusion": "success",
+          "name": "Cai dependency",
+          "number": 5,
+          "startedAt": "2026-11-24T08:42:32Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:21Z",
+          "conclusion": "success",
+          "name": "Kiem tra dinh dang (Prettier)",
+          "number": 6,
+          "startedAt": "2026-11-24T08:42:57Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:28Z",
+          "conclusion": "success",
+          "name": "Lint (ESLint)",
+          "number": 7,
+          "startedAt": "2026-11-24T08:43:21Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:36Z",
+          "conclusion": "success",
+          "name": "Kiem tra kieu (TypeScript)",
+          "number": 8,
+          "startedAt": "2026-11-24T08:43:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:09Z",
+          "conclusion": "success",
+          "name": "Unit test",
+          "number": 9,
+          "startedAt": "2026-11-24T08:43:36Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:21Z",
+          "conclusion": "success",
+          "name": "Deadline PostgreSQL integration",
+          "number": 10,
+          "startedAt": "2026-11-24T08:44:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:23Z",
+          "conclusion": "success",
+          "name": "Unit test cong cu (Frigate config + su kien MQTT)",
+          "number": 11,
+          "startedAt": "2026-11-24T08:44:21Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:23Z",
+          "conclusion": "success",
+          "name": "Upload bao cao coverage",
+          "number": 12,
+          "startedAt": "2026-11-24T08:44:23Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:25Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 22,
+          "startedAt": "2026-11-24T08:44:23Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:25Z",
+          "conclusion": "success",
+          "name": "Post Run pnpm/action-setup@v4",
+          "number": 23,
+          "startedAt": "2026-11-24T08:44:25Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:25Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 24,
+          "startedAt": "2026-11-24T08:44:25Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:25Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 25,
+          "startedAt": "2026-11-24T08:44:25Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/45358456431/job/138322124854"
+    },
+    {
+      "completedAt": "2026-11-24T08:42:47Z",
+      "conclusion": "success",
+      "databaseId": 138322125035,
+      "name": "Deadline worker (unit test)",
+      "startedAt": "2026-11-24T08:42:27Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-24T08:42:30Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-24T08:42:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:37Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-11-24T08:42:30Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:38Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-python@v5",
+          "number": 3,
+          "startedAt": "2026-11-24T08:42:37Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:44Z",
+          "conclusion": "success",
+          "name": "Install dependencies and run unit tests",
+          "number": 4,
+          "startedAt": "2026-11-24T08:42:38Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:44Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-python@v5",
+          "number": 7,
+          "startedAt": "2026-11-24T08:42:44Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:44Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 8,
+          "startedAt": "2026-11-24T08:42:44Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:44Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 9,
+          "startedAt": "2026-11-24T08:42:44Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/45358456431/job/138322125035"
+    },
+    {
+      "completedAt": "2026-11-24T08:44:28Z",
+      "conclusion": "success",
+      "databaseId": 138322125103,
+      "name": "YOLO CPU (isolated lock · export smoke)",
+      "startedAt": "2026-11-24T08:42:27Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-24T08:42:28Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-24T08:42:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:30Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-11-24T08:42:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:13Z",
+          "conclusion": "success",
+          "name": "Build isolated training environment from hash lock",
+          "number": 3,
+          "startedAt": "2026-11-24T08:42:30Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:26Z",
+          "conclusion": "success",
+          "name": "Two-class ONNX export compatibility (untrained graph)",
+          "number": 4,
+          "startedAt": "2026-11-24T08:44:13Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:27Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 8,
+          "startedAt": "2026-11-24T08:44:26Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:27Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 9,
+          "startedAt": "2026-11-24T08:44:27Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/45358456431/job/138322125103"
+    },
+    {
+      "completedAt": "2026-11-24T08:44:00Z",
+      "conclusion": "success",
+      "databaseId": 138322125229,
+      "name": "Database (migration tren Postgres sach)",
+      "startedAt": "2026-11-24T08:42:27Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-24T08:42:28Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-24T08:42:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:41Z",
+          "conclusion": "success",
+          "name": "Initialize containers",
+          "number": 2,
+          "startedAt": "2026-11-24T08:42:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:44Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 3,
+          "startedAt": "2026-11-24T08:42:41Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:45Z",
+          "conclusion": "success",
+          "name": "Run pnpm/action-setup@v4",
+          "number": 4,
+          "startedAt": "2026-11-24T08:42:44Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:46Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 5,
+          "startedAt": "2026-11-24T08:42:45Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:17Z",
+          "conclusion": "success",
+          "name": "Run pnpm install --frozen-lockfile",
+          "number": 6,
+          "startedAt": "2026-11-24T08:42:46Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:27Z",
+          "conclusion": "success",
+          "name": "Sprint 3 fresh, seeded upgrade, replay and constraint gate",
+          "number": 7,
+          "startedAt": "2026-11-24T08:43:17Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:35Z",
+          "conclusion": "success",
+          "name": "US-18 durable incident and result-delivery integration",
+          "number": 8,
+          "startedAt": "2026-11-24T08:43:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:53Z",
+          "conclusion": "success",
+          "name": "Cai psql client",
+          "number": 9,
+          "startedAt": "2026-11-24T08:43:35Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:55Z",
+          "conclusion": "success",
+          "name": "Chay toan bo migration theo thu tu",
+          "number": 10,
+          "startedAt": "2026-11-24T08:43:53Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:55Z",
+          "conclusion": "success",
+          "name": "Kiem tra 14 bang da duoc tao",
+          "number": 11,
+          "startedAt": "2026-11-24T08:43:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:57Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 19,
+          "startedAt": "2026-11-24T08:43:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:57Z",
+          "conclusion": "success",
+          "name": "Post Run pnpm/action-setup@v4",
+          "number": 20,
+          "startedAt": "2026-11-24T08:43:57Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:58Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 21,
+          "startedAt": "2026-11-24T08:43:57Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:59Z",
+          "conclusion": "success",
+          "name": "Stop containers",
+          "number": 22,
+          "startedAt": "2026-11-24T08:43:58Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:59Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 23,
+          "startedAt": "2026-11-24T08:43:59Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/45358456431/job/138322125229"
+    },
+    {
+      "completedAt": "2026-11-24T08:43:30Z",
+      "conclusion": "success",
+      "databaseId": 138322125231,
+      "name": "Python (ruff · pytest) (ubuntu-22.04, requirements-dev.lock)",
+      "startedAt": "2026-11-24T08:42:27Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-24T08:42:28Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-24T08:42:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:31Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-11-24T08:42:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:41Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-python@v5",
+          "number": 3,
+          "startedAt": "2026-11-24T08:42:31Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:41Z",
+          "conclusion": "skipped",
+          "name": "Run astral-sh/setup-uv@v6",
+          "number": 4,
+          "startedAt": "2026-11-24T08:42:41Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:41Z",
+          "conclusion": "skipped",
+          "name": "Create pinned Windows Python environment",
+          "number": 5,
+          "startedAt": "2026-11-24T08:42:41Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:55Z",
+          "conclusion": "success",
+          "name": "Linux system libraries for shared OpenCV/MediaPipe",
+          "number": 6,
+          "startedAt": "2026-11-24T08:42:41Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:15Z",
+          "conclusion": "success",
+          "name": "Cai dependency",
+          "number": 7,
+          "startedAt": "2026-11-24T08:42:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:22Z",
+          "conclusion": "success",
+          "name": "Verify pinned model artifacts and shared runtime",
+          "number": 8,
+          "startedAt": "2026-11-24T08:43:15Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:22Z",
+          "conclusion": "success",
+          "name": "Lint (ruff)",
+          "number": 9,
+          "startedAt": "2026-11-24T08:43:22Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:22Z",
+          "conclusion": "success",
+          "name": "Kiem tra dinh dang (ruff format)",
+          "number": 10,
+          "startedAt": "2026-11-24T08:43:22Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:27Z",
+          "conclusion": "success",
+          "name": "Unit test (pytest + coverage)",
+          "number": 11,
+          "startedAt": "2026-11-24T08:43:22Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:27Z",
+          "conclusion": "success",
+          "name": "Full-camera bridge regression",
+          "number": 12,
+          "startedAt": "2026-11-24T08:43:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:27Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-python@v5",
+          "number": 23,
+          "startedAt": "2026-11-24T08:43:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:28Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 24,
+          "startedAt": "2026-11-24T08:43:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:28Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 25,
+          "startedAt": "2026-11-24T08:43:28Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/45358456431/job/138322125231"
+    },
+    {
+      "completedAt": "2026-11-24T08:42:38Z",
+      "conclusion": "success",
+      "databaseId": 138322125310,
+      "name": "Face worker (unit test)",
+      "startedAt": "2026-11-24T08:42:27Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-24T08:42:29Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-24T08:42:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:31Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-11-24T08:42:29Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:31Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-python@v5",
+          "number": 3,
+          "startedAt": "2026-11-24T08:42:31Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:35Z",
+          "conclusion": "success",
+          "name": "Install dependencies and run unit tests",
+          "number": 4,
+          "startedAt": "2026-11-24T08:42:31Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:35Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-python@v5",
+          "number": 7,
+          "startedAt": "2026-11-24T08:42:35Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:35Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 8,
+          "startedAt": "2026-11-24T08:42:35Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:35Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 9,
+          "startedAt": "2026-11-24T08:42:35Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/45358456431/job/138322125310"
+    },
+    {
+      "completedAt": "2026-11-24T08:44:09Z",
+      "conclusion": "success",
+      "databaseId": 138322125326,
+      "name": "Python (ruff · pytest) (windows-latest, requirements-dev-windows.lock)",
+      "startedAt": "2026-11-24T08:42:27Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-24T08:42:29Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-24T08:42:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:39Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-11-24T08:42:29Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:39Z",
+          "conclusion": "skipped",
+          "name": "Run actions/setup-python@v5",
+          "number": 3,
+          "startedAt": "2026-11-24T08:42:39Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:44Z",
+          "conclusion": "success",
+          "name": "Run astral-sh/setup-uv@v6",
+          "number": 4,
+          "startedAt": "2026-11-24T08:42:39Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:58Z",
+          "conclusion": "success",
+          "name": "Create pinned Windows Python environment",
+          "number": 5,
+          "startedAt": "2026-11-24T08:42:44Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:58Z",
+          "conclusion": "skipped",
+          "name": "Linux system libraries for shared OpenCV/MediaPipe",
+          "number": 6,
+          "startedAt": "2026-11-24T08:42:58Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:37Z",
+          "conclusion": "success",
+          "name": "Cai dependency",
+          "number": 7,
+          "startedAt": "2026-11-24T08:42:58Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:53Z",
+          "conclusion": "success",
+          "name": "Verify pinned model artifacts and shared runtime",
+          "number": 8,
+          "startedAt": "2026-11-24T08:43:37Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:53Z",
+          "conclusion": "success",
+          "name": "Lint (ruff)",
+          "number": 9,
+          "startedAt": "2026-11-24T08:43:53Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:54Z",
+          "conclusion": "success",
+          "name": "Kiem tra dinh dang (ruff format)",
+          "number": 10,
+          "startedAt": "2026-11-24T08:43:53Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:03Z",
+          "conclusion": "success",
+          "name": "Unit test (pytest + coverage)",
+          "number": 11,
+          "startedAt": "2026-11-24T08:43:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:03Z",
+          "conclusion": "success",
+          "name": "Full-camera bridge regression",
+          "number": 12,
+          "startedAt": "2026-11-24T08:44:03Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:05Z",
+          "conclusion": "success",
+          "name": "Post Run astral-sh/setup-uv@v6",
+          "number": 23,
+          "startedAt": "2026-11-24T08:44:03Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:07Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 24,
+          "startedAt": "2026-11-24T08:44:05Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:44:07Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 25,
+          "startedAt": "2026-11-24T08:44:07Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/45358456431/job/138322125326"
+    },
+    {
+      "completedAt": "2026-11-24T08:47:52Z",
+      "conclusion": "success",
+      "databaseId": 138322125439,
+      "name": "Docker (compose config · build image)",
+      "startedAt": "2026-11-24T08:42:27Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-24T08:42:29Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-24T08:42:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:32Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-11-24T08:42:29Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:32Z",
+          "conclusion": "success",
+          "name": "Tao .env tu mau",
+          "number": 3,
+          "startedAt": "2026-11-24T08:42:32Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:32Z",
+          "conclusion": "success",
+          "name": "Kiem tra docker-compose.yml hop le",
+          "number": 4,
+          "startedAt": "2026-11-24T08:42:32Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:37Z",
+          "conclusion": "success",
+          "name": "Run docker/setup-buildx-action@v3",
+          "number": 5,
+          "startedAt": "2026-11-24T08:42:32Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:43Z",
+          "conclusion": "success",
+          "name": "Build image AI service",
+          "number": 6,
+          "startedAt": "2026-11-24T08:42:37Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:45:18Z",
+          "conclusion": "success",
+          "name": "Build image orchestrator (production)",
+          "number": 7,
+          "startedAt": "2026-11-24T08:43:43Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:47:30Z",
+          "conclusion": "success",
+          "name": "Build image web (production)",
+          "number": 8,
+          "startedAt": "2026-11-24T08:45:18Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:47:32Z",
+          "conclusion": "success",
+          "name": "Post Build image web (production)",
+          "number": 12,
+          "startedAt": "2026-11-24T08:47:30Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:47:33Z",
+          "conclusion": "success",
+          "name": "Post Build image orchestrator (production)",
+          "number": 13,
+          "startedAt": "2026-11-24T08:47:32Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:47:34Z",
+          "conclusion": "success",
+          "name": "Post Build image AI service",
+          "number": 14,
+          "startedAt": "2026-11-24T08:47:33Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:47:50Z",
+          "conclusion": "success",
+          "name": "Post Run docker/setup-buildx-action@v3",
+          "number": 15,
+          "startedAt": "2026-11-24T08:47:34Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:47:50Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 16,
+          "startedAt": "2026-11-24T08:47:50Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:47:50Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 17,
+          "startedAt": "2026-11-24T08:47:50Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/45358456431/job/138322125439"
+    },
+    {
+      "completedAt": "2026-11-24T08:43:12Z",
+      "conclusion": "success",
+      "databaseId": 138322125543,
+      "name": "OpenAPI (lint spec)",
+      "startedAt": "2026-11-24T08:42:27Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-24T08:42:30Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-24T08:42:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:35Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-11-24T08:42:30Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:36Z",
+          "conclusion": "success",
+          "name": "Run pnpm/action-setup@v4",
+          "number": 3,
+          "startedAt": "2026-11-24T08:42:35Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:42:40Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 4,
+          "startedAt": "2026-11-24T08:42:36Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:03Z",
+          "conclusion": "success",
+          "name": "Cai dependency",
+          "number": 5,
+          "startedAt": "2026-11-24T08:42:40Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:04Z",
+          "conclusion": "success",
+          "name": "Lint spec orchestrator va AI service",
+          "number": 6,
+          "startedAt": "2026-11-24T08:43:03Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:06Z",
+          "conclusion": "success",
+          "name": "Generated contracts must match both frozen specs",
+          "number": 7,
+          "startedAt": "2026-11-24T08:43:04Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:09Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 12,
+          "startedAt": "2026-11-24T08:43:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:09Z",
+          "conclusion": "success",
+          "name": "Post Run pnpm/action-setup@v4",
+          "number": 13,
+          "startedAt": "2026-11-24T08:43:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:09Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 14,
+          "startedAt": "2026-11-24T08:43:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:43:09Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-11-24T08:43:09Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/45358456431/job/138322125543"
+    },
+    {
+      "completedAt": "2026-11-24T08:42:24Z",
+      "conclusion": "skipped",
+      "databaseId": 138322127228,
+      "name": "Commit message",
+      "startedAt": "2026-11-24T08:42:25Z",
+      "status": "completed",
+      "steps": [],
+      "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/45358456431/job/138322127228"
+    },
+    {
+      "completedAt": "2026-11-24T08:47:57Z",
+      "conclusion": "success",
+      "databaseId": 138324799383,
+      "name": "CI xanh",
+      "startedAt": "2026-11-24T08:47:54Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-24T08:47:55Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-24T08:47:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:47:55Z",
+          "conclusion": "success",
+          "name": "Check mandatory jobs",
+          "number": 2,
+          "startedAt": "2026-11-24T08:47:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-24T08:47:55Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 3,
+          "startedAt": "2026-11-24T08:47:55Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/45358456431/job/138324799383"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/DuongDaiPhat/aws-camera-ai/actions/runs/45358456431"
+}

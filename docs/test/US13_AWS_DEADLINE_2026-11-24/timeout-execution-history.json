@@ -1,0 +1,363 @@
+{
+  "events": [
+    {
+      "timestamp": "2026-11-24T15:51:25.523000+07:00",
+      "type": "ExecutionStarted",
+      "id": 1,
+      "previousEventId": 0,
+      "executionStartedEventDetails": {
+        "input": "{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"}",
+        "inputDetails": {
+          "truncated": false
+        },
+        "roleArn": "arn:aws:iam::926883321040:role/ArgusAI-StepFunctions-Staging-Deadline"
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:25.544000+07:00",
+      "type": "PassStateEntered",
+      "id": 2,
+      "previousEventId": 0,
+      "stateEnteredEventDetails": {
+        "name": "Init",
+        "input": "{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:25.544000+07:00",
+      "type": "PassStateExited",
+      "id": 3,
+      "previousEventId": 2,
+      "stateExitedEventDetails": {
+        "name": "Init",
+        "output": "{\"notDueRetries\":0,\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:25.544000+07:00",
+      "type": "WaitStateEntered",
+      "id": 4,
+      "previousEventId": 3,
+      "stateEnteredEventDetails": {
+        "name": "WaitUntilDeadline",
+        "input": "{\"notDueRetries\":0,\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:25.544000+07:00",
+      "type": "WaitStateExited",
+      "id": 5,
+      "previousEventId": 4,
+      "stateExitedEventDetails": {
+        "name": "WaitUntilDeadline",
+        "output": "{\"notDueRetries\":0,\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:25.544000+07:00",
+      "type": "TaskStateEntered",
+      "id": 6,
+      "previousEventId": 5,
+      "stateEnteredEventDetails": {
+        "name": "ApplyDeadline",
+        "input": "{\"notDueRetries\":0,\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:25.544000+07:00",
+      "type": "TaskScheduled",
+      "id": 7,
+      "previousEventId": 6,
+      "taskScheduledEventDetails": {
+        "resourceType": "lambda",
+        "resource": "invoke",
+        "region": "ap-southeast-1",
+        "parameters": "{\"FunctionName\":\"arn:aws:lambda:ap-southeast-1:926883321040:function:argusai-staging-deadline:live\",\"Payload\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"}}",
+        "timeoutInSeconds": 30
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:25.579000+07:00",
+      "type": "TaskStarted",
+      "id": 8,
+      "previousEventId": 7,
+      "taskStartedEventDetails": {
+        "resourceType": "lambda",
+        "resource": "invoke"
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:25.774000+07:00",
+      "type": "TaskSucceeded",
+      "id": 9,
+      "previousEventId": 8,
+      "taskSucceededEventDetails": {
+        "resourceType": "lambda",
+        "resource": "invoke",
+        "output": "{\"ExecutedVersion\":\"2\",\"Payload\":{\"code\":\"NOT_DUE\",\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"message\":\"Sự kiện chưa đến hạn leo thang theo đồng hồ cơ sở dữ liệu.\"},\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"X-Amz-Executed-Version\":[\"2\"],\"x-amzn-Remapped-Content-Length\":[\"0\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\"],\"Content-Length\":[\"153\"],\"Date\":[\"Tue, 24 Nov 2026 08:51:25 GMT\"],\"X-Amzn-Trace-Id\":[\"Root=1-6b05500d-0f86aab83ce152b626991e33;Parent=2dcfc67cf9e29bee;Sampled=0;Lineage=1:11387963:0\"],\"Content-Type\":[\"application/json\"]},\"HttpHeaders\":{\"Connection\":\"keep-alive\",\"Content-Length\":\"153\",\"Content-Type\":\"application/json\",\"Date\":\"Tue, 24 Nov 2026 08:51:25 GMT\",\"X-Amz-Executed-Version\":\"2\",\"x-amzn-Remapped-Content-Length\":\"0\",\"x-amzn-RequestId\":\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\",\"X-Amzn-Trace-Id\":\"Root=1-6b05500d-0f86aab83ce152b626991e33;Parent=2dcfc67cf9e29bee;Sampled=0;Lineage=1:11387963:0\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\"},\"StatusCode\":200}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:25.786000+07:00",
+      "type": "TaskStateExited",
+      "id": 10,
+      "previousEventId": 9,
+      "stateExitedEventDetails": {
+        "name": "ApplyDeadline",
+        "output": "{\"notDueRetries\":0,\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"},\"call\":{\"ExecutedVersion\":\"2\",\"Payload\":{\"code\":\"NOT_DUE\",\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"message\":\"Sự kiện chưa đến hạn leo thang theo đồng hồ cơ sở dữ liệu.\"},\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"X-Amz-Executed-Version\":[\"2\"],\"x-amzn-Remapped-Content-Length\":[\"0\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\"],\"Content-Length\":[\"153\"],\"Date\":[\"Tue, 24 Nov 2026 08:51:25 GMT\"],\"X-Amzn-Trace-Id\":[\"Root=1-6b05500d-0f86aab83ce152b626991e33;Parent=2dcfc67cf9e29bee;Sampled=0;Lineage=1:11387963:0\"],\"Content-Type\":[\"application/json\"]},\"HttpHeaders\":{\"Connection\":\"keep-alive\",\"Content-Length\":\"153\",\"Content-Type\":\"application/json\",\"Date\":\"Tue, 24 Nov 2026 08:51:25 GMT\",\"X-Amz-Executed-Version\":\"2\",\"x-amzn-Remapped-Content-Length\":\"0\",\"x-amzn-RequestId\":\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\",\"X-Amzn-Trace-Id\":\"Root=1-6b05500d-0f86aab83ce152b626991e33;Parent=2dcfc67cf9e29bee;Sampled=0;Lineage=1:11387963:0\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\"},\"StatusCode\":200}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:25.786000+07:00",
+      "type": "ChoiceStateEntered",
+      "id": 11,
+      "previousEventId": 10,
+      "stateEnteredEventDetails": {
+        "name": "CheckDecision",
+        "input": "{\"notDueRetries\":0,\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"},\"call\":{\"ExecutedVersion\":\"2\",\"Payload\":{\"code\":\"NOT_DUE\",\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"message\":\"Sự kiện chưa đến hạn leo thang theo đồng hồ cơ sở dữ liệu.\"},\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"X-Amz-Executed-Version\":[\"2\"],\"x-amzn-Remapped-Content-Length\":[\"0\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\"],\"Content-Length\":[\"153\"],\"Date\":[\"Tue, 24 Nov 2026 08:51:25 GMT\"],\"X-Amzn-Trace-Id\":[\"Root=1-6b05500d-0f86aab83ce152b626991e33;Parent=2dcfc67cf9e29bee;Sampled=0;Lineage=1:11387963:0\"],\"Content-Type\":[\"application/json\"]},\"HttpHeaders\":{\"Connection\":\"keep-alive\",\"Content-Length\":\"153\",\"Content-Type\":\"application/json\",\"Date\":\"Tue, 24 Nov 2026 08:51:25 GMT\",\"X-Amz-Executed-Version\":\"2\",\"x-amzn-Remapped-Content-Length\":\"0\",\"x-amzn-RequestId\":\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\",\"X-Amzn-Trace-Id\":\"Root=1-6b05500d-0f86aab83ce152b626991e33;Parent=2dcfc67cf9e29bee;Sampled=0;Lineage=1:11387963:0\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\"},\"StatusCode\":200}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:25.786000+07:00",
+      "type": "ChoiceStateExited",
+      "id": 12,
+      "previousEventId": 11,
+      "stateExitedEventDetails": {
+        "name": "CheckDecision",
+        "output": "{\"notDueRetries\":0,\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"},\"call\":{\"ExecutedVersion\":\"2\",\"Payload\":{\"code\":\"NOT_DUE\",\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"message\":\"Sự kiện chưa đến hạn leo thang theo đồng hồ cơ sở dữ liệu.\"},\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"X-Amz-Executed-Version\":[\"2\"],\"x-amzn-Remapped-Content-Length\":[\"0\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\"],\"Content-Length\":[\"153\"],\"Date\":[\"Tue, 24 Nov 2026 08:51:25 GMT\"],\"X-Amzn-Trace-Id\":[\"Root=1-6b05500d-0f86aab83ce152b626991e33;Parent=2dcfc67cf9e29bee;Sampled=0;Lineage=1:11387963:0\"],\"Content-Type\":[\"application/json\"]},\"HttpHeaders\":{\"Connection\":\"keep-alive\",\"Content-Length\":\"153\",\"Content-Type\":\"application/json\",\"Date\":\"Tue, 24 Nov 2026 08:51:25 GMT\",\"X-Amz-Executed-Version\":\"2\",\"x-amzn-Remapped-Content-Length\":\"0\",\"x-amzn-RequestId\":\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\",\"X-Amzn-Trace-Id\":\"Root=1-6b05500d-0f86aab83ce152b626991e33;Parent=2dcfc67cf9e29bee;Sampled=0;Lineage=1:11387963:0\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\"},\"StatusCode\":200}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:25.786000+07:00",
+      "type": "PassStateEntered",
+      "id": 13,
+      "previousEventId": 12,
+      "stateEnteredEventDetails": {
+        "name": "CountRetry",
+        "input": "{\"notDueRetries\":0,\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"},\"call\":{\"ExecutedVersion\":\"2\",\"Payload\":{\"code\":\"NOT_DUE\",\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"message\":\"Sự kiện chưa đến hạn leo thang theo đồng hồ cơ sở dữ liệu.\"},\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"X-Amz-Executed-Version\":[\"2\"],\"x-amzn-Remapped-Content-Length\":[\"0\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\"],\"Content-Length\":[\"153\"],\"Date\":[\"Tue, 24 Nov 2026 08:51:25 GMT\"],\"X-Amzn-Trace-Id\":[\"Root=1-6b05500d-0f86aab83ce152b626991e33;Parent=2dcfc67cf9e29bee;Sampled=0;Lineage=1:11387963:0\"],\"Content-Type\":[\"application/json\"]},\"HttpHeaders\":{\"Connection\":\"keep-alive\",\"Content-Length\":\"153\",\"Content-Type\":\"application/json\",\"Date\":\"Tue, 24 Nov 2026 08:51:25 GMT\",\"X-Amz-Executed-Version\":\"2\",\"x-amzn-Remapped-Content-Length\":\"0\",\"x-amzn-RequestId\":\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\",\"X-Amzn-Trace-Id\":\"Root=1-6b05500d-0f86aab83ce152b626991e33;Parent=2dcfc67cf9e29bee;Sampled=0;Lineage=1:11387963:0\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"fd2c542c-dd52-4b9f-ba85-d311d2166d29\"},\"StatusCode\":200}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:25.786000+07:00",
+      "type": "PassStateExited",
+      "id": 14,
+      "previousEventId": 13,
+      "stateExitedEventDetails": {
+        "name": "CountRetry",
+        "output": "{\"notDueRetries\":1,\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:25.786000+07:00",
+      "type": "WaitStateEntered",
+      "id": 15,
+      "previousEventId": 14,
+      "stateEnteredEventDetails": {
+        "name": "WaitUntilRetry",
+        "input": "{\"notDueRetries\":1,\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:45.825000+07:00",
+      "type": "WaitStateExited",
+      "id": 16,
+      "previousEventId": 15,
+      "stateExitedEventDetails": {
+        "name": "WaitUntilRetry",
+        "output": "{\"notDueRetries\":1,\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:45.825000+07:00",
+      "type": "WaitStateEntered",
+      "id": 17,
+      "previousEventId": 16,
+      "stateEnteredEventDetails": {
+        "name": "WaitOneSecond",
+        "input": "{\"notDueRetries\":1,\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:46.855000+07:00",
+      "type": "WaitStateExited",
+      "id": 18,
+      "previousEventId": 17,
+      "stateExitedEventDetails": {
+        "name": "WaitOneSecond",
+        "output": "{\"notDueRetries\":1,\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:46.855000+07:00",
+      "type": "TaskStateEntered",
+      "id": 19,
+      "previousEventId": 18,
+      "stateEnteredEventDetails": {
+        "name": "ApplyDeadline",
+        "input": "{\"notDueRetries\":1,\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:46.855000+07:00",
+      "type": "TaskScheduled",
+      "id": 20,
+      "previousEventId": 19,
+      "taskScheduledEventDetails": {
+        "resourceType": "lambda",
+        "resource": "invoke",
+        "region": "ap-southeast-1",
+        "parameters": "{\"FunctionName\":\"arn:aws:lambda:ap-southeast-1:926883321040:function:argusai-staging-deadline:live\",\"Payload\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"}}",
+        "timeoutInSeconds": 30
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:46.894000+07:00",
+      "type": "TaskStarted",
+      "id": 21,
+      "previousEventId": 20,
+      "taskStartedEventDetails": {
+        "resourceType": "lambda",
+        "resource": "invoke"
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:47.395000+07:00",
+      "type": "TaskSucceeded",
+      "id": 22,
+      "previousEventId": 21,
+      "taskSucceededEventDetails": {
+        "resourceType": "lambda",
+        "resource": "invoke",
+        "output": "{\"ExecutedVersion\":\"2\",\"Payload\":{\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"disposition\":\"APPLIED\",\"reason\":\"ESCALATED\",\"aggregateVersion\":2},\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"X-Amz-Executed-Version\":[\"2\"],\"x-amzn-Remapped-Content-Length\":[\"0\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"2a49beb5-b382-40c0-94ce-577a371312ad\"],\"Content-Length\":[\"125\"],\"Date\":[\"Tue, 24 Nov 2026 08:51:47 GMT\"],\"X-Amzn-Trace-Id\":[\"Root=1-6b055022-7238e853729bd58579714d06;Parent=227bcaa720fad2fd;Sampled=0;Lineage=1:11387963:0\"],\"Content-Type\":[\"application/json\"]},\"HttpHeaders\":{\"Connection\":\"keep-alive\",\"Content-Length\":\"125\",\"Content-Type\":\"application/json\",\"Date\":\"Tue, 24 Nov 2026 08:51:47 GMT\",\"X-Amz-Executed-Version\":\"2\",\"x-amzn-Remapped-Content-Length\":\"0\",\"x-amzn-RequestId\":\"2a49beb5-b382-40c0-94ce-577a371312ad\",\"X-Amzn-Trace-Id\":\"Root=1-6b055022-7238e853729bd58579714d06;Parent=227bcaa720fad2fd;Sampled=0;Lineage=1:11387963:0\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"2a49beb5-b382-40c0-94ce-577a371312ad\"},\"StatusCode\":200}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:47.406000+07:00",
+      "type": "TaskStateExited",
+      "id": 23,
+      "previousEventId": 22,
+      "stateExitedEventDetails": {
+        "name": "ApplyDeadline",
+        "output": "{\"notDueRetries\":1,\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"},\"call\":{\"ExecutedVersion\":\"2\",\"Payload\":{\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"disposition\":\"APPLIED\",\"reason\":\"ESCALATED\",\"aggregateVersion\":2},\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"X-Amz-Executed-Version\":[\"2\"],\"x-amzn-Remapped-Content-Length\":[\"0\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"2a49beb5-b382-40c0-94ce-577a371312ad\"],\"Content-Length\":[\"125\"],\"Date\":[\"Tue, 24 Nov 2026 08:51:47 GMT\"],\"X-Amzn-Trace-Id\":[\"Root=1-6b055022-7238e853729bd58579714d06;Parent=227bcaa720fad2fd;Sampled=0;Lineage=1:11387963:0\"],\"Content-Type\":[\"application/json\"]},\"HttpHeaders\":{\"Connection\":\"keep-alive\",\"Content-Length\":\"125\",\"Content-Type\":\"application/json\",\"Date\":\"Tue, 24 Nov 2026 08:51:47 GMT\",\"X-Amz-Executed-Version\":\"2\",\"x-amzn-Remapped-Content-Length\":\"0\",\"x-amzn-RequestId\":\"2a49beb5-b382-40c0-94ce-577a371312ad\",\"X-Amzn-Trace-Id\":\"Root=1-6b055022-7238e853729bd58579714d06;Parent=227bcaa720fad2fd;Sampled=0;Lineage=1:11387963:0\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"2a49beb5-b382-40c0-94ce-577a371312ad\"},\"StatusCode\":200}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:47.406000+07:00",
+      "type": "ChoiceStateEntered",
+      "id": 24,
+      "previousEventId": 23,
+      "stateEnteredEventDetails": {
+        "name": "CheckDecision",
+        "input": "{\"notDueRetries\":1,\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"},\"call\":{\"ExecutedVersion\":\"2\",\"Payload\":{\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"disposition\":\"APPLIED\",\"reason\":\"ESCALATED\",\"aggregateVersion\":2},\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"X-Amz-Executed-Version\":[\"2\"],\"x-amzn-Remapped-Content-Length\":[\"0\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"2a49beb5-b382-40c0-94ce-577a371312ad\"],\"Content-Length\":[\"125\"],\"Date\":[\"Tue, 24 Nov 2026 08:51:47 GMT\"],\"X-Amzn-Trace-Id\":[\"Root=1-6b055022-7238e853729bd58579714d06;Parent=227bcaa720fad2fd;Sampled=0;Lineage=1:11387963:0\"],\"Content-Type\":[\"application/json\"]},\"HttpHeaders\":{\"Connection\":\"keep-alive\",\"Content-Length\":\"125\",\"Content-Type\":\"application/json\",\"Date\":\"Tue, 24 Nov 2026 08:51:47 GMT\",\"X-Amz-Executed-Version\":\"2\",\"x-amzn-Remapped-Content-Length\":\"0\",\"x-amzn-RequestId\":\"2a49beb5-b382-40c0-94ce-577a371312ad\",\"X-Amzn-Trace-Id\":\"Root=1-6b055022-7238e853729bd58579714d06;Parent=227bcaa720fad2fd;Sampled=0;Lineage=1:11387963:0\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"2a49beb5-b382-40c0-94ce-577a371312ad\"},\"StatusCode\":200}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:47.406000+07:00",
+      "type": "ChoiceStateExited",
+      "id": 25,
+      "previousEventId": 24,
+      "stateExitedEventDetails": {
+        "name": "CheckDecision",
+        "output": "{\"notDueRetries\":1,\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"},\"call\":{\"ExecutedVersion\":\"2\",\"Payload\":{\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"disposition\":\"APPLIED\",\"reason\":\"ESCALATED\",\"aggregateVersion\":2},\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"X-Amz-Executed-Version\":[\"2\"],\"x-amzn-Remapped-Content-Length\":[\"0\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"2a49beb5-b382-40c0-94ce-577a371312ad\"],\"Content-Length\":[\"125\"],\"Date\":[\"Tue, 24 Nov 2026 08:51:47 GMT\"],\"X-Amzn-Trace-Id\":[\"Root=1-6b055022-7238e853729bd58579714d06;Parent=227bcaa720fad2fd;Sampled=0;Lineage=1:11387963:0\"],\"Content-Type\":[\"application/json\"]},\"HttpHeaders\":{\"Connection\":\"keep-alive\",\"Content-Length\":\"125\",\"Content-Type\":\"application/json\",\"Date\":\"Tue, 24 Nov 2026 08:51:47 GMT\",\"X-Amz-Executed-Version\":\"2\",\"x-amzn-Remapped-Content-Length\":\"0\",\"x-amzn-RequestId\":\"2a49beb5-b382-40c0-94ce-577a371312ad\",\"X-Amzn-Trace-Id\":\"Root=1-6b055022-7238e853729bd58579714d06;Parent=227bcaa720fad2fd;Sampled=0;Lineage=1:11387963:0\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"2a49beb5-b382-40c0-94ce-577a371312ad\"},\"StatusCode\":200}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:47.406000+07:00",
+      "type": "SucceedStateEntered",
+      "id": 26,
+      "previousEventId": 25,
+      "stateEnteredEventDetails": {
+        "name": "Done",
+        "input": "{\"notDueRetries\":1,\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"},\"call\":{\"ExecutedVersion\":\"2\",\"Payload\":{\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"disposition\":\"APPLIED\",\"reason\":\"ESCALATED\",\"aggregateVersion\":2},\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"X-Amz-Executed-Version\":[\"2\"],\"x-amzn-Remapped-Content-Length\":[\"0\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"2a49beb5-b382-40c0-94ce-577a371312ad\"],\"Content-Length\":[\"125\"],\"Date\":[\"Tue, 24 Nov 2026 08:51:47 GMT\"],\"X-Amzn-Trace-Id\":[\"Root=1-6b055022-7238e853729bd58579714d06;Parent=227bcaa720fad2fd;Sampled=0;Lineage=1:11387963:0\"],\"Content-Type\":[\"application/json\"]},\"HttpHeaders\":{\"Connection\":\"keep-alive\",\"Content-Length\":\"125\",\"Content-Type\":\"application/json\",\"Date\":\"Tue, 24 Nov 2026 08:51:47 GMT\",\"X-Amz-Executed-Version\":\"2\",\"x-amzn-Remapped-Content-Length\":\"0\",\"x-amzn-RequestId\":\"2a49beb5-b382-40c0-94ce-577a371312ad\",\"X-Amzn-Trace-Id\":\"Root=1-6b055022-7238e853729bd58579714d06;Parent=227bcaa720fad2fd;Sampled=0;Lineage=1:11387963:0\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"2a49beb5-b382-40c0-94ce-577a371312ad\"},\"StatusCode\":200}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:47.406000+07:00",
+      "type": "SucceedStateExited",
+      "id": 27,
+      "previousEventId": 26,
+      "stateExitedEventDetails": {
+        "name": "Done",
+        "output": "{\"notDueRetries\":1,\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"},\"call\":{\"ExecutedVersion\":\"2\",\"Payload\":{\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"disposition\":\"APPLIED\",\"reason\":\"ESCALATED\",\"aggregateVersion\":2},\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"X-Amz-Executed-Version\":[\"2\"],\"x-amzn-Remapped-Content-Length\":[\"0\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"2a49beb5-b382-40c0-94ce-577a371312ad\"],\"Content-Length\":[\"125\"],\"Date\":[\"Tue, 24 Nov 2026 08:51:47 GMT\"],\"X-Amzn-Trace-Id\":[\"Root=1-6b055022-7238e853729bd58579714d06;Parent=227bcaa720fad2fd;Sampled=0;Lineage=1:11387963:0\"],\"Content-Type\":[\"application/json\"]},\"HttpHeaders\":{\"Connection\":\"keep-alive\",\"Content-Length\":\"125\",\"Content-Type\":\"application/json\",\"Date\":\"Tue, 24 Nov 2026 08:51:47 GMT\",\"X-Amz-Executed-Version\":\"2\",\"x-amzn-Remapped-Content-Length\":\"0\",\"x-amzn-RequestId\":\"2a49beb5-b382-40c0-94ce-577a371312ad\",\"X-Amzn-Trace-Id\":\"Root=1-6b055022-7238e853729bd58579714d06;Parent=227bcaa720fad2fd;Sampled=0;Lineage=1:11387963:0\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"2a49beb5-b382-40c0-94ce-577a371312ad\"},\"StatusCode\":200}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-24T15:51:47.435000+07:00",
+      "type": "ExecutionSucceeded",
+      "id": 28,
+      "previousEventId": 27,
+      "executionSucceededEventDetails": {
+        "output": "{\"notDueRetries\":1,\"retryAt\":\"2026-11-24T08:51:45.416Z\",\"command\":{\"schemaVersion\":1,\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"eventId\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"deadlineVersion\":1,\"expectedDeadlineAt\":\"2026-11-24T08:51:24.417Z\"},\"call\":{\"ExecutedVersion\":\"2\",\"Payload\":{\"commandId\":\"75f91ac8-dbb6-4637-a364-c96f250311c9\",\"disposition\":\"APPLIED\",\"reason\":\"ESCALATED\",\"aggregateVersion\":2},\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"X-Amz-Executed-Version\":[\"2\"],\"x-amzn-Remapped-Content-Length\":[\"0\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"2a49beb5-b382-40c0-94ce-577a371312ad\"],\"Content-Length\":[\"125\"],\"Date\":[\"Tue, 24 Nov 2026 08:51:47 GMT\"],\"X-Amzn-Trace-Id\":[\"Root=1-6b055022-7238e853729bd58579714d06;Parent=227bcaa720fad2fd;Sampled=0;Lineage=1:11387963:0\"],\"Content-Type\":[\"application/json\"]},\"HttpHeaders\":{\"Connection\":\"keep-alive\",\"Content-Length\":\"125\",\"Content-Type\":\"application/json\",\"Date\":\"Tue, 24 Nov 2026 08:51:47 GMT\",\"X-Amz-Executed-Version\":\"2\",\"x-amzn-Remapped-Content-Length\":\"0\",\"x-amzn-RequestId\":\"2a49beb5-b382-40c0-94ce-577a371312ad\",\"X-Amzn-Trace-Id\":\"Root=1-6b055022-7238e853729bd58579714d06;Parent=227bcaa720fad2fd;Sampled=0;Lineage=1:11387963:0\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"2a49beb5-b382-40c0-94ce-577a371312ad\"},\"StatusCode\":200}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    }
+  ]
+}

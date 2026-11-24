@@ -1,0 +1,5 @@
+{
+  "Status": "Success",
+  "ResponseCode": 0,
+  "StandardOutputContent": "LOCAL_CONTAINER_HEALTH_PASS\nDRIVER_SWITCH_COUNTS=[{\"id\":\"582b1161-5776-441f-9d65-7df44a25c527\",\"status\":\"RESOLVED\",\"intents\":0},{\"id\":\"9c07d090-00a4-4a92-a2fd-a979c6d4dc7e\",\"status\":\"ESCALATED\",\"intents\":1},{\"id\":\"bdd4b471-da01-4585-9f5d-6a5bc4ddbbd5\",\"status\":\"ESCALATED\",\"intents\":1}]\nRESTORED_BASELINE\n{\"version\":\"a93ec4a6e0c42ecc756daef10c3fa48f11b4d641-45351592388-1\",\"driver\":\"stepfunctions\",\"dryRun\":\"false\"}\n"
+}
