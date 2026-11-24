@@ -32,7 +32,7 @@ export const DEFAULT_FACE_TRACK_OPTIMIZATION_CONFIG: FaceTrackOptimizationConfig
   enabled: true,
   qualityGateEnabled: true,
   qualityGateFailOpen: false,
-  qualityGateTimeoutMs: 2000,
+  qualityGateTimeoutMs: 3500,
   bestShotWindowMs: 4000,
   bestShotMaxSamples: 32,
   bestShotEarlyDispatchScore: 0.95,
@@ -53,7 +53,7 @@ export const DEFAULT_FACE_TRACK_OPTIMIZATION_CONFIG: FaceTrackOptimizationConfig
   spatialReidMinProximityScore: 0.35,
   spatialReidMinAppearanceSimilarity: 0.78,
   trackStateTtlMs: 120000,
-  maxConcurrentAssessPerCamera: 2,
+  maxConcurrentAssessPerCamera: 1,
 };
 
 function readBoolean(config: ConfigService | undefined, key: string, fallback: boolean): boolean {

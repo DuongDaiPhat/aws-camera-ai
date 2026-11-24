@@ -240,37 +240,45 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     return [...new Set(after.current_zones ?? [])];
   }
 
-  private async buildEventContext(after: FrigateEventAfterDto): Promise<EventContext> {
+  private async buildEventContext(
+    messageType: FrigateMessageType,
+    after: FrigateEventAfterDto,
+  ): Promise<EventContext> {
     const camera = await this.eventsRepository.findCameraBySlug(after.camera);
     const cameraId = camera?.id ?? null;
     const activeZones = await this.findActiveZones(camera, after);
     const zone = activeZones[0];
+    const isRestrictedZone = zone !== undefined;
     const rawKey = `frigate:${after.camera}:${after.id}`;
     const now = Date.now();
     const existing = this.continuationKeys.get(rawKey);
-    let dedupKey = existing && existing.expiresAt > now ? existing.dedupKey : rawKey;
-    if (dedupKey === rawKey) {
+    let dedupKey: string;
+    if (existing && existing.expiresAt > now) {
+      dedupKey = existing.dedupKey;
+      this.continuationKeys.delete(rawKey);
+      this.continuationKeys.set(rawKey, existing);
+    } else if (messageType === 'end') {
+      if (existing) this.continuationKeys.delete(rawKey);
+      dedupKey = rawKey;
+    } else {
       const verified = await this.faceCoordinator?.resolveContinuationDedupKey?.(
         after,
         camera,
-        1500,
+        isRestrictedZone ? 0 : 1000,
       );
-      if (verified) dedupKey = verified;
-    }
-    if (dedupKey !== rawKey) {
+      dedupKey = verified ?? rawKey;
       this.continuationKeys.delete(rawKey);
       this.continuationKeys.set(rawKey, { dedupKey, expiresAt: now + 120_000 });
-      while (this.continuationKeys.size > 5000)
+      while (this.continuationKeys.size > 5000) {
         this.continuationKeys.delete(this.continuationKeys.keys().next().value!);
-    } else if (existing) this.continuationKeys.delete(rawKey);
+      }
+    }
 
     if (!camera) {
       this.logger.warn(
         `Camera "${after.camera}" chua co trong DB hoac bi disabled. Ghi camera_id=null.`,
       );
     }
-
-    const isRestrictedZone = zone !== undefined;
 
     return {
       camera,
@@ -355,7 +363,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     messageType: FrigateMessageType,
     after: FrigateEventAfterDto,
   ): Promise<SynchronizedEvent> {
-    const context = await this.buildEventContext(after);
+    const context = await this.buildEventContext(messageType, after);
     let event =
       messageType === 'new'
         ? null

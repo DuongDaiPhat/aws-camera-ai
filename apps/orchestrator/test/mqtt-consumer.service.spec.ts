@@ -926,4 +926,174 @@ describe('MqttConsumerService (US-03, US-04)', () => {
     expect(frigateMedia.getTimestampedFullFrame).not.toHaveBeenCalled();
     expect(mediaService.storeCameraSnapshot).not.toHaveBeenCalled();
   });
+
+  it('negative-caches continuation misses on new so update and end do not re-call resolveContinuationDedupKey', async () => {
+    const camera = {
+      id: 'cam-uuid-1',
+      name: 'Room',
+      slug: 'cam_living_room',
+      owner_user_id: 'owner-uuid-1',
+    };
+    const event = createEvent({
+      track_id: 'track-miss-1',
+      dedup_key: 'frigate:cam_living_room:track-miss-1',
+    });
+    eventsRepository.findCameraBySlug.mockResolvedValue(camera);
+    eventsRepository.createEvent.mockResolvedValueOnce(event);
+    eventsRepository.findEventByDedupKey.mockResolvedValue(event);
+    eventsRepository.updateEvent.mockResolvedValue(event);
+
+    const resolveContinuationDedupKey = jest.fn().mockResolvedValue(null);
+    Object.assign(service, {
+      faceCoordinator: { resolveContinuationDedupKey, handleTrackEvent: jest.fn() },
+    });
+
+    const baseAfter = {
+      id: 'track-miss-1',
+      camera: 'cam_living_room',
+      frame_time: 1_726_387_205,
+      label: 'person',
+      score: 0.9,
+      current_zones: [],
+      has_snapshot: false,
+    };
+
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(JSON.stringify({ type: 'new', after: baseAfter })),
+    );
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(JSON.stringify({ type: 'update', after: baseAfter })),
+    );
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(JSON.stringify({ type: 'end', after: baseAfter })),
+    );
+
+    expect(resolveContinuationDedupKey).toHaveBeenCalledTimes(1);
+    expect(resolveContinuationDedupKey).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'track-miss-1' }),
+      camera,
+      1000,
+    );
+    expect(eventsRepository.createEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ dedupKey: 'frigate:cam_living_room:track-miss-1' }),
+    );
+    expect(eventsRepository.findEventByDedupKey).toHaveBeenCalledTimes(2);
+    expect(eventsRepository.findEventByDedupKey).toHaveBeenCalledWith(
+      'frigate:cam_living_room:track-miss-1',
+    );
+  });
+
+  it('does not call resolveContinuationDedupKey when end is the first-seen message for a track', async () => {
+    const camera = {
+      id: 'cam-uuid-1',
+      name: 'Room',
+      slug: 'cam_living_room',
+      owner_user_id: 'owner-uuid-1',
+    };
+    const event = createEvent({
+      track_id: 'track-end-first',
+      dedup_key: 'frigate:cam_living_room:track-end-first',
+    });
+    eventsRepository.findCameraBySlug.mockResolvedValue(camera);
+    eventsRepository.findEventByDedupKey.mockResolvedValueOnce(event);
+    eventsRepository.updateEvent.mockResolvedValueOnce(event);
+
+    const resolveContinuationDedupKey = jest
+      .fn()
+      .mockResolvedValue('frigate:cam_living_room:track-old');
+    Object.assign(service, {
+      faceCoordinator: { resolveContinuationDedupKey, handleTrackEvent: jest.fn() },
+    });
+
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'end',
+          after: {
+            id: 'track-end-first',
+            camera: 'cam_living_room',
+            frame_time: 1_726_387_210,
+            label: 'person',
+            score: 0.9,
+            current_zones: [],
+            has_snapshot: false,
+          },
+        }),
+      ),
+    );
+
+    expect(resolveContinuationDedupKey).not.toHaveBeenCalled();
+    expect(eventsRepository.findEventByDedupKey).toHaveBeenCalledWith(
+      'frigate:cam_living_room:track-end-first',
+    );
+  });
+
+  it('passes waitForFrameMs = 0 to resolveContinuationDedupKey for RESTRICTED_ZONE (P1) events', async () => {
+    const camera = {
+      id: 'cam-uuid-kitchen',
+      name: 'Phong bep',
+      slug: 'cam_kitchen',
+      timezone: 'Asia/Bangkok',
+      zone_config_applied: true,
+      zone_config_version: 7,
+      owner_user_id: 'owner-uuid-1',
+    };
+    eventsRepository.findCameraBySlug.mockResolvedValueOnce(camera);
+    eventsRepository.findEligibleZones.mockResolvedValueOnce([
+      {
+        id: 'zone-uuid-stove',
+        camera_id: 'cam-uuid-kitchen',
+        name: 'Khu vuc bep',
+        slug: 'restricted_stove',
+        zone_type: 'RESTRICTED',
+        min_dwell_seconds: 2,
+        active_from: null,
+        active_to: null,
+      },
+    ]);
+    eventsRepository.createEvent.mockResolvedValueOnce(
+      createEvent({
+        camera_id: 'cam-uuid-kitchen',
+        zone_id: 'zone-uuid-stove',
+        event_type: 'RESTRICTED_ZONE',
+        priority: 'P1',
+        track_id: 'track-p1',
+        dedup_key: 'frigate:cam_kitchen:track-p1',
+        detected_at: new Date(1_726_387_200_000),
+      }),
+    );
+
+    const resolveContinuationDedupKey = jest.fn().mockResolvedValue(null);
+    Object.assign(service, {
+      faceCoordinator: { resolveContinuationDedupKey, handleTrackEvent: jest.fn() },
+    });
+
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'new',
+          after: {
+            id: 'track-p1',
+            camera: 'cam_kitchen',
+            frame_time: 1_726_387_200.123,
+            label: 'person',
+            score: 0.9,
+            current_zones: ['restricted_stove'],
+          },
+        }),
+      ),
+    );
+
+    expect(resolveContinuationDedupKey).toHaveBeenCalledTimes(1);
+    expect(resolveContinuationDedupKey).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'track-p1' }),
+      camera,
+      0,
+    );
+  });
 });
