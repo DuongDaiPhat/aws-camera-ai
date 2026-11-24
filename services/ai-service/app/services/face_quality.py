@@ -3,6 +3,7 @@
 import io
 import logging
 import math
+import queue
 import threading
 from pathlib import Path
 from typing import Any
@@ -27,7 +28,11 @@ class FaceQualityAssessor:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self._lock = threading.Lock()
+        self._detector_lock = threading.Lock()
+        self._sface_lock = threading.Lock()
         self._detector: cv2.FaceDetectorYN | None = None
+        self._primary_detector: cv2.FaceDetectorYN | None = None
+        self._detector_pool: queue.Queue[cv2.FaceDetectorYN] | None = None
         self._recognizer: Any = None
         self._warmed = False
 
@@ -68,13 +73,37 @@ class FaceQualityAssessor:
                 if not self._warmed:
                     self._load()
                     self._detect_faces(np.zeros((320, 320, 3), dtype=np.uint8))
-                    assert self._recognizer is not None
-                    self._recognizer.feature(np.zeros((112, 112, 3), dtype=np.uint8))
+                    recognizer = self._recognizer
+                    assert recognizer is not None
+                    blank_crop = np.zeros((112, 112, 3), dtype=np.uint8)
+                    if hasattr(recognizer, "align_crop"):
+                        recognizer.feature(blank_crop)
+                    else:
+                        with self._sface_lock:
+                            recognizer.feature(blank_crop)
                     self._warmed = True
             return True
         except (FileNotFoundError, cv2.error, OSError):
             LOGGER.warning("Face quality warmup unavailable; gate remains fail-closed")
             return False
+
+    def _create_detector_pool(
+        self, score_threshold: float
+    ) -> tuple[cv2.FaceDetectorYN, queue.Queue[cv2.FaceDetectorYN]]:
+        pool_size = max(1, int(self.settings.face_max_concurrent))
+        detectors = [
+            cv2.FaceDetectorYN.create(
+                self.settings.face_detector_path,
+                "",
+                (320, 320),
+                score_threshold,
+            )
+            for _ in range(pool_size)
+        ]
+        pool: queue.Queue[cv2.FaceDetectorYN] = queue.Queue(maxsize=pool_size)
+        for detector in detectors:
+            pool.put(detector)
+        return detectors[0], pool
 
     def _load(self, *, require_recognizer: bool = True) -> None:
         # Load local ONNX models regardless of settings.face_provider so the
@@ -88,13 +117,12 @@ class FaceQualityAssessor:
             score_threshold = max(
                 0.05, min(0.5, float(self.settings.face_gate_min_detection_score))
             )
-            self._detector = cv2.FaceDetectorYN.create(
-                self.settings.face_detector_path,
-                "",
-                (320, 320),
-                score_threshold,
-            )
-            self._recognizer = self._create_recognizer(embedder_path, backend)
+            primary_detector, detector_pool = self._create_detector_pool(score_threshold)
+            recognizer = self._create_recognizer(embedder_path, backend)
+            self._detector = primary_detector
+            self._primary_detector = primary_detector
+            self._detector_pool = detector_pool
+            self._recognizer = recognizer
         elif require_recognizer and self._recognizer is None:
             self._recognizer = self._create_recognizer(embedder_path, backend)
 
@@ -109,8 +137,8 @@ class FaceQualityAssessor:
             image = ImageOps.exif_transpose(source).convert("RGB")
             return cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
 
-    def _detect_faces(self, image: np.ndarray) -> list[np.ndarray]:
-        assert self._detector is not None
+    @staticmethod
+    def _detect_faces_with(detector: cv2.FaceDetectorYN, image: np.ndarray) -> list[np.ndarray]:
         height, width = image.shape[:2]
         scale = 1.0
         det_image = image
@@ -121,8 +149,8 @@ class FaceQualityAssessor:
             det_image = cv2.resize(image, (det_w, det_h))
 
         det_height, det_width = det_image.shape[:2]
-        self._detector.setInputSize((det_width, det_height))
-        _, detected = self._detector.detect(det_image)
+        detector.setInputSize((det_width, det_height))
+        _, detected = detector.detect(det_image)
 
         faces: list[np.ndarray] = []
         if detected is not None:
@@ -133,6 +161,17 @@ class FaceQualityAssessor:
                 faces.append(face)
             faces.sort(key=lambda item: (float(item[1]), float(item[0])))
         return faces
+
+    def _detect_faces(self, image: np.ndarray) -> list[np.ndarray]:
+        if self._detector_pool is not None and self._detector is self._primary_detector:
+            detector = self._detector_pool.get()
+            try:
+                return self._detect_faces_with(detector, image)
+            finally:
+                self._detector_pool.put(detector)
+        with self._detector_lock:
+            assert self._detector is not None
+            return self._detect_faces_with(self._detector, image)
 
     @staticmethod
     def _compute_sharpness(image: np.ndarray, face: np.ndarray) -> float:
@@ -254,6 +293,25 @@ class FaceQualityAssessor:
         bh = max(0.0, min(1.0 - by, max(0.0, float(face[3])) / height))
         return BoundingBox(x=bx, y=by, width=bw, height=bh)
 
+    def _extract_embedding(
+        self, image: np.ndarray, face: np.ndarray
+    ) -> tuple[str | None, int | None]:
+        recognizer = self._recognizer
+        assert recognizer is not None
+        if hasattr(recognizer, "align_crop"):
+            aligned = recognizer.align_crop(image, face)
+            raw_feature = recognizer.feature(aligned)
+        else:
+            with self._sface_lock:
+                aligned = recognizer.alignCrop(image, face)
+                raw_feature = recognizer.feature(aligned)
+        vector = np.asarray(raw_feature.flatten(), dtype=np.float32)
+        try:
+            return encode(vector), len(vector)
+        except ValueError:
+            LOGGER.warning("Face embedder returned invalid embedding vector")
+            return None, None
+
     def _assess_image(self, image: np.ndarray, include_embedding: bool) -> FaceAssessResponse:
         model_version = self._model_version()
         faces = self._detect_faces(image)
@@ -313,17 +371,7 @@ class FaceQualityAssessor:
         embedding_base64: str | None = None
         embedding_dim: int | None = None
         if include_embedding:
-            assert self._recognizer is not None
-            if hasattr(self._recognizer, "align_crop"):
-                aligned = self._recognizer.align_crop(image, face)
-            else:
-                aligned = self._recognizer.alignCrop(image, face)
-            vector = np.asarray(self._recognizer.feature(aligned).flatten(), dtype=np.float32)
-            try:
-                embedding_base64 = encode(vector)
-                embedding_dim = len(vector)
-            except ValueError:
-                LOGGER.warning("Face embedder returned invalid embedding vector")
+            embedding_base64, embedding_dim = self._extract_embedding(image, face)
 
         return FaceAssessResponse(
             passed=True,
@@ -364,7 +412,7 @@ class FaceQualityAssessor:
         try:
             with self._lock:
                 self._load(require_recognizer=include_embedding)
-                return self._assess_image(image, include_embedding)
+            return self._assess_image(image, include_embedding)
         except (FileNotFoundError, cv2.error, OSError):
             return FaceAssessResponse(
                 passed=False,

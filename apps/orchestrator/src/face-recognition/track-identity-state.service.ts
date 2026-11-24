@@ -200,6 +200,24 @@ export class TrackIdentityStateService {
     );
   }
 
+  findKnownTracksForCamera(
+    cameraSlug: string,
+    ownerScopeId: string,
+    now = Date.now(),
+  ): TrackRecord[] {
+    this.cleanup(now);
+    const maxGapMs = this.optConfig.spatialReidMaxGapMs;
+    return [...this.tracks.values()]
+      .filter(
+        (record) =>
+          record.cameraSlug === cameraSlug &&
+          record.ownerScopeId === ownerScopeId &&
+          record.state === 'KNOWN' &&
+          (record.endedAt === null || (now >= record.endedAt && now - record.endedAt <= maxGapMs)),
+      )
+      .sort((a, b) => (b.endedAt ?? b.lastUpdatedAt) - (a.endedAt ?? a.lastUpdatedAt));
+  }
+
   hasActiveKnownTrackForFace(
     cameraSlug: string,
     ownerScopeId: string,

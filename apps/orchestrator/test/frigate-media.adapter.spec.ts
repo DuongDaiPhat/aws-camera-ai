@@ -81,6 +81,43 @@ describe('FrigateMediaAdapter current person sampling', () => {
     ).resolves.toBeNull();
   });
 
+  it('returns timestamped full frames while fresh, prunes expired frames, and returns null when missing', async () => {
+    const jpeg = await sharp({
+      create: { width: 80, height: 40, channels: 3, background: '#ff0000' },
+    })
+      .jpeg({ quality: 95 })
+      .toBuffer();
+    const header = Buffer.from(
+      JSON.stringify({
+        schemaVersion: 1,
+        sourceSessionId: 'source-1',
+        frameId: 'frame-10',
+        cameraSlug: 'cam_front',
+        frameTimestamp: 10,
+        frameWidth: 80,
+        frameHeight: 40,
+        persons: [],
+      }),
+    );
+    const prefix = Buffer.alloc(4);
+    prefix.writeUInt32BE(header.length);
+    const media = new FrigateMediaAdapter(new ConfigService());
+
+    expect(media.getTimestampedFullFrame('cam_missing', 10_000)).toBeNull();
+
+    media.acceptTimestampedFrame(Buffer.concat([prefix, header, jpeg]), 10_000);
+    expect(media.getTimestampedFullFrame('cam_front', 11_000)).toEqual({
+      imageBytes: jpeg,
+      frameWidth: 80,
+      frameHeight: 40,
+      capturedAt: 10_000,
+    });
+
+    // After the 2000ms freshness window, the frame is pruned and returns null.
+    expect(media.getTimestampedFullFrame('cam_front', 12_500)).toBeNull();
+    expect(media.getTimestampedFullFrame('cam_front', 11_000)).toBeNull();
+  });
+
   it('reads the latest frame and scales the person box to the returned image', async () => {
     jest.spyOn(Date, 'now').mockReturnValue(10_000);
     const blue = await sharp({

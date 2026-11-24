@@ -406,6 +406,42 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     };
   }
 
+  private async storeTimestampedFallbackSnapshot(
+    messageType: FrigateMessageType,
+    event: EventRecord,
+    cameraSlug: string,
+  ): Promise<boolean> {
+    if (messageType !== 'update' && messageType !== 'end') {
+      return false;
+    }
+
+    const existingSnapshot = await this.eventMediaRepository.findMediaByEventIdAndType(
+      event.id,
+      'SNAPSHOT',
+    );
+    if (existingSnapshot) {
+      return false;
+    }
+
+    const frame = this.frigateMedia?.getTimestampedFullFrame?.(cameraSlug);
+    if (
+      !frame ||
+      frame.imageBytes.length === 0 ||
+      typeof this.mediaService.storeCameraSnapshot !== 'function'
+    ) {
+      return false;
+    }
+
+    const stored = await this.mediaService.storeCameraSnapshot(
+      event.id,
+      event.detected_at,
+      frame.imageBytes,
+      frame.frameWidth,
+      frame.frameHeight,
+    );
+    return stored !== null;
+  }
+
   /**
    * Tai snapshot/clip ve storage.
    * Tra ve `true` khi snapshot vua duoc luu lan dau — dashboard can biet de thay anh
@@ -429,6 +465,12 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
         event.detected_at,
       );
       hasNewSnapshot = !existingSnapshot && snapshot !== null;
+    } else {
+      hasNewSnapshot = await this.storeTimestampedFallbackSnapshot(
+        messageType,
+        event,
+        after.camera,
+      );
     }
 
     if (

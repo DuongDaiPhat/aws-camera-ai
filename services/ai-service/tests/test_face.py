@@ -1,6 +1,10 @@
 """US-09: quyền, lựa chọn, privacy và snapshot/replay; không cần model để chạy CI."""
 
 import io
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
+from threading import BoundedSemaphore
 from unittest.mock import Mock
 from uuid import uuid4
 
@@ -11,11 +15,12 @@ from PIL import Image
 
 from app.config import Settings, get_settings
 from app.main import app
-from app.models.face import CollectionFace, EmbedResponse, SyncRequest
+from app.models.face import CollectionFace, EmbedResponse, FaceAssessResponse, SyncRequest
 from app.routers.face import get_embedder, get_quality_assessor, get_slots
 from app.services.embedding_codec import decode, encode
 from app.services.face_collection import FaceCollection
 from app.services.face_embedder import FaceEmbedder
+from app.services.face_matcher import FaceMatcher
 from app.services.face_quality import FaceQualityAssessor
 
 
@@ -269,4 +274,172 @@ def test_router_assess_auth_embedding_rekognition_and_unavailable(
                 slots.release()
     finally:
         get_quality_assessor.cache_clear()
+        get_slots.cache_clear()
+
+
+class _SpyBoundedSemaphore(BoundedSemaphore):
+    def __init__(self, value: int) -> None:
+        super().__init__(value)
+        self.acquire_waiting = threading.Event()
+
+    def acquire(self, blocking: bool = True, timeout: float | None = None) -> bool:
+        if blocking and timeout is not None:
+            self.acquire_waiting.set()
+        return super().acquire(blocking=blocking, timeout=timeout)
+
+
+def _post_face_endpoint(endpoint: str, headers: dict[str, str]):
+    client = TestClient(app)
+    if endpoint == "assess":
+        return client.post(
+            "/face/assess",
+            files={"image": ("x.png", _sharp_face_png())},
+            headers=headers,
+        )
+    if endpoint == "embed":
+        return client.post(
+            "/face/embed",
+            files={"image": ("x.png", picture())},
+            headers=headers,
+        )
+    return client.post(
+        "/face/match",
+        data={
+            "requestId": str(uuid4()),
+            "ownerScopeId": str(uuid4()),
+            "collectionVersion": "1",
+        },
+        files={"image": ("crop.jpg", b"crop")},
+        headers=headers,
+    )
+
+
+@pytest.mark.parametrize("endpoint", ["assess", "embed", "match"])
+def test_router_waits_for_busy_slot_and_succeeds_when_released_in_time(
+    monkeypatch: pytest.MonkeyPatch, endpoint: str
+) -> None:
+    from app.routers import face
+
+    settings = Settings(
+        ai_internal_token="test-token",
+        face_max_concurrent=1,
+        face_acquire_timeout_seconds=1.5,
+    )
+    spy_slots = _SpyBoundedSemaphore(1)
+    assert spy_slots.acquire(blocking=False) is True
+
+    assessor_mock = Mock(spec=FaceQualityAssessor)
+    assessor_mock.assess.return_value = FaceAssessResponse(
+        passed=True,
+        quality_score=0.95,
+        face_count=1,
+        model_version=settings.face_model_version,
+        gate_status="READY",
+    )
+    embedder_mock = fake_embedder([[10, 10, 20, 20]])
+    matcher_mock = FaceMatcher(embedder_mock, FaceCollection())
+
+    monkeypatch.setattr(face, "get_settings", lambda: settings)
+    monkeypatch.setattr(face, "get_slots", lambda: spy_slots)
+    monkeypatch.setattr(face, "get_quality_assessor", lambda: assessor_mock)
+    monkeypatch.setattr(face, "get_embedder", lambda: embedder_mock)
+    monkeypatch.setattr(face, "get_matcher", lambda: matcher_mock)
+
+    headers = {"X-Internal-Token": "test-token"}
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(_post_face_endpoint, endpoint, headers)
+        assert spy_slots.acquire_waiting.wait(timeout=2.0)
+        time.sleep(0.02)
+        spy_slots.release()
+        response = future.result(timeout=5.0)
+
+    assert response.status_code == 200
+
+
+def test_router_concurrent_assess_requests_serialize_slot_and_both_succeed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from app.routers import face
+
+    get_slots.cache_clear()
+    settings = Settings(
+        ai_internal_token="test-token",
+        face_max_concurrent=1,
+        face_acquire_timeout_seconds=1.5,
+    )
+    spy_slots = _SpyBoundedSemaphore(1)
+    first_entered = threading.Event()
+    allow_first_finish = threading.Event()
+    call_count = 0
+    call_lock = threading.Lock()
+
+    def slow_then_fast_assess(_data: bytes, _include_embedding: bool) -> FaceAssessResponse:
+        nonlocal call_count
+        with call_lock:
+            call_count += 1
+            current = call_count
+        if current == 1:
+            first_entered.set()
+            assert allow_first_finish.wait(timeout=3.0)
+        return FaceAssessResponse(
+            passed=True,
+            quality_score=0.95,
+            face_count=1,
+            model_version=settings.face_model_version,
+            gate_status="READY",
+        )
+
+    assessor_mock = Mock(spec=FaceQualityAssessor)
+    assessor_mock.assess.side_effect = slow_then_fast_assess
+
+    monkeypatch.setattr(face, "get_settings", lambda: settings)
+    monkeypatch.setattr(face, "get_slots", lambda: spy_slots)
+    monkeypatch.setattr(face, "get_quality_assessor", lambda: assessor_mock)
+
+    headers = {"X-Internal-Token": "test-token"}
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        first = pool.submit(_post_face_endpoint, "assess", headers)
+        assert first_entered.wait(timeout=2.0)
+        second = pool.submit(_post_face_endpoint, "assess", headers)
+        assert spy_slots.acquire_waiting.wait(timeout=2.0)
+        time.sleep(0.02)
+        allow_first_finish.set()
+        res1 = first.result(timeout=5.0)
+        res2 = second.result(timeout=5.0)
+
+    assert res1.status_code == 200 and res1.json()["passed"] is True
+    assert res2.status_code == 200 and res2.json()["passed"] is True
+
+
+@pytest.mark.parametrize("endpoint", ["assess", "embed", "match"])
+@pytest.mark.parametrize("timeout_seconds", [0.15, 0.0])
+def test_router_returns_503_when_slots_stay_busy_past_timeout(
+    monkeypatch: pytest.MonkeyPatch, endpoint: str, timeout_seconds: float
+) -> None:
+    from app.routers import face
+
+    get_slots.cache_clear()
+    settings = Settings(
+        ai_internal_token="test-token",
+        face_max_concurrent=1,
+        face_acquire_timeout_seconds=timeout_seconds,
+    )
+    monkeypatch.setattr(face, "get_settings", lambda: settings)
+
+    slots = get_slots()
+    acquired = []
+    while slots.acquire(blocking=False):
+        acquired.append(True)
+    headers = {"X-Internal-Token": "test-token"}
+    try:
+        start = time.monotonic()
+        busy = _post_face_endpoint(endpoint, headers)
+        elapsed = time.monotonic() - start
+        assert busy.status_code == 503
+        assert busy.json()["detail"] == "PROVIDER_UNAVAILABLE"
+        if timeout_seconds > 0:
+            assert elapsed >= 0.1
+    finally:
+        for _ in acquired:
+            slots.release()
         get_slots.cache_clear()

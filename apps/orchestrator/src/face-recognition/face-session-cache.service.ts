@@ -39,6 +39,10 @@ export interface SpatialAppearanceMatchResult {
   appearanceSimilarity: number;
 }
 
+export interface SpatialReidLookupOptions {
+  allowAbsentTrackIds?: ReadonlySet<string>;
+}
+
 interface ScopeBucket {
   collectionVersion: number;
   entries: Map<string, FaceSessionEntry>;
@@ -339,16 +343,31 @@ export class FaceSessionCacheService {
     }
   }
 
-  hasRecentlyEndedKnownTrack(scope: FaceSessionScope, now = Date.now()): boolean {
+  private isSpatialReidEntryEligible(
+    entry: FaceSessionEntry,
+    now: number,
+    options?: SpatialReidLookupOptions,
+  ): boolean {
+    if (entry.endedAt !== null) {
+      return now >= entry.endedAt && now - entry.endedAt <= this.optConfig.spatialReidMaxGapMs;
+    }
+    return (
+      options?.allowAbsentTrackIds?.has(entry.trackId) === true &&
+      now >= entry.confirmedAt &&
+      now - entry.confirmedAt <= this.optConfig.sessionCacheTtlMs
+    );
+  }
+
+  hasRecentlyEndedKnownTrack(
+    scope: FaceSessionScope,
+    now = Date.now(),
+    options?: SpatialReidLookupOptions,
+  ): boolean {
     if (!this.optConfig.spatialReidEnabled) return false;
     const bucket = this.getScopeBucket(scope, false, now);
     if (!bucket) return false;
     for (const entry of bucket.entries.values()) {
-      if (
-        entry.endedAt !== null &&
-        now >= entry.endedAt &&
-        now - entry.endedAt <= this.optConfig.spatialReidMaxGapMs
-      ) {
+      if (this.isSpatialReidEntryEligible(entry, now, options)) {
         return true;
       }
     }
@@ -384,6 +403,7 @@ export class FaceSessionCacheService {
     box: number[] | null | undefined,
     appearanceSignature: Float32Array | null,
     now = Date.now(),
+    options?: SpatialReidLookupOptions,
   ): SpatialAppearanceMatchResult | null {
     if (
       !this.optConfig.spatialReidEnabled ||
@@ -400,9 +420,7 @@ export class FaceSessionCacheService {
     let bestCombined = -1;
     for (const entry of bucket.entries.values()) {
       if (
-        entry.endedAt === null ||
-        now < entry.endedAt ||
-        now - entry.endedAt > this.optConfig.spatialReidMaxGapMs ||
+        !this.isSpatialReidEntryEligible(entry, now, options) ||
         !entry.lastBox ||
         !entry.appearanceSignature
       ) {

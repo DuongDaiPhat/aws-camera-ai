@@ -69,6 +69,21 @@ export class FrigateMediaAdapter {
     return frame ? frame.header.frameTimestamp * 1000 : null;
   }
 
+  getTimestampedFullFrame(
+    cameraSlug: string,
+    now = Date.now(),
+  ): { imageBytes: Buffer; frameWidth: number; frameHeight: number; capturedAt: number } | null {
+    this.pruneTimestampedFrames(now);
+    const frame = this.timestampedFrames.get(cameraSlug);
+    if (!frame) return null;
+    return {
+      imageBytes: frame.imageBytes,
+      frameWidth: frame.header.frameWidth,
+      frameHeight: frame.header.frameHeight,
+      capturedAt: frame.header.frameTimestamp * 1000,
+    };
+  }
+
   getTimestampedPersonContext(cameraSlug: string, trackId: string): PersonCropContext | null {
     const frame = this.timestampedFrames.get(cameraSlug);
     const person = frame?.header.persons.find((item) => item.trackId === trackId);
@@ -108,7 +123,7 @@ export class FrigateMediaAdapter {
       return {
         imageBuffer: await image
           .extract({ left: 0, top: 0, width: meta.width, height })
-          .png()
+          .png({ compressionLevel: 1 })
           .toBuffer(),
         heightFraction: height / meta.height,
       };
@@ -184,7 +199,7 @@ export class FrigateMediaAdapter {
     return await image
       .extract({ left, top, width: right - left, height: bottom - top })
       // Preserve decoded bridge pixels; do not introduce another JPEG generation.
-      .png()
+      .png({ compressionLevel: 1 })
       .toBuffer();
   }
 
