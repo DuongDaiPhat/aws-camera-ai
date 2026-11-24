@@ -140,7 +140,7 @@ if (!existsSync(VENV_PYTHON)) {
 
 // `ruff` va `pytest` deu chay duoc duoi dang module: python -m ruff / python -m pytest
 kiemTraVenv();
-const ketQua = chay(VENV_PYTHON, ['-m', ...argv]);
+const ketQua = chay(VENV_PYTHON, ['-m', ...argv], { cwd: process.cwd() });
 
 if (ketQua.error) {
   console.error(`  Khong chay duoc: ${ketQua.error.message}`);

@@ -47,7 +47,9 @@ class SenderTests(unittest.TestCase):
         self.connect = MagicMock()
         self.sqs.send_message.side_effect = self.send
         self.sns.publish.return_value = {"MessageId": "provider-42"}
-        self.connect.start_outbound_voice_contact.return_value = {"ContactId": "call-42"}
+        self.connect.start_outbound_voice_contact.return_value = {
+            "ContactId": "call-42"
+        }
         self.start_patch(
             patch.dict(
                 os.environ,
@@ -63,7 +65,9 @@ class SenderTests(unittest.TestCase):
                 clear=True,
             )
         )
-        self.api_mock = self.start_patch(patch.object(handler, "backend", side_effect=self.api))
+        self.api_mock = self.start_patch(
+            patch.object(handler, "backend", side_effect=self.api)
+        )
         self.client = self.start_patch(
             patch.object(
                 handler,
@@ -106,8 +110,54 @@ class SenderTests(unittest.TestCase):
         self.trace.append("SQS")
         self.assertEqual(json.loads(arguments["MessageBody"]), self.cached)
 
+    def personal_email(self):
+        email = "caregiver@example.test"
+        prefix = TOPIC + "-user-"
+        os.environ["SNS_EMAIL_TOPIC_PREFIX_ARN"] = prefix
+        topic = prefix + "96af2868-7871-4101-98ec-6596d102fed4"
+        self.delivery.update(topicArn=topic, destination=email)
+        return {
+            "TopicArn": topic,
+            "Protocol": "email",
+            "Endpoint": email,
+            "SubscriptionArn": topic + ":confirmed",
+        }
+
+    def test_personal_email_checks_the_only_confirmed_recipient_before_publishing(self):
+        subscription = self.personal_email()
+        self.sns.list_subscriptions_by_topic.return_value = {
+            "Subscriptions": [subscription]
+        }
+        self.assert_outcome("PROVIDER_ACCEPTED", True, "provider-42")
+        self.sns.publish.assert_called_once()
+        self.assertEqual(
+            self.sns.publish.call_args.kwargs["TopicArn"], subscription["TopicArn"]
+        )
+
+    def test_personal_email_rejects_extra_subscription(self):
+        subscription = self.personal_email()
+        self.sns.list_subscriptions_by_topic.return_value = {
+            "Subscriptions": [
+                subscription,
+                dict(subscription, Endpoint="foreign@example.test"),
+            ]
+        }
+        self.assert_outcome("FAILED", False, reason="BLOCKED_PROVIDER")
+        self.sns.publish.assert_not_called()
+
+    def test_personal_email_never_authorizes_another_environment(self):
+        self.personal_email()
+        self.delivery["topicArn"] = self.delivery["topicArn"].replace(
+            "argusai-dev-", "argusai-production-"
+        )
+        self.assert_outcome("FAILED", False, reason="BLOCKED_PROVIDER")
+        self.sns.list_subscriptions_by_topic.assert_not_called()
+        self.sns.publish.assert_not_called()
+
     def run_batch(self, *messages, context=None):
-        records = [{"messageId": str(i), "body": json.dumps(m)} for i, m in enumerate(messages)]
+        records = [
+            {"messageId": str(i), "body": json.dumps(m)} for i, m in enumerate(messages)
+        ]
         return handler.lambda_handler({"Records": records}, context)
 
     def assert_outcome(self, status, called, provider_id=None, reason=None):
@@ -155,7 +205,9 @@ class SenderTests(unittest.TestCase):
     def test_email_subject_is_optional(self):
         del self.delivery["subject"]
         self.assert_outcome("PROVIDER_ACCEPTED", True, "provider-42")
-        self.sns.publish.assert_called_once_with(TopicArn=TOPIC, Message=f"{PREFIX} Incident")
+        self.sns.publish.assert_called_once_with(
+            TopicArn=TOPIC, Message=f"{PREFIX} Incident"
+        )
 
     def test_email_subject_must_be_valid_single_line(self):
         self.delivery["subject"] += "\nInvalid subject"
@@ -179,7 +231,9 @@ class SenderTests(unittest.TestCase):
     def test_sms_uses_authorized_e164_destination(self):
         self.phone_channel("SNS_SMS")
         self.assert_outcome("PROVIDER_ACCEPTED", True, "provider-42")
-        self.sns.publish.assert_called_once_with(PhoneNumber=PHONE, Message=f"{PREFIX} Incident")
+        self.sns.publish.assert_called_once_with(
+            PhoneNumber=PHONE, Message=f"{PREFIX} Incident"
+        )
 
     def test_sms_rejects_invalid_destination(self):
         self.phone_channel("SNS_SMS", "555-0101")
@@ -222,7 +276,9 @@ class SenderTests(unittest.TestCase):
 
     def test_invalid_lease_cannot_call_provider(self):
         self.claim["leaseUntil"] = "2099-01-01T00:00:00"
-        self.assertEqual(self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]})
+        self.assertEqual(
+            self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]}
+        )
         self.client.assert_not_called()
 
     def test_no_op_completes_without_provider_or_results(self):
@@ -237,22 +293,30 @@ class SenderTests(unittest.TestCase):
 
     def test_wrong_claim_scope_is_retried_without_send(self):
         self.claim["notificationId"] = EVENT
-        self.assertEqual(self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]})
+        self.assertEqual(
+            self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]}
+        )
         self.client.assert_not_called()
 
     def test_unknown_disposition_is_retried_without_send(self):
         self.claim["disposition"] = "GARBAGE"
-        self.assertEqual(self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]})
+        self.assertEqual(
+            self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]}
+        )
         self.client.assert_not_called()
 
     def test_unknown_claim_mode_is_retried_without_send(self):
         self.claim["mode"] = "UNKNOWN"
-        self.assertEqual(self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]})
+        self.assertEqual(
+            self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]}
+        )
         self.client.assert_not_called()
 
     def test_channel_swap_is_retried_without_send(self):
         self.delivery["channel"] = "SNS_SMS"
-        self.assertEqual(self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]})
+        self.assertEqual(
+            self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]}
+        )
         self.client.assert_not_called()
 
     def test_busy_is_partial_batch_failure(self):
@@ -269,14 +333,20 @@ class SenderTests(unittest.TestCase):
         self.sns.publish.assert_not_called()
 
     def test_context_404_from_wrong_tunnel_route_is_retained_for_retry(self):
-        self.api_mock.side_effect = HTTPError("https://example.com", 404, "Missing", {}, None)
-        self.assertEqual(self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]})
+        self.api_mock.side_effect = HTTPError(
+            "https://example.com", 404, "Missing", {}, None
+        )
+        self.assertEqual(
+            self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]}
+        )
         self.client.assert_not_called()
 
     def test_live_invocation_with_thirty_seconds_sends_and_persists(self):
         context = MagicMock()
         context.get_remaining_time_in_millis.return_value = 30_000
-        self.assertEqual(self.run_batch(self.job, context=context), {"batchItemFailures": []})
+        self.assertEqual(
+            self.run_batch(self.job, context=context), {"batchItemFailures": []}
+        )
         self.assertEqual(self.trace, ["GET", "POST", "PUT", "SQS"])
         self.assertEqual(self.cached["payload"]["status"], "PROVIDER_ACCEPTED")
         self.assertGreaterEqual(context.get_remaining_time_in_millis.call_count, 4)
@@ -302,7 +372,9 @@ class SenderTests(unittest.TestCase):
             11_000,
             9_000,
         ]
-        self.assertEqual(self.run_batch(self.job, context=context), {"batchItemFailures": []})
+        self.assertEqual(
+            self.run_batch(self.job, context=context), {"batchItemFailures": []}
+        )
         self.assertEqual(self.trace, ["GET", "POST", "PUT", "SQS"])
         self.sns.publish.assert_not_called()
         self.assertEqual(self.cached["payload"]["status"], "FAILED")
@@ -349,18 +421,24 @@ class SenderTests(unittest.TestCase):
     def test_forged_payload_never_reaches_claim(self):
         forged = copy.deepcopy(self.job)
         forged["payload"]["expectedEventVersion"] += 1
-        self.assertEqual(self.run_batch(forged), {"batchItemFailures": [{"itemIdentifier": "0"}]})
+        self.assertEqual(
+            self.run_batch(forged), {"batchItemFailures": [{"itemIdentifier": "0"}]}
+        )
         self.assertEqual(self.trace, ["GET"])
         self.client.assert_not_called()
 
     def test_wrong_queue_type_never_reaches_backend(self):
-        self.assertEqual(self.run_batch(CACHED), {"batchItemFailures": [{"itemIdentifier": "0"}]})
+        self.assertEqual(
+            self.run_batch(CACHED), {"batchItemFailures": [{"itemIdentifier": "0"}]}
+        )
         self.api_mock.assert_not_called()
 
     def test_cached_result_must_be_for_matching_owner(self):
         self.cached = copy.deepcopy(CACHED)
         self.cached["payload"]["ownerScopeId"] = ID
-        self.assertEqual(self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]})
+        self.assertEqual(
+            self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]}
+        )
         self.client.assert_not_called()
 
     def test_provider_timeout_caches_uncertain(self):
@@ -368,11 +446,15 @@ class SenderTests(unittest.TestCase):
         self.assert_outcome("UNCERTAIN", True, reason="PROVIDER_CALL_UNCERTAIN")
 
     def test_provider_5xx_caches_uncertain(self):
-        self.sns.publish.side_effect = ClientError({"Error": {"Code": "InternalError"}}, "Publish")
+        self.sns.publish.side_effect = ClientError(
+            {"Error": {"Code": "InternalError"}}, "Publish"
+        )
         self.assert_outcome("UNCERTAIN", True, reason="PROVIDER_CALL_UNCERTAIN")
 
     def test_provider_rejection_caches_failed(self):
-        self.sns.publish.side_effect = ClientError({"Error": {"Code": "AccessDenied"}}, "Publish")
+        self.sns.publish.side_effect = ClientError(
+            {"Error": {"Code": "AccessDenied"}}, "Publish"
+        )
         self.assert_outcome("FAILED", True, reason="BLOCKED_PROVIDER")
 
     def test_missing_credentials_caches_failed_without_provider_called(self):
@@ -390,13 +472,17 @@ class SenderTests(unittest.TestCase):
             return self.api(path, method=method, data=data)
 
         self.api_mock.side_effect = fail_put
-        self.assertEqual(self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]})
+        self.assertEqual(
+            self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]}
+        )
         self.sns.publish.assert_called_once()
         self.sqs.send_message.assert_not_called()
 
     def test_publish_failure_retries_stored_result_without_second_provider_call(self):
         self.sqs.send_message.side_effect = [TimeoutError, None]
-        self.assertEqual(self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]})
+        self.assertEqual(
+            self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]}
+        )
         self.assertEqual(self.run_batch(self.job), {"batchItemFailures": []})
         self.sns.publish.assert_called_once()
         self.assertEqual(
@@ -406,7 +492,9 @@ class SenderTests(unittest.TestCase):
 
     def test_invalid_attempt_id_is_retried_before_any_provider_call(self):
         self.claim["attemptId"] = "not-an-attempt"
-        self.assertEqual(self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]})
+        self.assertEqual(
+            self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]}
+        )
         self.client.assert_not_called()
 
     def test_client_setup_cannot_outlast_lease(self):
@@ -423,8 +511,12 @@ class SenderTests(unittest.TestCase):
         self.sns.publish.assert_not_called()
 
     def test_backend_lookup_5xx_is_retried(self):
-        self.api_mock.side_effect = HTTPError("https://example.com", 502, "Bad Gateway", {}, None)
-        self.assertEqual(self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]})
+        self.api_mock.side_effect = HTTPError(
+            "https://example.com", 502, "Bad Gateway", {}, None
+        )
+        self.assertEqual(
+            self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]}
+        )
         self.client.assert_not_called()
 
     def test_publishes_canonical_first_writer_after_cache_put(self):
@@ -452,7 +544,9 @@ class SenderTests(unittest.TestCase):
             return original(path, method=method, data=data)
 
         self.api_mock.side_effect = fence_after_first_claim
-        self.assertEqual(self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]})
+        self.assertEqual(
+            self.run_batch(self.job), {"batchItemFailures": [{"itemIdentifier": "0"}]}
+        )
         self.assertEqual(self.run_batch(self.job), {"batchItemFailures": []})
         self.sns.publish.assert_called_once()
         self.sqs.send_message.assert_not_called()
@@ -480,7 +574,9 @@ class TransportTests(unittest.TestCase):
             ),
             patch.object(handler, "BACKEND_OPENER") as opener,
         ):
-            opener.open.return_value.__enter__.return_value.read.return_value = b'{"ok":true}'
+            opener.open.return_value.__enter__.return_value.read.return_value = (
+                b'{"ok":true}'
+            )
             self.assertEqual(
                 handler.backend("/check", method="PUT", data={"version": 1}),
                 {"ok": True},
@@ -519,7 +615,9 @@ class TransportTests(unittest.TestCase):
 
     def test_rejects_redirect_including_token_forward(self):
         with self.assertRaises(ValueError):
-            handler.NoRedirect().redirect_request(None, None, 302, "", {}, "https://other.example")
+            handler.NoRedirect().redirect_request(
+                None, None, 302, "", {}, "https://other.example"
+            )
 
     def test_provider_client_is_reused_and_has_no_sdk_retry(self):
         with (
@@ -529,4 +627,6 @@ class TransportTests(unittest.TestCase):
         ):
             self.assertIs(handler.client("sns"), handler.client("sns"))
             self.assertEqual(boto.call_count, 1)
-            self.assertEqual(boto.call_args.kwargs["config"].retries["total_max_attempts"], 1)
+            self.assertEqual(
+                boto.call_args.kwargs["config"].retries["total_max_attempts"], 1
+            )

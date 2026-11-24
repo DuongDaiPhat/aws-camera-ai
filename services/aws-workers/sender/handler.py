@@ -22,7 +22,9 @@ from botocore.exceptions import (
 from jsonschema import Draft202012Validator, FormatChecker
 
 VALIDATOR = Draft202012Validator(
-    json.loads(Path(__file__).with_name("queue-v1.schema.json").read_text(encoding="utf-8")),
+    json.loads(
+        Path(__file__).with_name("queue-v1.schema.json").read_text(encoding="utf-8")
+    ),
     format_checker=FormatChecker(),
 )
 LOGGER = logging.getLogger(__name__)
@@ -34,6 +36,9 @@ SDK_BUDGET = SDK_CONNECT_TIMEOUT + SDK_READ_TIMEOUT
 RESULT_BUDGET = HTTP_TIMEOUT + SDK_BUDGET
 DELIVERY_BUDGET = SDK_BUDGET + RESULT_BUDGET
 PHONE = re.compile(r"\+[1-9][0-9]{1,14}")
+REGISTRATION_ID = re.compile(
+    r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+)
 DEFINITE_REJECTIONS = {
     "AccessDenied",
     "AccessDeniedException",
@@ -104,6 +109,38 @@ def client(service):
     return CLIENTS[service]
 
 
+def personal_email_topic(topic):
+    prefix = os.environ.get("SNS_EMAIL_TOPIC_PREFIX_ARN", "")
+    match = re.fullmatch(
+        r"arn:aws:sns:([a-z0-9-]+):[0-9]{12}:argusai-(dev|staging|production)-incident-email-user-",
+        prefix,
+    )
+    return bool(
+        match
+        and match[1] == os.environ.get("AWS_REGION")
+        and match[2] == os.environ.get("APP_ENV")
+        and isinstance(topic, str)
+        and topic.startswith(prefix)
+        and REGISTRATION_ID.fullmatch(topic[len(prefix) :])
+    )
+
+
+def sole_confirmed_email(sns, topic, destination):
+    if not isinstance(destination, str) or not destination:
+        return False
+    page = sns.list_subscriptions_by_topic(TopicArn=topic)
+    subscriptions = page.get("Subscriptions", [])
+    if page.get("NextToken") or len(subscriptions) != 1:
+        return False
+    subscription = subscriptions[0]
+    return (
+        subscription.get("TopicArn") == topic
+        and subscription.get("Protocol") == "email"
+        and subscription.get("Endpoint", "").lower() == destination.lower()
+        and subscription.get("SubscriptionArn", "").startswith(topic + ":")
+    )
+
+
 def provider_request(delivery, notice_id):
     env = os.environ.get("APP_ENV")
     if env not in {"dev", "staging", "production"}:
@@ -115,9 +152,11 @@ def provider_request(delivery, notice_id):
         raise BlockedProviderError
 
     if channel == "SNS_EMAIL":
-        topic = os.environ.get("SNS_TOPIC_ARN")
+        topic = delivery.get("topicArn")
         subject = delivery.get("subject")
-        if not topic or delivery.get("topicArn") != topic:
+        if not topic or (
+            topic != os.environ.get("SNS_TOPIC_ARN") and not personal_email_topic(topic)
+        ):
             raise BlockedProviderError
         fields = {"TopicArn": topic, "Message": message}
         if subject is not None:
@@ -168,7 +207,10 @@ def provider_request(delivery, notice_id):
 
 def has_budget(context, seconds):
     # Leave one extra second for response handling, validation, and serialization.
-    return context is None or context.get_remaining_time_in_millis() >= (seconds + 1) * 1000
+    return (
+        context is None
+        or context.get_remaining_time_in_millis() >= (seconds + 1) * 1000
+    )
 
 
 def require_budget(context, seconds):
@@ -178,7 +220,11 @@ def require_budget(context, seconds):
 
 def deliver(claim, job, context):
     if claim["mode"] == "DRY_RUN":
-        reason = "BLOCKED_PROVIDER" if claim.get("reason") == "BLOCKED_PROVIDER" else "LAB_DRY_RUN"
+        reason = (
+            "BLOCKED_PROVIDER"
+            if claim.get("reason") == "BLOCKED_PROVIDER"
+            else "LAB_DRY_RUN"
+        )
         return "DRY_RUN", False, None, reason
     if claim["mode"] != "REAL":
         raise ValueError("Unknown claim mode")
@@ -195,8 +241,17 @@ def deliver(claim, job, context):
         return "FAILED", False, None, "LEASE_EXPIRED"
 
     try:
-        service, operation, fields, id_key = provider_request(delivery, job["notificationId"])
-        send = getattr(client(service), operation)
+        service, operation, fields, id_key = provider_request(
+            delivery, job["notificationId"]
+        )
+        provider = client(service)
+        topic = fields.get("TopicArn")
+        if personal_email_topic(topic):
+            if not has_budget(context, DELIVERY_BUDGET + SDK_BUDGET):
+                return "FAILED", False, None, "LAMBDA_TIME_BUDGET"
+            if not sole_confirmed_email(provider, topic, delivery.get("destination")):
+                raise BlockedProviderError
+        send = getattr(provider, operation)
     except (BlockedProviderError, BotoCoreError, ClientError, KeyError):
         return "FAILED", False, None, "BLOCKED_PROVIDER"
     # Client creation can take time, so check the lease again immediately before sending.
@@ -299,7 +354,10 @@ def process(message, context):
         result["type"] != "notification.outcome"
         or result["messageId"] != outcome["outcomeId"]
         or result["correlationId"] != job["eventId"]
-        or any(outcome[key] != job[key] for key in ("notificationId", "eventId", "ownerScopeId"))
+        or any(
+            outcome[key] != job[key]
+            for key in ("notificationId", "eventId", "ownerScopeId")
+        )
     ):
         raise ValueError("Outcome scope mismatch")
     require_budget(context, SDK_BUDGET)
