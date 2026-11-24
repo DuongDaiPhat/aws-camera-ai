@@ -28,6 +28,7 @@ export interface ClaimJobRow extends JobRow {
   camera_id: string;
   current_owner: string;
   recipient_user_id: string | null;
+  recipient_registration_id: string | null;
   emergency_contact_id: string | null;
   cloud_contact_required: boolean;
   claim_reason: ClaimReason | null;

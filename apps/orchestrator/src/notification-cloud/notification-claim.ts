@@ -51,6 +51,7 @@ export async function claimNotification(
     `${notificationJobSelect},
        e.status AS event_status, e.version AS event_version, e.camera_id,
        d.owner_user_id AS current_owner, n.recipient_user_id, n.emergency_contact_id,
+       n.payload->>'recipientRegistrationId' AS recipient_registration_id,
        n.payload @> '{"cloudContactRequired":true}'::jsonb AS cloud_contact_required,
        decision.reason AS claim_reason, mode.notification_driver AS current_driver,
        j.created_at + ($2 * interval '1 second') <= clock_timestamp() AS expired

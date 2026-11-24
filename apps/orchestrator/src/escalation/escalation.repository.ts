@@ -294,6 +294,19 @@ export class EscalationRepository {
     return result.rowCount === 1;
   }
 
+  async createNotificationIntents(
+    client: PoolClient,
+    data: Parameters<EscalationRepository['createNotificationIntent']>[1],
+  ): Promise<void> {
+    if (
+      !data.recipientUserId &&
+      !data.emergencyContactId &&
+      (await this.notificationCloud?.enqueuePersonalIntents(client, data))
+    )
+      return;
+    await this.createNotificationIntent(client, data);
+  }
+
   async createNotificationIntent(
     client: PoolClient,
     data: {

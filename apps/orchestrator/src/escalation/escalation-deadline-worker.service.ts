@@ -91,7 +91,7 @@ export class EscalationDeadlineWorkerService implements OnModuleInit, OnModuleDe
         });
 
         // Tạo notification intent khẩn cấp cho worker gọi điện/thông báo (US-14/US-27)
-        await this.repository.createNotificationIntent(client, {
+        await this.repository.createNotificationIntents(client, {
           eventId: event.id,
           channel: 'CONNECT_CALL',
           status: 'PENDING',

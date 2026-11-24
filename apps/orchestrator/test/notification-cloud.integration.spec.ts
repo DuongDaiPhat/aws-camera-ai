@@ -12,6 +12,8 @@ import { EscalationRepository } from '../src/escalation/escalation.repository';
 import { EscalationEngineService } from '../src/escalation/escalation-engine.service';
 import { EscalationRulesRepository } from '../src/escalation-rules/escalation-rules.repository';
 import { NotificationCloudService } from '../src/notification-cloud/notification-cloud.service';
+import { EmailNotificationSettingsService } from '../src/notification-cloud/email-notification-settings.service';
+import { PhoneNotificationSettingsService } from '../src/notification-cloud/phone-notification-settings.service';
 import type { IStorageService } from '../src/storage/storage.interface';
 import type {
   ClaimRequest,
@@ -88,8 +90,194 @@ describe('cloud notifications in PostgreSQL', () => {
   });
 
   beforeEach(async () => {
-    await pool.query('TRUNCATE events, cloud_notification_routes CASCADE');
+    await pool.query(
+      'TRUNCATE events, cloud_notification_routes, user_email_alert_settings, user_phone_alert_settings CASCADE',
+    );
     await pool.query("UPDATE cloud_transport_mode SET mode='bullmq', notification_driver='sqs'");
+  });
+
+  it('lets a user opt in to their account email, confirm, and turn it off', async () => {
+    const register = jest.fn().mockResolvedValue(undefined);
+    const confirmed = jest.fn().mockResolvedValueOnce(false).mockResolvedValue(true);
+    const settings = new EmailNotificationSettingsService(
+      new ConfigService({
+        APP_ENV: 'dev',
+        AWS_REGION: 'ap-southeast-1',
+        NOTIFICATION_DRIVER: 'sqs',
+        SNS_EMAIL_TOPIC_PREFIX_ARN:
+          'arn:aws:sns:ap-southeast-1:123456789012:argusai-dev-incident-email-user-',
+      }),
+      db,
+      { register, confirmed },
+    );
+    expect(await settings.get(owner)).toMatchObject({ enabled: false, status: 'OFF' });
+    expect(await settings.set(owner, { enabled: true })).toMatchObject({
+      enabled: true,
+      email: 'owner@example.test',
+      status: 'PENDING',
+    });
+    expect(register).toHaveBeenCalledTimes(1);
+    await settings.verifyPending();
+    expect(await settings.get(owner)).toMatchObject({ status: 'PENDING' });
+    await pool.query(
+      "UPDATE user_email_alert_settings SET checked_at=now()-interval '16 seconds' WHERE user_id=$1",
+      [owner],
+    );
+    await settings.verifyPending();
+    expect(await settings.get(owner)).toMatchObject({ status: 'VERIFIED' });
+    expect(await settings.set(owner, { enabled: false })).toMatchObject({
+      enabled: false,
+      status: 'OFF',
+    });
+  });
+
+  const personalEmailConfig = {
+    AWS_REGION: 'ap-southeast-1',
+    SNS_EMAIL_TOPIC_PREFIX_ARN:
+      'arn:aws:sns:ap-southeast-1:123456789012:argusai-dev-incident-email-user-',
+  };
+  const personalPhoneConfig = {
+    AWS_REGION: 'ap-southeast-1',
+    SNS_PHONE_SELF_SERVICE_ENABLED: 'true',
+    INTERNAL_SERVICE_TOKEN: 'fixture-token-'.repeat(4),
+    SNS_SMS_ENABLED: 'true',
+    CONNECT_INSTANCE_ID: 'connect-fixture',
+    CONNECT_CONTACT_FLOW_ID: 'flow-fixture',
+    CONNECT_SOURCE_PHONE_NUMBER: '+15550100235',
+  };
+  const accountConfig = (settings: Record<string, string>) =>
+    new ConfigService({
+      APP_ENV: 'dev',
+      NOTIFICATION_DRIVER: 'sqs',
+      ...settings,
+    });
+
+  async function createPersonalIntents(
+    cloud: NotificationCloudService,
+    channel: NotificationJob['channel'],
+  ) {
+    const eventId = randomUUID();
+    await pool.query(
+      `INSERT INTO events(id,camera_id,event_type,status,priority,detected_at)
+      VALUES ($1,$2,'FIRE_SMOKE_DETECTED','NOTIFIED','P0',clock_timestamp())`,
+      [eventId, camera],
+    );
+    const repo = new EscalationRepository(pool, cloud);
+    await db.transaction((client) =>
+      repo.createNotificationIntents(client, {
+        eventId,
+        channel,
+        status: 'PENDING',
+        escalationLevel: 0,
+      }),
+    );
+    const { rows } = await pool.query<{
+      id: string;
+      recipient_user_id: string;
+      envelope: { payload: { expectedEventVersion: number } };
+    }>(
+      `SELECT n.id,n.recipient_user_id,j.envelope FROM notifications n
+       JOIN cloud_jobs j ON j.id=n.id WHERE n.event_id=$1`,
+      [eventId],
+    );
+    return rows.map((row) => ({
+      id: row.id,
+      recipient: row.recipient_user_id,
+      request: {
+        schemaVersion: 1 as const,
+        claimId: randomUUID(),
+        eventId,
+        expectedEventVersion: row.envelope.payload.expectedEventVersion,
+      },
+    }));
+  }
+
+  it('keeps phone calls independent of SMS and only queues a verified opt-in with camera access', async () => {
+    const sendPhoneCode = jest.fn().mockResolvedValue(undefined);
+    const settings = new PhoneNotificationSettingsService(accountConfig(personalPhoneConfig), db, {
+      sendPhoneCode,
+    });
+    const cloud = service(personalPhoneConfig);
+    const alternatePhone = '+84901234567';
+    expect(await settings.get(owner)).toMatchObject({
+      accountPhone: phone,
+      callAvailable: true,
+      smsAvailable: true,
+      status: 'OFF',
+    });
+    await settings.set(owner, { callEnabled: true, smsEnabled: false, phone: alternatePhone });
+    expect(await createPersonalIntents(cloud, 'CONNECT_CALL')).toEqual([]);
+    const code = sendPhoneCode.mock.calls[0][1] as string;
+    const wrong = code === '000000' ? '111111' : '000000';
+    await expect(settings.verify(owner, wrong)).rejects.toThrow('Mã xác minh');
+    await expect(
+      settings.set(owner, { callEnabled: true, smsEnabled: true, phone: alternatePhone }),
+    ).rejects.toThrow('đợi một phút');
+    expect(await settings.verify(owner, code)).toMatchObject({
+      phone: alternatePhone,
+      status: 'VERIFIED',
+      callEnabled: true,
+      smsEnabled: false,
+    });
+    await expect(settings.verify(owner, code)).rejects.toThrow('Mã xác minh');
+    await settings.set(foreignUser, { callEnabled: true, smsEnabled: false });
+    await settings.verify(foreignUser, sendPhoneCode.mock.calls[1][1] as string);
+    const [call] = await createPersonalIntents(cloud, 'CONNECT_CALL');
+    expect(call.recipient).toBe(owner);
+    expect(await createPersonalIntents(cloud, 'SNS_SMS')).toEqual([]);
+    const granted = await claimAttempt(cloud, call);
+    expect(granted.mode).toBe('REAL');
+    expect(granted.delivery).toMatchObject({
+      destination: alternatePhone,
+      channel: 'CONNECT_CALL',
+      instanceId: 'connect-fixture',
+    });
+    await settings.set(owner, { callEnabled: false, smsEnabled: true, phone: alternatePhone });
+    expect(sendPhoneCode).toHaveBeenCalledTimes(2);
+    const [sms] = await createPersonalIntents(cloud, 'SNS_SMS');
+    const smsGrant = await claimAttempt(cloud, sms);
+    expect(smsGrant.delivery).toMatchObject({ destination: alternatePhone, channel: 'SNS_SMS' });
+    expect(await createPersonalIntents(cloud, 'CONNECT_CALL')).toEqual([]);
+    await settings.set(owner, { callEnabled: false, smsEnabled: false });
+    expect(await createPersonalIntents(cloud, 'SNS_SMS')).toEqual([]);
+  });
+
+  it('routes a confirmed alternate email and rejects an older job after switching addresses', async () => {
+    const register = jest.fn().mockResolvedValue(undefined);
+    const confirmed = jest.fn().mockResolvedValue(true);
+    const settings = new EmailNotificationSettingsService(accountConfig(personalEmailConfig), db, {
+      register,
+      confirmed,
+    });
+    const cloud = service(personalEmailConfig);
+    await settings.set(owner, { enabled: true, email: 'ALT@example.test' });
+    await settings.verifyPending();
+    expect(await settings.get(owner)).toMatchObject({
+      status: 'VERIFIED',
+      email: 'alt@example.test',
+    });
+    await settings.set(owner, { enabled: true, email: 'alt@example.test' });
+    expect(register).toHaveBeenCalledTimes(1);
+    const [current] = await createPersonalIntents(cloud, 'SNS_EMAIL');
+    expect((await claimAttempt(cloud, current)).delivery).toMatchObject({
+      destination: 'alt@example.test',
+      topicArn: register.mock.calls[0][0],
+    });
+    const [old] = await createPersonalIntents(cloud, 'SNS_EMAIL');
+    await pool.query(
+      "UPDATE user_email_alert_settings SET requested_at=now()-interval '61 seconds' WHERE user_id=$1",
+      [owner],
+    );
+    await settings.set(owner, { enabled: true, email: 'new@example.test' });
+    await settings.verifyPending();
+    expect(await settings.get(owner)).toMatchObject({
+      status: 'VERIFIED',
+      email: 'new@example.test',
+    });
+    expect(register.mock.calls[1][0]).not.toEqual(register.mock.calls[0][0]);
+    const blocked = await claimAttempt(cloud, old);
+    expect(blocked).toMatchObject({ mode: 'DRY_RUN', reason: 'BLOCKED_PROVIDER' });
+    expect(blocked.delivery).not.toHaveProperty('destination');
   });
 
   afterAll(async () => {

@@ -21,6 +21,23 @@ export function readNotificationConfig(config: ConfigService) {
     }
     return Number(value);
   };
+  const emailTopicPrefix = text('SNS_EMAIL_TOPIC_PREFIX_ARN');
+  if (emailTopicPrefix) {
+    const match =
+      /^arn:aws:sns:([a-z0-9-]+):[0-9]{12}:argusai-(dev|staging|production)-incident-email-user-$/.exec(
+        emailTopicPrefix,
+      );
+    if (!match || match[1] !== text('AWS_REGION') || match[2] !== environment || driver !== 'sqs') {
+      throw new Error('SNS_EMAIL_TOPIC_PREFIX_ARN must match AWS_REGION and APP_ENV in SQS mode');
+    }
+  }
+  const phoneSelfService = boolean('SNS_PHONE_SELF_SERVICE_ENABLED', 'false');
+  if (
+    phoneSelfService &&
+    (driver !== 'sqs' || !text('AWS_REGION') || (text('INTERNAL_SERVICE_TOKEN')?.length ?? 0) < 32)
+  ) {
+    throw new Error('Phone alert settings require SQS, AWS_REGION and INTERNAL_SERVICE_TOKEN');
+  }
   return {
     driver,
     environment,
@@ -30,6 +47,8 @@ export function readNotificationConfig(config: ConfigService) {
     lease: positiveInteger('SENDER_LEASE_SECONDS', '120'),
     intentTtl: positiveInteger('SENDER_INTENT_TTL_SECONDS', '300'),
     topicArn: text('SNS_TOPIC_ARN'),
+    emailTopicPrefix,
+    phoneSelfService,
     smsEnabled: boolean('SNS_SMS_ENABLED', 'false'),
     connectInstanceId: text('CONNECT_INSTANCE_ID'),
     connectContactFlowId: text('CONNECT_CONTACT_FLOW_ID'),
@@ -38,3 +57,8 @@ export function readNotificationConfig(config: ConfigService) {
 }
 
 export type NotificationConfig = ReturnType<typeof readNotificationConfig>;
+
+export function usesPersonalAlertSettings(config: NotificationConfig, channel: string): boolean {
+  if (channel === 'SNS_EMAIL') return !!config.emailTopicPrefix;
+  return config.phoneSelfService && (channel === 'SNS_SMS' || channel === 'CONNECT_CALL');
+}

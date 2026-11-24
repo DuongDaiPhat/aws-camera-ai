@@ -201,7 +201,7 @@ export class EscalationEngineService {
     if (decision.targetStatus === 'NOTIFIED') {
       const rule = rulesMap.get(decision.triggeringEventType ?? input.eventType);
       for (const channel of rule?.notifyChannels ?? ['TELEGRAM']) {
-        await this.repository.createNotificationIntent(client, {
+        await this.repository.createNotificationIntents(client, {
           eventId: event.id,
           channel,
           status: 'PENDING',
@@ -406,7 +406,7 @@ export class EscalationEngineService {
 
       // Neu NEED_HELP: tao ngay notification intents cho lien he khan cap
       if (targetStatus === 'ESCALATED') {
-        await this.repository.createNotificationIntent(client, {
+        await this.repository.createNotificationIntents(client, {
           eventId,
           channel: 'CONNECT_CALL',
           status: 'PENDING',

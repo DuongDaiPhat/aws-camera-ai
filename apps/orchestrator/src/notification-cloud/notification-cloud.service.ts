@@ -14,7 +14,7 @@ import { DatabaseService } from '../database/database.service';
 import { STORAGE_SERVICE, type IStorageService } from '../storage/storage.interface';
 import type { NotificationEmailOptions } from './notification-email';
 import { claimNotification, matchesJob, notificationJobSelect } from './notification-claim';
-import { readNotificationConfig } from './notification-cloud.config';
+import { readNotificationConfig, usesPersonalAlertSettings } from './notification-cloud.config';
 import type {
   AttemptRow,
   ClaimRequest,
@@ -57,6 +57,44 @@ export class NotificationCloudService {
       ),
       webOrigin: config.get<string>('WEB_ORIGIN'),
     };
+  }
+
+  async enqueuePersonalIntents(
+    client: PoolClient,
+    input: {
+      eventId: string;
+      channel: string;
+      status: string;
+      escalationLevel: number;
+      payload?: Record<string, unknown>;
+    },
+  ): Promise<boolean> {
+    if (!usesPersonalAlertSettings(this.config, input.channel)) return false;
+    const recipients =
+      input.channel === 'SNS_EMAIL'
+        ? 'SELECT user_id, registration_id FROM user_email_alert_settings WHERE enabled AND verified_at IS NOT NULL AND topic_arn=$6 || registration_id::text'
+        : `SELECT user_id, registration_id FROM user_phone_alert_settings WHERE verified_at IS NOT NULL
+           AND CASE WHEN $2='SNS_SMS' THEN sms_enabled ELSE call_enabled END`;
+    const params = [
+      input.eventId,
+      input.channel,
+      input.status,
+      input.escalationLevel,
+      JSON.stringify(input.payload ?? {}),
+    ];
+    if (input.channel === 'SNS_EMAIL') params.push(this.config.emailTopicPrefix!);
+    const { rows } = await client.query<{ id: string }>(
+      `WITH recipients AS (${recipients})
+       INSERT INTO notifications(event_id,recipient_user_id,channel,status,escalation_level,payload)
+       SELECT e.id, r.user_id, $2::notification_channel, $3::notification_status, $4::int,
+         $5::jsonb || jsonb_build_object('recipientRegistrationId', r.registration_id)
+       FROM events e CROSS JOIN recipients r
+       WHERE e.id=$1 AND can_access_camera(r.user_id,e.camera_id)
+       RETURNING id`,
+      params,
+    );
+    for (const { id } of rows) await this.enqueueIntent(client, id);
+    return true;
   }
 
   async enqueueIntent(client: PoolClient, id: string, automaticContact = false): Promise<void> {
