@@ -64,6 +64,10 @@ describe('personal notification settings HTTP contract', () => {
 
     expect((await request('/email', 'PUT', { enabled: true, userId: 'other' })).status).toBe(400);
     expect(email.set).not.toHaveBeenCalled();
+    // Non-string email to test transform branch
+    expect((await request('/email', 'PUT', { enabled: true, email: 12345 })).status).toBe(400);
+    // Empty email to test transform branch (trims to undefined)
+    expect((await request('/email', 'PUT', { enabled: true, email: '   ' })).status).toBe(200);
     expect(
       (await request('/email', 'PUT', { enabled: true, email: ' alt@example.test ' })).status,
     ).toBe(200);
@@ -75,6 +79,7 @@ describe('personal notification settings HTTP contract', () => {
 
   it('validates a phone number and OTP while allowing call-only settings', async () => {
     const input = { callEnabled: true, smsEnabled: false };
+    expect((await request('/phone', 'PUT', { ...input, phone: 12345 })).status).toBe(400);
     expect((await request('/phone', 'PUT', { ...input, phone: '0901234567' })).status).toBe(400);
     expect((await request('/phone', 'PUT', { ...input, phone: '  ' })).status).toBe(200);
     expect((await request('/phone', 'PUT', { ...input, phone: ' +84901234567 ' })).status).toBe(
