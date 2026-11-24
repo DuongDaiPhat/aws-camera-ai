@@ -81,7 +81,7 @@ def test_face_quality_gate_defaults_and_env_override(monkeypatch: pytest.MonkeyP
     assert defaults.face_gate_min_sharpness == 45.0
     assert defaults.face_gate_max_yaw_ratio == 0.45
     assert defaults.face_gate_max_pitch_ratio == 0.45
-    assert defaults.face_acquire_timeout_seconds == 0.8
+    assert defaults.face_acquire_timeout_seconds == 1.5
 
     monkeypatch.setenv("FACE_QUALITY_GATE_ENABLED", "false")
     monkeypatch.setenv("FACE_GATE_MIN_FACE_PX", "80")
@@ -89,7 +89,7 @@ def test_face_quality_gate_defaults_and_env_override(monkeypatch: pytest.MonkeyP
     monkeypatch.setenv("FACE_GATE_MIN_SHARPNESS", "60.5")
     monkeypatch.setenv("FACE_GATE_MAX_YAW_RATIO", "0.35")
     monkeypatch.setenv("FACE_GATE_MAX_PITCH_RATIO", "0.40")
-    monkeypatch.setenv("FACE_ACQUIRE_TIMEOUT_SECONDS", "1.5")
+    monkeypatch.setenv("FACE_ACQUIRE_TIMEOUT_SECONDS", "2.5")
     get_settings.cache_clear()
     try:
         loaded = get_settings()
@@ -99,7 +99,7 @@ def test_face_quality_gate_defaults_and_env_override(monkeypatch: pytest.MonkeyP
         assert loaded.face_gate_min_sharpness == 60.5
         assert loaded.face_gate_max_yaw_ratio == 0.35
         assert loaded.face_gate_max_pitch_ratio == 0.40
-        assert loaded.face_acquire_timeout_seconds == 1.5
+        assert loaded.face_acquire_timeout_seconds == 2.5
     finally:
         get_settings.cache_clear()
 

@@ -219,9 +219,16 @@ export class FaceRecognitionCoordinatorService
     const absentKnownIds = camera?.owner_user_id
       ? this.getAbsentKnownTrackIds(after.camera, camera.owner_user_id, after.id, now)
       : new Set<string>();
+    const hasKnownCandidate = Boolean(
+      camera?.owner_user_id &&
+      this.stateService
+        .findKnownTracksForCamera(after.camera, camera.owner_user_id, now)
+        .some((r) => r.trackId !== after.id),
+    );
     // Paired pixels can arrive just after MQTT's new-track message. Give a
-    // proposed or recently-ended/absent KNOWN continuation a bounded chance before
-    // creating an irreversible second incident. Frame ingestion bypasses the event queue.
+    // proposed or recently-ended/absent KNOWN continuation (or briefly overlapping
+    // Frigate ID switch) a bounded chance before creating a second incident.
+    // Frame ingestion bypasses the event queue.
     const attempts =
       this.optConfig.enabled &&
       this.optConfig.spatialReidEnabled &&
@@ -235,8 +242,9 @@ export class FaceRecognitionCoordinatorService
             this.optConfig.spatialReidMaxGapMs,
             now,
           )) ||
-        absentKnownIds.size > 0)
-        ? Math.min(6, Math.max(0, Math.ceil(waitForFrameMs / 250)))
+        absentKnownIds.size > 0 ||
+        hasKnownCandidate)
+        ? Math.min(4, Math.max(0, Math.ceil(waitForFrameMs / 250)))
         : 0;
     for (let attempt = 0; attempt <= attempts; attempt++) {
       const key = await this.tryResolveContinuationDedupKey(after, camera);
@@ -402,7 +410,7 @@ export class FaceRecognitionCoordinatorService
         return null;
       }
     }
-    return `frigate:${after.camera}:${matchedCandidate.trackId}`;
+    return matchedCandidate.eventDedupKey ?? `frigate:${after.camera}:${matchedCandidate.trackId}`;
   }
 
   async handleTrackEvent(input: FaceTrackEventInput): Promise<void> {
@@ -607,6 +615,7 @@ export class FaceRecognitionCoordinatorService
         cameraSlug: after.camera,
         trackId: after.id,
         eventId: event.id,
+        eventDedupKey: event.dedup_key ?? undefined,
         cameraId: camera?.id ?? event.camera_id ?? null,
         ownerScopeId,
         collectionVersion,
@@ -615,6 +624,9 @@ export class FaceRecognitionCoordinatorService
       },
       now,
     );
+    if (!record.eventDedupKey && event.dedup_key) {
+      record.eventDedupKey = event.dedup_key;
+    }
     if (isValidBox(after.box)) {
       record.lastBox = [...after.box];
     }

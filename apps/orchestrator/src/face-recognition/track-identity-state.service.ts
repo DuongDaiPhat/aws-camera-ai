@@ -34,6 +34,7 @@ export interface TrackRecord {
   trackId: string;
   canonicalTrackId?: string;
   eventId: string;
+  eventDedupKey?: string;
   cameraId: string | null;
   ownerScopeId: string;
   collectionVersion: number;
@@ -62,6 +63,18 @@ export interface TrackRecord {
   matchedPersonName: string | null;
   lastBox: number[] | null;
   endedAt: number | null;
+}
+
+export interface GetOrCreateTrackInput {
+  cameraSlug: string;
+  trackId: string;
+  eventId: string;
+  eventDedupKey?: string;
+  cameraId: string | null;
+  ownerScopeId: string;
+  collectionVersion: number;
+  sourceSessionId: string;
+  canonicalTrackId?: string;
 }
 
 export interface TrackMetrics {
@@ -107,16 +120,7 @@ export class TrackIdentityStateService {
   }
 
   getOrCreate(
-    input: {
-      cameraSlug: string;
-      trackId: string;
-      eventId: string;
-      cameraId: string | null;
-      ownerScopeId: string;
-      collectionVersion: number;
-      sourceSessionId: string;
-      canonicalTrackId?: string;
-    },
+    input: GetOrCreateTrackInput,
     now = Date.now(),
   ): { record: TrackRecord; created: boolean } {
     this.cleanup(now);
@@ -125,6 +129,9 @@ export class TrackIdentityStateService {
     if (existing) {
       existing.lastUpdatedAt = now;
       if (input.canonicalTrackId) existing.canonicalTrackId = input.canonicalTrackId;
+      if (!existing.eventDedupKey && input.eventDedupKey) {
+        existing.eventDedupKey = input.eventDedupKey;
+      }
       if (existing.state === 'COLLECTING') {
         existing.collectionVersion = input.collectionVersion;
       }
@@ -140,6 +147,7 @@ export class TrackIdentityStateService {
       trackId: input.trackId,
       canonicalTrackId: input.canonicalTrackId,
       eventId: input.eventId,
+      eventDedupKey: input.eventDedupKey,
       cameraId: input.cameraId,
       ownerScopeId: input.ownerScopeId,
       collectionVersion: input.collectionVersion,

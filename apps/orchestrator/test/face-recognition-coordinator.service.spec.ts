@@ -2054,4 +2054,292 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
     );
     h.coordinator.onModuleDestroy();
   });
+
+  it('serializes per-camera assess calls to 1 concurrent call by default', async () => {
+    let now = 15_000;
+    jest.spyOn(Date, 'now').mockImplementation(() => now);
+    const h = buildHarness({
+      FACE_REQUIRE_TIMESTAMPED_FRAME: 'true',
+      FACE_MIN_SAMPLE_INTERVAL_MS: '150',
+      FACE_BEST_SHOT_EARLY_DISPATCH_ENABLED: 'false',
+      FACE_BEST_SHOT_WINDOW_MS: '4000',
+    });
+    const camera = makeCamera();
+    h.getTimestampedPersonCrop.mockResolvedValue(null);
+    for (const [idx, trackId] of (['t1', 't2'] as const).entries()) {
+      await h.coordinator.handleTrackEvent({
+        messageType: 'new',
+        event: makeEvent({
+          id: `11111111-1111-4111-8111-11111111140${idx + 1}`,
+          track_id: trackId,
+        }),
+        after: {
+          id: trackId,
+          camera: 'cam_front',
+          frame_time: now / 1000,
+          label: 'person',
+          score: 0.9,
+        },
+        isCreated: true,
+        camera,
+      });
+    }
+
+    now = 15_200;
+    const resolvers: Array<(res: FaceQualityGateResult) => void> = [];
+    const assessedOrder: string[] = [];
+    let notifyAssess: (() => void) | null = null;
+    const waitForAssessCount = (count: number): Promise<void> =>
+      assessedOrder.length >= count
+        ? Promise.resolve()
+        : new Promise((resolve) => {
+            notifyAssess = (): void => {
+              if (assessedOrder.length >= count) {
+                notifyAssess = null;
+                resolve();
+              }
+            };
+          });
+    h.getTimestampedPersonCrop.mockImplementation(async (_cam, trackId) =>
+      Buffer.from(`crop-${trackId}`),
+    );
+    h.assess.mockImplementation(
+      (buf) =>
+        new Promise((resolve) => {
+          assessedOrder.push(buf.toString('utf8'));
+          resolvers.push(resolve);
+          notifyAssess?.();
+        }),
+    );
+
+    const batch1 = h.coordinator.sampleAvailableFrame('cam_front', ['t1', 't2']);
+    await waitForAssessCount(1);
+    expect(assessedOrder).toEqual(['crop-t1']);
+    await h.coordinator.sampleAvailableFrame('cam_front', ['t1', 't2']);
+    expect(assessedOrder).toEqual(['crop-t1']);
+
+    resolvers[0]!(makeGateResult({ qualityScore: 0.7 }));
+    await batch1;
+
+    now = 15_400;
+    const batch2 = h.coordinator.sampleAvailableFrame('cam_front', ['t1', 't2']);
+    await waitForAssessCount(2);
+    resolvers[1]!(makeGateResult({ qualityScore: 0.75 }));
+    await batch2;
+    expect(assessedOrder).toEqual(['crop-t1', 'crop-t2']);
+    h.coordinator.onModuleDestroy();
+  });
+
+  it('chains 3-fragment continuations (track1 -> track2 -> track3) onto the root event dedup_key', async () => {
+    let now = 20_000;
+    jest.spyOn(Date, 'now').mockImplementation(() => now);
+    const canonicalMap: Record<string, string> = {
+      'track-1': 'track-1',
+      'track-2': 'track-1',
+      'track-3': 'track-2',
+    };
+    const tracker = {
+      getCanonicalTrackId: (_cam: string, id: string) => canonicalMap[id] ?? id,
+      frames: {
+        get: () => [],
+      },
+    } as unknown as FrigateDetectionTrackerService;
+    const h = buildHarness({ FACE_REQUIRE_TIMESTAMPED_FRAME: 'true' }, tracker);
+    const camera = makeCamera();
+    const box = [100, 100, 220, 340];
+    const aliceCrop = await solidJpeg({ r: 20, g: 40, b: 220 }, { r: 30, g: 30, b: 30 });
+    const rootDedupKey = 'frigate:cam_front:track-1';
+    const rootEvent = makeEvent({
+      id: '11111111-1111-4111-8111-111111111501',
+      track_id: 'track-1',
+      dedup_key: rootDedupKey,
+    });
+
+    // Fragment 1: recognized as Alice, then ends.
+    h.getTimestampedPersonCrop.mockResolvedValue(aliceCrop);
+    h.assess.mockResolvedValue(
+      makeGateResult({ qualityScore: 0.9, embeddingBase64: encodeVector([1, 0, 0, 0]) }),
+    );
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: rootEvent,
+      after: {
+        id: 'track-1',
+        camera: 'cam_front',
+        frame_time: 20,
+        label: 'person',
+        score: 0.9,
+        box,
+      },
+      isCreated: true,
+      camera,
+    });
+    await h.coordinator.onRecognitionResult({
+      eventId: rootEvent.id,
+      cameraSlug: 'cam_front',
+      ownerScopeId: camera.owner_user_id!,
+      trackId: 'track-1',
+      collectionVersion: 1,
+      revision: 1,
+      personStatus: 'KNOWN',
+      matchedKnownFaceId: aliceId,
+      matchedPersonName: 'Alice',
+      similarity: 0.97,
+      disposition: 'ACCEPTED',
+    });
+    now += 1_000;
+    await h.coordinator.handleTrackEvent({
+      messageType: 'end',
+      event: rootEvent,
+      after: {
+        id: 'track-1',
+        camera: 'cam_front',
+        frame_time: 21,
+        label: 'person',
+        score: 0.9,
+        box,
+      },
+      isCreated: false,
+      camera,
+    });
+
+    // Fragment 2: merges onto rootEvent, becomes KNOWN via local cache, then ends.
+    now += 500;
+    const after2 = {
+      id: 'track-2',
+      camera: 'cam_front',
+      frame_time: 21.5,
+      label: 'person',
+      score: 0.9,
+      box,
+    };
+    await expect(h.coordinator.resolveContinuationDedupKey(after2, camera)).resolves.toBe(
+      rootDedupKey,
+    );
+    await h.coordinator.handleTrackEvent({
+      messageType: 'new',
+      event: rootEvent,
+      after: after2,
+      isCreated: false,
+      camera,
+    });
+    expect(h.stateService.get('cam_front', 'track-2', now)?.eventDedupKey).toBe(rootDedupKey);
+    now += 1_000;
+    await h.coordinator.handleTrackEvent({
+      messageType: 'end',
+      event: rootEvent,
+      after: { ...after2, frame_time: 22.5 },
+      isCreated: false,
+      camera,
+    });
+
+    // Fragment 3: matches fragment 2 (both with canonical -> track-2 and without canonical fallback)
+    // and MUST resolve to rootDedupKey rather than frigate:cam_front:track-2.
+    now += 500;
+    const after3 = {
+      id: 'track-3',
+      camera: 'cam_front',
+      frame_time: 23,
+      label: 'person',
+      score: 0.9,
+      box,
+    };
+    await expect(h.coordinator.resolveContinuationDedupKey(after3, camera)).resolves.toBe(
+      rootDedupKey,
+    );
+    canonicalMap['track-3'] = 'track-3';
+    await expect(h.coordinator.resolveContinuationDedupKey(after3, camera)).resolves.toBe(
+      rootDedupKey,
+    );
+    h.coordinator.onModuleDestroy();
+  });
+
+  it('resolves brief live-frame overlap within bounded wait while rejecting active-throughout tailgating', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(4_000);
+      const box = [100, 100, 220, 340];
+      let liveIds: string[] = ['track-old', 'track-new'];
+      const tracker = {
+        getCanonicalTrackId: (_cam: string, id: string) => id,
+        frames: {
+          get: () => {
+            const now = Date.now();
+            return [
+              {
+                frameTime: now - 50,
+                objects: liveIds.map((id) => ({ id, box, observedAt: now - 50 })),
+              },
+            ];
+          },
+        },
+      } as unknown as FrigateDetectionTrackerService;
+      const h = buildHarness({}, tracker);
+      const camera = makeCamera();
+      const crop = await solidJpeg({ r: 20, g: 40, b: 220 }, { r: 30, g: 30, b: 30 });
+
+      const { record } = h.stateService.getOrCreate(
+        {
+          cameraSlug: 'cam_front',
+          trackId: 'track-old',
+          eventId: makeEvent().id,
+          eventDedupKey: 'frigate:cam_front:track-old',
+          cameraId: camera.id,
+          ownerScopeId: camera.owner_user_id!,
+          collectionVersion: 1,
+          sourceSessionId: 'old-source',
+        },
+        2_000,
+      );
+      h.stateService.markKnownFromLocalCache(record, aliceId, 'Alice', 1, box, 2_000);
+      h.sessionCache.upsertKnown(
+        { ownerScopeId: camera.owner_user_id!, cameraSlug: 'cam_front', collectionVersion: 1 },
+        {
+          knownFaceId: aliceId,
+          personName: 'Alice',
+          trackId: 'track-old',
+          embedding: new Float32Array([1, 0, 0, 0]),
+          appearanceSignature: await computeAppearanceSignature(crop),
+          lastBox: box,
+          confirmedAt: 2_000,
+          endedAt: null,
+        },
+        2_000,
+      );
+      h.getTimestampedPersonCrop.mockResolvedValue(crop);
+      h.assess.mockResolvedValue(makeGateResult());
+      const after = {
+        id: 'track-new',
+        camera: 'cam_front',
+        frame_time: 4,
+        label: 'person',
+        score: 0.9,
+        box,
+      };
+
+      // Case 1: Brief overlap at attempt 0, resolved by attempt 1 (+250ms) when track-old leaves live frame.
+      const briefOverlapPromise = h.coordinator.resolveContinuationDedupKey(after, camera, 1000);
+      await jest.advanceTimersByTimeAsync(0);
+      expect(h.assess).not.toHaveBeenCalled();
+
+      liveIds = ['track-new'];
+      await jest.advanceTimersByTimeAsync(250);
+      await expect(briefOverlapPromise).resolves.toBe('frigate:cam_front:track-old');
+      expect(h.assess).toHaveBeenCalledTimes(1);
+
+      // Case 2: Active-throughout tailgating (track-old stays in live frame across all 1000ms checks) -> null.
+      h.assess.mockClear();
+      liveIds = ['track-old', 'track-new'];
+      const tailgatingPromise = h.coordinator.resolveContinuationDedupKey(after, camera, 1000);
+      await jest.advanceTimersByTimeAsync(1000);
+      await expect(tailgatingPromise).resolves.toBeNull();
+      expect(h.assess).not.toHaveBeenCalled();
+
+      // Case 3: waitForFrameMs = 0 (P1) returns immediately with 0 waits.
+      await expect(h.coordinator.resolveContinuationDedupKey(after, camera, 0)).resolves.toBeNull();
+      h.coordinator.onModuleDestroy();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });
