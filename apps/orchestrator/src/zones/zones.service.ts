@@ -1,9 +1,4 @@
-import {
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import type { components } from '@cam/contracts';
 import type { CreateZoneDto } from './dto/create-zone.dto';
 import type { UpdateZoneDto } from './dto/update-zone.dto';
@@ -40,30 +35,12 @@ export class ZonesService {
     return { data: zones.map((zone) => this.toDto(zone)) };
   }
 
-  private async assertZoneModuleEnabled(
-    cameraId: string,
-    zoneType: ZoneRecord['zone_type'],
-  ): Promise<void> {
-    const modules = await this.zonesRepository.getCameraAiModules?.(cameraId);
-    if (zoneType === 'RESTRICTED' && modules?.m4Zone === false) {
-      throw new ForbiddenException(
-        'Module Giám sát vùng cấm (M4) đang tắt. Caregiver cần bật lại trong Cài đặt để sử dụng.',
-      );
-    }
-    if (zoneType === 'REST_AREA' && modules?.m2aFall === false) {
-      throw new ForbiddenException(
-        'Module Phát hiện té ngã (M2a) đang tắt. Caregiver cần bật lại trong Cài đặt để sử dụng.',
-      );
-    }
-  }
-
   async create(cameraId: string, dto: CreateZoneDto): Promise<ZoneDto> {
     if (!(await this.zonesRepository.cameraExists(cameraId))) {
       throw new NotFoundException({
         error: { code: 'CAMERA_NOT_FOUND', message: `Không tìm thấy camera với ID: ${cameraId}` },
       });
     }
-    await this.assertZoneModuleEnabled(cameraId, dto.zoneType);
     const schedule = {
       activeFrom: dto.activeFrom ?? null,
       activeTo: dto.activeTo ?? null,
@@ -92,8 +69,6 @@ export class ZonesService {
   async update(zoneId: string, dto: UpdateZoneDto): Promise<ZoneDto> {
     const existing = await this.zonesRepository.findById(zoneId);
     if (!existing) this.throwZoneNotFound(zoneId);
-    const targetType = dto.zoneType ?? existing.zone_type;
-    await this.assertZoneModuleEnabled(existing.camera_id, targetType);
 
     const activeFrom = dto.activeFrom !== undefined ? dto.activeFrom : existing.active_from;
     const activeTo = dto.activeTo !== undefined ? dto.activeTo : existing.active_to;

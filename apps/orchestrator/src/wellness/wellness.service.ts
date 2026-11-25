@@ -105,7 +105,6 @@ export class WellnessService {
     dto: CreateWellnessScheduleDto,
   ): Promise<WellnessScheduleRecord> {
     this.requireManager(user);
-    await this.requireWellnessEnabled(user.sub);
     await this.validateSchedule(
       user.sub,
       dto.residentUserId,
@@ -149,7 +148,6 @@ export class WellnessService {
       await this.authorizeSchedule(user, existing, client);
       const owner = existing.owner_user_id ?? user.sub,
         resident = dto.residentUserId ?? existing.resident_user_id;
-      await this.requireWellnessEnabled(owner, client);
       await this.validateSchedule(
         owner,
         resident,

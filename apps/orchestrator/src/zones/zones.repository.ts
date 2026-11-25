@@ -48,26 +48,6 @@ export class ZonesRepository {
     return (result.rowCount ?? 0) > 0;
   }
 
-  async getCameraAiModules(cameraId: string): Promise<{ m2aFall: boolean; m4Zone: boolean }> {
-    const result = await this.pool.query<{ m2a_fall_enabled: boolean; m4_zone_enabled: boolean }>(
-      `SELECT COALESCE(ai.m2a_fall_enabled, TRUE) AS m2a_fall_enabled,
-              COALESCE(ai.m4_zone_enabled, TRUE) AS m4_zone_enabled
-       FROM cameras c
-       JOIN devices d ON d.id = c.device_id
-       LEFT JOIN users u ON u.id = d.owner_user_id
-       LEFT JOIN household_ai_module_settings ai
-         ON ai.owner_user_id = COALESCE(u.household_owner_id, u.id)
-       WHERE c.id = $1
-       LIMIT 1`,
-      [cameraId],
-    );
-    const row = result.rows[0];
-    return {
-      m2aFall: row?.m2a_fall_enabled ?? true,
-      m4Zone: row?.m4_zone_enabled ?? true,
-    };
-  }
-
   async listByCameraId(cameraId: string): Promise<ZoneRecord[]> {
     const result = await this.pool.query<ZoneRecord>(
       `SELECT ${ZONE_COLUMNS} FROM zones WHERE camera_id = $1 ORDER BY name ASC, id ASC LIMIT 500`,

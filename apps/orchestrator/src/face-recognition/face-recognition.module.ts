@@ -3,6 +3,7 @@ import { FrigateMediaAdapter } from '../media/frigate-media.adapter';
 import { AiResultsService } from '../ai-results/ai-results.service';
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
+import { DatabaseService } from '../database/database.service';
 import { FaceRecognitionWorker } from './face-recognition.worker';
 import { MediaModule } from '../media/media.module';
 import { AiResultsModule } from '../ai-results/ai-results.module';
@@ -37,15 +38,17 @@ import { FaceRecognitionCoordinatorService } from './face-recognition-coordinato
         FrigateMediaAdapter,
         AiResultsService,
         FaceRecognitionCoordinatorService,
+        DatabaseService,
       ],
       useFactory: (
         config: ConfigService,
         media: FrigateMediaAdapter,
         ai: AiResultsService,
         coordinator: FaceRecognitionCoordinatorService,
+        db: DatabaseService,
       ) =>
         config.get<string>('FACE_JOB_TRANSPORT', 'bullmq') === 'bullmq'
-          ? new FaceRecognitionWorker(media, config, ai, coordinator)
+          ? new FaceRecognitionWorker(media, config, ai, coordinator, db)
           : null,
     },
   ],

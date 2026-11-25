@@ -72,18 +72,6 @@ export class KnownFacesRepository {
     if (!result.rows[0]) throw faceError(401, 'UNAUTHORIZED', 'Bạn cần đăng nhập.');
     return result.rows[0].owner;
   }
-
-  async isFaceModuleEnabled(ownerUserId: string): Promise<boolean> {
-    const result = await this.db.query<{ enabled: boolean }>(
-      `SELECT COALESCE(ai.m1_face_enabled, TRUE) AS enabled
-       FROM users u
-       LEFT JOIN household_ai_module_settings ai
-         ON ai.owner_user_id = COALESCE(u.household_owner_id, u.id)
-       WHERE u.id = $1`,
-      [ownerUserId],
-    );
-    return result.rows[0]?.enabled ?? true;
-  }
   async update(
     owner: string,
     id: string,

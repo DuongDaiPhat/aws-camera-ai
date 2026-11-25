@@ -1,10 +1,21 @@
 import { ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import type { Job } from 'bullmq';
+import type { AiResultsService } from '../src/ai-results/ai-results.service';
 import type { TokenClaims } from '../src/auth/auth.types';
-import type { FaceCollectionSyncService } from '../src/known-faces/face-collection-sync.service';
-import type { IFaceInference } from '../src/known-faces/face-inference.interface';
-import type { KnownFacesRepository } from '../src/known-faces/known-faces.repository';
-import { KnownFacesService } from '../src/known-faces/known-faces.service';
+import type { DatabaseService } from '../src/database/database.service';
+import type { EventsService } from '../src/events/events.service';
+import {
+  FaceRecognitionWorker,
+  type MatchFaceJob,
+} from '../src/face-recognition/face-recognition.worker';
+import type { FireAiClient } from '../src/fire/fire-ai.client';
+import { FireConfig } from '../src/fire/fire.config';
+import type { FireIncidentsRepository } from '../src/fire/fire-incidents.repository';
+import { FireProcessorService } from '../src/fire/fire-processor.service';
+import { FireTelemetry } from '../src/fire/fire-telemetry.service';
+import type { FrigateMediaAdapter } from '../src/media/frigate-media.adapter';
+import type { MediaService } from '../src/media/media.service';
 import type { WellnessRepository } from '../src/wellness/wellness.repository';
 import { WellnessService } from '../src/wellness/wellness.service';
 import type { FrigateConfigSyncWorker } from '../src/zones/frigate-config-sync.worker';
@@ -12,157 +23,177 @@ import { ZoneScheduleService } from '../src/zones/zone-schedule.service';
 import type { ZonesRepository } from '../src/zones/zones.repository';
 import { ZonesService } from '../src/zones/zones.service';
 
-describe('AI module API feature locks when Caregiver turns modules OFF', () => {
-  describe('M1 KnownFacesService lock', () => {
-    it('rejects create, update, and remove when m1_face_enabled is false, and allows when true', async () => {
-      const repo = {
-        householdOwner: jest.fn().mockResolvedValue('owner-1'),
-        isFaceModuleEnabled: jest.fn().mockResolvedValue(false),
-        update: jest.fn(),
-        remove: jest.fn(),
-        list: jest.fn().mockResolvedValue([{ id: 'face-1', personName: 'An' }]),
-      } as unknown as KnownFacesRepository;
-      const inference = {
-        embed: jest.fn(),
-        sync: jest.fn(),
-      } as unknown as IFaceInference;
-      const sync = {
-        sync: jest.fn().mockResolvedValue(true),
-      } as unknown as FaceCollectionSyncService;
-      const config = new ConfigService({ FACE_PROVIDER: 'local' });
-      const service = new KnownFacesService(repo, inference, sync, config);
-
-      await expect(service.create('cg-1', { personName: 'An' }, [])).rejects.toMatchObject({
-        status: 403,
-      });
-      await expect(service.update('cg-1', 'face-1', { personName: 'An 2' })).rejects.toMatchObject({
-        status: 403,
-      });
-      await expect(service.remove('cg-1', 'face-1', null, null)).rejects.toMatchObject({
-        status: 403,
-      });
-
-      (repo.isFaceModuleEnabled as jest.Mock).mockResolvedValue(true);
-      await expect(service.update('cg-1', 'face-1', { personName: 'An 2' })).resolves.toMatchObject(
-        { id: 'face-1' },
+describe('Camera-only AI runtime locks while CRUD remains open', () => {
+  describe('M1 BullMQ worker stops in-flight recognition when m1_face_enabled is false', () => {
+    it('skips AI service call and submission when household disabled M1', async () => {
+      const frigateAdapter = {
+        getCroppedSnapshot: jest.fn(),
+      } as unknown as FrigateMediaAdapter;
+      const submit = jest.fn();
+      const aiResults = { submit } as unknown as AiResultsService;
+      const db = {
+        query: jest.fn().mockResolvedValue({ rows: [{ enabled: false }] }),
+      } as unknown as DatabaseService;
+      const coordinator = { onRecognitionResult: jest.fn() };
+      const worker = new FaceRecognitionWorker(
+        frigateAdapter,
+        new ConfigService({ FACE_JOB_TRANSPORT: 'bullmq' }),
+        aiResults,
+        coordinator,
+        db,
       );
-      await expect(service.remove('cg-1', 'face-1', null, null)).resolves.toBe(true);
+
+      await worker.process({
+        data: {
+          eventId: 'evt-1',
+          trackId: 'track-1',
+          cameraSlug: 'cam_living',
+          ownerScopeId: 'owner-1',
+          collectionVersion: 1,
+          imageBase64: Buffer.from('img').toString('base64'),
+        },
+      } as Job<MatchFaceJob, void, string>);
+
+      expect(db.query).toHaveBeenCalledWith(expect.stringContaining('m1_face_enabled'), [
+        'owner-1',
+      ]);
+      expect(submit).not.toHaveBeenCalled();
+      expect(coordinator.onRecognitionResult).not.toHaveBeenCalled();
     });
   });
 
-  describe('M2a & M4 ZonesService lock', () => {
-    const polygon = [
-      [0.1, 0.1],
-      [0.4, 0.1],
-      [0.4, 0.4],
-    ];
+  describe('M3 FireProcessorService skips disabled camera and clears cached frame state', () => {
+    it('does not call fire AI or confirm incident when findEnabledCamera returns null', async () => {
+      const detect = jest.fn();
+      const repository = {
+        findEnabledCamera: jest.fn().mockResolvedValue(null),
+        confirm: jest.fn(),
+        clearActive: jest.fn(),
+      } as unknown as FireIncidentsRepository;
+      const fireCfg = new FireConfig(
+        new ConfigService({
+          M3_ENABLED: 'true',
+          FIRE_FRAME_MAX_AGE_SECONDS: '5',
+        }),
+      );
+      const processor = new FireProcessorService(
+        fireCfg,
+        { detect } as unknown as FireAiClient,
+        repository,
+        {} as unknown as MediaService,
+        {} as unknown as EventsService,
+        new FireTelemetry(fireCfg),
+      );
 
-    it('rejects RESTRICTED when M4 is off and REST_AREA when M2a is off, while NORMAL stays usable', async () => {
+      await processor.process({
+        header: {
+          schemaVersion: 1,
+          cameraSlug: 'cam_fire',
+          sourceSessionId: 'sess-fire',
+          frameId: '11111111-1111-4111-8111-111111111111',
+          frameTimestamp: new Date().toISOString(),
+          frameWidth: 640,
+          frameHeight: 360,
+        },
+        image: Buffer.from([0xff, 0xd8, 0xff, 0xd9]),
+      });
+
+      expect(repository.findEnabledCamera).toHaveBeenCalledWith('cam_fire');
+      expect(detect).not.toHaveBeenCalled();
+      expect(repository.confirm).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('User CRUD remains usable even when camera AI modules are disabled', () => {
+    it('allows creating RESTRICTED and REST_AREA zones via ZonesService', async () => {
+      const polygon = [
+        [0.1, 0.1],
+        [0.4, 0.1],
+        [0.4, 0.4],
+      ];
       const repo = {
         cameraExists: jest.fn().mockResolvedValue(true),
-        getCameraAiModules: jest.fn().mockResolvedValue({ m2aFall: false, m4Zone: false }),
-        findById: jest.fn().mockResolvedValue({
-          id: 'zone-1',
-          camera_id: 'cam-1',
-          name: 'Restricted',
-          slug: 'restricted_1',
-          zone_type: 'RESTRICTED',
-          polygon,
-          min_dwell_seconds: 2,
-          active_from: null,
-          active_to: null,
-          is_enabled: true,
-        }),
-        create: jest.fn().mockResolvedValue({
+        create: jest.fn().mockImplementation(async (_cameraId, values) => ({
           zone: {
-            id: 'zone-2',
+            id: 'zone-1',
             camera_id: 'cam-1',
-            name: 'Normal',
-            slug: 'normal_1',
-            zone_type: 'NORMAL',
-            polygon,
-            min_dwell_seconds: 2,
-            active_from: null,
-            active_to: null,
-            is_enabled: true,
+            name: values.name,
+            slug: values.slug,
+            zone_type: values.zoneType,
+            polygon: values.polygon,
+            min_dwell_seconds: values.minDwellSeconds,
+            active_from: values.activeFrom,
+            active_to: values.activeTo,
+            is_enabled: values.isEnabled,
           },
           version: 2,
-        }),
-        update: jest.fn(),
+        })),
       } as unknown as ZonesRepository;
       const syncWorker = { enqueue: jest.fn() } as unknown as FrigateConfigSyncWorker;
-      const service = new ZonesService(repo, new ZoneScheduleService(), syncWorker);
+      const zones = new ZonesService(repo, new ZoneScheduleService(), syncWorker);
 
       await expect(
-        service.create('cam-1', {
-          name: 'Bep',
-          slug: 'bep',
+        zones.create('cam-1', {
+          name: 'Vùng cấm',
+          slug: 'vung_cam',
           zoneType: 'RESTRICTED',
           polygon,
         }),
-      ).rejects.toThrow(ForbiddenException);
-
+      ).resolves.toMatchObject({ zoneType: 'RESTRICTED' });
       await expect(
-        service.create('cam-1', {
-          name: 'Giuong',
-          slug: 'giuong',
+        zones.create('cam-1', {
+          name: 'Khu nghỉ',
+          slug: 'khu_nghi',
           zoneType: 'REST_AREA',
           polygon,
         }),
-      ).rejects.toThrow(ForbiddenException);
-
-      await expect(service.update('zone-1', { name: 'Updated' })).rejects.toThrow(
-        ForbiddenException,
-      );
-
-      await expect(
-        service.create('cam-1', {
-          name: 'Normal',
-          slug: 'normal_1',
-          zoneType: 'NORMAL',
-          polygon,
-        }),
-      ).resolves.toMatchObject({ zoneType: 'NORMAL' });
+      ).resolves.toMatchObject({ zoneType: 'REST_AREA' });
     });
-  });
 
-  describe('M5 WellnessService lock', () => {
-    const caregiver: TokenClaims = {
-      sub: 'cg-1',
-      email: 'cg@example.test',
-      role: 'CAREGIVER',
-      tokenType: 'access',
-      jti: 'jti-cg',
-    };
-
-    it('rejects createSchedule, updateSchedule, and submitObservation when m5_wellness_enabled is false', async () => {
+    it('keeps wellness schedule CRUD open while blocking camera AI observations when M5 is off', async () => {
+      const caregiver: TokenClaims = {
+        sub: 'cg-1',
+        email: 'cg@example.test',
+        role: 'CAREGIVER',
+        tokenType: 'access',
+        jti: 'jti-cg',
+      };
       const client = { query: jest.fn().mockResolvedValue({ rows: [] }) };
       const repo = {
         isWellnessModuleEnabled: jest.fn().mockResolvedValue(false),
-        transaction: jest.fn(async (fn: (c: typeof client) => Promise<unknown>) => fn(client)),
-        getScheduleById: jest.fn().mockResolvedValue({
+        verifyResidentHouseholdLink: jest.fn().mockResolvedValue(true),
+        timezoneExists: jest.fn().mockResolvedValue(true),
+        enabledCameraIds: jest.fn().mockResolvedValue([]),
+        residentCanReceive: jest.fn().mockResolvedValue(true),
+        findConflictingSchedule: jest.fn().mockResolvedValue(false),
+        createSchedule: jest.fn().mockResolvedValue({
           id: 'sched-1',
           owner_user_id: 'cg-1',
           resident_user_id: 'res-1',
+          name: 'Buổi sáng',
           check_at: '09:00',
+          days_of_week: [1, 2, 3],
+          lookback_hours: 6,
+          grace_seconds: 300,
           camera_ids: [],
           timezone: 'Asia/Ho_Chi_Minh',
           is_enabled: true,
+          version: 1,
+          activation_started_at: new Date(),
+          last_materialized_at: null,
+          last_checked_at: null,
+          deleted_at: null,
+          created_at: new Date(),
+          updated_at: new Date(),
         }),
+        transaction: jest.fn(async (fn: (c: typeof client) => Promise<unknown>) => fn(client)),
         findObservationById: jest.fn().mockResolvedValue(null),
       } as unknown as WellnessRepository;
       const service = new WellnessService(repo, new ConfigService());
 
       await expect(
-        service.createSchedule(caregiver, {
-          residentUserId: 'res-1',
-          checkAt: '09:00',
-        }),
-      ).rejects.toThrow(ForbiddenException);
-
-      await expect(
-        service.updateSchedule(caregiver, 'sched-1', { name: 'New name' }),
-      ).rejects.toThrow(ForbiddenException);
+        service.createSchedule(caregiver, { residentUserId: 'res-1', checkAt: '09:00' }),
+      ).resolves.toMatchObject({ id: 'sched-1' });
 
       await expect(
         service.submitObservation({
