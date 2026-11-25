@@ -279,3 +279,63 @@ def test_fall_tracker_axial_fall_candidate() -> None:
     assert res_axial["state"] == "CANDIDATE"
     assert res_axial["reason"] in ("FALL_CANDIDATE", "AXIAL_FALL_CANDIDATE")
     assert res_axial["episodeId"] is not None
+
+
+def test_fall_tracker_axial_fall_confirms_when_center_y_drifts() -> None:
+    """Nga doc camera: sau khi vao CANDIDATE, center_y co the hoi nhich len (< 0.20) van dem du -> CONFIRMED."""
+    tracker = FallTracker("cam1", "sess1", "track_axial_confirm")
+    t0 = datetime(2026, 10, 11, 12, 0, 0, tzinfo=UTC)
+    kps = make_kps()
+    geom_standing = make_geom(
+        angle=85.0, center_y=200.0, height=200.0, torso_length=120.0, angle_3d=85.0
+    )
+
+    for i in range(10):
+        tracker.evaluate_frame(
+            observed_at=t0 + timedelta(milliseconds=i * 200),
+            frame_id=f"f{i}",
+            keypoints=kps,
+            geometry=geom_standing,
+            pose_available=True,
+            reason="NORMAL_POSTURE",
+        )
+
+    # Frame 10: Vao CANDIDATE voi drop >= 0.20 va angle_3d < 30
+    geom_entry = make_geom(
+        angle=85.0,
+        center_y=250.0,
+        height=140.0,
+        torso_length=60.0,
+        angle_3d=10.0,
+    )
+    res_entry = tracker.evaluate_frame(
+        observed_at=t0 + timedelta(seconds=2.0),
+        frame_id="f_entry",
+        keypoints=kps,
+        geometry=geom_entry,
+        pose_available=True,
+        reason="NORMAL_POSTURE",
+    )
+    assert res_entry["state"] == "CANDIDATE"
+
+    # Cac frame tiep theo nam im nhung center_y hoi nhich len (drop ~ 0.05 < 0.20)
+    geom_lying_axial = make_geom(
+        angle=87.0,
+        center_y=210.0,
+        height=120.0,
+        torso_length=55.0,
+        angle_3d=8.0,
+    )
+    last_res = res_entry
+    for step in range(1, 17):
+        last_res = tracker.evaluate_frame(
+            observed_at=t0 + timedelta(seconds=2.0 + step * 0.2),
+            frame_id=f"f_still_{step}",
+            keypoints=kps,
+            geometry=geom_lying_axial,
+            pose_available=True,
+            reason="NORMAL_POSTURE",
+        )
+
+    assert last_res["state"] == "CONFIRMED"
+    assert last_res["reason"] == "IMMOBILE_CONFIRMED"
