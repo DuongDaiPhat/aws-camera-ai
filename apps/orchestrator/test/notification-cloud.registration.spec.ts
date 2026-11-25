@@ -2,7 +2,6 @@ import { ConfigService } from '@nestjs/config';
 import {
   CreateTopicCommand,
   ListSubscriptionsByTopicCommand,
-  PublishCommand,
   SubscribeCommand,
 } from '@aws-sdk/client-sns';
 import { NotificationRegistrationProvider } from '../src/notification-cloud/notification-registration.provider';
@@ -63,17 +62,3 @@ it.each([
     expect(send.mock.calls[0][0]).toBeInstanceOf(ListSubscriptionsByTopicCommand);
   },
 );
-
-it('uses transactional SMS for phone verification', async () => {
-  const { provider, send } = setup();
-  await provider.sendPhoneCode('+84901234567', '123456');
-  const command = send.mock.calls[0][0];
-  expect(command).toBeInstanceOf(PublishCommand);
-  expect(command.input).toMatchObject({
-    PhoneNumber: '+84901234567',
-    Message: expect.stringContaining('123456'),
-    MessageAttributes: {
-      'AWS.SNS.SMS.SMSType': { DataType: 'String', StringValue: 'Transactional' },
-    },
-  });
-});

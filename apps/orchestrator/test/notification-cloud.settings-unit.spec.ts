@@ -282,44 +282,10 @@ describe('EmailNotificationSettingsService unit edge cases', () => {
 });
 
 describe('PhoneNotificationSettingsService unit edge cases', () => {
-  const fullConfig = new ConfigService({
-    NOTIFICATION_DRIVER: 'sqs',
-    APP_ENV: 'dev',
-    AWS_REGION: 'ap-southeast-1',
-    INTERNAL_SERVICE_TOKEN: '0123456789abcdef0123456789abcdef',
-    SNS_PHONE_SELF_SERVICE_ENABLED: 'true',
-    SNS_SMS_ENABLED: 'true',
-    CONNECT_INSTANCE_ID: 'inst-1',
-    CONNECT_CONTACT_FLOW_ID: 'flow-1',
-    CONNECT_SOURCE_PHONE_NUMBER: '+15550100',
-  });
-
-  const partialConfig = new ConfigService({
-    NOTIFICATION_DRIVER: 'sqs',
-    APP_ENV: 'dev',
-    AWS_REGION: 'ap-southeast-1',
-    INTERNAL_SERVICE_TOKEN: '0123456789abcdef0123456789abcdef',
-    SNS_PHONE_SELF_SERVICE_ENABLED: 'true',
-    SNS_SMS_ENABLED: 'false',
-  });
-
-  it('validates configuration availability, account existence, phone regex, and rate limits', async () => {
-    const unconfigured = new PhoneNotificationSettingsService(partialConfig, {} as any, {} as any);
-    await expect(unconfigured.set('u1', { smsEnabled: true, callEnabled: false })).rejects.toThrow(
-      ServiceUnavailableException,
-    );
-    await expect(unconfigured.set('u1', { smsEnabled: false, callEnabled: true })).rejects.toThrow(
-      ServiceUnavailableException,
-    );
-
+  it('validates account existence, phone regex, and persists contact phone', async () => {
     const query = jest.fn();
     const transaction = jest.fn();
-    const sendPhoneCode = jest.fn();
-    const service = new PhoneNotificationSettingsService(
-      fullConfig,
-      { query, transaction } as any,
-      { sendPhoneCode } as any,
-    );
+    const service = new PhoneNotificationSettingsService({ query, transaction } as any);
 
     // user not found in get
     query.mockResolvedValueOnce({ rows: [] });
@@ -334,31 +300,6 @@ describe('PhoneNotificationSettingsService unit edge cases', () => {
       NotFoundException,
     );
 
-    // disable phone settings
-    transaction.mockImplementation(async (cb) => {
-      const client = {
-        query: jest.fn().mockImplementation(async (sql) => {
-          if (sql.includes('SELECT phone_e164 FROM users'))
-            return { rows: [{ phone_e164: '+84901234567' }] };
-          return { rows: [] };
-        }),
-      };
-      return cb(client);
-    });
-    query.mockResolvedValueOnce({
-      rows: [
-        {
-          account_phone: '+84901234567',
-          phone: null,
-          sms_enabled: false,
-          call_enabled: false,
-          verified_at: null,
-        },
-      ],
-    });
-    const off = await service.set('u1', { smsEnabled: false, callEnabled: false });
-    expect(off.status).toBe('OFF');
-
     // invalid phone format
     transaction.mockImplementation(async (cb) => {
       const client = {
@@ -370,15 +311,37 @@ describe('PhoneNotificationSettingsService unit edge cases', () => {
       service.set('u1', { smsEnabled: true, callEnabled: false, phone: 'invalid' }),
     ).rejects.toThrow(BadRequestException);
 
-    // already verified with same phone
+    // disable phone settings when no phone is present
+    transaction.mockImplementation(async (cb) => {
+      const client = {
+        query: jest.fn().mockImplementation(async (sql) => {
+          if (sql.includes('SELECT phone_e164 FROM users')) return { rows: [{ phone_e164: null }] };
+          return { rows: [] };
+        }),
+      };
+      return cb(client);
+    });
+    query.mockResolvedValueOnce({
+      rows: [
+        {
+          account_phone: null,
+          phone: null,
+          sms_enabled: false,
+          call_enabled: false,
+          verified_at: null,
+        },
+      ],
+    });
+    const off = await service.set('u1', { smsEnabled: false, callEnabled: false });
+    expect(off.status).toBe('OFF');
+
+    // valid phone save with account sync
     transaction.mockImplementation(async (cb) => {
       const client = {
         query: jest.fn().mockImplementation(async (sql) => {
           if (sql.includes('SELECT phone_e164 FROM users'))
             return { rows: [{ phone_e164: '+84901234567' }] };
-          return {
-            rows: [{ phone: '+84901234567', verified_at: new Date() }],
-          };
+          return { rows: [] };
         }),
       };
       return cb(client);
@@ -387,68 +350,35 @@ describe('PhoneNotificationSettingsService unit edge cases', () => {
       rows: [
         {
           account_phone: '+84901234567',
-          phone: '+84901234567',
+          phone: '+84909876543',
           sms_enabled: true,
           call_enabled: true,
           verified_at: new Date(),
         },
       ],
     });
-    const fastEnable = await service.set('u1', { smsEnabled: true, callEnabled: true });
-    expect(fastEnable.status).toBe('VERIFIED');
-    expect(sendPhoneCode).not.toHaveBeenCalled();
-
-    // rate limited (blocked)
-    transaction.mockImplementation(async (cb) => {
-      const client = {
-        query: jest.fn().mockImplementation(async (sql) => {
-          if (sql.includes('SELECT phone_e164 FROM users')) return { rows: [{ phone_e164: null }] };
-          if (sql.includes('SELECT * FROM user_phone_alert_settings')) return { rows: [] };
-          if (sql.includes('advisory_xact_lock')) return { rows: [] };
-          if (sql.includes('blocked')) return { rows: [{ blocked: true }] };
-          return { rows: [] };
-        }),
-      };
-      return cb(client);
+    const saved = await service.set('u1', {
+      smsEnabled: true,
+      callEnabled: true,
+      phone: '+84909876543',
     });
-    await expect(
-      service.set('u1', { smsEnabled: true, callEnabled: false, phone: '+84901234567' }),
-    ).rejects.toThrow('Vui lòng đợi một phút');
+    expect(saved.status).toBe('VERIFIED');
+    expect(saved.phone).toBe('+84909876543');
 
-    // SNS sending error throws 503
-    transaction.mockImplementation(async (cb) => {
-      const client = {
-        query: jest.fn().mockImplementation(async (sql) => {
-          if (sql.includes('SELECT phone_e164 FROM users')) return { rows: [{ phone_e164: null }] };
-          if (sql.includes('SELECT * FROM user_phone_alert_settings')) return { rows: [] };
-          if (sql.includes('advisory_xact_lock')) return { rows: [] };
-          if (sql.includes('blocked')) return { rows: [{ blocked: false }] };
-          return { rows: [] };
-        }),
-      };
-      return cb(client);
+    // verify method is a safe passthrough
+    query.mockResolvedValueOnce({
+      rows: [
+        {
+          account_phone: '+84901234567',
+          phone: '+84909876543',
+          sms_enabled: true,
+          call_enabled: true,
+          verified_at: new Date(),
+        },
+      ],
     });
-    sendPhoneCode.mockRejectedValueOnce(new Error('SMS failed'));
-    await expect(
-      service.set('u1', { smsEnabled: true, callEnabled: false, phone: '+84901234567' }),
-    ).rejects.toThrow(ServiceUnavailableException);
-  });
-
-  it('handles phone verification rejection and mismatch', async () => {
-    const query = jest.fn();
-    const transaction = jest.fn();
-    const service = new PhoneNotificationSettingsService(
-      fullConfig,
-      { query, transaction } as any,
-      {} as any,
-    );
-
-    // no active verification found
-    transaction.mockImplementation(async (cb) => {
-      const client = { query: jest.fn().mockResolvedValueOnce({ rows: [] }) };
-      return cb(client);
-    });
-    await expect(service.verify('u1', '123456')).rejects.toThrow(BadRequestException);
+    const verified = await service.verify('u1', '123456');
+    expect(verified.status).toBe('VERIFIED');
   });
 });
 

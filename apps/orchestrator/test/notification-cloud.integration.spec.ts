@@ -93,6 +93,11 @@ describe('cloud notifications in PostgreSQL', () => {
     await pool.query(
       'TRUNCATE events, cloud_notification_routes, user_email_alert_settings, user_phone_alert_settings CASCADE',
     );
+    await pool.query('UPDATE users SET phone_e164=$1 WHERE id IN ($2,$3)', [
+      phone,
+      owner,
+      foreignUser,
+    ]);
     await pool.query("UPDATE cloud_transport_mode SET mode='bullmq', notification_driver='sqs'");
   });
 
@@ -135,15 +140,6 @@ describe('cloud notifications in PostgreSQL', () => {
     AWS_REGION: 'ap-southeast-1',
     SNS_EMAIL_TOPIC_PREFIX_ARN:
       'arn:aws:sns:ap-southeast-1:123456789012:argusai-dev-incident-email-user-',
-  };
-  const personalPhoneConfig = {
-    AWS_REGION: 'ap-southeast-1',
-    SNS_PHONE_SELF_SERVICE_ENABLED: 'true',
-    INTERNAL_SERVICE_TOKEN: 'fixture-token-'.repeat(4),
-    SNS_SMS_ENABLED: 'true',
-    CONNECT_INSTANCE_ID: 'connect-fixture',
-    CONNECT_CONTACT_FLOW_ID: 'flow-fixture',
-    CONNECT_SOURCE_PHONE_NUMBER: '+15550100235',
   };
   const accountConfig = (settings: Record<string, string>) =>
     new ConfigService({
@@ -192,54 +188,36 @@ describe('cloud notifications in PostgreSQL', () => {
     }));
   }
 
-  it('keeps phone calls independent of SMS and only queues a verified opt-in with camera access', async () => {
-    const sendPhoneCode = jest.fn().mockResolvedValue(undefined);
-    const settings = new PhoneNotificationSettingsService(accountConfig(personalPhoneConfig), db, {
-      sendPhoneCode,
-    });
-    const cloud = service(personalPhoneConfig);
+  it('saves contact phone number and syncs to account phone', async () => {
+    const settings = new PhoneNotificationSettingsService(db);
     const alternatePhone = '+84901234567';
     expect(await settings.get(owner)).toMatchObject({
       accountPhone: phone,
-      callAvailable: true,
-      smsAvailable: true,
-      status: 'OFF',
+      callAvailable: false,
+      smsAvailable: false,
+      status: 'VERIFIED',
     });
-    await settings.set(owner, { callEnabled: true, smsEnabled: false, phone: alternatePhone });
-    expect(await createPersonalIntents(cloud, 'CONNECT_CALL')).toEqual([]);
-    const code = sendPhoneCode.mock.calls[0][1] as string;
-    const wrong = code === '000000' ? '111111' : '000000';
-    await expect(settings.verify(owner, wrong)).rejects.toThrow('Mã xác minh');
-    await expect(
-      settings.set(owner, { callEnabled: true, smsEnabled: true, phone: alternatePhone }),
-    ).rejects.toThrow('đợi một phút');
-    expect(await settings.verify(owner, code)).toMatchObject({
+    const updated = await settings.set(owner, {
+      callEnabled: true,
+      smsEnabled: false,
+      phone: alternatePhone,
+    });
+    expect(updated).toMatchObject({
       phone: alternatePhone,
       status: 'VERIFIED',
       callEnabled: true,
       smsEnabled: false,
     });
-    await expect(settings.verify(owner, code)).rejects.toThrow('Mã xác minh');
-    await settings.set(foreignUser, { callEnabled: true, smsEnabled: false });
-    await settings.verify(foreignUser, sendPhoneCode.mock.calls[1][1] as string);
-    const [call] = await createPersonalIntents(cloud, 'CONNECT_CALL');
-    expect(call.recipient).toBe(owner);
-    expect(await createPersonalIntents(cloud, 'SNS_SMS')).toEqual([]);
-    const granted = await claimAttempt(cloud, call);
-    expect(granted.mode).toBe('REAL');
-    expect(granted.delivery).toMatchObject({
-      destination: alternatePhone,
-      channel: 'CONNECT_CALL',
-      instanceId: 'connect-fixture',
+    expect(await settings.verify(owner, '123456')).toMatchObject({
+      phone: alternatePhone,
+      status: 'VERIFIED',
     });
-    await settings.set(owner, { callEnabled: false, smsEnabled: true, phone: alternatePhone });
-    expect(sendPhoneCode).toHaveBeenCalledTimes(2);
-    const [sms] = await createPersonalIntents(cloud, 'SNS_SMS');
-    const smsGrant = await claimAttempt(cloud, sms);
-    expect(smsGrant.delivery).toMatchObject({ destination: alternatePhone, channel: 'SNS_SMS' });
-    expect(await createPersonalIntents(cloud, 'CONNECT_CALL')).toEqual([]);
     await settings.set(owner, { callEnabled: false, smsEnabled: false });
-    expect(await createPersonalIntents(cloud, 'SNS_SMS')).toEqual([]);
+    expect(await settings.get(owner)).toMatchObject({
+      phone: alternatePhone,
+      callEnabled: false,
+      smsEnabled: false,
+    });
   });
 
   it('routes a confirmed alternate email and rejects an older job after switching addresses', async () => {

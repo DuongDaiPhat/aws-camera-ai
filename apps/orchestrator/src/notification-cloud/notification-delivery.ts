@@ -9,18 +9,11 @@ async function readPersonalRoute(client: PoolClient, job: ClaimJobRow): Promise<
   const scope = `WHERE user_id=$1 AND can_access_camera(user_id,$2)
     AND registration_id::text=$3 AND verified_at <= clock_timestamp()`;
   const params = [job.recipient_user_id, job.camera_id, job.recipient_registration_id];
-  const result =
-    job.channel === 'SNS_EMAIL'
-      ? await client.query<Route>(
-          `SELECT email AS destination,topic_arn FROM user_email_alert_settings
-         ${scope} AND enabled FOR SHARE`,
-          params,
-        )
-      : await client.query<Route>(
-          `SELECT phone AS destination,NULL AS topic_arn FROM user_phone_alert_settings
-         ${scope} AND CASE WHEN $4='SNS_SMS' THEN sms_enabled ELSE call_enabled END FOR SHARE`,
-          [...params, job.channel],
-        );
+  const result = await client.query<Route>(
+    `SELECT email AS destination,topic_arn FROM user_email_alert_settings
+     ${scope} AND enabled FOR SHARE`,
+    params,
+  );
   return result.rows[0];
 }
 

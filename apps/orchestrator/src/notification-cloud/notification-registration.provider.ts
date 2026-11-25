@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import {
   CreateTopicCommand,
   ListSubscriptionsByTopicCommand,
-  PublishCommand,
   SNSClient,
   SubscribeCommand,
 } from '@aws-sdk/client-sns';
@@ -41,19 +40,6 @@ export class NotificationRegistrationProvider {
       subscription.Protocol === 'email' &&
       subscription.Endpoint?.toLowerCase() === email &&
       !!subscription.SubscriptionArn?.startsWith(topic + ':')
-    );
-  }
-
-  async sendPhoneCode(phone: string, code: string): Promise<void> {
-    await this.sns.send(
-      new PublishCommand({
-        PhoneNumber: phone,
-        Message: `ArgusAI: Ma xac minh cua ban la ${code}. Ma co hieu luc 10 phut.`,
-        MessageAttributes: {
-          'AWS.SNS.SMS.SMSType': { DataType: 'String', StringValue: 'Transactional' },
-        },
-      }),
-      { abortSignal: AbortSignal.timeout(5000) },
     );
   }
 }
