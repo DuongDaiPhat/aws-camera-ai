@@ -166,6 +166,19 @@ class FallTracker:
             is_replay=False,
         )
 
+    def _is_recovered_posture(self, geometry: PoseGeometry) -> bool:
+        """Return True when the person has stood back up from a fallen posture."""
+        effective_angle = (
+            min(geometry.torso_angle_deg, geometry.torso_angle_3d_deg)
+            if geometry.torso_angle_3d_deg is not None
+            else geometry.torso_angle_deg
+        )
+        frozen_drop = self._compute_frozen_drop(geometry)
+        return (
+            effective_angle >= self.settings.fall_recovery_angle_deg
+            and frozen_drop < self.settings.fall_center_drop_ratio
+        )
+
     def _handle_confirmed_state(
         self,
         observed_at: datetime,
@@ -173,11 +186,7 @@ class FallTracker:
         geometry: PoseGeometry | None,
         pose_available: bool,
     ) -> dict:
-        if (
-            pose_available
-            and geometry
-            and geometry.torso_angle_deg >= self.settings.fall_recovery_angle_deg
-        ):
+        if pose_available and geometry and self._is_recovered_posture(geometry):
             logger.info(
                 "Track %s recovered from confirmed fall -> re-arm MONITORING", self.track_id
             )
@@ -303,6 +312,55 @@ class FallTracker:
 
         return self._step_monitoring_state(observed_at, frame_id, geometry, current_obs)
 
+    def _compute_frozen_drop(self, geometry: PoseGeometry) -> float:
+        """Compute normalized center-Y drop relative to the frozen standing baseline."""
+        if self.baseline_scale_px <= 0:
+            return 0.0
+        return (geometry.center_y_px - self.baseline_center_y_px) / self.baseline_scale_px
+
+    def _is_candidate_posture_abnormal(self, geometry: PoseGeometry) -> bool:
+        """Check whether a CANDIDATE frame still exhibits a fallen posture.
+
+        Standard 2D horizontal falls must remain below fall_center_drop_ratio so
+        lifting back up resets immobility. Axial falls toward the camera (where
+        2D torso_angle_deg stays >= threshold but 3D angle or torso shrink
+        indicates lying flat) can experience slight center_y upward drift.
+        """
+        frozen_drop = self._compute_frozen_drop(geometry)
+        torso_shrink = (
+            geometry.torso_length_px / max(10.0, self.baseline_torso_length_px)
+            if self.baseline_torso_length_px > 0
+            else 1.0
+        )
+        is_2d_angle_fall = geometry.torso_angle_deg < self.settings.fall_torso_angle_threshold_deg
+        is_3d_axial_fall = (
+            geometry.torso_angle_3d_deg is not None
+            and geometry.torso_angle_3d_deg < self.settings.fall_torso_angle_threshold_deg
+        )
+        is_shrink_or_aspect = (
+            torso_shrink < self.settings.fall_torso_shrink_ratio
+            or geometry.aspect_ratio < self.settings.fall_aspect_ratio_threshold
+        )
+
+        axial_hysteresis_angle = max(self.settings.fall_torso_angle_threshold_deg, 45.0)
+        is_3d_axial_hysteresis = (
+            not is_2d_angle_fall
+            and geometry.torso_angle_3d_deg is not None
+            and geometry.torso_angle_3d_deg < axial_hysteresis_angle
+            and frozen_drop >= self.settings.fall_center_drop_ratio
+        )
+
+        if not (
+            is_2d_angle_fall or is_3d_axial_fall or is_3d_axial_hysteresis or is_shrink_or_aspect
+        ):
+            return False
+
+        # Axial falls (2D angle upright, 3D angle flat) allow slight center_y drift.
+        if not is_2d_angle_fall and is_3d_axial_fall:
+            return frozen_drop >= -0.10
+
+        return frozen_drop >= self.settings.fall_center_drop_ratio
+
     def _step_candidate_state(
         self,
         observed_at: datetime,
@@ -312,12 +370,7 @@ class FallTracker:
         current_obs: PoseObservation,
         dt_seconds: float,
     ) -> dict:
-        effective_angle = (
-            min(geometry.torso_angle_deg, geometry.torso_angle_3d_deg)
-            if geometry.torso_angle_3d_deg is not None
-            else geometry.torso_angle_deg
-        )
-        if effective_angle >= self.settings.fall_recovery_angle_deg:
+        if self._is_recovered_posture(geometry):
             logger.info(
                 "Track %s stood up (angle=%.1f, angle_3d=%.1f) -> CANCELLED (RECOVERED)",
                 self.track_id,
@@ -337,38 +390,10 @@ class FallTracker:
             )
 
         motion_score: float | None = None
-        frozen_drop = (
-            (geometry.center_y_px - self.baseline_center_y_px) / self.baseline_scale_px
-            if self.baseline_scale_px > 0
-            else 0.0
-        )
-        torso_shrink = (
-            geometry.torso_length_px / max(10.0, self.baseline_torso_length_px)
-            if self.baseline_torso_length_px > 0
-            else 1.0
-        )
-        is_abnormal = (
-            min(geometry.torso_angle_deg, geometry.torso_angle_3d_deg)
-            < self.settings.fall_torso_angle_threshold_deg
-            or torso_shrink < self.settings.fall_torso_shrink_ratio
-            or geometry.aspect_ratio < self.settings.fall_aspect_ratio_threshold
-        ) and frozen_drop >= self.settings.fall_center_drop_ratio
+        is_abnormal = self._is_candidate_posture_abnormal(geometry)
         if is_abnormal and self.last_observation is not None:
             prev_obs = self.last_observation
-            prev_shrink = (
-                prev_obs.geometry.torso_length_px / max(10.0, self.baseline_torso_length_px)
-                if self.baseline_torso_length_px > 0
-                else 1.0
-            )
-            prev_abnormal = (
-                min(prev_obs.geometry.torso_angle_deg, prev_obs.geometry.torso_angle_3d_deg)
-                < self.settings.fall_torso_angle_threshold_deg
-                or prev_shrink < self.settings.fall_torso_shrink_ratio
-                or prev_obs.geometry.aspect_ratio < self.settings.fall_aspect_ratio_threshold
-            ) and (
-                prev_obs.geometry.center_y_px - self.baseline_center_y_px
-            ) / self.baseline_scale_px >= self.settings.fall_center_drop_ratio
-            if prev_abnormal:
+            if self._is_candidate_posture_abnormal(prev_obs.geometry):
                 motion_score = calculate_motion_score(
                     current_keypoints=keypoints,
                     previous_keypoints=prev_obs.keypoints,
