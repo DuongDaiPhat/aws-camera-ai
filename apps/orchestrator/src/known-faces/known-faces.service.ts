@@ -64,9 +64,21 @@ export class KnownFacesService {
     return { data: await this.repository.list(await this.repository.householdOwner(owner)) };
   }
 
-  async create(owner: string, dto: CreateKnownFaceDto, files: FaceUpload[]): Promise<KnownFace> {
+  private async requireFaceModuleEnabled(owner: string): Promise<void> {
+    const enabled = (await this.repository.isFaceModuleEnabled?.(owner)) ?? true;
+    if (!enabled) {
+      throw faceError(
+        403,
+        'MODULE_DISABLED',
+        'Module Nhận diện khuôn mặt (M1) đang tắt. Caregiver cần bật lại trong Cài đặt để sử dụng.',
+      );
+    }
+  }
+
+  async create(actor: string, dto: CreateKnownFaceDto, files: FaceUpload[]): Promise<KnownFace> {
     try {
-      owner = await this.repository.householdOwner(owner);
+      const owner = await this.repository.householdOwner(actor);
+      await this.requireFaceModuleEnabled(owner);
       validateImages(
         files,
         readPositiveFaceNumber(this.config, 'FACE_MAX_IMAGE_BYTES', 5242880),
@@ -148,6 +160,7 @@ export class KnownFacesService {
 
   async update(actor: string, id: string, input: UpdateKnownFaceDto): Promise<KnownFace> {
     const owner = await this.repository.householdOwner(actor);
+    await this.requireFaceModuleEnabled(owner);
     try {
       await this.repository.update(owner, id, input, actor);
     } catch (error: unknown) {
@@ -166,6 +179,7 @@ export class KnownFacesService {
   async replacePhotos(actor: string, id: string, files: FaceUpload[]): Promise<KnownFace> {
     try {
       const owner = await this.repository.householdOwner(actor);
+      await this.requireFaceModuleEnabled(owner);
       validateImages(
         files,
         readPositiveFaceNumber(this.config, 'FACE_MAX_IMAGE_BYTES', 5242880),
@@ -222,6 +236,7 @@ export class KnownFacesService {
 
   async deactivate(actor: string, id: string): Promise<KnownFace> {
     const owner = await this.repository.householdOwner(actor);
+    await this.requireFaceModuleEnabled(owner);
     if (this.faceConfig.provider !== 'rekognition') {
       throw faceError(
         503,
@@ -291,6 +306,7 @@ export class KnownFacesService {
     agent: string | null,
   ): Promise<boolean> {
     owner = await this.repository.householdOwner(owner);
+    await this.requireFaceModuleEnabled(owner);
     if (this.faceConfig.provider === 'local') {
       await this.repository.remove(owner, id, ip, agent);
       return this.sync.sync(owner);

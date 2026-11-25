@@ -72,7 +72,10 @@ export class FireProcessorService implements OnModuleInit, OnModuleDestroy {
       return;
     }
     const cameraId = await this.repository.findEnabledCamera(frame.header.cameraSlug);
-    if (!cameraId) return;
+    if (!cameraId) {
+      this.cameras.delete(frame.header.cameraSlug);
+      return;
+    }
     const state = this.admit(frame);
     if (!state) return;
     await this.persistPending(state);
