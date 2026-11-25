@@ -20,6 +20,7 @@ vi.mock('@/lib/wellness-client', () => ({
 vi.mock('@/lib/known-faces-client', () => ({ listKnownFaces: vi.fn() }));
 vi.mock('@/lib/cameras-client', () => ({ fetchCameras: vi.fn() }));
 vi.mock('@/lib/events-client', () => ({ subscribeEventsStream: vi.fn(() => () => {}) }));
+vi.mock('@/hooks/useHouseholdAiModules', () => ({ useHouseholdAiModules: () => null }));
 const schedule: api.WellnessSchedule = {
   id: 'schedule',
   residentUserId: 'resident',
