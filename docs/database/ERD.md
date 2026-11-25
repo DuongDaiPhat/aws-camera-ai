@@ -7,7 +7,7 @@
 > Callback/recovery US-14: [`0011_telegram_confirmation_delivery.sql`](../../db/migrations/0011_telegram_confirmation_delivery.sql).
 > Thời gian nhánh cao nhập tay: [`0012_configurable_high_wait.sql`](../../db/migrations/0012_configurable_high_wait.sql).
 > Sprint 3 contract/DDL: [0013 M2a](../../db/migrations/0013_fall_incidents.sql), [0014 M3](../../db/migrations/0014_fire_incidents.sql), [0015 M5](../../db/migrations/0015_wellness_check_runtime.sql). Chưa tự apply DB; runtime thực hiện theo các plan.
-> Sprint 4 / cập nhật 22/11/2026: [0016 nguồn wellness](../../db/migrations/0016_wellness_source_evidence.sql), [0017 Cognito issuer](../../db/migrations/0017_cognito_issuer.sql), [0018 Cognito email](../../db/migrations/0018_cognito_email.sql), [0018 cloud pipeline](../../db/migrations/0018_aws_queue_pipeline.sql), [0019 household](../../db/migrations/0019_household_access.sql), [0020 playback](../../db/migrations/0020_playback_frames.sql), [0021 caregiver households](../../db/migrations/0021_caregiver_households.sql), [0022 system settings](../../db/migrations/0022_admin_system_settings.sql), [0025 claim/outcome](../../db/migrations/0025_notification_claim_outcome.sql), [0025 email rules](../../db/migrations/0025_notification_email_rules.sql).
+> Sprint 4 / cập nhật 25/11/2026: [0016 nguồn wellness](../../db/migrations/0016_wellness_source_evidence.sql), [0017 Cognito issuer](../../db/migrations/0017_cognito_issuer.sql), [0018 Cognito email](../../db/migrations/0018_cognito_email.sql), [0018 cloud pipeline](../../db/migrations/0018_aws_queue_pipeline.sql), [0019 household](../../db/migrations/0019_household_access.sql), [0020 playback](../../db/migrations/0020_playback_frames.sql), [0021 caregiver households](../../db/migrations/0021_caregiver_households.sql), [0022 system settings](../../db/migrations/0022_admin_system_settings.sql), [0025 claim/outcome](../../db/migrations/0025_notification_claim_outcome.sql), [0025 email rules](../../db/migrations/0025_notification_email_rules.sql), [0026 notification delivery](../../db/migrations/0026_notification_delivery_settings.sql), [0027 household AI modules](../../db/migrations/0027_household_ai_modules.sql).
 > Setup/test luồng thông báo: [NOTIFICATION_SETUP_TEST.md](../NOTIFICATION_SETUP_TEST.md).
 
 ## Mục lục
@@ -106,6 +106,8 @@ erDiagram
     notifications ||..o| cloud_jobs : "cung id cho notification.job - khong FK"
     cameras ||--o{ playback_frames : "camera_id"
     users ||--o| household_settings : "owner_user_id"
+    users ||--o| household_ai_module_settings : "owner_user_id"
+    users |o--o{ household_ai_module_settings : "updated_by_user_id"
     users ||--o{ camera_access_grants : "user_id"
     cameras ||--o{ camera_access_grants : "camera_id"
     users ||--o| user_notification_preferences : "user_id"
@@ -595,6 +597,17 @@ erDiagram
         timestamptz updated_at
         integer max_cameras
         text service_plan
+    }
+
+    household_ai_module_settings {
+        uuid owner_user_id PK,FK
+        boolean m1_face_enabled
+        boolean m2a_fall_enabled
+        boolean m3_fire_enabled
+        boolean m4_zone_enabled
+        boolean m5_wellness_enabled
+        uuid updated_by_user_id FK
+        timestamptz updated_at
     }
 
     camera_access_grants {
@@ -1231,6 +1244,7 @@ Các bảng đã có trong migration 0021/0022, bổ sung vào sơ đồ để t
 | Bảng                            | Khóa và vai trò                                                                                                            |
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `household_settings`            | PK/FK owner tới users, RESTRICT; retention, quota, max_cameras và service_plan của hộ                                      |
+| `household_ai_module_settings`  | PK/FK owner tới users, CASCADE; bật/tắt các module AI (M1..M5) theo hộ gia đình và người cập nhật cuối                     |
 | `camera_access_grants`          | PK ghép `(user_id,camera_id)`, hai FK cascade; quyền live/playback cho Viewer                                              |
 | `user_notification_preferences` | PK/FK user cascade; các cờ in-app, sound, Telegram; chưa có cờ SNS email trong DDL này                                     |
 | `household_escalation_rules`    | PK ghép `(owner_user_id,event_type)`; owner RESTRICT, updated_by nullable FK users; override threshold/deadline và version |
