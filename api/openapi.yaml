@@ -330,6 +330,51 @@ paths:
           description: Authentication required
         "403":
           description: Forbidden
+  /household/ai-modules:
+    get:
+      operationId: getHouseholdAiModules
+      tags:
+        - household
+      summary: Lấy cấu hình bật/tắt các module AI của hộ gia đình (chỉ CAREGIVER)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Cấu hình module AI của hộ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HouseholdAiModulesSettings"
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden (CAREGIVER only)
+    put:
+      operationId: updateHouseholdAiModules
+      tags:
+        - household
+      summary: Cập nhật cấu hình bật/tắt các module AI của hộ gia đình (chỉ CAREGIVER)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HouseholdAiModulesInput"
+      responses:
+        "200":
+          description: Cấu hình module AI sau khi cập nhật
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HouseholdAiModulesSettings"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Forbidden (CAREGIVER only)
   /household/cameras:
     post:
       operationId: createHouseholdCamera
@@ -2978,6 +3023,55 @@ components:
           type: integer
           minimum: 1
           maximum: 100000
+    HouseholdAiModulesInput:
+      type: object
+      required:
+        - m1Face
+        - m2aFall
+        - m3Fire
+        - m4Zone
+        - m5Wellness
+      properties:
+        m1Face: *a1
+        m2aFall: *a1
+        m3Fire: *a1
+        m4Zone: *a1
+        m5Wellness: *a1
+    HouseholdAiModulesSettings:
+      type: object
+      required:
+        - m1Face
+        - m2aFall
+        - m3Fire
+        - m4Zone
+        - m5Wellness
+        - availability
+        - updatedAt
+      properties:
+        m1Face: *a1
+        m2aFall: *a1
+        m3Fire: *a1
+        m4Zone: *a1
+        m5Wellness: *a1
+        availability:
+          type: object
+          required:
+            - m1Face
+            - m2aFall
+            - m3Fire
+            - m4Zone
+            - m5Wellness
+          properties:
+            m1Face: *a1
+            m2aFall: *a1
+            m3Fire: *a1
+            m4Zone: *a1
+            m5Wellness: *a1
+        updatedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
     EmailAlertSettingsInput:
       type: object
       required: [enabled]

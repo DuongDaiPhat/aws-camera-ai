@@ -124,6 +124,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/household/ai-modules': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Lấy cấu hình bật/tắt các module AI của hộ gia đình (chỉ CAREGIVER) */
+    get: operations['getHouseholdAiModules'];
+    /** Cập nhật cấu hình bật/tắt các module AI của hộ gia đình (chỉ CAREGIVER) */
+    put: operations['updateHouseholdAiModules'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/household/cameras': {
     parameters: {
       query?: never;
@@ -1664,6 +1682,29 @@ export interface components {
     HouseholdSettings: {
       retentionDays: number;
       storageQuotaGb: number;
+    };
+    HouseholdAiModulesInput: {
+      m1Face: boolean;
+      m2aFall: boolean;
+      m3Fire: boolean;
+      m4Zone: boolean;
+      m5Wellness: boolean;
+    };
+    HouseholdAiModulesSettings: {
+      m1Face: boolean;
+      m2aFall: boolean;
+      m3Fire: boolean;
+      m4Zone: boolean;
+      m5Wellness: boolean;
+      availability: {
+        m1Face: boolean;
+        m2aFall: boolean;
+        m3Fire: boolean;
+        m4Zone: boolean;
+        m5Wellness: boolean;
+      };
+      /** Format: date-time */
+      updatedAt: string | null;
     };
     EmailAlertSettingsInput: {
       enabled: boolean;
@@ -3746,6 +3787,85 @@ export interface operations {
         content?: never;
       };
       /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getHouseholdAiModules: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cấu hình module AI của hộ */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HouseholdAiModulesSettings'];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden (CAREGIVER only) */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  updateHouseholdAiModules: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['HouseholdAiModulesInput'];
+      };
+    };
+    responses: {
+      /** @description Cấu hình module AI sau khi cập nhật */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HouseholdAiModulesSettings'];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden (CAREGIVER only) */
       403: {
         headers: {
           [name: string]: unknown;
