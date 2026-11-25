@@ -65,6 +65,7 @@ describe('US-09 orchestration', () => {
   beforeEach(() => {
     jest.restoreAllMocks();
     jest.spyOn(repository, 'householdOwner').mockResolvedValue('owner');
+    jest.spyOn(repository, 'isFaceModuleEnabled').mockResolvedValue(true);
   });
   afterAll(async () => pool.end());
 

@@ -366,6 +366,7 @@ describe('US-24 KnownFacesService Rekognition orchestration & reconciliation', (
     sync = new FaceCollectionSyncService(repository, inference, cfg);
     service = new KnownFacesService(repository, inference, sync, cfg, rekognition);
     jest.spyOn(repository, 'householdOwner').mockResolvedValue(OWNER_ID);
+    jest.spyOn(repository, 'isFaceModuleEnabled').mockResolvedValue(true);
   });
 
   afterEach(async () => {
