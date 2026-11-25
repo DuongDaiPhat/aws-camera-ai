@@ -79,7 +79,7 @@ describe('AiModulesSettings', () => {
     });
 
     for (const key of ['m1Face', 'm2aFall', 'm3Fire', 'm4Zone', 'm5Wellness']) {
-      expect(host.querySelector(`input[name="${key}"]`)).not.toBeNull();
+      expect(host.querySelector(`input[name="${key}"][role="switch"]`)).not.toBeNull();
     }
     expect(host.textContent).toContain('Nhận diện khuôn mặt');
     expect(host.textContent).toContain('Phát hiện té ngã');

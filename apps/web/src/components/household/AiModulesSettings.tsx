@@ -136,10 +136,9 @@ export function AiModulesSettings() {
             const serverReady = saved.availability[mod.key];
             return (
               <label key={mod.key} className={compact.aiModuleCard}>
-                <div className={compact.aiModuleInfo}>
+                <div className={compact.aiModuleTopRow}>
                   <div className={compact.aiModuleTitleRow}>
                     <span className={compact.aiModuleCode}>{mod.code}</span>
-                    <strong>{mod.name}</strong>
                     <span
                       className={
                         !serverReady
@@ -152,21 +151,26 @@ export function AiModulesSettings() {
                       {!serverReady ? 'Máy chủ chưa bật' : checked ? 'Đang bật' : 'Đang tắt'}
                     </span>
                   </div>
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    className={compact.aiSwitch}
+                    name={mod.key}
+                    checked={checked}
+                    disabled={busy}
+                    aria-label={`Bật ${mod.name} (${mod.code})`}
+                    onChange={(e) => {
+                      const value = e.target.checked;
+                      setDraft((prev) => (prev ? { ...prev, [mod.key]: value } : prev));
+                      setNotice('');
+                      setError('');
+                    }}
+                  />
+                </div>
+                <div className={compact.aiModuleInfo}>
+                  <strong>{mod.name}</strong>
                   <p>{mod.description}</p>
                 </div>
-                <input
-                  type="checkbox"
-                  name={mod.key}
-                  checked={checked}
-                  disabled={busy}
-                  aria-label={`Bật ${mod.name} (${mod.code})`}
-                  onChange={(e) => {
-                    const value = e.target.checked;
-                    setDraft((prev) => (prev ? { ...prev, [mod.key]: value } : prev));
-                    setNotice('');
-                    setError('');
-                  }}
-                />
               </label>
             );
           })}
