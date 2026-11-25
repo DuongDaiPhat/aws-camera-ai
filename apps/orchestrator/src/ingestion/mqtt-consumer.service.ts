@@ -261,11 +261,14 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       if (existing) this.continuationKeys.delete(rawKey);
       dedupKey = rawKey;
     } else {
-      const verified = await this.faceCoordinator?.resolveContinuationDedupKey?.(
-        after,
-        camera,
-        isRestrictedZone ? 0 : 1000,
-      );
+      const verified =
+        camera?.ai_m1_face_enabled === false
+          ? null
+          : await this.faceCoordinator?.resolveContinuationDedupKey?.(
+              after,
+              camera,
+              isRestrictedZone ? 0 : 1000,
+            );
       dedupKey = verified ?? rawKey;
       this.continuationKeys.delete(rawKey);
       this.continuationKeys.set(rawKey, { dedupKey, expiresAt: now + 120_000 });
@@ -298,7 +301,13 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
     after: FrigateEventAfterDto,
   ): Promise<ZoneRecord[]> {
     const zoneSlugs = this.getZoneSlugs(after);
-    if (!camera || camera.zone_config_applied !== true || zoneSlugs.length === 0) return [];
+    if (
+      !camera ||
+      camera.ai_m4_zone_enabled === false ||
+      camera.zone_config_applied !== true ||
+      zoneSlugs.length === 0
+    )
+      return [];
     const observedAt = new Date(after.frame_time * 1_000);
     const eligibleZones = await this.eventsRepository.findEligibleZones(camera.id, zoneSlugs);
     return eligibleZones.filter(
@@ -539,15 +548,18 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       await this.zoneResultProducer.submit(event, message.after, zoneResultContext);
       // Face sampling must start before snapshot/S3 synchronization can make
       // the event box stale. Both operations use the already persisted event.
+      const faceEnabled = camera?.ai_m1_face_enabled !== false;
       const [hasNewSnapshot] = await Promise.all([
         this.synchronizeMedia(message.type, event, message.after),
-        this.faceCoordinator?.handleTrackEvent({
-          messageType: message.type,
-          event,
-          after: message.after,
-          isCreated,
-          camera,
-        }),
+        faceEnabled
+          ? this.faceCoordinator?.handleTrackEvent({
+              messageType: message.type,
+              event,
+              after: message.after,
+              isCreated,
+              camera,
+            })
+          : Promise.resolve(),
       ]);
 
       if (isCreated) {
@@ -560,6 +572,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
 
       if (
         !this.faceCoordinator &&
+        faceEnabled &&
         isCreated &&
         this.configService.get<string>('FACE_JOB_TRANSPORT', 'bullmq') === 'bullmq' &&
         this.faceQueue &&
@@ -567,6 +580,7 @@ export class MqttConsumerService implements OnModuleInit, OnModuleDestroy {
       ) {
         const resolvedCamera =
           camera ?? (await this.eventsRepository.findCameraBySlug(message.after.camera));
+        if (resolvedCamera?.ai_m1_face_enabled === false) return;
         const ownerScopeId =
           resolvedCamera?.owner_user_id ?? '00000000-0000-0000-0000-000000000000';
         const collectionVersion =

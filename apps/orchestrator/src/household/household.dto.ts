@@ -61,3 +61,10 @@ export class ChangePasswordDto {
 export class CreateHouseholdCameraDto {
   @IsString() @Length(1, 120) name!: string;
 }
+export class HouseholdAiModulesDto {
+  @IsBoolean() m1Face!: boolean;
+  @IsBoolean() m2aFall!: boolean;
+  @IsBoolean() m3Fire!: boolean;
+  @IsBoolean() m4Zone!: boolean;
+  @IsBoolean() m5Wellness!: boolean;
+}

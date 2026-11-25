@@ -45,7 +45,15 @@ export class FireIncidentsRepository {
 
   async listEnabledCameras(limit: number): Promise<{ slug: string }[]> {
     const result = await this.database.query<{ slug: string }>(
-      'SELECT slug FROM cameras WHERE is_enabled AND detection_enabled ORDER BY slug LIMIT $1',
+      `SELECT c.slug
+       FROM cameras c
+       JOIN devices d ON d.id = c.device_id
+       JOIN users owner_u ON owner_u.id = d.owner_user_id
+       LEFT JOIN household_ai_module_settings ai
+         ON ai.owner_user_id = COALESCE(owner_u.household_owner_id, owner_u.id)
+       WHERE c.is_enabled AND c.detection_enabled
+         AND COALESCE(ai.m3_fire_enabled, TRUE)
+       ORDER BY c.slug LIMIT $1`,
       [limit],
     );
     return result.rows;
@@ -53,7 +61,14 @@ export class FireIncidentsRepository {
 
   async findEnabledCamera(slug: string): Promise<string | null> {
     const result = await this.database.query<CameraRow>(
-      'SELECT id FROM cameras WHERE slug = $1 AND is_enabled AND detection_enabled',
+      `SELECT c.id
+       FROM cameras c
+       JOIN devices d ON d.id = c.device_id
+       JOIN users owner_u ON owner_u.id = d.owner_user_id
+       LEFT JOIN household_ai_module_settings ai
+         ON ai.owner_user_id = COALESCE(owner_u.household_owner_id, owner_u.id)
+       WHERE c.slug = $1 AND c.is_enabled AND c.detection_enabled
+         AND COALESCE(ai.m3_fire_enabled, TRUE)`,
       [slug],
     );
     return result.rows[0]?.id ?? null;
@@ -66,7 +81,15 @@ export class FireIncidentsRepository {
   ): Promise<FireIncident | null> {
     return this.database.transaction(async (client) => {
       const camera = await client.query<CameraRow>(
-        'SELECT id FROM cameras WHERE id = $1 AND is_enabled AND detection_enabled FOR UPDATE',
+        `SELECT c.id
+         FROM cameras c
+         JOIN devices d ON d.id = c.device_id
+         JOIN users owner_u ON owner_u.id = d.owner_user_id
+         LEFT JOIN household_ai_module_settings ai
+           ON ai.owner_user_id = COALESCE(owner_u.household_owner_id, owner_u.id)
+         WHERE c.id = $1 AND c.is_enabled AND c.detection_enabled
+           AND COALESCE(ai.m3_fire_enabled, TRUE)
+         FOR UPDATE OF c`,
         [cameraId],
       );
       if (!camera.rows[0]) return null;

@@ -233,6 +233,8 @@ export interface CameraRecord {
   owner_user_id?: string;
   detect_width?: number;
   detect_height?: number;
+  ai_m1_face_enabled?: boolean;
+  ai_m4_zone_enabled?: boolean;
 }
 
 export interface ZoneRecord {
@@ -329,9 +331,14 @@ export class EventsRepository {
                COALESCE(f.detect_height, c.detect_height) AS detect_height,
              COALESCE(f.sync_status = 'SYNCED' AND f.applied_version = f.config_version, false)
                AS zone_config_applied,
-             f.applied_version AS zone_config_version
+             f.applied_version AS zone_config_version,
+             COALESCE(ai.m1_face_enabled, true) AS ai_m1_face_enabled,
+             COALESCE(ai.m4_zone_enabled, true) AS ai_m4_zone_enabled
       FROM cameras c
       JOIN devices d ON c.device_id = d.id
+      LEFT JOIN users owner_u ON owner_u.id = d.owner_user_id
+      LEFT JOIN household_ai_module_settings ai
+        ON ai.owner_user_id = COALESCE(owner_u.household_owner_id, owner_u.id)
       LEFT JOIN camera_frigate_settings f ON f.camera_id = c.id
       WHERE c.slug = $1 AND c.is_enabled = true
       LIMIT 1;
