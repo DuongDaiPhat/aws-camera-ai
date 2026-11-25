@@ -36,6 +36,22 @@ it.each(['CAREGIVER', 'VIEWER'] as const)(
         return { smsAvailable: true, callAvailable: true, status: 'OFF' };
       if (path === '/account/alert-delivery/email')
         return { available: true, accountEmail: user.email, email: user.email, status: 'OFF' };
+      if (path === '/household/ai-modules')
+        return {
+          m1Face: true,
+          m2aFall: true,
+          m3Fire: true,
+          m4Zone: true,
+          m5Wellness: true,
+          availability: {
+            m1Face: true,
+            m2aFall: true,
+            m3Fire: true,
+            m4Zone: false,
+            m5Wellness: true,
+          },
+          updatedAt: '2026-11-25T10:00:00.000Z',
+        };
       throw new Error('Unexpected settings request');
     });
     try {
@@ -43,6 +59,12 @@ it.each(['CAREGIVER', 'VIEWER'] as const)(
       const section = container.querySelector('[aria-label="Kênh nhận cảnh báo cá nhân"]');
       expect(section?.querySelector('input[name=phone]')).not.toBeFalsy();
       expect(section?.querySelector('input[name=email]')).not.toBeFalsy();
+      const aiModules = container.querySelector('[aria-labelledby="caregiver-ai-modules-title"]');
+      if (user.role === 'CAREGIVER') {
+        expect(aiModules).not.toBeNull();
+      } else {
+        expect(aiModules).toBeNull();
+      }
     } finally {
       await act(async () => root.unmount());
       mocked.mockReset();
