@@ -213,4 +213,34 @@ describe('WellnessSchedulerService (US-20)', () => {
       expect(repository.processWellnessTimeouts).toHaveBeenCalledWith(50);
     });
   });
+
+  describe('Household AI module toggle (M5)', () => {
+    it('bỏ qua kiểm tra và chuyển SKIPPED_DISABLED khi Caregiver tắt module M5', async () => {
+      const mockClient = {
+        query: jest.fn().mockResolvedValue({ rows: [] }),
+        release: jest.fn(),
+      };
+      repository.getPoolClient.mockResolvedValue(mockClient as any);
+      Object.assign(repository, {
+        isWellnessModuleEnabled: jest.fn().mockResolvedValue(false),
+      });
+
+      await scheduler.evaluateSingleRun(mockRun);
+
+      expect(repository.updateRunDecision).toHaveBeenCalledWith(
+        mockRun.id,
+        mockRun.lease_token,
+        'SKIPPED_DISABLED',
+        expect.objectContaining({
+          decisionReason: 'M5 wellness module disabled',
+        }),
+        mockClient,
+      );
+      expect(repository.findActivityInWindow).not.toHaveBeenCalled();
+      expect(mockClient.query).not.toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO events'),
+        expect.anything(),
+      );
+    });
+  });
 });

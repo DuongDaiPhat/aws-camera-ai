@@ -1096,4 +1096,84 @@ describe('MqttConsumerService (US-03, US-04)', () => {
       0,
     );
   });
+
+  it('bỏ qua nhận diện khuôn mặt (M1) khi household tắt m1Face', async () => {
+    const camera = {
+      id: 'cam-uuid-1',
+      name: 'Phong khach',
+      slug: 'cam_living_room',
+      owner_user_id: 'owner-uuid-1',
+      ai_m1_face_enabled: false,
+      ai_m4_zone_enabled: true,
+    };
+    eventsRepository.findCameraBySlug.mockResolvedValueOnce(camera);
+    eventsRepository.createEvent.mockResolvedValueOnce(createEvent());
+
+    const resolveContinuationDedupKey = jest.fn().mockResolvedValue('frigate:cam_living_room:old');
+    const handleTrackEvent = jest.fn().mockResolvedValue(undefined);
+    const faceQueueAdd = jest.fn().mockResolvedValue(undefined);
+    Object.assign(service, {
+      faceCoordinator: { resolveContinuationDedupKey, handleTrackEvent },
+      faceQueue: { add: faceQueueAdd },
+    });
+
+    await service.handleMessage('frigate/events', buildSnapshotUpdateMessage('track-m1-off'));
+
+    expect(eventsRepository.createEvent).toHaveBeenCalledTimes(1);
+    expect(resolveContinuationDedupKey).not.toHaveBeenCalled();
+    expect(handleTrackEvent).not.toHaveBeenCalled();
+    expect(faceQueueAdd).not.toHaveBeenCalled();
+  });
+
+  it('không truy vấn vùng cấm và giữ PERSON_DETECTED P3 khi household tắt m4Zone', async () => {
+    const camera = {
+      id: 'cam-uuid-kitchen',
+      name: 'Phong bep',
+      slug: 'cam_kitchen',
+      timezone: 'Asia/Bangkok',
+      zone_config_applied: true,
+      zone_config_version: 7,
+      owner_user_id: 'owner-uuid-1',
+      ai_m1_face_enabled: false,
+      ai_m4_zone_enabled: false,
+    };
+    eventsRepository.findCameraBySlug.mockResolvedValueOnce(camera);
+    eventsRepository.createEvent.mockResolvedValueOnce(
+      createEvent({
+        camera_id: 'cam-uuid-kitchen',
+        zone_id: null,
+        event_type: 'PERSON_DETECTED',
+        priority: 'P3',
+        track_id: 'track-m4-off',
+        dedup_key: 'frigate:cam_kitchen:track-m4-off',
+      }),
+    );
+
+    await service.handleMessage(
+      'frigate/events',
+      Buffer.from(
+        JSON.stringify({
+          type: 'new',
+          after: {
+            id: 'track-m4-off',
+            camera: 'cam_kitchen',
+            frame_time: 1_726_387_200.123,
+            label: 'person',
+            score: 0.9,
+            current_zones: ['restricted_stove'],
+            has_snapshot: false,
+          },
+        }),
+      ),
+    );
+
+    expect(eventsRepository.findEligibleZones).not.toHaveBeenCalled();
+    expect(eventsRepository.createEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        zoneId: null,
+        eventType: 'PERSON_DETECTED',
+        priority: 'P3',
+      }),
+    );
+  });
 });

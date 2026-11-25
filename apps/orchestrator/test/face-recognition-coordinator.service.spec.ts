@@ -2342,4 +2342,55 @@ describe('FaceRecognitionCoordinatorService (Layers 1-4 E2E Orchestration)', () 
       jest.useRealTimers();
     }
   });
+
+  it('skips continuation resolution and clears pending best-shot timer when M1 face is disabled', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(10_000);
+      const h = buildHarness({
+        FACE_BEST_SHOT_EARLY_DISPATCH_ENABLED: 'false',
+        FACE_BEST_SHOT_WINDOW_MS: '4000',
+      });
+      const disabledCamera = makeCamera({ ai_m1_face_enabled: false });
+      const after = {
+        id: 'track-m1-disabled',
+        camera: 'cam_front',
+        frame_time: 10,
+        label: 'person',
+        score: 0.9,
+      };
+
+      await expect(
+        h.coordinator.resolveContinuationDedupKey(after, disabledCamera),
+      ).resolves.toBeNull();
+      expect(h.assess).not.toHaveBeenCalled();
+
+      // Start an enabled track first so a window timer is scheduled, then toggle M1 off.
+      h.getCroppedSnapshot.mockResolvedValue(Buffer.from('crop'));
+      h.assess.mockResolvedValue(makeGateResult({ qualityScore: 0.7 }));
+      await h.coordinator.handleTrackEvent({
+        messageType: 'new',
+        event: makeEvent({ track_id: 'track-m1-disabled' }),
+        after,
+        isCreated: true,
+        camera: makeCamera({ ai_m1_face_enabled: true }),
+      });
+
+      h.assess.mockClear();
+      await h.coordinator.handleTrackEvent({
+        messageType: 'update',
+        event: makeEvent({ track_id: 'track-m1-disabled' }),
+        after,
+        isCreated: false,
+        camera: disabledCamera,
+      });
+      await jest.advanceTimersByTimeAsync(5_000);
+
+      expect(h.assess).not.toHaveBeenCalled();
+      expect(h.enqueueFaceJob).not.toHaveBeenCalled();
+      h.coordinator.onModuleDestroy();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });
