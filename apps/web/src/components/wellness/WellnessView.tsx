@@ -5,8 +5,6 @@ import type { CurrentUser } from '@/types';
 import { listKnownFaces } from '@/lib/known-faces-client';
 import { fetchCameras } from '@/lib/cameras-client';
 import { subscribeEventsStream } from '@/lib/events-client';
-import { useHouseholdAiModules } from '@/hooks/useHouseholdAiModules';
-import { DisabledModuleBanner } from '@/components/household/DisabledModuleBanner';
 import {
   confirmWellnessCheck,
   createWellnessSchedule,
@@ -50,17 +48,9 @@ const labels: Record<string, string> = {
   CLOSED: 'Đã đóng',
 };
 
-export function WellnessView({
-  user,
-  onOpenSettings,
-}: {
-  user: CurrentUser | null;
-  onOpenSettings?: () => void;
-}) {
+export function WellnessView({ user }: { user: CurrentUser | null }) {
   const pageTitle = user?.role === 'CAREGIVER' ? 'Kiểm tra an toàn' : 'Kiểm tra sức khỏe';
   const manager = user?.role === 'ADMIN' || user?.role === 'CAREGIVER';
-  const aiModules = useHouseholdAiModules(user?.role === 'CAREGIVER');
-  const m5Disabled = aiModules?.m5Wellness === false;
   const [schedules, setSchedules] = useState<WellnessSchedule[]>([]);
   const [checks, setChecks] = useState<WellnessCheck[]>([]);
   const [residents, setResidents] = useState<{ id: string; name: string }[]>([]);
@@ -138,7 +128,6 @@ export function WellnessView({
   }
   async function save(event: FormEvent) {
     event.preventDefault();
-    if (m5Disabled) return;
     await act(async () => {
       if (editing) await updateWellnessSchedule(editing, draft);
       else await createWellnessSchedule(draft);
@@ -182,12 +171,6 @@ export function WellnessView({
         <h2 className={styles.pageTitle}>{pageTitle}</h2>
         <p>Lịch theo dõi hoạt động và yêu cầu xác nhận của người được giám sát.</p>
       </header>
-      {m5Disabled && (
-        <DisabledModuleBanner
-          message="Module Kiểm tra an sinh định kỳ (M5) đang tắt — không thể tạo, chỉnh sửa hoặc chạy lịch kiểm tra cho tới khi Caregiver bật lại M5 trong Cài đặt."
-          onOpenSettings={onOpenSettings}
-        />
-      )}
       {error && (
         <p role="alert" className={styles.error}>
           {error}{' '}
@@ -201,7 +184,7 @@ export function WellnessView({
       {manager && (
         <form onSubmit={save} className={styles.panel}>
           <h2>{editing ? 'Sửa lịch kiểm tra' : 'Tạo lịch kiểm tra'}</h2>
-          <fieldset disabled={busy || m5Disabled} className={styles.fields}>
+          <fieldset disabled={busy} className={styles.fields}>
             <label>
               Người được giám sát
               <select
@@ -319,7 +302,7 @@ export function WellnessView({
             </label>
           </fieldset>
           <div className={styles.actions}>
-            <button disabled={busy || m5Disabled || !draft.daysOfWeek?.length} type="submit">
+            <button disabled={busy || !draft.daysOfWeek?.length} type="submit">
               Lưu lịch
             </button>
             {editing && (
@@ -367,11 +350,11 @@ export function WellnessView({
             </div>
             {manager && (
               <div className={styles.actions}>
-                <button disabled={busy || m5Disabled} onClick={() => edit(schedule)}>
+                <button disabled={busy} onClick={() => edit(schedule)}>
                   Sửa
                 </button>
                 <button
-                  disabled={busy || m5Disabled}
+                  disabled={busy}
                   onClick={() =>
                     void act(
                       () => updateWellnessSchedule(schedule.id, { isEnabled: !schedule.isEnabled }),

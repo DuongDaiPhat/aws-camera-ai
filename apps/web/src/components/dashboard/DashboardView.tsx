@@ -490,17 +490,13 @@ export function DashboardView() {
             ) : activeNav === 'settings' ? (
               <SettingsView user={user} />
             ) : !isViewer && activeNav === 'wellness' ? (
-              <WellnessView user={user} onOpenSettings={() => navigate('settings')} />
+              <WellnessView user={user} />
             ) : user?.role === 'CAREGIVER' && activeNav === 'family' ? (
               <FamilyView />
             ) : !isViewer && activeNav === 'known-faces' ? (
-              <KnownFacesView
-                isAdmin={canManageHousehold}
-                canConfigureAi={user?.role === 'CAREGIVER'}
-                onOpenSettings={() => navigate('settings')}
-              />
+              <KnownFacesView isAdmin={canManageHousehold} />
             ) : !isViewer && activeNav === 'zones' ? (
-              <ZonesView user={user} onOpenSettings={() => navigate('settings')} />
+              <ZonesView user={user} />
             ) : isViewer && activeNav !== 'events' ? (
               <CameraView user={user} />
             ) : (

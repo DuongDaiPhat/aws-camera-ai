@@ -44,18 +44,10 @@ export const createHouseholdCamera = (name: string) =>
     method: 'POST',
     body: JSON.stringify({ name }),
   });
-export const AI_MODULES_UPDATED_EVENT = 'camerai:ai-modules-updated';
 export const getHouseholdAiModules = (signal?: AbortSignal) =>
   apiFetch<HouseholdAiModulesSettings>('/household/ai-modules', { signal });
-export async function saveHouseholdAiModules(
-  input: HouseholdAiModulesInput,
-): Promise<HouseholdAiModulesSettings> {
-  const updated = await apiFetch<HouseholdAiModulesSettings>('/household/ai-modules', {
+export const saveHouseholdAiModules = (input: HouseholdAiModulesInput) =>
+  apiFetch<HouseholdAiModulesSettings>('/household/ai-modules', {
     method: 'PUT',
     body: JSON.stringify(input),
   });
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent(AI_MODULES_UPDATED_EVENT, { detail: updated }));
-  }
-  return updated;
-}
