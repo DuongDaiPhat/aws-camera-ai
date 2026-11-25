@@ -7,6 +7,7 @@ export function ZoneForm({
   draft,
   isSaving,
   polygonError,
+  disabledZoneTypes = [],
   onChange,
   onSave,
   onDelete,
@@ -14,11 +15,15 @@ export function ZoneForm({
   draft: ZoneDraft;
   isSaving: boolean;
   polygonError: string | null;
+  disabledZoneTypes?: ZoneDraft['zoneType'][];
   onChange: (patch: Partial<ZoneDraft>) => void;
   onSave: () => void;
   onDelete?: () => void;
 }) {
   const isAllDay = draft.activeFrom === null && draft.activeTo === null;
+  const restrictedDisabled = disabledZoneTypes.includes('RESTRICTED');
+  const restAreaDisabled = disabledZoneTypes.includes('REST_AREA');
+  const selectedTypeDisabled = disabledZoneTypes.includes(draft.zoneType);
   return (
     <form
       className={styles.form}
@@ -52,8 +57,12 @@ export function ZoneForm({
           value={draft.zoneType}
           onChange={(e) => onChange({ zoneType: e.target.value as ZoneDraft['zoneType'] })}
         >
-          <option value="RESTRICTED">Vùng cấm</option>
-          <option value="REST_AREA">Khu nghỉ</option>
+          <option value="RESTRICTED" disabled={restrictedDisabled}>
+            Vùng cấm{restrictedDisabled ? ' (M4 đang tắt)' : ''}
+          </option>
+          <option value="REST_AREA" disabled={restAreaDisabled}>
+            Khu nghỉ{restAreaDisabled ? ' (M2a đang tắt)' : ''}
+          </option>
           <option value="NORMAL">Vùng thường</option>
         </select>
       </label>
@@ -112,6 +121,11 @@ export function ZoneForm({
         </label>
       )}
       {polygonError && <p className={styles.formError}>{polygonError}</p>}
+      {selectedTypeDisabled && (
+        <p className={styles.formError}>
+          Module AI cho loại vùng này đang tắt. Caregiver cần bật lại trong Cài đặt.
+        </p>
+      )}
       <div className={styles.formActions}>
         {onDelete && (
           <button type="button" className={styles.dangerButton} onClick={onDelete}>
@@ -121,7 +135,7 @@ export function ZoneForm({
         <button
           type="submit"
           className={styles.primaryButton}
-          disabled={isSaving || Boolean(polygonError) || !draft.name.trim()}
+          disabled={isSaving || Boolean(polygonError) || !draft.name.trim() || selectedTypeDisabled}
         >
           {isSaving ? 'Đang lưu…' : 'Lưu vùng'}
         </button>

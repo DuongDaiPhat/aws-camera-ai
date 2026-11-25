@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { deleteKnownFace, listKnownFaces, type KnownFace } from '@/lib/known-faces-client';
 import { getHousehold, type HouseholdMember } from '@/lib/household-client';
+import { useHouseholdAiModules } from '@/hooks/useHouseholdAiModules';
+import { DisabledModuleBanner } from '@/components/household/DisabledModuleBanner';
 import { AddKnownFaceForm } from './AddKnownFaceForm';
 import { KnownFaceEditor } from './KnownFaceEditor';
 import styles from './known-faces.module.css';
@@ -161,7 +163,18 @@ function FacePageControls({
   );
 }
 
-export function KnownFacesView({ isAdmin }: { isAdmin: boolean }) {
+export function KnownFacesView({
+  isAdmin,
+  canConfigureAi = isAdmin,
+  onOpenSettings,
+}: {
+  isAdmin: boolean;
+  canConfigureAi?: boolean;
+  onOpenSettings?: () => void;
+}) {
+  const aiModules = useHouseholdAiModules(Boolean(canConfigureAi));
+  const m1Disabled = aiModules?.m1Face === false;
+  const canEditFaces = isAdmin && !m1Disabled;
   const [members, setMembers] = useState<HouseholdMember[]>([]);
   const [faces, setFaces] = useState<KnownFace[]>([]);
   const [loading, setLoading] = useState(true);
@@ -210,15 +223,15 @@ export function KnownFacesView({ isAdmin }: { isAdmin: boolean }) {
     return () => controller.abort();
   }, [isAdmin]);
 
-  const formOpen = Boolean(isAdmin && (adding || editing));
+  const formOpen = Boolean(canEditFaces && (adding || editing));
   useEffect(() => {
     if (formOpen) formDialog.current?.showModal();
     else formDialog.current?.close();
   }, [formOpen]);
   useEffect(() => {
-    if (deleting) deleteDialog.current?.showModal();
+    if (deleting && canEditFaces) deleteDialog.current?.showModal();
     else deleteDialog.current?.close();
-  }, [deleting]);
+  }, [deleting, canEditFaces]);
 
   function closeForm() {
     setAdding(false);
@@ -226,7 +239,7 @@ export function KnownFacesView({ isAdmin }: { isAdmin: boolean }) {
   }
 
   async function remove(): Promise<void> {
-    if (!deleting) return;
+    if (!deleting || !canEditFaces) return;
     setBusy(true);
     setDeleteError('');
     try {
@@ -256,12 +269,23 @@ export function KnownFacesView({ isAdmin }: { isAdmin: boolean }) {
             <RefreshCw size={16} aria-hidden="true" /> Tải lại
           </button>
           {isAdmin && (
-            <button type="button" className={styles.primary} onClick={() => setAdding(true)}>
+            <button
+              type="button"
+              className={styles.primary}
+              disabled={m1Disabled}
+              onClick={() => setAdding(true)}
+            >
               <Plus size={16} aria-hidden="true" /> Thêm mới
             </button>
           )}
         </div>
       </div>
+      {m1Disabled && (
+        <DisabledModuleBanner
+          message="Module Nhận diện khuôn mặt (M1) đang tắt — không thể thêm, sửa, xóa người quen và camera sẽ không nhận diện cho tới khi Caregiver bật lại M1 trong Cài đặt."
+          onOpenSettings={onOpenSettings}
+        />
+      )}
       {notice && (
         <p className={styles.notice} role="status">
           {notice}
@@ -293,9 +317,9 @@ export function KnownFacesView({ isAdmin }: { isAdmin: boolean }) {
               <FaceCard
                 key={face.id}
                 face={face}
-                onEdit={isAdmin ? () => setEditing(face) : undefined}
+                onEdit={canEditFaces ? () => setEditing(face) : undefined}
                 onDelete={
-                  isAdmin
+                  canEditFaces
                     ? () => {
                         setDeleteError('');
                         setDeleting(face);
@@ -321,7 +345,7 @@ export function KnownFacesView({ isAdmin }: { isAdmin: boolean }) {
         aria-labelledby="known-face-form-title"
         onCancel={closeForm}
       >
-        {isAdmin && adding && (
+        {canEditFaces && adding && (
           <AddKnownFaceForm
             members={members}
             onCancel={closeForm}
@@ -337,7 +361,7 @@ export function KnownFacesView({ isAdmin }: { isAdmin: boolean }) {
             }}
           />
         )}
-        {isAdmin && editing && (
+        {canEditFaces && editing && (
           <KnownFaceEditor
             key={editing.id}
             face={editing}

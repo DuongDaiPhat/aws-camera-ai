@@ -1,0 +1,30 @@
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  padding: 12px 15px;
+  border-radius: 12px;
+  border: 1px solid #f2c4ce;
+  background: #fff5f7;
+  color: #881337;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.banner button {
+  flex: 0 0 auto;
+  border: 1px solid #fda4af;
+  border-radius: 8px;
+  padding: 7px 12px;
+  background: #ffffff;
+  color: #881337;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.banner button:hover {
+  background: #ffe4e6;
+}

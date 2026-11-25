@@ -5,6 +5,8 @@ import type { CurrentUser, Zone } from '@/types';
 import { useCameraSnapshot, useCameras, useZones } from '@/hooks';
 import { retryFrigateSync } from '@/lib/cameras-client';
 import { getPolygonError, suggestZoneSlug, type ZonePoint } from '@/lib/zone-geometry';
+import { useHouseholdAiModules } from '@/hooks/useHouseholdAiModules';
+import { DisabledModuleBanner } from '@/components/household/DisabledModuleBanner';
 import { CameraZonePreview } from './CameraZonePreview';
 import { DeleteZoneDialog } from './DeleteZoneDialog';
 import { ZoneForm } from './ZoneForm';
@@ -49,7 +51,30 @@ const SYNC_LABEL = {
   FAILED: 'Đồng bộ thất bại',
 } as const;
 
-export function ZonesView({ user }: { user: CurrentUser | null }) {
+export function ZonesView({
+  user,
+  onOpenSettings,
+}: {
+  user: CurrentUser | null;
+  onOpenSettings?: () => void;
+}) {
+  const aiModules = useHouseholdAiModules(user?.role === 'CAREGIVER');
+  const m4Disabled = aiModules?.m4Zone === false;
+  const m2aDisabled = aiModules?.m2aFall === false;
+  const disabledZoneTypes: ZoneDraft['zoneType'][] = [
+    ...(m4Disabled ? (['RESTRICTED'] as const) : []),
+    ...(m2aDisabled ? (['REST_AREA'] as const) : []),
+  ];
+  const defaultZoneType: ZoneDraft['zoneType'] = !m4Disabled
+    ? 'RESTRICTED'
+    : !m2aDisabled
+      ? 'REST_AREA'
+      : 'NORMAL';
+  const disabledLabels = [
+    m4Disabled ? 'Giám sát vùng cấm (M4 — Vùng cấm)' : '',
+    m2aDisabled ? 'Phát hiện té ngã (M2a — Khu nghỉ)' : '',
+  ].filter(Boolean);
+
   const camerasState = useCameras();
   const camera = camerasState.selectedCamera;
   const cameraId = camera?.id ?? null;
@@ -108,7 +133,7 @@ export function ZonesView({ user }: { user: CurrentUser | null }) {
   };
 
   const saveDraft = async () => {
-    if (!draft || polygonError) return;
+    if (!draft || polygonError || disabledZoneTypes.includes(draft.zoneType)) return;
     setIsSaving(true);
     setActionError(null);
     try {
@@ -174,7 +199,7 @@ export function ZonesView({ user }: { user: CurrentUser | null }) {
             className={styles.primaryButton}
             disabled={!snapshot.preview || draft !== null}
             onClick={() => {
-              setDraft({ ...NEW_DRAFT, polygon: [] });
+              setDraft({ ...NEW_DRAFT, zoneType: defaultZoneType, polygon: [] });
               setSelectedZoneId(null);
             }}
           >
@@ -182,6 +207,12 @@ export function ZonesView({ user }: { user: CurrentUser | null }) {
           </button>
         )}
       </header>
+      {disabledLabels.length > 0 && (
+        <DisabledModuleBanner
+          message={`Module đang tắt: ${disabledLabels.join('; ')}. Không thể tạo mới hoặc chỉnh sửa loại vùng thuộc module đã tắt cho tới khi Caregiver bật lại trong Cài đặt.`}
+          onOpenSettings={onOpenSettings}
+        />
+      )}
 
       {camerasState.error && (
         <div className={styles.error} role="alert">
@@ -275,7 +306,11 @@ export function ZonesView({ user }: { user: CurrentUser | null }) {
                   <span>{zonesState.zones.length} vùng</span>
                 </div>
                 {selectedZone && isAdmin && !draft && (
-                  <button type="button" onClick={() => startEdit(selectedZone)}>
+                  <button
+                    type="button"
+                    disabled={disabledZoneTypes.includes(selectedZone.zoneType)}
+                    onClick={() => startEdit(selectedZone)}
+                  >
                     Sửa
                   </button>
                 )}
@@ -306,6 +341,7 @@ export function ZonesView({ user }: { user: CurrentUser | null }) {
                   draft={draft}
                   isSaving={isSaving}
                   polygonError={polygonError}
+                  disabledZoneTypes={disabledZoneTypes}
                   onChange={changeDraft}
                   onSave={() => void saveDraft()}
                   onDelete={
