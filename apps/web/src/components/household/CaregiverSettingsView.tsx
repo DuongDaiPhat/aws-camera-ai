@@ -14,6 +14,7 @@ import {
 import { useHousehold } from '@/hooks/useHousehold';
 import { AlertDeliverySettings } from '@/components/settings/AlertDeliverySettings';
 import { EscalationRulesSection } from '@/components/settings/EscalationRulesSection';
+import { AiModulesSettings } from './AiModulesSettings';
 import styles from './household.module.css';
 import compact from './caregiver-settings.module.css';
 
@@ -350,6 +351,7 @@ export function CaregiverSettingsView() {
       </header>
       <AccountPanels />
       <AlertDeliverySettings />
+      <AiModulesSettings />
       <HouseholdStorage />
       <section className={compact.rulesSection}>
         <h3>Quy tắc cảnh báo của hộ</h3>

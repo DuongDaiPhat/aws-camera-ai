@@ -177,7 +177,146 @@
 @media (pointer: coarse) {
   .accountGrid button,
   .accountSection > label,
-  .settingsPage .storageForm button {
+  .settingsPage .storageForm button,
+  .aiModuleCard input[type='checkbox'],
+  .aiModulesFooter button {
     min-height: 44px;
   }
 }
+
+.aiModulesSection {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.aiModulesHeader {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.aiModulesForm {
+  display: grid;
+  gap: 1rem;
+}
+
+.aiModulesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 0.75rem;
+}
+
+.aiModuleCard {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  border-radius: 0.9rem;
+  border: 1px solid #e6dfee;
+  background: #ffffff;
+  color: #28232e;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.aiModuleCard:hover {
+  border-color: #c8b8dc;
+  background: #faf7fd;
+}
+
+.aiModuleCard:has(input:checked) {
+  border-color: #694489;
+  background: #f8f4fc;
+}
+
+.aiModuleCard:has(input:focus-visible) {
+  outline: 2px solid #9566c5;
+  outline-offset: 2px;
+}
+
+.aiModuleCard:has(input:disabled) {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.aiModuleCard input[type='checkbox'] {
+  accent-color: #694489;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.18rem;
+  flex: 0 0 auto;
+  cursor: inherit;
+}
+
+.aiModuleInfo {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.aiModuleInfo > span:last-child {
+  color: #6f637b;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.aiModuleTitleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.aiModuleCode {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: #eee8f4;
+  color: #694489;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.aiBadgeOn,
+.aiBadgeOff,
+.aiBadgeMuted {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.aiBadgeOn {
+  background: #e9f6ee;
+  color: #196b3b;
+  border: 1px solid #bce3cb;
+}
+
+.aiBadgeOff {
+  background: #f5f2f8;
+  color: #6f637b;
+  border: 1px solid #e6dfee;
+}
+
+.aiBadgeMuted {
+  background: #fdf4e7;
+  color: #8c5319;
+  border: 1px solid #f2d5ad;
+}
+
+.aiModulesFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+

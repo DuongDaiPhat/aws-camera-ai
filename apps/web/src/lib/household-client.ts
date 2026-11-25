@@ -5,6 +5,8 @@ export type HouseholdMember = components['schemas']['HouseholdMember'];
 export type CameraGrant = components['schemas']['HouseholdCameraGrant'];
 export type HouseholdContact = components['schemas']['HouseholdContact'];
 export type HouseholdSettings = components['schemas']['HouseholdSettings'];
+export type HouseholdAiModulesSettings = components['schemas']['HouseholdAiModulesSettings'];
+export type HouseholdAiModulesInput = components['schemas']['HouseholdAiModulesInput'];
 export type AccountSettings = components['schemas']['AccountSettings'];
 export type NotificationPreferences = components['schemas']['NotificationPreferences'];
 export const getHousehold = (signal?: AbortSignal) => apiFetch<Household>('/household', { signal });
@@ -41,4 +43,11 @@ export const createHouseholdCamera = (name: string) =>
   apiFetch<{ id: string }>('/household/cameras', {
     method: 'POST',
     body: JSON.stringify({ name }),
+  });
+export const getHouseholdAiModules = (signal?: AbortSignal) =>
+  apiFetch<HouseholdAiModulesSettings>('/household/ai-modules', { signal });
+export const saveHouseholdAiModules = (input: HouseholdAiModulesInput) =>
+  apiFetch<HouseholdAiModulesSettings>('/household/ai-modules', {
+    method: 'PUT',
+    body: JSON.stringify(input),
   });
