@@ -99,15 +99,9 @@ function PhoneSettingsForm() {
             />
           </label>
           <p className={styles.viewerHint}>
-            Để trống để dùng số tài khoản. Với số chưa xác minh, bạn sẽ nhận một mã qua SMS.
+            Để trống để dùng số tài khoản. Số điện thoại được lưu để liên lạc khi có sự cố.
           </p>
-          <button
-            type="submit"
-            disabled={
-              busy ||
-              !(state.callAvailable || state.smsAvailable || state.callEnabled || state.smsEnabled)
-            }
-          >
+          <button type="submit" disabled={busy}>
             Lưu cài đặt điện thoại
           </button>
         </form>
