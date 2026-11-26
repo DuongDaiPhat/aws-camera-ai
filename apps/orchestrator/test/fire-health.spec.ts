@@ -15,7 +15,7 @@ function readyAi(): FireAiHealthDto {
   return {
     status: 'READY',
     instanceId: randomUUID(),
-    modelVersion: 'fire-smoke-yolo26n-checkpoint-nms-v1',
+    modelVersion: 'fire-smoke-yolo26n-checkpoint-nms-v2',
     modelLoaded: true,
     requestCount: 1,
     errorCount: 0,

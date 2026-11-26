@@ -102,8 +102,8 @@ class Settings(BaseSettings):
 
     # Module 3 — fire-only detection using the existing verified checkpoint.
     m3_enabled: bool = False
-    fire_model_path: str = "models/fire-smoke-yolo26n-checkpoint-nms.onnx"
-    fire_model_version: str = "fire-smoke-yolo26n-checkpoint-nms-v1"
+    fire_model_path: str = "models/fire-smoke-yolo26n-checkpoint-nms-v2.onnx"
+    fire_model_version: str = "fire-smoke-yolo26n-checkpoint-nms-v2"
     fire_model_sha256: str = ""
     fire_min_consecutive_frames: int = Field(default=3, ge=3, le=60)
     fire_confidence_threshold: float = Field(default=0.50, gt=0, le=1)
