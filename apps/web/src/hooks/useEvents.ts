@@ -192,6 +192,7 @@ interface EventsSource {
   reload: () => void;
   liveNoticeText: string | null;
   setLiveNoticeText: NoticeSetter;
+  streamVersion: number;
 }
 
 function useEventsSource(): EventsSource {
@@ -200,6 +201,7 @@ function useEventsSource(): EventsSource {
   const [error, setError] = useState<string | null>(null);
   const [liveNoticeText, setLiveNoticeText] = useState<string | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
+  const [streamVersion, setStreamVersion] = useState(0);
 
   const reload = useCallback(() => {
     setReloadToken((token) => token + 1);
@@ -239,17 +241,33 @@ function useEventsSource(): EventsSource {
 
   useEffect(() => {
     const unsubscribe = subscribeEventsStream({
-      onCreated: (event) => prependEvent(event, setEvents, setLiveNoticeText),
-      onUpdated: (event) => replaceEvent(event, setEvents),
+      onCreated: (event) => {
+        prependEvent(event, setEvents, setLiveNoticeText);
+        setStreamVersion((version) => version + 1);
+      },
+      onUpdated: (event) => {
+        replaceEvent(event, setEvents);
+        setStreamVersion((version) => version + 1);
+      },
     });
     return unsubscribe;
   }, []);
 
-  return { events, setEvents, isLoading, error, reload, liveNoticeText, setLiveNoticeText };
+  return {
+    events,
+    setEvents,
+    isLoading,
+    error,
+    reload,
+    liveNoticeText,
+    setLiveNoticeText,
+    streamVersion,
+  };
 }
 
 export function useEvents() {
-  const { events, setEvents, isLoading, error, reload, liveNoticeText } = useEventsSource();
+  const { events, setEvents, isLoading, error, reload, liveNoticeText, streamVersion } =
+    useEventsSource();
   const filterState = useEventFilters(events);
   const paginationState = useEventPagination(
     filterState.filteredEvents,
@@ -318,6 +336,7 @@ export function useEvents() {
     error,
     reload,
     liveNoticeText,
+    streamVersion,
     confirmOk,
     confirmHelp,
     closeEmergency,

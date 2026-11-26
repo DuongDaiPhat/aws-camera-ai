@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   alertEmphasis,
   canInterruptFire,
+  isMandatoryFireAlert,
+  nextMandatoryFire,
   nextUnreviewedFire,
   fireReviewKey,
   reconcileFireReceipts,
@@ -110,5 +112,24 @@ describe('fire attention policy', () => {
     const extended = reconcileFireReceipts([middle, latest], receipts, NOW);
     expect(nextUnreviewedFire([latest], extended, NOW)).toBeNull();
     expect(extended[0]?.eventIds).toContain('latest');
+  });
+  it('marks active fire alerts as mandatory until resolved, closed, or viewer-only escalated', () => {
+    const notifiedFire = event('fire-notified', 'NOTIFIED', NOW - 5000);
+    const escalatedFire = event('fire-escalated', 'ESCALATED', NOW - 5000);
+    const resolvedFire = event('fire-resolved', 'RESOLVED', NOW - 5000);
+    const fall = {
+      ...event('fall-p0', 'NOTIFIED', NOW - 5000),
+      eventType: 'FALL_DETECTED' as const,
+    };
+
+    expect(isMandatoryFireAlert(notifiedFire, true)).toBe(true);
+    expect(isMandatoryFireAlert(notifiedFire, false)).toBe(true);
+    expect(isMandatoryFireAlert(escalatedFire, true)).toBe(true);
+    expect(isMandatoryFireAlert(escalatedFire, false)).toBe(false);
+    expect(isMandatoryFireAlert(resolvedFire, true)).toBe(false);
+    expect(isMandatoryFireAlert(fall, true)).toBe(false);
+    expect(nextMandatoryFire([resolvedFire, fall, notifiedFire], NOW, true)?.id).toBe(
+      'fire-notified',
+    );
   });
 });

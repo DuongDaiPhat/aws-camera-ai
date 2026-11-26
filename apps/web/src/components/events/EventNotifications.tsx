@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api-client';
-import { FIRE_DETAIL_REFRESH_MS } from '@/lib/fire-ui-config';
+import { FIRE_DETAIL_FAST_POLL_MS, FIRE_DETAIL_REFRESH_MS } from '@/lib/fire-ui-config';
 import type { components, operations } from '@/types';
+import { ChannelFluentIcon } from './FireAlertIcons';
 import styles from './event-detail-modal.module.css';
 
 type Notification = components['schemas']['Notification'];
@@ -41,7 +42,22 @@ function notificationStatus({ status, errorCode }: Notification): string {
   return statuses[status];
 }
 
-export function EventNotifications({ eventId }: { eventId: string }) {
+function statusPillClass(status: Notification['status']): string {
+  if (status === 'SENT' || status === 'CONFIRMED') return styles.notifToneSuccess;
+  if (status === 'FAILED') return styles.notifToneDanger;
+  if (status === 'PENDING') return styles.notifToneWarning;
+  return styles.notifToneNeutral;
+}
+
+export function EventNotifications({
+  eventId,
+  eventStatus,
+  refreshSignal = 0,
+}: {
+  eventId: string;
+  eventStatus?: string;
+  refreshSignal?: number;
+}) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [error, setError] = useState(false);
 
@@ -49,6 +65,7 @@ export function EventNotifications({ eventId }: { eventId: string }) {
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout>;
     async function load() {
+      let nextDelay = FIRE_DETAIL_REFRESH_MS;
       try {
         const result = await apiFetch<NotificationsResponse>(`/events/${eventId}/notifications`, {
           cache: 'no-store',
@@ -57,34 +74,48 @@ export function EventNotifications({ eventId }: { eventId: string }) {
         if (controller.signal.aborted) return;
         setNotifications(result.data);
         setError(false);
+        const hasPending = result.data.some((item) => item.status === 'PENDING');
+        const awaitingDispatch =
+          result.data.length === 0 && (eventStatus === 'NOTIFIED' || eventStatus === 'ESCALATED');
+        if (hasPending || awaitingDispatch) {
+          nextDelay = FIRE_DETAIL_FAST_POLL_MS;
+        }
       } catch {
         if (controller.signal.aborted) return;
         setError(true);
       }
-      timer = setTimeout(() => void load(), FIRE_DETAIL_REFRESH_MS);
+      timer = setTimeout(() => void load(), nextDelay);
     }
     void load();
     return () => {
       controller.abort();
       clearTimeout(timer);
     };
-  }, [eventId]);
+  }, [eventId, eventStatus, refreshSignal]);
 
   if (!notifications.length && !error) return null;
 
   return (
-    <section className={styles.aiSection}>
-      <h3 className={styles.sectionTitle}>Thông báo</h3>
+    <section className={styles.notificationsSection}>
+      <h3 className={styles.sectionTitle}>Kênh thông báo khẩn</h3>
       {error && (
         <p className={styles.inlineNoticeError} role="status">
           Chưa cập nhật được trạng thái thông báo.
         </p>
       )}
-      <ul className={styles.historyList}>
+      <ul className={styles.notificationGrid}>
         {notifications.map((notification) => (
-          <li className={styles.historyItem} key={notification.id}>
-            <strong>{channels[notification.channel]}</strong>
-            <span>{notificationStatus(notification)}</span>
+          <li
+            className={`${styles.notificationItem} ${statusPillClass(notification.status)}`}
+            key={notification.id}
+          >
+            <div className={styles.notificationChannelRow}>
+              <ChannelFluentIcon channel={notification.channel} size={20} />
+              <strong>{channels[notification.channel]}</strong>
+            </div>
+            <span className={styles.notificationStatusText}>
+              {notificationStatus(notification)}
+            </span>
           </li>
         ))}
       </ul>

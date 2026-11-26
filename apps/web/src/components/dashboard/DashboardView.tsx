@@ -210,6 +210,7 @@ function DashboardEventDetails({
   return (
     <EventDetailModal
       event={event}
+      refreshSignal={actions.streamVersion}
       onClose={onClose}
       readOnly={readOnly}
       canCloseEmergency={canManageEvents}
@@ -270,7 +271,7 @@ export function DashboardView() {
   const { events, liveNoticeText, confirmOk, confirmHelp, closeEmergency } = eventState;
   const preferences = useAccountPreferences(user?.id);
   useNewAlertSound(events, preferences.soundAlerts, user?.id);
-  const attention = useFireAttention(events, user?.id);
+  const attention = useFireAttention(events, user?.id, !isViewer);
   const notificationNow = useNotificationClock(events);
   const { read, markRead } = useNotificationReadState(user?.id);
   const notificationCount =
@@ -556,14 +557,26 @@ export function DashboardView() {
         <FireAttention
           key={fireReviewKey(attention.event)}
           event={attention.event}
+          mandatory={attention.isMandatory}
+          refreshSignal={eventState.streamVersion}
           onInspect={markRead}
           canCloseEmergency={!isViewer}
           onReviewed={() => {
             if (attention.event) attention.review(attention.event.id);
           }}
-          onConfirmOk={confirmOk}
-          onConfirmHelp={confirmHelp}
-          onCloseEmergency={closeEmergency}
+          onConfirmOk={async (id, note) => {
+            await confirmOk(id, note);
+            setEventActionVersion((version) => version + 1);
+          }}
+          onConfirmHelp={async (id, note) => {
+            await confirmHelp(id, note);
+            setEventActionVersion((version) => version + 1);
+          }}
+          onCloseEmergency={async (id, note) => {
+            await closeEmergency(id, note);
+            setEventActionVersion((version) => version + 1);
+          }}
+          onToggleFalseAlarm={!isViewer ? eventState.toggleFalseAlarm : undefined}
         />
       )}
     </CameraSignalsProvider>

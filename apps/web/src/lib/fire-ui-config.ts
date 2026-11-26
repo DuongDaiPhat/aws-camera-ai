@@ -8,14 +8,19 @@ export const FIRE_DETAIL_REFRESH_MS = milliseconds(
   process.env.NEXT_PUBLIC_FIRE_DETAIL_REFRESH_MS,
   30000,
 );
+export const FIRE_DETAIL_FAST_POLL_MS = milliseconds(
+  process.env.NEXT_PUBLIC_FIRE_DETAIL_FAST_POLL_MS,
+  2000,
+);
 export const FIRE_DETAIL_RETRY_MS = milliseconds(
   process.env.NEXT_PUBLIC_FIRE_DETAIL_RETRY_MS,
   3000,
 );
 export const FIRE_ATTENTION_POLL_MS = milliseconds(
   process.env.NEXT_PUBLIC_FIRE_ATTENTION_POLL_MS,
-  10000,
+  3000,
 );
+export const FIRE_CLIP_WAIT_WINDOW_MS = 120000;
 export const EVENTS_REFRESH_MS = milliseconds(process.env.NEXT_PUBLIC_EVENTS_REFRESH_MS, 60000);
 export const FIRE_ATTENTION_MAX_AGE_MS = 3 * 60 * 60 * 1000;
 export const FIRE_ATTENTION_EPISODE_GAP_MS = milliseconds(

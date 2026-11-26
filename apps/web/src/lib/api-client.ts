@@ -17,8 +17,17 @@ interface RefreshResponse {
 const ACCESS_TOKEN_KEY = 'camerai_access_token';
 let accessToken: string | null = null;
 let refreshRequest: Promise<string> | null = null;
+const tokenListeners = new Set<(token: string | null) => void>();
+
+export function subscribeAccessTokenChange(listener: (token: string | null) => void): () => void {
+  tokenListeners.add(listener);
+  return () => {
+    tokenListeners.delete(listener);
+  };
+}
 
 export function setAccessToken(token: string | null): void {
+  const changed = accessToken !== token;
   accessToken = token;
   if (typeof window !== 'undefined' && window.sessionStorage) {
     if (token) {
@@ -27,6 +36,9 @@ export function setAccessToken(token: string | null): void {
       window.sessionStorage.removeItem(ACCESS_TOKEN_KEY);
     }
   }
+  if (changed) {
+    for (const listener of tokenListeners) listener(token);
+  }
 }
 
 export function getAccessToken(): string | null {
@@ -34,6 +46,16 @@ export function getAccessToken(): string | null {
     accessToken = window.sessionStorage.getItem(ACCESS_TOKEN_KEY);
   }
   return accessToken;
+}
+
+export async function refreshSessionToken(): Promise<string | null> {
+  try {
+    const refreshed = await refreshAccessToken();
+    setAccessToken(refreshed);
+    return refreshed;
+  } catch {
+    return getAccessToken();
+  }
 }
 
 export class ApiError extends Error {

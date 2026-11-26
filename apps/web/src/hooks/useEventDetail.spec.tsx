@@ -85,4 +85,11 @@ describe('event evidence recovery', () => {
     await act(async () => complete?.(detail('second')));
     expect(container.querySelector('[data-testid="id"]')?.textContent).toBe('second');
   });
+  it('fast-polls fire detail every 2s until evidence and snapshot arrive', async () => {
+    vi.mocked(fetchEventDetail).mockResolvedValue(detail('fire-sync'));
+    await act(async () => root.render(<Harness id="fire-sync" />));
+    expect(fetchEventDetail).toHaveBeenCalledTimes(1);
+    await act(async () => vi.advanceTimersByTimeAsync(2000));
+    expect(fetchEventDetail).toHaveBeenCalledTimes(2);
+  });
 });
