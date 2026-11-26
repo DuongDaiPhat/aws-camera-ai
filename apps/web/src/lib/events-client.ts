@@ -1,4 +1,10 @@
-import { apiFetch, getAccessToken, API_BASE_URL } from './api-client';
+import {
+  apiFetch,
+  getAccessToken,
+  refreshSessionToken,
+  subscribeAccessTokenChange,
+  API_BASE_URL,
+} from './api-client';
 import { formatRelativeTime } from './format';
 import type {
   EventSummary,
@@ -191,22 +197,22 @@ export interface EventsStreamHandlers {
   onUpdated: (event: UIEventItem) => void;
 }
 
+const SSE_RECONNECT_BASE_MS = 2000;
+const SSE_RECONNECT_MAX_MS = 15000;
+
 /**
  * Lắng nghe luồng SSE realtime từ backend (US-06, FR-DSH-02).
- * `event.updated` xuất hiện khi ảnh snapshot của Frigate về muộn hơn sự kiện.
+ * Tự kết nối lại khi token được làm mới hoặc kết nối SSE bị gián đoạn.
  */
 export function subscribeEventsStream(handlers: EventsStreamHandlers): () => void {
   if (typeof window === 'undefined' || !window.EventSource) {
     return () => {};
   }
 
-  const token = getAccessToken();
-  if (!token) {
-    return () => {};
-  }
-
-  const url = `${API_BASE_URL}/events/stream?token=${encodeURIComponent(token)}`;
-  const eventSource = new EventSource(url);
+  let closed = false;
+  let eventSource: EventSource | null = null;
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  let reconnectAttempts = 0;
 
   function forward(handle: (event: UIEventItem) => void) {
     return (message: MessageEvent) => {
@@ -219,11 +225,72 @@ export function subscribeEventsStream(handlers: EventsStreamHandlers): () => voi
     };
   }
 
-  eventSource.addEventListener('event.created', forward(handlers.onCreated));
-  eventSource.addEventListener('event.updated', forward(handlers.onUpdated));
+  function closeCurrent(): void {
+    if (eventSource) {
+      eventSource.close();
+      eventSource = null;
+    }
+  }
+
+  function clearReconnect(): void {
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+  }
+
+  function scheduleReconnect(): void {
+    if (closed || reconnectTimer) return;
+    const delay = Math.min(SSE_RECONNECT_BASE_MS * 2 ** reconnectAttempts, SSE_RECONNECT_MAX_MS);
+    reconnectAttempts = Math.min(reconnectAttempts + 1, 4);
+    reconnectTimer = setTimeout(() => {
+      reconnectTimer = null;
+      void refreshSessionToken().then((freshToken) => {
+        if (!closed && freshToken) connect(freshToken);
+      });
+    }, delay);
+  }
+
+  function connect(token: string): void {
+    if (closed) return;
+    closeCurrent();
+    clearReconnect();
+    const url = `${API_BASE_URL}/events/stream?token=${encodeURIComponent(token)}`;
+    const next = new EventSource(url);
+    next.addEventListener('event.created', forward(handlers.onCreated));
+    next.addEventListener('event.updated', forward(handlers.onUpdated));
+    next.addEventListener('open', () => {
+      reconnectAttempts = 0;
+    });
+    next.addEventListener('error', () => {
+      if (closed || eventSource !== next) return;
+      closeCurrent();
+      scheduleReconnect();
+    });
+    eventSource = next;
+  }
+
+  const initialToken = getAccessToken();
+  if (initialToken) {
+    connect(initialToken);
+  }
+
+  const unsubscribeToken = subscribeAccessTokenChange((nextToken) => {
+    if (closed) return;
+    if (!nextToken) {
+      closeCurrent();
+      clearReconnect();
+      return;
+    }
+    reconnectAttempts = 0;
+    connect(nextToken);
+  });
 
   return () => {
-    eventSource.close();
+    closed = true;
+    unsubscribeToken();
+    clearReconnect();
+    closeCurrent();
   };
 }
 

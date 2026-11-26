@@ -23,6 +23,35 @@ export function isActiveFire(event: UIEventItem): boolean {
   );
 }
 
+/**
+ * Active fire events require mandatory operator handling and cannot be dismissed or
+ * suppressed by earlier receipts while the operator still has an available resolution action.
+ */
+export function isMandatoryFireAlert(event: UIEventItem, canCloseEmergency = true): boolean {
+  if (!isActiveFire(event)) return false;
+  if (event.status === 'DETECTED' || event.status === 'NOTIFIED') return true;
+  return event.status === 'ESCALATED' && canCloseEmergency;
+}
+
+export function nextMandatoryFire(
+  events: UIEventItem[],
+  now = Date.now(),
+  canCloseEmergency = true,
+): UIEventItem | null {
+  return (
+    events
+      .filter(
+        (event) =>
+          isMandatoryFireAlert(event, canCloseEmergency) && canInterruptCriticalAlert(event, now),
+      )
+      .sort(
+        (a, b) =>
+          (criticalAlertDeadline(a) ?? Infinity) - (criticalAlertDeadline(b) ?? Infinity) ||
+          Date.parse(b.detectedAt) - Date.parse(a.detectedAt),
+      )[0] ?? null
+  );
+}
+
 export function criticalAlertDeadline(event: UIEventItem): number | null {
   if (event.priority !== 'P0' || !isPendingPriority(event)) return null;
   const until = notificationExpiresAt(event);

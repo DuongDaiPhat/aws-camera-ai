@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { RefreshCw } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useEffect, useId, useState } from 'react';
 import type { EventDetail, UIEventItem } from '@/types';
 import { useEvidenceUrl } from '@/hooks/useEvidenceUrl';
 import { formatExactTime } from '@/lib/format';
+import { SnapshotFrameFluentIcon, VideoReelFluentIcon } from './FireAlertIcons';
 import { FireBoxes } from './FireEvidenceSection';
 import { EventRecording } from './EventRecording';
 import styles from './event-detail-modal.module.css';
@@ -12,10 +15,12 @@ export function EventSnapshot({
   event,
   detail,
   compact = false,
+  isLoading = false,
 }: {
   event: UIEventItem;
   detail: EventDetail | null;
   compact?: boolean;
+  isLoading?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -40,17 +45,25 @@ export function EventSnapshot({
           }
         />
       ) : (
-        <p className={styles.snapshotMissing}>
-          {failed && compact
-            ? 'Ảnh chưa sẵn sàng. Mở chi tiết để kiểm tra bằng chứng.'
-            : failed
-              ? 'Chưa tải được ảnh. Bấm tải lại bằng chứng để làm mới liên kết.'
-              : 'Ảnh camera chưa sẵn sàng.'}
-        </p>
+        <div className={styles.snapshotEmptyState}>
+          {isLoading && <div className={styles.mediaSkeleton} aria-hidden="true" />}
+          <p className={styles.snapshotMissing}>
+            {failed && compact
+              ? 'Ảnh chưa sẵn sàng. Mở chi tiết để kiểm tra bằng chứng.'
+              : failed
+                ? 'Chưa tải được ảnh. Bấm tải lại bằng chứng để làm mới liên kết.'
+                : isLoading
+                  ? 'Đang tải ảnh bằng chứng từ camera…'
+                  : 'Ảnh camera chưa sẵn sàng.'}
+          </p>
+        </div>
       )}
       {url && !failed && <FireBoxes detail={detail} {...size} />}
       <div className={styles.camWatermark}>
-        {event.camera?.name ?? 'Camera'} · {event.cameraCode}
+        <span className={styles.liveRecDot} aria-hidden="true" />
+        <span>
+          {event.camera?.name ?? 'Camera'} · {event.cameraCode}
+        </span>
       </div>
       <div className={styles.timeWatermark}>{formatExactTime(event.detectedAt)}</div>
     </div>
@@ -61,65 +74,135 @@ export function EventEvidenceViewer({
   event,
   detail,
   onReload,
+  isLoading = false,
+  isSyncing = false,
 }: {
   event: UIEventItem;
   detail: EventDetail | null;
   onReload: () => void;
+  isLoading?: boolean;
+  isSyncing?: boolean;
 }) {
   const [mode, setMode] = useState<'snapshot' | 'video'>('snapshot');
+  const [spinTick, setSpinTick] = useState(0);
+  const reduceMotion = useReducedMotion();
+  const switchId = useId();
   const isFire = event.eventType === 'FIRE_SMOKE_DETECTED';
+  const hasClip = Boolean(detail?.media?.some((item) => item.mediaType === 'CLIP'));
+
   return (
-    <section aria-label="Ảnh và video bằng chứng">
+    <section className={styles.evidenceColumn} aria-label="Ảnh và video bằng chứng">
       {isFire && (
-        <div className={styles.mediaSwitch} aria-label="Chọn bằng chứng">
-          <button
-            type="button"
-            aria-pressed={mode === 'snapshot'}
-            onClick={() => setMode('snapshot')}
-          >
-            Ảnh khoanh vùng
-          </button>
-          <button type="button" aria-pressed={mode === 'video'} onClick={() => setMode('video')}>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-              focusable="false"
+        <div className={styles.mediaToolbar}>
+          <div className={styles.mediaSwitch} role="group" aria-label="Chọn bằng chứng">
+            <button
+              type="button"
+              className={styles.mediaTabBtn}
+              aria-pressed={mode === 'snapshot'}
+              onClick={() => setMode('snapshot')}
             >
-              <path d="m8 5 11 7-11 7z" />
-            </svg>
-            Xem video diễn biến
-          </button>
-          <button
+              {mode === 'snapshot' && (
+                <motion.span
+                  layoutId={`media-pill-${switchId}`}
+                  className={styles.mediaTabPill}
+                  transition={
+                    reduceMotion
+                      ? { duration: 0 }
+                      : { type: 'spring', stiffness: 440, damping: 34, mass: 0.75 }
+                  }
+                />
+              )}
+              <SnapshotFrameFluentIcon size={17} className={styles.mediaTabIcon} />
+              <span className={styles.mediaTabLabel}>Ảnh khoanh vùng</span>
+            </button>
+            <button
+              type="button"
+              className={styles.mediaTabBtn}
+              aria-pressed={mode === 'video'}
+              onClick={() => setMode('video')}
+            >
+              {mode === 'video' && (
+                <motion.span
+                  layoutId={`media-pill-${switchId}`}
+                  className={styles.mediaTabPill}
+                  transition={
+                    reduceMotion
+                      ? { duration: 0 }
+                      : { type: 'spring', stiffness: 440, damping: 34, mass: 0.75 }
+                  }
+                />
+              )}
+              <VideoReelFluentIcon size={17} className={styles.mediaTabIcon} />
+              <span className={styles.mediaTabLabel}>Xem video diễn biến</span>
+              {!hasClip && isSyncing && <span className={styles.clipPendingTag}>Đang tạo</span>}
+            </button>
+          </div>
+          <motion.button
             className={styles.reloadButton}
             type="button"
-            onClick={onReload}
+            whileHover={reduceMotion ? undefined : { scale: 1.05 }}
+            whileTap={reduceMotion ? undefined : { scale: 0.93 }}
+            onClick={() => {
+              setSpinTick((value) => value + 1);
+              onReload();
+            }}
             aria-label="Tải lại bằng chứng"
             title="Tải lại bằng chứng"
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.8}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              focusable="false"
+            <motion.span
+              className={styles.reloadIconWrap}
+              animate={reduceMotion ? undefined : { rotate: spinTick * 360 }}
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
             >
-              <path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-              <path d="M21 3v5h-5" />
-            </svg>
-          </button>
+              <RefreshCw
+                size={15}
+                className={isLoading ? styles.spinIcon : undefined}
+                aria-hidden="true"
+              />
+            </motion.span>
+          </motion.button>
         </div>
       )}
-      {(!isFire || mode === 'snapshot') && <EventSnapshot event={event} detail={detail} />}
-      {(!isFire || mode === 'video') && (
-        <EventRecording detail={detail} isFire={isFire} onReload={onReload} />
+
+      {isFire ? (
+        <AnimatePresence mode="wait" initial={false}>
+          {mode === 'snapshot' ? (
+            <motion.div
+              key="snapshot"
+              initial={reduceMotion ? false : { opacity: 0, scale: 0.985 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={reduceMotion ? undefined : { opacity: 0, scale: 0.985 }}
+              transition={{ duration: reduceMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <EventSnapshot event={event} detail={detail} isLoading={isLoading && !detail} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="video"
+              initial={reduceMotion ? false : { opacity: 0, scale: 0.985 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={reduceMotion ? undefined : { opacity: 0, scale: 0.985 }}
+              transition={{ duration: reduceMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <EventRecording
+                detail={detail}
+                isFire={isFire}
+                isSyncing={isSyncing}
+                onReload={onReload}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      ) : (
+        <>
+          <EventSnapshot event={event} detail={detail} isLoading={isLoading && !detail} />
+          <EventRecording
+            detail={detail}
+            isFire={false}
+            isSyncing={isSyncing}
+            onReload={onReload}
+          />
+        </>
       )}
     </section>
   );
