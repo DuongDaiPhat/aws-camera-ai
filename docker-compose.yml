@@ -237,8 +237,8 @@ services:
       POSE_TRACK_SWEEP_INTERVAL_MS: ${POSE_TRACK_SWEEP_INTERVAL_MS:-250}
       FIRE_MIN_CONSECUTIVE_FRAMES: ${FIRE_MIN_CONSECUTIVE_FRAMES:-3}
       M3_ENABLED: ${M3_ENABLED:-false}
-      FIRE_MODEL_PATH: ${FIRE_MODEL_PATH:-/app/models/fire-smoke-yolo26n-checkpoint-nms.onnx}
-      FIRE_MODEL_VERSION: ${FIRE_MODEL_VERSION:-fire-smoke-yolo26n-checkpoint-nms-v1}
+      FIRE_MODEL_PATH: ${FIRE_MODEL_PATH:-/app/models/fire-smoke-yolo26n-checkpoint-nms-v2.onnx}
+      FIRE_MODEL_VERSION: ${FIRE_MODEL_VERSION:-fire-smoke-yolo26n-checkpoint-nms-v2}
       FIRE_MODEL_SHA256: ${FIRE_MODEL_SHA256:-}
       FIRE_CONFIDENCE_THRESHOLD: ${FIRE_CONFIDENCE_THRESHOLD:-0.50}
       FIRE_OUTPUT_CONFIDENCE_FLOOR: ${FIRE_OUTPUT_CONFIDENCE_FLOOR:-0.10}

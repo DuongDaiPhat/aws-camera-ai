@@ -31,7 +31,7 @@ export function fireResponse(
   const base: FireResponseDto = {
     confirmed: false,
     detections: [],
-    modelVersion: 'fire-smoke-yolo26n-checkpoint-nms-v1',
+    modelVersion: 'fire-smoke-yolo26n-checkpoint-nms-v2',
     processedAt: frame.header.frameTimestamp,
     cameraSlug: frame.header.cameraSlug,
     sourceSessionId: frame.header.sourceSessionId,

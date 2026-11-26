@@ -27,7 +27,7 @@ export class FireConfig {
   constructor(config: ConfigService) {
     this.enabled = String(config.get('M3_ENABLED', 'false')) === 'true';
     this.topic = config.get('MQTT_TOPIC_FIRE_FRAMES', 'frigate/camerai/fire/frames');
-    this.modelVersion = config.get('FIRE_MODEL_VERSION', 'fire-smoke-yolo26n-checkpoint-nms-v1');
+    this.modelVersion = config.get('FIRE_MODEL_VERSION', 'fire-smoke-yolo26n-checkpoint-nms-v2');
     this.threshold = this.number(config, 'FIRE_CONFIDENCE_THRESHOLD', 0.5, 0.000001, 1);
     this.requiredFrames = this.number(config, 'FIRE_MIN_CONSECUTIVE_FRAMES', 3, 3, 60, true);
     this.windowSeconds = this.number(config, 'FIRE_CONFIRMATION_WINDOW_SECONDS', 5, 0.001);
