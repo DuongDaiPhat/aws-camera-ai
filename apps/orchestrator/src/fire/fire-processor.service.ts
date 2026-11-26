@@ -1,10 +1,17 @@
 import { randomUUID } from 'node:crypto';
-import { Injectable, Logger, type OnModuleInit, type OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  Optional,
+  type OnModuleInit,
+  type OnModuleDestroy,
+} from '@nestjs/common';
 import type { SubmitAiResultDto } from '../ai-results/dto/submit-ai-result.dto';
 import { MediaService } from '../media/media.service';
 import { EventsService } from '../events/events.service';
 import { FireAiClient } from './fire-ai.client';
 import { FireConfig } from './fire.config';
+import { FireDeliveryService } from './fire-delivery.service';
 import type { ConfirmedFireResponse, FireFrame, FireResponseDto } from './fire.dto';
 import {
   hasConfirmedFire,
@@ -47,6 +54,7 @@ export class FireProcessorService implements OnModuleInit, OnModuleDestroy {
     private readonly media: MediaService,
     private readonly events: EventsService,
     private readonly telemetry: FireTelemetry,
+    @Optional() private readonly delivery?: FireDeliveryService,
   ) {}
 
   onModuleInit(): void {
@@ -248,6 +256,16 @@ export class FireProcessorService implements OnModuleInit, OnModuleDestroy {
       frame.header.frameWidth,
       frame.header.frameHeight,
     );
+    if (this.delivery) {
+      await this.delivery
+        .dispatch()
+        .catch((error) =>
+          this.logger.error(
+            { eventId, err: error },
+            'Immediate fire delivery failed; background retry will continue',
+          ),
+        );
+    }
     if (snapshot) await this.events.publishCommittedUpdate(eventId);
   }
 

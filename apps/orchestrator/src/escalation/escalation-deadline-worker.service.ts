@@ -1,5 +1,14 @@
-import { Injectable, Logger, type OnModuleInit, type OnModuleDestroy } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+  Optional,
+  type OnModuleInit,
+  type OnModuleDestroy,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { EventsService } from '../events/events.service';
 import { EscalationRepository } from './escalation.repository';
 
 @Injectable()
@@ -13,6 +22,9 @@ export class EscalationDeadlineWorkerService implements OnModuleInit, OnModuleDe
   constructor(
     private readonly repository: EscalationRepository,
     private readonly configService: ConfigService,
+    @Optional()
+    @Inject(forwardRef(() => EventsService))
+    private readonly eventsService?: EventsService,
   ) {
     this.pollIntervalMs = Number(
       this.configService.get<number>('ESCALATION_POLL_INTERVAL_MS') ?? 5000,
@@ -107,6 +119,21 @@ export class EscalationDeadlineWorkerService implements OnModuleInit, OnModuleDe
       }
 
       await client.query('COMMIT');
+      const eventsService = this.eventsService;
+      if (eventsService) {
+        await Promise.all(
+          dueEvents.map((event) =>
+            eventsService
+              .publishCommittedUpdate(event.id)
+              .catch((err: unknown) =>
+                this.logger.warn(
+                  { eventId: event.id, err },
+                  'Không phát được SSE sau khi leo thang',
+                ),
+              ),
+          ),
+        );
+      }
       return processedCount;
     } catch (error) {
       this.logger.error('Lỗi khi quét và xử lý deadline leo thang', error);

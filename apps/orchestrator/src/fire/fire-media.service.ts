@@ -38,8 +38,8 @@ export class FireMediaService implements OnModuleInit, OnModuleDestroy {
     @Inject(STORAGE_SERVICE) private readonly storage: IStorageService,
     private readonly events: EventsService,
   ) {
-    this.readySeconds = positive(config, 'FIRE_MEDIA_READY_DELAY_SECONDS', 15);
-    this.retrySeconds = positive(config, 'FIRE_MEDIA_RETRY_SECONDS', 30);
+    this.readySeconds = positive(config, 'FIRE_MEDIA_READY_DELAY_SECONDS', 8);
+    this.retrySeconds = positive(config, 'FIRE_MEDIA_RETRY_SECONDS', 5);
     this.maxAgeDays = positive(config, 'FIRE_MEDIA_MAX_AGE_DAYS', 7);
   }
 
