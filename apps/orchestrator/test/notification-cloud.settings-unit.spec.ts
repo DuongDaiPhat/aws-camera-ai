@@ -341,10 +341,12 @@ describe('PhoneNotificationSettingsService unit edge cases', () => {
     );
     expect(deleteQueries.some((sql) => sql.includes('phone=NULL'))).toBe(false);
 
-    // valid phone save with account sync
+    // valid local 0... phone normalizes to +84... with account sync
+    const syncCalls: unknown[][] = [];
     transaction.mockImplementation(async (cb) => {
       const client = {
-        query: jest.fn().mockImplementation(async (sql) => {
+        query: jest.fn().mockImplementation(async (sql: string, params: unknown[]) => {
+          syncCalls.push([sql, params]);
           if (sql.includes('SELECT phone_e164 FROM users'))
             return { rows: [{ phone_e164: '+84901234567' }] };
           return { rows: [] };
@@ -355,8 +357,8 @@ describe('PhoneNotificationSettingsService unit edge cases', () => {
     query.mockResolvedValueOnce({
       rows: [
         {
-          account_phone: '+84901234567',
-          phone: '+84909876543',
+          account_phone: '+84349556384',
+          phone: '+84349556384',
           sms_enabled: true,
           call_enabled: true,
           verified_at: new Date(),
@@ -366,10 +368,11 @@ describe('PhoneNotificationSettingsService unit edge cases', () => {
     const saved = await service.set('u1', {
       smsEnabled: true,
       callEnabled: true,
-      phone: '+84909876543',
+      phone: '0349556384',
     });
     expect(saved.status).toBe('VERIFIED');
-    expect(saved.phone).toBe('+84909876543');
+    expect(saved.phone).toBe('+84349556384');
+    expect(syncCalls.some(([, p]) => Array.isArray(p) && p.includes('+84349556384'))).toBe(true);
 
     // verify method is a safe passthrough
     query.mockResolvedValueOnce({

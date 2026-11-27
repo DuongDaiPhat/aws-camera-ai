@@ -1,5 +1,6 @@
 import { DATABASE_UUID_PATTERN } from '../auth/database-uuid';
-import { Type } from 'class-transformer';
+import { ALERT_PHONE, INVALID_PHONE_MESSAGE, normalizePhoneE164Input } from '../common/phone';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayUnique,
@@ -35,11 +36,11 @@ export class UpdateCameraGrantsDto {
   @Type(() => CameraGrantDto)
   grants!: CameraGrantDto[];
 }
-const INVALID_PHONE_MESSAGE = 'Nhập số điện thoại có mã quốc gia, ví dụ +84901234567.';
-
 export class EmergencyContactDto {
   @IsString() @Length(1, 120) name!: string;
-  @Matches(/^\+[1-9][0-9]{7,14}$/, { message: INVALID_PHONE_MESSAGE }) phone!: string;
+  @Transform(({ value }: { value: unknown }) => normalizePhoneE164Input(value))
+  @Matches(ALERT_PHONE, { message: INVALID_PHONE_MESSAGE })
+  phone!: string;
   @IsInt() @Min(1) @Max(3) priority!: number;
   @IsBoolean() isEnabled!: boolean;
 }
@@ -54,7 +55,10 @@ export class NotificationPreferencesDto {
 }
 export class ProfileDto {
   @IsString() @Length(1, 120) fullName!: string;
-  @IsOptional() @Matches(/^\+[1-9][0-9]{7,14}$/, { message: INVALID_PHONE_MESSAGE }) phone?: string;
+  @Transform(({ value }: { value: unknown }) => normalizePhoneE164Input(value))
+  @IsOptional()
+  @Matches(ALERT_PHONE, { message: INVALID_PHONE_MESSAGE })
+  phone?: string;
 }
 export class ChangePasswordDto {
   @IsString() @Length(1, 128) currentPassword!: string;

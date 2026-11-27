@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { ALERT_PHONE, INVALID_PHONE_MESSAGE, normalizePhoneE164Input } from '../common/phone';
 import { DatabaseService } from '../database/database.service';
 
-export const ALERT_PHONE = /^\+[1-9][0-9]{7,14}$/;
+export { ALERT_PHONE };
 type PhonePreference = { smsEnabled: boolean; callEnabled: boolean; phone?: string };
 type PhoneSetting = {
   smsAvailable: boolean;
@@ -59,10 +60,11 @@ export class PhoneNotificationSettingsService {
       );
       if (!account) throw new NotFoundException('Không tìm thấy tài khoản.');
 
-      const trimmedInput = input.phone?.trim();
-      const phone = trimmedInput || account.phone_e164;
-      if (trimmedInput && !ALERT_PHONE.test(trimmedInput)) {
-        throw new BadRequestException('Nhập số điện thoại có mã quốc gia, ví dụ +84901234567.');
+      const normalized = normalizePhoneE164Input(input.phone);
+      const normalizedStr = typeof normalized === 'string' ? normalized : undefined;
+      const phone = normalizedStr || account.phone_e164;
+      if (normalizedStr && !ALERT_PHONE.test(normalizedStr)) {
+        throw new BadRequestException(INVALID_PHONE_MESSAGE);
       }
 
       if (!phone) {
@@ -79,7 +81,7 @@ export class PhoneNotificationSettingsService {
         [user, !!input.smsEnabled, !!input.callEnabled, phone],
       );
 
-      if (input.phone && input.phone !== account.phone_e164) {
+      if (normalizedStr && normalizedStr !== account.phone_e164) {
         await client.query('UPDATE users SET phone_e164=$2 WHERE id=$1', [user, phone]);
       }
     });

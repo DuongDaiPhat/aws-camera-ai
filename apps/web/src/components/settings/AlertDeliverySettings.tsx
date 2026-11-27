@@ -99,7 +99,8 @@ function PhoneSettingsForm() {
             />
           </label>
           <p className={styles.viewerHint}>
-            Để trống để dùng số tài khoản. Số điện thoại được lưu để liên lạc khi có sự cố.
+            Để trống để dùng số tài khoản (hỗ trợ 0... hoặc +84...). Số điện thoại được lưu để liên
+            lạc khi có sự cố.
           </p>
           <button type="submit" disabled={busy}>
             Lưu cài đặt điện thoại

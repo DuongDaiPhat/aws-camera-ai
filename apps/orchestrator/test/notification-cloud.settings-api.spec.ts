@@ -80,12 +80,18 @@ describe('personal notification settings HTTP contract', () => {
   it('validates a phone number and OTP while allowing call-only settings', async () => {
     const input = { callEnabled: true, smsEnabled: false };
     expect((await request('/phone', 'PUT', { ...input, phone: 12345 })).status).toBe(400);
-    const badPhoneRes = await request('/phone', 'PUT', { ...input, phone: '0901234567' });
+    const badPhoneRes = await request('/phone', 'PUT', { ...input, phone: '012345' });
     expect(badPhoneRes.status).toBe(400);
     await expect(badPhoneRes.json()).resolves.toMatchObject({
-      message: ['Nhập số điện thoại có mã quốc gia, ví dụ +84901234567.'],
+      message: ['Nhập số điện thoại hợp lệ (ví dụ 0901234567 hoặc +84901234567).'],
     });
+    expect((await request('/phone', 'PUT', { ...input, phone: '00901234567' })).status).toBe(400);
     expect((await request('/phone', 'PUT', { ...input, phone: '  ' })).status).toBe(200);
+    expect((await request('/phone', 'PUT', { ...input, phone: '0349556384' })).status).toBe(200);
+    expect(phone.set).toHaveBeenLastCalledWith('fixture-account', {
+      ...input,
+      phone: '+84349556384',
+    });
     expect((await request('/phone', 'PUT', { ...input, phone: ' +84901234567 ' })).status).toBe(
       200,
     );

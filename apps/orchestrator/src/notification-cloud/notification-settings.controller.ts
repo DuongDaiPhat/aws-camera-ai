@@ -2,13 +2,9 @@ import { Body, Controller, Get, Header, HttpCode, Post, Put, Req } from '@nestjs
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsEmail, IsOptional, Matches, MaxLength } from 'class-validator';
 import type { AuthenticatedRequest } from '../auth/jwt-auth.guard';
+import { ALERT_PHONE, INVALID_PHONE_MESSAGE, normalizePhoneE164Input } from '../common/phone';
 import { EmailNotificationSettingsService } from './email-notification-settings.service';
-import {
-  ALERT_PHONE,
-  PhoneNotificationSettingsService,
-} from './phone-notification-settings.service';
-
-const INVALID_PHONE_MESSAGE = 'Nhập số điện thoại có mã quốc gia, ví dụ +84901234567.';
+import { PhoneNotificationSettingsService } from './phone-notification-settings.service';
 
 class EmailAlertSettingsDto {
   @IsBoolean() enabled!: boolean;
@@ -23,9 +19,7 @@ class EmailAlertSettingsDto {
 class PhoneAlertSettingsDto {
   @IsBoolean() smsEnabled!: boolean;
   @IsBoolean() callEnabled!: boolean;
-  @Transform(({ value }: { value: unknown }) =>
-    typeof value === 'string' ? value.trim() || undefined : value,
-  )
+  @Transform(({ value }: { value: unknown }) => normalizePhoneE164Input(value))
   @IsOptional()
   @Matches(ALERT_PHONE, { message: INVALID_PHONE_MESSAGE })
   phone?: string;
