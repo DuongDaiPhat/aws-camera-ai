@@ -142,6 +142,7 @@ it('saves the call toggle without turning on SMS, verifies the phone, and uses a
       body: JSON.stringify({ callEnabled: true, smsEnabled: false, phone: '+84901234567' }),
     });
     expect(container.textContent).toContain('Chờ xác minh số điện thoại');
+    expect(container.textContent).toContain('Đã lưu số điện thoại +84901234567.');
     input('code').value = '123456';
     await act(async () => {
       submit('code');
@@ -151,6 +152,7 @@ it('saves the call toggle without turning on SMS, verifies the phone, and uses a
       body: JSON.stringify({ code: '123456' }),
     });
     expect(container.textContent).toContain('Đã xác minh +84901234567');
+    expect(container.textContent).toContain('Đã xác minh số điện thoại.');
     input('emailEnabled').checked = true;
     input('email').value = 'alt@example.com';
     await act(async () => {
@@ -161,6 +163,7 @@ it('saves the call toggle without turning on SMS, verifies the phone, and uses a
       body: JSON.stringify({ enabled: true, email: 'alt@example.com' }),
     });
     expect(container.textContent).toContain('Chờ xác nhận qua thư gửi đến alt@example.com');
+    expect(container.textContent).toContain('Đã lưu cài đặt email.');
     input('phone').value = '';
     input('call').checked = false;
     await act(async () => {
@@ -171,6 +174,8 @@ it('saves the call toggle without turning on SMS, verifies the phone, and uses a
       body: JSON.stringify({ callEnabled: false, smsEnabled: false, phone: null }),
     });
     expect(container.textContent).toContain('Đã tắt cảnh báo qua điện thoại');
+    expect(container.textContent).toContain('Đã xóa số điện thoại nhận cảnh báo.');
+    expect(input('phone').value).toBe('');
   } finally {
     await act(async () => root.unmount());
     mocked.mockReset();

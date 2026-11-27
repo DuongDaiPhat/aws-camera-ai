@@ -13,41 +13,57 @@ function useDeliverySettings<T>(channel: 'email' | 'phone') {
   const path = ROOT + '/' + channel;
   const [state, setState] = useState<T | null>(null);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const fail = (value: unknown) =>
     setError(value instanceof Error ? value.message : 'Không thể cập nhật cài đặt.');
 
   useEffect(() => {
     const controller = new AbortController();
-    void apiFetch<T>(path, { signal: controller.signal })
-      .then(setState)
-      .catch((value: unknown) => {
-        if (!controller.signal.aborted) fail(value);
-      });
-    return () => controller.abort();
-  }, [path]);
+    const load = () => {
+      void apiFetch<T>(path, { signal: controller.signal })
+        .then(setState)
+        .catch((value: unknown) => {
+          if (!controller.signal.aborted) fail(value);
+        });
+    };
+    load();
+    if (channel !== 'phone') return () => controller.abort();
+    const onProfileUpdated = (event: Event) => {
+      if (event instanceof CustomEvent && event.detail === 'phone-delivery') return;
+      load();
+    };
+    window.addEventListener('camerai-profile-updated', onProfileUpdated);
+    return () => {
+      controller.abort();
+      window.removeEventListener('camerai-profile-updated', onProfileUpdated);
+    };
+  }, [channel, path]);
 
-  async function update(body: unknown, action: '' | '/verify' = '') {
+  async function update(body: unknown, action: '' | '/verify' = ''): Promise<T | null> {
     setBusy(true);
     setError('');
+    setNotice('');
     try {
-      setState(
-        await apiFetch<T>(path + action, {
-          method: action ? 'POST' : 'PUT',
-          body: JSON.stringify(body),
-        }),
-      );
+      const next = await apiFetch<T>(path + action, {
+        method: action ? 'POST' : 'PUT',
+        body: JSON.stringify(body),
+      });
+      setState(next);
+      return next;
     } catch (value) {
       fail(value);
+      return null;
     } finally {
       setBusy(false);
     }
   }
-  return { state, setState, error, busy, update };
+  return { state, setState, error, notice, setNotice, busy, update };
 }
 
 function PhoneSettingsForm() {
-  const { state, error, busy, update } = useDeliverySettings<PhoneSettings>('phone');
+  const { state, error, notice, setNotice, busy, update } =
+    useDeliverySettings<PhoneSettings>('phone');
   if (!state)
     return <p role={error ? 'alert' : 'status'}>{error || 'Đang tải cài đặt điện thoại…'}</p>;
   const save = (event: FormEvent<HTMLFormElement>) => {
@@ -57,6 +73,14 @@ function PhoneSettingsForm() {
       callEnabled: data.has('call'),
       smsEnabled: data.has('sms'),
       phone: String(data.get('phone') ?? '').trim() || null,
+    }).then((next) => {
+      if (!next) return;
+      setNotice(
+        next.phone ? `Đã lưu số điện thoại ${next.phone}.` : 'Đã xóa số điện thoại nhận cảnh báo.',
+      );
+      window.dispatchEvent(
+        new CustomEvent('camerai-profile-updated', { detail: 'phone-delivery' }),
+      );
     });
   };
   return (
@@ -126,7 +150,9 @@ function PhoneSettingsForm() {
               void update(
                 { code: String(new FormData(event.currentTarget).get('code')) },
                 '/verify',
-              );
+              ).then((next) => {
+                if (next) setNotice('Đã xác minh số điện thoại.');
+              });
             }}
           >
             <label className={styles.alertDeliveryField}>
@@ -153,6 +179,11 @@ function PhoneSettingsForm() {
               ? 'Chờ xác minh số điện thoại'
               : 'Đã tắt cảnh báo qua điện thoại'}
         </p>
+        {notice && (
+          <p className={styles.viewerSavedNotice} role="status">
+            {notice}
+          </p>
+        )}
         {error && <p role="alert">{error}</p>}
       </div>
     </section>
@@ -160,7 +191,8 @@ function PhoneSettingsForm() {
 }
 
 function EmailSettingsForm() {
-  const { state, setState, error, busy, update } = useDeliverySettings<EmailSettings>('email');
+  const { state, setState, error, notice, setNotice, busy, update } =
+    useDeliverySettings<EmailSettings>('email');
   const pending = state?.status === 'PENDING' && state.confirmationSent;
   useEffect(() => {
     if (!pending || busy) return;
@@ -192,6 +224,10 @@ function EmailSettingsForm() {
             void update({
               enabled: data.has('emailEnabled'),
               email: String(data.get('email') ?? '').trim() || undefined,
+            }).then((next) => {
+              if (next) {
+                setNotice(next.enabled ? 'Đã lưu cài đặt email.' : 'Đã tắt cảnh báo qua email.');
+              }
             });
           }}
         >
@@ -233,6 +269,11 @@ function EmailSettingsForm() {
                   ? 'Chưa gửi được thư xác nhận. Hãy lưu lại để thử lại.'
                   : 'Đã tắt cảnh báo qua email'}
         </p>
+        {notice && (
+          <p className={styles.viewerSavedNotice} role="status">
+            {notice}
+          </p>
+        )}
         {error && <p role="alert">{error}</p>}
       </div>
     </section>

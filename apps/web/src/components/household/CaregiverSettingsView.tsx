@@ -28,12 +28,23 @@ function AccountPanels() {
     [telegram, setTelegram] = useState<{ linkToken: string; expiresAt: string } | null>(null);
   useEffect(() => {
     const abort = new AbortController();
-    void getAccountSettings(abort.signal)
-      .then(setAccount)
-      .catch((e: unknown) => {
-        if (!abort.signal.aborted) setError(errorText(e));
-      });
-    return () => abort.abort();
+    const load = () => {
+      void getAccountSettings(abort.signal)
+        .then(setAccount)
+        .catch((e: unknown) => {
+          if (!abort.signal.aborted) setError(errorText(e));
+        });
+    };
+    load();
+    const onProfileUpdated = (event: Event) => {
+      if (event instanceof CustomEvent && event.detail === 'account-form') return;
+      load();
+    };
+    window.addEventListener('camerai-profile-updated', onProfileUpdated);
+    return () => {
+      abort.abort();
+      window.removeEventListener('camerai-profile-updated', onProfileUpdated);
+    };
   }, []);
   async function run(work: () => Promise<void>, message: string) {
     setBusy(true);
@@ -63,18 +74,22 @@ function AccountPanels() {
       )}
       <div className={compact.accountGrid}>
         <form
+          key={`${account.fullName}\0${account.phone ?? ''}`}
           className={`${styles.form} ${compact.accountForm}`}
           aria-label="Hồ sơ chủ hộ"
           onSubmit={(event) => {
             event.preventDefault();
             const form = new FormData(event.currentTarget);
+            const phone = String(form.get('phone') ?? '').trim();
             void run(async () => {
               const updated = await saveProfile({
                 fullName: String(form.get('fullName')),
-                ...(form.get('phone') ? { phone: String(form.get('phone')) } : {}),
+                ...(phone ? { phone } : {}),
               });
               setAccount(updated);
-              window.dispatchEvent(new Event('camerai-profile-updated'));
+              window.dispatchEvent(
+                new CustomEvent('camerai-profile-updated', { detail: 'account-form' }),
+              );
             }, 'Đã lưu hồ sơ.');
           }}
         >

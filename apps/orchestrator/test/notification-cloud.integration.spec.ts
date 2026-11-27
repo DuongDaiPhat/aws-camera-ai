@@ -14,6 +14,7 @@ import { EscalationRulesRepository } from '../src/escalation-rules/escalation-ru
 import { NotificationCloudService } from '../src/notification-cloud/notification-cloud.service';
 import { EmailNotificationSettingsService } from '../src/notification-cloud/email-notification-settings.service';
 import { PhoneNotificationSettingsService } from '../src/notification-cloud/phone-notification-settings.service';
+import { AccountService } from '../src/household/account.service';
 import type { IStorageService } from '../src/storage/storage.interface';
 import type {
   ClaimRequest,
@@ -235,6 +236,20 @@ describe('cloud notifications in PostgreSQL', () => {
       phone: null,
       callEnabled: false,
       smsEnabled: false,
+      status: 'OFF',
+    });
+
+    const accountService = new AccountService(db, new ConfigService({}));
+    await accountService.profile(owner, { fullName: 'Owner', phone: alternatePhone });
+    expect(await settings.get(owner)).toMatchObject({
+      accountPhone: alternatePhone,
+      phone: alternatePhone,
+      status: 'VERIFIED',
+    });
+    await accountService.profile(owner, { fullName: 'Owner' });
+    expect(await settings.get(owner)).toMatchObject({
+      accountPhone: null,
+      phone: null,
       status: 'OFF',
     });
     await pool.query('UPDATE users SET phone_e164=$2 WHERE id=$1', [owner, phone]);
