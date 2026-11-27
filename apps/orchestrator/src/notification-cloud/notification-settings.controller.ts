@@ -8,14 +8,16 @@ import {
   PhoneNotificationSettingsService,
 } from './phone-notification-settings.service';
 
+const INVALID_PHONE_MESSAGE = 'Nhập số điện thoại có mã quốc gia, ví dụ +84901234567.';
+
 class EmailAlertSettingsDto {
   @IsBoolean() enabled!: boolean;
   @Transform(({ value }: { value: unknown }) =>
     typeof value === 'string' ? value.trim() || undefined : value,
   )
   @IsOptional()
-  @IsEmail({ allow_utf8_local_part: false })
-  @MaxLength(254)
+  @IsEmail({ allow_utf8_local_part: false }, { message: 'Vui lòng nhập địa chỉ email hợp lệ.' })
+  @MaxLength(254, { message: 'Địa chỉ email không được vượt quá 254 ký tự.' })
   email?: string;
 }
 class PhoneAlertSettingsDto {
@@ -25,11 +27,11 @@ class PhoneAlertSettingsDto {
     typeof value === 'string' ? value.trim() || undefined : value,
   )
   @IsOptional()
-  @Matches(ALERT_PHONE)
+  @Matches(ALERT_PHONE, { message: INVALID_PHONE_MESSAGE })
   phone?: string;
 }
 class VerifyPhoneAlertSettingsDto {
-  @Matches(/^[0-9]{6}$/) code!: string;
+  @Matches(/^[0-9]{6}$/, { message: 'Mã xác minh phải gồm 6 chữ số.' }) code!: string;
 }
 
 @Controller('account/alert-delivery')

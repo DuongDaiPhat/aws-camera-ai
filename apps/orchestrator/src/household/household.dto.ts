@@ -35,9 +35,11 @@ export class UpdateCameraGrantsDto {
   @Type(() => CameraGrantDto)
   grants!: CameraGrantDto[];
 }
+const INVALID_PHONE_MESSAGE = 'Nhập số điện thoại có mã quốc gia, ví dụ +84901234567.';
+
 export class EmergencyContactDto {
   @IsString() @Length(1, 120) name!: string;
-  @Matches(/^\+[1-9][0-9]{7,14}$/) phone!: string;
+  @Matches(/^\+[1-9][0-9]{7,14}$/, { message: INVALID_PHONE_MESSAGE }) phone!: string;
   @IsInt() @Min(1) @Max(3) priority!: number;
   @IsBoolean() isEnabled!: boolean;
 }
@@ -52,7 +54,7 @@ export class NotificationPreferencesDto {
 }
 export class ProfileDto {
   @IsString() @Length(1, 120) fullName!: string;
-  @IsOptional() @Matches(/^\+[1-9][0-9]{7,14}$/) phone?: string;
+  @IsOptional() @Matches(/^\+[1-9][0-9]{7,14}$/, { message: INVALID_PHONE_MESSAGE }) phone?: string;
 }
 export class ChangePasswordDto {
   @IsString() @Length(1, 128) currentPassword!: string;
