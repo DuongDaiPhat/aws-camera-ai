@@ -99,8 +99,23 @@ it('saves the call toggle without turning on SMS, verifies the phone, and uses a
   const mocked = vi.mocked(apiFetch);
   mocked.mockImplementation(async (path, options) => {
     if (path.endsWith('/verify')) return { ...phone, status: 'VERIFIED', callEnabled: true };
-    if (path.endsWith('/phone'))
-      return options?.method ? { ...phone, status: 'PENDING', callEnabled: true } : phone;
+    if (path.endsWith('/phone')) {
+      if (options?.method) {
+        const body = JSON.parse(String(options.body)) as { phone?: string | null };
+        if (body.phone === null) {
+          return {
+            ...phone,
+            accountPhone: null,
+            phone: null,
+            callEnabled: false,
+            smsEnabled: false,
+            status: 'OFF',
+          };
+        }
+        return { ...phone, status: 'PENDING', callEnabled: true };
+      }
+      return phone;
+    }
     return options?.method
       ? {
           ...email,
@@ -146,6 +161,16 @@ it('saves the call toggle without turning on SMS, verifies the phone, and uses a
       body: JSON.stringify({ enabled: true, email: 'alt@example.com' }),
     });
     expect(container.textContent).toContain('Chờ xác nhận qua thư gửi đến alt@example.com');
+    input('phone').value = '';
+    input('call').checked = false;
+    await act(async () => {
+      submit('phone');
+    });
+    expect(mocked).toHaveBeenCalledWith('/account/alert-delivery/phone', {
+      method: 'PUT',
+      body: JSON.stringify({ callEnabled: false, smsEnabled: false, phone: null }),
+    });
+    expect(container.textContent).toContain('Đã tắt cảnh báo qua điện thoại');
   } finally {
     await act(async () => root.unmount());
     mocked.mockReset();

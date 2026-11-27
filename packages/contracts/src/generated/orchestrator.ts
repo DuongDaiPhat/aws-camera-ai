@@ -1725,7 +1725,7 @@ export interface components {
     PhoneAlertSettingsInput: {
       smsEnabled: boolean;
       callEnabled: boolean;
-      phone?: string;
+      phone?: string | null;
     };
     PhoneAlertSettings: {
       smsAvailable: boolean;

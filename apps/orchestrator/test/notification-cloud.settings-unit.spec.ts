@@ -334,12 +334,43 @@ describe('PhoneNotificationSettingsService unit edge cases', () => {
         },
       ],
     });
-    const off = await service.set('u1', { smsEnabled: false, callEnabled: false, phone: '   ' });
+    const off = await service.set('u1', { smsEnabled: false, callEnabled: false });
     expect(off.status).toBe('OFF');
     expect(deleteQueries.some((sql) => sql.includes('DELETE FROM user_phone_alert_settings'))).toBe(
       true,
     );
     expect(deleteQueries.some((sql) => sql.includes('phone=NULL'))).toBe(false);
+
+    // explicitly clearing phone (null or empty) deletes settings and clears users.phone_e164
+    const clearQueries: string[] = [];
+    transaction.mockImplementation(async (cb) => {
+      const client = {
+        query: jest.fn().mockImplementation(async (sql: string) => {
+          clearQueries.push(sql);
+          if (sql.includes('SELECT phone_e164 FROM users'))
+            return { rows: [{ phone_e164: '+84901234567' }] };
+          return { rows: [] };
+        }),
+      };
+      return cb(client);
+    });
+    query.mockResolvedValueOnce({
+      rows: [
+        {
+          account_phone: null,
+          phone: null,
+          sms_enabled: false,
+          call_enabled: false,
+          verified_at: null,
+        },
+      ],
+    });
+    const cleared = await service.set('u1', { smsEnabled: false, callEnabled: false, phone: '  ' });
+    expect(cleared.status).toBe('OFF');
+    expect(clearQueries.some((sql) => sql.includes('DELETE FROM user_phone_alert_settings'))).toBe(
+      true,
+    );
+    expect(clearQueries.some((sql) => sql.includes('UPDATE users SET phone_e164=NULL'))).toBe(true);
 
     // valid local 0... phone normalizes to +84... with account sync
     const syncCalls: unknown[][] = [];

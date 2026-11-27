@@ -19,10 +19,10 @@ class EmailAlertSettingsDto {
 class PhoneAlertSettingsDto {
   @IsBoolean() smsEnabled!: boolean;
   @IsBoolean() callEnabled!: boolean;
-  @Transform(({ value }: { value: unknown }) => normalizePhoneE164Input(value))
+  @Transform(({ value }: { value: unknown }) => normalizePhoneE164Input(value, null))
   @IsOptional()
   @Matches(ALERT_PHONE, { message: INVALID_PHONE_MESSAGE })
-  phone?: string;
+  phone?: string | null;
 }
 class VerifyPhoneAlertSettingsDto {
   @Matches(/^[0-9]{6}$/, { message: 'Mã xác minh phải gồm 6 chữ số.' }) code!: string;

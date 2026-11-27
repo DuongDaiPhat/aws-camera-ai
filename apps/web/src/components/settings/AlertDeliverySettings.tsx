@@ -56,7 +56,7 @@ function PhoneSettingsForm() {
     void update({
       callEnabled: data.has('call'),
       smsEnabled: data.has('sms'),
-      phone: String(data.get('phone') ?? '').trim() || undefined,
+      phone: String(data.get('phone') ?? '').trim() || null,
     });
   };
   return (
@@ -104,8 +104,7 @@ function PhoneSettingsForm() {
             />
           </label>
           <p className={styles.viewerHint}>
-            Để trống để dùng số tài khoản (hỗ trợ 0... hoặc +84...). Số điện thoại được lưu để liên
-            lạc khi có sự cố.
+            Nhập số điện thoại (hỗ trợ 0... hoặc +84...). Để trống và bấm lưu để xóa số điện thoại.
           </p>
           <button type="submit" disabled={busy}>
             Lưu cài đặt điện thoại

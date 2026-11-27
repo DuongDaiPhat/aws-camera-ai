@@ -3,7 +3,7 @@ import { ALERT_PHONE, INVALID_PHONE_MESSAGE, normalizePhoneE164Input } from '../
 import { DatabaseService } from '../database/database.service';
 
 export { ALERT_PHONE };
-type PhonePreference = { smsEnabled: boolean; callEnabled: boolean; phone?: string };
+type PhonePreference = { smsEnabled: boolean; callEnabled: boolean; phone?: string | null };
 type PhoneSetting = {
   smsAvailable: boolean;
   callAvailable: boolean;
@@ -60,7 +60,15 @@ export class PhoneNotificationSettingsService {
       );
       if (!account) throw new NotFoundException('Không tìm thấy tài khoản.');
 
-      const normalized = normalizePhoneE164Input(input.phone);
+      const normalized = normalizePhoneE164Input(input.phone, null);
+      if (normalized === null) {
+        await client.query('DELETE FROM user_phone_alert_settings WHERE user_id=$1', [user]);
+        if (account.phone_e164 !== null) {
+          await client.query('UPDATE users SET phone_e164=NULL WHERE id=$1', [user]);
+        }
+        return;
+      }
+
       const normalizedStr = typeof normalized === 'string' ? normalized : undefined;
       const phone = normalizedStr || account.phone_e164;
       if (normalizedStr && !ALERT_PHONE.test(normalizedStr)) {

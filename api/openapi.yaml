@@ -3096,7 +3096,7 @@ components:
       properties:
         smsEnabled: { type: boolean }
         callEnabled: { type: boolean }
-        phone: { type: string, pattern: '^\+[1-9][0-9]{7,14}$' }
+        phone: { type: [string, "null"], pattern: '^\+[1-9][0-9]{7,14}$' }
 
     PhoneAlertSettings:
       type: object

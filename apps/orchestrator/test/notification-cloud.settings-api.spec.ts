@@ -87,6 +87,15 @@ describe('personal notification settings HTTP contract', () => {
     });
     expect((await request('/phone', 'PUT', { ...input, phone: '00901234567' })).status).toBe(400);
     expect((await request('/phone', 'PUT', { ...input, phone: '  ' })).status).toBe(200);
+    expect(phone.set).toHaveBeenLastCalledWith('fixture-account', {
+      ...input,
+      phone: null,
+    });
+    expect((await request('/phone', 'PUT', { ...input, phone: null })).status).toBe(200);
+    expect(phone.set).toHaveBeenLastCalledWith('fixture-account', {
+      ...input,
+      phone: null,
+    });
     expect((await request('/phone', 'PUT', { ...input, phone: '0349556384' })).status).toBe(200);
     expect(phone.set).toHaveBeenLastCalledWith('fixture-account', {
       ...input,
