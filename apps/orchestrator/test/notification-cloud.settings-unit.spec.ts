@@ -311,10 +311,12 @@ describe('PhoneNotificationSettingsService unit edge cases', () => {
       service.set('u1', { smsEnabled: true, callEnabled: false, phone: 'invalid' }),
     ).rejects.toThrow(BadRequestException);
 
-    // disable phone settings when no phone is present
+    // disable phone settings when no phone is present (deletes row instead of violating NOT NULL)
+    const deleteQueries: string[] = [];
     transaction.mockImplementation(async (cb) => {
       const client = {
-        query: jest.fn().mockImplementation(async (sql) => {
+        query: jest.fn().mockImplementation(async (sql: string) => {
+          deleteQueries.push(sql);
           if (sql.includes('SELECT phone_e164 FROM users')) return { rows: [{ phone_e164: null }] };
           return { rows: [] };
         }),
@@ -332,8 +334,12 @@ describe('PhoneNotificationSettingsService unit edge cases', () => {
         },
       ],
     });
-    const off = await service.set('u1', { smsEnabled: false, callEnabled: false });
+    const off = await service.set('u1', { smsEnabled: false, callEnabled: false, phone: '   ' });
     expect(off.status).toBe('OFF');
+    expect(deleteQueries.some((sql) => sql.includes('DELETE FROM user_phone_alert_settings'))).toBe(
+      true,
+    );
+    expect(deleteQueries.some((sql) => sql.includes('phone=NULL'))).toBe(false);
 
     // valid phone save with account sync
     transaction.mockImplementation(async (cb) => {

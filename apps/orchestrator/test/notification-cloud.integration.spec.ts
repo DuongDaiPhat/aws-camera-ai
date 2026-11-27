@@ -218,6 +218,16 @@ describe('cloud notifications in PostgreSQL', () => {
       callEnabled: false,
       smsEnabled: false,
     });
+
+    await pool.query('UPDATE users SET phone_e164=NULL WHERE id=$1', [owner]);
+    expect(await settings.set(owner, { callEnabled: false, smsEnabled: false })).toMatchObject({
+      accountPhone: null,
+      phone: null,
+      callEnabled: false,
+      smsEnabled: false,
+      status: 'OFF',
+    });
+    await pool.query('UPDATE users SET phone_e164=$2 WHERE id=$1', [owner, phone]);
   });
 
   it('routes a confirmed alternate email and rejects an older job after switching addresses', async () => {

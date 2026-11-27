@@ -59,16 +59,14 @@ export class PhoneNotificationSettingsService {
       );
       if (!account) throw new NotFoundException('Không tìm thấy tài khoản.');
 
-      const phone = input.phone?.trim() || account.phone_e164;
-      if (input.phone && !ALERT_PHONE.test(phone!)) {
+      const trimmedInput = input.phone?.trim();
+      const phone = trimmedInput || account.phone_e164;
+      if (trimmedInput && !ALERT_PHONE.test(trimmedInput)) {
         throw new BadRequestException('Nhập số điện thoại có mã quốc gia, ví dụ +84901234567.');
       }
 
       if (!phone) {
-        await client.query(
-          'UPDATE user_phone_alert_settings SET sms_enabled=false,call_enabled=false,phone=NULL,verified_at=NULL WHERE user_id=$1',
-          [user],
-        );
+        await client.query('DELETE FROM user_phone_alert_settings WHERE user_id=$1', [user]);
         return;
       }
 
