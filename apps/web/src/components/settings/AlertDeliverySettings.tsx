@@ -67,7 +67,12 @@ function PhoneSettingsForm() {
       <div className={styles.alertDeliveryBody}>
         <form
           onSubmit={save}
-          key={JSON.stringify([state.callEnabled, state.smsEnabled, state.phone])}
+          key={JSON.stringify([
+            state.callEnabled,
+            state.smsEnabled,
+            state.phone,
+            state.accountPhone,
+          ])}
         >
           <label className={styles.viewerToggleRow}>
             <span>Nhận cuộc gọi cảnh báo</span>
@@ -92,9 +97,9 @@ function PhoneSettingsForm() {
             <input
               name="phone"
               type="tel"
-              placeholder={state.accountPhone ?? '+84901234567'}
+              placeholder={state.accountPhone ?? '0901234567 hoặc +84901234567'}
               maxLength={16}
-              defaultValue={state.phone !== state.accountPhone ? (state.phone ?? '') : ''}
+              defaultValue={state.phone ?? state.accountPhone ?? ''}
               disabled={busy}
             />
           </label>

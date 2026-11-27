@@ -117,13 +117,14 @@ it('saves the call toggle without turning on SMS, verifies the phone, and uses a
     input(name).form!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
   try {
     await act(async () => root.render(<AlertDeliverySettings />));
+    expect(input('phone').value).toBe('+84901234567');
     input('call').checked = true;
     await act(async () => {
       submit('call');
     });
     expect(mocked).toHaveBeenCalledWith('/account/alert-delivery/phone', {
       method: 'PUT',
-      body: JSON.stringify({ callEnabled: true, smsEnabled: false }),
+      body: JSON.stringify({ callEnabled: true, smsEnabled: false, phone: '+84901234567' }),
     });
     expect(container.textContent).toContain('Chờ xác minh số điện thoại');
     input('code').value = '123456';
