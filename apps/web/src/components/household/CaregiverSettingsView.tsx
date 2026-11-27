@@ -12,7 +12,9 @@ import {
   type NotificationPreferences,
 } from '@/lib/household-client';
 import { useHousehold } from '@/hooks/useHousehold';
+import { AlertDeliverySettings } from '@/components/settings/AlertDeliverySettings';
 import { EscalationRulesSection } from '@/components/settings/EscalationRulesSection';
+import { AiModulesSettings } from './AiModulesSettings';
 import styles from './household.module.css';
 import compact from './caregiver-settings.module.css';
 
@@ -26,12 +28,23 @@ function AccountPanels() {
     [telegram, setTelegram] = useState<{ linkToken: string; expiresAt: string } | null>(null);
   useEffect(() => {
     const abort = new AbortController();
-    void getAccountSettings(abort.signal)
-      .then(setAccount)
-      .catch((e: unknown) => {
-        if (!abort.signal.aborted) setError(errorText(e));
-      });
-    return () => abort.abort();
+    const load = () => {
+      void getAccountSettings(abort.signal)
+        .then(setAccount)
+        .catch((e: unknown) => {
+          if (!abort.signal.aborted) setError(errorText(e));
+        });
+    };
+    load();
+    const onProfileUpdated = (event: Event) => {
+      if (event instanceof CustomEvent && event.detail === 'account-form') return;
+      load();
+    };
+    window.addEventListener('camerai-profile-updated', onProfileUpdated);
+    return () => {
+      abort.abort();
+      window.removeEventListener('camerai-profile-updated', onProfileUpdated);
+    };
   }, []);
   async function run(work: () => Promise<void>, message: string) {
     setBusy(true);
@@ -61,18 +74,22 @@ function AccountPanels() {
       )}
       <div className={compact.accountGrid}>
         <form
+          key={`${account.fullName}\0${account.phone ?? ''}`}
           className={`${styles.form} ${compact.accountForm}`}
           aria-label="Hồ sơ chủ hộ"
           onSubmit={(event) => {
             event.preventDefault();
             const form = new FormData(event.currentTarget);
+            const phone = String(form.get('phone') ?? '').trim();
             void run(async () => {
               const updated = await saveProfile({
                 fullName: String(form.get('fullName')),
-                ...(form.get('phone') ? { phone: String(form.get('phone')) } : {}),
+                ...(phone ? { phone } : {}),
               });
               setAccount(updated);
-              window.dispatchEvent(new Event('camerai-profile-updated'));
+              window.dispatchEvent(
+                new CustomEvent('camerai-profile-updated', { detail: 'account-form' }),
+              );
             }, 'Đã lưu hồ sơ.');
           }}
         >
@@ -94,8 +111,8 @@ function AccountPanels() {
             <input
               name="phone"
               type="tel"
-              pattern="\+[1-9][0-9]{7,14}"
-              placeholder="+84901234567"
+              pattern="(\+[1-9][0-9]{7,14}|0[1-9][0-9]{8,10})"
+              placeholder="0901234567 hoặc +84901234567"
               defaultValue={account.phone ?? ''}
               disabled={busy}
             />
@@ -348,6 +365,8 @@ export function CaregiverSettingsView() {
         </div>
       </header>
       <AccountPanels />
+      <AlertDeliverySettings />
+      <AiModulesSettings />
       <HouseholdStorage />
       <section className={compact.rulesSection}>
         <h3>Quy tắc cảnh báo của hộ</h3>

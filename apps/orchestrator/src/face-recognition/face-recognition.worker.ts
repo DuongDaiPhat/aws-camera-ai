@@ -10,6 +10,7 @@ import { imageFormat } from '../media/image-format';
 import { AiResultsService } from '../ai-results/ai-results.service';
 import type { SubmitAiResultDto } from '../ai-results/dto/submit-ai-result.dto';
 import type { FaceRecognitionResultListener } from '../cloud-queue/cloud-queue.service';
+import { DatabaseService } from '../database/database.service';
 
 const AI_SERVICE_TIMEOUT_MS = 5_000;
 
@@ -110,8 +111,22 @@ export class FaceRecognitionWorker extends WorkerHost {
     private readonly config: ConfigService,
     private readonly aiResultsService: AiResultsService,
     @Optional() private readonly coordinator?: FaceRecognitionResultListener,
+    @Optional() private readonly db?: DatabaseService,
   ) {
     super();
+  }
+
+  private async isFaceModuleEnabled(ownerScopeId: string): Promise<boolean> {
+    if (!this.db) return true;
+    const { rows } = await this.db.query<{ enabled: boolean }>(
+      `SELECT COALESCE(ai.m1_face_enabled, TRUE) AS enabled
+       FROM users u
+       LEFT JOIN household_ai_module_settings ai
+         ON ai.owner_user_id = COALESCE(u.household_owner_id, u.id)
+       WHERE u.id = $1`,
+      [ownerScopeId],
+    );
+    return rows[0]?.enabled ?? true;
   }
 
   async process(job: Job<MatchFaceJob, void, string>): Promise<void> {
@@ -128,6 +143,11 @@ export class FaceRecognitionWorker extends WorkerHost {
       revision = 1,
       imageBase64,
     } = job.data;
+
+    if (!(await this.isFaceModuleEnabled(ownerScopeId))) {
+      this.logger.log({ eventId, trackId }, 'Bỏ qua job M1 do module nhận diện khuôn mặt đã tắt');
+      return;
+    }
 
     this.logger.log(
       `Đang xử lý job nhận diện khuôn mặt cho trackId=${trackId}, eventId=${eventId}`,
@@ -247,6 +267,13 @@ export class FaceRecognitionWorker extends WorkerHost {
     ctx: WorkerResultContext,
   ): Promise<void> {
     const result = normalizeMatchResponse(response);
+    if (!(await this.isFaceModuleEnabled(ctx.ownerScopeId))) {
+      this.logger.log(
+        { eventId, trackId },
+        'Bỏ qua kết quả M1 do module M1 đã tắt trong khi xử lý',
+      );
+      return;
+    }
     this.logger.log(
       {
         eventId,

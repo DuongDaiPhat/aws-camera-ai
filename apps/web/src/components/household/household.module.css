@@ -162,7 +162,7 @@
   flex-direction: row;
   align-items: center;
 }
-.page input[type='checkbox'] {
+.page input[type='checkbox']:not([role='switch']) {
   accent-color: #8650bf;
   width: 16px;
   height: 16px;

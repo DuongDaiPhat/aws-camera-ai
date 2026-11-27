@@ -1,7 +1,21 @@
 import { createHash } from 'node:crypto';
 import type { PoolClient } from 'pg';
-import type { NotificationConfig } from './notification-cloud.config';
+import { usesPersonalAlertSettings, type NotificationConfig } from './notification-cloud.config';
 import type { ClaimJobRow, Delivery } from './notification-cloud.types';
+
+type Route = { destination: string; topic_arn: string | null };
+
+async function readPersonalRoute(client: PoolClient, job: ClaimJobRow): Promise<Route | undefined> {
+  const scope = `WHERE user_id=$1 AND can_access_camera(user_id,$2)
+    AND registration_id::text=$3 AND verified_at <= clock_timestamp()`;
+  const params = [job.recipient_user_id, job.camera_id, job.recipient_registration_id];
+  const result = await client.query<Route>(
+    `SELECT email AS destination,topic_arn FROM user_email_alert_settings
+     ${scope} AND enabled FOR SHARE`,
+    params,
+  );
+  return result.rows[0];
+}
 
 export async function readDelivery(
   client: PoolClient,
@@ -22,8 +36,14 @@ export async function readDelivery(
     message: `${prefix} A new incident needs review. Open ArgusAI for details.`,
   };
   if (missingContact) return { delivery, recipientKey: null };
-  const { rows } = await client.query<{ destination: string; topic_arn: string | null }>(
-    `SELECT route.destination, route.topic_arn
+  const personal = !!job.recipient_registration_id;
+  if (personal !== usesPersonalAlertSettings(config, job.channel))
+    return { delivery, recipientKey: null };
+  const route = personal
+    ? await readPersonalRoute(client, job)
+    : (
+        await client.query<Route>(
+          `SELECT route.destination, route.topic_arn
      FROM cloud_notification_routes route
      LEFT JOIN users u ON u.id = $4 AND can_access_camera(u.id, $6) AND u.is_active
      LEFT JOIN emergency_contacts c ON c.id = $5 AND c.owner_user_id = $1
@@ -35,20 +55,24 @@ export async function readDelivery(
          ELSE CASE WHEN $3 = 'SNS_EMAIL' THEN lower(u.email::text) ELSE u.phone_e164 END
        END = CASE WHEN $3 = 'SNS_EMAIL' THEN lower(route.destination) ELSE route.destination END
      FOR SHARE OF route`,
-    [
-      job.owner_user_id,
-      recipientRef,
-      job.channel,
-      job.recipient_user_id,
-      job.emergency_contact_id,
-      job.camera_id,
-    ],
-  );
-  const route = rows[0];
+          [
+            job.owner_user_id,
+            recipientRef,
+            job.channel,
+            job.recipient_user_id,
+            job.emergency_contact_id,
+            job.camera_id,
+          ],
+        )
+      ).rows[0];
   if (!route) return { delivery, recipientKey: null };
 
-  if (email && config.topicArn && route.topic_arn === config.topicArn) {
-    delivery.topicArn = config.topicArn;
+  const emailTopic = personal
+    ? config.emailTopicPrefix + job.recipient_registration_id!
+    : config.topicArn;
+  if (email && emailTopic && route.topic_arn === emailTopic) {
+    delivery.topicArn = emailTopic;
+    if (personal) delivery.destination = route.destination;
     delivery.subject = `${prefix} New incident`;
   } else if (job.channel === 'SNS_SMS' && config.smsEnabled) {
     delivery.destination = route.destination;

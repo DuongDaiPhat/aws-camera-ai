@@ -60,7 +60,7 @@ export class PoseFrameConsumer {
 
     // Tra cứu camera theo slug
     const camera = await this.camerasRepository.findBySlug(header.cameraSlug);
-    if (!camera || !camera.is_enabled) {
+    if (!camera || !camera.is_enabled || camera.ai_m2a_fall_enabled === false) {
       return;
     }
 

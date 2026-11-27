@@ -69,6 +69,18 @@ export class WellnessRepository {
       .rows[0].now;
   }
 
+  async isWellnessModuleEnabled(ownerUserId: string, client?: PoolClient): Promise<boolean> {
+    const { rows } = await (client ?? this.pool).query<{ enabled: boolean }>(
+      `SELECT COALESCE(ai.m5_wellness_enabled, TRUE) AS enabled
+       FROM users u
+       LEFT JOIN household_ai_module_settings ai
+         ON ai.owner_user_id = COALESCE(u.household_owner_id, u.id)
+       WHERE u.id = $1`,
+      [ownerUserId],
+    );
+    return rows[0]?.enabled ?? true;
+  }
+
   async enabledCameraIds(owner: string, ids: string[], client?: PoolClient): Promise<string[]> {
     const result = await (client ?? this.pool).query<{ id: string }>(
       `SELECT c.id FROM cameras c JOIN devices d ON d.id=c.device_id
@@ -891,6 +903,7 @@ export class WellnessRepository {
         if (!locked.rows.length) return 0;
         const current = await this.getScheduleById(schedule.id, client);
         if (!current?.is_enabled || !current.owner_user_id) return 0;
+        if (!(await this.isWellnessModuleEnabled(current.owner_user_id, client))) return 0;
         if (
           !(await this.verifyResidentHouseholdLink(
             current.owner_user_id,

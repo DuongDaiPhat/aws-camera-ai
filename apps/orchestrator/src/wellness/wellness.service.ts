@@ -74,6 +74,14 @@ export class WellnessService {
     if (!['ADMIN', 'CAREGIVER'].includes(user.role))
       throw new ForbiddenException('Chỉ người giám sát hoặc quản trị viên được quản lý lịch');
   }
+  private async requireWellnessEnabled(ownerUserId: string, client?: PoolClient): Promise<void> {
+    const enabled = (await this.repository.isWellnessModuleEnabled?.(ownerUserId, client)) ?? true;
+    if (!enabled) {
+      throw new ForbiddenException(
+        'Module Kiểm tra an sinh định kỳ (M5) đang tắt. Caregiver cần bật lại trong Cài đặt để sử dụng.',
+      );
+    }
+  }
   private async validateSchedule(
     owner: string,
     resident: string,
@@ -376,6 +384,9 @@ export class WellnessService {
         dto.observationId,
       ]);
       const existing = await this.repository.findObservationById(dto.observationId, client);
+      if (!existing) {
+        await this.requireWellnessEnabled(dto.ownerUserId, client);
+      }
       if (existing) {
         if (existing.payload_hash !== hash)
           throw new ConflictException('Observation ID đã được dùng với nội dung khác');

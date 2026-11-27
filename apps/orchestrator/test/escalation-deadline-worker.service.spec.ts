@@ -22,7 +22,7 @@ describe('EscalationDeadlineWorkerService (US-13)', () => {
       findDueEventsForEscalation: jest.fn(),
       updateEventStatus: jest.fn(),
       createStatusHistory: jest.fn(),
-      createNotificationIntent: jest.fn(),
+      createNotificationIntents: jest.fn(),
     };
 
     const mockConfig = {
@@ -107,7 +107,7 @@ describe('EscalationDeadlineWorkerService (US-13)', () => {
         actorType: 'SYSTEM',
       }),
     );
-    expect(repository.createNotificationIntent).toHaveBeenCalledWith(
+    expect(repository.createNotificationIntents).toHaveBeenCalledWith(
       mockClient,
       expect.objectContaining({
         eventId: 'evt-timeout-1',

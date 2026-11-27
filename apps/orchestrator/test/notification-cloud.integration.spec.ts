@@ -12,6 +12,9 @@ import { EscalationRepository } from '../src/escalation/escalation.repository';
 import { EscalationEngineService } from '../src/escalation/escalation-engine.service';
 import { EscalationRulesRepository } from '../src/escalation-rules/escalation-rules.repository';
 import { NotificationCloudService } from '../src/notification-cloud/notification-cloud.service';
+import { EmailNotificationSettingsService } from '../src/notification-cloud/email-notification-settings.service';
+import { PhoneNotificationSettingsService } from '../src/notification-cloud/phone-notification-settings.service';
+import { AccountService } from '../src/household/account.service';
 import type { IStorageService } from '../src/storage/storage.interface';
 import type {
   ClaimRequest,
@@ -88,8 +91,206 @@ describe('cloud notifications in PostgreSQL', () => {
   });
 
   beforeEach(async () => {
-    await pool.query('TRUNCATE events, cloud_notification_routes CASCADE');
+    await pool.query(
+      'TRUNCATE events, cloud_notification_routes, user_email_alert_settings, user_phone_alert_settings CASCADE',
+    );
+    await pool.query('UPDATE users SET phone_e164=$1 WHERE id IN ($2,$3)', [
+      phone,
+      owner,
+      foreignUser,
+    ]);
     await pool.query("UPDATE cloud_transport_mode SET mode='bullmq', notification_driver='sqs'");
+  });
+
+  it('lets a user opt in to their account email, confirm, and turn it off', async () => {
+    const register = jest.fn().mockResolvedValue(undefined);
+    const confirmed = jest.fn().mockResolvedValueOnce(false).mockResolvedValue(true);
+    const settings = new EmailNotificationSettingsService(
+      new ConfigService({
+        APP_ENV: 'dev',
+        AWS_REGION: 'ap-southeast-1',
+        NOTIFICATION_DRIVER: 'sqs',
+        SNS_EMAIL_TOPIC_PREFIX_ARN:
+          'arn:aws:sns:ap-southeast-1:123456789012:argusai-dev-incident-email-user-',
+      }),
+      db,
+      { register, confirmed },
+    );
+    expect(await settings.get(owner)).toMatchObject({ enabled: false, status: 'OFF' });
+    expect(await settings.set(owner, { enabled: true })).toMatchObject({
+      enabled: true,
+      email: 'owner@example.test',
+      status: 'PENDING',
+    });
+    expect(register).toHaveBeenCalledTimes(1);
+    await settings.verifyPending();
+    expect(await settings.get(owner)).toMatchObject({ status: 'PENDING' });
+    await pool.query(
+      "UPDATE user_email_alert_settings SET checked_at=now()-interval '16 seconds' WHERE user_id=$1",
+      [owner],
+    );
+    await settings.verifyPending();
+    expect(await settings.get(owner)).toMatchObject({ status: 'VERIFIED' });
+    expect(await settings.set(owner, { enabled: false })).toMatchObject({
+      enabled: false,
+      status: 'OFF',
+    });
+  });
+
+  const personalEmailConfig = {
+    AWS_REGION: 'ap-southeast-1',
+    SNS_EMAIL_TOPIC_PREFIX_ARN:
+      'arn:aws:sns:ap-southeast-1:123456789012:argusai-dev-incident-email-user-',
+  };
+  const accountConfig = (settings: Record<string, string>) =>
+    new ConfigService({
+      APP_ENV: 'dev',
+      NOTIFICATION_DRIVER: 'sqs',
+      ...settings,
+    });
+
+  async function createPersonalIntents(
+    cloud: NotificationCloudService,
+    channel: NotificationJob['channel'],
+  ) {
+    const eventId = randomUUID();
+    await pool.query(
+      `INSERT INTO events(id,camera_id,event_type,status,priority,detected_at)
+      VALUES ($1,$2,'FIRE_SMOKE_DETECTED','NOTIFIED','P0',clock_timestamp())`,
+      [eventId, camera],
+    );
+    const repo = new EscalationRepository(pool, cloud);
+    await db.transaction((client) =>
+      repo.createNotificationIntents(client, {
+        eventId,
+        channel,
+        status: 'PENDING',
+        escalationLevel: 0,
+      }),
+    );
+    const { rows } = await pool.query<{
+      id: string;
+      recipient_user_id: string;
+      envelope: { payload: { expectedEventVersion: number } };
+    }>(
+      `SELECT n.id,n.recipient_user_id,j.envelope FROM notifications n
+       JOIN cloud_jobs j ON j.id=n.id WHERE n.event_id=$1`,
+      [eventId],
+    );
+    return rows.map((row) => ({
+      id: row.id,
+      recipient: row.recipient_user_id,
+      request: {
+        schemaVersion: 1 as const,
+        claimId: randomUUID(),
+        eventId,
+        expectedEventVersion: row.envelope.payload.expectedEventVersion,
+      },
+    }));
+  }
+
+  it('saves contact phone number and syncs to account phone', async () => {
+    const settings = new PhoneNotificationSettingsService(db);
+    const alternatePhone = '+84901234567';
+    expect(await settings.get(owner)).toMatchObject({
+      accountPhone: phone,
+      callAvailable: false,
+      smsAvailable: false,
+      status: 'VERIFIED',
+    });
+    const updated = await settings.set(owner, {
+      callEnabled: true,
+      smsEnabled: false,
+      phone: alternatePhone,
+    });
+    expect(updated).toMatchObject({
+      phone: alternatePhone,
+      status: 'VERIFIED',
+      callEnabled: true,
+      smsEnabled: false,
+    });
+    expect(await settings.verify(owner, '123456')).toMatchObject({
+      phone: alternatePhone,
+      status: 'VERIFIED',
+    });
+    await settings.set(owner, { callEnabled: false, smsEnabled: false });
+    expect(await settings.get(owner)).toMatchObject({
+      phone: alternatePhone,
+      callEnabled: false,
+      smsEnabled: false,
+    });
+
+    await pool.query('UPDATE users SET phone_e164=NULL WHERE id=$1', [owner]);
+    expect(await settings.set(owner, { callEnabled: false, smsEnabled: false })).toMatchObject({
+      accountPhone: null,
+      phone: null,
+      callEnabled: false,
+      smsEnabled: false,
+      status: 'OFF',
+    });
+    await settings.set(owner, { callEnabled: false, smsEnabled: false, phone: alternatePhone });
+    expect(
+      await settings.set(owner, { callEnabled: false, smsEnabled: false, phone: null }),
+    ).toMatchObject({
+      accountPhone: null,
+      phone: null,
+      callEnabled: false,
+      smsEnabled: false,
+      status: 'OFF',
+    });
+
+    const accountService = new AccountService(db, new ConfigService({}));
+    await accountService.profile(owner, { fullName: 'Owner', phone: alternatePhone });
+    expect(await settings.get(owner)).toMatchObject({
+      accountPhone: alternatePhone,
+      phone: alternatePhone,
+      status: 'VERIFIED',
+    });
+    await accountService.profile(owner, { fullName: 'Owner' });
+    expect(await settings.get(owner)).toMatchObject({
+      accountPhone: null,
+      phone: null,
+      status: 'OFF',
+    });
+    await pool.query('UPDATE users SET phone_e164=$2 WHERE id=$1', [owner, phone]);
+  });
+
+  it('routes a confirmed alternate email and rejects an older job after switching addresses', async () => {
+    const register = jest.fn().mockResolvedValue(undefined);
+    const confirmed = jest.fn().mockResolvedValue(true);
+    const settings = new EmailNotificationSettingsService(accountConfig(personalEmailConfig), db, {
+      register,
+      confirmed,
+    });
+    const cloud = service(personalEmailConfig);
+    await settings.set(owner, { enabled: true, email: 'ALT@example.test' });
+    await settings.verifyPending();
+    expect(await settings.get(owner)).toMatchObject({
+      status: 'VERIFIED',
+      email: 'alt@example.test',
+    });
+    await settings.set(owner, { enabled: true, email: 'alt@example.test' });
+    expect(register).toHaveBeenCalledTimes(1);
+    const [current] = await createPersonalIntents(cloud, 'SNS_EMAIL');
+    expect((await claimAttempt(cloud, current)).delivery).toMatchObject({
+      destination: 'alt@example.test',
+      topicArn: register.mock.calls[0][0],
+    });
+    const [old] = await createPersonalIntents(cloud, 'SNS_EMAIL');
+    await pool.query(
+      "UPDATE user_email_alert_settings SET requested_at=now()-interval '61 seconds' WHERE user_id=$1",
+      [owner],
+    );
+    await settings.set(owner, { enabled: true, email: 'new@example.test' });
+    await settings.verifyPending();
+    expect(await settings.get(owner)).toMatchObject({
+      status: 'VERIFIED',
+      email: 'new@example.test',
+    });
+    expect(register.mock.calls[1][0]).not.toEqual(register.mock.calls[0][0]);
+    const blocked = await claimAttempt(cloud, old);
+    expect(blocked).toMatchObject({ mode: 'DRY_RUN', reason: 'BLOCKED_PROVIDER' });
+    expect(blocked.delivery).not.toHaveProperty('destination');
   });
 
   afterAll(async () => {

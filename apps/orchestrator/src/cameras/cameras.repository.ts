@@ -170,8 +170,13 @@ export class CamerasRepository {
         f.sync_error_code,
         f.sync_error_message,
         f.managed_zone_slugs,
+        COALESCE(ai.m2a_fall_enabled, true) AS ai_m2a_fall_enabled,
         (SELECT COUNT(*)::int FROM zones z WHERE z.camera_id = c.id) AS zone_count
       FROM cameras c
+      LEFT JOIN devices d ON d.id = c.device_id
+      LEFT JOIN users owner_u ON owner_u.id = d.owner_user_id
+      LEFT JOIN household_ai_module_settings ai
+        ON ai.owner_user_id = COALESCE(owner_u.household_owner_id, owner_u.id)
       LEFT JOIN camera_sources s ON s.camera_id = c.id
       LEFT JOIN camera_frigate_settings f ON f.camera_id = c.id
       WHERE c.slug = $1

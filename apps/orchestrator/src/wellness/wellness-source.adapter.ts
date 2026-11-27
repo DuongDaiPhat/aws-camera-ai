@@ -140,9 +140,13 @@ export class WellnessSourceAdapter {
         await client.query(
           `SELECT e.camera_id,e.track_id,e.person_status,d.owner_user_id,k.linked_user_id,k.id AS face_id
         FROM events e JOIN cameras c ON c.id=e.camera_id JOIN devices d ON d.id=c.device_id
+        JOIN users owner_u ON owner_u.id=d.owner_user_id
+        LEFT JOIN household_ai_module_settings ai
+          ON ai.owner_user_id=COALESCE(owner_u.household_owner_id,owner_u.id)
         JOIN known_faces k ON k.id=$2 JOIN users u ON u.id=k.linked_user_id
         WHERE e.id=$1 AND e.person_status='KNOWN' AND e.matched_known_face_id=k.id AND k.owner_user_id=d.owner_user_id
-          AND k.is_active AND u.is_active AND c.is_enabled`,
+          AND k.is_active AND u.is_active AND c.is_enabled
+          AND COALESCE(ai.m5_wellness_enabled, TRUE)`,
           [dto.eventId, dto.matchedKnownFaceId],
         )
       ).rows[0];
@@ -212,7 +216,11 @@ export class WellnessSourceAdapter {
       const camera = (
         await client.query(
           `SELECT c.id,c.detect_width,c.detect_height FROM cameras c
-        JOIN devices d ON d.id=c.device_id WHERE c.slug=$1 AND c.is_enabled`,
+        JOIN devices d ON d.id=c.device_id
+        JOIN users owner_u ON owner_u.id=d.owner_user_id
+        LEFT JOIN household_ai_module_settings ai
+          ON ai.owner_user_id=COALESCE(owner_u.household_owner_id,owner_u.id)
+        WHERE c.slug=$1 AND c.is_enabled AND COALESCE(ai.m5_wellness_enabled, TRUE)`,
           [data.camera],
         )
       ).rows[0];

@@ -233,8 +233,8 @@ function ContactForm({
           name="phone"
           type="tel"
           required
-          pattern="\+[1-9][0-9]{7,14}"
-          placeholder="+84901234567"
+          pattern="(\+[1-9][0-9]{7,14}|0[1-9][0-9]{8,10})"
+          placeholder="0901234567 hoặc +84901234567"
           defaultValue={contact?.phone}
           disabled={busy}
         />

@@ -177,7 +177,195 @@
 @media (pointer: coarse) {
   .accountGrid button,
   .accountSection > label,
-  .settingsPage .storageForm button {
+  .settingsPage .storageForm button,
+  .aiModulesFooter button {
     min-height: 44px;
   }
+}
+
+.aiModulesSection {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.aiModulesHeader {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.aiModulesForm {
+  display: grid;
+  gap: 1rem;
+}
+
+.aiModulesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 0.85rem;
+}
+
+.aiModuleCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.95rem 1.05rem;
+  border-radius: 0.95rem;
+  border: 1px solid #e6dfee;
+  background: #ffffff;
+  color: #28232e;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.aiModuleCard:hover {
+  border-color: #c8b8dc;
+  background: #faf7fd;
+}
+
+.aiModuleCard:has(input:checked) {
+  border-color: #694489;
+  background: #f8f4fc;
+}
+
+.aiModuleCard:has(input:focus-visible) {
+  outline: 2px solid #9566c5;
+  outline-offset: 2px;
+}
+
+.aiModuleCard:has(input:disabled) {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.aiModuleTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.aiModuleTopRow .aiSwitch[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  position: relative;
+  width: 44px;
+  min-width: 44px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+  margin: 0;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #d5ccdf;
+  border: 1px solid #c3b6d2;
+  cursor: inherit;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.aiSwitch::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgb(40 35 46 / 0.25);
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.aiModuleTopRow .aiSwitch[type='checkbox']:checked {
+  background: #694489;
+  border-color: #694489;
+}
+
+.aiSwitch:checked::before {
+  transform: translateX(20px);
+}
+
+.aiSwitch:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.aiModuleInfo {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.aiModuleInfo strong {
+  font-size: 0.96rem;
+  line-height: 1.35;
+  color: #28232e;
+}
+
+.aiModuleInfo p {
+  margin: 0;
+  color: #6f637b;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.aiModuleTitleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.aiModuleCode {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: #eee8f4;
+  color: #694489;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.aiBadgeOn,
+.aiBadgeOff,
+.aiBadgeMuted {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.aiBadgeOn {
+  background: #e9f6ee;
+  color: #196b3b;
+  border: 1px solid #bce3cb;
+}
+
+.aiBadgeOff {
+  background: #f5f2f8;
+  color: #6f637b;
+  border: 1px solid #e6dfee;
+}
+
+.aiBadgeMuted {
+  background: #fdf4e7;
+  color: #8c5319;
+  border: 1px solid #f2d5ad;
+}
+
+.aiModulesFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }

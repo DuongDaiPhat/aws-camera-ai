@@ -132,7 +132,39 @@ Invoke-RestMethod http://localhost:3001/api/v1/health
 Kết quả mong đợi: backend health `ok`, không báo mismatch driver/queue/APP_ENV.
 `restart` đơn thuần không nạp lại env mới của Compose.
 
-## 5. Chọn người giám sát và xác minh email route
+## 5. Thiết lập người nhận cảnh báo
+
+### Cài đặt cá nhân
+
+Mở **Cài đặt → Kênh nhận cảnh báo cá nhân**. Mỗi thành viên tự bật **Cuộc gọi**,
+**SMS** hoặc **Email** và chỉ nhận cảnh báo từ camera mình có quyền xem. Quy tắc
+sự kiện vẫn quyết định lúc nào gửi từng kênh. Ví dụ, cuộc gọi được tạo khi sự kiện
+chuyển cấp theo quy tắc hoặc người dùng bấm **Cần giúp đỡ**.
+
+1. **Cuộc gọi và SMS.** Bật từng kênh theo nhu cầu, dùng số tài khoản hoặc nhập
+   số khác ở dạng quốc tế, ví dụ `+84901234567`. Lưu và nhập mã xác minh nhận
+   qua SMS. Mã này cũng dùng khi chỉ đăng ký cuộc gọi.
+2. **Email.** Bật nhận email, giữ email tài khoản hoặc nhập địa chỉ khác, rồi lưu.
+   Mở thư AWS và bấm **Confirm subscription**. Backend kiểm tra xác nhận định kỳ,
+   kể cả khi người dùng đã đóng trang Cài đặt. [Hướng dẫn xác nhận SNS](https://docs.aws.amazon.com/sns/latest/dg/sns-email-notifications.html).
+
+Để bật tính năng trong một môi trường SQS, áp dụng migration
+`0026_notification_delivery_settings.sql` rồi cấu hình theo kênh:
+
+| Kênh         | Cấu hình và quyền cần có                                                                                                                                                                                                                                                                                                             |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Email        | Backend và Sender dùng cùng `SNS_EMAIL_TOPIC_PREFIX_ARN`, theo mẫu `arn:aws:sns:<region>:<account>:argusai-<env>-incident-email-user-`. Backend cần `sns:CreateTopic`, `sns:Subscribe` và `sns:ListSubscriptionsByTopic` trên các topic có prefix này. Sender cần `sns:ListSubscriptionsByTopic` và `sns:Publish` trên cùng phạm vi. |
+| Xác minh số  | Backend bật `SNS_PHONE_SELF_SERVICE_ENABLED=true` và có quyền `sns:Publish` SMS. Nếu AWS đang ở SMS sandbox, chỉ dùng số đích đã xác minh trong sandbox. [Amazon SNS SMS sandbox](https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox.html).                                                                                   |
+| Cảnh báo SMS | Bật `SNS_SMS_ENABLED=true` theo cấu hình Sender ở mục 7.                                                                                                                                                                                                                                                                             |
+| Cuộc gọi     | Cấu hình bộ biến Amazon Connect ở mục 7 và quyền `connect:StartOutboundVoiceContact`. [Amazon Connect API](https://docs.aws.amazon.com/connect/latest/APIReference/API_StartOutboundVoiceContact.html).                                                                                                                              |
+
+Chạy `pnpm test:notification` để kiểm tra bật riêng cuộc gọi, SMS và email, xác
+minh đích mới, chặn người ngoài household và chặn job cũ khi đổi đích. Ca tự động
+dùng PostgreSQL test và giả lập AWS. `SENDER_DRY_RUN` áp dụng cho cảnh báo sự kiện.
+Thao tác đăng ký nhận cảnh báo qua Cài đặt sẽ gửi thư xác nhận hoặc mã SMS thật
+khi backend được cấp quyền AWS.
+
+### Route vận hành khi chưa bật cài đặt cá nhân
 
 Mặc định intent ưu tiên `CAREGIVER` active cùng household; nếu nhiều người thì chọn
 theo `created_at,id`, nếu chưa có thì dự phòng chủ thiết bị. Cần kiểm rõ người được
@@ -144,8 +176,7 @@ chọn trước khi test; đăng nhập bằng user nào không tự đổi emai
    **Confirm subscription** trong thư AWS. [Hướng dẫn xác nhận SNS](https://docs.aws.amazon.com/sns/latest/dg/sns-email-notifications.html).
 3. Kiểm topic không có subscription của người/hộ khác. SNS publish tới topic không
    tự giới hạn theo email trong route; topic chứa ảnh riêng tư phải có đúng người nhận.
-4. Provision route sau khi đã kiểm subscription. Chưa có màn hình quản trị route;
-   thao tác này do người vận hành thực hiện trên DB đúng môi trường.
+4. Người vận hành tạo route trên DB đúng môi trường sau khi đã kiểm subscription.
 
 Ví dụ tạo route ở trạng thái chưa bật; thay UUID/email/topic thật, không chạy nguyên placeholder:
 

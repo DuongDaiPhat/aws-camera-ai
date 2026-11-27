@@ -63,7 +63,7 @@ describe('EscalationEngineService (US-13)', () => {
       createStatusHistory: jest.fn(),
       createConfirmation: jest.fn(),
       findAuthoritativeConfirmation: jest.fn(),
-      createNotificationIntent: jest.fn(),
+      createNotificationIntents: jest.fn(),
       findDueEventsForEscalation: jest.fn(),
     };
 
@@ -121,7 +121,7 @@ describe('EscalationEngineService (US-13)', () => {
       expect(updated.status).toBe('NOTIFIED');
       expect(repository.findEventForUpdate).toHaveBeenCalledWith(mockClient, 'evt-1');
       expect(repository.updateEventStatus).toHaveBeenCalled();
-      expect(repository.createNotificationIntent).toHaveBeenCalledWith(
+      expect(repository.createNotificationIntents).toHaveBeenCalledWith(
         mockClient,
         expect.objectContaining({
           eventId: 'evt-1',
@@ -274,7 +274,7 @@ describe('EscalationEngineService (US-13)', () => {
           escalationDeadlineAt: null,
         }),
       );
-      expect(repository.createNotificationIntent).toHaveBeenCalledWith(
+      expect(repository.createNotificationIntents).toHaveBeenCalledWith(
         mockClient,
         expect.objectContaining({
           eventId: 'evt-1',

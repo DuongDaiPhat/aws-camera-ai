@@ -111,6 +111,12 @@ export class WellnessSchedulerService implements OnModuleInit, OnModuleDestroy {
           await decide('SKIPPED_DISABLED');
           return;
         }
+        const m5Enabled =
+          (await this.repository.isWellnessModuleEnabled?.(run.owner_user_id, client)) ?? true;
+        if (!m5Enabled) {
+          await decide('SKIPPED_DISABLED', { decisionReason: 'M5 wellness module disabled' });
+          return;
+        }
         if (schedule.version !== current.schedule_version) {
           await decide('SKIPPED_SUPERSEDED', { decisionReason: 'Schedule configuration changed' });
           return;

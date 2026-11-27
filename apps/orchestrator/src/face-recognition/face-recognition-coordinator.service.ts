@@ -213,6 +213,9 @@ export class FaceRecognitionCoordinatorService
     camera: CameraRecord | null,
     waitForFrameMs = 0,
   ): Promise<string | null> {
+    if (camera?.ai_m1_face_enabled === false) {
+      return null;
+    }
     const now = Date.now();
     const canonical = this.detectionTracker?.getCanonicalTrackId(after.camera, after.id);
     const previous = canonical ? this.stateService.get(after.camera, canonical, now) : undefined;
@@ -414,6 +417,12 @@ export class FaceRecognitionCoordinatorService
   }
 
   async handleTrackEvent(input: FaceTrackEventInput): Promise<void> {
+    if (input.camera?.ai_m1_face_enabled === false) {
+      const key = TrackIdentityStateService.makeKey(input.after.camera, input.after.id);
+      this.sampleInputs.delete(key);
+      this.clearWindowTimer(key);
+      return;
+    }
     if (!this.optConfig.enabled) {
       await this.handleLegacyDispatch(input);
       return;

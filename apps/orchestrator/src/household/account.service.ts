@@ -34,11 +34,22 @@ export class AccountService {
     input: ProfileDto,
   ): Promise<components['schemas']['AccountSettings']> {
     if (!input.fullName.trim()) throw new BadRequestException('Họ tên không được để trống.');
-    const result = await this.db.query(
-      `UPDATE users SET full_name=$2,phone_e164=$3 WHERE id=$1 AND is_active RETURNING id`,
-      [userId, input.fullName.trim(), input.phone ?? null],
-    );
-    if (!result.rows[0]) throw new UnauthorizedException();
+    const nextPhone = input.phone ?? null;
+    await this.db.transaction(async (client) => {
+      const result = await client.query(
+        `UPDATE users SET full_name=$2,phone_e164=$3 WHERE id=$1 AND is_active RETURNING id`,
+        [userId, input.fullName.trim(), nextPhone],
+      );
+      if (!result.rows[0]) throw new UnauthorizedException();
+      if (!nextPhone) {
+        await client.query('DELETE FROM user_phone_alert_settings WHERE user_id=$1', [userId]);
+      } else {
+        await client.query('UPDATE user_phone_alert_settings SET phone=$2 WHERE user_id=$1', [
+          userId,
+          nextPhone,
+        ]);
+      }
+    });
     return this.get(userId);
   }
   async preferences(

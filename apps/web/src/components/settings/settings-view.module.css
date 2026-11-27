@@ -194,6 +194,36 @@
   font-size: 12px;
 }
 
+.alertDeliverySection {
+  display: grid;
+  gap: 12px;
+  margin-block: 16px;
+}
+
+.alertDeliveryBody,
+.alertDeliveryBody form,
+.alertDeliveryField {
+  display: grid;
+  gap: 10px;
+}
+
+.alertDeliveryBody {
+  padding: 16px;
+}
+
+.alertDeliveryBody button {
+  justify-self: start;
+}
+
+.alertDeliveryField input {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-width: 0;
+}
+
 .waitPresets {
   display: flex;
   flex-wrap: wrap;

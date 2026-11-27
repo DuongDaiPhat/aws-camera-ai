@@ -124,6 +124,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/household/ai-modules': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Lấy cấu hình bật/tắt các module AI của hộ gia đình (chỉ CAREGIVER) */
+    get: operations['getHouseholdAiModules'];
+    /** Cập nhật cấu hình bật/tắt các module AI của hộ gia đình (chỉ CAREGIVER) */
+    put: operations['updateHouseholdAiModules'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/household/cameras': {
     parameters: {
       query?: never;
@@ -186,6 +204,59 @@ export interface paths {
     /** updateNotificationPreferences */
     put: operations['updateNotificationPreferences'];
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/account/alert-delivery/email': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get my email alert settings and confirmation status */
+    get: operations['getEmailAlertSettings'];
+    /** Update my email delivery and request confirmation when needed */
+    put: operations['updateEmailAlertSettings'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/account/alert-delivery/phone': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get my SMS and call settings */
+    get: operations['getPhoneAlertSettings'];
+    /** Update my SMS and call settings and request verification when needed */
+    put: operations['updatePhoneAlertSettings'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/account/alert-delivery/phone/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Verify my preferred alert phone number with the SMS code */
+    post: operations['verifyPhoneAlertSettings'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1611,6 +1682,60 @@ export interface components {
     HouseholdSettings: {
       retentionDays: number;
       storageQuotaGb: number;
+    };
+    HouseholdAiModulesInput: {
+      m1Face: boolean;
+      m2aFall: boolean;
+      m3Fire: boolean;
+      m4Zone: boolean;
+      m5Wellness: boolean;
+    };
+    HouseholdAiModulesSettings: {
+      m1Face: boolean;
+      m2aFall: boolean;
+      m3Fire: boolean;
+      m4Zone: boolean;
+      m5Wellness: boolean;
+      availability: {
+        m1Face: boolean;
+        m2aFall: boolean;
+        m3Fire: boolean;
+        m4Zone: boolean;
+        m5Wellness: boolean;
+      };
+      /** Format: date-time */
+      updatedAt: string | null;
+    };
+    EmailAlertSettingsInput: {
+      enabled: boolean;
+      /** Format: email */
+      email?: string;
+    };
+    EmailAlertSettings: {
+      available: boolean;
+      /** Format: email */
+      accountEmail: string;
+      /** Format: email */
+      email: string;
+      enabled: boolean;
+      /** @enum {string} */
+      status: 'OFF' | 'PENDING' | 'VERIFIED';
+      confirmationSent: boolean;
+    };
+    PhoneAlertSettingsInput: {
+      smsEnabled: boolean;
+      callEnabled: boolean;
+      phone?: string | null;
+    };
+    PhoneAlertSettings: {
+      smsAvailable: boolean;
+      callAvailable: boolean;
+      smsEnabled: boolean;
+      callEnabled: boolean;
+      accountPhone: string | null;
+      phone: string | null;
+      /** @enum {string} */
+      status: 'OFF' | 'PENDING' | 'VERIFIED';
     };
     NotificationPreferences: {
       inAppAlerts: boolean;
@@ -3670,6 +3795,85 @@ export interface operations {
       };
     };
   };
+  getHouseholdAiModules: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cấu hình module AI của hộ */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HouseholdAiModulesSettings'];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden (CAREGIVER only) */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  updateHouseholdAiModules: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['HouseholdAiModulesInput'];
+      };
+    };
+    responses: {
+      /** @description Cấu hình module AI sau khi cập nhật */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HouseholdAiModulesSettings'];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden (CAREGIVER only) */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   createHouseholdCamera: {
     parameters: {
       query?: never;
@@ -3844,6 +4048,218 @@ export interface operations {
       };
       /** @description Forbidden */
       403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getEmailAlertSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Email delivery settings */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailAlertSettings'];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Account is inactive or missing */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  updateEmailAlertSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['EmailAlertSettingsInput'];
+      };
+    };
+    responses: {
+      /** @description Updated email delivery settings */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailAlertSettings'];
+        };
+      };
+      /** @description Invalid email address */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Confirmation request rate limit */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Email registration unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getPhoneAlertSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Phone delivery settings */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PhoneAlertSettings'];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Account is inactive or missing */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  updatePhoneAlertSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PhoneAlertSettingsInput'];
+      };
+    };
+    responses: {
+      /** @description Updated phone delivery settings */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PhoneAlertSettings'];
+        };
+      };
+      /** @description Invalid phone number */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Verification request rate limit */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Phone registration unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  verifyPhoneAlertSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          code: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Verified phone delivery settings */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PhoneAlertSettings'];
+        };
+      };
+      /** @description Invalid or expired verification code */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Authentication required */
+      401: {
         headers: {
           [name: string]: unknown;
         };

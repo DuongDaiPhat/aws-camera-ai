@@ -113,4 +113,5 @@ export interface CameraAggregateRecord extends CameraRecord {
   sync_error_message: string | null;
   managed_zone_slugs?: string[] | null;
   zone_count: string | number;
+  ai_m2a_fall_enabled?: boolean;
 }

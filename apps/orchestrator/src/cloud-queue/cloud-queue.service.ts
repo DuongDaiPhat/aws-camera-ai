@@ -432,9 +432,12 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
       const jobId = message.payload.jobId;
       const found = await client.query(
         `SELECT j.*, d.owner_user_id AS current_owner, c.version AS current_collection_version,
-           camera.slug AS camera_slug
+           camera.slug AS camera_slug,
+           COALESCE(ai.m1_face_enabled, TRUE) AS m1_face_enabled
     FROM cloud_jobs j JOIN events e ON e.id=j.event_id
     JOIN cameras camera ON camera.id=e.camera_id JOIN devices d ON d.id=camera.device_id
+    LEFT JOIN users u ON u.id=d.owner_user_id
+    LEFT JOIN household_ai_module_settings ai ON ai.owner_user_id=COALESCE(u.household_owner_id, u.id)
     LEFT JOIN cloud_face_collections c ON c.owner_user_id=j.owner_user_id
     WHERE j.id=$1 FOR UPDATE OF j`,
         [jobId],
@@ -476,7 +479,7 @@ export class CloudQueueService implements OnModuleInit, OnModuleDestroy {
       );
       if (!same.rows[0]?.identical) throw new Error('Result differs from durable worker result');
       const disposition =
-        body.collectionVersion === job.current_collection_version
+        body.collectionVersion === job.current_collection_version && job.m1_face_enabled !== false
           ? (await this.ai.submit(body.eventId, body, client)).disposition
           : 'STALE';
       const trackIdFromObs =
