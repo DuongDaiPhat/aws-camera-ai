@@ -156,7 +156,7 @@ function ArchiveWorkspace({ date, userId }: { date: string; userId?: string }) {
   }
   async function fullscreen() {
     try {
-      if (document.fullscreenElement) await document.exitFullscreen();
+      if (document.fullscreenElement === monitor.current) await document.exitFullscreen();
       else if (monitor.current?.requestFullscreen) await monitor.current.requestFullscreen();
       else setNotice('Trình duyệt này chưa hỗ trợ chế độ toàn màn hình.');
     } catch {
