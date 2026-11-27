@@ -67,7 +67,12 @@ export function DashboardOverview({
   const [pinnedId, setPinnedId] = useState<string | null>(null);
   const [fullscreenId, setFullscreenId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const expandedRef = useDialogFocus(Boolean(expandedId) && !blocked, () => setExpandedId(null));
+  const returnToPanelRef = useRef(false);
+  const closeExpanded = () => {
+    returnToPanelRef.current = false;
+    setExpandedId(null);
+  };
+  const expandedRef = useDialogFocus(Boolean(expandedId) && !blocked, closeExpanded);
   const screenId = fullscreenId ?? expandedId;
   const panelRef = useRef<HTMLElement>(null);
   const available = ordered.filter((camera) => camera.isEnabled);
@@ -89,13 +94,21 @@ export function DashboardOverview({
     };
   }, []);
   useEffect(() => {
-    if (blocked) setExpandedId(null);
-    if (
-      blocked &&
-      document.fullscreenElement &&
-      panelRef.current?.contains(document.fullscreenElement)
-    )
-      void document.exitFullscreen().catch(() => {});
+    if (!blocked) return;
+    returnToPanelRef.current = false;
+    setExpandedId(null);
+    const unwindFullscreen = async () => {
+      let previous: Element | null = null;
+      while (
+        document.fullscreenElement &&
+        document.fullscreenElement !== previous &&
+        panelRef.current?.contains(document.fullscreenElement)
+      ) {
+        previous = document.fullscreenElement;
+        await document.exitFullscreen();
+      }
+    };
+    void unwindFullscreen().catch(() => {});
   }, [blocked]);
   function choose(id: string) {
     selectCamera(id);
@@ -103,16 +116,32 @@ export function DashboardOverview({
     setPage(0);
   }
   async function fullscreen(element: HTMLElement | null) {
+    if (!element) return;
     if (expandedId) {
-      setExpandedId(element?.id === expandedId ? null : (element?.id ?? null));
+      if (element.id === expandedId) {
+        if (expandedId !== 'camera-monitor' && returnToPanelRef.current) {
+          returnToPanelRef.current = false;
+          setExpandedId('camera-monitor');
+          return;
+        }
+        closeExpanded();
+        return;
+      }
+      returnToPanelRef.current = expandedId === 'camera-monitor' && element.id !== 'camera-monitor';
+      setExpandedId(element.id);
       return;
     }
     try {
-      if (document.fullscreenElement) await document.exitFullscreen();
-      else if (element?.requestFullscreen) await element.requestFullscreen();
-      else setExpandedId(element?.id ?? 'camera-monitor');
+      // Only exit when toggling the active fullscreen element; requesting a child pushes onto the fullscreen stack.
+      if (document.fullscreenElement === element) {
+        await document.exitFullscreen();
+      } else if (element.requestFullscreen) {
+        await element.requestFullscreen();
+      } else {
+        setExpandedId(element.id);
+      }
     } catch {
-      setExpandedId(element?.id ?? 'camera-monitor');
+      setExpandedId(element.id);
     }
   }
   const monitor = (
@@ -295,7 +324,7 @@ export function DashboardOverview({
                 type="button"
                 className={styles.exitExpanded}
                 aria-label="Đóng camera toàn màn hình"
-                onClick={() => setExpandedId(null)}
+                onClick={closeExpanded}
               >
                 <Minimize2 size={16} />
                 Thoát toàn màn hình
