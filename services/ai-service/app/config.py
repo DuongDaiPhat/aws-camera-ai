@@ -102,11 +102,23 @@ class Settings(BaseSettings):
 
     # Module 3 — fire-only detection using the existing verified checkpoint.
     m3_enabled: bool = False
-    fire_model_path: str = "models/fire-smoke-yolo26n-checkpoint-nms.onnx"
-    fire_model_version: str = "fire-smoke-yolo26n-checkpoint-nms-v1"
+    fire_model_path: str = "models/fire-smoke-yolo26n-checkpoint-nms-v2.onnx"
+    fire_model_version: str = "fire-smoke-yolo26n-checkpoint-nms-v2"
     fire_model_sha256: str = ""
     fire_min_consecutive_frames: int = Field(default=3, ge=3, le=60)
     fire_confidence_threshold: float = Field(default=0.50, gt=0, le=1)
+    fire_peak_confidence_threshold: float = Field(default=0.65, ge=0, le=1, allow_inf_nan=False)
+    fire_min_association_iou: float = Field(default=0.10, ge=0, le=1, allow_inf_nan=False)
+    fire_association_box_padding: float = Field(default=0.05, ge=0, le=0.5, allow_inf_nan=False)
+    fire_static_suppression_enabled: bool = True
+    fire_min_temporal_motion: float = Field(default=0.015, ge=0, le=1, allow_inf_nan=False)
+    fire_static_bypass_confidence: float = Field(default=0.85, ge=0, le=1, allow_inf_nan=False)
+    fire_verifier_enabled: bool = False
+    fire_verifier_model_path: str = "models/fire-verifier-mobilenetv3-v1.onnx"
+    fire_verifier_model_sha256: str = ""
+    fire_verifier_confidence_threshold: float = Field(default=0.55, gt=0, le=1, allow_inf_nan=False)
+    fire_verifier_context_scale: float = Field(default=2.5, ge=1.0, le=6.0, allow_inf_nan=False)
+    fire_verifier_fail_open: bool = True
     fire_output_confidence_floor: float = Field(default=0.10, ge=0, le=1)
     fire_confirmation_window_seconds: float = Field(default=5, gt=0)
     fire_max_frame_gap_seconds: float = Field(default=1, gt=0)

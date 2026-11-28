@@ -6,6 +6,8 @@ import { fetchPendingCriticalEvents } from '@/lib/events-client';
 import {
   canInterruptCriticalAlert,
   criticalAlertDeadline,
+  isMandatoryFireAlert,
+  nextMandatoryFire,
   nextUnreviewedFire,
   reconcileFireReceipts,
   rememberFireAttention,
@@ -48,14 +50,59 @@ function usePendingFireEvents(userId: string | undefined, token: string) {
   return { events: data?.userId === userId ? data?.events : null, error };
 }
 
-function useAttentionClock(event: UIEventItem | null) {
+const CLOCK_SKEW_WAKE_WINDOW_MS = 10000;
+
+function mergeCriticalSources(
+  liveEvents: UIEventItem[],
+  pendingEvents: UIEventItem[] | null | undefined,
+  hasPendingError: boolean,
+): UIEventItem[] {
+  if (hasPendingError || !pendingEvents) return [...liveEvents];
+  const merged = new Map<string, UIEventItem>();
+  for (const item of pendingEvents) merged.set(item.id, item);
+  for (const item of liveEvents) {
+    const existing = merged.get(item.id);
+    if (!existing) {
+      merged.set(item.id, item);
+      continue;
+    }
+    if (
+      ['RESOLVED', 'CLOSED', 'ESCALATED'].includes(item.status) ||
+      item.isFalseAlarm ||
+      item.status !== existing.status ||
+      item.thumbnailUrl !== existing.thumbnailUrl ||
+      item.confidence !== existing.confidence
+    ) {
+      merged.set(item.id, { ...existing, ...item });
+    }
+  }
+  return Array.from(merged.values());
+}
+
+function nextWakeTime(event: UIEventItem | null, source: UIEventItem[], now: number): number {
+  let wakeAt = event ? (criticalAlertDeadline(event) ?? Infinity) : Infinity;
+  for (const item of source) {
+    if (item.priority !== 'P0') continue;
+    const detectedAt = Date.parse(item.detectedAt);
+    if (
+      Number.isFinite(detectedAt) &&
+      detectedAt > now &&
+      detectedAt <= now + CLOCK_SKEW_WAKE_WINDOW_MS
+    ) {
+      wakeAt = Math.min(wakeAt, detectedAt);
+    }
+  }
+  return wakeAt;
+}
+
+function useAttentionClock(event: UIEventItem | null, source: UIEventItem[]) {
   const [now, setNow] = useState(Date.now);
-  const expiresAt = event ? (criticalAlertDeadline(event) ?? Infinity) : Infinity;
+  const wakeAt = nextWakeTime(event, source, now);
   useEffect(() => {
-    const delay = Math.min(FIRE_ATTENTION_POLL_MS, Math.max(1, expiresAt - Date.now()));
+    const delay = Math.min(FIRE_ATTENTION_POLL_MS, Math.max(1, wakeAt - Date.now()));
     const timer = setTimeout(() => setNow(Date.now()), delay);
     return () => clearTimeout(timer);
-  }, [expiresAt, now]);
+  }, [wakeAt, now]);
   return now;
 }
 
@@ -73,27 +120,24 @@ function useReceiptSync(
   }, [userId, setRevision]);
 }
 
-export function useFireAttention(events: UIEventItem[], userId: string | undefined) {
+export function useFireAttention(
+  events: UIEventItem[],
+  userId: string | undefined,
+  canCloseEmergency = true,
+) {
   const [revision, setRevision] = useState(0);
   useReceiptSync(userId, setRevision);
-  const token = `${revision}:${events.map((item) => `${item.id}:${item.status}`).join('|')}`;
+  const token = `${revision}:${events.map((item) => `${item.id}:${item.status}:${Number(Boolean(item.isFalseAlarm))}`).join('|')}`;
   const pending = usePendingFireEvents(userId, token);
   const [current, setCurrent] = useState<{ userId: string; event: UIEventItem } | null>(null);
   const currentRef = useRef(current);
   const [storageError, setStorageError] = useState<string | null>(null);
   const active = current?.userId === userId ? (current?.event ?? null) : null;
-  const now = useAttentionClock(active);
+  const source = mergeCriticalSources(events, pending.events, Boolean(pending.error));
+  const now = useAttentionClock(active, source);
   useEffect(() => {
     if (!userId) return;
     let cancelled = false;
-    const source = pending.error ? [...events] : [...(pending.events ?? events)];
-    // A later lifecycle SSE update takes precedence over an earlier pending-list response.
-    for (const event of events) {
-      if (['RESOLVED', 'CLOSED', 'ESCALATED'].includes(event.status) || event.isFalseAlarm) {
-        const index = source.findIndex((item) => item.id === event.id);
-        if (index >= 0) source[index] = event;
-      }
-    }
     const claim = () => {
       if (cancelled) return;
       const at = Date.now();
@@ -101,11 +145,21 @@ export function useFireAttention(events: UIEventItem[], userId: string | undefin
       let receipts = reconcileFireReceipts(source, stored.receipts, at);
       const previous = currentRef.current?.userId === userId ? currentRef.current.event : null;
       const latest = source.find((item) => item.id === previous?.id);
-      const event =
-        latest && canInterruptCriticalAlert(latest, at)
+      const keepMandatory =
+        latest &&
+        isMandatoryFireAlert(latest, canCloseEmergency) &&
+        canInterruptCriticalAlert(latest, at)
           ? latest
-          : nextUnreviewedFire(source, receipts, at);
-      if (event) receipts = rememberFireAttention(source, event, receipts, at);
+          : null;
+      const mandatory = keepMandatory ?? nextMandatoryFire(source, at, canCloseEmergency);
+      const event =
+        mandatory ??
+        (latest && canInterruptCriticalAlert(latest, at)
+          ? latest
+          : nextUnreviewedFire(source, receipts, at));
+      if (event && !isMandatoryFireAlert(event, canCloseEmergency)) {
+        receipts = rememberFireAttention(source, event, receipts, at);
+      }
       setStorageError(saveFireReceipts(userId, receipts) ?? stored.warning);
       currentRef.current = event ? { userId, event } : null;
       setCurrent(currentRef.current);
@@ -117,13 +171,19 @@ export function useFireAttention(events: UIEventItem[], userId: string | undefin
     return () => {
       cancelled = true;
     };
-  }, [events, pending.events, pending.error, userId, now, revision]);
+  }, [events, pending.events, pending.error, userId, now, revision, canCloseEmergency]);
+  const visibleEvent = active && canInterruptCriticalAlert(active) ? active : null;
   return {
-    event: active && canInterruptCriticalAlert(active) ? active : null,
+    event: visibleEvent,
+    isMandatory: Boolean(visibleEvent && isMandatoryFireAlert(visibleEvent, canCloseEmergency)),
     error: pending.error ?? storageError,
     retry: () => setRevision((value) => value + 1),
     review: (eventId: string) => {
       if (currentRef.current?.event.id !== eventId) return;
+      if (isMandatoryFireAlert(currentRef.current.event, canCloseEmergency)) {
+        setRevision((value) => value + 1);
+        return;
+      }
       currentRef.current = null;
       setCurrent(null);
       setRevision((value) => value + 1);

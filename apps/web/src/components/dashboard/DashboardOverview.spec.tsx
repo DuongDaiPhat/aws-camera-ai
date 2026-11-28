@@ -98,6 +98,86 @@ it('requests and exits fullscreen on the actual grid element', async () => {
   expect(exit).toHaveBeenCalledOnce();
   Object.defineProperty(document, 'fullscreenElement', { value: null, configurable: true });
 });
+it('transitions from grid fullscreen into a single camera tile instead of exiting to the dashboard', async () => {
+  await act(async () => root.render(<DashboardOverview isAdmin onNavigate={() => {}} />));
+  const panel = host.querySelector<HTMLElement>('#camera-monitor')!;
+  const tile = host.querySelector<HTMLElement>('#live-c1')!;
+  const stack: HTMLElement[] = [];
+  const syncFullscreen = () => {
+    Object.defineProperty(document, 'fullscreenElement', {
+      value: stack.at(-1) ?? null,
+      configurable: true,
+    });
+    document.dispatchEvent(new Event('fullscreenchange'));
+  };
+  const requestPanel = vi.fn(async () => {
+    stack.push(panel);
+    syncFullscreen();
+  });
+  const requestTile = vi.fn(async () => {
+    stack.push(tile);
+    syncFullscreen();
+  });
+  const exit = vi.fn(async () => {
+    stack.pop();
+    syncFullscreen();
+  });
+  panel.requestFullscreen = requestPanel;
+  tile.requestFullscreen = requestTile;
+  document.exitFullscreen = exit;
+
+  try {
+    await act(async () =>
+      host.querySelector<HTMLButtonElement>('[aria-label="Phóng to lưới camera"]')!.click(),
+    );
+    expect(requestPanel).toHaveBeenCalledOnce();
+    expect(document.fullscreenElement).toBe(panel);
+
+    await act(async () =>
+      host.querySelector<HTMLButtonElement>('[aria-label="Phóng to Camera 1"]')!.click(),
+    );
+    expect(requestTile).toHaveBeenCalledOnce();
+    expect(exit).not.toHaveBeenCalled();
+    expect(document.fullscreenElement).toBe(tile);
+
+    await act(async () =>
+      host.querySelector<HTMLButtonElement>('[aria-label="Thu nhỏ Camera 1"]')!.click(),
+    );
+    expect(exit).toHaveBeenCalledTimes(1);
+    expect(document.fullscreenElement).toBe(panel);
+
+    await act(async () =>
+      host.querySelector<HTMLButtonElement>('[aria-label="Thu nhỏ lưới camera"]')!.click(),
+    );
+    expect(exit).toHaveBeenCalledTimes(2);
+    expect(document.fullscreenElement).toBeNull();
+  } finally {
+    Object.defineProperty(document, 'fullscreenElement', { value: null, configurable: true });
+  }
+});
+it('unwinds nested fullscreen levels when blocked by a critical alert', async () => {
+  await act(async () => root.render(<DashboardOverview isAdmin onNavigate={() => {}} />));
+  const panel = host.querySelector<HTMLElement>('#camera-monitor')!;
+  const tile = host.querySelector<HTMLElement>('#live-c1')!;
+  const stack: HTMLElement[] = [panel, tile];
+  Object.defineProperty(document, 'fullscreenElement', { value: tile, configurable: true });
+  const exit = vi.fn(async () => {
+    stack.pop();
+    Object.defineProperty(document, 'fullscreenElement', {
+      value: stack.at(-1) ?? null,
+      configurable: true,
+    });
+  });
+  document.exitFullscreen = exit;
+
+  try {
+    await act(async () => root.render(<DashboardOverview isAdmin blocked onNavigate={() => {}} />));
+    expect(exit).toHaveBeenCalledTimes(2);
+    expect(document.fullscreenElement).toBeNull();
+  } finally {
+    Object.defineProperty(document, 'fullscreenElement', { value: null, configurable: true });
+  }
+});
 it('falls back to an accessible expanded view when native fullscreen is unavailable', async () => {
   await act(async () => root.render(<DashboardOverview isAdmin onNavigate={() => {}} />));
   host.querySelector<HTMLElement>('#camera-monitor')!.requestFullscreen = vi.fn(async () => {
@@ -109,6 +189,14 @@ it('falls back to an accessible expanded view when native fullscreen is unavaila
   expect(
     document.querySelector('[role="dialog"][aria-label="Camera toàn màn hình"]'),
   ).not.toBeNull();
+  await act(async () =>
+    document.querySelector<HTMLButtonElement>('[aria-label="Phóng to Camera 1"]')!.click(),
+  );
+  expect(document.querySelectorAll('[role="dialog"] article[id^="live-"]')).toHaveLength(1);
+  await act(async () =>
+    document.querySelector<HTMLButtonElement>('[aria-label="Thu nhỏ Camera 1"]')!.click(),
+  );
+  expect(document.querySelectorAll('[role="dialog"] article[id^="live-"]')).toHaveLength(2);
   await act(async () =>
     document.querySelector<HTMLButtonElement>('[aria-label="Đóng camera toàn màn hình"]')!.click(),
   );

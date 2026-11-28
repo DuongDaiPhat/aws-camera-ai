@@ -81,3 +81,28 @@ it('seeks again within the same clip when the absolute-time command changes', as
   await show(false, 1, 2, 45);
   expect(video.currentTime).toBe(45);
 });
+it('requests fullscreen for the camera surface when an ancestor monitor is already fullscreen', async () => {
+  await show();
+  const button = host.querySelector<HTMLButtonElement>('[aria-label="Toàn màn hình Bếp"]')!;
+  const surface = button.parentElement!;
+  const request = vi.fn(async () => {
+    Object.defineProperty(document, 'fullscreenElement', { value: surface, configurable: true });
+  });
+  const exit = vi.fn(async () => {
+    Object.defineProperty(document, 'fullscreenElement', { value: host, configurable: true });
+  });
+  surface.requestFullscreen = request;
+  document.exitFullscreen = exit;
+  Object.defineProperty(document, 'fullscreenElement', { value: host, configurable: true });
+
+  try {
+    await act(async () => button.click());
+    expect(request).toHaveBeenCalledOnce();
+    expect(exit).not.toHaveBeenCalled();
+
+    await act(async () => button.click());
+    expect(exit).toHaveBeenCalledOnce();
+  } finally {
+    Object.defineProperty(document, 'fullscreenElement', { value: null, configurable: true });
+  }
+});

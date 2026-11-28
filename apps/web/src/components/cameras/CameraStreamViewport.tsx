@@ -88,7 +88,7 @@ export function CameraStreamViewport({
           aria-label={`Toàn màn hình ${title}`}
           onClick={async () => {
             try {
-              if (document.fullscreenElement) await document.exitFullscreen();
+              if (document.fullscreenElement === surface.current) await document.exitFullscreen();
               else if (surface.current?.requestFullscreen)
                 await surface.current.requestFullscreen();
               else throw new Error('Fullscreen unavailable');

@@ -150,6 +150,9 @@ class FireDetector:
 
     def detect(self, data: bytes) -> list[FireDetection]:
         image = self.decode(data)
+        return self.detect_image(image)
+
+    def detect_image(self, image: np.ndarray) -> list[FireDetection]:
         session = self._load()
         try:
             tensor, gain, left, top = self.preprocess(image)

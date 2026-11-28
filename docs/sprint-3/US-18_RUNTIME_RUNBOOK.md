@@ -24,11 +24,11 @@ From the repository root:
 
 ```powershell
 & artifacts/m3/runtime-dev/Scripts/python.exe services/ai-service/scripts/prepare_fire_model.py `
-  --source artifacts/m3/exported/yolo26n-checkpoint-head-v1/fire-smoke-yolo26n.onnx
+  --source artifacts/m3/exported/yolo26n-checkpoint-head-v2/fire-smoke-yolo26n.onnx
 ```
 
 The script checks size/SHA-256 against `services/ai-service/model-manifest.json`
-and stages `services/ai-service/models/fire-smoke-yolo26n-checkpoint-nms.onnx`
+and stages `services/ai-service/models/fire-smoke-yolo26n-checkpoint-nms-v2.onnx`
 with its `.contract.json` sidecar. A different
 existing model is rejected. Model binaries, videos, environments and local test
 artifacts remain ignored by Git. On another machine, supply the same verified
@@ -46,8 +46,17 @@ least 0.10 and no higher than `FIRE_CONFIDENCE_THRESHOLD` (currently 0.50).
 The loader rejects mismatches instead of silently dropping potentially qualifying
 scores. The exporter writes this contract after successful parity verification.
 
-For a deliberate rollback, preserve the current registry record and verify/stage
-the recorded historical bytes:
+For a deliberate rollback to `fire-smoke-yolo26n-checkpoint-nms-v1` (26/10 baseline), preserve the current registry record and verify/stage the recorded historical bytes (if not already present in `services/ai-service/models/`):
+
+```powershell
+& artifacts/m3/runtime-dev/Scripts/python.exe services/ai-service/scripts/prepare_fire_model.py --source artifacts/m3/exported/yolo26n-checkpoint-head-v1/fire-smoke-yolo26n.onnx --artifact-version fire-smoke-yolo26n-checkpoint-nms-v1
+```
+
+Then consistently configure AI and backend with `FIRE_MODEL_VERSION=fire-smoke-yolo26n-checkpoint-nms-v1`,
+`FIRE_MODEL_PATH=/app/models/fire-smoke-yolo26n-checkpoint-nms.onnx` (or `models/fire-smoke-yolo26n-checkpoint-nms.onnx` locally) and
+`FIRE_MODEL_SHA256=773e23d1896d82787819f665694bfbc33825081f7f7a0f5fa5b1c6a22cb54650`.
+
+For a rollback to the earlier NMS-free `fire-smoke-yolo26n-v1` export:
 
 ```powershell
 & artifacts/m3/runtime-dev/Scripts/python.exe services/ai-service/scripts/prepare_fire_model.py --source artifacts/m3/exported/yolo26n-cpu-v1/fire-smoke-yolo26n.onnx --artifact-version fire-smoke-yolo26n-v1
