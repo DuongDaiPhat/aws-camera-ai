@@ -154,3 +154,90 @@ def test_bounding_boxes_and_scores_reject_nonfinite_values() -> None:
         FireBoundingBox(x=float("nan"), y=0, width=0.1, height=0.1)
     with pytest.raises(ValueError):
         signal(float("inf"))
+
+
+def _detection_at(
+    x: float, y: float, score: float = 0.85, size: float = 0.08
+) -> list[FireDetection]:
+    return [
+        FireDetection(
+            label="fire",
+            confidence=score,
+            bounding_box=FireBoundingBox(x=x, y=y, width=size, height=size),
+        )
+    ]
+
+
+def test_spatial_association_rejects_jumping_false_flashes_and_keeps_swaying_flame() -> None:
+    tracker = FireTracker(Settings(_env_file=None))
+    # Three flashes jumping across opposite sides of the frame must not confirm.
+    first = tracker.evaluate(frame(0.0), _detection_at(0.05, 0.10, 0.85), START)
+    second = tracker.evaluate(
+        frame(0.2), _detection_at(0.75, 0.10, 0.85), START + timedelta(seconds=0.2)
+    )
+    third = tracker.evaluate(
+        frame(0.4), _detection_at(0.40, 0.70, 0.85), START + timedelta(seconds=0.4)
+    )
+    assert not first.confirmed and not second.confirmed and not third.confirmed
+    assert third.consecutive_frames == 1
+
+    # A small swaying flame within the padded neighborhood stays linked and confirms.
+    fourth = tracker.evaluate(
+        frame(0.6), _detection_at(0.43, 0.68, 0.85), START + timedelta(seconds=0.6)
+    )
+    fifth = tracker.evaluate(
+        frame(0.8), _detection_at(0.41, 0.71, 0.85), START + timedelta(seconds=0.8)
+    )
+    assert fourth.consecutive_frames == 2 and not fourth.confirmed
+    assert fifth.confirmed and fifth.reason == "CONFIRMED"
+    assert fifth.qualifying_frame_ids == ["frame-0.4", "frame-0.6", "frame-0.8"]
+
+
+def test_peak_confidence_hysteresis_blocks_low_glare_and_confirms_on_peak() -> None:
+    tracker = FireTracker(
+        Settings(
+            _env_file=None, fire_confidence_threshold=0.50, fire_peak_confidence_threshold=0.65
+        )
+    )
+    # Sustained 0.57 glare (e.g. window backlight) fails the 0.65 peak gate.
+    for seconds in (0.0, 0.2, 0.4):
+        result = observe(tracker, seconds, 0.57)
+        assert not result.confirmed
+        assert result.reason == "INSUFFICIENT_FRAMES"
+
+    # Once a frame spikes above the peak threshold, the sliding 3-frame window confirms.
+    confirmed = observe(tracker, 0.6, 0.72)
+    assert confirmed.confirmed and confirmed.reason == "CONFIRMED"
+    assert confirmed.qualifying_frame_ids == ["frame-0.2", "frame-0.4", "frame-0.6"]
+    assert confirmed.incident_confidence == pytest.approx(0.57)
+
+
+def test_static_light_suppression_blocks_frozen_lamp_and_allows_flickering_flame() -> None:
+    import numpy as np
+
+    tracker = FireTracker(
+        Settings(
+            _env_file=None,
+            fire_confidence_threshold=0.50,
+            fire_peak_confidence_threshold=0.65,
+            fire_static_suppression_enabled=True,
+            fire_min_temporal_motion=0.02,
+            fire_static_bypass_confidence=0.85,
+        )
+    )
+    static_frame = np.full((120, 160, 3), 240, dtype=np.uint8)
+    for seconds in (0.0, 0.2, 0.4):
+        item = frame(seconds)
+        result = tracker.evaluate(
+            item, _detection_at(0.2, 0.2, 0.74, 0.2), item.observed_at, image=static_frame
+        )
+        assert not result.confirmed
+
+    # Now simulate real flame flicker inside the ROI (y=24..48, x=32..64).
+    flicker_frame = np.full((120, 160, 3), 60, dtype=np.uint8)
+    flicker_frame[30:44, 40:56] = 250
+    item = frame(0.6)
+    confirmed = tracker.evaluate(
+        item, _detection_at(0.2, 0.2, 0.74, 0.2), item.observed_at, image=flicker_frame
+    )
+    assert confirmed.confirmed and confirmed.reason == "CONFIRMED"
