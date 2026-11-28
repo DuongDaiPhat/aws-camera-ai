@@ -5,11 +5,14 @@ import time
 from datetime import UTC, datetime
 from threading import BoundedSemaphore
 
+import numpy as np
+
 from app.config import Settings
-from app.models.fire import FireFrame, FireInferenceError, FireResponse
+from app.models.fire import FireDetection, FireFrame, FireInferenceError, FireResponse
 from app.services.fire_detector import FireDetector, FireDetectorError, FireImageTooLargeError
 from app.services.fire_health import FireHealth
 from app.services.fire_tracker import FireTracker
+from app.services.fire_verifier import FireVerifier
 
 LOGGER = logging.getLogger(__name__)
 
@@ -18,6 +21,7 @@ class FireService:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.detector = FireDetector(settings)
+        self.verifier = FireVerifier(settings)
         self.tracker = FireTracker(settings)
         self.slots = BoundedSemaphore(settings.fire_max_concurrent_requests)
         self.health = FireHealth(settings.m3_enabled, settings.fire_model_version)
@@ -31,6 +35,14 @@ class FireService:
             return result
         finally:
             self.health.finish(result, (time.monotonic() - started) * 1000)
+
+    def _run_detection(self, data: bytes) -> tuple[np.ndarray | None, list[FireDetection]]:
+        # Preserve direct monkeypatches on `detector.detect` used by unit tests.
+        if "detect" in self.detector.__dict__:
+            return None, self.detector.detect(data)
+        image = self.detector.decode(data)
+        detections = self.detector.detect_image(image)
+        return image, detections
 
     def _process(self, frame: FireFrame, data: bytes) -> FireResponse:
         now = datetime.now(UTC)
@@ -50,10 +62,12 @@ class FireService:
             )
         started = time.monotonic()
         try:
-            detections = self.detector.detect(data)
+            image, detections = self._run_detection(data)
+            if self.verifier.is_enabled:
+                detections = self.verifier.filter_detections(image, detections)
             if (time.monotonic() - started) * 1000 > self.settings.fire_request_timeout_ms:
                 raise FireDetectorError("TIMEOUT", "Fire inference deadline exceeded.")
-            result = self.tracker.evaluate(frame, detections, datetime.now(UTC))
+            result = self.tracker.evaluate(frame, detections, datetime.now(UTC), image=image)
             if result.reason == "CONFIRMED":
                 LOGGER.info(
                     "Fire episode confirmed camera=%s episode=%s modelVersion=%s",
